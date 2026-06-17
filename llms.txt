@@ -1,0 +1,128 @@
+# Hirobius Design System
+
+Generated: 2026-06-17T21:56:02.111Z
+Primary sources: `public/hds-manifest.json`, `src/app/data/component-api.json`, `hirobius.tokens.json`
+
+## System Architecture
+
+- Engine: React + TypeScript
+- Icons: Lucide React
+- Tokens: W3C DTCG
+- Styling: CSS Variables
+- Token pipeline: `hirobius.tokens.json` -> `pnpm tokens` -> generated CSS vars + generated TS constants
+- Docs pipeline: `public/hds-manifest.json` + `src/app/data/component-api.json` -> reflective docs pages
+- AI entrypoint: read `public/llms.txt` before editing code
+
+## Phase Snapshot
+
+- foundation. Foundations - 63% - Token architecture, CSS pipeline, accessibility, and primitive scales.
+  - Criteria: done: W3C DTCG three-tier token architecture; done: CSS variable pipeline + token verify; partial: Primitive scales complete (color, type, space); todo: Token audit clean
+- components. Components - 75% - Accessible React UI built from foundations and mapped toward Figma parity.
+  - Criteria: done: Component inventory with typed props; done: Action system architecture (buttons, links, groups); done: Prop tables and API doc coverage; todo: Figma parity mapping
+- infrastructure-operations. Architecture - 55% - System delivery, Figma sync, automation, quality gates, and operational hygiene.
+  - Criteria: done: System manifest + llms.txt AI context; done: Release gate + full audit gate; done: Documentation automation (AST pipeline, LLMS sync); partial: Payload sweep + orphan cleanup; partial: Motion system foundations; todo: Figma library generated from tokens; todo: Code Connect CI + reverse sync; partial: AST gatekeeper + token schema validation; partial: A11y CI + visual regression pipeline; partial: Operational feedback loop + AI retrospective
+
+## Component Inventory (Source Of Truth)
+
+This file intentionally does not embed the full component list to avoid duplication and excess context.
+
+- Canonical inventory + metadata: read `public/hds-manifest.json`.
+- If you see references to `public/manifest.json`, treat it as an optional alias; in this repo prefer `public/hds-manifest.json`.
+
+## Component API (Source Of Truth)
+
+This file intentionally does not embed prop tables or long-form API docs.
+
+- Detailed prop types, unions, defaults, and descriptions: read `src/app/data/component-api.json`.
+- Runtime behavior: read the actual component source under `src/app/components/` (and associated styles).
+
+## Tokens (Primary Source Of Truth)
+
+- Primary token source of truth: `hirobius.tokens.json` (W3C DTCG).
+- Prefer `semantic.*` and `component.*` tokens for product UI. Use `primitive.*` only when editing the token system itself.
+- CSS variable naming convention: token path `semantic.color.surface.page` maps to `var(--semantic-color-surface-page)`.
+
+## Quick Token Reference
+
+| Need | Token path examples | CSS var examples |
+| --- | --- | --- |
+| Page/background surfaces | `semantic.color.surface.page`, `semantic.color.surface.raised` | `--semantic-color-surface-page`, `--semantic-color-surface-raised` |
+| Text/content colors | `semantic.color.content.primary`, `semantic.color.content.secondary` | `--semantic-color-content-primary`, `--semantic-color-content-secondary` |
+| Borders/dividers | `semantic.color.border.default`, `semantic.color.border.subdued` | `--semantic-color-border-default`, `--semantic-color-border-subdued` |
+| Feedback states | `semantic.color.feedback.error`, `semantic.color.feedback.success` | `--semantic-color-feedback-error`, `--semantic-color-feedback-success` |
+| Spacing (semantic tiers) | `semantic.space.subgrid.hairline`, `semantic.space.subgrid.xs`, `semantic.space.component.gap` | use semantic tokens or `--hds-space-px12` style vars |
+| Radius | `semantic.radius.action` | `--semantic-radius-action` |
+| Motion | `semantic.motion.productive`, `semantic.motion.expressive`, `semantic.motion.exit` | use token refs; values are structured (duration/easing) |
+| Typography | `semantic.typography.body`, `semantic.typography.h2`, `semantic.typography.caption` | use token refs; values are structured (family/size/weight/etc) |
+
+## HDS Card Anatomy (mandatory — every property is non-negotiable)
+
+When building any card component or card-like surface, ALL of the following rules apply. There is no creative latitude here — deviation from any property is a bug.
+
+| Property | Required value | Forbidden |
+| --- | --- | --- |
+| Background | `var(--semantic-color-surface-raised)` | Custom colors, gradients, tinted fills, any non-token value |
+| Border | `1px solid var(--semantic-color-border-default)` | `box-shadow` as an elevation substitute |
+| Border radius | `var(--primitive-radius-8)` (8 px) | 12 px, 16 px, 20 px, `rounded-full`, or any other value |
+| Padding | `var(--semantic-space-component-padding)` or `<Surface padding="component">` | Raw pixel values, Tailwind spacing classes, ad hoc insets |
+| Shadow | Resting cards: none (`elevation.flat`). Interactive lifted state: `shadow.subtle` via `elevation.raised`. Never reach for shadow values directly — bind via `var(--semantic-elevation-{role}-shadow)` | Raw `box-shadow` values, `drop-shadow`, glow, or any depth effect not bound to a role token |
+| Title | `hds.typeStyles.heading3` / `<Text variant="heading3">` | Any other type style for the primary card heading |
+| Subtitle / meta | `hds.typeStyles.caption` / `<Text variant="caption">` + `var(--semantic-color-content-secondary)` | Primary color, body size, or custom color for secondary text |
+| Hover (interactive cards only) | `transform: scale(1.02)` CSS transform | Background color change, fill swap, border color shift on hover |
+
+**NEVER on any card surface:** gradient backgrounds, glow effects, frosted glass (`backdrop-filter: blur`), decorative overlays, gradient borders, colored or tinted card backgrounds, inner shadows, patterned backgrounds, AI-aesthetic shimmer or particle effects. Never reach for shadow values directly — bind to a `semantic.elevation.*` role bundle so surface + shadow + border stay coherent.
+
+## Elevation roles
+
+| Surface | Role token | Background | Shadow | Border |
+| --- | --- | --- | --- | --- |
+| Card / panel resting | `semantic.elevation.flat` | `surface.page` | none | `border.subtle` 1px |
+| Card / panel lifted (interactive only) | `semantic.elevation.raised` | `surface.raised` | `shadow.subtle` | none |
+| Popover / dropdown / tooltip | `semantic.elevation.floating` | `surface.raised` | `shadow.floating` | none |
+| Dialog / sheet / modal | `semantic.elevation.overlay` | `surface.overlay` | `shadow.overlay` | none |
+
+Cards default to `elevation.flat`. Popovers/tooltips/dropdowns use `elevation.floating`. Dialogs/sheets use `elevation.overlay`. Interactive cards lift to `elevation.raised` on hover. Never combine `raised` with a border — depth is one mechanism (border OR shadow), not both stacked.
+
+## Context Loading Rules (Credit Efficiency)
+
+Default context (load first):
+
+- `public/llms.txt`
+- `public/hds-manifest.json`
+- `src/app/data/component-api.json`
+- `hirobius.tokens.json`
+- `DESIGN.md`
+
+On-demand only (load only if explicitly requested or the task clearly requires it):
+
+- `DESIGN-HANDOFF.md`
+- `TOKEN_GOVERNANCE.md`
+- `SYSTEMS_REGISTRY.md`
+- `BACKLOG.md`
+
+## Token Rules
+
+- Component inventory: read `public/hds-manifest.json`. Do not duplicate inventories in markdown.
+- Component prop API: read `src/app/data/component-api.json`. Do not inline prop tables in `llms.txt`.
+- Token source of truth: read `hirobius.tokens.json` (W3C DTCG). Prefer `semantic.*` and `component.*` tokens over `primitive.*` for product UI.
+- CSS variables: token path `semantic.color.surface.page` maps to `var(--semantic-color-surface-page)` (see generated token refs).
+- Docs: use `DESIGN.md` as the default lean visual spec. Load `DESIGN-HANDOFF.md` only on-demand.
+- Load `TOKEN_GOVERNANCE.md`, `SYSTEMS_REGISTRY.md`, and `BACKLOG.md` only on-demand (when explicitly requested or required by the task).
+- Read `public/llms.txt` before touching code so AI workflows start from the same system map as humans.
+
+## Agent Workflow
+
+1. Read `public/llms.txt` and the relevant source files.
+2. Check `public/hds-manifest.json` for component metadata and phase status.
+3. Check `src/app/data/component-api.json` for prop names, unions, defaults, and descriptions.
+4. Use `hirobius.tokens.json` (and generated CSS vars) for styling decisions, never raw hex or ad hoc values.
+5. Run `pnpm tokens:audit` or `pnpm build` after changes that affect docs, tokens, or manifests.
+
+## Key Files
+
+- `public/hds-manifest.json` - canonical machine-readable system inventory, metadata, and token snapshot
+- `src/app/data/component-api.json` - generated prop reference (source of truth for prop docs)
+- `hirobius.tokens.json` - token source of truth (W3C DTCG)
+- `public/llms.txt` - machine-readable AI context index
+- `DESIGN.md` - lean agent-facing visual spec (default)
+- `DESIGN-HANDOFF.md` - verbose visual language mirror (on-demand only)

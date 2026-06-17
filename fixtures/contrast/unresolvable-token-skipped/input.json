@@ -1,0 +1,18 @@
+{
+  "tree": [
+    {
+      "id": "4:1",
+      "name": "OklchSurface",
+      "type": "FRAME",
+      "tokenPaths": { "fills": ["primitive.color.blue.300"] },
+      "children": [
+        {
+          "id": "4:2",
+          "name": "BodyText",
+          "type": "TEXT",
+          "tokenPaths": { "fills": ["semantic.color.content.primary"] }
+        }
+      ]
+    }
+  ]
+}

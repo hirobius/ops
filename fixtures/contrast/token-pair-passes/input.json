@@ -1,0 +1,18 @@
+{
+  "tree": [
+    {
+      "id": "1:1",
+      "name": "Page",
+      "type": "FRAME",
+      "tokenPaths": { "fills": ["semantic.color.surface.page"] },
+      "children": [
+        {
+          "id": "1:2",
+          "name": "Heading",
+          "type": "TEXT",
+          "tokenPaths": { "fills": ["semantic.color.content.primary"] }
+        }
+      ]
+    }
+  ]
+}

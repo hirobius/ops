@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsSyntheticMissing",
+      "code": "BINDING_INCOMPLETE",
+      "message": "HdsSyntheticMissing declares tokens but slots[] is missing — masters pipeline has nothing to bind",
+      "suggestion": "Either add slots[] with non-empty tokenBinding to HdsSyntheticMissing in public/hds-manifest.json, or pick a different binding-complete component for this slot."
+    }
+  ]
+}

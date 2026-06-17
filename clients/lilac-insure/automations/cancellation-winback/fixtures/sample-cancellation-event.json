@@ -1,0 +1,16 @@
+{
+  "event": "policy.cancelled",
+  "ts": "2026-05-05T15:30:00Z",
+  "policy": {
+    "id": "POL-0005678",
+    "applicantId": "APP-0007777",
+    "type": "auto",
+    "cancelledAt": "2026-05-05T00:00:00Z",
+    "reason": "price"
+  },
+  "customer": {
+    "first_name": "Test",
+    "last_name": "ExCustomer",
+    "email": "administration@lilacinsure.com"
+  }
+}

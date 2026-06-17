@@ -1,0 +1,9 @@
+{
+  "slug": "<<slug>>",
+  "status": "prospect",
+  "lastContactAt": null,
+  "lastContactKind": null,
+  "nextTouchSuggestion": "email",
+  "overdueAfterDays": 7,
+  "notes": null
+}

@@ -1,0 +1,1 @@
+<HdsFrame fill="semantic.color.surface.raised" gap="16" layout="VERTICAL" padding="24" radius="8" stroke="semantic.color.border.default"><Text fill="semantic.color.content.warning" typography="semantic.typography.caption">Save failed. Changes were not saved.</Text><HdsButton size="sm" variant="tertiary">Dismiss</HdsButton></HdsFrame>

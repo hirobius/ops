@@ -1,0 +1,49 @@
+{
+  "status": "pending-recording-review",
+  "packageHypothesis": "starter",
+  "starterPackage": {
+    "name": "Starter",
+    "priceRange": "$500–$1,500",
+    "deliverables": [
+      "5-page website (Home, About, Services, Contact, optional Blog/Portfolio)",
+      "Mobile-responsive, clean design from HDS token system",
+      "Google Business Profile cleanup and optimization",
+      "Email signature template with logo",
+      "Brand audit deck — current touchpoints + 3 easy wins"
+    ],
+    "timeline": "3–4 weeks",
+    "includes": ["1 revision round", "Handoff documentation", "2 weeks post-launch support"],
+    "pitch": "Get online and look professional. Everything someone needs to find you, trust you, and contact you."
+  },
+  "growthPackage": {
+    "name": "Growth",
+    "priceRange": "$1,500–$3,500",
+    "deliverables": [
+      "Everything in Starter",
+      "Lead capture form + automated email acknowledgment",
+      "Follow-up sequence (3-touch email/text)",
+      "Basic reporting dashboard (weekly lead count, form submissions)",
+      "Inbox triage setup (if they have email overload)"
+    ],
+    "timeline": "5–7 weeks",
+    "includes": ["2 revision rounds", "Handoff + training session", "30 days post-launch support"],
+    "pitch": "A website that works while you sleep — leads captured, followed up, and tracked without you lifting a finger."
+  },
+  "consultQuestions": [
+    "What do you have today — website, social, nothing?",
+    "What's the main thing you want someone to do when they find you online?",
+    "Do you have a logo, brand colors, or anything you've built brand-wise?",
+    "Is there a competitor or another business whose website you really like?",
+    "What's your timeline — is there a deadline driving this?",
+    "How do leads or customers find you today?",
+    "What's your biggest frustration with how things work right now?",
+    "Are you open to automation that handles repetitive admin — or is it just the website?"
+  ],
+  "prepChecklist": [
+    { "item": "Review Drive recording and extract company/contact/industry", "status": "todo" },
+    { "item": "Research their current web presence", "status": "todo" },
+    { "item": "Prepare 1-page Hirobius intro (who we are, who we work with)", "status": "todo" },
+    { "item": "Prepare Starter vs Growth comparison slide", "status": "todo" },
+    { "item": "Send calendar invite for first formal consult", "status": "todo" }
+  ]
+}

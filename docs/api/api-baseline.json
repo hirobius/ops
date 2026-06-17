@@ -1,0 +1,205 @@
+{
+  "entry": "src/index.ts",
+  "generatedAt": "baseline",
+  "modules": {
+    "(barrel)": [
+      "cn",
+      "hds",
+      "tokens"
+    ],
+    "./app/components/alert": [
+      "Alert"
+    ],
+    "./app/components/asset-img": [
+      "AssetImg"
+    ],
+    "./app/components/badge": [
+      "Badge"
+    ],
+    "./app/components/button": [
+      "Button",
+      "ButtonProps",
+      "buttonVariants"
+    ],
+    "./app/components/callout": [
+      "Callout",
+      "CalloutProps",
+      "default"
+    ],
+    "./app/components/field": [
+      "Field",
+      "FieldProps",
+      "FieldTone"
+    ],
+    "./app/components/stat": [
+      "Stat",
+      "StatProps",
+      "StatTone"
+    ],
+    "./app/components/status-list-item": [
+      "StatusListItem",
+      "StatusListItemProps",
+      "StatusListItemTone"
+    ],
+    "./app/components/card": [
+      "Card",
+      "CardBody",
+      "CardDescription",
+      "CardFooter",
+      "CardHeader",
+      "CardMetric",
+      "CardProgress",
+      "CardProps",
+      "CardTitle"
+    ],
+    "./app/components/cinematic-link": [
+      "CinematicLink"
+    ],
+    "./app/components/code-block": [
+      "CodeBlock"
+    ],
+    "./app/components/component-instance-matrix": [
+      "ComponentInstanceMatrix"
+    ],
+    "./app/components/container": [
+      "Container"
+    ],
+    "./app/components/dialog": [
+      "Dialog",
+      "DialogClose",
+      "DialogContent",
+      "DialogContentProps",
+      "DialogDescription",
+      "DialogFooter",
+      "DialogHeader",
+      "DialogOverlay",
+      "DialogPortal",
+      "DialogProps",
+      "DialogTitle",
+      "DialogTrigger"
+    ],
+    "./app/components/divider": [
+      "Divider"
+    ],
+    "./app/components/doc-link-card": [
+      "DocLinkCard"
+    ],
+    "./app/components/grid": [
+      "Grid"
+    ],
+    "./app/components/heading-stack": [
+      "HeadingStack"
+    ],
+    "./app/components/history-card": [
+      "HistoryCard",
+      "HistoryCardCommit",
+      "HistoryCardProps"
+    ],
+    "./app/components/icon": [
+      "Icon",
+      "IconProps",
+      "IconSize"
+    ],
+    "./app/components/inline-code": [
+      "InlineCode"
+    ],
+    "./app/components/inline-link": [
+      "InlineLink"
+    ],
+    "./app/components/input": [
+      "Input",
+      "InputProps",
+      "InputSize",
+      "inputVariants"
+    ],
+    "./app/components/nav-item": [
+      "NavItem"
+    ],
+    "./app/components/segmented-control": [
+      "SegmentedControl"
+    ],
+    "./app/components/specimen-block": [
+      "SpecimenBlock"
+    ],
+    "./app/components/stack": [
+      "Stack"
+    ],
+    "./app/components/surface": [
+      "Surface"
+    ],
+    "./app/components/table": [
+      "Table",
+      "TableCell",
+      "TableCellSlot",
+      "TableColumn",
+      "TableColumnAlign",
+      "TableRow"
+    ],
+    "./app/components/tag": [
+      "Tag"
+    ],
+    "./app/components/text": [
+      "Text",
+      "TextProps"
+    ],
+    "./app/components/token": [
+      "Token"
+    ],
+    "./app/components/activity-feed": [
+      "ActivityEvent",
+      "ActivityFeed",
+      "ActivityFeedProps",
+      "ActivityStatus",
+      "defaultActivityEvents"
+    ],
+    "./app/components/disclosure": [
+      "Disclosure"
+    ],
+    "./app/components/foundation-swatch": [
+      "FoundationSwatch",
+      "FoundationSwatchProps"
+    ],
+    "./app/components/icon-button": [
+      "IconButton"
+    ],
+    "./app/components/nav-group": [
+      "NavGroup"
+    ],
+    "./app/components/sketch": [
+      "Sketch",
+      "SketchProps"
+    ],
+    "./app/components/stepper-field": [
+      "StepperField"
+    ],
+    "./app/components/text-lockup": [
+      "TextLockup",
+      "TextLockupProps"
+    ],
+    "./app/layouts/CaseStudyLayout": [
+      "CaseStudyLayout"
+    ],
+    "./app/components/ComponentDocPage": [
+      "HdsComponentDoc"
+    ],
+    "./app/components/error-pattern": [
+      "ErrorPattern"
+    ],
+    "./app/components/info-page": [
+      "InfoPage",
+      "InfoPageProps"
+    ],
+    "./app/pages/hds/HdsSystemDocLayout": [
+      "HdsSystemDocLayout"
+    ],
+    "@subpath/cn": [
+      "cn"
+    ],
+    "@subpath/tokens": [
+      "default"
+    ],
+    "@subpath/manifest": [
+      "default"
+    ]
+  }
+}

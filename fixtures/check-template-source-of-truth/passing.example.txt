@@ -1,0 +1,2 @@
+// TODO: replace with real-passing-example for check-template-source-of-truth
+// STUB — this file needs real passing content

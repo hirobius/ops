@@ -1,0 +1,40 @@
+{
+  "references": [
+    {
+      "title": "UI Skills — Swiss Design Frameworks",
+      "url": "https://www.ui-skills.com",
+      "category": "design",
+      "notes": "Swiss design + Addy Osmani frameworks. Primary source for hardening rubrics in Phase 8."
+    },
+    {
+      "title": "Addy Osmani — Learning Patterns",
+      "url": "https://www.patterns.dev",
+      "category": "engineering",
+      "notes": "Design patterns for modern web apps. Referenced for component architecture decisions."
+    },
+    {
+      "title": "Radix UI Primitives",
+      "url": "https://www.radix-ui.com/primitives",
+      "category": "components",
+      "notes": "Unstyled, accessible component primitives underpinning HDS interactive components."
+    },
+    {
+      "title": "Anthropic Claude API Docs",
+      "url": "https://docs.anthropic.com",
+      "category": "ai",
+      "notes": "Primary reference for Claude API, vision capabilities, and prompt caching used in the autonomous build pipeline."
+    },
+    {
+      "title": "Figma Plugin API",
+      "url": "https://www.figma.com/plugin-docs/",
+      "category": "figma",
+      "notes": "Official Figma plugin API reference. Used for HDS bridge plugin development."
+    },
+    {
+      "title": "Web Vitals",
+      "url": "https://web.dev/vitals/",
+      "category": "performance",
+      "notes": "LCP, CLS, INP baselines. CI gate added in Phase 12 (12o-perf-web-vitals-budget)."
+    }
+  ]
+}

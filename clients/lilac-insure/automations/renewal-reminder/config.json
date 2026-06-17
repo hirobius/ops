@@ -1,0 +1,17 @@
+{
+  "id": "renewal-reminder",
+  "phase": "phase-1",
+  "bucket": "bucket-4",
+  "systemsTouched": ["ezlynx", "outlook", "lightspeed", "n8n"],
+  "ownerSystem": "ezlynx",
+  "sequence": [
+    { "name": "T-30", "daysBeforeRenewal": 30, "channels": ["email", "sms"] },
+    { "name": "T-14", "daysBeforeRenewal": 14, "channels": ["email"] },
+    { "name": "T-3",  "daysBeforeRenewal": 3,  "channels": ["sms"] }
+  ],
+  "policy": {
+    "logEzlynxNote": true,
+    "smsOptOutCompliance": "wa-state",
+    "ezlynxWebhookEvent": "policy.renewal_due"
+  }
+}

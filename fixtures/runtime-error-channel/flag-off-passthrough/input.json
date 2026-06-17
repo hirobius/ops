@@ -1,0 +1,13 @@
+{
+  "scenario": "flag-off-passthrough",
+  "runtimeErrorsEnabled": false,
+  "id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "type": "draw-component",
+  "ttlMs": 5000,
+  "renderError": {
+    "type": "render-error",
+    "inReplyTo": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "code": "UNKNOWN_TOKEN_PATH",
+    "message": "semantic.color.unknown.path not in variable map"
+  }
+}

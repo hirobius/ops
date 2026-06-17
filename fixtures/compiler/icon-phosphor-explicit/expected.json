@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsicon-1",
+      "parentId": "root",
+      "type": "ICON",
+      "props": {
+        "size": 20,
+        "icon": "ph:check-bold"
+      }
+    }
+  ]
+}

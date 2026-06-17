@@ -1,0 +1,8 @@
+{
+  "source": "figma-variables",
+  "tokens": {
+    "semantic": [
+      { "path": "semantic.color.surface.page", "type": "color", "alias": "not a token path!" }
+    ]
+  }
+}

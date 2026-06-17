@@ -1,0 +1,6 @@
+// TODO: replace with real-passing-example for audit-gates-supportjson
+// STUB — this file needs real passing content
+// Real example shape: a registry.json with every strict-channel gate
+// having supportsJson:true AND its --json mode parses as
+// { violations: Array }. The audit gate exits 0 with summary.compliant
+// === summary.total.

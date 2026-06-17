@@ -1,0 +1,23 @@
+{
+  "id": "lilac-insure",
+  "name": "Lilac Insurance Group, LLC",
+  "website": "https://lilacinsure.com",
+  "contact": {
+    "name": "Conrad Milsap",
+    "role": "Owner / Principal Agent"
+  },
+  "location": "Spokane, WA",
+  "type": "Independent Insurance Agency",
+  "scale": {
+    "customers": 600,
+    "policies": 1200,
+    "employees": "Solo (owner-operated)"
+  },
+  "engagementType": "Automation Consulting Retainer",
+  "startDate": "2026-04-28",
+  "status": "active",
+  "serviceModel": "Hirobius: automation solutions provider — first client",
+  "driveDocId": "161_cRiCEv5KeYFFSelqbLN6L-TSRlS994gEpGNov2rk",
+  "figmaFileUrl": null,
+  "portalUrl": null
+}

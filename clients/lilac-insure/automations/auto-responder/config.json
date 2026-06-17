@@ -1,0 +1,16 @@
+{
+  "id": "auto-responder",
+  "phase": "phase-1",
+  "bucket": "bucket-2",
+  "systemsTouched": ["outlook", "n8n"],
+  "ownerSystem": "outlook",
+  "template": {
+    "subject": "Thanks for reaching out to Lilac Insurance",
+    "from": "administration@lilacinsure.com",
+    "slaMinutes": 5
+  },
+  "policy": {
+    "perEventRecipient": true,
+    "noteAboutRecipients": "This workflow sends to the lead's email per event, not a fixed allowlist. productionRecipients stays empty by design."
+  }
+}

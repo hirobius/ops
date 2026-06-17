@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+set -e
+
+echo "Running secrets scan..."
+gitleaks git --config .gitleaks.toml --staged --verbose
+
+echo "Running fast static analysis..."
+pnpm typecheck
+
+echo "Checking generated token files are in sync with source..."
+node scripts/check-token-rebake-needed.mjs
+
+echo "Running lint..."
+pnpm lint --max-warnings=0
+
+echo "Running design-system invariant gates..."
+node scripts/check-manifest-drift.mjs
+node scripts/check-binding-drift.mjs
+node scripts/check-source-canon.mjs
+
+echo "Running hardcoded-value gates..."
+node scripts/check-hardcoded-colors.mjs
+node scripts/check-mojibake.mjs
+node scripts/check-hardcoded-fonts.mjs
+node scripts/check-hardcoded-spacing.mjs; exit 0
+node scripts/audit-typography-overrides.mjs
+
+node scripts/validate-manifest.mjs
+node scripts/validate-orchestration.mjs
+node scripts/validate-orchestration.mjs --strict-validation
+node scripts/check-component-completeness.mjs
+node scripts/check-token-paths.mjs
+
+echo "Checking for direct edits to auto-generated files..."
+node scripts/check-template-source-of-truth.mjs
+
+echo "Verifying font file references are not broken..."
+node scripts/check-font-files.mjs
+
+echo "Checking guardrail registry is complete..."
+node scripts/validate-guardrail-registry.mjs
+node scripts/check-validator-wiring.mjs

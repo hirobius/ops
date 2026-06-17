@@ -1,0 +1,83 @@
+{
+  "ci": {
+    "collect": {
+      "staticDistDir": "./dist",
+      "isSinglePageApplication": true,
+      "numberOfRuns": 3,
+      "url": [
+        "http://localhost/",
+        "http://localhost/atlas",
+        "http://localhost/portfolio",
+        "http://localhost/hds",
+        "http://localhost/ops"
+      ],
+      "settings": {
+        "preset": "desktop",
+        "chromeFlags": "--no-sandbox --disable-dev-shm-usage --headless=new"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": [
+          "error",
+          {
+            "minScore": 0.78,
+            "_baseline": "median=0.82 (3 runs 2026-05-02); budget=median*0.95"
+          }
+        ],
+        "categories:accessibility": [
+          "error",
+          {
+            "minScore": 0.95,
+            "_baseline": "baseline=1.0; floor held at 0.95"
+          }
+        ],
+        "categories:best-practices": [
+          "error",
+          {
+            "minScore": 0.9,
+            "_baseline": "baseline=1.0; floor held at 0.90"
+          }
+        ],
+        "categories:seo": [
+          "error",
+          {
+            "minScore": 0.79,
+            "_baseline": "baseline median=0.83; budget=median*0.95"
+          }
+        ],
+        "largest-contentful-paint": [
+          "error",
+          {
+            "maxNumericValue": 1563,
+            "_baseline": "baseline median=1489ms; budget=+5% (1563ms)"
+          }
+        ],
+        "cumulative-layout-shift": [
+          "error",
+          {
+            "maxNumericValue": 0.005,
+            "_baseline": "baseline median=0.000; budget=+0.005"
+          }
+        ],
+        "total-blocking-time": [
+          "error",
+          {
+            "maxNumericValue": 625,
+            "_baseline": "session medians: 313ms, 359ms, 577ms; TBT is headless-noisy; budget=max-session-median*1.05 (605ms) rounded to 625ms"
+          }
+        ],
+        "first-contentful-paint": [
+          "error",
+          {
+            "maxNumericValue": 823,
+            "_baseline": "baseline median=784ms; budget=+5% (823ms)"
+          }
+        ]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

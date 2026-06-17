@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "selector": "//FRAME[@name~=Card]",
+  "count": 2,
+  "nodes": [
+    {
+      "id": "frame:001",
+      "name": "Card/Product",
+      "type": "FRAME",
+      "width": 320,
+      "height": 200,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "frame:002",
+      "name": "Card/Hero",
+      "type": "FRAME",
+      "width": 640,
+      "height": 360,
+      "x": 400,
+      "y": 0,
+      "componentName": "HdsCard"
+    }
+  ]
+}

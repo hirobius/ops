@@ -1,0 +1,113 @@
+{
+  "_meta": {
+    "lastUpdated": "2026-05-06",
+    "version": "v0-draft",
+    "status": "draft — Conrad reviews voice and flips approved=true per template before promotion",
+    "voiceGuidelines": [
+      "First-name greeting — never 'Dear Customer'.",
+      "Plain English, not corporate. Short sentences.",
+      "Conrad signs personally. Phone number for urgent.",
+      "No auto-reply on claim/cancel/compliance — those are conversations, not transactions.",
+      "Templates use {{var_name}} for substitution. Vars listed in each template's frontmatter."
+    ]
+  },
+
+  "buckets": {
+    "lead": {
+      "autoReply": true,
+      "template": "lead.md",
+      "slaMinutes": 5,
+      "approved": false,
+      "conradAction": "Personal call within 1 business day after the auto-ack lands.",
+      "notes": "First-touch SLA promise. The 5-minute auto-reply buys Conrad time before his personal call."
+    },
+    "quoting": {
+      "autoReply": false,
+      "template": null,
+      "slaMinutes": null,
+      "approved": null,
+      "conradAction": "Review carrier quote, decide bind/decline, reply to underwriter manually.",
+      "notes": "Carrier/wholesaler email. Conrad-only — auto-reply to a carrier looks unprofessional."
+    },
+    "onboarding": {
+      "autoReply": true,
+      "template": "onboarding.md",
+      "slaMinutes": 1440,
+      "approved": false,
+      "conradAction": "Verify ID cards attached and first billing schedule populated before queuing.",
+      "notes": "Triggered ~1 day after DocuSign-completed + first-payment-confirmed event. Welcome touch — sets expectations + asks for a Google review."
+    },
+    "service": {
+      "autoReply": true,
+      "template": "service.md",
+      "slaMinutes": 5,
+      "approved": false,
+      "conradAction": "Process the actual request (id card, endorsement, address change). Reply with completion confirmation by EOD — separate from this auto-ack.",
+      "notes": "Auto-ack only. The fulfillment work is a human task."
+    },
+    "claim": {
+      "autoReply": false,
+      "template": null,
+      "slaMinutes": null,
+      "approved": null,
+      "conradAction": "Call client within 30 minutes. Capture FNOL details. File with carrier same day.",
+      "notes": "URGENT. Handle by phone, never email-only. Auto-reply on a claim could create the wrong liability impression — never automate this bucket."
+    },
+    "renewal": {
+      "autoReply": false,
+      "template": null,
+      "slaMinutes": null,
+      "approved": null,
+      "conradAction": "Inbound renewal questions: personal reply with quote/coverage detail.",
+      "notes": "Outbound renewal reminders are owned by the renewal-reminder workflow — distinct from this. This bucket is *inbound* renewal email; Conrad handles personally."
+    },
+    "retention": {
+      "autoReply": false,
+      "template": null,
+      "slaMinutes": null,
+      "approved": null,
+      "conradAction": "Inbound cancel / non-pay / lapse: call within 1 business day, understand the why.",
+      "notes": "Outbound win-back is the cancellation-winback workflow. Inbound is a conversation — auto-reply on a cancel intent reads cold."
+    },
+    "carrier-ops": {
+      "autoReply": false,
+      "template": null,
+      "slaMinutes": null,
+      "approved": null,
+      "conradAction": "Read on schedule. Action items (commission statements, rate changes, appointments) go into the work queue.",
+      "notes": "Not customer-facing. No reply expected."
+    },
+    "vendor-ops": {
+      "autoReply": false,
+      "template": null,
+      "slaMinutes": null,
+      "approved": null,
+      "conradAction": "Triage as ops. Most are FYI-only (release notes, scheduled maintenance, invoices).",
+      "notes": "System notifications from EZLynx, DocuSign, Wonder Write, etc."
+    },
+    "compliance": {
+      "autoReply": false,
+      "template": null,
+      "slaMinutes": null,
+      "approved": null,
+      "conradAction": "License renewals, CE deadlines, E&O — Conrad-only with a calendar reminder set.",
+      "notes": "Regulatory. Never auto-anything. State DOI / NAIC / WA OIC traffic."
+    },
+    "internal": {
+      "autoReply": false,
+      "template": null,
+      "slaMinutes": null,
+      "approved": null,
+      "conradAction": "Personal. No automation.",
+      "notes": "Hirobius / family / personal email. Fallback bucket."
+    },
+    "noise": {
+      "autoReply": false,
+      "template": null,
+      "slaMinutes": null,
+      "approved": null,
+      "conradAction": "Mark as junk or unsubscribe. No reply.",
+      "notes": "Marketing, newsletters, spam."
+    }
+  }
+}

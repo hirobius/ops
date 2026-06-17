@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdstext-1",
+      "parentId": "root",
+      "type": "TEXT",
+      "props": {
+        "fill": "semantic.color.content.primary",
+        "typography": "semantic.typography.h3",
+        "text": "Hello"
+      }
+    }
+  ]
+}

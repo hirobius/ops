@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+set -e
+
+echo "Running secrets scan..."
+gitleaks git --config .gitleaks.toml --staged --verbose
+
+echo "Running fast static analysis..."
+pnpm typecheck
+
+echo "Running lint..."
+pnpm lint --max-warnings=0
+
+echo "Validating manifest schema..."
+node scripts/validate-manifest.mjs
+
+echo "Checking guardrail registry is complete..."
+node scripts/validate-guardrail-registry.mjs
+
+echo "Running all pre-commit registry gates (declaration order)..."
+node scripts/run-gates.mjs --channel pre-commit
+
+echo "Updating pre-commit structure hash..."
+node scripts/update-precommit-hash.mjs

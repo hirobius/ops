@@ -1,0 +1,10 @@
+{
+  "scenario": "render-error-no-pending-id",
+  "runtimeErrorsEnabled": true,
+  "renderError": {
+    "type": "render-error",
+    "inReplyTo": "deadbeef-dead-4dad-8dad-deadbeefdead",
+    "code": "FONT_LOAD_FAILED",
+    "message": "loadFontAsync rejected: family not available"
+  }
+}

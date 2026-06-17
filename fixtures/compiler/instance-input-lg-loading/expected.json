@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsinput-1",
+      "parentId": "root",
+      "type": "INSTANCE",
+      "componentName": "HdsInput",
+      "attributes": {
+        "type": "search",
+        "size": "lg",
+        "label": "Search",
+        "placeholder": "Search the docs",
+        "loading": true
+      },
+      "figmaProperties": {
+        "Type": "search",
+        "Size": "lg",
+        "Label": "Search",
+        "Placeholder": "Search the docs",
+        "Loading": true
+      }
+    }
+  ]
+}

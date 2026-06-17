@@ -1,0 +1,9 @@
+{
+  "slug": "lilac-insure",
+  "status": "active",
+  "lastContactAt": "2026-05-08",
+  "lastContactKind": "email",
+  "nextTouchSuggestion": "check-in",
+  "overdueAfterDays": 14,
+  "notes": "Retainer active; weekly automation cadence."
+}

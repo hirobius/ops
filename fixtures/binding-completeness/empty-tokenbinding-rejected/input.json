@@ -1,0 +1,14 @@
+{
+  "jsx": "<HdsSyntheticEmpty />",
+  "manifestOverride": {
+    "componentSpecs": {
+      "HdsSyntheticEmpty": {
+        "tokens": { "fill": "component.synthetic.bg" },
+        "slots": [
+          { "name": "background", "figmaSlotName": "Background", "tokenBinding": {} },
+          { "name": "label", "figmaSlotName": "Label", "tokenBinding": { "fill": null } }
+        ]
+      }
+    }
+  }
+}

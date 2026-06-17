@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsFrame.background",
+      "code": "SWISS_BG_WHITE_BLACK",
+      "message": "HdsFrame.background=\"bg-white\" uses pure white/black",
+      "suggestion": "Use semantic.color.surface.{raised,page,dark,overlay} or semantic.color.content.{primary,secondary} — never bg-white or bg-black."
+    }
+  ]
+}

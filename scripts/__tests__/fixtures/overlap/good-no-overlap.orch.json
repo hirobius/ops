@@ -1,0 +1,22 @@
+{
+  "units": [
+    {
+      "id": "unit-alpha",
+      "status": "claimed",
+      "claimedBy": "agent-a",
+      "claimedAt": "2026-05-05T09:00:00.000Z",
+      "description": "Updates src/foo.tsx with new layout tokens.",
+      "agentNotes": ["Edits src/foo.tsx only."],
+      "validationCmd": "node scripts/validate-manifest.mjs",
+      "dependsOn": []
+    },
+    {
+      "id": "unit-beta",
+      "status": "approved",
+      "description": "Adds src/bar.tsx component for the HDS grid system.",
+      "agentNotes": ["Creates src/bar.tsx — no overlap with other units."],
+      "validationCmd": "node scripts/validate-manifest.mjs",
+      "dependsOn": []
+    }
+  ]
+}

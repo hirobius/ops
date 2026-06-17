@@ -1,0 +1,70 @@
+name: Sync Design Tokens → Figma Variables
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'hirobius.tokens.json'
+
+  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Compile tokens and push to Figma
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # ── Build both output files ──────────────────────────────────────────
+      - name: Generate Figma variables files
+        run: node scripts/build-figma-variables.mjs
+
+      # ── Commit the generated plugin file back to the repo ────────────────
+      # This keeps hirobius.figma-variables.json always in sync with the
+      # token source, so it can be imported manually at any time.
+      - name: Commit generated Figma variables file
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: regenerate hirobius.figma-variables.json'
+          file_pattern: 'hirobius.figma-variables.json hirobius.figma-variables-api.json'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+
+      # ── Push to Figma Variables REST API ─────────────────────────────────
+      # Requires GitHub Secrets:
+      #   FIGMA_PERSONAL_ACCESS_TOKEN — from figma.com/settings > Security > Personal access tokens
+      #   FIGMA_FILE_KEY              — from your Figma file URL: figma.com/design/{FILE_KEY}/...
+      #
+      # First-time setup: this creates all variables fresh.
+      # Subsequent runs: Figma treats existing variable names as updates (no duplicates within a collection).
+      - name: Push variables to Figma API
+        env:
+          FIGMA_FILE_KEY: ${{ secrets.FIGMA_FILE_KEY }}
+          FIGMA_TOKEN:    ${{ secrets.FIGMA_PERSONAL_ACCESS_TOKEN }}
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "https://api.figma.com/v1/files/${FIGMA_FILE_KEY}/variables" \
+            -H "X-Figma-Token: ${FIGMA_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d @hirobius.figma-variables-api.json)
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "Status: $HTTP_CODE"
+          echo "$BODY" | head -20
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "❌ Figma API sync failed (HTTP $HTTP_CODE)"
+            exit 1
+          fi
+
+          echo "✓ Figma Variables synced successfully"

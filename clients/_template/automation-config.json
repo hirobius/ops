@@ -1,0 +1,49 @@
+{
+  "client": "<<slug>>",
+  "mode": "test",
+  "testRecipient": "<<test-recipient@example.com>>",
+  "productionRecipients": [],
+  "logPath": "clients/<<slug>>/automations/_log.jsonl",
+
+  "_note": "Replace <<slug>> and <<test-recipient>>. Add system blocks for whatever services this client uses (delete the ones you don't need). Hirobius never touches .env files; only env-key NAMES are referenced here.",
+
+  "systems": {
+    "outlook": {
+      "envKeys": ["MS_GRAPH_CLIENT_ID", "MS_GRAPH_CLIENT_SECRET", "MS_GRAPH_TENANT_ID"],
+      "status": "pending-access",
+      "notes": "Microsoft Graph API. Per-tenant Azure AD app registration."
+    }
+  },
+
+  "modeContract": {
+    "test": "All outbound (email, SMS, API writes) must target testRecipient OR be no-op'd.",
+    "production": "Outbound sends to productionRecipients per workflow. Requires explicit per-workflow promotion checklist."
+  },
+
+  "llm": {
+    "provider": "ollama",
+    "providerNotes": "ollama | claude | none. Default ollama (local, free, private). Customer flips to claude with their own ANTHROPIC_API_KEY for higher quality. 'none' forces deterministic-only paths.",
+    "ollama": {
+      "endpoint": "http://localhost:11434",
+      "model": "hermes3:latest",
+      "fallbackModels": ["gemma3:27b", "llama3.3:70b", "qwen2.5:32b"],
+      "timeoutMs": 120000
+    },
+    "claude": {
+      "envKey": "ANTHROPIC_API_KEY",
+      "model": "claude-sonnet-4-6",
+      "cheapModel": "claude-haiku-4-5-20251001",
+      "endpoint": "https://api.anthropic.com/v1/messages",
+      "useCache": true,
+      "timeoutMs": 60000,
+      "billing": "Customer's Anthropic account. Hirobius never sees usage or billing."
+    }
+  },
+
+  "outlook": {
+    "mailbox": "<<mailbox@example.com>>",
+    "applyMode": "tag",
+    "folders": {},
+    "categoryTagPrefix": "<<slug>>-"
+  }
+}

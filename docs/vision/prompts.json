@@ -1,0 +1,19 @@
+{
+  "prompts": [
+    {
+      "label": "Ramble classifier",
+      "content": "Classify this into Action Items, System Evolutions, Memory adds:",
+      "tags": ["operations", "knowledge-management"]
+    },
+    {
+      "label": "Unit spec from description",
+      "content": "Given this description, produce a valid orchestration.json unit entry with id, phase, cluster, name, status: 'proposed', dependsOn, description, validationCmd, and agentNotes:",
+      "tags": ["orchestration", "autonomous-build"]
+    },
+    {
+      "label": "Component from Figma context",
+      "content": "Using the Figma design context below, produce an HDS-compliant React component. Use existing HDS tokens, avoid raw hex values, follow REACT_COMPONENTS.md rules:",
+      "tags": ["hds", "figma", "components"]
+    }
+  ]
+}

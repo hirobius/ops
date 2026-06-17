@@ -1,0 +1,23 @@
+[
+  {
+    "id": "dpa-template",
+    "label": "DPA template — needed before any client storing PII signs SOW",
+    "severity": "high",
+    "status": "todo",
+    "link": "docs/business/dpa-template.md"
+  },
+  {
+    "id": "stripe-connect",
+    "label": "Stripe account onboarded — required before first invoice issues",
+    "severity": "medium",
+    "status": "in-progress",
+    "link": "docs/business/stripe-onboarding.md"
+  },
+  {
+    "id": "sow-master",
+    "label": "Master SOW template — phase, retainer, scope-change clauses",
+    "severity": "medium",
+    "status": "todo",
+    "link": "docs/business/sow-template.md"
+  }
+]

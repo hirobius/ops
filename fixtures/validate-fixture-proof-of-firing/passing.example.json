@@ -1,0 +1,11 @@
+{
+  "gates": [
+    {
+      "id": "validate-orchestration",
+      "description": "Validates docs/ai/orchestration.json schema.",
+      "severity": "error",
+      "gateScript": "scripts/validate-orchestration.mjs",
+      "fixturePath": "fixtures/validate-orchestration"
+    }
+  ]
+}

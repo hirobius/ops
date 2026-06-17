@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsFrame.background",
+      "code": "SWISS_GRADIENT",
+      "message": "HdsFrame.background=\"bg-gradient-to-r\" uses a gradient",
+      "suggestion": "Flat surfaces only. Use a single semantic surface token. If accent is needed, full-opacity solid only — no gradients."
+    }
+  ]
+}

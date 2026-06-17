@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# Validates that commits on feature branches reference an open Hermes Kanban
+# task. Warn-only by default; promote with KANBAN_REF_ENFORCE=error.
+# See scripts/check-commit-message-task-ref.mjs for the full rule.
+node scripts/check-commit-message-task-ref.mjs "$1"

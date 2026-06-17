@@ -1,0 +1,8 @@
+{
+  "scenario": "replay",
+  "secret": "test-secret-replay",
+  "type": "selection.update",
+  "payload": {
+    "nodeIds": ["1:2"]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsText.children",
+      "code": "SWISS_LOREM",
+      "message": "HdsText contains lorem ipsum placeholder copy",
+      "suggestion": "Use realistic copy. Placeholder text hides wrap, length, and overflow defects."
+    }
+  ]
+}

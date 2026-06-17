@@ -1,0 +1,7 @@
+// TODO: replace with real-violating-example for audit-gates-supportjson
+// STUB — this file needs real violating content
+// Real example shape: a registry.json with at least one strict-channel
+// gate where `node <gateScript> --json` either crashes, times out, or
+// emits stdout that fails JSON.parse. The audit gate, in --strict mode,
+// exits 1 and the violations list contains a row with rule:
+// 'json-mode-not-implemented'.

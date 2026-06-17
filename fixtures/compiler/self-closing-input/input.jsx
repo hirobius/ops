@@ -1,0 +1,1 @@
+<HdsInput type="email" />

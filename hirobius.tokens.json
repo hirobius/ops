@@ -1,0 +1,2220 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "$description": "Adrian Milsap hirobius design tokens - W3C DTCG 2025.10 compliant, Figma SDS architecture",
+  "primitive": {
+    "$description": "Base values used as inputs to derived token layers.",
+    "color": {
+      "$type": "color",
+      "neutral": {
+        "50": {
+          "$value": "#fafafa",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "100": {
+          "$value": "#f5f5f5",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "200": {
+          "$value": "#e5e5e5",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "300": {
+          "$value": "#d4d4d4",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "400": {
+          "$value": "#a3a3a3",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "500": {
+          "$value": "#737373",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "600": {
+          "$value": "#525252",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "700": {
+          "$value": "#404040",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "800": {
+          "$value": "#262626",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "850": {
+          "$value": "#1a1a1a",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "900": {
+          "$value": "#111111",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "950": {
+          "$value": "#0a0a0a",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "$description": "Discrete values within the neutral range at defined lightness steps.",
+        "white": {
+          "$value": "#ffffff",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        },
+        "black": {
+          "$value": "#000000",
+          "$description": "Specific value within the neutral range at a defined lightness step."
+        }
+      },
+      "blue": {
+        "50": {
+          "$value": "oklch(0.96 0.03 266.54)",
+          "$description": "Specific value within the blue range at a defined lightness step."
+        },
+        "100": {
+          "$value": "oklch(0.92 0.04 266.54)",
+          "$description": "Specific value within the blue range at a defined lightness step."
+        },
+        "200": {
+          "$value": "oklch(0.88 0.07 266.54)",
+          "$description": "Specific value within the blue range at a defined lightness step."
+        },
+        "300": {
+          "$value": "oklch(0.70 0.2903 266.54)",
+          "$description": "Specific value within the blue range at a defined lightness step."
+        },
+        "400": {
+          "$value": "oklch(0.65 0.2903 266.54)",
+          "$description": "Specific value within the blue range at a defined lightness step."
+        },
+        "450": {
+          "$value": "oklch(0.56 0.29 266.60)",
+          "$description": "Specific value within the blue range at a defined lightness step."
+        },
+        "500": {
+          "$value": "#1E2EFD",
+          "$description": "Specific value within the blue range at a defined lightness step."
+        },
+        "600": {
+          "$value": "oklch(0.45 0.2903 266.54)",
+          "$description": "Specific value within the blue range at a defined lightness step."
+        },
+        "700": {
+          "$value": "oklch(0.44 0.2903 266.54)",
+          "$description": "Specific value within the blue range at a defined lightness step."
+        },
+        "800": {
+          "$value": "oklch(0.30 0.07 266.54)",
+          "$description": "Specific value within the blue range at a defined lightness step."
+        },
+        "900": {
+          "$value": "oklch(0.22 0.05 266.54)",
+          "$description": "Specific value within the blue range at a defined lightness step."
+        },
+        "$description": "Discrete values within the blue range at defined lightness steps."
+      },
+      "red": {
+        "50": {
+          "$value": "#fef2f2",
+          "$description": "Specific value within the red range at a defined lightness step."
+        },
+        "400": {
+          "$value": "#f87171",
+          "$description": "Specific value within the red range at a defined lightness step."
+        },
+        "700": {
+          "$value": "#b91c1c",
+          "$description": "Specific value within the red range at a defined lightness step."
+        },
+        "950": {
+          "$value": "#450a0a",
+          "$description": "Specific value within the red range at a defined lightness step."
+        },
+        "$description": "Discrete values within the red range at defined lightness steps."
+      },
+      "green": {
+        "50": {
+          "$value": "#ecfdf5",
+          "$description": "Specific value within the green range at a defined lightness step."
+        },
+        "400": {
+          "$value": "#34d399",
+          "$description": "Specific value within the green range at a defined lightness step."
+        },
+        "700": {
+          "$value": "#047857",
+          "$description": "Specific value within the green range at a defined lightness step."
+        },
+        "950": {
+          "$value": "#022c22",
+          "$description": "Specific value within the green range at a defined lightness step."
+        },
+        "$description": "Discrete values within the green range at defined lightness steps."
+      },
+      "amber": {
+        "50": {
+          "$value": "#fffbeb",
+          "$description": "Specific value within the amber range at a defined lightness step."
+        },
+        "400": {
+          "$value": "#fbbf24",
+          "$description": "Specific value within the amber range at a defined lightness step."
+        },
+        "800": {
+          "$value": "#92400e",
+          "$description": "Specific value within the amber range at a defined lightness step."
+        },
+        "950": {
+          "$value": "#451a03",
+          "$description": "Specific value within the amber range at a defined lightness step."
+        },
+        "$description": "Discrete values within the amber range at defined lightness steps."
+      },
+      "stone": {
+        "$description": "Warm stone/brown palette for Concrete Creations brand accent ramp. PLACEHOLDER values pending final brand identity work.",
+        "100": {
+          "$value": "#F5EFE7",
+          "$description": "Stone 100 — near-white warm tint; accent-subtle surface."
+        },
+        "400": {
+          "$value": "#D0B492",
+          "$description": "Stone 400 — light warm tone; dark-mode pressed accent."
+        },
+        "450": {
+          "$value": "#BC9D7E",
+          "$description": "Stone 450 — medium warm tone; dark-mode hover accent."
+        },
+        "500": {
+          "$value": "#A8896A",
+          "$description": "Stone 500 — mid warm tone; dark-mode rest accent."
+        },
+        "600": {
+          "$value": "#8B6F47",
+          "$description": "Stone 600 — primary warm stone; light-mode rest accent and CTA surface."
+        },
+        "700": {
+          "$value": "#75593A",
+          "$description": "Stone 700 — darker warm stone; light-mode hover accent."
+        },
+        "800": {
+          "$value": "#5C432A",
+          "$description": "Stone 800 — deep warm stone; light-mode pressed accent."
+        },
+        "950": {
+          "$value": "#3A2E1F",
+          "$description": "Stone 950 — near-black warm tone; dark-mode subtle accent surface."
+        }
+      },
+      "projectBrand": {
+        "microsoftGameDev": {
+          "100": {
+            "$value": "#E5E5FC",
+            "$description": "Light support tone for the Microsoft Game Dev project brand."
+          },
+          "500": {
+            "$value": "#6d31fb",
+            "$description": "Primary accent tone for the Microsoft Game Dev project brand."
+          },
+          "900": {
+            "$value": "oklch(0.22 0.16 304)",
+            "$description": "Dark support tone for the Microsoft Game Dev project brand."
+          },
+          "$description": "Project-specific brand colors used in portfolio contexts."
+        },
+        "$description": "Project-specific brand color families reserved for portfolio surfaces."
+      }
+    },
+    "space": {
+      "0": {
+        "$value": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "1": {
+        "$value": {
+          "value": 4,
+          "unit": "px"
+        }
+      },
+      "2": {
+        "$value": {
+          "value": 8,
+          "unit": "px"
+        }
+      },
+      "3": {
+        "$value": {
+          "value": 12,
+          "unit": "px"
+        }
+      },
+      "4": {
+        "$value": {
+          "value": 16,
+          "unit": "px"
+        }
+      },
+      "5": {
+        "$value": {
+          "value": 20,
+          "unit": "px"
+        }
+      },
+      "6": {
+        "$value": {
+          "value": 24,
+          "unit": "px"
+        }
+      },
+      "7": {
+        "$value": {
+          "value": 28,
+          "unit": "px"
+        }
+      },
+      "8": {
+        "$value": {
+          "value": 32,
+          "unit": "px"
+        }
+      },
+      "10": {
+        "$value": {
+          "value": 40,
+          "unit": "px"
+        }
+      },
+      "12": {
+        "$value": {
+          "value": 48,
+          "unit": "px"
+        }
+      },
+      "16": {
+        "$value": {
+          "value": 64,
+          "unit": "px"
+        }
+      },
+      "20": {
+        "$value": {
+          "value": 80,
+          "unit": "px"
+        }
+      },
+      "24": {
+        "$value": {
+          "value": 96,
+          "unit": "px"
+        }
+      },
+      "32": {
+        "$value": {
+          "value": 128,
+          "unit": "px"
+        }
+      },
+      "$type": "dimension",
+      "$description": "Dimensional increments within the 4px base-unit spatial system.",
+      "px1": {
+        "$value": {
+          "value": 1,
+          "unit": "px"
+        }
+      },
+      "px2": {
+        "$value": {
+          "value": 2,
+          "unit": "px"
+        }
+      },
+      "px6": {
+        "$value": {
+          "value": 6,
+          "unit": "px"
+        }
+      },
+      "px10": {
+        "$value": {
+          "value": 10,
+          "unit": "px"
+        }
+      }
+    },
+    "blur": {
+      "8": {
+        "$value": {
+          "value": 8,
+          "unit": "px"
+        },
+        "$description": "8px blur step."
+      },
+      "16": {
+        "$value": {
+          "value": 16,
+          "unit": "px"
+        },
+        "$description": "Fullscreen backdrop blur for portfolio lightbox overlays."
+      },
+      "$type": "dimension",
+      "$description": "Backdrop blur strengths for frosted overlays and fullscreen media treatments."
+    },
+    "radius": {
+      "0": {
+        "$value": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "2": {
+        "$value": {
+          "value": 2,
+          "unit": "px"
+        }
+      },
+      "4": {
+        "$value": {
+          "value": 4,
+          "unit": "px"
+        }
+      },
+      "8": {
+        "$value": {
+          "value": 8,
+          "unit": "px"
+        }
+      },
+      "12": {
+        "$value": {
+          "value": 12,
+          "unit": "px"
+        }
+      },
+      "$type": "dimension",
+      "full": {
+        "$value": {
+          "value": 9999,
+          "unit": "px"
+        }
+      }
+    },
+    "typography": {
+      "family": {
+        "$type": "fontFamily",
+        "primary": {
+          "$value": [
+            "Satoshi",
+            "system-ui",
+            "-apple-system",
+            "BlinkMacSystemFont",
+            "Segoe UI",
+            "sans-serif"
+          ],
+          "$description": "Self-hosted Satoshi (ITF) body typeface; falls back to system-ui sans-serif stack."
+        },
+        "display": {
+          "$value": [
+            "Clash Display",
+            "system-ui",
+            "-apple-system",
+            "BlinkMacSystemFont",
+            "Segoe UI",
+            "sans-serif"
+          ],
+          "$description": "Display face: Clash Display ITF, bound to display/h1/h2/h3 composites."
+        },
+        "mono": {
+          "$value": ["Geist Mono", "Courier New", "monospace"],
+          "$description": "Monospace face: Geist Mono. Falls back to Courier New, monospace."
+        }
+      },
+      "size": {
+        "$type": "dimension",
+        "2xs": {
+          "$value": {
+            "value": 10,
+            "unit": "px"
+          }
+        },
+        "xs": {
+          "$value": {
+            "value": 13,
+            "unit": "px"
+          }
+        },
+        "sm": {
+          "$value": {
+            "value": 15,
+            "unit": "px"
+          }
+        },
+        "base": {
+          "$value": {
+            "value": 17,
+            "unit": "px"
+          }
+        },
+        "lg": {
+          "$value": {
+            "value": 20,
+            "unit": "px"
+          }
+        },
+        "xl": {
+          "$value": {
+            "value": 24,
+            "unit": "px"
+          }
+        },
+        "2xl": {
+          "$value": {
+            "value": 30,
+            "unit": "px"
+          }
+        },
+        "3xl": {
+          "$value": {
+            "value": 36,
+            "unit": "px"
+          }
+        },
+        "4xl": {
+          "$value": {
+            "value": 48,
+            "unit": "px"
+          }
+        },
+        "5xl": {
+          "$value": {
+            "value": 80,
+            "unit": "px"
+          }
+        },
+        "7xl": {
+          "$value": {
+            "value": 72,
+            "unit": "px"
+          },
+          "$description": "Swiss-canon display size. Static desktop value; fluid in theme.css."
+        }
+      },
+      "weight": {
+        "$type": "fontWeight",
+        "light": {
+          "$value": 300,
+          "$description": "Swiss-canon heading weight. Display and h1/h2 composites only."
+        },
+        "regular": {
+          "$value": 400
+        },
+        "medium": {
+          "$value": 500
+        },
+        "semibold": {
+          "$value": 600
+        },
+        "bold": {
+          "$value": 700
+        }
+      },
+      "lineHeight": {
+        "$type": "number",
+        "compact": {
+          "$value": 0.95
+        },
+        "none": {
+          "$value": 1
+        },
+        "tight": {
+          "$value": 1.25
+        },
+        "snug": {
+          "$value": 1.375,
+          "$description": "Swiss-canon snug rhythm (10t-5). Used by h2/h3 composites for tight-but-readable heading lines."
+        },
+        "normal": {
+          "$value": 1.5
+        },
+        "relaxed": {
+          "$value": 1.625,
+          "$description": "Swiss-canon relaxed rhythm (10t-5). Used by body/small/mono composites for long-form prose comfort."
+        }
+      },
+      "letterSpacing": {
+        "$type": "dimension",
+        "tighter": {
+          "$value": {
+            "value": -0.02,
+            "unit": "em"
+          }
+        },
+        "tight": {
+          "$value": {
+            "value": -0.01,
+            "unit": "em"
+          }
+        },
+        "normal": {
+          "$value": {
+            "value": 0,
+            "unit": "em"
+          }
+        },
+        "wide": {
+          "$value": {
+            "value": 0.01,
+            "unit": "em"
+          }
+        },
+        "wider": {
+          "$value": {
+            "value": 0.02,
+            "unit": "em"
+          }
+        },
+        "caps": {
+          "$value": {
+            "value": 0.06,
+            "unit": "em"
+          },
+          "$description": "All-caps tracking for eyebrow / kicker labels. Always pairs with text-transform: uppercase."
+        }
+      }
+    },
+    "duration": {
+      "$type": "duration",
+      "instant": {
+        "$value": {
+          "value": 100,
+          "unit": "ms"
+        },
+        "$description": "Fixed elapsed time interval in milliseconds."
+      },
+      "short": {
+        "$value": {
+          "value": 150,
+          "unit": "ms"
+        },
+        "$description": "Fixed elapsed time interval in milliseconds."
+      },
+      "medium": {
+        "$value": {
+          "value": 250,
+          "unit": "ms"
+        },
+        "$description": "Fixed elapsed time interval in milliseconds."
+      },
+      "long": {
+        "$value": {
+          "value": 400,
+          "unit": "ms"
+        },
+        "$description": "Fixed elapsed time interval in milliseconds."
+      }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "emphasized": {
+        "$value": [0.4, 0, 0.2, 1],
+        "$description": "Cubic bezier with balanced input and output tangents."
+      },
+      "decelerate": {
+        "$value": [0, 0, 0.2, 1],
+        "$description": "Cubic bezier with steep initial gain and constrained tail velocity."
+      },
+      "accelerate": {
+        "$value": [0.4, 0, 1, 1],
+        "$description": "Cubic bezier with restrained initial gain and steep terminal velocity."
+      },
+      "elastic": {
+        "$type": "spring",
+        "$value": {
+          "type": "spring",
+          "stiffness": 300,
+          "damping": 20,
+          "mass": 1
+        },
+        "$description": "Spring response defined by stiffness, damping, and mass parameters."
+      }
+    },
+    "shadow": {
+      "color": {
+        "$type": "color",
+        "$value": "220 13% 18%",
+        "$description": "HSL channels for shadow-color alpha compositing. Light: cool neutral; dark: black.",
+        "$extensions": {
+          "com.figma.variables": {
+            "modes": {
+              "Light": "220 13% 18%",
+              "Dark": "0 0% 0%"
+            }
+          }
+        }
+      }
+    },
+    "breakpoint": {
+      "$description": "Discrete viewport thresholds expressed as dimensions.",
+      "xs": {
+        "$type": "dimension",
+        "$value": {
+          "value": 375,
+          "unit": "px"
+        }
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": {
+          "value": 640,
+          "unit": "px"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": {
+          "value": 768,
+          "unit": "px"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1024,
+          "unit": "px"
+        }
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1280,
+          "unit": "px"
+        }
+      }
+    },
+    "size": {
+      "8": {
+        "$type": "dimension",
+        "$value": {
+          "value": 8,
+          "unit": "px"
+        },
+        "$description": "8px size step."
+      },
+      "10": {
+        "$type": "dimension",
+        "$value": {
+          "value": 10,
+          "unit": "px"
+        },
+        "$description": "10px size step."
+      },
+      "12": {
+        "$type": "dimension",
+        "$value": {
+          "value": 12,
+          "unit": "px"
+        },
+        "$description": "12px size step."
+      },
+      "16": {
+        "$type": "dimension",
+        "$value": {
+          "value": 16,
+          "unit": "px"
+        },
+        "$description": "16px size step."
+      },
+      "20": {
+        "$type": "dimension",
+        "$value": {
+          "value": 20,
+          "unit": "px"
+        },
+        "$description": "20px size step."
+      },
+      "24": {
+        "$type": "dimension",
+        "$value": {
+          "value": 24,
+          "unit": "px"
+        },
+        "$description": "24px size step."
+      },
+      "32": {
+        "$type": "dimension",
+        "$value": {
+          "value": 32,
+          "unit": "px"
+        },
+        "$description": "32px size step."
+      },
+      "40": {
+        "$type": "dimension",
+        "$value": {
+          "value": 40,
+          "unit": "px"
+        },
+        "$description": "40px size step."
+      },
+      "48": {
+        "$type": "dimension",
+        "$value": {
+          "value": 48,
+          "unit": "px"
+        },
+        "$description": "48px size step."
+      },
+      "64": {
+        "$type": "dimension",
+        "$value": {
+          "value": 64,
+          "unit": "px"
+        },
+        "$description": "64px size step."
+      },
+      "80": {
+        "$type": "dimension",
+        "$value": {
+          "value": 80,
+          "unit": "px"
+        },
+        "$description": "80px size step."
+      },
+      "96": {
+        "$type": "dimension",
+        "$value": {
+          "value": 96,
+          "unit": "px"
+        },
+        "$description": "96px size step."
+      },
+      "$description": "Unaliased dimensional values.",
+      "interactive": {
+        "$description": "Interactive control size minimums.",
+        "min": {
+          "$type": "dimension",
+          "$value": {
+            "value": 44,
+            "unit": "px"
+          },
+          "$description": "Minimum interactive hit target size."
+        }
+      },
+      "width": {
+        "96": {
+          "$type": "dimension",
+          "$value": {
+            "value": 96,
+            "unit": "px"
+          },
+          "$description": "96px width step."
+        },
+        "760": {
+          "$type": "dimension",
+          "$value": {
+            "value": 760,
+            "unit": "px"
+          }
+        },
+        "1200": {
+          "$type": "dimension",
+          "$value": {
+            "value": 1200,
+            "unit": "px"
+          }
+        },
+        "50ch": {
+          "$type": "dimension",
+          "$value": {
+            "value": 50,
+            "unit": "ch"
+          }
+        }
+      }
+    },
+    "grid": {
+      "columns": {
+        "1": {
+          "$type": "number",
+          "$value": 1
+        },
+        "2": {
+          "$type": "number",
+          "$value": 2
+        },
+        "3": {
+          "$type": "number",
+          "$value": 3
+        }
+      }
+    },
+    "zIndex": {
+      "0": {
+        "$type": "number",
+        "$value": 0
+      },
+      "10": {
+        "$type": "number",
+        "$value": 10
+      },
+      "100": {
+        "$type": "number",
+        "$value": 100
+      },
+      "1000": {
+        "$type": "number",
+        "$value": 1000
+      },
+      "$description": "Discrete stacking levels along the z axis."
+    },
+    "borderWidth": {
+      "$type": "dimension",
+      "xs": {
+        "$value": {
+          "value": 1,
+          "unit": "px"
+        }
+      },
+      "sm": {
+        "$value": {
+          "value": 2,
+          "unit": "px"
+        }
+      },
+      "md": {
+        "$value": {
+          "value": 4,
+          "unit": "px"
+        }
+      }
+    }
+  },
+  "semantic": {
+    "motion": {
+      "$type": "motion",
+      "productive": {
+        "$value": {
+          "duration": "{primitive.duration.short}",
+          "easing": "{primitive.easing.decelerate}"
+        },
+        "$description": "For micro-interactions and status changes. No deformation."
+      },
+      "expressive": {
+        "$value": {
+          "duration": "{primitive.duration.medium}",
+          "easing": "{primitive.easing.elastic}"
+        },
+        "$description": "For teaching moments and significant UI entries. Includes physics-based squish."
+      },
+      "spatial": {
+        "$value": {
+          "duration": "{primitive.duration.long}",
+          "easing": "{primitive.easing.emphasized}"
+        },
+        "$description": "For elements traveling long distances across the viewport."
+      },
+      "exit": {
+        "$value": {
+          "duration": "{primitive.duration.instant}",
+          "easing": "{primitive.easing.accelerate}"
+        },
+        "$description": "For elements being removed from the DOM."
+      }
+    },
+    "color": {
+      "$type": "color",
+      "surface": {
+        "page": {
+          "$value": "{primitive.color.neutral.white}",
+          "$description": "Main page background",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.white}",
+                "Dark": "{primitive.color.neutral.black}"
+              }
+            }
+          }
+        },
+        "raised": {
+          "$value": "{primitive.color.neutral.50}",
+          "$description": "Subtle elevated surface (cards, sections)",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.50}",
+                "Dark": "{primitive.color.neutral.950}"
+              }
+            }
+          }
+        },
+        "overlay": {
+          "$value": "{primitive.color.neutral.100}",
+          "$description": "Deeper surface layer",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.100}",
+                "Dark": "{primitive.color.neutral.850}"
+              }
+            }
+          }
+        },
+        "inverse": {
+          "$value": "{primitive.color.neutral.black}",
+          "$description": "Inverted background for contrast sections",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.black}",
+                "Dark": "{primitive.color.neutral.white}"
+              }
+            }
+          }
+        },
+        "accent": {
+          "$value": "{primitive.color.blue.500}",
+          "$description": "Accent-colored background",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.blue.500}",
+                "Dark": "{primitive.color.blue.500}"
+              }
+            }
+          }
+        },
+        "accentSubtle": {
+          "$value": "{primitive.color.blue.50}",
+          "$description": "Faint accent tint for hover states or highlights",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.blue.50}",
+                "Dark": "{primitive.color.blue.900}"
+              }
+            }
+          }
+        }
+      },
+      "content": {
+        "primary": {
+          "$value": "{primitive.color.neutral.900}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.900}",
+                "Dark": "{primitive.color.neutral.100}"
+              }
+            }
+          }
+        },
+        "secondary": {
+          "$value": "{primitive.color.neutral.600}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.600}",
+                "Dark": "{primitive.color.neutral.400}"
+              }
+            }
+          }
+        },
+        "disabled": {
+          "$value": "{primitive.color.neutral.300}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.300}",
+                "Dark": "{primitive.color.neutral.600}"
+              }
+            }
+          }
+        },
+        "inverse": {
+          "$value": "{primitive.color.neutral.100}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.100}",
+                "Dark": "{primitive.color.neutral.900}"
+              }
+            }
+          }
+        },
+        "accent": {
+          "$value": "{primitive.color.blue.500}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.blue.500}",
+                "Dark": "{primitive.color.blue.300}"
+              }
+            }
+          }
+        },
+        "onAccent": {
+          "$value": "{primitive.color.neutral.white}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.white}",
+                "Dark": "{primitive.color.neutral.white}"
+              }
+            }
+          }
+        }
+      },
+      "border": {
+        "default": {
+          "$value": "{primitive.color.neutral.200}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.200}",
+                "Dark": "{primitive.color.neutral.700}"
+              }
+            }
+          }
+        },
+        "subdued": {
+          "$value": "{primitive.color.neutral.200}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.200}",
+                "Dark": "{primitive.color.neutral.800}"
+              }
+            }
+          }
+        },
+        "subtle": {
+          "$value": "{primitive.color.neutral.100}",
+          "$description": "Lowest-contrast border for resting hairline edges on flat surfaces.",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.100}",
+                "Dark": "{primitive.color.neutral.850}"
+              }
+            }
+          }
+        },
+        "strong": {
+          "$value": "{primitive.color.neutral.300}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.neutral.300}",
+                "Dark": "{primitive.color.neutral.600}"
+              }
+            }
+          }
+        },
+        "accent": {
+          "$value": "{primitive.color.blue.500}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.blue.500}",
+                "Dark": "{primitive.color.blue.500}"
+              }
+            }
+          }
+        }
+      },
+      "feedback": {
+        "error": {
+          "$type": "color",
+          "$value": "{primitive.color.red.700}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.red.700}",
+                "Dark": "{primitive.color.red.400}"
+              }
+            }
+          }
+        },
+        "success": {
+          "$type": "color",
+          "$value": "{primitive.color.green.700}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.green.700}",
+                "Dark": "{primitive.color.green.400}"
+              }
+            }
+          }
+        },
+        "warning": {
+          "$type": "color",
+          "$value": "{primitive.color.amber.800}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.amber.800}",
+                "Dark": "{primitive.color.amber.400}"
+              }
+            }
+          }
+        },
+        "info": {
+          "$type": "color",
+          "$value": "{primitive.color.blue.500}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{primitive.color.blue.500}",
+                "Dark": "{primitive.color.blue.300}"
+              }
+            }
+          }
+        },
+        "bg": {
+          "error": {
+            "$type": "color",
+            "$value": "{primitive.color.red.50}",
+            "$extensions": {
+              "com.figma.variables": {
+                "modes": {
+                  "Light": "{primitive.color.red.50}",
+                  "Dark": "{primitive.color.red.950}"
+                }
+              }
+            }
+          },
+          "success": {
+            "$type": "color",
+            "$value": "{primitive.color.green.50}",
+            "$extensions": {
+              "com.figma.variables": {
+                "modes": {
+                  "Light": "{primitive.color.green.50}",
+                  "Dark": "{primitive.color.green.950}"
+                }
+              }
+            }
+          },
+          "warning": {
+            "$type": "color",
+            "$value": "{primitive.color.amber.50}",
+            "$extensions": {
+              "com.figma.variables": {
+                "modes": {
+                  "Light": "{primitive.color.amber.50}",
+                  "Dark": "{primitive.color.amber.950}"
+                }
+              }
+            }
+          },
+          "info": {
+            "$type": "color",
+            "$value": "{primitive.color.blue.50}",
+            "$extensions": {
+              "com.figma.variables": {
+                "modes": {
+                  "Light": "{primitive.color.blue.50}",
+                  "Dark": "{primitive.color.blue.900}"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "space": {
+      "$type": "dimension",
+      "$description": "Semantic spacing tiers: subgrid, component, layout, section.",
+      "subgrid": {
+        "hairline": {
+          "$value": "{primitive.space.px1}",
+          "$description": "1px border offset and hairline spacing."
+        },
+        "xs": {
+          "$value": "{primitive.space.px2}",
+          "$description": "2px vertical rhythm nudge and baseline adjustment."
+        },
+        "gap": {
+          "$value": "{primitive.space.1}",
+          "$description": "4px cap-height and inline cluster spacing."
+        }
+      },
+      "component": {
+        "gap": {
+          "$value": "{primitive.space.2}",
+          "$description": "8px label\u2194input rhythm and closely coupled control spacing."
+        },
+        "medium": {
+          "$value": "{primitive.space.3}",
+          "$description": "12px adjacent form fields and medium intra-component gaps."
+        },
+        "padding": {
+          "$value": "{primitive.space.6}",
+          "$description": "24px default inset for cards, forms, panels, and grouped surfaces."
+        }
+      },
+      "layout": {
+        "tight": {
+          "$value": "{primitive.space.4}",
+          "$description": "16px default HdsStack gap and inter-component spacing."
+        },
+        "normal": {
+          "$value": "{primitive.space.6}",
+          "$description": "24px column gutters and sidebar gutter spacing."
+        },
+        "gutter": {
+          "$value": "{primitive.space.6}",
+          "$description": "24px column and region gutters (alias for layout.normal)."
+        },
+        "inset": {
+          "$value": "{primitive.space.8}",
+          "$description": "32px major block separation and inset inter-component gaps."
+        },
+        "spacious": {
+          "$value": "{primitive.space.12}",
+          "$description": "48px section break and whitespace separator between major content blocks."
+        }
+      },
+      "section": {
+        "stack": {
+          "$value": "{primitive.space.20}",
+          "$description": "80px vertical rhythm between page sections and major editorial blocks."
+        },
+        "inset": {
+          "$value": "{primitive.space.24}",
+          "$description": "96px hero and landing-page inset padding."
+        },
+        "heroMax": {
+          "$value": "{primitive.space.32}",
+          "$description": "128px maximum hero region padding for extra-large displays."
+        }
+      },
+      "sidebar": {
+        "indent": {
+          "$value": "{primitive.space.3}",
+          "$description": "12px indent level for nested sidebar and TOC groups."
+        },
+        "gap": {
+          "$value": "{primitive.space.4}",
+          "$description": "16px vertical spacing between items in sidebar and TOC stacks."
+        },
+        "sectionGap": {
+          "$value": "{primitive.space.3}",
+          "$description": "12px spacing between sidebar sections and grouped rail blocks."
+        },
+        "railPadding": {
+          "$value": "{primitive.space.5}",
+          "$description": "20px outer padding for sidebar and TOC rails."
+        }
+      }
+    },
+    "layout": {
+      "width": {
+        "content": {
+          "$type": "dimension",
+          "$value": "{primitive.size.width.760}",
+          "$description": "Max width for prose/content (760px). Use with HdsContainer for centered text blocks."
+        },
+        "max": {
+          "$type": "dimension",
+          "$value": "{primitive.size.width.1200}",
+          "$description": "Max width for full-layout containers (1200px). Use with HdsContainer for page layouts."
+        }
+      },
+      "container": {
+        "maxWidth": {
+          "$type": "dimension",
+          "$value": "{primitive.size.width.1200}"
+        }
+      },
+      "content": {
+        "maxWidth": {
+          "$type": "dimension",
+          "$value": "{primitive.size.width.760}"
+        }
+      },
+      "prose": {
+        "maxWidth": {
+          "$type": "dimension",
+          "$value": "{primitive.size.width.50ch}"
+        }
+      },
+      "section": {
+        "paddingY": {
+          "$type": "dimension",
+          "$value": "{primitive.space.20}"
+        }
+      },
+      "grid": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{primitive.space.8}"
+        },
+        "columns": {
+          "mobile": {
+            "$type": "number",
+            "$value": "{primitive.grid.columns.1}"
+          },
+          "tablet": {
+            "$type": "number",
+            "$value": "{primitive.grid.columns.2}"
+          },
+          "desktop": {
+            "$type": "number",
+            "$value": "{primitive.grid.columns.3}"
+          }
+        }
+      }
+    },
+    "typography": {
+      "$type": "typography",
+      "$description": "8-style Swiss-canon type ramp: display, h1\u2013h3, body, small, caption, mono.",
+      "display": {
+        "$value": {
+          "fontFamily": "{primitive.typography.family.display}",
+          "fontSize": "{primitive.typography.size.7xl}",
+          "fontWeight": "{primitive.typography.weight.medium}",
+          "letterSpacing": "{primitive.typography.letterSpacing.tight}",
+          "lineHeight": "{primitive.typography.lineHeight.none}"
+        },
+        "$description": "Display headline. 72px / Clash Display 500 / leading-none.",
+        "$extensions": {
+          "com.figma.variables": {
+            "fontSize": "clamp(40px, 8vw, 72px)",
+            "note": "Figma stores the 72px desktop-max static value. Browser CSS overrides with fluid scaling (40px min \u2192 72px max). See src/styles/theme.css."
+          }
+        }
+      },
+      "h1": {
+        "$value": {
+          "fontFamily": "{primitive.typography.family.display}",
+          "fontSize": "{primitive.typography.size.4xl}",
+          "fontWeight": "{primitive.typography.weight.medium}",
+          "letterSpacing": "{primitive.typography.letterSpacing.tight}",
+          "lineHeight": "{primitive.typography.lineHeight.tight}"
+        },
+        "$description": "Primary section headings (h1). 48px / Clash Display medium 500 / leading-tight.",
+        "$extensions": {
+          "com.figma.variables": {
+            "fontSize": "clamp(32px, 6vw, 48px)",
+            "note": "Figma stores the 48px desktop-max static value. Browser CSS overrides with fluid scaling (32px min \u2192 48px max). See src/styles/theme.css."
+          }
+        }
+      },
+      "h2": {
+        "$value": {
+          "fontFamily": "{primitive.typography.family.display}",
+          "fontSize": "{primitive.typography.size.2xl}",
+          "fontWeight": "{primitive.typography.weight.medium}",
+          "letterSpacing": "{primitive.typography.letterSpacing.tight}",
+          "lineHeight": "42px"
+        },
+        "$description": "Secondary section headings (h2). Clash Display medium, 30px, line-height 42px.",
+        "$extensions": {
+          "com.figma.variables": {
+            "fontSize": "clamp(24px, 3.5vw, 30px)",
+            "note": "Figma stores the 30px desktop-max static value. Browser CSS overrides with fluid scaling (24px min \u2192 30px max). See src/styles/theme.css."
+          }
+        }
+      },
+      "h3": {
+        "$value": {
+          "fontFamily": "{primitive.typography.family.display}",
+          "fontSize": "{primitive.typography.size.lg}",
+          "fontWeight": "{primitive.typography.weight.medium}",
+          "letterSpacing": "{primitive.typography.letterSpacing.normal}",
+          "lineHeight": "28px"
+        },
+        "$description": "Component and card headers (h3). 20px / Clash Display medium 500 / leading-snug.",
+        "$extensions": {
+          "com.figma.variables": {
+            "fontSize": "clamp(18px, 2vw, 20px)",
+            "note": "Figma stores the 20px desktop-max static value. Browser CSS overrides with fluid scaling (18px min \u2192 20px max). See src/styles/theme.css."
+          }
+        }
+      },
+      "body": {
+        "$value": {
+          "fontFamily": "{primitive.typography.family.primary}",
+          "fontSize": "{primitive.typography.size.base}",
+          "fontWeight": "{primitive.typography.weight.medium}",
+          "letterSpacing": "{primitive.typography.letterSpacing.normal}",
+          "lineHeight": "28px",
+          "maxWidth": {
+            "value": 60,
+            "unit": "ch"
+          }
+        },
+        "$description": "Body prose. Satoshi medium, 17px, line-height 28px, max 60ch measure."
+      },
+      "ui": {
+        "$value": {
+          "fontFamily": "{primitive.typography.family.primary}",
+          "fontSize": "{primitive.typography.size.sm}",
+          "fontWeight": "{primitive.typography.weight.medium}",
+          "letterSpacing": "{primitive.typography.letterSpacing.normal}",
+          "lineHeight": "24px",
+          "maxWidth": {
+            "value": 60,
+            "unit": "ch"
+          }
+        },
+        "$description": "UI text for nav, labels, captions. Satoshi medium, 15px, line-height 24px."
+      },
+      "eyebrow": {
+        "$value": {
+          "fontFamily": "{primitive.typography.family.primary}",
+          "fontSize": "{primitive.typography.size.xs}",
+          "fontWeight": "{primitive.typography.weight.medium}",
+          "letterSpacing": "{primitive.typography.letterSpacing.caps}",
+          "lineHeight": "20px",
+          "textTransform": "uppercase"
+        },
+        "$description": "Eyebrow / kicker label. Satoshi medium, 13px, caps tracking, uppercase."
+      },
+      "mono": {
+        "$value": {
+          "fontFamily": "{primitive.typography.family.mono}",
+          "fontSize": "{primitive.typography.size.xs}",
+          "fontWeight": "{primitive.typography.weight.regular}",
+          "letterSpacing": "{primitive.typography.letterSpacing.normal}",
+          "lineHeight": "20px",
+          "maxWidth": {
+            "value": 60,
+            "unit": "ch"
+          }
+        },
+        "$description": "Monospace for code, token names, shortcuts. Geist Mono regular, 13px."
+      },
+      "lineHeight": {
+        "none": {
+          "$type": "number",
+          "$value": "{primitive.typography.lineHeight.none}",
+          "$description": "Semantic alias for leading-none (1). Display text and badge spans."
+        }
+      }
+    },
+    "docs": {
+      "$description": "Doc-page spacing scale: section, paragraph, inline rhythm.",
+      "space": {
+        "$type": "dimension",
+        "section": {
+          "$value": "{primitive.space.12}",
+          "$description": "48px between H2 sections \u2014 generous section break for doc pages."
+        },
+        "paragraph": {
+          "$value": "{primitive.space.6}",
+          "$description": "24px between paragraphs \u2014 comfortable prose rhythm for long-form doc content."
+        },
+        "inline": {
+          "$value": "{primitive.space.2}",
+          "$description": "8px inline cluster spacing \u2014 gap between metadata badges, inline icons, doc-page chips."
+        }
+      }
+    },
+    "accent": {
+      "$type": "color",
+      "rest": {
+        "$value": "{primitive.color.blue.500}",
+        "$description": "Default accent fill for interactive elements at rest.",
+        "$extensions": {
+          "com.figma.variables": {
+            "modes": {
+              "Light": "{primitive.color.blue.500}",
+              "Dark": "{primitive.color.blue.500}"
+            }
+          }
+        }
+      },
+      "hover": {
+        "$value": "{primitive.color.blue.600}",
+        "$description": "Accent fill on pointer hover.",
+        "$extensions": {
+          "com.figma.variables": {
+            "modes": {
+              "Light": "{primitive.color.blue.600}",
+              "Dark": "{primitive.color.blue.450}"
+            }
+          }
+        }
+      },
+      "pressed": {
+        "$value": "{primitive.color.blue.700}",
+        "$description": "Accent fill during active press.",
+        "$extensions": {
+          "com.figma.variables": {
+            "modes": {
+              "Light": "{primitive.color.blue.700}",
+              "Dark": "{primitive.color.blue.400}"
+            }
+          }
+        }
+      },
+      "inactive": {
+        "$value": "{primitive.color.blue.200}",
+        "$description": "Accent fill for inactive or unselected accent elements.",
+        "$extensions": {
+          "com.figma.variables": {
+            "modes": {
+              "Light": "{primitive.color.blue.200}",
+              "Dark": "{primitive.color.blue.200}"
+            }
+          }
+        }
+      },
+      "disabled": {
+        "$value": "{primitive.color.blue.100}",
+        "$description": "Accent fill for disabled accent elements.",
+        "$extensions": {
+          "com.figma.variables": {
+            "modes": {
+              "Light": "{primitive.color.blue.100}",
+              "Dark": "{primitive.color.blue.100}"
+            }
+          }
+        }
+      },
+      "content": {
+        "$value": "{primitive.color.blue.500}",
+        "$description": "Text and icon color on neutral surfaces with accent intent.",
+        "$extensions": {
+          "com.figma.variables": {
+            "modes": {
+              "Light": "{primitive.color.blue.500}",
+              "Dark": "{primitive.color.blue.300}"
+            }
+          }
+        }
+      },
+      "contentHover": {
+        "$value": "{primitive.color.blue.600}",
+        "$description": "Accent content color on pointer hover.",
+        "$extensions": {
+          "com.figma.variables": {
+            "modes": {
+              "Light": "{primitive.color.blue.600}",
+              "Dark": "{primitive.color.blue.200}"
+            }
+          }
+        }
+      },
+      "subtle": {
+        "$value": "{primitive.color.blue.50}",
+        "$description": "Low-emphasis accent tint for hover backgrounds and selection highlights.",
+        "$extensions": {
+          "com.figma.variables": {
+            "modes": {
+              "Light": "{primitive.color.blue.50}",
+              "Dark": "{primitive.color.blue.900}"
+            }
+          }
+        }
+      }
+    },
+    "radius": {
+      "action": {
+        "$type": "dimension",
+        "$value": "{primitive.radius.12}",
+        "$description": "Corner radius for interactive action elements like buttons and inputs."
+      }
+    },
+    "borderWidth": {
+      "default": {
+        "$type": "dimension",
+        "$value": "{primitive.borderWidth.xs}",
+        "$description": "Default hairline border weight for surfaces and inputs."
+      },
+      "emphasis": {
+        "$type": "dimension",
+        "$value": "{primitive.borderWidth.sm}",
+        "$description": "Stronger border weight for focus rings and active indicators."
+      }
+    },
+    "shadow": {
+      "$type": "shadow",
+      "subtle": {
+        "$value": "0 1px 2px hsl(var(--primitive-shadow-color) / 0.04), 0 1px 1px hsl(var(--primitive-shadow-color) / 0.06)",
+        "$description": "Resting elevation shadow for raised surfaces (cards, inline panels)."
+      },
+      "floating": {
+        "$value": "0 4px 6px hsl(var(--primitive-shadow-color) / 0.05), 0 10px 15px hsl(var(--primitive-shadow-color) / 0.08)",
+        "$description": "Hover/floating elevation for menus, popovers, and tooltips."
+      },
+      "overlay": {
+        "$value": "0 10px 15px hsl(var(--primitive-shadow-color) / 0.08), 0 25px 50px hsl(var(--primitive-shadow-color) / 0.12)",
+        "$description": "Modal/dialog elevation for full-screen overlays."
+      }
+    },
+    "elevation": {
+      "$type": "elevation",
+      "flat": {
+        "$value": {
+          "surface": "{semantic.color.surface.page}",
+          "shadow": null,
+          "border": "{semantic.color.border.subtle}"
+        },
+        "$description": "Flat surface (no shadow, hairline border) for embedded panels."
+      },
+      "raised": {
+        "$value": {
+          "surface": "{semantic.color.surface.raised}",
+          "shadow": "{semantic.shadow.subtle}",
+          "border": null
+        },
+        "$description": "Resting card / panel elevation."
+      },
+      "floating": {
+        "$value": {
+          "surface": "{semantic.color.surface.raised}",
+          "shadow": "{semantic.shadow.floating}",
+          "border": null
+        },
+        "$description": "Hover, menu, and popover elevation."
+      },
+      "overlay": {
+        "$value": {
+          "surface": "{semantic.color.surface.overlay}",
+          "shadow": "{semantic.shadow.overlay}",
+          "border": null
+        },
+        "$description": "Modal, dialog, and drawer elevation."
+      }
+    }
+  },
+  "component": {
+    "nav": {
+      "bg": {
+        "$type": "color",
+        "$value": "{semantic.color.surface.page}",
+        "$description": "Nav bar background fill."
+      },
+      "bgActive": {
+        "$type": "color",
+        "$value": "{semantic.accent.subtle}",
+        "$description": "Nav item background fill when active or selected."
+      },
+      "borderActive": {
+        "$type": "color",
+        "$value": "{semantic.color.surface.accent}",
+        "$description": "Nav item border color when active or selected."
+      },
+      "text": {
+        "$type": "color",
+        "$value": "{semantic.color.content.secondary}",
+        "$description": "Nav item text color at rest."
+      },
+      "textActive": {
+        "$type": "color",
+        "$value": "{semantic.color.content.primary}",
+        "$description": "Nav item text color when active or selected."
+      },
+      "height": {
+        "$type": "dimension",
+        "$value": "{primitive.space.16}",
+        "$description": "Nav bar height."
+      },
+      "paddingX": {
+        "$type": "dimension",
+        "$value": "{primitive.space.6}",
+        "$description": "Horizontal padding inside nav items."
+      },
+      "paddingY": {
+        "$type": "dimension",
+        "$value": "{primitive.space.2}",
+        "$description": "Vertical padding inside nav items."
+      }
+    },
+    "tag": {
+      "background": {
+        "$type": "color",
+        "$value": "{semantic.accent.subtle}",
+        "$description": "Base tag surface color."
+      },
+      "text": {
+        "$type": "color",
+        "$value": "{semantic.color.content.primary}",
+        "$description": "Default tag text color."
+      },
+      "border": {
+        "$type": "color",
+        "$value": "{semantic.color.border.default}",
+        "$description": "Default tag border color."
+      },
+      "radius": {
+        "$type": "dimension",
+        "$value": "{primitive.radius.full}",
+        "$description": "Pill radius for the tag surface."
+      },
+      "fontSize": {
+        "$type": "dimension",
+        "$value": "{primitive.typography.size.xs}",
+        "$description": "Tag type size."
+      },
+      "fontWeight": {
+        "$type": "fontWeight",
+        "$value": "{primitive.typography.weight.medium}",
+        "$description": "Tag label weight."
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": "{primitive.typography.lineHeight.normal}",
+        "$description": "Readable label rhythm for tags."
+      },
+      "minWidth": {
+        "$type": "dimension",
+        "$value": "{primitive.size.48}",
+        "$description": "Minimum tag width."
+      },
+      "minHeight": {
+        "$type": "dimension",
+        "$value": "{primitive.space.6}",
+        "$description": "Minimum tag height."
+      },
+      "paddingX": {
+        "$type": "dimension",
+        "$value": "{primitive.space.3}",
+        "$description": "Horizontal padding inside the pill."
+      },
+      "paddingY": {
+        "$type": "dimension",
+        "$value": "{primitive.space.2}",
+        "$description": "Vertical padding inside the pill."
+      },
+      "activeText": {
+        "$type": "color",
+        "$value": "{semantic.color.content.onAccent}",
+        "$description": "Text color when the tag is active."
+      },
+      "activeBackground": {
+        "$type": "color",
+        "$value": "{semantic.accent.rest}",
+        "$description": "Active tag fill color."
+      },
+      "activeBorder": {
+        "$type": "color",
+        "$value": "{semantic.accent.rest}",
+        "$description": "Active tag border color."
+      },
+      "activeHover": {
+        "$type": "color",
+        "$value": "{semantic.accent.hover}",
+        "$description": "Active tag hover fill color."
+      }
+    },
+    "badge": {
+      "fontSize": {
+        "$type": "dimension",
+        "$value": "{primitive.typography.size.xs}",
+        "$description": "Badge type size."
+      },
+      "fontWeight": {
+        "$type": "fontWeight",
+        "$value": "{primitive.typography.weight.medium}",
+        "$description": "Badge label weight."
+      },
+      "text": {
+        "$type": "color",
+        "$value": "{semantic.color.content.primary}",
+        "$description": "Badge text color."
+      },
+      "bg": {
+        "$type": "color",
+        "$value": "{semantic.color.feedback.bg.info}",
+        "$extensions": {
+          "com.figma.variables": {
+            "modes": {
+              "Light": "{semantic.color.feedback.bg.info}",
+              "Dark": "{semantic.color.feedback.bg.info}"
+            }
+          }
+        },
+        "$description": "Badge background color."
+      },
+      "radius": {
+        "$type": "dimension",
+        "$value": "{primitive.radius.4}",
+        "$description": "Small rounded radius for badges."
+      },
+      "height": {
+        "$type": "dimension",
+        "$value": "{primitive.size.20}",
+        "$description": "Badge height."
+      },
+      "minWidth": {
+        "$type": "dimension",
+        "$value": "{primitive.size.20}",
+        "$description": "Badge minimum width."
+      },
+      "paddingY": {
+        "$type": "dimension",
+        "$value": "{primitive.space.px2}",
+        "$description": "Vertical padding inside the badge."
+      },
+      "paddingX": {
+        "$type": "dimension",
+        "$value": "{primitive.space.px6}",
+        "$description": "Horizontal padding inside the badge."
+      }
+    },
+    "button": {
+      "bg": {
+        "$type": "color",
+        "$value": "{semantic.color.surface.accent}",
+        "$description": "Primary button fill."
+      },
+      "bgHover": {
+        "$type": "color",
+        "$value": "{semantic.accent.hover}",
+        "$description": "Primary button hover fill."
+      },
+      "text": {
+        "$type": "color",
+        "$value": "{semantic.color.content.onAccent}",
+        "$description": "Primary button text color."
+      },
+      "radius": {
+        "$type": "dimension",
+        "$value": "{semantic.radius.action}",
+        "$description": "Button corner radius."
+      },
+      "paddingX": {
+        "$type": "dimension",
+        "$value": "{primitive.space.4}",
+        "$description": "Horizontal button padding."
+      },
+      "paddingY": {
+        "$type": "dimension",
+        "$value": "{primitive.space.3}",
+        "$description": "Vertical button padding."
+      },
+      "size": {
+        "sm": {
+          "paddingX": {
+            "$type": "dimension",
+            "$value": "{primitive.space.2}",
+            "$description": "Small button horizontal padding (8px)."
+          },
+          "paddingY": {
+            "$type": "dimension",
+            "$value": "{primitive.space.1}",
+            "$description": "Small button vertical padding (4px)."
+          },
+          "fontSize": {
+            "$type": "dimension",
+            "$value": "{primitive.typography.size.xs}",
+            "$description": "Small button label size (13px)."
+          },
+          "iconSize": {
+            "$type": "dimension",
+            "$value": "{primitive.size.12}",
+            "$description": "Small button icon slot size (12px)."
+          },
+          "height": {
+            "$type": "dimension",
+            "$value": "{primitive.space.7}",
+            "$description": "Small button height (28px)."
+          },
+          "itemSpacing": {
+            "$type": "dimension",
+            "$value": "{primitive.space.1}",
+            "$description": "Small button icon-to-label gap (4px)."
+          }
+        },
+        "md": {
+          "paddingX": {
+            "$type": "dimension",
+            "$value": "{primitive.space.4}",
+            "$description": "Medium button horizontal padding (16px)."
+          },
+          "paddingY": {
+            "$type": "dimension",
+            "$value": "{primitive.space.3}",
+            "$description": "Medium button vertical padding (12px)."
+          },
+          "fontSize": {
+            "$type": "dimension",
+            "$value": "{primitive.typography.size.sm}",
+            "$description": "Medium button label size (15px)."
+          },
+          "iconSize": {
+            "$type": "dimension",
+            "$value": "{primitive.size.16}",
+            "$description": "Medium button icon slot size (16px)."
+          },
+          "height": {
+            "$type": "dimension",
+            "$value": "{primitive.size.40}",
+            "$description": "Medium button height (40px)."
+          },
+          "itemSpacing": {
+            "$type": "dimension",
+            "$value": "{primitive.space.2}",
+            "$description": "Medium button icon-to-label gap (8px)."
+          }
+        },
+        "lg": {
+          "paddingX": {
+            "$type": "dimension",
+            "$value": "{primitive.space.6}",
+            "$description": "Large button horizontal padding (24px)."
+          },
+          "paddingY": {
+            "$type": "dimension",
+            "$value": "{primitive.space.4}",
+            "$description": "Large button vertical padding (16px)."
+          },
+          "fontSize": {
+            "$type": "dimension",
+            "$value": "{primitive.typography.size.base}",
+            "$description": "Large button label size (17px)."
+          },
+          "iconSize": {
+            "$type": "dimension",
+            "$value": "{primitive.size.20}",
+            "$description": "Large button icon slot size (20px)."
+          },
+          "height": {
+            "$type": "dimension",
+            "$value": "{primitive.size.48}",
+            "$description": "Large button height (48px)."
+          },
+          "itemSpacing": {
+            "$type": "dimension",
+            "$value": "{primitive.space.2}",
+            "$description": "Large button icon-to-label gap (8px)."
+          }
+        }
+      },
+      "primary": {
+        "textDisabled": {
+          "$type": "color",
+          "$value": "{semantic.color.content.onAccent}",
+          "$extensions": {
+            "com.figma.variables": {
+              "modes": {
+                "Light": "{semantic.color.content.onAccent}",
+                "Dark": "{semantic.color.content.disabled}"
+              }
+            }
+          },
+          "$description": "Disabled primary button text color."
+        },
+        "bgDisabled": {
+          "$type": "color",
+          "$value": "{semantic.color.surface.accentSubtle}",
+          "$description": "Disabled primary button fill."
+        }
+      },
+      "secondary": {
+        "bg": {
+          "rest": {
+            "$type": "color",
+            "$value": "{semantic.color.surface.page}",
+            "$description": "Secondary button fill."
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{semantic.color.surface.raised}",
+            "$description": "Secondary button hover fill."
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{semantic.color.surface.overlay}",
+            "$description": "Secondary button pressed fill."
+          }
+        },
+        "border": {
+          "rest": {
+            "$type": "color",
+            "$value": "{semantic.color.border.default}",
+            "$description": "Secondary button border."
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{semantic.color.border.default}",
+            "$description": "Secondary button hover border."
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{semantic.color.border.default}",
+            "$description": "Secondary button pressed border."
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{semantic.color.border.subdued}",
+            "$description": "Secondary button disabled border."
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{semantic.color.content.primary}",
+          "$description": "Secondary button text color."
+        }
+      }
+    },
+    "input": {
+      "bg": {
+        "$type": "color",
+        "$value": "{semantic.color.surface.raised}"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "{semantic.color.content.primary}"
+      },
+      "border": {
+        "$type": "color",
+        "$value": "{semantic.color.border.default}"
+      },
+      "borderError": {
+        "$type": "color",
+        "$value": "{semantic.color.feedback.error}"
+      },
+      "radius": {
+        "$type": "dimension",
+        "$value": "{semantic.radius.action}"
+      },
+      "paddingX": {
+        "$type": "dimension",
+        "$value": "{primitive.space.4}"
+      },
+      "paddingY": {
+        "$type": "dimension",
+        "$value": "{primitive.space.3}"
+      }
+    },
+    "card": {
+      "bg": {
+        "$type": "color",
+        "$value": "{semantic.color.surface.raised}"
+      },
+      "border": {
+        "$type": "color",
+        "$value": "{semantic.color.border.default}"
+      },
+      "radius": {
+        "$type": "dimension",
+        "$value": "{primitive.radius.8}"
+      },
+      "padding": {
+        "$type": "dimension",
+        "$value": "{primitive.space.6}"
+      },
+      "gap": {
+        "$type": "dimension",
+        "$value": "{primitive.space.2}"
+      }
+    },
+    "lightbox": {
+      "backdrop": {
+        "blur": {
+          "$type": "dimension",
+          "$value": "{primitive.blur.16}",
+          "$description": "Backdrop blur applied behind fullscreen image lightboxes."
+        }
+      }
+    }
+  },
+  "role": {
+    "$description": "Shadcn-style role aliases mapping to semantic tokens. Compiled to --role-* CSS vars.",
+    "background": {
+      "$type": "color",
+      "$value": "{semantic.color.surface.page}",
+      "$description": "Page background. shadcn role: background."
+    },
+    "foreground": {
+      "$type": "color",
+      "$value": "{semantic.color.content.primary}",
+      "$description": "Default text on background. shadcn role: foreground."
+    },
+    "card": {
+      "$type": "color",
+      "$value": "{semantic.color.surface.raised}",
+      "$description": "Card surface. shadcn role: card."
+    },
+    "card-foreground": {
+      "$type": "color",
+      "$value": "{semantic.color.content.primary}",
+      "$description": "Text on card. shadcn role: card-foreground."
+    },
+    "popover": {
+      "$type": "color",
+      "$value": "{semantic.color.surface.overlay}",
+      "$description": "Popover/menu surface. shadcn role: popover."
+    },
+    "popover-foreground": {
+      "$type": "color",
+      "$value": "{semantic.color.content.primary}",
+      "$description": "Text on popover. shadcn role: popover-foreground."
+    },
+    "primary": {
+      "$type": "color",
+      "$value": "{semantic.color.surface.accent}",
+      "$description": "Primary action surface. shadcn role: primary."
+    },
+    "primary-foreground": {
+      "$type": "color",
+      "$value": "{semantic.color.content.onAccent}",
+      "$description": "Text/icons on primary surface. shadcn role: primary-foreground."
+    },
+    "secondary": {
+      "$type": "color",
+      "$value": "{semantic.color.surface.raised}",
+      "$description": "Secondary action surface. shadcn role: secondary."
+    },
+    "secondary-foreground": {
+      "$type": "color",
+      "$value": "{semantic.color.content.primary}",
+      "$description": "Text on secondary surface. shadcn role: secondary-foreground."
+    },
+    "muted": {
+      "$type": "color",
+      "$value": "{semantic.color.surface.overlay}",
+      "$description": "Muted/quiet bg (skeletons, disabled inputs). shadcn role: muted."
+    },
+    "muted-foreground": {
+      "$type": "color",
+      "$value": "{semantic.color.content.secondary}",
+      "$description": "Muted text. shadcn role: muted-foreground."
+    },
+    "accent": {
+      "$type": "color",
+      "$value": "{semantic.color.surface.accentSubtle}",
+      "$description": "Hover/active tinted bg. shadcn role: accent."
+    },
+    "accent-foreground": {
+      "$type": "color",
+      "$value": "{semantic.color.content.accent}",
+      "$description": "Text on accent surface. shadcn role: accent-foreground."
+    },
+    "destructive": {
+      "$type": "color",
+      "$value": "{semantic.color.feedback.error}",
+      "$description": "Destructive action surface. shadcn role: destructive."
+    },
+    "destructive-foreground": {
+      "$type": "color",
+      "$value": "{semantic.color.content.inverse}",
+      "$description": "Text on destructive surface. shadcn role: destructive-foreground."
+    },
+    "border": {
+      "$type": "color",
+      "$value": "{semantic.color.border.default}",
+      "$description": "Default border. shadcn role: border."
+    },
+    "input": {
+      "$type": "color",
+      "$value": "{semantic.color.border.default}",
+      "$description": "Input field border. shadcn role: input."
+    },
+    "ring": {
+      "$type": "color",
+      "$value": "{semantic.color.border.accent}",
+      "$description": "Focus ring color. shadcn role: ring."
+    },
+    "radius": {
+      "$type": "dimension",
+      "$value": "{semantic.radius.action}",
+      "$description": "Default border radius. shadcn role: radius."
+    }
+  }
+}

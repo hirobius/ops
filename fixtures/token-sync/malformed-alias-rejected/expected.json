@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "semantic.color.surface.page",
+      "code": "TOKEN_ALIAS_MALFORMED",
+      "message": "alias must be a token path string, got \"not a token path!\"",
+      "suggestion": null
+    }
+  ]
+}

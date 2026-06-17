@@ -1,0 +1,1 @@
+a card showing a project title, a category caption, and a date

@@ -1,0 +1,2 @@
+// TODO: replace with real-violating-example for check-security-baseline
+// STUB — this file needs real violating content

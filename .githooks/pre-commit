@@ -1,0 +1,16 @@
+#!/bin/sh
+# HDS pre-commit gate
+# Keep commit-time validation limited to fast static analysis.
+#
+# Activate once with: git config core.hooksPath .githooks
+
+echo "Running fast static analysis..."
+pnpm typecheck
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Commit blocked. Fix the typecheck failures above, then commit again."
+  exit 1
+fi
+
+echo "Typecheck passed. Committing."

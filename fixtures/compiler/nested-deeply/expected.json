@@ -1,0 +1,57 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-section-1",
+      "parentId": "root",
+      "type": "FRAME",
+      "props": {
+        "layoutMode": "VERTICAL",
+        "fill": "semantic.color.surface.page",
+        "itemSpacing": "semantic.space.layout.tight",
+        "primaryAxisSizingMode": "AUTO",
+        "counterAxisSizingMode": "AUTO"
+      }
+    },
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-article-2",
+      "parentId": "jsx-section-1",
+      "type": "FRAME",
+      "props": {
+        "layoutMode": "VERTICAL",
+        "fill": "semantic.color.surface.page",
+        "itemSpacing": "semantic.space.layout.tight",
+        "primaryAxisSizingMode": "AUTO",
+        "counterAxisSizingMode": "AUTO"
+      }
+    },
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-div-3",
+      "parentId": "jsx-article-2",
+      "type": "FRAME",
+      "props": {
+        "fill": "semantic.color.surface.raised",
+        "padding": "semantic.space.component.padding",
+        "radius": "semantic.radius.action",
+        "layoutMode": "VERTICAL",
+        "itemSpacing": "semantic.space.layout.tight",
+        "primaryAxisSizingMode": "AUTO",
+        "counterAxisSizingMode": "AUTO"
+      }
+    },
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-h2-4",
+      "parentId": "jsx-div-3",
+      "type": "TEXT",
+      "props": {
+        "typography": "semantic.typography.h2",
+        "fill": "semantic.color.content.primary",
+        "text": "Title"
+      }
+    }
+  ]
+}

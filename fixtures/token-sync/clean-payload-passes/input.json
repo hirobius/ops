@@ -1,0 +1,19 @@
+{
+  "source": "figma-variables",
+  "emittedAt": "2026-05-01T12:00:00.000Z",
+  "collections": {
+    "primitive": { "id": "VC:1", "name": "HDS Primitive" },
+    "semantic": { "id": "VC:2", "name": "HDS Semantic" },
+    "component": { "id": "VC:3", "name": "HDS Component" }
+  },
+  "tokens": {
+    "primitive": [
+      { "path": "primitive.color.neutral.50", "type": "color", "value": "#fafafa" },
+      { "path": "primitive.size.spacing.4", "type": "dimension", "value": 4 }
+    ],
+    "semantic": [
+      { "path": "semantic.color.surface.page", "type": "color", "alias": "primitive.color.neutral.50" }
+    ],
+    "component": []
+  }
+}

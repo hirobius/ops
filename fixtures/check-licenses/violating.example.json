@@ -1,0 +1,8 @@
+{
+  "MIT": [
+    { "name": "some-mit-lib", "version": "1.0.0", "license": "MIT" }
+  ],
+  "GPL-3.0": [
+    { "name": "bad-gpl-dep", "version": "2.0.0", "license": "GPL-3.0" }
+  ]
+}

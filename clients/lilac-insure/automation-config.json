@@ -1,0 +1,94 @@
+{
+  "client": "lilac-insure",
+  "mode": "test",
+  "testRecipient": "administration@lilacinsure.com",
+  "productionRecipients": [],
+  "logPath": "clients/lilac-insure/automations/_log.jsonl",
+  "systems": {
+    "ezlynx": {
+      "envKeys": ["EZLYNX_API_KEY", "EZLYNX_AGENCY_ID"],
+      "status": "pending-activation",
+      "notes": "REST API + webhooks. Activation via BGI Agency / EZLynx Support ticket #1943345."
+    },
+    "outlook": {
+      "envKeys": ["MS_GRAPH_CLIENT_ID", "MS_GRAPH_CLIENT_SECRET", "MS_GRAPH_TENANT_ID"],
+      "status": "pending-access",
+      "notes": "Microsoft Graph API. Used for inbox triage rules + auto-responder + send."
+    },
+    "wordpress": {
+      "envKeys": ["WP_GRAVITY_WEBHOOK_SECRET", "WP_BASE_URL"],
+      "status": "pending-access",
+      "notes": "Gravity Forms webhook → lead-intake. Replaces broken Zapier bridge."
+    },
+    "docusign": {
+      "envKeys": ["DOCUSIGN_INTEGRATOR_KEY", "DOCUSIGN_USER_ID", "DOCUSIGN_ACCOUNT_ID"],
+      "status": "pending-access",
+      "notes": "Templates for onboarding + commercial renewals (Phase 2)."
+    },
+    "lightspeed": {
+      "envKeys": ["LIGHTSPEED_API_TOKEN"],
+      "status": "unknown",
+      "notes": "VoIP. API surface uncertain. Phase 2 candidate for call-transcription."
+    },
+    "wonderwrite": {
+      "envKeys": [],
+      "status": "api-unknown",
+      "notes": "ACORD form digitization. API availability unconfirmed."
+    },
+    "n8n": {
+      "envKeys": ["N8N_BASE_URL", "N8N_API_KEY"],
+      "status": "deferred",
+      "notes": "Hosting decision deferred. Workflow JSON exports staged under each automation's n8n/ folder."
+    }
+  },
+  "modeContract": {
+    "test": "All outbound (email, SMS, API writes) must target testRecipient OR be no-op'd. test-mode-guard.mjs enforces.",
+    "production": "Outbound sends to productionRecipients per workflow. Requires explicit per-workflow promotion checklist in workflow README."
+  },
+
+  "llm": {
+    "provider": "ollama",
+    "providerNotes": "ollama | claude | none. Default ollama (local, free, private). Customer flips to claude with their own ANTHROPIC_API_KEY for higher quality. 'none' forces deterministic-only paths (classifier rules, no LLM calls).",
+    "ollama": {
+      "endpoint": "http://localhost:11434",
+      "model": "hermes3:latest",
+      "fallbackModels": ["gemma3:27b", "llama3.3:70b", "qwen2.5:32b", "gemma4:e4b"],
+      "modelNotes": "hermes3 (~8B) chosen as default because it's already pulled in Adrian's local Ollama and runs on modest hardware. Customers with GPUs should override to gemma3:27b or larger for sharper analysis.",
+      "timeoutMs": 120000
+    },
+    "claude": {
+      "envKey": "ANTHROPIC_API_KEY",
+      "model": "claude-sonnet-4-6",
+      "cheapModel": "claude-haiku-4-5-20251001",
+      "endpoint": "https://api.anthropic.com/v1/messages",
+      "useCache": true,
+      "timeoutMs": 60000,
+      "billing": "Customer's Anthropic account. Hirobius never sees usage or billing."
+    },
+    "none": {
+      "behavior": "Throws if a workflow attempts an LLM call. Forces deterministic-only execution. Safe default for paranoid privacy postures."
+    }
+  },
+
+  "outlook": {
+    "mailbox": "administration@lilacinsure.com",
+    "mailboxNote": "Production mailbox. For dev-tenant testing, override via MS_GRAPH_TEST_MAILBOX in .env.local.",
+    "applyMode": "tag",
+    "applyModeNote": "tag = set Outlook category only. move = also move to folder. both = tag + move.",
+    "folders": {
+      "lead":         "01 - Leads",
+      "quoting":      "02 - Quoting",
+      "onboarding":   "03 - Onboarding",
+      "service":      "04 - Service",
+      "claim":        "05 - URGENT Claims",
+      "renewal":      "06 - Renewals",
+      "retention":    "07 - Retention",
+      "carrier-ops":  "08 - Carrier Ops",
+      "vendor-ops":   "09 - Vendor Ops",
+      "compliance":   "10 - Compliance",
+      "internal":     "11 - Internal",
+      "noise":        "_Junk"
+    },
+    "categoryTagPrefix": "lilac-"
+  }
+}

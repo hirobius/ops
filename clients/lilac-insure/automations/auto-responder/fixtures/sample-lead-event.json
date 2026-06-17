@@ -1,0 +1,12 @@
+{
+  "event": "lead-created",
+  "ts": "2026-05-05T12:00:30Z",
+  "lead": {
+    "first_name": "Test",
+    "last_name": "Lead",
+    "email": "administration@lilacinsure.com",
+    "line_of_business": "auto"
+  },
+  "source_workflow": "lead-intake",
+  "submission_id": "fixture-001"
+}

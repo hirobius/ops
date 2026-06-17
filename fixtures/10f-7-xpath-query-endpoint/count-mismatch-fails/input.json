@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "selector": "//FRAME",
+  "count": 3,
+  "nodes": [
+    {
+      "id": "frame:001",
+      "name": "Frame 1",
+      "type": "FRAME"
+    }
+  ]
+}

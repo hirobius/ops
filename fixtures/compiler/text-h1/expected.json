@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-h1-1",
+      "parentId": "root",
+      "type": "TEXT",
+      "props": {
+        "typography": "semantic.typography.display",
+        "fill": "semantic.color.content.primary",
+        "text": "Welcome"
+      }
+    }
+  ]
+}

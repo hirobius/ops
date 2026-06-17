@@ -1,0 +1,35 @@
+{
+  "phases": [
+    {
+      "name": "Phase 12 — HDS Refinement",
+      "status": "in-progress",
+      "description": "UI polish, agency platform, knowledge pipeline, Figma plugin hardening, and web vitals CI gate.",
+      "units": [
+        "12n-api-storybook-setup",
+        "12o-perf-web-vitals-budget",
+        "12h-2-plugin-auth-envelope",
+        "12h-5-vision-board-wetpaint",
+        "12d-variant-family-previews",
+        "12f-visual-ingestion-tooling"
+      ]
+    },
+    {
+      "name": "Phase 11 — Agency Platform Foundations",
+      "status": "done",
+      "description": "Multi-tenant token theming, client portal scaffolding, knowledge ingestion pipeline, and ops dashboard.",
+      "units": []
+    },
+    {
+      "name": "Phase 10 — Component Library Expansion",
+      "status": "done",
+      "description": "Card, Table, FoundationSwatch, VariantStrip, ButtonPage wiring, and storybook setup.",
+      "units": []
+    },
+    {
+      "name": "Phase 8 — Generative UI Pipeline",
+      "status": "done",
+      "description": "shadcn pivot, Radix primitives, cva/clsx/cn helpers, component validator, manifest prompt quality improvements.",
+      "units": []
+    }
+  ]
+}

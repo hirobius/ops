@@ -1,0 +1,21 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsframe-1",
+      "parentId": "root",
+      "type": "FRAME",
+      "props": {
+        "layoutMode": "VERTICAL",
+        "fill": "semantic.color.surface.page",
+        "itemSpacing": "semantic.space.layout.tight",
+        "primaryAxisSizingMode": "AUTO",
+        "counterAxisSizingMode": "AUTO"
+      },
+      "a11y": {
+        "role": "region"
+      }
+    }
+  ]
+}

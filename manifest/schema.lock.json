@@ -1,0 +1,287 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HDS Manifest Component Spec",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "category",
+    "filePath",
+    "description",
+    "props",
+    "allowedChildren",
+    "propConstraints",
+    "requiredProps",
+    "a11yRules",
+    "tier"
+  ],
+  "properties": {
+    "category": {
+      "type": "string"
+    },
+    "filePath": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "props": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/propSpec"
+      }
+    },
+    "allowedChildren": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "propConstraints": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/propConstraint"
+      }
+    },
+    "requiredProps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "a11yRules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/a11yRule"
+      }
+    },
+    "variantAxes": {
+      "type": "array",
+      "description": "Ordered list of prop names (or pseudo-axis names like 'state') that emit as Figma variant properties on the master. The cartesian product of these axes defines the COMPONENT_SET variants. Order determines the order of dimensions in each variant's name (e.g. 'Variant=primary, Size=md, State=hover').",
+      "items": { "type": "string" }
+    },
+    "componentProperties": {
+      "type": "array",
+      "description": "Figma component-property declarations applied to the master via addComponentProperty() AFTER combineAsVariants. These are scalar overrides (TEXT/BOOLEAN/INSTANCE_SWAP), not variant axes. Each property binds to a tree node attribute (visibility, characters, mainComponent) on a node identified by targetSelector.",
+      "items": {
+        "$ref": "#/definitions/componentProperty"
+      }
+    },
+    "slots": {
+      "type": "array",
+      "description": "Render anatomy of the component as a flat list of named slots. Each slot has a semantic role (name), a Figma layer name (figmaSlotName), and a tokenBinding describing which token paths drive which CSS/Figma properties on that slot. Optional during the 8-V migration window; becomes the source of truth for figma-masters-batch.mjs in 8v-3 and is required for any spec carrying a `tokens` field starting in 8v-5.",
+      "items": {
+        "$ref": "#/definitions/slotSpec"
+      }
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["primitive", "pattern", "template", "utility"],
+      "description": "Component classification used for asymmetric documentation weight and LLM-surface filtering. Required — every spec in componentSpecs and utilities must carry a tier. Definitions: primitive = atomic, generally-interactive building blocks shipped as the public flagship API (HdsButton, HdsInput, HdsCard, HdsDialog) — heavy doc weight (full API pages, prop tables, anatomy diagrams). pattern = composition of primitives expressing a recurring product intent (HdsBreadcrumbs, HdsToolbar, HdsAlertBanner) — light doc weight (usage page with one canonical example). template = page-shaped layouts that consume primitives + patterns (HdsAppShell, HdsAuthLayout, HdsSettingsLayout) — kept in componentSpecs but not surfaced in public-facing human docs (templates are gallery-only). utility = behavioral, runtime, or non-visual helpers that don't render product surfaces (HdsControls, HdsErrorBoundary, HdsNotFoundPattern) — physically isolated under top-level `utilities` (peer to componentSpecs), hidden from LLM-facing inventory and public docs. Public docs surface = primitive + pattern only. The `experiment` tier was removed in 8x-6 — exploratory work lives in the vibe sketchbook outside the component library."
+    },
+    "stability": {
+      "type": "string",
+      "enum": ["stable", "beta"],
+      "description": "API stability classification surfaced in doc-page headers (HdsDocPageHeader from 9d-4). Optional/additive — when absent, consumers compute a default: primitives default to 'stable'; patterns and templates default to 'beta' when they lack a `slots[]` array or carry propConstraints warnings, otherwise 'stable'. Setting an explicit value overrides the computed default and lets newly-introduced primitives ship with a 'beta' badge during their stabilization window."
+    }
+  },
+  "definitions": {
+    "deprecations": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Top-level manifest section listing deprecated source patterns scanned by `node scripts/audit-tokens.mjs --scan-source`. Replaces the legacy hard-coded RULES array in the deleted scripts/audit-component-source.js. Keys: `patterns` (array of deprecationPattern entries).",
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/deprecationPattern" }
+        }
+      }
+    },
+    "deprecationPattern": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["name", "regex"],
+      "description": "A single deprecated pattern. `regex` is the JavaScript RegExp source (no enclosing slashes). `flags` is the RegExp flag string (e.g. 'gi'). `category` is one of typography|spacing|structural|spatial and drives audit metric counters. `replacement` (optional) names the HDS component or token that should replace the deprecated pattern. `rationale` is the human-readable explanation surfaced in audit output.",
+      "properties": {
+        "name": { "type": "string" },
+        "regex": { "type": "string" },
+        "flags": { "type": "string" },
+        "category": {
+          "type": "string",
+          "enum": ["typography", "spacing", "structural", "spatial"]
+        },
+        "replacement": { "type": "string" },
+        "rationale": { "type": "string" }
+      }
+    },
+    "componentProperty": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable Figma property name shown in the panel. Title Case with spaces (e.g. 'Leading icon')."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["BOOLEAN", "TEXT", "INSTANCE_SWAP"],
+          "description": "Figma component-property kind. BOOLEAN binds to node visibility; TEXT binds to text node characters; INSTANCE_SWAP binds to instance mainComponent."
+        },
+        "defaultValue": {
+          "description": "Default value applied to the property at creation. For BOOLEAN: true|false. For TEXT: the placeholder string. For INSTANCE_SWAP: the default master component name."
+        },
+        "sourceProp": {
+          "type": "string",
+          "description": "React prop name this property maps from. Used by the JSX compiler to translate prop values to Figma property values when generating instances."
+        },
+        "boundTo": {
+          "type": "string",
+          "enum": ["visibility", "characters", "mainComponent"],
+          "description": "Figma node attribute that the property reference attaches to. Defaults per type: BOOLEAN → visibility, TEXT → characters, INSTANCE_SWAP → mainComponent."
+        },
+        "targetSelector": {
+          "type": "string",
+          "description": "Logical name of the tree node this property attaches to. The plugin matches the master's child node by this name. Convention: PascalCase (e.g. 'Label', 'IconLeft')."
+        },
+        "invert": {
+          "type": "boolean",
+          "description": "If true, the JSX compiler negates the source prop value before applying. Useful for cases like iconOnly→Label.visible where the Figma boolean represents the inverse of the React prop."
+        }
+      }
+    },
+    "propSpec": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array"
+        },
+        "default": {},
+        "optional": {
+          "type": "boolean"
+        }
+      }
+    },
+    "propConstraint": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array"
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        }
+      }
+    },
+    "a11yRule": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "rule",
+        "required"
+      ],
+      "properties": {
+        "rule": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "selector": {
+          "type": "string"
+        }
+      }
+    },
+    "slotSpec": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Semantic role of this slot in the component anatomy. Vocabulary should be reused across components — common names: background, label, icon-leading, icon-trailing, divider, placeholder, helper-text, error-text, scrim, content. Avoid component-specific names (e.g. 'button-bg' — just use 'background')."
+        },
+        "figmaSlotName": {
+          "type": "string",
+          "description": "Layer name to match in the Figma master component tree. Required when tokenBinding is present so the projection step in 8v-3 knows which Figma layer to bind to. Convention: PascalCase (e.g. 'Background', 'IconLeft', 'Label')."
+        },
+        "tokenBinding": {
+          "$ref": "#/definitions/tokenBinding"
+        },
+        "defaultValue": {
+          "description": "Optional fallback value for this slot when no tokenBinding resolves (e.g. a literal string for label slots, a hex color for background slots in tests). Mostly used by fixtures and snapshot tests."
+        }
+      }
+    },
+    "tokenBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Maps slot CSS/Figma properties to design-token paths. Each value is a dot-delimited token path string (e.g. 'semantic.color.surface.raised', 'semantic.space.layout.tight') that resolves through hirobius.tokens.json. Null entries explicitly suppress a property; absent entries fall back to component defaults.",
+      "properties": {
+        "fill": {
+          "type": ["string", "null"],
+          "description": "Background fill token path. Mapped to Figma SOLID paint via setBoundVariableForPaint."
+        },
+        "stroke": {
+          "type": ["string", "null"],
+          "description": "Border stroke token path. Mapped to Figma stroke paint."
+        },
+        "paddingX": {
+          "type": ["string", "null"],
+          "description": "Horizontal padding token path (sets paddingLeft + paddingRight in the plugin)."
+        },
+        "paddingY": {
+          "type": ["string", "null"],
+          "description": "Vertical padding token path (sets paddingTop + paddingBottom in the plugin)."
+        },
+        "paddingTop": {
+          "type": ["string", "null"]
+        },
+        "paddingBottom": {
+          "type": ["string", "null"]
+        },
+        "paddingLeft": {
+          "type": ["string", "null"]
+        },
+        "paddingRight": {
+          "type": ["string", "null"]
+        },
+        "cornerRadius": {
+          "type": ["string", "null"],
+          "description": "Border-radius token path. Bound via setBoundVariable on the cornerRadius property."
+        },
+        "gap": {
+          "type": ["string", "null"],
+          "description": "Auto-layout itemSpacing token path."
+        },
+        "typography": {
+          "type": ["string", "null"],
+          "description": "Composite typography token path (font-family + size + weight + line-height + tracking). Resolved against semantic.typography.*."
+        },
+        "color": {
+          "type": ["string", "null"],
+          "description": "Foreground / text color token path (for text slots)."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "primitive.color.neutral.50",
+      "code": "TOKEN_DUPLICATE_PATH",
+      "message": "path \"primitive.color.neutral.50\" appears more than once",
+      "suggestion": null
+    }
+  ]
+}

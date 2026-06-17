@@ -1,0 +1,22 @@
+{
+  "units": [
+    {
+      "id": "unit-comp-a",
+      "status": "claimed",
+      "claimedBy": "agent-a",
+      "claimedAt": "2026-05-05T09:00:00.000Z",
+      "description": "Refactors src/components/Foo.tsx to use new token variables.",
+      "agentNotes": ["Touches src/components/Foo.tsx and its CSS module."],
+      "validationCmd": "node scripts/validate-manifest.mjs",
+      "dependsOn": []
+    },
+    {
+      "id": "unit-comp-b",
+      "status": "approved",
+      "description": "Adds props to src/components/Foo.tsx for variant support.",
+      "agentNotes": ["Edits src/components/Foo.tsx to add variant prop."],
+      "validationCmd": "node scripts/validate-manifest.mjs",
+      "dependsOn": []
+    }
+  ]
+}

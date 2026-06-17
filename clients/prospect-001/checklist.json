@@ -1,0 +1,83 @@
+{
+  "categories": [
+    {
+      "id": "prep",
+      "name": "Pre-Consult Prep",
+      "items": [
+        {
+          "id": "p-1",
+          "item": "Review call transcript (Conrad referral call)",
+          "status": "done",
+          "notes": "Done 2026-05-03. Phil, land management contractor, Deer Park/Cheney area."
+        },
+        {
+          "id": "p-2",
+          "item": "Research Phil's current web presence",
+          "status": "todo",
+          "owner": "Adrian"
+        },
+        {
+          "id": "p-3",
+          "item": "Identify 2–3 competitor sites to reference on the call",
+          "status": "todo",
+          "owner": "Adrian"
+        },
+        {
+          "id": "p-4",
+          "item": "Prepare Hirobius 1-pager for the call",
+          "status": "todo",
+          "owner": "Adrian"
+        },
+        {
+          "id": "p-5",
+          "item": "Prepare Starter package one-pager",
+          "status": "todo",
+          "owner": "Adrian"
+        },
+        {
+          "id": "p-6",
+          "item": "Send calendar invite (via Conrad intro)",
+          "status": "todo",
+          "owner": "Adrian"
+        }
+      ]
+    },
+    {
+      "id": "intake",
+      "name": "Info to Collect on Consult",
+      "items": [
+        {
+          "id": "i-1",
+          "item": "Confirm legal business name",
+          "status": "todo"
+        },
+        {
+          "id": "i-2",
+          "item": "Confirm domain / email / hosting status",
+          "status": "todo",
+          "notes": "Assume none — Conrad said these guys don't know what's involved with all that."
+        },
+        {
+          "id": "i-3",
+          "item": "Collect project photos (or agree on delivery method)",
+          "status": "todo"
+        },
+        {
+          "id": "i-4",
+          "item": "Confirm logo / brand assets exist (likely none)",
+          "status": "todo"
+        },
+        {
+          "id": "i-5",
+          "item": "Confirm service area (Deer Park / Cheney — any broader reach?)",
+          "status": "todo"
+        },
+        {
+          "id": "i-6",
+          "item": "Confirm primary CTA: contact form vs. phone call vs. both",
+          "status": "todo"
+        }
+      ]
+    }
+  ]
+}

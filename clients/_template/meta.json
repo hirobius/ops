@@ -1,0 +1,27 @@
+{
+  "id": "<<slug>>",
+  "name": "<<Client Name>>",
+  "website": "https://<<example.com>>",
+  "contact": {
+    "name": "<<Primary Contact>>",
+    "role": "<<Role / Title>>",
+    "email": "<<contact@example.com>>",
+    "phone": "<<+1-555-555-0100>>"
+  },
+  "location": "<<City, ST>>",
+  "type": "<<Industry / Vertical>>",
+  "scale": {
+    "customers": null,
+    "policies": null,
+    "employees": "<<Solo / Small / Mid>>"
+  },
+  "engagementType": "<<Automation Consulting Retainer | Software License | Project>>",
+  "startDate": "<<YYYY-MM-DD>>",
+  "status": "prospect",
+  "serviceModel": "Hirobius: software vendor — code runs on customer infrastructure, customer remains data controller",
+  "domains": [],
+  "portalUrl": {},
+  "figmaFileUrl": {},
+  "referredBy": null,
+  "notes": null
+}

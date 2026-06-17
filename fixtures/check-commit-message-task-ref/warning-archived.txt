@@ -1,0 +1,6 @@
+feat(scope): work on a task that was archived
+
+This commit references a task that has already been archived in kanban.db.
+The validator should detect this and warn.
+
+Refs: t_38b7574e

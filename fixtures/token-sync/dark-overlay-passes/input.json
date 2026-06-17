@@ -1,0 +1,13 @@
+{
+  "source": "figma-variables",
+  "tokens": {
+    "semantic": [
+      {
+        "path": "semantic.color.surface.page",
+        "type": "color",
+        "alias": "{primitive.color.neutral.50}",
+        "dark": { "alias": "{primitive.color.neutral.900}" }
+      }
+    ]
+  }
+}

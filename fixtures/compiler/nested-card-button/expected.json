@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-div-1",
+      "parentId": "root",
+      "type": "FRAME",
+      "props": {
+        "fill": "semantic.color.surface.raised",
+        "padding": "semantic.space.component.padding",
+        "radius": "semantic.radius.action",
+        "layoutMode": "VERTICAL",
+        "itemSpacing": "semantic.space.layout.tight",
+        "primaryAxisSizingMode": "AUTO",
+        "counterAxisSizingMode": "AUTO"
+      }
+    },
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsbutton-2",
+      "parentId": "jsx-div-1",
+      "type": "INSTANCE",
+      "componentName": "HdsButton",
+      "attributes": {
+        "variant": "primary",
+        "label": "Click"
+      },
+      "figmaProperties": {
+        "Variant": "primary",
+        "Label": "Click"
+      }
+    }
+  ]
+}

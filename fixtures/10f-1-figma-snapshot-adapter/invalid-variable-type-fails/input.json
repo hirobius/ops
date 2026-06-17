@@ -1,0 +1,26 @@
+{
+  "snapshotAt": "2026-05-01T12:00:00.000Z",
+  "pages": [],
+  "variables": {
+    "HDS Primitive": {
+      "id": "vc:001",
+      "name": "HDS Primitive",
+      "modes": [{ "modeId": "m:001", "name": "Default" }],
+      "variables": [
+        {
+          "id": "v:001",
+          "name": "blue/500",
+          "tokenPath": "primitive.color.blue.500",
+          "resolvedType": "UNKNOWN_TYPE",
+          "valuesByMode": { "m:001": "#3b82f6" }
+        }
+      ]
+    }
+  },
+  "styles": {
+    "paint": [],
+    "text": [],
+    "effect": [],
+    "grid": []
+  }
+}

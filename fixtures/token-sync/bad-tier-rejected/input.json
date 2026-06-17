@@ -1,0 +1,8 @@
+{
+  "source": "figma-variables",
+  "tokens": {
+    "primitives": [
+      { "path": "primitive.color.x", "type": "color", "value": "#000000" }
+    ]
+  }
+}

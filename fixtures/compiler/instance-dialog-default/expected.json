@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsdialog-1",
+      "parentId": "root",
+      "type": "INSTANCE",
+      "componentName": "HdsDialog",
+      "attributes": {
+        "title": "Confirm action",
+        "description": "This will permanently update your settings."
+      },
+      "figmaProperties": {
+        "Title": "Confirm action",
+        "Description": "This will permanently update your settings."
+      },
+      "a11y": {
+        "description": "This will permanently update your settings."
+      }
+    }
+  ]
+}

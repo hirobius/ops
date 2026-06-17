@@ -1,0 +1,6 @@
+{
+  "expected": "service",
+  "from": "client@example.com",
+  "subject": "Need a copy of my insurance card",
+  "body": "Hi Conrad, can you send me a proof of insurance for my auto policy? I need it for the DMV today."
+}

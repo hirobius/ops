@@ -1,0 +1,2252 @@
+{
+  "generatedAt": "2026-05-06T21:31:26.291Z",
+  "channel": "pre-commit",
+  "gates": [
+    {
+      "id": "audit-batch-deliverables",
+      "exitCode": 0,
+      "durationMs": 38,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "OK — no batch specified, channel-mode no-op\n"
+    },
+    {
+      "id": "audit-claims",
+      "exitCode": 0,
+      "durationMs": 30,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "OK — no stale claims (threshold 4h)\n"
+    },
+    {
+      "id": "audit-component-integrity",
+      "exitCode": 0,
+      "durationMs": 1145,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\n✓ audit-component-integrity [tokens] — 0 violations. Safe to mark [x] shipped.\n\n✓ audit-component-integrity [completeness] — all shipped components have rich manifest entries\n\n✓ audit-component-integrity [docs] — 38/38 components documented.\n\n[check-public-api] ✅ public API surface matches baseline (101 symbols across 49 modules).\n✓ audit-component-integrity [api] — public API surface matches baseline.\n"
+    },
+    {
+      "id": "audit-exceptions",
+      "exitCode": 0,
+      "durationMs": 322,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "Audit complete. Report written to /home/adrian/projects/adrian-milsap/docs/audits/exceptions-audit.md\nTotal suppressions found: 266\nJustified: 262\nUntriaged: 4\n"
+    },
+    {
+      "id": "audit-tiers",
+      "exitCode": 0,
+      "durationMs": 42,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "Wrote docs/ai/TIER_AUDIT.md — Audit proposes: 0 primitive, 0 pattern, 0 template, 0 utility (total 0)\n"
+    },
+    {
+      "id": "audit-tokens",
+      "exitCode": 0,
+      "durationMs": 24,
+      "supportsJson": true,
+      "violations": [],
+      "outputTail": "{\n  \"violations\": [],\n  \"summary\": {\n    \"note\": \"audit-tokens --json shape compliance only (per 13p-9); full per-mode wiring is follow-on work\"\n  },\n  \"ok\": true\n}\n"
+    },
+    {
+      "id": "check-typography-discipline",
+      "exitCode": 1,
+      "durationMs": 55,
+      "supportsJson": true,
+      "violations": null,
+      "outputTail": "\nnode:fs:1710\n  const stats = binding.stat(\n                        ^\n\nError: ENOENT: no such file or directory, stat '/home/adrian/projects/adrian-milsap/C:\\Users\\Adrian\\AppData\\Local\\lighthouse.12452408/SingletonCookie'\n    at statSync (node:fs:1710:25)\n    at walkFonts (file:///home/adrian/projects/adrian-milsap/scripts/check-typography-discipline.mjs:83:20)\n    at walkFonts (file:///home/adrian/projects/adrian-milsap/scripts/check-typography-discipline.mjs:84:33)\n    at file:///home/adrian/projects/adrian-milsap/scripts/check-typography-discipline.mjs:93:82\n    at ModuleJob.run (node:internal/modules/esm/module_job:437:25)\n    at async node:internal/modules/esm/loader:639:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\n  errno: -2,\n  code: 'ENOENT',\n  syscall: 'stat',\n  path: '/home/adrian/projects/adrian-milsap/C:\\\\Users\\\\Adrian\\\\AppData\\\\Local\\\\lighthouse.12452408/SingletonCookie'\n}\n\nNode.js v25.9.0"
+    },
+    {
+      "id": "check-asset-manifest",
+      "exitCode": 0,
+      "durationMs": 40,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\n✓ Asset manifest check passed — asset files, metadata, and portfolio alt coverage are in sync.\n\n"
+    },
+    {
+      "id": "check-attributions",
+      "exitCode": 0,
+      "durationMs": 34,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\n✓ Attribution check passed — registry IDs and manifest references are in sync.\n\n"
+    },
+    {
+      "id": "check-binding-drift",
+      "exitCode": 0,
+      "durationMs": 34,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "OK — no binding drift detected\n"
+    },
+    {
+      "id": "check-brand",
+      "exitCode": 0,
+      "durationMs": 39,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "âœ“ check:brand â€” primary color #1e2efd, font \"Satoshi\" â€” all docs in sync\n"
+    },
+    {
+      "id": "check-code-connect",
+      "exitCode": 0,
+      "durationMs": 35,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "No Code Connect files found — skipping.\n"
+    },
+    {
+      "id": "check-contrast",
+      "exitCode": 0,
+      "durationMs": 31,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\n✓ WCAG contrast check passed — all pairs meet AA.\n\n  Pair                              Light   Dark    AA (L/D)    AAA (L/D)\n  ───────────────────────────────────────────────────────────────────────\n  content.primary / surface.page    18.9:1  19.3:1  ✓/✓         ✓/✓\n  content.primary / surface.raised  18.1:1  18.2:1  ✓/✓         ✓/✓\n  content.primary / surface.overlay 17.3:1  16.0:1  ✓/✓         ✓/✓\n  content.secondary / surface.page  7.8:1   8.3:1   ✓/✓         ✓/✓\n  content.secondary / surface.raised7.5:1   7.8:1   ✓/✓         ✓/✓\n  content.secondary / surface.overlay7.2:1   6.9:1   ✓/✓         ✓/✗\n  content.onAccent / surface.accent 7.3:1   7.3:1   ✓/✓         ✓/✓\n\n"
+    },
+    {
+      "id": "check-css-integrity",
+      "exitCode": 0,
+      "durationMs": 32,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "[ok] CSS integrity - theme.css bridge vars match token values\n"
+    },
+    {
+      "id": "check-dimensions",
+      "exitCode": 0,
+      "durationMs": 63,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "OK check-dimensions - no raw fixed-size width/height values found\n"
+    },
+    {
+      "id": "check-doc-structure",
+      "exitCode": 0,
+      "durationMs": 44,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\nDoc structure check passed — 13 foundation pages + 7 component pages (specimen gate) validated. (22 warning(s))\n\n\n\nDoc structure warnings (third-party linking):\n  ⚠  src/app/pages/hds/ScopePage.tsx:50 — \"Figma\" referenced in JSX text but no link to figma.com found in file. Add href or // link-ok: <reason>\n  ⚠  src/app/pages/hds/ScopePage.tsx:106 — \"Figma\" referenced in JSX text but no link to figma.com found in file. Add href or // link-ok: <reason>\n  ⚠  src/app/pages/hds/ScopePage.tsx:44 — \"React\" referenced in JSX text but no link to react.dev found in file. Add href or // link-ok: <reason>\n\nDoc structure soft warnings (pass --strict to hard-fail):\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:36 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:59 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:63 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:67 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:71 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:75 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:79 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:94 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:108 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:123 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:127 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:139 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:151 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/DisplayPage.tsx:164 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/FeedbackPage.tsx:26 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/FeedbackPage.tsx:41 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/FeedbackPage.tsx:45 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/FeedbackPage.tsx:60 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)\n  ⚠  MISSING_DOCSECTION_ID  src/app/pages/hds/components/FeedbackPage.tsx:64 -- DocSection/HdsFoundationSection has neither id nor title prop (no navigable anchor)"
+    },
+    {
+      "id": "check-exemptions",
+      "exitCode": 0,
+      "durationMs": 149,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\n✓ Exemption check passed — all escape hatches are known and reasoned.\n\nExemption summary:\n  audit-ok: 39\n  tier-ok: 43\n  spacing-ok: 19\n  font-ok: 14\n  css-ok: 21\n  tw-ok: 4\n  inline-ok: 26\n  security-ok: 4\n  route-ok: 13\n  doc-ref-ok: 2\n  aria-ok: 1\n  motion-ok: 34\n  grid-ok: 12\n  ref-ok: 4\n  breakpoint-ok: 3\n  color-ok: 50\n  hds-ok: 4\n  outline-ok: 11\n  binding-ok: 1\n  link-ok: 6\n  doc-structure-ok: 3\n  token-path-ok: 4\n  eyebrow-ok: 9\n\n"
+    },
+    {
+      "id": "check-focus-states",
+      "exitCode": 0,
+      "durationMs": 59,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\nâœ“ Focus state check passed â€” all interactive elements have focus indicators.\n\n"
+    },
+    {
+      "id": "check-frozen-demos",
+      "exitCode": 0,
+      "durationMs": 31,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "Frozen demo check passed: consumer preview pages only use default-state specimens and matrices.\n"
+    },
+    {
+      "id": "check-hardcoded-breakpoints",
+      "exitCode": 0,
+      "durationMs": 66,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\n✓ Breakpoint check passed — no hardcoded breakpoint values found.\n\n"
+    },
+    {
+      "id": "check-hardcoded-colors",
+      "exitCode": 0,
+      "durationMs": 75,
+      "supportsJson": true,
+      "violations": [],
+      "outputTail": "{\n  \"violations\": [],\n  \"summary\": {\n    \"total\": 0,\n    \"filesScanned\": 287\n  },\n  \"ok\": true\n}\n"
+    },
+    {
+      "id": "check-hardcoded-spacing",
+      "exitCode": 0,
+      "durationMs": 159,
+      "supportsJson": true,
+      "violations": [],
+      "outputTail": "{\n  \"violations\": [],\n  \"summary\": {\n    \"total\": 0\n  },\n  \"ok\": true\n}\n"
+    },
+    {
+      "id": "check-legacy-hds-vars",
+      "exitCode": 0,
+      "durationMs": 43,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "âœ“ check-legacy-hds-vars â€” no --hds-text-primary/secondary/disabled references in component files\n"
+    },
+    {
+      "id": "check-licenses",
+      "exitCode": 0,
+      "durationMs": 635,
+      "supportsJson": true,
+      "violations": [],
+      "outputTail": "{\n  \"violations\": [],\n  \"summary\": {\n    \"totalLicenseGroups\": 6,\n    \"offenders\": 0\n  },\n  \"ok\": true\n}\n"
+    },
+    {
+      "id": "check-manifest-drift",
+      "exitCode": 0,
+      "durationMs": 31,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": ""
+    },
+    {
+      "id": "check-manifest-schema-semver",
+      "exitCode": 0,
+      "durationMs": 27,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "Schema check passed — no breaking changes detected.\n"
+    },
+    {
+      "id": "check-mono-roles",
+      "exitCode": 0,
+      "durationMs": 27,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "✓ check-mono-roles — prose surfaces are free of ornamental raw monospace\n"
+    },
+    {
+      "id": "check-motion",
+      "exitCode": 0,
+      "durationMs": 34,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\nâœ“ Motion check passed â€” all interactive components have motion feedback.\n\n"
+    },
+    {
+      "id": "check-og-meta",
+      "exitCode": 0,
+      "durationMs": 27,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\u001b[32m ✓ index.html meta validation passed: \u001b[0m\n\u001b[32m   • title: \"Adrian Milsap\" (13 chars) \u001b[0m\n\u001b[32m   • og:image: ✓ /assets/xds-overview.webp \u001b[0m\n\u001b[32m   • description: (not set) \u001b[0m\n"
+    },
+    {
+      "id": "check-page-shell",
+      "exitCode": 0,
+      "durationMs": 39,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "✓ Page-shell check: 129 page files, all clean.\n"
+    },
+    {
+      "id": "check-reduced-motion",
+      "exitCode": 0,
+      "durationMs": 27,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\n✓ Reduced motion check passed — CSS + Motion layers both covered.\n\n"
+    },
+    {
+      "id": "check-ref-forwarding",
+      "exitCode": 0,
+      "durationMs": 35,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\nâœ“ Ref forwarding check passed â€” all form control components forward their ref.\n\n"
+    },
+    {
+      "id": "check-registry",
+      "exitCode": 0,
+      "durationMs": 34,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "OK check:registry - 44 entries, all complete\n"
+    },
+    {
+      "id": "check-route-coverage",
+      "exitCode": 0,
+      "durationMs": 281,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "OK route coverage — 49 router paths, all covered (or exempt).\n"
+    },
+    {
+      "id": "check-secrets",
+      "exitCode": 0,
+      "durationMs": 509,
+      "supportsJson": true,
+      "violations": [],
+      "outputTail": "{\n  \"violations\": [],\n  \"summary\": {\n    \"mode\": \"staged\"\n  },\n  \"ok\": true\n}\n"
+    },
+    {
+      "id": "check-security-baseline",
+      "exitCode": 0,
+      "durationMs": 271,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\n✓ Security baseline check passed — no committed secrets, blocked env files, unsafe injection, or external font drift detected.\n\n"
+    },
+    {
+      "id": "check-source-canon",
+      "exitCode": 0,
+      "durationMs": 75,
+      "supportsJson": true,
+      "violations": [],
+      "outputTail": "[check-source-canon] DEPRECATION: src/app/pages/ops/BriefingPage.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/BuildPage.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/ClientDashboardPage.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/ClientsIndexPage.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/CostBurnWidget.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/OpsCommandPalette.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/OpsDashboardPage.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/OpsShell.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/SecurityPostureWidget.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/SessionInputForm.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/SessionsPage.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/SessionsSection.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/agentic-os/AgenticOSPage.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/agentic-os/KpiCards.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/agentic-os/LanesGrid.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/agentic-os/SkillsBar.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/agentic-os/StatusBanner.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/agentic-os/StrengthFooter.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/agentic-os/TraceTable.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/atlas/component-graph.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/atlas/pipeline-dag.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/atlas/routes-tree.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/atlas/strength-tab.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/atlas/tokens-tab.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER\n[check-source-canon] DEPRECATION: src/app/pages/ops/atlas/validators-tab.tsx uses bare hds-bypass without explicit rule codes.\n  Update to: /* hds-bypass: CODE1, CODE2 */ using codes from: FONT_BOLD, BG_WHITE_BLACK, OVERSIZED_RADIUS, PURPLE_INDIGO, GRADIENT, LOREM, ELLIPSIS, OFF_GRID_SPACING, DATA_TENANT, INLINE_THIN_BAR, INLINE_STRUCTURAL_BORDER"
+    },
+    {
+      "id": "check-template-source-of-truth",
+      "exitCode": 0,
+      "durationMs": 33,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "✓ check-template-source-of-truth — no direct auto-gen edits detected.\n"
+    },
+    {
+      "id": "check-tenant-tokens",
+      "exitCode": 0,
+      "durationMs": 35,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "✔ Tenant tokens valid (1 tenant(s) checked)\n"
+    },
+    {
+      "id": "check-token-paths-ratchet",
+      "exitCode": 0,
+      "durationMs": 79,
+      "supportsJson": true,
+      "violations": [
+        {
+          "file": "src/app/components/ComponentDocPage.tsx",
+          "line": 365,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/component-instance-matrix.tsx",
+          "line": 132,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/doc-link-card.tsx",
+          "line": 41,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/doc-link-card.tsx",
+          "line": 48,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/doc-link-card.tsx",
+          "line": 143,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/doc-sections.tsx",
+          "line": 158,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/doc-sections.tsx",
+          "line": 159,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/doc-sections.tsx",
+          "line": 271,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/health-rail.tsx",
+          "line": 38,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/history-card.tsx",
+          "line": 59,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/image-lightbox.tsx",
+          "line": 43,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/info-page.tsx",
+          "line": 84,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/lab/token-list.tsx",
+          "line": 157,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/components/segmented-control.tsx",
+          "line": 54,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 46,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 116,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 122,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 325,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 358,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 546,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 554,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 557,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 558,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 560,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 746,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 752,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 893,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 898,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 899,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 901,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 923,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1101,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1562,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1568,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1636,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1708,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: primitive.space.px48",
+          "ref": "primitive.space.px48"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1714,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: primitive.space.px64",
+          "ref": "primitive.space.px64"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1720,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: primitive.space.px24",
+          "ref": "primitive.space.px24"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1726,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: primitive.space.px32",
+          "ref": "primitive.space.px32"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1866,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1869,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1870,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1872,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1876,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1951,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 1991,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 2289,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 2373,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.color.surface.raised.dark",
+          "ref": "semantic.color.surface.raised.dark"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 2379,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.color.surface.raised.light",
+          "ref": "semantic.color.surface.raised.light"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 2452,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 2464,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 2482,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: primitive.space.px12",
+          "ref": "primitive.space.px12"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 2630,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 2707,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 2718,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 2730,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 2736,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/component-api.json",
+          "line": 2815,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/foundations/typography.json",
+          "line": 97,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/foundations/typography.json",
+          "line": 144,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/foundations/typography.json",
+          "line": 150,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/foundations/typography.json",
+          "line": 162,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/hds-registry.json",
+          "line": 299,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/data/hds-registry.json",
+          "line": 304,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/data/hds-registry.json",
+          "line": 518,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: component.button.border",
+          "ref": "component.button.border"
+        },
+        {
+          "file": "src/app/data/hds-registry.json",
+          "line": 546,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: component.button.border",
+          "ref": "component.button.border"
+        },
+        {
+          "file": "src/app/data/hdsEditorial.tsx",
+          "line": 66,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: primitive.color.accent",
+          "ref": "primitive.color.accent"
+        },
+        {
+          "file": "src/app/data/token-audit-report.json",
+          "line": 15,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.px8",
+          "ref": "semantic.space.px8"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 412,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 4957,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 4969,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 4981,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 5145,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 5223,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 5287,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 5300,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 5317,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 5331,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 5408,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 5720,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7059,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7130,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7177,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7195,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7226,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7264,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7286,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7311,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7324,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7340,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7391,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7411,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7443,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7486,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7501,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7515,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7542,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7602,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7613,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7649,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/design-system/token-usage-map.json",
+          "line": 7732,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/hooks/useHdsManifest.ts",
+          "line": 6,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.accent.active",
+          "ref": "semantic.accent.active"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 195,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 226,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 231,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 303,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 332,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 346,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 376,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 396,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 426,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 435,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 481,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 511,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 581,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 612,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 616,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 621,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 628,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ArchitectureSnapshotPage.tsx",
+          "line": 641,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/BreakpointsPage.tsx",
+          "line": 40,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/BreakpointsPage.tsx",
+          "line": 45,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ColorPage.tsx",
+          "line": 310,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: primitive.neutral.map",
+          "ref": "primitive.neutral.map"
+        },
+        {
+          "file": "src/app/pages/hds/ColorPage.tsx",
+          "line": 311,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: primitive.blue.map",
+          "ref": "primitive.blue.map"
+        },
+        {
+          "file": "src/app/pages/hds/ContributionGuidePage.tsx",
+          "line": 32,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ContributionGuidePage.tsx",
+          "line": 278,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ElevationPage.tsx",
+          "line": 46,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/ElevationPage.tsx",
+          "line": 174,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/HDSLayout.tsx",
+          "line": 69,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/HdsDocPrimitives.tsx",
+          "line": 88,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/HdsDocPrimitives.tsx",
+          "line": 118,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/HdsDocPrimitives.tsx",
+          "line": 260,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/HdsDocPrimitives.tsx",
+          "line": 261,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/HdsDocPrimitives.tsx",
+          "line": 497,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/HdsDocPrimitives.tsx",
+          "line": 505,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/HdsDocPrimitives.tsx",
+          "line": 673,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/HirobiusCaseStudyPage.tsx",
+          "line": 21,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/HirobiusCaseStudyPage.tsx",
+          "line": 23,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/IconsPage.tsx",
+          "line": 50,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/LegacyTokenExplorerPanel.tsx",
+          "line": 287,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/MicrosoftDesignSystemsPage.tsx",
+          "line": 17,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/MicrosoftDesignSystemsPage.tsx",
+          "line": 218,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/MicrosoftDesignSystemsPage.tsx",
+          "line": 754,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/MultiBrandThemingPage.tsx",
+          "line": 133,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/OpsPage.tsx",
+          "line": 91,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/PortfolioDraftPage.tsx",
+          "line": 17,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/PortfolioDraftPage.tsx",
+          "line": 211,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/PortfolioHomePage.tsx",
+          "line": 264,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/PortfolioHomePage.tsx",
+          "line": 265,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/PortfolioHomePage.tsx",
+          "line": 286,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/PortfolioHomePage.tsx",
+          "line": 325,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/PortfolioHomePage.tsx",
+          "line": 396,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/SpacingPage.tsx",
+          "line": 63,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/SpacingPage.tsx",
+          "line": 265,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/SystemContractPage.tsx",
+          "line": 22,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/SystemContractPage.tsx",
+          "line": 185,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/TechStackPage.tsx",
+          "line": 184,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/TokenCascadeDiagram.tsx",
+          "line": 206,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/TokensPage.tsx",
+          "line": 194,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/TypographyPage.tsx",
+          "line": 140,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/pages/hds/TypographyPage.tsx",
+          "line": 141,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/pages/hds/TypographyTestPage.tsx",
+          "line": 59,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.small",
+          "ref": "semantic.typography.small"
+        },
+        {
+          "file": "src/app/pages/hds/TypographyTestPage.tsx",
+          "line": 67,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.typography.caption",
+          "ref": "semantic.typography.caption"
+        },
+        {
+          "file": "src/app/pages/hds/VisualsPage.tsx",
+          "line": 19,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/components/IconGallery.tsx",
+          "line": 172,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/hds/components/IconGallery.tsx",
+          "line": 173,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/app/pages/sketches/SketchbookIndexPage.tsx",
+          "line": 28,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.space.layout.gap",
+          "ref": "semantic.space.layout.gap"
+        },
+        {
+          "file": "src/stories/inline-code.stories.tsx",
+          "line": 33,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.color.brand.primary",
+          "ref": "semantic.color.brand.primary"
+        },
+        {
+          "file": "src/stories/inline-code.stories.tsx",
+          "line": 80,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.color.brand.primary",
+          "ref": "semantic.color.brand.primary"
+        },
+        {
+          "file": "src/stories/input.stories.tsx",
+          "line": 89,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.color.brand.primary",
+          "ref": "semantic.color.brand.primary"
+        },
+        {
+          "file": "src/stories/table.stories.tsx",
+          "line": 48,
+          "rule": "token-path-unresolved",
+          "severity": "baselined",
+          "message": "baselined unresolved token path: semantic.color.bg.default",
+          "ref": "semantic.color.bg.default"
+        }
+      ],
+      "outputTail": "    {\n      \"file\": \"src/app/pages/sketches/SketchbookIndexPage.tsx\",\n      \"line\": 28,\n      \"rule\": \"token-path-unresolved\",\n      \"severity\": \"baselined\",\n      \"message\": \"baselined unresolved token path: semantic.space.layout.gap\",\n      \"ref\": \"semantic.space.layout.gap\"\n    },\n    {\n      \"file\": \"src/stories/inline-code.stories.tsx\",\n      \"line\": 33,\n      \"rule\": \"token-path-unresolved\",\n      \"severity\": \"baselined\",\n      \"message\": \"baselined unresolved token path: semantic.color.brand.primary\",\n      \"ref\": \"semantic.color.brand.primary\"\n    },\n    {\n      \"file\": \"src/stories/inline-code.stories.tsx\",\n      \"line\": 80,\n      \"rule\": \"token-path-unresolved\",\n      \"severity\": \"baselined\",\n      \"message\": \"baselined unresolved token path: semantic.color.brand.primary\",\n      \"ref\": \"semantic.color.brand.primary\"\n    },\n    {\n      \"file\": \"src/stories/input.stories.tsx\",\n      \"line\": 89,\n      \"rule\": \"token-path-unresolved\",\n      \"severity\": \"baselined\",\n      \"message\": \"baselined unresolved token path: semantic.color.brand.primary\",\n      \"ref\": \"semantic.color.brand.primary\"\n    },\n    {\n      \"file\": \"src/stories/table.stories.tsx\",\n      \"line\": 48,\n      \"rule\": \"token-path-unresolved\",\n      \"severity\": \"baselined\",\n      \"message\": \"baselined unresolved token path: semantic.color.bg.default\",\n      \"ref\": \"semantic.color.bg.default\"\n    }\n  ],\n  \"summary\": {\n    \"filesScanned\": 319,\n    \"validPaths\": 539,\n    \"newViolations\": 0,\n    \"baselinedViolations\": 171\n  },\n  \"ok\": true\n}\n"
+    },
+    {
+      "id": "check-token-rebake-needed",
+      "exitCode": 0,
+      "durationMs": 1244,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": ""
+    },
+    {
+      "id": "check-token-renames",
+      "exitCode": 0,
+      "durationMs": 37,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "[check-token-renames] OK — 2 removed path(s) all documented in TOKEN_MIGRATION.md\n"
+    },
+    {
+      "id": "check-token-structure",
+      "exitCode": 0,
+      "durationMs": 30,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "✓ check-token-structure — no cross-tier alias violations or theme coverage gaps\n"
+    },
+    {
+      "id": "check-unresponsive-grids",
+      "exitCode": 0,
+      "durationMs": 59,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "\n✓ Unresponsive grid check passed — all multi-column grids have mobile guards.\n\n"
+    },
+    {
+      "id": "check-validator-wiring",
+      "exitCode": 0,
+      "durationMs": 31,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "✓ check-validator-wiring — 65 gate(s) wired as declared.\n"
+    },
+    {
+      "id": "generate-strength-report",
+      "exitCode": 0,
+      "durationMs": 198307,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "Started a web server on port 38537...\nRunning Lighthouse 1 time(s) on http://localhost:38537/\nRun #1...done.\nRunning Lighthouse 1 time(s) on http://localhost:38537/atlas\nRun #1...done.\nRunning Lighthouse 1 time(s) on http://localhost:38537/portfolio\nRun #1...done.\nDone running Lighthouse!\n[strength] Score A: 82/100  (wired: 6/6)\n[strength] Score B: 78/100  (wired: 7/8)\n[strength] Reports written to docs/guardrails/strength-report.{md,json} + SYSTEM_OVERVIEW.md\n"
+    },
+    {
+      "id": "validate-fixture-proof-of-firing",
+      "exitCode": 1,
+      "durationMs": 32404,
+      "supportsJson": true,
+      "violations": [
+        {
+          "file": "/home/adrian/projects/adrian-milsap/fixtures/audit-soft-gates/passing.example.json",
+          "line": null,
+          "rule": "fixture-proof-of-firing-failure",
+          "severity": "error",
+          "message": "audit-soft-gates: passing fixture triggered gate (expected exit 0, got 1)",
+          "gateId": "audit-soft-gates"
+        },
+        {
+          "file": "/home/adrian/projects/adrian-milsap/fixtures/audit-gate-replaceability/violating.example.json",
+          "line": null,
+          "rule": "fixture-proof-of-firing-failure",
+          "severity": "error",
+          "message": "audit-gate-replaceability: violating fixture did not trigger gate (exit 0 expected non-zero)",
+          "gateId": "audit-gate-replaceability"
+        },
+        {
+          "file": "fixtures/audit-batch-deliverables/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-batch-deliverables: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-batch-deliverables",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-batch-deliverables/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-batch-deliverables/passing.example.json"
+        },
+        {
+          "file": "fixtures/audit-bundle/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-bundle: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-bundle",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-bundle/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-bundle/passing.example.json"
+        },
+        {
+          "file": "fixtures/audit-claims/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-claims: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-claims",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-claims/violating.example.txt",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-claims/passing.example.txt"
+        },
+        {
+          "file": "fixtures/audit-deps/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-deps: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-deps",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-deps/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-deps/passing.example.json"
+        },
+        {
+          "file": "fixtures/audit-exceptions/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-exceptions: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-exceptions",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-exceptions/violating.example.txt",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-exceptions/passing.example.txt"
+        },
+        {
+          "file": "fixtures/audit-figma-system/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-figma-system: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-figma-system",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-figma-system/violating.example.txt",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-figma-system/passing.example.txt"
+        },
+        {
+          "file": "fixtures/audit-gate-purity/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-gate-purity: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-gate-purity",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-gate-purity/violating.example.txt",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-gate-purity/passing.example.txt"
+        },
+        {
+          "file": "fixtures/audit-gates-supportjson/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-gates-supportjson: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-gates-supportjson",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-gates-supportjson/violating.example.txt",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-gates-supportjson/passing.example.txt"
+        },
+        {
+          "file": "fixtures/audit-pages/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-pages: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-pages",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-pages/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-pages/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/audit-sbom/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-sbom: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-sbom",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-sbom/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-sbom/passing.example.json"
+        },
+        {
+          "file": "fixtures/audit-strengths/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-strengths: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-strengths",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-strengths/violating.example.txt",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-strengths/passing.example.txt"
+        },
+        {
+          "file": "fixtures/audit-tiers/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-tiers: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-tiers",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-tiers/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-tiers/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/audit-tokens/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "audit-tokens: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "audit-tokens",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-tokens/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/audit-tokens/passing.example.json"
+        },
+        {
+          "file": "fixtures/check-asset-manifest/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-asset-manifest: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-asset-manifest",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-asset-manifest/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-asset-manifest/passing.example.json"
+        },
+        {
+          "file": "fixtures/check-attributions/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-attributions: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-attributions",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-attributions/violating.example.md",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-attributions/passing.example.md"
+        },
+        {
+          "file": "fixtures/check-binding-drift/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-binding-drift: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-binding-drift",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-binding-drift/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-binding-drift/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-brand/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-brand: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-brand",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-brand/violating.example.md",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-brand/passing.example.md"
+        },
+        {
+          "file": "fixtures/check-code-connect/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-code-connect: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-code-connect",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-code-connect/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-code-connect/passing.example.json"
+        },
+        {
+          "file": "fixtures/check-contrast/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-contrast: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-contrast",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-contrast/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-contrast/passing.example.json"
+        },
+        {
+          "file": "fixtures/check-css-integrity/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-css-integrity: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-css-integrity",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-css-integrity/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-css-integrity/passing.example.json"
+        },
+        {
+          "file": "fixtures/check-dimensions/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-dimensions: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-dimensions",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-dimensions/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-dimensions/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-doc-structure/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-doc-structure: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-doc-structure",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-doc-structure/violating.example.md",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-doc-structure/passing.example.md"
+        },
+        {
+          "file": "fixtures/check-focus-states/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-focus-states: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-focus-states",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-focus-states/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-focus-states/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-frozen-demos/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-frozen-demos: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-frozen-demos",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-frozen-demos/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-frozen-demos/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-hardcoded-breakpoints/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-hardcoded-breakpoints: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-hardcoded-breakpoints",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-hardcoded-breakpoints/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-hardcoded-breakpoints/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-hardcoded-colors/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-hardcoded-colors: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-hardcoded-colors",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-hardcoded-colors/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-hardcoded-colors/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-legacy-hds-vars/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-legacy-hds-vars: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-legacy-hds-vars",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-legacy-hds-vars/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-legacy-hds-vars/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-manifest-drift/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-manifest-drift: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-manifest-drift",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-manifest-drift/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-manifest-drift/passing.example.json"
+        },
+        {
+          "file": "fixtures/check-manifest-schema-semver/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-manifest-schema-semver: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-manifest-schema-semver",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-manifest-schema-semver/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-manifest-schema-semver/passing.example.json"
+        },
+        {
+          "file": "fixtures/check-mono-roles/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-mono-roles: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-mono-roles",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-mono-roles/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-mono-roles/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-og-meta/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-og-meta: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-og-meta",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-og-meta/violating.example.txt",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-og-meta/passing.example.txt"
+        },
+        {
+          "file": "fixtures/check-page-shell/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-page-shell: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-page-shell",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-page-shell/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-page-shell/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-reduced-motion/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-reduced-motion: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-reduced-motion",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-reduced-motion/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-reduced-motion/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-ref-forwarding/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-ref-forwarding: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-ref-forwarding",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-ref-forwarding/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-ref-forwarding/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-registry/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-registry: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-registry",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-registry/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-registry/passing.example.json"
+        },
+        {
+          "file": "fixtures/check-route-coverage/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-route-coverage: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-route-coverage",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-route-coverage/violating.example.txt",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-route-coverage/passing.example.txt"
+        },
+        {
+          "file": "fixtures/check-route-smoke/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-route-smoke: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-route-smoke",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-route-smoke/violating.example.txt",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-route-smoke/passing.example.txt"
+        },
+        {
+          "file": "fixtures/check-security-baseline/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-security-baseline: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-security-baseline",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-security-baseline/violating.example.txt",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-security-baseline/passing.example.txt"
+        },
+        {
+          "file": "fixtures/check-source-canon/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-source-canon: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-source-canon",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-source-canon/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-source-canon/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-template-source-of-truth/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-template-source-of-truth: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-template-source-of-truth",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-template-source-of-truth/violating.example.txt",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-template-source-of-truth/passing.example.txt"
+        },
+        {
+          "file": "fixtures/check-tenant-tokens/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-tenant-tokens: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-tenant-tokens",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-tenant-tokens/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-tenant-tokens/passing.example.json"
+        },
+        {
+          "file": "fixtures/check-tier-bypass/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-tier-bypass: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-tier-bypass",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-tier-bypass/violating.example.tsx",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-tier-bypass/passing.example.tsx"
+        },
+        {
+          "file": "fixtures/check-token-rebake-needed/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-token-rebake-needed: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-token-rebake-needed",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-token-rebake-needed/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-token-rebake-needed/passing.example.json"
+        },
+        {
+          "file": "fixtures/check-token-renames/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-token-renames: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-token-renames",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-token-renames/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-token-renames/passing.example.json"
+        },
+        {
+          "file": "fixtures/check-token-structure/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-token-structure: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-token-structure",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-token-structure/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-token-structure/passing.example.json"
+        },
+        {
+          "file": "fixtures/check-validator-wiring/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "check-validator-wiring: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "check-validator-wiring",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-validator-wiring/violating.example.txt",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/check-validator-wiring/passing.example.txt"
+        },
+        {
+          "file": "fixtures/generate-strength-report/",
+          "line": null,
+          "rule": "fixture-stub",
+          "severity": "baselined",
+          "message": "generate-strength-report: stub fixture (TODO marker) — burn down by replacing with real fixture",
+          "gateId": "generate-strength-report",
+          "violatingPath": "/home/adrian/projects/adrian-milsap/fixtures/generate-strength-report/violating.example.json",
+          "passingPath": "/home/adrian/projects/adrian-milsap/fixtures/generate-strength-report/passing.example.json"
+        }
+      ],
+      "outputTail": "      \"line\": null,\n      \"rule\": \"fixture-stub\",\n      \"severity\": \"baselined\",\n      \"message\": \"check-token-renames: stub fixture (TODO marker) — burn down by replacing with real fixture\",\n      \"gateId\": \"check-token-renames\",\n      \"violatingPath\": \"/home/adrian/projects/adrian-milsap/fixtures/check-token-renames/violating.example.json\",\n      \"passingPath\": \"/home/adrian/projects/adrian-milsap/fixtures/check-token-renames/passing.example.json\"\n    },\n    {\n      \"file\": \"fixtures/check-token-structure/\",\n      \"line\": null,\n      \"rule\": \"fixture-stub\",\n      \"severity\": \"baselined\",\n      \"message\": \"check-token-structure: stub fixture (TODO marker) — burn down by replacing with real fixture\",\n      \"gateId\": \"check-token-structure\",\n      \"violatingPath\": \"/home/adrian/projects/adrian-milsap/fixtures/check-token-structure/violating.example.json\",\n      \"passingPath\": \"/home/adrian/projects/adrian-milsap/fixtures/check-token-structure/passing.example.json\"\n    },\n    {\n      \"file\": \"fixtures/check-validator-wiring/\",\n      \"line\": null,\n      \"rule\": \"fixture-stub\",\n      \"severity\": \"baselined\",\n      \"message\": \"check-validator-wiring: stub fixture (TODO marker) — burn down by replacing with real fixture\",\n      \"gateId\": \"check-validator-wiring\",\n      \"violatingPath\": \"/home/adrian/projects/adrian-milsap/fixtures/check-validator-wiring/violating.example.txt\",\n      \"passingPath\": \"/home/adrian/projects/adrian-milsap/fixtures/check-validator-wiring/passing.example.txt\"\n    },\n    {\n      \"file\": \"fixtures/generate-strength-report/\",\n      \"line\": null,\n      \"rule\": \"fixture-stub\",\n      \"severity\": \"baselined\",\n      \"message\": \"generate-strength-report: stub fixture (TODO marker) — burn down by replacing with real fixture\",\n      \"gateId\": \"generate-strength-report\",\n      \"violatingPath\": \"/home/adrian/projects/adrian-milsap/fixtures/generate-strength-report/violating.example.json\",\n      \"passingPath\": \"/home/adrian/projects/adrian-milsap/fixtures/generate-strength-report/passing.example.json\"\n    }\n  ],\n  \"summary\": {\n    \"total\": 65,\n    \"withRealFixtures\": 18,\n    \"withStubFixtures\": 47,\n    \"withMissingFixtures\": 0,\n    \"scriptsMissingFromDisk\": 0,\n    \"failures\": 2\n  },\n  \"ok\": false\n}\n"
+    },
+    {
+      "id": "validate-orchestration",
+      "exitCode": 0,
+      "durationMs": 28,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "OK — orchestration schema valid (39 active unit(s) checked)\nOK — strict-validation passed (26 approved unit(s) have valid validationCmd)\n"
+    }
+  ],
+  "totalsByExitCode": {
+    "0": 46,
+    "1": 2
+  },
+  "gatesWithJson": 9,
+  "gatesWithoutJson": 39
+}

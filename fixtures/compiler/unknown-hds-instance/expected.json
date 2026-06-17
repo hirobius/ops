@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdscustomthing-1",
+      "parentId": "root",
+      "type": "INSTANCE",
+      "componentName": "HdsCustomThing"
+    }
+  ]
+}

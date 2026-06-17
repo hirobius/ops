@@ -1,0 +1,8 @@
+{
+  "scenario": "expired",
+  "secret": "test-secret-expired",
+  "type": "selection.update",
+  "payload": {
+    "nodeIds": ["1:2"]
+  }
+}

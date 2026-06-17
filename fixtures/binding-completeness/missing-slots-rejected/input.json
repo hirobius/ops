@@ -1,0 +1,10 @@
+{
+  "jsx": "<HdsSyntheticMissing />",
+  "manifestOverride": {
+    "componentSpecs": {
+      "HdsSyntheticMissing": {
+        "tokens": { "fill": "component.synthetic.bg" }
+      }
+    }
+  }
+}

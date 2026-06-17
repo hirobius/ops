@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "code": "MISSING_MASTER",
+  "requestId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "message": "HdsButton master component not found in registry",
+  "matched": true,
+  "dispatched": true,
+  "pendingSize": 0
+}

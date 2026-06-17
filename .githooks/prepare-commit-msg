@@ -1,0 +1,6 @@
+#!/bin/sh
+# HDS prepare-commit-msg hook placeholder.
+# Commit-time journal generation now happens in post-commit so the final
+# systems-log entry can be amended into the same commit.
+
+exit 0

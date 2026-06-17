@@ -1,0 +1,7 @@
+{
+  "expected": "internal",
+  "_note": "No signals match anything — should fall back to internal (manual review).",
+  "from": "someone@example.com",
+  "subject": "Question",
+  "body": "Hey, got a sec?"
+}

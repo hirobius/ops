@@ -1,0 +1,21 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsbutton-1",
+      "parentId": "root",
+      "type": "INSTANCE",
+      "componentName": "HdsButton",
+      "attributes": {
+        "variant": "primary"
+      },
+      "figmaProperties": {
+        "Variant": "primary"
+      },
+      "a11y": {
+        "description": "Submits the order"
+      }
+    }
+  ]
+}

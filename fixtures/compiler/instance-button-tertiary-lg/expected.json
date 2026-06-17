@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsbutton-1",
+      "parentId": "root",
+      "type": "INSTANCE",
+      "componentName": "HdsButton",
+      "attributes": {
+        "variant": "tertiary",
+        "size": "lg",
+        "label": "Skip"
+      },
+      "figmaProperties": {
+        "Variant": "tertiary",
+        "Size": "lg",
+        "Label": "Skip"
+      }
+    }
+  ]
+}

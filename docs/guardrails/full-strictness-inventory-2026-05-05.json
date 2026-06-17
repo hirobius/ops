@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-05-05T22:38:18.290Z",
+  "channel": "ci-pr",
+  "gates": [
+    {
+      "id": "audit-gate-purity",
+      "exitCode": 0,
+      "durationMs": 63,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "audit-gate-purity — registered gates scanned for impurity patterns\nscanned: 73\n  PURE:     64\n  EXEMPTED: 0  (impurity present + documented in pureExceptions)\n  IMPURE:   9    (impurity present, NOT documented)\n  MISSING:  0   (gateScript file does not exist)\n\nIMPURE gates (need pureExceptions or refactor):\n  ✗ audit-claims  (time)\n  ✗ audit-exceptions  (time)\n  ✗ audit-gate-purity  (env, network, time)\n  ✗ audit-tiers  (mutation, time)\n  ✗ audit-tokens  (time)\n  ✗ check-external-links  (network)\n  ✗ check-route-smoke  (env, network)\n  ✗ check-source-canon  (mutation)\n  ✗ generate-strength-report  (random, time)\n\n"
+    },
+    {
+      "id": "audit-strengths",
+      "exitCode": 0,
+      "durationMs": 71,
+      "supportsJson": false,
+      "violations": null,
+      "outputTail": "[OK]   validator-count: 83 validator/check/audit scripts found in scripts/ (threshold: >= 40)\n[OK]   fixture-count: 517 fixture files found across fixtures/, tests/__fixtures__/, and visual snapshots (threshold: >= 269)\n[OK]   no-style-dictionary: style-dictionary / @tokens-studio not present in any dependency field\n[OK]   manifest-single-source: public/hds-manifest.json is the sole registry with 51 componentSpecs (checked src/, manifest/, docs/, scripts/, pipeline/)\n[OK]   adr-naming-convention: No RFC files in docs/architecture/; docs/adr/ follows NNNN-kebab-case.md convention\n[OK]   eco-model-rule-referenced: Eco-model rule referenced in CLAUDE.md and memory/feedback_eco_efficient_subagents.md\n\nPASS\n"
+    }
+  ],
+  "totalsByExitCode": {
+    "0": 2
+  },
+  "gatesWithJson": 0,
+  "gatesWithoutJson": 2
+}

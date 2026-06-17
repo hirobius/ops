@@ -1,0 +1,11 @@
+{
+  "scenario": "wrong-secret",
+  "secret": "shared-bridge-secret-fixture",
+  "clientSecret": "attacker-secret-different",
+  "authEnabled": true,
+  "type": "selection.update",
+  "payload": {
+    "nodeIds": ["1:2"],
+    "page": "Page 1"
+  }
+}

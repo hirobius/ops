@@ -1,0 +1,29 @@
+{
+  "$schema": "../../hirobius.tenant-metadata.schema.json",
+  "slug": "_template",
+  "displayName": "Tenant Template",
+  "tagline": "Starter scaffold — copy this directory and rename to onboard a new tenant.",
+  "tier": 1,
+  "deployment": {
+    "vercelProject": null,
+    "primaryDomain": null,
+    "previewDomain": null
+  },
+  "brand": {
+    "primaryHex": "#888888",
+    "accentName": "placeholder",
+    "logoPath": null
+  },
+  "legal": {
+    "entity": null,
+    "jurisdiction": null,
+    "stripeAccountKind": null
+  },
+  "createdAt": "2026-05-01",
+  "status": "scaffold",
+  "_notes": [
+    "This is the canonical starter for new tenants. Do NOT deploy from this directory.",
+    "When onboarding a new client: cp -r tenants/_template tenants/<slug> && update slug, displayName, tier, deployment, brand, legal.",
+    "Tier guide: 1 = brand presence (marketing site), 2 = e-commerce (Stripe Checkout, legal pages), 3 = product (custom auth/dashboards)."
+  ]
+}

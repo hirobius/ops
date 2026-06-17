@@ -1,0 +1,121 @@
+/*
+ * Hirobius Studio — global styles.
+ *
+ * Tokens are sourced from the parent HDS via tokens.generated.css.
+ * Regenerate at the parent: `pnpm tokens`. We re-export the CSS vars
+ * here, then bind Tailwind utilities to them in tailwind.config.ts.
+ */
+
+@import "../../../../src/styles/tokens.generated.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Responsive type ramp — mirrors src/styles/theme.css :root overrides.
+     Token JSON stores desktop-max sizes for Figma; these clamp() values
+     restore fluid scaling. */
+  --semantic-typography-display-font-size: clamp(40px, 8vw, 72px);
+  --semantic-typography-h1-font-size:      clamp(32px, 6vw, 48px);
+  --semantic-typography-h2-font-size:      clamp(24px, 3.5vw, 30px);
+  --semantic-typography-h3-font-size:      clamp(18px, 2vw, 20px);
+}
+
+@layer base {
+  html {
+    font-family: 'Satoshi', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--semantic-color-content-primary);
+    background: var(--semantic-color-surface-page);
+    font-size: var(--semantic-typography-body-font-size, 17px);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  /* Single source of truth: every heading inherits Clash Display + weight 500.
+     Components don't repeat font-display on heading elements. */
+  h1, h2, h3, h4 {
+    font-family: 'Clash Display', 'Inter', system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--semantic-color-content-primary);
+  }
+
+  ::selection {
+    background: var(--semantic-color-content-primary);
+    color: var(--semantic-color-surface-page);
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-[80rem];
+    padding-left: var(--semantic-layout-page-gutter-x, clamp(1rem, 4vw, 4rem));
+    padding-right: var(--semantic-layout-page-gutter-x, clamp(1rem, 4vw, 4rem));
+  }
+
+  .rule {
+    height: 1px;
+    width: 100%;
+    background: var(--semantic-color-border-subtle);
+  }
+
+  /* Action: bg accent + onAccent text + 12px radius (semantic.radius.action) */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 1.75rem;
+    background: var(--semantic-color-surface-accent);
+    color: var(--semantic-color-content-onAccent);
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+    border-radius: 12px;
+    transition: filter 200ms ease, background 200ms ease;
+  }
+  .btn-primary:hover { filter: brightness(0.92); }
+  .btn-primary:active { filter: brightness(0.85); }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: none;
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1.25rem;
+    background: transparent;
+    color: var(--semantic-color-content-primary);
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid var(--semantic-color-border-default);
+    border-radius: 12px;
+    transition: border-color 200ms ease, background 200ms ease;
+  }
+  .btn-ghost:hover {
+    border-color: var(--semantic-color-border-strong);
+    background: var(--semantic-color-surface-raised);
+  }
+
+  /* Eyebrow: small uppercase block label — never inline in prose. 13px / 500. */
+  .eyebrow {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--semantic-color-content-secondary);
+  }
+}

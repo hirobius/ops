@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-p-1",
+      "parentId": "root",
+      "type": "TEXT",
+      "props": {
+        "typography": "semantic.typography.body",
+        "fill": "semantic.color.content.secondary",
+        "text": "Some body text"
+      }
+    }
+  ]
+}

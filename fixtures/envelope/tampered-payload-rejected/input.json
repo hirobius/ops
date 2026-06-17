@@ -1,0 +1,9 @@
+{
+  "scenario": "tampered",
+  "secret": "test-secret-tampered",
+  "type": "selection.update",
+  "payload": {
+    "nodeIds": ["1:2"],
+    "page": "Page 1"
+  }
+}

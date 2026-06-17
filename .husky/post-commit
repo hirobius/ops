@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+# Post-commit: non-blocking background work.
+#
+# 1. Refresh ready-queue.json so the next agent pick is instant.
+# 2. Re-run all pre-commit registry gates against HEAD and append per-gate
+#    results to docs/guardrails/firing-log.jsonl (unit 13g-12). If a gate
+#    that should have gated the commit fails post-commit, that means
+#    --no-verify was used (or the pre-commit hook silently failed). The
+#    log makes bypasses auditable; it does not prevent them.
+#
+# Both jobs are detached + nohup'd so `git commit` returns immediately.
+
+ROOT="$(git rev-parse --show-toplevel)"
+LOG_DIR="$ROOT/docs/guardrails"
+mkdir -p "$LOG_DIR"
+
+nohup node "$ROOT/scripts/orchestration-watcher.mjs" --once --quiet \
+  >/dev/null 2>&1 </dev/null &
+
+nohup sh -c "node \"$ROOT/scripts/run-gates.mjs\" --channel pre-commit --emit-jsonl docs/guardrails/firing-log.jsonl && node \"$ROOT/scripts/refresh-firing-stats.mjs\"" \
+  >>"$LOG_DIR/firing-log.stderr" 2>&1 </dev/null &
+
+exit 0

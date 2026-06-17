@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsdialog-1",
+      "parentId": "root",
+      "type": "INSTANCE",
+      "componentName": "HdsDialog",
+      "attributes": {
+        "title": "Welcome",
+        "description": "Let's get you started.",
+        "hideClose": true
+      },
+      "figmaProperties": {
+        "Title": "Welcome",
+        "Description": "Let's get you started.",
+        "Hide close": false
+      },
+      "a11y": {
+        "description": "Let's get you started."
+      }
+    }
+  ]
+}

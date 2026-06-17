@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adrian Milsap</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="Adrian Milsap — design systems, interaction, and visual design."
+    />
+    <meta property="og:title" content="Adrian Milsap — Design Engineer" />
+    <meta
+      property="og:description"
+      content="Design engineer specializing in design systems, component architecture, and creative engineering."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://adrianmilsap.com/" />
+    <meta property="og:image" content="https://adrianmilsap.com/assets/xds-overview.webp" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!--
+        12c-1: Preload Clash Display (display/h1/h2/h3), Clash Grotesk 400 (body/UI),
+        and Geist Mono 400 (code/mono). font-display: block is set on Clash Grotesk
+        and Geist Mono @font-face rules to eliminate FOUC on first paint.
+      -->
+    <link
+      rel="preload"
+      href="/fonts/clash-display/clash-display-300.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="preload"
+      href="/fonts/clash-display/clash-display-400.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="preload"
+      href="/fonts/clash-grotesk/clash-grotesk-400.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="preload"
+      href="/fonts/geist-mono/geist-mono-400.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
+    <!--
+        FOUC prevention — must remain synchronous (no async/import).
+        Reads hds-theme-mode (ThemeContext primary key) first, then falls
+        back to legacy hds-theme binary key. Sets data-theme + .dark class
+        before first paint so tokens resolve correctly without a flash.
+        Storage keys must stay in sync with ThemeContext.tsx constants:
+          MODE_STORAGE_KEY  = 'hds-theme-mode'  (system|light|dark)
+          THEME_STORAGE_KEY = 'hds-theme'        (light|dark, legacy)
+      -->
+    <script>
+      (() => {
+        try {
+          var osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var mode = localStorage.getItem('hds-theme-mode');
+          var isDark;
+          if (mode === 'dark') {
+            isDark = true;
+          } else if (mode === 'light') {
+            isDark = false;
+          } else if (mode === 'system') {
+            isDark = osDark;
+          } else {
+            // Fall back to legacy binary key, then OS preference
+            var legacy = localStorage.getItem('hds-theme');
+            isDark = legacy ? legacy === 'dark' : osDark;
+          }
+          var root = document.documentElement;
+          root.setAttribute('data-theme', isDark ? 'dark' : 'light');
+          root.classList.toggle('dark', isDark);
+        } catch (e) {
+          // If localStorage is unavailable, default to OS preference with no flash
+          var root = document.documentElement;
+          var osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          root.setAttribute('data-theme', osDark ? 'dark' : 'light');
+          root.classList.toggle('dark', osDark);
+        }
+      })();
+    </script>
+    <style>
+      html,
+      body {
+        min-height: 100%;
+        background-color: var(--semantic-color-surface-page);
+      }
+      body {
+        margin: 0;
+      }
+      #root {
+        min-height: 100%;
+        opacity: 1;
+        transition: opacity 0.4s ease-out;
+      }
+      #root:empty {
+        opacity: 0;
+      }
+    </style>
+    <style>
+      .skip-link {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      .skip-link:focus {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        width: auto;
+        height: auto;
+        overflow: visible;
+        clip: auto;
+        padding: 8px 12px;
+        border: 1px solid var(--semantic-color-border-accent);
+        background: var(--semantic-color-surface-page);
+        color: var(--semantic-color-content-primary);
+        text-decoration: none;
+        z-index: 9999;
+      }
+    </style>
+  </head>
+
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Register the PWA service worker on production hosts only — never on
+      // localhost / 127.0.0.1, where the SW's cache-first would defeat HMR
+      // and serve stale HTML across new route additions. On dev hosts we
+      // also unregister any pre-existing SW so a switch from prod → dev
+      // doesn't leave a stale worker behind.
+      (function () {
+        if (!('serviceWorker' in navigator)) return;
+        var host = location.hostname;
+        var isDev = host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local');
+        if (isDev) {
+          navigator.serviceWorker
+            .getRegistrations()
+            .then(function (regs) {
+              regs.forEach(function (r) {
+                r.unregister();
+              });
+            })
+            .catch(function () {});
+          return;
+        }
+        navigator.serviceWorker.register('/sw.js').catch(function () {});
+      })();
+    </script>
+  </body>
+</html>

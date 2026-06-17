@@ -1,0 +1,6 @@
+{
+  "scenario": "timeout",
+  "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "type": "selection.update",
+  "ttlMs": 25
+}

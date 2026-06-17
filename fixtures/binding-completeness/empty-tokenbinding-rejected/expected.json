@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsSyntheticEmpty",
+      "code": "BINDING_INCOMPLETE",
+      "message": "HdsSyntheticEmpty declares tokens and slots[] but every slot.tokenBinding is empty — masters pipeline cannot project a Figma binding",
+      "suggestion": "Either add slots[] with non-empty tokenBinding to HdsSyntheticEmpty in public/hds-manifest.json, or pick a different binding-complete component for this slot."
+    }
+  ]
+}

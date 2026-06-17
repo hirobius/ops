@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsButton",
+      "code": "MISSING_ACCESSIBLE_NAME",
+      "message": "HdsButton must have an accessible name",
+      "suggestion": "Add a label prop (label=\"...\") or aria-label=\"...\""
+    }
+  ]
+}

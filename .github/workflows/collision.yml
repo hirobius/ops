@@ -1,0 +1,45 @@
+name: Collision
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: collision-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  collision:
+    name: Collision tests
+    runs-on: ubuntu-latest
+    # NOTE: Not a required check for merge yet — needs a baseline run to confirm green.
+    # Expected to pass; promote to branch-protection-required after first smoke run.
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (catches Vite/asset issues)
+        run: pnpm build
+
+      - name: Install Playwright (chromium only)
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Collision tests
+        run: pnpm test:collision

@@ -1,0 +1,9 @@
+{
+  "slug": "prospect-001",
+  "status": "prospect",
+  "lastContactAt": null,
+  "lastContactKind": null,
+  "nextTouchSuggestion": "email",
+  "overdueAfterDays": 7,
+  "notes": "Conrad referral; awaiting first outreach."
+}

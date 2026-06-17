@@ -1,0 +1,33 @@
+{
+  "$schema": "./queries.schema.json",
+  "_comment": "Auto-research subscriptions. Each query is run by scripts/auto-research.mjs. Findings land in docs/research/findings/<id>/<timestamp>.md. Schedule is descriptive only — actual cron wiring is deferred until VPS is up (see project_vps_deployment memory). Run manually with: node scripts/auto-research.mjs --once --query <id>",
+  "queries": [
+    {
+      "id": "hds-trends",
+      "topic": "Design system updates and patterns this week",
+      "prompt": "Summarize 3-5 notable design-system updates, articles, or open-source releases from the past 7 days. Focus on token strategy, component API design, and Figma↔code parity. Cite sources.",
+      "schedule": "weekly",
+      "source": "web",
+      "model": "hermes3:latest",
+      "enabled": true
+    },
+    {
+      "id": "agentic-build-loops",
+      "topic": "Agentic AI build loop patterns and frameworks",
+      "prompt": "Identify recent (last 14 days) work on autonomous agent loops, multi-agent dispatch patterns, and orchestration frameworks. Highlight any drop-in tools that could replace bespoke watchdog scripts. Be concrete with names + links.",
+      "schedule": "weekly",
+      "source": "web",
+      "model": "hermes3:latest",
+      "enabled": true
+    },
+    {
+      "id": "indie-agency-ops",
+      "topic": "Solo-founder agency automation",
+      "prompt": "Find 3-5 patterns or case studies from the past 30 days about solo-founder design/dev agencies using automation to scale without hiring. Bias toward client-onboarding, billing, and asset-pipeline automation. Note tooling specifics.",
+      "schedule": "monthly",
+      "source": "web",
+      "model": "hermes3:latest",
+      "enabled": true
+    }
+  ]
+}

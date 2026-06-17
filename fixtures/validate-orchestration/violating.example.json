@@ -1,0 +1,10 @@
+{
+  "units": [
+    {
+      "id": "bad-unit-missing-fields",
+      "status": "approved",
+      "description": "This unit is missing priority, sprint, cluster, and approval fields.",
+      "validationCmd": "node scripts/validate-orchestration.mjs"
+    }
+  ]
+}

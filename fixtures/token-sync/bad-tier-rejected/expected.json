@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "tokens.primitives",
+      "code": "TIER_UNKNOWN",
+      "message": "unknown tier \"primitives\"; expected one of: primitive, semantic, component",
+      "suggestion": null
+    }
+  ]
+}

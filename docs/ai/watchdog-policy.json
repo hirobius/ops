@@ -1,0 +1,45 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-05-05",
+  "modelDispatch": {
+    "haikuForUnattended": "FORBIDDEN",
+    "rationale": "Adrian directive 2026-05-04 — feedback_no_haiku_dispatch.md. Haiku shipped real defects (cache-first SW, wrong-framework imports, fabricated input files, invalid token paths) faster than the gates could catch."
+  },
+  "concurrency": {
+    "maxParallelPodsForUnattended": 1,
+    "rationale": "Mario Zechner: parallel sub-agents are an anti-pattern when they share files. Cross-pod sibling-patches blurred ownership in batches 1–2."
+  },
+  "fileOverlap": {
+    "policy": "REFUSE",
+    "rationale": "Worktree isolation reduces but doesn't eliminate cross-contamination. When two pods edit the same file path, the merge produces commits whose messages don't match contents (observed in batch 1)."
+  },
+  "uncommittedHumanWork": {
+    "policy": "REFUSE_OVERLAP",
+    "rationale": "If Adrian has uncommitted edits, an agent must not touch those files. Avoids stomping on in-progress human work."
+  },
+  "visualUI": {
+    "policy": "ATTENDED_ONLY",
+    "rationale": "Visual debt the gates couldn't catch in batch 3: PWA cache-first SW, segmented-control overflow, routes-tree styling. All required Adrian eyeballs. Cost > savings on every dispatch."
+  },
+  "selfReferentialDispatch": {
+    "policy": "FORBIDDEN_VIA_SAME_RUNNER",
+    "rationale": "13g-8 modifies hermes-unit.mjs — must dispatch via Claude Code Agent tool (different runner layer), not via those same scripts."
+  },
+  "dispatchableSafeUnattended": {
+    "policy": "OPT_IN_ONLY",
+    "rationale": "Default safeForUnattended=false. Each unit explicitly marks true. Conservative; new gaps surface as deferred-not-dispatched, never as runaway."
+  },
+  "fixtureDriftWindow": {
+    "warnAfterDays": 90,
+    "rationale": "Gates that haven't fired in 90 days are either dormant or perfectly clean — surface for review, don't auto-park."
+  },
+  "costPriceTablePerMillionTokens": {
+    "haiku-4-5": 1.00,
+    "sonnet-4-6": 3.00,
+    "opus-4-7": 15.00,
+    "hermes3": 0,
+    "qwen2.5-coder:14b-hds": 0,
+    "gemma4:e4b": 0,
+    "gemma4:26b": 0
+  }
+}

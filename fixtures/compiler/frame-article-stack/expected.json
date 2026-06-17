@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-article-1",
+      "parentId": "root",
+      "type": "FRAME",
+      "props": {
+        "layoutMode": "VERTICAL",
+        "itemSpacing": 8,
+        "fill": "semantic.color.surface.page",
+        "primaryAxisSizingMode": "AUTO",
+        "counterAxisSizingMode": "AUTO"
+      }
+    }
+  ]
+}

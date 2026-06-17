@@ -1,0 +1,21 @@
+{
+  "units": [
+    {
+      "id": "unit-done-a",
+      "status": "done",
+      "completedAt": "2026-05-04",
+      "description": "Previously completed unit touching src/app/components/HdsToken.tsx.",
+      "agentNotes": ["Edited src/app/components/HdsToken.tsx."],
+      "validationCmd": "node scripts/validate-manifest.mjs",
+      "dependsOn": []
+    },
+    {
+      "id": "unit-approved-x",
+      "status": "approved",
+      "description": "New unit that touches src/app/components/HdsToken.tsx — safe because done-a is no longer claimed.",
+      "agentNotes": ["Edits src/app/components/HdsToken.tsx."],
+      "validationCmd": "node scripts/validate-manifest.mjs",
+      "dependsOn": []
+    }
+  ]
+}

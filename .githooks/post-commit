@@ -1,0 +1,18 @@
+#!/bin/sh
+# HDS post-commit hook
+# 1. Appends a systems-log entry from the committed message and diff, then amends
+#    the commit so the journal entry lands in the same final commit.
+# 2. Updates the commit history feed for HdsHistoryCard (recent commits metadata).
+
+set -eu
+
+if [ "${HDS_JOURNAL_AMEND:-0}" = "1" ]; then
+  # After amend completes, update the commit history feed
+  node scripts/update-commit-history.mjs
+  exit 0
+fi
+
+export HDS_JOURNAL_AMEND=1
+node scripts/update-journal.mjs --post-commit HEAD
+git add docs/SYSTEMS-LOG.md
+git commit --amend --no-edit --no-verify

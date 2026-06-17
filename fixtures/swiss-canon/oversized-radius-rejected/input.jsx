@@ -1,0 +1,1 @@
+<HdsCard radius={24} />

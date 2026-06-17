@@ -1,0 +1,1 @@
+<HdsFrame fill="semantic.color.surface.raised" gap="24" layout="VERTICAL" padding="32" radius="8"><Text fill="semantic.color.content.primary" typography="semantic.typography.h2">Headline</Text><Text fill="semantic.color.content.secondary" typography="semantic.typography.bodyEmphasis">Subhead</Text><HdsButton size="lg" variant="primary">Primary CTA</HdsButton></HdsFrame>

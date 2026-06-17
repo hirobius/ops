@@ -1,0 +1,14 @@
+{
+  "model": "<<retainer | project | license | hybrid>>",
+  "description": "<<one-sentence description of the engagement model>>",
+  "currentPhase": {
+    "phase": "phase-1",
+    "status": "evaluating",
+    "currency": "USD",
+    "scopedAt": 0,
+    "includes": [],
+    "excludes": []
+  },
+  "blockers": [],
+  "futureTiers": []
+}

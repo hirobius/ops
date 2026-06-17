@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsinput-1",
+      "parentId": "root",
+      "type": "INSTANCE",
+      "componentName": "HdsInput",
+      "attributes": {
+        "type": "text",
+        "label": "Email",
+        "placeholder": "you@example.com"
+      },
+      "figmaProperties": {
+        "Type": "text",
+        "Label": "Email",
+        "Placeholder": "you@example.com"
+      }
+    }
+  ]
+}

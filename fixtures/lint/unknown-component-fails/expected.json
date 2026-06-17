@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsTotallyFake",
+      "code": "UNKNOWN_COMPONENT",
+      "message": "\"HdsTotallyFake\" is not in componentSpecs",
+      "suggestion": "Add \"HdsTotallyFake\" to public/hds-manifest.json or use an existing HDS component"
+    }
+  ]
+}

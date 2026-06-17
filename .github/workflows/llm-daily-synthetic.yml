@@ -1,0 +1,117 @@
+name: LLM daily synthetic regression
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: llm-daily-synthetic
+  cancel-in-progress: true
+
+jobs:
+  regression:
+    name: Prompt regression against 8 goldens
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run LLM prompt regression suite
+        id: regression
+        run: node scripts/test-prompt-regression.mjs --verbose
+
+      - name: Open GitHub issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          gh issue create \
+            --title "LLM regression: ${DATE}" \
+            --body "$(cat <<'EOF'
+          ## LLM prompt regression failure
+
+          **Date:** ${DATE}
+          **Trigger:** ${{ github.event_name }}
+          **Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          ### Fixtures checked (8 goldens)
+
+          - data-card-with-meta
+          - dialog-confirm-delete
+          - error-banner-warning
+          - login-form
+          - marketing-hero
+          - nav-with-active-state
+          - primary-button-save
+          - settings-table-3-rows
+
+          ### What to do
+
+          1. Click the run link above and expand the **Run LLM prompt regression suite** step to see which fixtures failed and the element-level diff.
+          2. Determine if the regression is a model drift, system-prompt change, or bridge issue.
+          3. If intentional: run \`node scripts/test-prompt-regression.mjs --update\` locally to re-capture goldens, review the diff, and commit.
+          4. If unintentional: revert the most recent system-prompt or bridge commit.
+
+          > Auto-opened by \`.github/workflows/llm-daily-synthetic.yml\`
+          EOF
+          )" \
+            --label "bug"
+
+      - name: Retry-exhaust threshold check
+        id: exhaust_check
+        run: node scripts/telemetry-report.mjs --alert --threshold=10
+        continue-on-error: true
+
+      - name: Open GitHub issue on retry-exhaust breach
+        if: steps.exhaust_check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          REPORT=$(node scripts/telemetry-report.mjs --alert --threshold=10 2>&1 || true)
+          gh issue create \
+            --title "LLM retry-exhaust threshold breach: ${DATE}" \
+            --body "$(cat <<EOF
+          ## Retry-exhaustion rate exceeded 10 % in the last 24 h
+
+          **Date:** ${DATE}
+          **Trigger:** ${{ github.event_name }}
+          **Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          ### Telemetry summary
+
+          \`\`\`
+          ${REPORT}
+          \`\`\`
+
+          ### What to do
+
+          1. Review the top failing error codes in the summary above.
+          2. Check recent system-prompt commits: \`git log --oneline --diff-filter=M -- scripts/llm-stream-bridge.mjs\`
+          3. If the most recent system-prompt change caused the spike, revert it.
+          4. Otherwise tune the failing prompt or relax the validator rule that is triggering exhaustion.
+          5. Re-run this workflow manually once the rate drops below 10 %.
+
+          > Auto-opened by \`.github/workflows/llm-daily-synthetic.yml\` (step: retry-exhaust threshold check)
+          EOF
+          )" \
+            --label "bug"

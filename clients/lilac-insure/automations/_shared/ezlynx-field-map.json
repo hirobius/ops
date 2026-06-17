@@ -1,0 +1,46 @@
+{
+  "_meta": {
+    "source": "Sketched from public Postman collection https://documenter.getpostman.com/view/17108315/UVXjHahb. Verify against live sandbox once API access is active (acc-2).",
+    "lastUpdated": "2026-05-05",
+    "status": "draft-pending-validation"
+  },
+  "gravityToApplicant": {
+    "first_name": "FirstName",
+    "last_name": "LastName",
+    "email": "Email",
+    "phone": "PhoneNumber",
+    "street_address": "AddressLine1",
+    "city": "City",
+    "state": "State",
+    "zip": "ZipCode",
+    "line_of_business": "LineOfBusiness",
+    "notes": "ApplicantNotes",
+    "referral_source": "Source",
+    "preferred_contact_method": "PreferredContactMethod"
+  },
+  "applicantToEzlynxPolicy": {
+    "LineOfBusiness": "PolicyType",
+    "Source": "LeadSource"
+  },
+  "ezlynxOperations": {
+    "createApplicant": { "method": "POST", "path": "/applicants" },
+    "getApplicant": { "method": "GET", "path": "/applicants/{id}" },
+    "createPolicy": { "method": "POST", "path": "/applicants/{id}/policies" },
+    "updatePolicy": { "method": "PATCH", "path": "/policies/{id}" },
+    "createTask": { "method": "POST", "path": "/tasks" },
+    "attachDocument": { "method": "POST", "path": "/applicants/{id}/documents" },
+    "subscribeWebhook": { "method": "POST", "path": "/webhooks" }
+  },
+  "webhookEvents": {
+    "applicant.created": "fires when a new applicant is created",
+    "policy.renewal_due": "fires N days before policy expiration (configurable)",
+    "policy.cancelled": "fires on cancellation",
+    "task.completed": "fires when a task is marked done"
+  },
+  "openQuestions": [
+    "Confirm exact field names — Postman public docs may lag actual API.",
+    "Confirm webhook event names + signing secret format.",
+    "Confirm pagination shape on GET /applicants.",
+    "Confirm rate-limit headers + retry policy."
+  ]
+}

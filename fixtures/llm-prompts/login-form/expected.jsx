@@ -1,0 +1,1 @@
+<HdsFrame fill="semantic.color.surface.raised" gap="20" layout="VERTICAL" padding="32" radius="8"><Text fill="semantic.color.content.primary" typography="semantic.typography.h3">Sign in</Text><Input placeholder="Email address" type="email"/><Input placeholder="Password" type="password"/><HdsButton variant="primary">Login</HdsButton></HdsFrame>

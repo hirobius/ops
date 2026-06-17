@@ -1,0 +1,30 @@
+{
+  "$schema": "../../hirobius.tenant-metadata.schema.json",
+  "slug": "concrete-creations",
+  "displayName": "Concrete Creations",
+  "tagline": "Handmade concrete and stone home goods, made in Washington State.",
+  "tier": 2,
+  "deployment": {
+    "vercelProject": "concrete-creations",
+    "primaryDomain": null,
+    "previewDomain": null
+  },
+  "brand": {
+    "primaryHex": "#8B6F47",
+    "accentName": "warm-stone",
+    "logoPath": null
+  },
+  "legal": {
+    "entity": "Concrete Creations LLC",
+    "jurisdiction": "WA, USA",
+    "stripeAccountKind": "platform-checkout"
+  },
+  "createdAt": "2026-05-01",
+  "status": "scaffold",
+  "_notes": [
+    "First multi-tenant pilot consumer of HDS. Separate Vercel deploy, imports @hirobius/design-system as a dependency.",
+    "Stripe Checkout (hosted) for launch — no custom payment UI.",
+    "Brand hexes in tokens.json are PLACEHOLDERS; Adrian will specify final values once the brand identity work concludes.",
+    "Domains TBD — fill once registered."
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "primitive.color.neutral.50",
+      "code": "TOKEN_VALUE_MISSING",
+      "message": "token must declare either `alias` or `value`",
+      "suggestion": null
+    }
+  ]
+}

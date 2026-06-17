@@ -1,0 +1,452 @@
+{
+  "assets": [
+    {
+      "path": "/assets/_archive/asset-31.png",
+      "kind": "image",
+      "alt": "Archived Asset 31 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds-illustration-refresh-2026-04-17/asset-29-prelatest.png",
+      "kind": "image",
+      "alt": "Archived MDS Illustration Refresh 2026 04 17 Asset 29 Prelatest image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds-illustration-refresh-2026-04-17/asset-29.png",
+      "kind": "image",
+      "alt": "Archived MDS Illustration Refresh 2026 04 17 Asset 29 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds-illustration-refresh-2026-04-17/asset-30.png",
+      "kind": "image",
+      "alt": "Archived MDS Illustration Refresh 2026 04 17 Asset 30 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds-illustration-refresh-2026-04-17/asset-31.png",
+      "kind": "image",
+      "alt": "Archived MDS Illustration Refresh 2026 04 17 Asset 31 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds-illustration-refresh-2026-04-17/asset-32-prelatest.png",
+      "kind": "image",
+      "alt": "Archived MDS Illustration Refresh 2026 04 17 Asset 32 Prelatest image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds-illustration-refresh-2026-04-17/asset-32.png",
+      "kind": "image",
+      "alt": "Archived MDS Illustration Refresh 2026 04 17 Asset 32 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-19/2026-04-09-1629-asset-19.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 19 2026 04 09 1629 Asset 19 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-19/2026-04-09-asset-19.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 19 2026 04 09 Asset 19 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-19/2026-04-11-asset-19.webp",
+      "kind": "image",
+      "alt": "Archived MDS Asset 19 2026 04 11 Asset 19 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-20/2026-04-09-1703-Hero Purple 1.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 20 2026 04 09 1703 Hero Purple 1 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-20/2026-04-09-1726-asset-20.webp",
+      "kind": "image",
+      "alt": "Archived MDS Asset 20 2026 04 09 1726 Asset 20 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-20/2026-04-09-1727-1920_1080.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 20 2026 04 09 1727 1920 1080 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-20/2026-04-09-1801-asset-20.webp",
+      "kind": "image",
+      "alt": "Archived MDS Asset 20 2026 04 09 1801 Asset 20 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-20/2026-04-09-1802-1920_1080.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 20 2026 04 09 1802 1920 1080 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-20/2026-04-09-asset-20.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 20 2026 04 09 Asset 20 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-21/2026-04-09-1703-Hero Purple 2.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 21 2026 04 09 1703 Hero Purple 2 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-21/2026-04-09-1726-asset-21.webp",
+      "kind": "image",
+      "alt": "Archived MDS Asset 21 2026 04 09 1726 Asset 21 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-21/2026-04-09-1727-1920_1080-1.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 21 2026 04 09 1727 1920 1080 1 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-21/2026-04-09-1801-asset-21.webp",
+      "kind": "image",
+      "alt": "Archived MDS Asset 21 2026 04 09 1801 Asset 21 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-21/2026-04-09-1802-1920_1080-1.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 21 2026 04 09 1802 1920 1080 1 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-22/2026-04-09-1703-Teal.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 22 2026 04 09 1703 Teal image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-22/2026-04-09-1726-asset-22.webp",
+      "kind": "image",
+      "alt": "Archived MDS Asset 22 2026 04 09 1726 Asset 22 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-22/2026-04-09-1727-1920_1080-3.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 22 2026 04 09 1727 1920 1080 3 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-22/2026-04-09-1801-asset-22.webp",
+      "kind": "image",
+      "alt": "Archived MDS Asset 22 2026 04 09 1801 Asset 22 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-22/2026-04-09-1802-1920_1080-2.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 22 2026 04 09 1802 1920 1080 2 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-23/2026-04-10-1506-TOP.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 23 2026 04 10 1506 Top image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-23/2026-04-10-1722-asset-23.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 23 2026 04 10 1722 Asset 23 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-23/2026-04-10-2035-asset-23.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 23 2026 04 10 2035 Asset 23 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-23/2026-04-10-2038-asset-23.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 23 2026 04 10 2038 Asset 23 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-23/2026-04-11-1331-asset-23.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 23 2026 04 11 1331 Asset 23 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-24/2026-04-11-1035-asset-24.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 24 2026 04 11 1035 Asset 24 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-25/2026-04-11-1035-asset-25.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 25 2026 04 11 1035 Asset 25 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-26/2026-04-11-1035-asset-26.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 26 2026 04 11 1035 Asset 26 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-27/2026-04-11-1035-asset-27.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 27 2026 04 11 1035 Asset 27 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-28/2026-04-12-110040-asset-28.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 28 2026 04 12 110040 Asset 28 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-29/2026-04-11-1541-asset-29.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 29 2026 04 11 1541 Asset 29 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-29/2026-04-11-1554-asset-29.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 29 2026 04 11 1554 Asset 29 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-30/2026-04-11-1602-asset-30.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 30 2026 04 11 1602 Asset 30 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-30/2026-04-11-1628-asset-30.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 30 2026 04 11 1628 Asset 30 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-30/2026-04-11-1709-asset-30.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 30 2026 04 11 1709 Asset 30 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-31/2026-04-11-1604-asset-31.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 31 2026 04 11 1604 Asset 31 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-31/2026-04-11-1606-asset-31.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 31 2026 04 11 1606 Asset 31 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-32/2026-04-11-1720-asset-32.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 32 2026 04 11 1720 Asset 32 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-33/2026-04-11-1541-asset-33.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 33 2026 04 11 1541 Asset 33 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/asset-33/2026-04-11-1551-asset-33.png",
+      "kind": "image",
+      "alt": "Archived MDS Asset 33 2026 04 11 1551 Asset 33 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_archive/mds/hero-01/2026-04-09-154412-hero-01.webp",
+      "kind": "image",
+      "alt": "Archived MDS Hero 01 2026 04 09 154412 Hero 01 image",
+      "status": "archived",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/_incoming/clone-2026-05-03-02-53-41-example-com-root.png",
+      "kind": "image",
+      "alt": "Incoming Clone 2026 05 03 02 53 41 Example Com Root image",
+      "status": "ready",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/adrian-headshot.webp",
+      "kind": "image",
+      "alt": "Adrian Headshot image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/adrian.webp",
+      "kind": "image",
+      "alt": "Adrian Milsap — profile photo",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/asset-19.png",
+      "kind": "image",
+      "alt": "MDS Asset 19 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/asset-24.png",
+      "kind": "image",
+      "alt": "MDS Asset 24 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/asset-25.png",
+      "kind": "image",
+      "alt": "MDS Asset 25 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/asset-26.png",
+      "kind": "image",
+      "alt": "MDS Asset 26 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/asset-27.png",
+      "kind": "image",
+      "alt": "MDS Asset 27 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/asset-28.png",
+      "kind": "image",
+      "alt": "MDS Asset 28 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/asset-29.png",
+      "kind": "image",
+      "alt": "MDS Asset 29 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/asset-30.png",
+      "kind": "image",
+      "alt": "MDS Asset 30 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/asset-31.png",
+      "kind": "image",
+      "alt": "MDS Asset 31 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/asset-32.png",
+      "kind": "image",
+      "alt": "MDS Asset 32 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/asset-33.png",
+      "kind": "image",
+      "alt": "MDS Asset 33 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/asset-34.png",
+      "kind": "image",
+      "alt": "MDS Asset 34 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/mds/hero-01.png",
+      "kind": "image",
+      "alt": "MDS Hero 01 image",
+      "status": "published",
+      "reviewed": true
+    },
+    {
+      "path": "/assets/xds-overview.webp",
+      "kind": "image",
+      "alt": "XDS Overview image",
+      "status": "published",
+      "reviewed": true
+    }
+  ]
+}

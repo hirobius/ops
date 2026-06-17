@@ -1,0 +1,33 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-nav-1",
+      "parentId": "root",
+      "type": "FRAME",
+      "props": {
+        "layoutMode": "HORIZONTAL",
+        "fill": "semantic.color.surface.page",
+        "itemSpacing": "semantic.space.layout.tight",
+        "primaryAxisSizingMode": "AUTO",
+        "counterAxisSizingMode": "AUTO"
+      }
+    },
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsbutton-2",
+      "parentId": "jsx-nav-1",
+      "type": "INSTANCE",
+      "componentName": "HdsButton",
+      "attributes": {
+        "variant": "tertiary",
+        "label": "Home"
+      },
+      "figmaProperties": {
+        "Variant": "tertiary",
+        "Label": "Home"
+      }
+    }
+  ]
+}

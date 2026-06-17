@@ -1,0 +1,156 @@
+{
+  "_meta": {
+    "lastUpdated": "2026-05-05",
+    "version": "v0-placeholder",
+    "status": "placeholder",
+    "lifecycleSource": "Insurance client lifecycle: Prospect → Onboarding → Active → Renewal → Off-boarding. Cross-cutting buckets handle ops/admin not tied to a single client.",
+    "tunedWith": "none yet — built from industry conventions + Lilac's stack.json. Tune with Conrad against a real 50-thread sample.",
+    "scoring": {
+      "fromExact":   10,
+      "fromPattern": 5,
+      "subject":     3,
+      "body":        1,
+      "thresholdForCategorize": 3,
+      "fallback": "internal"
+    }
+  },
+
+  "categories": [
+    {
+      "id": "lead",
+      "label": "New lead / quote request",
+      "lifecycle": "prospect",
+      "urgency": "high-5min-sla",
+      "downstreamWorkflow": "auto-responder",
+      "rules": {
+        "fromPatterns": ["forms@lilacinsure.com", "no-reply@gravityforms.com", "wordpress@"],
+        "subjectKeywords": ["quote request", "quote for", "new lead", "looking for insurance", "interested in coverage", "online quote", "free quote", "insurance inquiry"],
+        "bodyKeywords":   ["please contact me", "looking for a quote", "i'd like a quote", "interested in your services"]
+      }
+    },
+    {
+      "id": "quoting",
+      "label": "Quote in progress",
+      "lifecycle": "prospect",
+      "urgency": "medium",
+      "rules": {
+        "fromPatterns": ["@rtspecialty.com", "@rpsins.com", "@burnsandwilcox.com", "@libertymutual.com", "@progressive.com", "@safeco.com", "@travelers.com", "@nationwide.com"],
+        "subjectKeywords": ["submission", "indication", "binder request", "quote ready", "quote indication", "rated", "declined", "rate locked", "proposal"],
+        "bodyKeywords":   ["please review", "please bind", "rate is locked", "indication attached"]
+      }
+    },
+    {
+      "id": "onboarding",
+      "label": "Onboarding / new policy bind",
+      "lifecycle": "onboarding",
+      "urgency": "high",
+      "rules": {
+        "fromPatterns": ["@docusign.net", "dse_NA", "noreply@docusign"],
+        "subjectKeywords": ["welcome to lilac", "policy issued", "policy effective", "your new policy", "completed: ", "signing complete", "first payment", "initial payment", "binder issued"],
+        "bodyKeywords":   ["welcome aboard", "your policy is now in effect", "thank you for choosing"]
+      }
+    },
+    {
+      "id": "service",
+      "label": "Active client service request",
+      "lifecycle": "active",
+      "urgency": "medium",
+      "rules": {
+        "fromPatterns": [],
+        "subjectKeywords": ["id card", "insurance card", "proof of insurance", "address change", "add vehicle", "remove vehicle", "endorsement", "policy change", "billing question", "payment question", "auto-pay", "autopay", "premium question", "coverage question"],
+        "bodyKeywords":   ["please update", "i need a copy", "can you send", "could you change"]
+      }
+    },
+    {
+      "id": "claim",
+      "label": "Claim",
+      "lifecycle": "active",
+      "urgency": "URGENT",
+      "rules": {
+        "fromPatterns": ["claims@", "@claimcenter", "claim-center@", "fnol@", "@cccis.com"],
+        "subjectKeywords": ["claim", "fnol", "first notice of loss", "loss report", "accident", "incident", "damage report", "claim number", "auto claim", "property claim"],
+        "bodyKeywords":   ["filing a claim", "had an accident", "report a loss", "i was in an accident", "my car was hit"]
+      }
+    },
+    {
+      "id": "renewal",
+      "label": "Renewal cycle",
+      "lifecycle": "renewal",
+      "urgency": "medium-high",
+      "downstreamWorkflow": "renewal-reminder",
+      "rules": {
+        "fromPatterns": [],
+        "subjectKeywords": ["renewal", "renew", "renewing", "expiration", "expires", "renewal proposal", "renewal quote", "policy renews", "up for renewal", "annual renewal"],
+        "bodyKeywords":   ["policy renews on", "up for renewal", "renewal effective"]
+      }
+    },
+    {
+      "id": "retention",
+      "label": "Cancellation / non-pay / win-back",
+      "lifecycle": "off-boarding",
+      "urgency": "medium",
+      "downstreamWorkflow": "cancellation-winback",
+      "rules": {
+        "fromPatterns": [],
+        "subjectKeywords": ["cancel", "cancellation", "non-payment", "non pay", "nsf", "returned check", "lapse", "lapsed", "termination", "policy cancelled", "policy canceled", "intent to cancel"],
+        "bodyKeywords":   ["cancel my policy", "want to cancel", "no longer needed", "no longer need coverage"]
+      }
+    },
+    {
+      "id": "carrier-ops",
+      "label": "Carrier / wholesaler operations",
+      "lifecycle": "cross",
+      "urgency": "low-medium",
+      "rules": {
+        "fromPatterns": ["@rtspecialty.com", "@rpsins.com", "@burnsandwilcox.com", "@libertymutual.com", "@progressive.com", "@safeco.com", "@travelers.com", "@nationwide.com"],
+        "subjectKeywords": ["appointment", "commission statement", "1099", "carrier update", "underwriting bulletin", "rate change", "product update", "agent newsletter", "agent bulletin", "appetite", "binding authority"],
+        "bodyKeywords":   ["commission report", "rate change effective", "underwriting guideline"]
+      }
+    },
+    {
+      "id": "vendor-ops",
+      "label": "Vendor / software operations",
+      "lifecycle": "cross",
+      "urgency": "low",
+      "rules": {
+        "fromPatterns": ["@ezlynx.com", "@wonderwrite.com", "notifications@docusign.net", "billing@docusign", "@lightspeed.com", "@orbittel.com", "@gravityforms.com", "@wordpress.com"],
+        "subjectKeywords": ["system maintenance", "scheduled maintenance", "feature update", "release notes", "invoice", "subscription", "software update", "outage", "incident report"],
+        "bodyKeywords":   ["scheduled downtime", "your invoice", "subscription renewed"]
+      }
+    },
+    {
+      "id": "compliance",
+      "label": "Compliance / regulatory",
+      "lifecycle": "cross",
+      "urgency": "high-when-present",
+      "rules": {
+        "fromPatterns": ["@oic.wa.gov", "@dol.wa.gov", "@insurance.wa.gov", ".wa.gov", "@naic.org"],
+        "subjectKeywords": ["license renewal", "e&o", "errors and omissions", "audit", "compliance", "regulatory", "doi", "department of insurance", "ce credit", "continuing education", "license expir", "license expiring"],
+        "bodyKeywords":   ["your license", "compliance review", "regulatory update"]
+      }
+    },
+    {
+      "id": "internal",
+      "label": "Internal / personal / Hirobius",
+      "lifecycle": "cross",
+      "urgency": "variable",
+      "isFallback": true,
+      "rules": {
+        "fromPatterns": ["@hirobius.com", "adrian@", "@milsap"],
+        "subjectKeywords": [],
+        "bodyKeywords":   []
+      }
+    },
+    {
+      "id": "noise",
+      "label": "Marketing / newsletter / junk",
+      "lifecycle": "cross",
+      "urgency": "zero",
+      "rules": {
+        "fromPatterns": ["newsletter@", "marketing@", "promotions@", "deals@", "no-reply@"],
+        "subjectKeywords": ["unsubscribe", "newsletter", "deal", "offer", "promotion", "[promo]", "limited time", "save ", "% off", "exclusive offer", "weekly digest"],
+        "bodyKeywords":   ["unsubscribe from", "view in browser"]
+      }
+    }
+  ]
+}

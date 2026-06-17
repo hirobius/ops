@@ -1,0 +1,7 @@
+{
+  "ok": false,
+  "code": "AUTH_FAILED",
+  "reason": "HMAC_MISMATCH",
+  "httpStatus": 401,
+  "wireCode": "HMAC_MISMATCH"
+}

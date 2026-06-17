@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /ops
+Disallow: /ops/
+Disallow: /portfolio/draft
+Disallow: /wet-paint
+Disallow: /lab/incubator
+
+Sitemap: https://adrianmilsap.com/sitemap.xml

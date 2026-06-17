@@ -1,0 +1,39 @@
+{
+  "categories": [
+    {
+      "id": "access",
+      "name": "System Access",
+      "items": [
+        {
+          "id": "acc-1",
+          "item": "<<First system credentials needed>>",
+          "status": "todo",
+          "owner": "<<Client | Adrian>>"
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "name": "Security & Privacy",
+      "items": [
+        {
+          "id": "sec-1",
+          "item": "Confirm customer's stance on local vs. cloud AI for sensitive data",
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "id": "payments",
+      "name": "Payments & Retainer",
+      "items": [
+        {
+          "id": "pay-1",
+          "item": "<<Establish retainer / invoice>>",
+          "status": "todo",
+          "owner": "<<Client | Adrian>>"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+// TODO: replace with real-passing-example for audit-gate-purity
+// STUB — this file needs real passing content

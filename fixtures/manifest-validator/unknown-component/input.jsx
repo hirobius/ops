@@ -1,0 +1,1 @@
+<HdsFakeWidget color="red" />

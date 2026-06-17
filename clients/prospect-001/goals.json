@@ -1,0 +1,38 @@
+{
+  "micro": [
+    {
+      "id": "m1",
+      "goal": "Close on Starter package in the first consult",
+      "metric": "Verbal yes + deposit received",
+      "status": "not-started"
+    },
+    {
+      "id": "m2",
+      "goal": "Collect all assets before build starts",
+      "metric": "Photos + company name + domain decision confirmed",
+      "status": "not-started"
+    },
+    {
+      "id": "m3",
+      "goal": "Launch website within 3–4 weeks of deposit",
+      "metric": "Live site at Phil's domain with contact form working",
+      "status": "not-started"
+    }
+  ],
+  "macro": [
+    {
+      "id": "M1",
+      "goal": "Become Phil's go-to tech person as the business grows",
+      "description": "He's newly licensed and set-it-and-forget-it now — but if the business grows he'll need Google Ads, lead capture, or a more serious online presence. A clean, fast Starter delivery builds that trust.",
+      "horizon": "6–18 months",
+      "status": "planned"
+    },
+    {
+      "id": "M2",
+      "goal": "Open a contractor referral pipeline through Conrad",
+      "description": "Conrad explicitly said he deals with a lot of these guys at the beginning of their businesses. A fast, professional delivery for Phil demonstrates the model. Conrad sends more.",
+      "horizon": "3–12 months",
+      "status": "planned"
+    }
+  ]
+}

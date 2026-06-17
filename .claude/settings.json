@@ -1,0 +1,32 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm exec eslint --fix --quiet $CLAUDE_FILE_PATHS 2>/dev/null || true",
+            "shell": "bash",
+            "timeout": 30,
+            "statusMessage": "Auto-formatting touched files..."
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r f; case \"$f\" in *hirobius.tokens.json*) cd \"$(git rev-parse --show-toplevel)\" && pnpm tokens:verify 2>&1;; esac; } || true",
+            "shell": "bash",
+            "timeout": 45,
+            "statusMessage": "Verifying token pipeline..."
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r f; case \"$f\" in *theme.css*) cd \"$(git rev-parse --show-toplevel)\" && pnpm check:css 2>&1;; esac; } || true",
+            "shell": "bash",
+            "timeout": 15,
+            "statusMessage": "Checking CSS integrity..."
+          }
+        ]
+      }
+    ]
+  }
+}

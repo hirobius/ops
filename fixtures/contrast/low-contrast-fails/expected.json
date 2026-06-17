@@ -1,0 +1,13 @@
+{
+  "ok": false,
+  "pairs": [
+    {
+      "fg": { "hex": "#d4d4d4", "tokenPath": "primitive.color.neutral.300" },
+      "bg": { "hex": "#ffffff", "tokenPath": "semantic.color.surface.page" },
+      "ratio": 1.48,
+      "AA": false,
+      "AAA": false
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsText.weight",
+      "code": "SWISS_BOLD",
+      "message": "HdsText uses bold weight \"bold\" — bold is forbidden",
+      "suggestion": "Headings use font-light (display, h1) or font-normal (h2, h3). Body emphasis uses font-medium (500). Never bold."
+    }
+  ]
+}

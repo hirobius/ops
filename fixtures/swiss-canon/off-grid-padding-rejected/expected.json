@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsFrame.padding",
+      "code": "SWISS_OFF_GRID",
+      "message": "HdsFrame.padding=13 is not on the 4/8px scale",
+      "suggestion": "Use {0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96, 128}. Prefer multiples of 8 for layout, multiples of 4 for component-internal padding."
+    }
+  ]
+}

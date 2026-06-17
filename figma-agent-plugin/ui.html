@@ -1,0 +1,595 @@
+<style>
+  body { font-family: 'Inter', sans-serif; padding: 0; background: #fff; display: flex; flex-direction: column; gap: 0; }
+  /* ── Tab nav ── */
+  .tab-nav {
+    display: flex; gap: 0; border-bottom: 1px solid #e5e5e5; padding: 0 12px; background: #fafafa;
+  }
+  .tab-btn {
+    background: none; border: none; border-bottom: 2px solid transparent;
+    padding: 8px 10px; font-size: 11px; font-weight: 600; cursor: pointer;
+    color: #888; text-transform: uppercase; letter-spacing: 0.05em;
+    transition: color 0.15s, border-color 0.15s;
+    width: auto;
+  }
+  .tab-btn.active { color: #111; border-bottom-color: #0d99ff; }
+  .tab-btn:hover { color: #333; }
+  /* ── Tab panels ── */
+  .tab-panel { display: none; flex-direction: column; gap: 8px; padding: 12px; }
+  .tab-panel.active { display: flex; }
+  /* ── Action buttons ── */
+  button.action {
+    border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer;
+    color: white; width: 100%; transition: transform 0.1s; font-family: 'Inter', sans-serif;
+    font-size: 13px;
+  }
+  button.action:active { transform: scale(0.98); }
+  #render-btn       { background: #0d99ff; }
+  #push-btn         { background: #10a37f; }
+  #sync-tokens-btn  { background: #111111; }
+  #scaffold-btn     { background: #eab308; color: black; }
+  #masters-btn      { background: #7c3aed; }
+  #refresh-registry-btn { background: #374151; }
+  #stream-indicator { background: #1E2EFD; }
+  #inject-btn       { background: #0d99ff; }
+  #status-sync-btn  { background: #047857; }
+  #set-secret-btn   { background: #525252; }
+  /* ── Inline secret form ── */
+  .secret-form { display: none; flex-direction: column; gap: 6px; padding: 8px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; margin-top: 4px; }
+  .secret-form.open { display: flex; }
+  .secret-form input { width: 100%; padding: 8px; border: 1px solid #d4d4d4; border-radius: 4px; font-family: monospace; font-size: 12px; background: #fff; color: #111; box-sizing: border-box; }
+  .secret-form input:focus { outline: 2px solid #0d99ff; outline-offset: 1px; border-color: #0d99ff; }
+  .secret-form-row { display: flex; gap: 6px; }
+  .secret-form-row button { flex: 1; padding: 6px; border: none; border-radius: 4px; font-weight: 600; font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .secret-form-row .save { background: #047857; color: white; }
+  .secret-form-row .cancel { background: #e5e5e5; color: #525252; }
+  /* ── Separator ── */
+  .separator { height: 1px; background: #e5e5e5; margin: 2px 0; }
+  /* ── Stream label ── */
+  .stream-label {
+    font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: -4px;
+  }
+  /* ── Status/log box ── */
+  .status-box {
+    margin-top: 4px; padding: 6px 8px; border-radius: 4px; background: #f0f0f0;
+    font-size: 11px; font-family: monospace; color: #444; border: 1px solid #ddd;
+    max-height: 120px; overflow-y: auto;
+  }
+  #log-list {
+    list-style: none; margin: 0; padding: 0;
+  }
+  #log-list li {
+    padding: 2px 0; word-break: break-word;
+  }
+  #log-list li + li {
+    border-top: 1px solid #e0e0e0; margin-top: 2px; padding-top: 4px;
+  }
+  /* ── Template select ── */
+  .field-label {
+    font-size: 11px; font-weight: 600; color: #555; margin-bottom: 2px;
+  }
+  select.hds-select {
+    width: 100%; padding: 8px; border: 1px solid #d4d4d4; border-radius: 6px;
+    font-family: 'Inter', sans-serif; font-size: 12px; background: #fff; color: #111;
+    cursor: pointer;
+  }
+  select.hds-select:focus { outline: 2px solid #0d99ff; outline-offset: 1px; border-color: #0d99ff; }
+  /* ── Status summary boxes ── */
+  .status-summary {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 4px;
+  }
+  .stat-chip {
+    padding: 8px 4px; border-radius: 6px; text-align: center; font-size: 11px; font-weight: 600;
+  }
+  .stat-chip .count { font-size: 20px; display: block; font-weight: 700; }
+  .stat-chip.done    { background: #d1fae5; color: #047857; }
+  .stat-chip.active  { background: #fef3c7; color: #92400e; }
+  .stat-chip.pending { background: #f0f0f0; color: #525252; }
+  #status-detail { max-height: 140px; overflow-y: auto; margin-top: 4px; }
+  .phase-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 3px 0; font-size: 11px; color: #444; border-bottom: 1px solid #f0f0f0;
+  }
+  .phase-row .phase-name { font-family: monospace; font-size: 10px; color: #737373; }
+  .phase-bar-wrap { width: 60px; height: 5px; background: #e5e5e5; border-radius: 3px; overflow: hidden; }
+  .phase-bar-fill { height: 100%; background: #047857; border-radius: 3px; }
+</style>
+
+<!-- Tab nav -->
+<div class="tab-nav">
+  <button class="tab-btn active" data-tab="main">Main</button>
+  <button class="tab-btn" data-tab="templates">Templates</button>
+  <button class="tab-btn" data-tab="status">Status</button>
+</div>
+
+<!-- MAIN TAB -->
+<div class="tab-panel active" id="panel-main">
+  <button id="sync-tokens-btn" class="action">Step 0: Sync Manifest → Variables</button>
+  <button id="render-btn" class="action">Step 1: Draw Sticker Sheet (Canvas)</button>
+  <button id="push-btn" class="action">Step 2: Push Figma to Code (Manifest)</button>
+  <button id="scaffold-btn" class="action">Step 3: Scaffold Components</button>
+  <button id="masters-btn" class="action">Step 4: Build Master Components</button>
+  <button id="refresh-registry-btn" class="action">Step 4b: Refresh Registry</button>
+
+  <div class="separator"></div>
+  <div class="stream-label">Real-time LLM Stream</div>
+  <button id="stream-indicator" class="action" title="Listening for JSONL commands from the local stream bridge">Connecting to stream…</button>
+
+  <div class="status-box"><ul id="log-list"><li>Ready for action...</li></ul></div>
+
+  <div class="separator"></div>
+  <button id="set-secret-btn" class="action" title="Paste the value of HDS_BRIDGE_SECRET to authenticate this plugin against the bridge">Set Bridge Secret</button>
+
+  <div id="secret-form" class="secret-form">
+    <input id="secret-input" type="password" placeholder="Paste HDS_BRIDGE_SECRET" autocomplete="off" spellcheck="false" />
+    <div class="secret-form-row">
+      <button class="save" id="secret-save-btn">Save</button>
+      <button class="cancel" id="secret-cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEMPLATES TAB (12h-3) -->
+<div class="tab-panel" id="panel-templates">
+  <div class="field-label">Page Layout Template</div>
+  <select id="template-select" class="hds-select">
+    <option value="home-hero">Home</option>
+    <option value="product-detail">Product Detail</option>
+    <option value="about">About</option>
+    <option value="contact">Contact</option>
+    <option value="digital-biz-card">Digital Business Card</option>
+  </select>
+
+  <button id="inject-btn" class="action">Inject Template</button>
+
+  <div class="status-box">
+    <ul id="template-log"><li>Select a template and click Inject.</li></ul>
+  </div>
+</div>
+
+<!-- STATUS TAB (12h-4) -->
+<div class="tab-panel" id="panel-status">
+  <button id="status-sync-btn" class="action">Sync to Figma</button>
+
+  <div class="status-summary">
+    <div class="stat-chip done">
+      <span class="count" id="stat-done">—</span>Done
+    </div>
+    <div class="stat-chip active">
+      <span class="count" id="stat-active">—</span>Active
+    </div>
+    <div class="stat-chip pending">
+      <span class="count" id="stat-pending">—</span>Pending
+    </div>
+  </div>
+
+  <div id="status-detail">
+    <div style="font-size:11px;color:#737373;text-align:center;padding:12px 0;">
+      Click "Sync to Figma" to load build status.
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Tab switching ──────────────────────────────────────────────────────────
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var tabPanels = document.querySelectorAll('.tab-panel');
+  tabBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      tabBtns.forEach(function(b) { b.classList.remove('active'); });
+      tabPanels.forEach(function(p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ── Bridge URL resolution ──────────────────────────────────────────────────
+  function resolveBridgeUrl() {
+    try {
+      if (window.localStorage) {
+        var stored = window.localStorage.getItem('HDS_BRIDGE_URL');
+        if (stored) return stored;
+      }
+    } catch (_) {}
+    return 'http://localhost:3005';
+  }
+
+  const BRIDGE_URL = resolveBridgeUrl();
+  let awaitingRegistryRefresh = false;
+
+  // ── Shared log helper ──────────────────────────────────────────────────────
+  function appendLog(msg) {
+    var list = document.getElementById('log-list');
+    var li = document.createElement('li');
+    li.textContent = msg;
+    list.appendChild(li);
+    list.parentElement.scrollTop = list.parentElement.scrollHeight;
+  }
+
+  function appendTemplateLog(msg) {
+    var list = document.getElementById('template-log');
+    var li = document.createElement('li');
+    li.textContent = msg;
+    list.appendChild(li);
+    list.parentElement.scrollTop = list.parentElement.scrollHeight;
+  }
+
+  // ── MAIN tab: button handlers ──────────────────────────────────────────────
+  document.getElementById('sync-tokens-btn').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'SYNC_TOKENS' } }, '*');
+    appendLog("Syncing manifest tokens to Figma variables…");
+  };
+
+  document.getElementById('render-btn').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'render-trigger' } }, '*');
+    appendLog("Drawing visuals...");
+  };
+
+  document.getElementById('push-btn').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'pull-to-codebase' } }, '*');
+    appendLog("Extracting variables from Figma...");
+  };
+
+  document.getElementById('scaffold-btn').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'scaffold-components' } }, '*');
+    appendLog("Building component architecture...");
+  };
+
+  document.getElementById('masters-btn').onclick = async () => {
+    appendLog("Building real Figma master components...");
+    awaitingRegistryRefresh = true;
+    try {
+      const res = await fetch(BRIDGE_URL + '/build-masters', { method: 'POST' });
+      const data = await res.json().catch(function() { return {}; });
+      if (!res.ok) {
+        awaitingRegistryRefresh = false;
+        appendLog("❌ " + (data.error || "Master build failed."));
+        return;
+      }
+      appendLog(
+        "🧩 Master build dispatched: " +
+        (data.components || 0) + " components · " +
+        (data.states || 0) + " states"
+      );
+    } catch (err) {
+      awaitingRegistryRefresh = false;
+      appendLog("❌ Bridge offline (3005)");
+    }
+  };
+
+  document.getElementById('refresh-registry-btn').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'refresh-registry' } }, '*');
+    appendLog("Refreshing HDS component registry...");
+  };
+
+  // Inline secret form — window.prompt is silently cancelled inside the
+  // Figma plugin iframe on some platforms (Windows Desktop), so we use a
+  // real DOM input instead.
+  function openSecretForm() {
+    var form = document.getElementById('secret-form');
+    var input = document.getElementById('secret-input');
+    form.classList.add('open');
+    input.value = '';
+    setTimeout(function() { input.focus(); }, 0);
+  }
+  function closeSecretForm() {
+    var form = document.getElementById('secret-form');
+    var input = document.getElementById('secret-input');
+    form.classList.remove('open');
+    input.value = '';
+  }
+  function submitSecretForm() {
+    var input = document.getElementById('secret-input');
+    var value = (input.value || '').trim();
+    if (value.length === 0) {
+      appendLog('⚠ Bridge secret entry cancelled — empty value.');
+      closeSecretForm();
+      return;
+    }
+    parent.postMessage({ pluginMessage: { type: 'set-bridge-secret', secret: value } }, '*');
+    appendLog('🔐 Bridge secret submitted.');
+    closeSecretForm();
+  }
+
+  document.getElementById('set-secret-btn').onclick = openSecretForm;
+  document.getElementById('secret-save-btn').onclick = submitSecretForm;
+  document.getElementById('secret-cancel-btn').onclick = function() {
+    appendLog('⚠ Bridge secret entry cancelled — no change.');
+    closeSecretForm();
+  };
+  document.getElementById('secret-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); submitSecretForm(); }
+    if (e.key === 'Escape') { e.preventDefault(); closeSecretForm(); }
+  });
+
+  // ── TEMPLATES tab: inject handler (12h-3) ─────────────────────────────────
+  document.getElementById('inject-btn').onclick = async () => {
+    var templateId = document.getElementById('template-select').value;
+    appendTemplateLog("Injecting template: " + templateId + " …");
+    try {
+      const res = await fetch(BRIDGE_URL + '/inject-template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ templateId: templateId })
+      });
+      const data = await res.json().catch(function() { return {}; });
+      if (!res.ok) {
+        appendTemplateLog("❌ " + (data.error || "Inject failed."));
+        return;
+      }
+      appendTemplateLog(
+        "Dispatched: " + (data.templateName || templateId) +
+        " (" + (data.sections || 0) + " sections)"
+      );
+    } catch (err) {
+      appendTemplateLog("❌ Bridge offline (" + BRIDGE_URL + ")");
+    }
+  };
+
+  // ── STATUS tab: sync handler (12h-4) ──────────────────────────────────────
+  document.getElementById('status-sync-btn').onclick = async () => {
+    document.getElementById('stat-done').textContent = '…';
+    document.getElementById('stat-active').textContent = '…';
+    document.getElementById('stat-pending').textContent = '…';
+    try {
+      const res = await fetch(BRIDGE_URL + '/build-status');
+      const data = await res.json().catch(function() { return {}; });
+      if (!res.ok) {
+        document.getElementById('status-detail').innerHTML =
+          '<div style="font-size:11px;color:#92400e;padding:8px 0;">❌ ' + (data.error || 'Bridge error') + '</div>';
+        return;
+      }
+
+      // Update stat chips
+      document.getElementById('stat-done').textContent = data.done ?? '—';
+      document.getElementById('stat-active').textContent = data.inProgress ?? '—';
+      document.getElementById('stat-pending').textContent = data.pending ?? '—';
+
+      // Render phase breakdown
+      var phases = data.phases || [];
+      var html = '';
+      for (var pi = 0; pi < phases.length; pi++) {
+        var ph = phases[pi];
+        var pct = ph.total > 0 ? Math.round((ph.done / ph.total) * 100) : 0;
+        html +=
+          '<div class="phase-row">' +
+            '<span class="phase-name">' + escapeHtml(String(ph.phase)) + '</span>' +
+            '<div class="phase-bar-wrap"><div class="phase-bar-fill" style="width:' + pct + '%"></div></div>' +
+            '<span style="font-size:10px;color:#737373;">' + ph.done + '/' + ph.total + '</span>' +
+          '</div>';
+      }
+      document.getElementById('status-detail').innerHTML = html ||
+        '<div style="font-size:11px;color:#737373;padding:8px 0;">No phase data.</div>';
+
+      // Also dispatch to the plugin sandbox so it can render a Figma frame
+      parent.postMessage({ pluginMessage: {
+        type: 'build-status-sync',
+        totalUnits: data.totalUnits,
+        done: data.done,
+        inProgress: data.inProgress,
+        pending: data.pending,
+        phases: phases
+      }}, '*');
+
+    } catch (err) {
+      document.getElementById('status-detail').innerHTML =
+        '<div style="font-size:11px;color:#92400e;padding:8px 0;">❌ Bridge offline</div>';
+    }
+  };
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── SSE stream (main tab) ─────────────────────────────────────────────────
+  const streamIndicator = document.getElementById('stream-indicator');
+  var activeStream = null;
+
+  function connectStream() {
+    if (activeStream) { try { activeStream.close(); } catch(_) {} }
+    if (typeof EventSource !== 'function') {
+      streamIndicator.textContent = 'SSE unsupported';
+      appendLog('❌ EventSource is unavailable in this plugin UI runtime.');
+      return;
+    }
+    activeStream = new EventSource(BRIDGE_URL + '/stream');
+
+    activeStream.addEventListener('ready', function() {
+      streamIndicator.textContent = 'Listening on :3005';
+      appendLog('SSE stream connected.');
+    });
+
+    activeStream.addEventListener('node', function(event) {
+      try {
+        var payload = JSON.parse(event.data);
+        parent.postMessage({ pluginMessage: { type: 'llm-stream-node', payload: payload } }, '*');
+        var cmd = payload.command || {};
+        appendLog('Render #' + payload.sequence + ': ' + (cmd.type || 'NODE') + ' ' + (cmd.id || ''));
+      } catch (err) {
+        appendLog('Stream parse failed.');
+      }
+    });
+
+    activeStream.addEventListener('plugin-message', function(event) {
+      try {
+        var payload = JSON.parse(event.data);
+        var message = payload.message;
+        if (!message || typeof message !== 'object') {
+          appendLog('Plugin message ignored.');
+          return;
+        }
+
+        parent.postMessage({ pluginMessage: message }, '*');
+        appendLog(
+          'Plugin #' + payload.sequence + ': ' +
+          (message.type || 'message') +
+          (message.component ? ' ' + message.component : '')
+        );
+      } catch (err) {
+        appendLog('Plugin message parse failed.');
+      }
+    });
+
+    activeStream.onerror = function() {
+      streamIndicator.textContent = 'Bridge offline — retrying…';
+      activeStream.close();
+      setTimeout(connectStream, 5000);
+    };
+  }
+
+  window.addEventListener('error', function(event) {
+    appendLog('❌ UI error: ' + (event.message || 'unknown error'));
+  });
+
+  window.addEventListener('unhandledrejection', function(event) {
+    var reason = event.reason && event.reason.message ? event.reason.message : String(event.reason || 'unknown rejection');
+    appendLog('❌ Promise error: ' + reason);
+  });
+
+  appendLog('Bridge: ' + BRIDGE_URL);
+  connectStream();
+
+  window.onmessage = async (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+
+    if (msg.type === 'push-data') {
+      appendLog("Sending " + msg.data.length + " tokens to server...");
+      try {
+        const res = await fetch(BRIDGE_URL + '/update-manifest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tokens: msg.data })
+        });
+        if (res.ok) appendLog("✅ Manifest Updated! Check VS Code.");
+      } catch (err) { appendLog("❌ Push failed."); }
+    }
+
+    // p5-2: correlation reply. The sandbox calls replyToBridge(...) to
+    // echo the original envelope.id; the UI shell forwards it via HTTP
+    // so the bridge can resolve the matching pending entry.
+    //
+    // p5-3 upgrade: when the sandbox supplies a signed envelope, send
+    // the envelope object as the body and add the `Authorization: HMAC
+    // <hex>` header. When no envelope is present (auth off, or secret
+    // not yet configured) fall back to the legacy unsigned shape so the
+    // flag-off path stays byte-equivalent to pre-p5-3.
+    //
+    // p5-4: this same path also forwards `render-error` messages from
+    // the sandbox. The sandbox's sendRenderError helper sets the inner
+    // body's `type` to 'render-error' (overriding the default 'reply');
+    // the relay below is type-agnostic so it ships them through without
+    // dropping. The bridge inspects the inner type and routes accordingly.
+    if (msg.type === 'bridge-reply' && typeof msg.inReplyTo === 'string') {
+      try {
+        var headers = { 'Content-Type': 'application/json' };
+        var body;
+        if (msg.envelope && typeof msg.envelope === 'object' && typeof msg.envelope.hmac === 'string') {
+          body = msg.envelope;
+          headers['Authorization'] = 'HMAC ' + msg.envelope.hmac;
+        } else {
+          body = Object.assign({ type: 'reply', inReplyTo: msg.inReplyTo }, msg.reply || {});
+        }
+        await fetch(BRIDGE_URL + '/plugin-message', {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(body)
+        });
+      } catch (err) {
+        appendLog('❌ Reply forwarding failed.');
+      }
+    }
+
+    // p5-3: first-time setup. The sandbox didn't find HDS_BRIDGE_SECRET
+    // in clientStorage. Reveal the inline secret form (window.prompt is
+    // silently cancelled in the Figma plugin iframe on some platforms).
+    if (msg.type === 'bridge-secret-needed') {
+      appendLog('🔐 Bridge secret required — use the "Set Bridge Secret" form below.');
+      openSecretForm();
+    }
+
+    if (msg.type === 'bridge-secret-stored') {
+      appendLog('🔐 Bridge secret stored.');
+    }
+
+    if (msg.type === 'bridge-secret-diagnostic') {
+      if (msg.found) {
+        appendLog('🔍 Boot: secret found in clientStorage (' + msg.length + ' chars).');
+      } else if (msg.error) {
+        appendLog('🔍 Boot: clientStorage read errored — ' + msg.error);
+      } else {
+        appendLog('🔍 Boot: no secret in clientStorage (got ' + msg.raw + ').');
+      }
+    }
+
+    if (msg.type === 'render-complete') {
+      appendLog("✨ Operation complete!");
+    }
+
+    if (msg.type === 'draw-complete') {
+      appendLog(msg.component ? "✨ " + msg.component + " drawn on canvas!" : "✨ Done!");
+      if (awaitingRegistryRefresh) {
+        awaitingRegistryRefresh = false;
+        parent.postMessage({ pluginMessage: { type: 'refresh-registry' } }, '*');
+        appendLog("Refreshing HDS component registry...");
+      }
+    }
+
+    if (msg.type === 'registry-refreshed') {
+      appendLog("🔄 Registry refreshed: " + (msg.count || 0) + " component(s) indexed");
+    }
+
+    if (msg.type === 'sync-tokens-complete') {
+      var s = msg.report && msg.report.summary ? msg.report.summary : {};
+      appendLog(
+        "✅ Tokens: " + (s.created || 0) + " created · " +
+        (s.updated || 0) + " updated · " +
+        (s.unchanged || 0) + " same · " +
+        (s.errors || 0) + " errors · " +
+        (s.orphans || 0) + " orphans"
+      );
+      if (s.errors && msg.report.errors) {
+        msg.report.errors.slice(0, 3).forEach(function(e) {
+          appendLog("  ⚠ " + e.path + ": " + e.error);
+        });
+        if (msg.report.errors.length > 3) {
+          appendLog("  …+" + (msg.report.errors.length - 3) + " more (see console)");
+          console.warn('[SYNC_TOKENS errors]', msg.report.errors);
+        }
+      }
+    }
+
+    if (msg.type === 'sync-tokens-error') {
+      appendLog("❌ Sync failed: " + msg.error);
+    }
+
+    if (msg.type === 'selection-changed') {
+      fetch(BRIDGE_URL + '/selection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tree: msg.tree, timestamp: Date.now() })
+      }).catch(function() {});
+      if (msg.tree && msg.tree.length > 0) {
+        appendLog('Selection: ' + msg.tree.length + ' node(s) — "' + msg.tree.map(function(n) { return n.name; }).join(', ') + '"');
+      } else {
+        appendLog('Selection cleared.');
+      }
+    }
+
+    // 12h-3: template inject confirmation from plugin sandbox
+    if (msg.type === 'template-inject-complete') {
+      appendTemplateLog("✅ " + (msg.templateName || 'Template') + " created: " + (msg.frameId || ''));
+    }
+
+    if (msg.type === 'template-inject-error') {
+      appendTemplateLog("❌ Inject failed: " + (msg.error || 'Unknown error'));
+    }
+
+    // 12h-4: build status frame rendered
+    if (msg.type === 'build-status-frame-rendered') {
+      document.getElementById('status-detail').insertAdjacentHTML('afterbegin',
+        '<div style="font-size:11px;color:#047857;padding:4px 0;">✅ Status frame rendered on \'' + escapeHtml(msg.page || '🔄 Build Status') + '\' page.</div>'
+      );
+    }
+  };
+</script>

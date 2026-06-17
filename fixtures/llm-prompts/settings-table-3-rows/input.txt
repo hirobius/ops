@@ -1,0 +1,1 @@
+a settings table with 3 rows showing a label and a toggle in each row

@@ -1,0 +1,11 @@
+{
+  "MIT": [
+    { "name": "react", "version": "18.2.0", "license": "MIT" }
+  ],
+  "Apache-2.0": [
+    { "name": "typescript", "version": "5.0.0", "license": "Apache-2.0" }
+  ],
+  "ISC": [
+    { "name": "semver", "version": "7.6.0", "license": "ISC" }
+  ]
+}

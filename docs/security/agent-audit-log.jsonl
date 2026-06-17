@@ -1,0 +1,17 @@
+{"timestamp":"2026-05-03T05:07:51.086Z","unit_id":"12i-quality-eslint-burndown","agent_id":"kimi-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"dry-run"}
+{"timestamp":"2026-05-03T05:07:56.762Z","unit_id":"12i-quality-eslint-burndown","agent_id":"kimi-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"dry-run"}
+{"timestamp":"2026-05-06T05:59:10.524Z","unit_id":"13z-1-root-oneoff-cleanup","agent_id":"kimi-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"dry-run"}
+{"timestamp":"2026-05-06T05:59:10.562Z","unit_id":"13z-1-root-oneoff-cleanup","agent_id":"hermes-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"dry-run"}
+{"timestamp":"2026-05-06T06:01:14.700Z","unit_id":"13z-1-root-oneoff-cleanup","agent_id":"hermes-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"failed"}
+{"timestamp":"2026-05-06T06:07:07.116Z","unit_id":"13z-4-archive-stale-ai-status-docs","agent_id":"kimi-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"aborted"}
+{"timestamp":"2026-05-06T06:09:08.428Z","unit_id":"13z-3-archive-dir-delete","agent_id":"hermes-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"failed"}
+{"timestamp":"2026-05-06T06:09:54.104Z","unit_id":"13z-4-archive-stale-ai-status-docs","agent_id":"kimi-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"aborted"}
+{"timestamp":"2026-05-06T06:10:40.251Z","unit_id":"13z-3-archive-dir-delete","agent_id":"hermes-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"failed"}
+{"timestamp":"2026-05-06T06:11:16.970Z","unit_id":"13z-5-knowledge-corpus-gitignore","agent_id":"hermes-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"failed"}
+{"timestamp":"2026-05-06T06:11:34.727Z","unit_id":"13z-5-knowledge-corpus-gitignore","agent_id":"hermes-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"failed"}
+{"timestamp":"2026-05-06T06:12:10.205Z","unit_id":"13z-4-archive-stale-ai-status-docs","agent_id":"kimi-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"aborted"}
+{"timestamp":"2026-05-06T06:13:48.450Z","unit_id":"13z-6-gate-consolidation","agent_id":"hermes-agent","files_written":[],"commands_run":[],"commit_hash":"a66c72e2","outcome":"done"}
+{"timestamp":"2026-05-06T06:14:41.755Z","unit_id":"13z-5-knowledge-corpus-gitignore","agent_id":"hermes-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"failed"}
+{"timestamp":"2026-05-06T06:15:09.592Z","unit_id":"13z-5-knowledge-corpus-gitignore","agent_id":"hermes-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"failed"}
+{"timestamp":"2026-05-06T06:15:47.518Z","unit_id":"12q-tailwind-arbitrary-burndown","agent_id":"hermes-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"failed"}
+{"timestamp":"2026-05-06T06:16:10.034Z","unit_id":"12q-tailwind-arbitrary-burndown","agent_id":"hermes-agent","files_written":[],"commands_run":[],"commit_hash":null,"outcome":"failed"}

@@ -1,0 +1,13 @@
+{
+  "id": "email-triage",
+  "phase": "phase-1",
+  "bucket": "bucket-2",
+  "systemsTouched": ["outlook", "n8n"],
+  "ownerSystem": "outlook",
+  "categoriesRef": "./categories.json",
+  "policy": {
+    "writeBodyToDisk": false,
+    "rolloutOrder": ["noise", "vendor-ops", "carrier-ops", "compliance", "lead", "claim", "service", "renewal", "retention", "onboarding", "quoting", "internal"],
+    "rolloutOrderRationale": "Promote one bucket at a time. Start with low-risk + high-volume (noise, vendor-ops). Save 'internal' for last because it's the manual-review fallback."
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "snapshotAt": "2026-05-01T12:00:00.000Z",
+  "documentName": "HDS Components",
+  "pages": [
+    {
+      "id": "page:001",
+      "name": "Components",
+      "type": "PAGE",
+      "frames": [
+        {
+          "id": "frame:001",
+          "name": "Button/Primary",
+          "type": "FRAME",
+          "width": 120,
+          "height": 40,
+          "x": 0,
+          "y": 0,
+          "componentName": "HdsButton"
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "HDS Primitive": {
+      "id": "vc:001",
+      "name": "HDS Primitive",
+      "modes": [{ "modeId": "m:001", "name": "Default" }],
+      "variables": [
+        {
+          "id": "v:001",
+          "name": "blue/500",
+          "tokenPath": "primitive.color.blue.500",
+          "resolvedType": "COLOR",
+          "valuesByMode": { "m:001": "#3b82f6" }
+        }
+      ]
+    }
+  },
+  "styles": {
+    "paint": [],
+    "text": [],
+    "effect": [],
+    "grid": []
+  },
+  "components": [
+    {
+      "id": "comp:001",
+      "name": "HdsButton",
+      "type": "COMPONENT_SET",
+      "componentName": "HdsButton",
+      "pageId": "page:001",
+      "variants": ["Variant=primary", "Variant=secondary"]
+    }
+  ]
+}

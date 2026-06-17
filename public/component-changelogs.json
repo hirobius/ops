@@ -1,0 +1,2878 @@
+{
+  "generatedAt": "2026-05-03T07:12:46.674Z",
+  "changelogs": {
+    "ActivityFeed": [
+      {
+        "date": "2026-05-01",
+        "hash": "5c9a950",
+        "subject": "chore(quality): 12i-quality-tsconfig-typecheck-realign cover full src tree"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "576c4ee",
+        "subject": "refactor(icons): migrate every Phosphor import site to Lucide"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "c6c02c0",
+        "subject": "chore(system): complete phase 11 infrastructure [skip ci]"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      }
+    ],
+    "Alert": [
+      {
+        "date": "2026-05-01",
+        "hash": "50813ca",
+        "subject": "refactor(icons): port Icon wrapper to lucide-react"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-12",
+        "hash": "70b6cb9",
+        "subject": "Fix accessibility regressions in HDS docs"
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-06",
+        "hash": "f7b9695",
+        "subject": "chore: checkpoint release prep"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "c80e7fc",
+        "subject": "Refine token system and docs utilities"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "6c04f70",
+        "subject": "Refine HDS accent content and icon treatments"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "97bf6cc",
+        "subject": "refactor(hds): widen typecheck coverage and doc primitives"
+      },
+      {
+        "date": "2026-03-26",
+        "hash": "244649d",
+        "subject": "Refine token layouts and clean HDS workspace"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "72e530e",
+        "subject": "feat(hds): reorganize docs taxonomy and feedback states"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-18",
+        "hash": "fa1b590",
+        "subject": "feat: work routes, component updates, playwright dep, token-usage-map refresh"
+      },
+      {
+        "date": "2026-03-17",
+        "hash": "4b288c1",
+        "subject": "feat: add token scan prevention system (5 static checks + CI workflow)"
+      },
+      {
+        "date": "2026-03-16",
+        "hash": "0181904",
+        "subject": "chore: stage all pre-existing work + deploy prep"
+      },
+      {
+        "date": "2026-03-16",
+        "hash": "ee831ad",
+        "subject": "feat: motion system, semantic.radius.action token, animated dropdowns, mono font guardrail"
+      },
+      {
+        "date": "2026-03-15",
+        "hash": "d029eba",
+        "subject": "feat(hds): accent token family, density system, automated handoff pipeline"
+      }
+    ],
+    "ApprovalCard": [
+      {
+        "date": "2026-05-01",
+        "hash": "8dde9f3",
+        "subject": "feat(approval-app): 11a-3 approval app list view"
+      }
+    ],
+    "AssetImg": [
+      {
+        "date": "2026-05-02",
+        "hash": "683c33a",
+        "subject": "chore(orch): claim 10o-10-playwright-vrt-expansion for hermes-agent"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "c4c1f4d",
+        "subject": "fix(lint): wave-1 burndown — clear @typescript-eslint/no-unused-vars from all src/app files"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "7f462a1",
+        "subject": "Remove remaining theme helper surface aliases"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "97bf6cc",
+        "subject": "refactor(hds): widen typecheck coverage and doc primitives"
+      },
+      {
+        "date": "2026-03-26",
+        "hash": "244649d",
+        "subject": "Refine token layouts and clean HDS workspace"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "79d7ff1",
+        "subject": "feat(hds): refine token model and explorer"
+      },
+      {
+        "date": "2026-03-18",
+        "hash": "fa1b590",
+        "subject": "feat: work routes, component updates, playwright dep, token-usage-map refresh"
+      },
+      {
+        "date": "2026-03-17",
+        "hash": "4b288c1",
+        "subject": "feat: add token scan prevention system (5 static checks + CI workflow)"
+      },
+      {
+        "date": "2026-03-14",
+        "hash": "dbb3899",
+        "subject": "feat(ds): typography overhaul, font switcher, guardrail scripts, new components"
+      },
+      {
+        "date": "2026-03-12",
+        "hash": "503d665",
+        "subject": "feat: expand HDS with Icon system, Token context, and new doc pages"
+      },
+      {
+        "date": "2026-03-08",
+        "hash": "d6a54d2",
+        "subject": "feat(hds): v2 token architecture — 10 critical fixes + ecommerce prep"
+      },
+      {
+        "date": "2026-03-08",
+        "hash": "b50de0e",
+        "subject": "Add files from Figma Make"
+      }
+    ],
+    "Badge": [
+      {
+        "date": "2026-05-02",
+        "hash": "fbce02e",
+        "subject": "chore(orch): approve all 33 proposed+pending — Adrian ratified 2026-05-02"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-26",
+        "hash": "7d66e6d",
+        "subject": "style(hds): pivot to minimalist elevation model; remove outlines and mono-badges [skip ci]"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-21",
+        "hash": "1f9713d",
+        "subject": "feat:"
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "e9f1329",
+        "subject": "Fix: Added padding buffer to Vitals rail to prevent content overlap with scrollbar."
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "5e528b9",
+        "subject": "Complete docs automation and sizing governance"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "5f07b60",
+        "subject": "Refine HDS docs rails and token checks"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "c80e7fc",
+        "subject": "Refine token system and docs utilities"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "c8002f1",
+        "subject": "Refine sketch shell and shared display primitives"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "72e530e",
+        "subject": "feat(hds): reorganize docs taxonomy and feedback states"
+      },
+      {
+        "date": "2026-03-17",
+        "hash": "4b288c1",
+        "subject": "feat: add token scan prevention system (5 static checks + CI workflow)"
+      },
+      {
+        "date": "2026-03-15",
+        "hash": "d029eba",
+        "subject": "feat(hds): accent token family, density system, automated handoff pipeline"
+      },
+      {
+        "date": "2026-03-12",
+        "hash": "503d665",
+        "subject": "feat: expand HDS with Icon system, Token context, and new doc pages"
+      }
+    ],
+    "HdsButton": [
+      {
+        "date": "2026-04-30",
+        "hash": "7c7d001",
+        "subject": "feat(component): 8s-4 replace HdsButton with shadcn baseline + role tokens"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "0eea6fb",
+        "subject": "refactor(core): clean orchestration, establish ledger, enforce polymorphism, and eradicate a11y bypasses [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-06",
+        "hash": "f7b9695",
+        "subject": "chore: checkpoint release prep"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "a571e32",
+        "subject": "Prove automated storefront governance"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "5e528b9",
+        "subject": "Complete docs automation and sizing governance"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "5f07b60",
+        "subject": "Refine HDS docs rails and token checks"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "0c70f65",
+        "subject": "feat(hds): add asChild slot support to HdsButton"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "831b2b7",
+        "subject": "feat(hds): remove ghost variant — merge low-emphasis actions into tertiary"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "d80e48b",
+        "subject": "Refine HDS navigation cards and pager motion"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "c8002f1",
+        "subject": "Refine sketch shell and shared display primitives"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "0e4e6fc",
+        "subject": "Add manifest component specs and unify nav"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "97bf6cc",
+        "subject": "refactor(hds): widen typecheck coverage and doc primitives"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "4a9a279",
+        "subject": "refactor(hds): sync blue 450 and docs"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "10d8047",
+        "subject": "refactor(hds): finalize nav, docs, and hero motion"
+      },
+      {
+        "date": "2026-03-27",
+        "hash": "86f20d2",
+        "subject": "refactor(design-system): complete token and docs migration"
+      },
+      {
+        "date": "2026-03-26",
+        "hash": "244649d",
+        "subject": "Refine token layouts and clean HDS workspace"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "79d7ff1",
+        "subject": "feat(hds): refine token model and explorer"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "72e530e",
+        "subject": "feat(hds): reorganize docs taxonomy and feedback states"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-18",
+        "hash": "fa1b590",
+        "subject": "feat: work routes, component updates, playwright dep, token-usage-map refresh"
+      },
+      {
+        "date": "2026-03-17",
+        "hash": "4b288c1",
+        "subject": "feat: add token scan prevention system (5 static checks + CI workflow)"
+      },
+      {
+        "date": "2026-03-17",
+        "hash": "b536c29",
+        "subject": "chore(tokens): update token pipeline, components, and HDS doc pages"
+      },
+      {
+        "date": "2026-03-16",
+        "hash": "ee831ad",
+        "subject": "feat: motion system, semantic.radius.action token, animated dropdowns, mono font guardrail"
+      },
+      {
+        "date": "2026-03-15",
+        "hash": "d029eba",
+        "subject": "feat(hds): accent token family, density system, automated handoff pipeline"
+      },
+      {
+        "date": "2026-03-14",
+        "hash": "dbb3899",
+        "subject": "feat(ds): typography overhaul, font switcher, guardrail scripts, new components"
+      },
+      {
+        "date": "2026-03-12",
+        "hash": "503d665",
+        "subject": "feat: expand HDS with Icon system, Token context, and new doc pages"
+      },
+      {
+        "date": "2026-03-08",
+        "hash": "d6a54d2",
+        "subject": "feat(hds): v2 token architecture — 10 critical fixes + ecommerce prep"
+      },
+      {
+        "date": "2026-03-08",
+        "hash": "b50de0e",
+        "subject": "Add files from Figma Make"
+      }
+    ],
+    "HdsButtonGroup": [
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      }
+    ],
+    "Card": [
+      {
+        "date": "2026-05-01",
+        "hash": "fb40a28",
+        "subject": "chore(lint): 12i-quality-eslint-burndown wave-1 lower baseline 521 -> 206"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "85b031d",
+        "subject": "feat(component): 8s-7 add Dialog (shadcn Radix Dialog + role.popover)"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "f28ca12",
+        "subject": "feat(component): 8s-6 replace Card with shadcn compound parts + role tokens"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "098418b",
+        "subject": "feat(governance): 8x-5 split tier=utility|experiment into peer sections"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "c8002f1",
+        "subject": "Refine sketch shell and shared display primitives"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "0e4e6fc",
+        "subject": "Add manifest component specs and unify nav"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-20",
+        "hash": "3d6f4be",
+        "subject": "Polish shell, docs, and recovery surfaces"
+      },
+      {
+        "date": "2026-03-17",
+        "hash": "4b288c1",
+        "subject": "feat: add token scan prevention system (5 static checks + CI workflow)"
+      },
+      {
+        "date": "2026-03-14",
+        "hash": "dbb3899",
+        "subject": "feat(ds): typography overhaul, font switcher, guardrail scripts, new components"
+      }
+    ],
+    "CinematicLink": [
+      {
+        "date": "2026-05-01",
+        "hash": "0cc660e",
+        "subject": "feat(system): wave-2 sprint close — font switch, agent infra hardening, agency platform scaffold"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-06",
+        "hash": "f7b9695",
+        "subject": "chore: checkpoint release prep"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-26",
+        "hash": "244649d",
+        "subject": "Refine token layouts and clean HDS workspace"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-16",
+        "hash": "ee831ad",
+        "subject": "feat: motion system, semantic.radius.action token, animated dropdowns, mono font guardrail"
+      },
+      {
+        "date": "2026-03-14",
+        "hash": "dbb3899",
+        "subject": "feat(ds): typography overhaul, font switcher, guardrail scripts, new components"
+      },
+      {
+        "date": "2026-03-13",
+        "hash": "78a0a95",
+        "subject": "refactor(phase-2b): shared components use token system"
+      },
+      {
+        "date": "2026-03-12",
+        "hash": "503d665",
+        "subject": "feat: expand HDS with Icon system, Token context, and new doc pages"
+      },
+      {
+        "date": "2026-03-08",
+        "hash": "b50de0e",
+        "subject": "Add files from Figma Make"
+      }
+    ],
+    "CodeBlock": [
+      {
+        "date": "2026-05-01",
+        "hash": "d99c9fd",
+        "subject": "refactor(types): drop 6 unused exported types/symbols (knip drain)"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "0cc660e",
+        "subject": "feat(system): wave-2 sprint close — font switch, agent infra hardening, agency platform scaffold"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "e285b64",
+        "subject": "feat(docs): 9d-5 CodeBlock collapsed-by-default with copy + filename + language"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "413e7b5",
+        "subject": "fix(ui): resolve sticky nav physics, spacing blowouts, and strip nested surfaces [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-17",
+        "hash": "0e29845",
+        "subject": "fix(hds): realign token explorer and doc details"
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "c80e7fc",
+        "subject": "Refine token system and docs utilities"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-27",
+        "hash": "86f20d2",
+        "subject": "refactor(design-system): complete token and docs migration"
+      },
+      {
+        "date": "2026-03-27",
+        "hash": "b7f63c1",
+        "subject": "Fix accessibility contrast issues"
+      },
+      {
+        "date": "2026-03-26",
+        "hash": "244649d",
+        "subject": "Refine token layouts and clean HDS workspace"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "72e530e",
+        "subject": "feat(hds): reorganize docs taxonomy and feedback states"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-17",
+        "hash": "4b288c1",
+        "subject": "feat: add token scan prevention system (5 static checks + CI workflow)"
+      },
+      {
+        "date": "2026-03-16",
+        "hash": "0181904",
+        "subject": "chore: stage all pre-existing work + deploy prep"
+      },
+      {
+        "date": "2026-03-15",
+        "hash": "a18cfe2",
+        "subject": "feat(lab): add lab experiment infrastructure + particle tunnel"
+      },
+      {
+        "date": "2026-03-14",
+        "hash": "dbb3899",
+        "subject": "feat(ds): typography overhaul, font switcher, guardrail scripts, new components"
+      }
+    ],
+    "ComponentInstanceMatrix": [
+      {
+        "date": "2026-05-01",
+        "hash": "5512744",
+        "subject": "feat(ts): 12i-quality-ts-strict-wave2 enable noUnusedLocals + noUnusedParameters + clean 55 violations"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "00bfb53",
+        "subject": "fix: resolve shell visual bugs and refactor HDS navigation"
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-06",
+        "hash": "f7b9695",
+        "subject": "chore: checkpoint release prep"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "a571e32",
+        "subject": "Prove automated storefront governance"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      }
+    ],
+    "Container": [
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      }
+    ],
+    "Dialog": [
+      {
+        "date": "2026-05-01",
+        "hash": "2adcf0e",
+        "subject": "feat(10p): tab-focus-ring + asset-validation + decision-log ADRs"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "85b031d",
+        "subject": "feat(component): 8s-7 add Dialog (shadcn Radix Dialog + role.popover)"
+      }
+    ],
+    "Disclosure": [
+      {
+        "date": "2026-05-01",
+        "hash": "5512744",
+        "subject": "feat(ts): 12i-quality-ts-strict-wave2 enable noUnusedLocals + noUnusedParameters + clean 55 violations"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "2adcf0e",
+        "subject": "feat(10p): tab-focus-ring + asset-validation + decision-log ADRs"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "cf034db",
+        "subject": "feat(component): 8t-3b pattern batch (heavy) — 4 patterns"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-28",
+        "hash": "7a700ac",
+        "subject": "chore(scripts): rename audit-tokens.js to audit-component-source.js"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-21",
+        "hash": "1f9713d",
+        "subject": "feat:"
+      },
+      {
+        "date": "2026-04-19",
+        "hash": "78eb9b6",
+        "subject": "docs: simplify docs copy and tables"
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-06",
+        "hash": "f7b9695",
+        "subject": "chore: checkpoint release prep"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "9c66a17",
+        "subject": "Remove legacy docs and sidebar typography tokens"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "bc25351",
+        "subject": "Refine HDS rails and token explorer spacing"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      }
+    ],
+    "Divider": [
+      {
+        "date": "2026-05-01",
+        "hash": "fb40a28",
+        "subject": "chore(lint): 12i-quality-eslint-burndown wave-1 lower baseline 521 -> 206"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "97bf6cc",
+        "subject": "refactor(hds): widen typecheck coverage and doc primitives"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-14",
+        "hash": "dbb3899",
+        "subject": "feat(ds): typography overhaul, font switcher, guardrail scripts, new components"
+      }
+    ],
+    "DocLinkCard": [
+      {
+        "date": "2026-05-01",
+        "hash": "5512744",
+        "subject": "feat(ts): 12i-quality-ts-strict-wave2 enable noUnusedLocals + noUnusedParameters + clean 55 violations"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-21",
+        "hash": "1f9713d",
+        "subject": "feat:"
+      },
+      {
+        "date": "2026-04-17",
+        "hash": "ac3b32d",
+        "subject": "feat(hds): refresh home, overview, and theme bootstrapping"
+      },
+      {
+        "date": "2026-04-12",
+        "hash": "06bba50",
+        "subject": "Harden shared icon rendering across HDS docs"
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "9c66a17",
+        "subject": "Remove legacy docs and sidebar typography tokens"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "c3464cd",
+        "subject": "refactor(hds): move doc hover states into theme css"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "d80e48b",
+        "subject": "Refine HDS navigation cards and pager motion"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "486785b",
+        "subject": "Refine HDS overview and color docs"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "0e4e6fc",
+        "subject": "Add manifest component specs and unify nav"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "97bf6cc",
+        "subject": "refactor(hds): widen typecheck coverage and doc primitives"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "10d8047",
+        "subject": "refactor(hds): finalize nav, docs, and hero motion"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "f82830c",
+        "subject": "refactor(portfolio): streamline shell navigation and active work surfaces"
+      },
+      {
+        "date": "2026-03-27",
+        "hash": "86f20d2",
+        "subject": "refactor(design-system): complete token and docs migration"
+      },
+      {
+        "date": "2026-03-27",
+        "hash": "b7f63c1",
+        "subject": "Fix accessibility contrast issues"
+      },
+      {
+        "date": "2026-03-26",
+        "hash": "244649d",
+        "subject": "Refine token layouts and clean HDS workspace"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "79d7ff1",
+        "subject": "feat(hds): refine token model and explorer"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "72e530e",
+        "subject": "feat(hds): reorganize docs taxonomy and feedback states"
+      },
+      {
+        "date": "2026-03-22",
+        "hash": "4c3aac5",
+        "subject": "feat: extract HDS shell primitives, fix nav hover treatment, add SideNavItem docs"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-20",
+        "hash": "3d6f4be",
+        "subject": "Polish shell, docs, and recovery surfaces"
+      }
+    ],
+    "FoundationSwatch": [
+      {
+        "date": "2026-05-01",
+        "hash": "cf034db",
+        "subject": "feat(component): 8t-3b pattern batch (heavy) — 4 patterns"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-28",
+        "hash": "7a700ac",
+        "subject": "chore(scripts): rename audit-tokens.js to audit-component-source.js"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "00027bc",
+        "subject": "chore(system): track remaining doc shells and generated assets [skip ci]"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-06",
+        "hash": "f7b9695",
+        "subject": "chore: checkpoint release prep"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "9445cc4",
+        "subject": "Refresh HDS foundation and utility docs"
+      }
+    ],
+    "Grid": [
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "7765a63",
+        "subject": "feat(tooling): implement global x-ray diagnostic lens for visual qa [skip ci]"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "0eea6fb",
+        "subject": "refactor(core): clean orchestration, establish ledger, enforce polymorphism, and eradicate a11y bypasses [skip ci]"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      }
+    ],
+    "HeadingStack": [
+      {
+        "date": "2026-05-01",
+        "hash": "19ffb04",
+        "subject": "feat(tokens): 10t-5-type-ramp-composites Swiss-canon 8-style ramp"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "0eea6fb",
+        "subject": "refactor(core): clean orchestration, establish ledger, enforce polymorphism, and eradicate a11y bypasses [skip ci]"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "c6c02c0",
+        "subject": "chore(system): complete phase 11 infrastructure [skip ci]"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "053ff9b",
+        "subject": "feat: Compositional component logic — HdsSurface and HeadingStack"
+      }
+    ],
+    "Icon": [
+      {
+        "date": "2026-05-01",
+        "hash": "50813ca",
+        "subject": "refactor(icons): port Icon wrapper to lucide-react"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "0cc660e",
+        "subject": "feat(system): wave-2 sprint close — font switch, agent infra hardening, agency platform scaffold"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-12",
+        "hash": "06bba50",
+        "subject": "Harden shared icon rendering across HDS docs"
+      },
+      {
+        "date": "2026-04-09",
+        "hash": "91b6ad4",
+        "subject": "Polish token panel and harden icon sizing"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "6c04f70",
+        "subject": "Refine HDS accent content and icon treatments"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "97bf6cc",
+        "subject": "refactor(hds): widen typecheck coverage and doc primitives"
+      },
+      {
+        "date": "2026-03-26",
+        "hash": "244649d",
+        "subject": "Refine token layouts and clean HDS workspace"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-20",
+        "hash": "3d6f4be",
+        "subject": "Polish shell, docs, and recovery surfaces"
+      },
+      {
+        "date": "2026-03-16",
+        "hash": "0181904",
+        "subject": "chore: stage all pre-existing work + deploy prep"
+      },
+      {
+        "date": "2026-03-15",
+        "hash": "d029eba",
+        "subject": "feat(hds): accent token family, density system, automated handoff pipeline"
+      },
+      {
+        "date": "2026-03-12",
+        "hash": "503d665",
+        "subject": "feat: expand HDS with Icon system, Token context, and new doc pages"
+      }
+    ],
+    "IconButton": [
+      {
+        "date": "2026-05-02",
+        "hash": "75329c6",
+        "subject": "feat(validator,tokens): 10d-12 + 10d-10 + 10d-4 batch delivery"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "5512744",
+        "subject": "feat(ts): 12i-quality-ts-strict-wave2 enable noUnusedLocals + noUnusedParameters + clean 55 violations"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "d4383a0",
+        "subject": "feat(hds): rename icon button and clarify button slot docs"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "6c04f70",
+        "subject": "Refine HDS accent content and icon treatments"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "d80e48b",
+        "subject": "Refine HDS navigation cards and pager motion"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "4a9a279",
+        "subject": "refactor(hds): sync blue 450 and docs"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "f82830c",
+        "subject": "refactor(portfolio): streamline shell navigation and active work surfaces"
+      },
+      {
+        "date": "2026-03-26",
+        "hash": "244649d",
+        "subject": "Refine token layouts and clean HDS workspace"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-17",
+        "hash": "b536c29",
+        "subject": "chore(tokens): update token pipeline, components, and HDS doc pages"
+      },
+      {
+        "date": "2026-03-12",
+        "hash": "503d665",
+        "subject": "feat: expand HDS with Icon system, Token context, and new doc pages"
+      }
+    ],
+    "InlineCode": [
+      {
+        "date": "2026-05-01",
+        "hash": "576c4ee",
+        "subject": "refactor(icons): migrate every Phosphor import site to Lucide"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-12",
+        "hash": "894151a",
+        "subject": "Refine portfolio case studies and token display UX"
+      },
+      {
+        "date": "2026-04-06",
+        "hash": "f7b9695",
+        "subject": "chore: checkpoint release prep"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "c80e7fc",
+        "subject": "Refine token system and docs utilities"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "4aa26f9",
+        "subject": "docs: remove inline bypass cleanup"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "519f9a2",
+        "subject": "tokens: rename tag size token and tighten inline audit"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "10d8047",
+        "subject": "refactor(hds): finalize nav, docs, and hero motion"
+      },
+      {
+        "date": "2026-03-26",
+        "hash": "244649d",
+        "subject": "Refine token layouts and clean HDS workspace"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "72e530e",
+        "subject": "feat(hds): reorganize docs taxonomy and feedback states"
+      },
+      {
+        "date": "2026-03-24",
+        "hash": "aae6a10",
+        "subject": "Polish HDS docs and slim repo context"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-20",
+        "hash": "3d6f4be",
+        "subject": "Polish shell, docs, and recovery surfaces"
+      }
+    ],
+    "InlineLink": [
+      {
+        "date": "2026-05-01",
+        "hash": "576c4ee",
+        "subject": "refactor(icons): migrate every Phosphor import site to Lucide"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "00027bc",
+        "subject": "chore(system): track remaining doc shells and generated assets [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-12",
+        "hash": "06bba50",
+        "subject": "Harden shared icon rendering across HDS docs"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "7f462a1",
+        "subject": "Remove remaining theme helper surface aliases"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "6c04f70",
+        "subject": "Refine HDS accent content and icon treatments"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "72e530e",
+        "subject": "feat(hds): reorganize docs taxonomy and feedback states"
+      },
+      {
+        "date": "2026-03-23",
+        "hash": "fb5939e",
+        "subject": "fix: unblock check:full — reduced-motion regex, duplicate @media block, motion-ok annotations"
+      },
+      {
+        "date": "2026-03-23",
+        "hash": "4eda589",
+        "subject": "refactor: add CSS semantic state classes, convert link hover to CSS"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-16",
+        "hash": "d24e002",
+        "subject": "chore: add vitest + tokens:index script to package.json"
+      }
+    ],
+    "Input": [
+      {
+        "date": "2026-04-30",
+        "hash": "9135ec0",
+        "subject": "feat(component): 8s-5 replace Input with shadcn baseline + role tokens"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-12",
+        "hash": "06bba50",
+        "subject": "Harden shared icon rendering across HDS docs"
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-06",
+        "hash": "f7b9695",
+        "subject": "chore: checkpoint release prep"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "170cdd1",
+        "subject": "Polish HDS input controls and dedupe systems log"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "1126764",
+        "subject": "Verified Zero-Debt Governance & Orchestrated Health Sync"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "5e528b9",
+        "subject": "Complete docs automation and sizing governance"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "5f07b60",
+        "subject": "Refine HDS docs rails and token checks"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "90d9b7f",
+        "subject": "docs: restore semantic caption structure"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "0c70f65",
+        "subject": "feat(hds): add asChild slot support to HdsButton"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "9b43b87",
+        "subject": "feat(hds): add neonDisplay type style with blue glow"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "98d0498",
+        "subject": "Refine HDS overview and cloth sim controls"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "c8002f1",
+        "subject": "Refine sketch shell and shared display primitives"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "0e4e6fc",
+        "subject": "Add manifest component specs and unify nav"
+      },
+      {
+        "date": "2026-03-27",
+        "hash": "86f20d2",
+        "subject": "refactor(design-system): complete token and docs migration"
+      },
+      {
+        "date": "2026-03-26",
+        "hash": "32c9fc2",
+        "subject": "Refine sketch controls and input docs"
+      },
+      {
+        "date": "2026-03-26",
+        "hash": "244649d",
+        "subject": "Refine token layouts and clean HDS workspace"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-18",
+        "hash": "fa1b590",
+        "subject": "feat: work routes, component updates, playwright dep, token-usage-map refresh"
+      },
+      {
+        "date": "2026-03-17",
+        "hash": "4b288c1",
+        "subject": "feat: add token scan prevention system (5 static checks + CI workflow)"
+      },
+      {
+        "date": "2026-03-15",
+        "hash": "d029eba",
+        "subject": "feat(hds): accent token family, density system, automated handoff pipeline"
+      },
+      {
+        "date": "2026-03-14",
+        "hash": "dbb3899",
+        "subject": "feat(ds): typography overhaul, font switcher, guardrail scripts, new components"
+      }
+    ],
+    "NavGroup": [
+      {
+        "date": "2026-05-01",
+        "hash": "cf034db",
+        "subject": "feat(component): 8t-3b pattern batch (heavy) — 4 patterns"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-28",
+        "hash": "7a700ac",
+        "subject": "chore(scripts): rename audit-tokens.js to audit-component-source.js"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "413e7b5",
+        "subject": "fix(ui): resolve sticky nav physics, spacing blowouts, and strip nested surfaces [skip ci]"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "86b38de",
+        "subject": "feat: replace HdsWebGLTriangleLogo with Mobius branding"
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "00bfb53",
+        "subject": "fix: resolve shell visual bugs and refactor HDS navigation"
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "7f69bcb",
+        "subject": "feat: add nav levels for hds sidebar"
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "a33b992",
+        "subject": "feat: standardize component docs and patterns"
+      }
+    ],
+    "NavItem": [
+      {
+        "date": "2026-05-01",
+        "hash": "5512744",
+        "subject": "feat(ts): 12i-quality-ts-strict-wave2 enable noUnusedLocals + noUnusedParameters + clean 55 violations"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "0cc660e",
+        "subject": "feat(system): wave-2 sprint close — font switch, agent infra hardening, agency platform scaffold"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-28",
+        "hash": "7a700ac",
+        "subject": "chore(scripts): rename audit-tokens.js to audit-component-source.js"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "86b38de",
+        "subject": "feat: replace HdsWebGLTriangleLogo with Mobius branding"
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "fe78449",
+        "subject": "feat: auto-generate Quick Token Reference from hirobius.tokens.json"
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "7f69bcb",
+        "subject": "feat: add nav levels for hds sidebar"
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "a33b992",
+        "subject": "feat: standardize component docs and patterns"
+      },
+      {
+        "date": "2026-04-17",
+        "hash": "d505bfa",
+        "subject": "feat(tokens): add nav padding token and spacing sync"
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-06",
+        "hash": "f7b9695",
+        "subject": "chore: checkpoint release prep"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "9c66a17",
+        "subject": "Remove legacy docs and sidebar typography tokens"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "40806b0",
+        "subject": "feat: add semantic mapping audit"
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "00205b5",
+        "subject": "docs: rename work to portfolio and align nav"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "d80e48b",
+        "subject": "Refine HDS navigation cards and pager motion"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "a93247d",
+        "subject": "Suppress nav focus audit false positives"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "198b0f7",
+        "subject": "Make nav focus class explicit"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "5580912",
+        "subject": "Fix nav focus audit hooks"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "c8002f1",
+        "subject": "Refine sketch shell and shared display primitives"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "0e4e6fc",
+        "subject": "Add manifest component specs and unify nav"
+      }
+    ],
+    "SegmentedControl": [
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-06",
+        "hash": "f7b9695",
+        "subject": "chore: checkpoint release prep"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "7f462a1",
+        "subject": "Remove remaining theme helper surface aliases"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "5e528b9",
+        "subject": "Complete docs automation and sizing governance"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "c80e7fc",
+        "subject": "Refine token system and docs utilities"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "9da3b0c",
+        "subject": "Refine HDS docs and token explorer"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "97bf6cc",
+        "subject": "refactor(hds): widen typecheck coverage and doc primitives"
+      }
+    ],
+    "Sketch": [
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      }
+    ],
+    "SpecimenBlock": [
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-26",
+        "hash": "7e6bced",
+        "subject": "refactor(docs): unify manifests and implement useHdsManifest hook [skip ci]"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "00bfb53",
+        "subject": "fix: resolve shell visual bugs and refactor HDS navigation"
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "a33b992",
+        "subject": "feat: standardize component docs and patterns"
+      }
+    ],
+    "Stack": [
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "7765a63",
+        "subject": "feat(tooling): implement global x-ray diagnostic lens for visual qa [skip ci]"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "0eea6fb",
+        "subject": "refactor(core): clean orchestration, establish ledger, enforce polymorphism, and eradicate a11y bypasses [skip ci]"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-15",
+        "hash": "d029eba",
+        "subject": "feat(hds): accent token family, density system, automated handoff pipeline"
+      }
+    ],
+    "StackedCardRail": [
+      {
+        "date": "2026-05-02",
+        "hash": "fbce02e",
+        "subject": "chore(orch): approve all 33 proposed+pending — Adrian ratified 2026-05-02"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "5c2ea54",
+        "subject": "perf(bundle): 12o — lazy HDSLayout Möbius layer + fix pre-existing audit violations"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "c9931cd",
+        "subject": "fix(validators): 12i-1 manifest scanner skip 10 demo helpers + promote validate-manifest to pre-commit hard-fail"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "0cc660e",
+        "subject": "feat(system): wave-2 sprint close — font switch, agent infra hardening, agency platform scaffold"
+      }
+    ],
+    "StepperField": [
+      {
+        "date": "2026-05-01",
+        "hash": "5c9a950",
+        "subject": "chore(quality): 12i-quality-tsconfig-typecheck-realign cover full src tree"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "576c4ee",
+        "subject": "refactor(icons): migrate every Phosphor import site to Lucide"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "00bfb53",
+        "subject": "fix: resolve shell visual bugs and refactor HDS navigation"
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "1126764",
+        "subject": "Verified Zero-Debt Governance & Orchestrated Health Sync"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "5f07b60",
+        "subject": "Refine HDS docs rails and token checks"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "d4383a0",
+        "subject": "feat(hds): rename icon button and clarify button slot docs"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "7ecfcab",
+        "subject": "Add motion feedback to StepperField"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "99c4899",
+        "subject": "Add StepperField doc exemption"
+      },
+      {
+        "date": "2026-03-29",
+        "hash": "98d0498",
+        "subject": "Refine HDS overview and cloth sim controls"
+      }
+    ],
+    "HdsSurface": [
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-26",
+        "hash": "7d66e6d",
+        "subject": "style(hds): pivot to minimalist elevation model; remove outlines and mono-badges [skip ci]"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "7765a63",
+        "subject": "feat(tooling): implement global x-ray diagnostic lens for visual qa [skip ci]"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "0eea6fb",
+        "subject": "refactor(core): clean orchestration, establish ledger, enforce polymorphism, and eradicate a11y bypasses [skip ci]"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "c6c02c0",
+        "subject": "chore(system): complete phase 11 infrastructure [skip ci]"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "053ff9b",
+        "subject": "feat: Compositional component logic — HdsSurface and HeadingStack"
+      }
+    ],
+    "Table": [
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "c6c02c0",
+        "subject": "chore(system): complete phase 11 infrastructure [skip ci]"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "00bfb53",
+        "subject": "fix: resolve shell visual bugs and refactor HDS navigation"
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-06",
+        "hash": "f7b9695",
+        "subject": "chore: checkpoint release prep"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "9445cc4",
+        "subject": "Refresh HDS foundation and utility docs"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "5e528b9",
+        "subject": "Complete docs automation and sizing governance"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "c80e7fc",
+        "subject": "Refine token system and docs utilities"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      }
+    ],
+    "Tag": [
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "7f462a1",
+        "subject": "Remove remaining theme helper surface aliases"
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "5e528b9",
+        "subject": "Complete docs automation and sizing governance"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "5f07b60",
+        "subject": "Refine HDS docs rails and token checks"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2b5e5da",
+        "subject": "feat: add systems ledger and semantic shell cleanup"
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "c43123f",
+        "subject": "feat(tokens): add generated css and audit report"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "519f9a2",
+        "subject": "tokens: rename tag size token and tighten inline audit"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "d5b4235",
+        "subject": "feat(hds): add system primitives and sidebar sync"
+      },
+      {
+        "date": "2026-03-31",
+        "hash": "c9115bd",
+        "subject": "Update HDS token pipeline and docs"
+      },
+      {
+        "date": "2026-03-27",
+        "hash": "86f20d2",
+        "subject": "refactor(design-system): complete token and docs migration"
+      },
+      {
+        "date": "2026-03-27",
+        "hash": "b7f63c1",
+        "subject": "Fix accessibility contrast issues"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "79d7ff1",
+        "subject": "feat(hds): refine token model and explorer"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "72e530e",
+        "subject": "feat(hds): reorganize docs taxonomy and feedback states"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-18",
+        "hash": "fa1b590",
+        "subject": "feat: work routes, component updates, playwright dep, token-usage-map refresh"
+      },
+      {
+        "date": "2026-03-17",
+        "hash": "4b288c1",
+        "subject": "feat: add token scan prevention system (5 static checks + CI workflow)"
+      },
+      {
+        "date": "2026-03-14",
+        "hash": "dbb3899",
+        "subject": "feat(ds): typography overhaul, font switcher, guardrail scripts, new components"
+      }
+    ],
+    "Text": [
+      {
+        "date": "2026-05-01",
+        "hash": "5512744",
+        "subject": "feat(ts): 12i-quality-ts-strict-wave2 enable noUnusedLocals + noUnusedParameters + clean 55 violations"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "19ffb04",
+        "subject": "feat(tokens): 10t-5-type-ramp-composites Swiss-canon 8-style ramp"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "f696a66",
+        "subject": "feat(tokens): 9d-7 semantic.docs.* type + spacing scale for doc-site"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-28",
+        "hash": "7a700ac",
+        "subject": "chore(scripts): rename audit-tokens.js to audit-component-source.js"
+      }
+    ],
+    "TextLockup": [
+      {
+        "date": "2026-05-01",
+        "hash": "5512744",
+        "subject": "feat(ts): 12i-quality-ts-strict-wave2 enable noUnusedLocals + noUnusedParameters + clean 55 violations"
+      },
+      {
+        "date": "2026-05-01",
+        "hash": "19ffb04",
+        "subject": "feat(tokens): 10t-5-type-ramp-composites Swiss-canon 8-style ramp"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-28",
+        "hash": "7a700ac",
+        "subject": "chore(scripts): rename audit-tokens.js to audit-component-source.js"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "0eea6fb",
+        "subject": "refactor(core): clean orchestration, establish ledger, enforce polymorphism, and eradicate a11y bypasses [skip ci]"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "c6c02c0",
+        "subject": "chore(system): complete phase 11 infrastructure [skip ci]"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "f84be05",
+        "subject": "feat: Finalize compositional guardrails — TextLockup variants and strict enforcement"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "94f55fd",
+        "subject": "fix: restore TextLockup and clarify compositional guardrails"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "053ff9b",
+        "subject": "feat: Compositional component logic — HdsSurface and HeadingStack"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "00bfb53",
+        "subject": "fix: resolve shell visual bugs and refactor HDS navigation"
+      },
+      {
+        "date": "2026-04-20",
+        "hash": "a33b992",
+        "subject": "feat: standardize component docs and patterns"
+      },
+      {
+        "date": "2026-04-12",
+        "hash": "06bba50",
+        "subject": "Harden shared icon rendering across HDS docs"
+      },
+      {
+        "date": "2026-04-12",
+        "hash": "894151a",
+        "subject": "Refine portfolio case studies and token display UX"
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-06",
+        "hash": "f7b9695",
+        "subject": "chore: checkpoint release prep"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "9c66a17",
+        "subject": "Remove legacy docs and sidebar typography tokens"
+      }
+    ],
+    "Token": [
+      {
+        "date": "2026-05-01",
+        "hash": "5512744",
+        "subject": "feat(ts): 12i-quality-ts-strict-wave2 enable noUnusedLocals + noUnusedParameters + clean 55 violations"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "161cffc",
+        "subject": "feat(governance): 8x-3 source @tier tagging + tier required on validate"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "413e7b5",
+        "subject": "fix(ui): resolve sticky nav physics, spacing blowouts, and strip nested surfaces [skip ci]"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "00027bc",
+        "subject": "chore(system): track remaining doc shells and generated assets [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "b45e7ac",
+        "subject": "[HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails."
+      },
+      {
+        "date": "2026-04-08",
+        "hash": "fd7512d",
+        "subject": "Refine HDS docs and prep deploy"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "bc25351",
+        "subject": "Refine HDS rails and token explorer spacing"
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "8837496",
+        "subject": "Refactor: Implemented CSS Grid with minmax(0, 1fr) to cleanly contain token definition overflow."
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "0bcda8c",
+        "subject": "Fix: Hardened central Definition column to prevent flexbox layout blowout."
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "2d7d91e",
+        "subject": "UI: Scoped multi-line wrapping to Source Nodes while maintaining standard token truncation."
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "e9d0548",
+        "subject": "UI: Applied fit-content hugging and word-wrap protection to Token DNA nodes."
+      },
+      {
+        "date": "2026-04-05",
+        "hash": "a8d2ea5",
+        "subject": "UI: Reimagined Token Definition with 'Bubbling Up' provenance and consolidated metadata."
+      },
+      {
+        "date": "2026-04-04",
+        "hash": "b075465",
+        "subject": "Storefront: Unified System Lab with automated visual previews."
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "c80e7fc",
+        "subject": "Refine token system and docs utilities"
+      },
+      {
+        "date": "2026-04-03",
+        "hash": "1838d94",
+        "subject": "checkpoint: before removing hds namespace"
+      },
+      {
+        "date": "2026-04-02",
+        "hash": "2841ea9",
+        "subject": "refactor: finish hds component filename alignment"
+      },
+      {
+        "date": "2026-04-01",
+        "hash": "03dd1f6",
+        "subject": "chore: checkpoint knip cleanup state"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "9da3b0c",
+        "subject": "Refine HDS docs and token explorer"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "6c04f70",
+        "subject": "Refine HDS accent content and icon treatments"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "d955df9",
+        "subject": "Refine HDS token explorer and foundation swatches"
+      },
+      {
+        "date": "2026-03-30",
+        "hash": "486785b",
+        "subject": "Refine HDS overview and color docs"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "4a9a279",
+        "subject": "refactor(hds): sync blue 450 and docs"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "10d8047",
+        "subject": "refactor(hds): finalize nav, docs, and hero motion"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "f82830c",
+        "subject": "refactor(portfolio): streamline shell navigation and active work surfaces"
+      },
+      {
+        "date": "2026-03-28",
+        "hash": "9bbf926",
+        "subject": "refactor(typography): lock mono stack to atkinson hyperlegible mono"
+      },
+      {
+        "date": "2026-03-27",
+        "hash": "86f20d2",
+        "subject": "refactor(design-system): complete token and docs migration"
+      },
+      {
+        "date": "2026-03-27",
+        "hash": "b7f63c1",
+        "subject": "Fix accessibility contrast issues"
+      },
+      {
+        "date": "2026-03-26",
+        "hash": "244649d",
+        "subject": "Refine token layouts and clean HDS workspace"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "79d7ff1",
+        "subject": "feat(hds): refine token model and explorer"
+      },
+      {
+        "date": "2026-03-25",
+        "hash": "72e530e",
+        "subject": "feat(hds): reorganize docs taxonomy and feedback states"
+      },
+      {
+        "date": "2026-03-22",
+        "hash": "bd5ba62",
+        "subject": "feat: restore scroll position on token deep-link back navigation"
+      },
+      {
+        "date": "2026-03-22",
+        "hash": "8beabda",
+        "subject": "fix: token deep-link scroll, back button style, and focus/audit compliance"
+      },
+      {
+        "date": "2026-03-22",
+        "hash": "52a68e9",
+        "subject": "feat: token deep-link — chip navigates to Architecture explorer with back path"
+      },
+      {
+        "date": "2026-03-21",
+        "hash": "5bf068f",
+        "subject": "feat: HDS expansion, compliance system, vibe-sketchbook, and pre-deploy hardening"
+      },
+      {
+        "date": "2026-03-18",
+        "hash": "fa1b590",
+        "subject": "feat: work routes, component updates, playwright dep, token-usage-map refresh"
+      },
+      {
+        "date": "2026-03-17",
+        "hash": "4b288c1",
+        "subject": "feat: add token scan prevention system (5 static checks + CI workflow)"
+      },
+      {
+        "date": "2026-03-16",
+        "hash": "0181904",
+        "subject": "chore: stage all pre-existing work + deploy prep"
+      },
+      {
+        "date": "2026-03-15",
+        "hash": "d029eba",
+        "subject": "feat(hds): accent token family, density system, automated handoff pipeline"
+      },
+      {
+        "date": "2026-03-14",
+        "hash": "dbb3899",
+        "subject": "feat(ds): typography overhaul, font switcher, guardrail scripts, new components"
+      },
+      {
+        "date": "2026-03-12",
+        "hash": "503d665",
+        "subject": "feat: expand HDS with Icon system, Token context, and new doc pages"
+      }
+    ],
+    "Surface": [
+      {
+        "date": "2026-05-01",
+        "hash": "0cc660e",
+        "subject": "feat(system): wave-2 sprint close — font switch, agent infra hardening, agency platform scaffold"
+      },
+      {
+        "date": "2026-04-30",
+        "hash": "098418b",
+        "subject": "feat(governance): 8x-5 split tier=utility|experiment into peer sections"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "bdfa21b",
+        "subject": "chore(hds): stabilize codebase and patch primitive API compliance"
+      },
+      {
+        "date": "2026-04-24",
+        "hash": "c6c02c0",
+        "subject": "chore(system): complete phase 11 infrastructure [skip ci]"
+      },
+      {
+        "date": "2026-04-23",
+        "hash": "305b6d2",
+        "subject": "arch(hds): systemic v2 architecture lock-in [skip ci]"
+      },
+      {
+        "date": "2026-04-22",
+        "hash": "1a8c621",
+        "subject": "feat: Surface utility component and ArchitectureSnapshotPage V2 refactor"
+      }
+    ]
+  }
+}

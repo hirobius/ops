@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsbutton-1",
+      "parentId": "root",
+      "type": "INSTANCE",
+      "componentName": "HdsButton",
+      "attributes": {
+        "variant": "secondary",
+        "size": "sm",
+        "label": "Cancel"
+      },
+      "figmaProperties": {
+        "Variant": "secondary",
+        "Size": "sm",
+        "Label": "Cancel"
+      }
+    }
+  ]
+}

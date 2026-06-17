@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsbadge-1",
+      "parentId": "root",
+      "type": "INSTANCE",
+      "componentName": "HdsBadge",
+      "attributes": {
+        "variant": "success"
+      },
+      "characters": "New"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "model": "retainer",
+  "description": "Refillable bucket — Conrad pays for time/deliverables, refills as needed",
+  "currentPhase": {
+    "phase": "phase-1",
+    "scopedAt": 1500,
+    "currency": "USD",
+    "status": "agreed-verbal",
+    "includes": [
+      "Lead intake automation setup",
+      "Outlook triage structure and rules",
+      "Follow-up email/text templates",
+      "Renewal reminder prototype",
+      "Tool and access review",
+      "End-to-end testing with fake accounts",
+      "Handoff documentation"
+    ],
+    "excludes": [
+      "Full EZLynx API integration (scoped after access confirmed)",
+      "AI call transcription (Phase 2)",
+      "Document extraction / commercial renewal pre-fill (Phase 2)",
+      "Any additional software license costs (passed through)"
+    ]
+  },
+  "blockers": [
+    "EZLynx login credentials from Conrad — pending",
+    "Retainer payment setup — Conrad to create"
+  ],
+  "notes": "Additional license for EZLynx = ~$150/month if needed. Software subscription costs are pass-through expenses, not included in retainer hours.",
+  "futureTiers": [
+    {
+      "tier": "Phase 2 — AI & Intelligence Layer",
+      "estimatedScope": "TBD after Phase 1 delivery and EZLynx API audit"
+    },
+    {
+      "tier": "Phase 3 — Agentic Command Center",
+      "estimatedScope": "Lightweight ops dashboard for Conrad + continued automation expansion"
+    },
+    {
+      "tier": "Ongoing Maintenance",
+      "estimatedScope": "Monthly retainer for monitoring, updates, new automations"
+    }
+  ]
+}

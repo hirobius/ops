@@ -1,0 +1,10 @@
+{
+  "scenario": "valid",
+  "secret": "shared-bridge-secret-fixture",
+  "authEnabled": true,
+  "type": "selection.update",
+  "payload": {
+    "nodeIds": ["1:2", "3:4"],
+    "page": "Page 1"
+  }
+}

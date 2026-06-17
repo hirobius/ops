@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsicon-1",
+      "parentId": "root",
+      "type": "ICON",
+      "props": {
+        "icon": "ph:warning-circle-bold",
+        "size": 24,
+        "fill": "semantic.color.content.primary"
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "tree": [
+    {
+      "id": "2:1",
+      "name": "Card",
+      "type": "FRAME",
+      "tokenPaths": { "fills": ["semantic.color.surface.page"] },
+      "children": [
+        {
+          "id": "2:2",
+          "name": "Faint helper text",
+          "type": "TEXT",
+          "tokenPaths": { "fills": ["primitive.color.neutral.300"] }
+        }
+      ]
+    }
+  ]
+}

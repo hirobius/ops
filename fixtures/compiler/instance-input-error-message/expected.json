@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsinput-1",
+      "parentId": "root",
+      "type": "INSTANCE",
+      "componentName": "HdsInput",
+      "attributes": {
+        "type": "email",
+        "label": "Email",
+        "placeholder": "you@example.com",
+        "error": true,
+        "errorMessage": "Enter a valid email."
+      },
+      "figmaProperties": {
+        "Type": "email",
+        "Label": "Email",
+        "Placeholder": "you@example.com",
+        "Error": true,
+        "Error message": "Enter a valid email."
+      }
+    }
+  ]
+}

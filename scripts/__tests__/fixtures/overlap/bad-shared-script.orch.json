@@ -1,0 +1,22 @@
+{
+  "units": [
+    {
+      "id": "unit-checker-a",
+      "status": "claimed",
+      "claimedBy": "agent-a",
+      "claimedAt": "2026-05-05T09:00:00.000Z",
+      "description": "Adds new validation logic to scripts/check-x.mjs.",
+      "agentNotes": ["Edits scripts/check-x.mjs to add a new rule."],
+      "validationCmd": "node scripts/check-x.mjs --self-test",
+      "dependsOn": []
+    },
+    {
+      "id": "unit-checker-b",
+      "status": "approved",
+      "description": "Extends scripts/check-x.mjs with additional coverage.",
+      "agentNotes": ["Also modifies scripts/check-x.mjs — adds fixtures."],
+      "validationCmd": "node scripts/check-x.mjs --self-test",
+      "dependsOn": []
+    }
+  ]
+}

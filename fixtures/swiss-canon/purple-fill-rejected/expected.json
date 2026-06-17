@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsButton.fill",
+      "code": "SWISS_PURPLE_INDIGO",
+      "message": "HdsButton.fill=\"purple-500\" uses purple/indigo/violet/fuchsia",
+      "suggestion": "Project palette is stone neutrals + Swiss Red accent. Replace with semantic.color.surface.* / .content.* / .accent.*."
+    }
+  ]
+}

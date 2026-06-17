@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "pairs": [
+    {
+      "fg": { "hex": "#ffffff", "tokenPath": null },
+      "bg": { "hex": "#000000", "tokenPath": null },
+      "ratio": 21,
+      "AA": true,
+      "AAA": true
+    }
+  ],
+  "errors": []
+}

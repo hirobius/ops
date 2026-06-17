@@ -1,0 +1,114 @@
+{
+  "micro": [
+    {
+      "id": "m1",
+      "goal": "Eliminate manual lead data entry from WordPress into EZLynx",
+      "metric": "0 manual copy-paste events per new lead",
+      "status": "not-started"
+    },
+    {
+      "id": "m2",
+      "goal": "Respond to new leads within minutes, not hours",
+      "metric": "Auto-acknowledgment email/text sent within 5 minutes of form submission",
+      "status": "not-started"
+    },
+    {
+      "id": "m3",
+      "goal": "Replace physical renewal letters with automated text/email",
+      "metric": "0 physical letters sent for routine renewals",
+      "status": "not-started"
+    },
+    {
+      "id": "m4",
+      "goal": "Clear the Outlook inbox backlog and implement triage system",
+      "metric": "< 20 untagged emails in inbox at any time",
+      "status": "not-started"
+    },
+    {
+      "id": "m5",
+      "goal": "Reduce commercial renewal form completion time by 70%",
+      "metric": "Time from renewal trigger to pre-filled form sent to client < 15 min",
+      "status": "not-started"
+    },
+    {
+      "id": "m6",
+      "goal": "Eliminate pinned emails as task management system",
+      "metric": "All action items tracked in EZLynx tasks or dedicated task system",
+      "status": "not-started"
+    }
+  ],
+  "macro": [
+    {
+      "id": "M1",
+      "goal": "Remove Conrad from lead intake bottleneck",
+      "description": "System handles everything from form submission → EZLynx record → quote workflow initiation without Conrad touching it until it's ready to review",
+      "horizon": "6-12 months",
+      "status": "planned"
+    },
+    {
+      "id": "M2",
+      "goal": "Scale to 1,000+ customers without adding headcount",
+      "description": "Automation absorbs the growth overhead — renewals, follow-ups, onboarding — so Conrad can grow from 600 to 1,000+ clients on the same time budget",
+      "horizon": "12-18 months",
+      "status": "planned"
+    },
+    {
+      "id": "M3",
+      "goal": "Hire and successfully onboard first employee",
+      "description": "Clean documented workflows and automated systems make onboarding a non-event. Employee inherits a well-oiled machine, not a pile of tribal knowledge",
+      "horizon": "12-24 months",
+      "status": "planned"
+    },
+    {
+      "id": "M4",
+      "goal": "Run agency nearly autonomously with light human interaction",
+      "description": "Day-to-day operations (lead intake, renewals, follow-ups, document management) are automated. Conrad's attention is reserved for complex commercial accounts and relationship management",
+      "horizon": "24-36 months",
+      "status": "future"
+    },
+    {
+      "id": "M5",
+      "goal": "Agency ready for sale or hands-off retention",
+      "description": "Documented systems, automated workflows, clean data in EZLynx, and predictable revenue make the agency an asset that doesn't depend on Conrad being present",
+      "horizon": "36-60 months",
+      "status": "future"
+    }
+  ],
+  "aiOpportunities": [
+    {
+      "id": "ai-opp-1",
+      "title": "Local call transcription + action item extraction",
+      "description": "LightSpeed/Orbit call ends → local Whisper model transcribes → Hermes/local LLM extracts action items → structured note pushed to EZLynx via API",
+      "privacyRisk": "low — completely local, never leaves trusted infrastructure",
+      "readiness": "phase-2"
+    },
+    {
+      "id": "ai-opp-2",
+      "title": "Email triage and bucketing bot",
+      "description": "Batch-process Outlook inbox with local LLM → classify each thread (renewal / commercial / billing / onboarding / junk) → apply Outlook tags → surface action queue",
+      "privacyRisk": "low — local only, no SSN/DOB in email content assumed",
+      "readiness": "phase-2"
+    },
+    {
+      "id": "ai-opp-3",
+      "title": "Commercial renewal form pre-fill",
+      "description": "Prior year ACORD form data extracted → new form pre-populated with dates updated → sent to client for review and e-sign via DocuSign",
+      "privacyRisk": "medium — ACORD forms contain business financials; keep local",
+      "readiness": "phase-2"
+    },
+    {
+      "id": "ai-opp-4",
+      "title": "Lead scoring and priority routing",
+      "description": "As data volume grows, ML scoring of leads by likelihood to close + commercial vs. personal routing",
+      "privacyRisk": "low",
+      "readiness": "phase-3"
+    },
+    {
+      "id": "ai-opp-5",
+      "title": "Client-facing AI triage widget",
+      "description": "Simple contained bot on lilacinsure.com for existing clients: policy change requests, billing questions, claim starts — pre-sorted, routed to EZLynx. Conrad explicitly concerned about data exposure — requires local/airgapped implementation only.",
+      "privacyRisk": "high — requires strict data isolation; no external AI API calls",
+      "readiness": "phase-3"
+    }
+  ]
+}

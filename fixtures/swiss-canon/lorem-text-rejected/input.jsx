@@ -1,0 +1,1 @@
+<HdsText typography="semantic.typography.body">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</HdsText>

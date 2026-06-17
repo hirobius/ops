@@ -1,0 +1,1 @@
+<HdsText typography="semantic.typography.heading2" weight="bold">Welcome</HdsText>

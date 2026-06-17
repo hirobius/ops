@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsText.children",
+      "code": "SWISS_STRAIGHT_QUOTES",
+      "message": "HdsText uses straight quotes in user-visible text",
+      "suggestion": "Use curly quotation marks: “ … ” for double, ‘ … ’ for single. Apostrophes inside contractions (don’t) should also be curly."
+    }
+  ]
+}

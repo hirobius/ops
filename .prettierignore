@@ -1,0 +1,30 @@
+# Build output
+dist/
+build/
+.vercel/
+coverage/
+playwright-report/
+test-results/
+
+# Generated artifacts
+src/design-system/tokens/**
+src/app/data/**.json
+public/hds-manifest.json
+public/llms.txt
+llms.txt
+docs/guardrails/baselines/**
+docs/guardrails/strength-history.jsonl
+docs/guardrails/full-strictness-inventory.json
+docs/ai/swarm-watchdog-decisions.jsonl
+docs/ai/orchestration.json
+
+# Lock + node
+pnpm-lock.yaml
+node_modules/
+
+# Worktree caches
+.claude/worktrees/
+.fixture-proof-cache.json
+
+# Vendor
+src/lib/vendor/**

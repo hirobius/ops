@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdscheckbox-1",
+      "parentId": "root",
+      "type": "INSTANCE",
+      "componentName": "HdsCheckbox",
+      "attributes": {
+        "checked": true
+      }
+    }
+  ]
+}

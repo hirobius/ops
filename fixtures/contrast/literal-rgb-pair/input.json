@@ -1,0 +1,18 @@
+{
+  "tree": [
+    {
+      "id": "3:1",
+      "name": "RawFrame",
+      "type": "FRAME",
+      "fills": [{ "type": "SOLID", "color": { "r": 0, "g": 0, "b": 0 } }],
+      "children": [
+        {
+          "id": "3:2",
+          "name": "Label",
+          "type": "TEXT",
+          "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 1, "b": 1 } }]
+        }
+      ]
+    }
+  ]
+}

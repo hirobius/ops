@@ -1,0 +1,11 @@
+{
+  "gates": [
+    {
+      "id": "synthetic-gate-missing-fixture",
+      "description": "A gate whose fixture directory does not exist — should trigger MISSING error.",
+      "severity": "error",
+      "gateScript": "scripts/check-hardcoded-spacing.mjs",
+      "fixturePath": "fixtures/nonexistent-synthetic-gate-xyz"
+    }
+  ]
+}

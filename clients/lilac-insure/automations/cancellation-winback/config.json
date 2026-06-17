@@ -1,0 +1,16 @@
+{
+  "id": "cancellation-winback",
+  "phase": "phase-1",
+  "bucket": "bucket-4",
+  "systemsTouched": ["ezlynx", "outlook", "n8n"],
+  "ownerSystem": "ezlynx",
+  "sequence": [
+    { "name": "checkin",   "dayOffset": 1,  "channels": ["email"] },
+    { "name": "winback",   "dayOffset": 7,  "channels": ["email"], "conditional": "reason==price" },
+    { "name": "courtesy",  "dayOffset": 14, "channels": ["email"] }
+  ],
+  "policy": {
+    "logEzlynxNote": true,
+    "ezlynxWebhookEvent": "policy.cancelled"
+  }
+}

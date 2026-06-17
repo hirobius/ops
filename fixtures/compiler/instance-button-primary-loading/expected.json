@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsbutton-1",
+      "parentId": "root",
+      "type": "INSTANCE",
+      "componentName": "HdsButton",
+      "attributes": {
+        "variant": "primary",
+        "size": "md",
+        "label": "Saving",
+        "loading": true
+      },
+      "figmaProperties": {
+        "Variant": "primary",
+        "Size": "md",
+        "Label": "Saving",
+        "Loading": true
+      }
+    }
+  ]
+}

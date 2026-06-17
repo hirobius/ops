@@ -1,0 +1,5 @@
+# passing fixture for check-secrets
+# No credentials — only innocuous configuration constants.
+const THEME = "dark";
+const DEBUG = false;
+const API_URL = "https://api.example.com/v1";

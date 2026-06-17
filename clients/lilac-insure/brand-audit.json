@@ -1,0 +1,74 @@
+{
+  "summary": "Pro bono visual identity scrub — map all brand touchpoints on the web, surface quick wins and improvement opportunities without overwhelming Conrad. Not a redesign pitch — a gift that shows professionalism and care.",
+  "website": {
+    "url": "https://lilacinsure.com",
+    "platform": "WordPress",
+    "assessment": "todo",
+    "notes": "Clean visual appearance per Adrian. AdvisorEvolved bookmarked as competitor reference for insurance agency websites."
+  },
+  "touchpoints": [
+    {
+      "id": "tp-1",
+      "channel": "Website",
+      "url": "https://lilacinsure.com",
+      "status": "needs-audit",
+      "items": ["Logo usage", "Color consistency", "Typography", "Mobile responsiveness", "CTA clarity", "Lead form UX"]
+    },
+    {
+      "id": "tp-2",
+      "channel": "Google Business Profile",
+      "url": null,
+      "status": "needs-audit",
+      "items": ["Logo", "Photos", "Description", "Hours", "Review response consistency"]
+    },
+    {
+      "id": "tp-3",
+      "channel": "Facebook",
+      "url": null,
+      "status": "needs-audit",
+      "items": ["Profile/cover image quality", "Branding consistency", "Last active date"]
+    },
+    {
+      "id": "tp-4",
+      "channel": "Insurance directory listings",
+      "url": null,
+      "status": "needs-audit",
+      "items": ["Yelp", "Insurance.com", "Insurify", "Google Maps", "BBB — consistent name/address/phone (NAP)"]
+    },
+    {
+      "id": "tp-5",
+      "channel": "EZLynx Client Portal",
+      "url": null,
+      "status": "needs-audit",
+      "items": ["Logo shown to clients", "Email template branding"]
+    },
+    {
+      "id": "tp-6",
+      "channel": "DocuSign templates",
+      "url": null,
+      "status": "needs-audit",
+      "items": ["Logo placement", "Professional appearance vs. default DocuSign chrome"]
+    },
+    {
+      "id": "tp-7",
+      "channel": "Email signature",
+      "url": null,
+      "status": "needs-audit",
+      "items": ["Logo", "Contact info", "Social links", "Brand consistency"]
+    }
+  ],
+  "quickWins": [
+    "Consistent logo file (SVG + PNG) across all platforms",
+    "Google Business Profile photo refresh and description update",
+    "Email signature template with logo",
+    "DocuSign header branding"
+  ],
+  "competitorReferences": [
+    {
+      "name": "AdvisorEvolved",
+      "url": "https://advisorevolved.com/#why",
+      "notes": "Bookmarked — insurance agency websites built for SEO, mobile, and conversions"
+    }
+  ],
+  "deliverable": "A simple visual deck (PDF or Figma slide) showing: current brand touchpoints → inconsistencies spotted → 3-5 quick wins. Tease potential without prescribing a full rebrand."
+}

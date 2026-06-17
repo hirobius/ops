@@ -1,0 +1,30 @@
+title = "HDS Gitleaks Config"
+
+[extend]
+# Use Gitleaks default rules as the baseline
+useDefault = true
+
+[[rules]]
+id = "hds-design-tokens"
+description = "Allowlist HDS design-token paths falsely matched as API keys"
+regex = '''primitive\.(radius|size)\.[\w\.]+'''
+path = '''(?i)(src/app/data/.*\.json|public/.*\.json)$'''
+tags = ["allowlist", "design-tokens"]
+[rules.allowlist]
+regexTarget = "match"
+regexes = [
+  '''primitive\.(radius|size)\.[\w\.]+''',
+]
+
+[allowlist]
+description = "Global allowlist for known false positives in HDS"
+paths = [
+  '''(?i)(^.*\/\.pnpm\/.*$)''',
+  '''(?i)(^.*\/node_modules\/.*$)''',
+  '''(?i)(^.*\/dist\/.*$)''',
+  '''(?i)(^.*\.claude\/worktrees\/.*$)''',
+]
+regexes = [
+  # HDS design-system token paths (not secrets)
+  '''primitive\.(radius|size|color|space|border|shadow)\.[\w\.\-]+''',
+]

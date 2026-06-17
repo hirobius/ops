@@ -1,0 +1,11 @@
+{
+  "tree": [
+    {
+      "id": "1:42",
+      "name": "Save",
+      "type": "INSTANCE",
+      "componentName": "HdsButton",
+      "a11y": { "name": "Save", "role": "button" }
+    }
+  ]
+}

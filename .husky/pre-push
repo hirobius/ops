@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+set -e
+
+echo "Running full HDS checks..."
+pnpm check:full
+
+echo "Running a11y tests..."
+pnpm test:a11y
+
+echo "Running HDS self-heal..."
+pnpm run heal
+
+echo "Running foundation visual parity..."
+node scripts/visual-ingest.mjs --foundation-parity

@@ -1,0 +1,12 @@
+{
+  "tree": [
+    {
+      "id": "1:45",
+      "name": "Some Frame",
+      "type": "FRAME",
+      "children": [
+        { "id": "1:46", "name": "Label", "type": "TEXT" }
+      ]
+    }
+  ]
+}

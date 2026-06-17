@@ -1,0 +1,132 @@
+{
+  "phases": [
+    {
+      "id": "pre-consult",
+      "name": "Pre-Consult Prep",
+      "budget": null,
+      "status": "in-progress",
+      "description": "Research Phil's current web presence, prepare a simple 1-pager and Starter overview, get the intro from Conrad, and schedule the first call.",
+      "swimlanes": [
+        {
+          "id": "sl-1",
+          "name": "Research",
+          "goal": "Know enough about Phil's business and competitors to lead the consult confidently",
+          "tasks": [
+            {
+              "id": "r-1",
+              "title": "Search for Phil's current web presence (name + Deer Park land management)",
+              "status": "todo",
+              "owner": "Adrian",
+              "priority": 1
+            },
+            {
+              "id": "r-2",
+              "title": "Check WA Secretary of State for business registration and legal name",
+              "status": "todo",
+              "owner": "Adrian",
+              "priority": 2
+            },
+            {
+              "id": "r-3",
+              "title": "Find 2–3 local competitor sites to reference on the call",
+              "status": "todo",
+              "owner": "Adrian",
+              "priority": 3,
+              "notes": "Brush clearing / defensible space / fire mitigation contractors in Spokane area."
+            }
+          ]
+        },
+        {
+          "id": "sl-2",
+          "name": "Materials",
+          "goal": "Have something to show Phil so the call feels professional, not like a cold pitch",
+          "tasks": [
+            {
+              "id": "m-1",
+              "title": "Prepare Hirobius 1-pager (who we are, who we work with, what we build)",
+              "status": "todo",
+              "owner": "Adrian",
+              "priority": 1
+            },
+            {
+              "id": "m-2",
+              "title": "Prepare Starter package one-pager (deliverables, timeline, price range)",
+              "status": "todo",
+              "owner": "Adrian",
+              "priority": 2,
+              "notes": "Keep it visual and simple. Phil is a trade guy — bullets, not paragraphs."
+            }
+          ]
+        },
+        {
+          "id": "sl-3",
+          "name": "Outreach",
+          "goal": "Get Phil on a call",
+          "tasks": [
+            {
+              "id": "o-1",
+              "title": "Confirm Conrad will make the intro to Phil",
+              "status": "in-progress",
+              "owner": "Conrad",
+              "priority": 1,
+              "notes": "Conrad said on the call: 'I'll send him your way.' Following up to confirm."
+            },
+            {
+              "id": "o-2",
+              "title": "Send calendar invite for first consult",
+              "status": "todo",
+              "owner": "Adrian",
+              "priority": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "consult",
+      "name": "Initial Consult",
+      "budget": null,
+      "status": "planned",
+      "description": "First call with Phil. Goal: scope the website, agree on Starter package, collect deposit and assets.",
+      "swimlanes": [
+        {
+          "id": "sl-4",
+          "name": "Intake",
+          "goal": "Leave the call with everything needed to start building",
+          "tasks": [
+            {
+              "id": "c-1",
+              "title": "Confirm company name and Phil's last name",
+              "status": "todo",
+              "owner": "Adrian"
+            },
+            {
+              "id": "c-2",
+              "title": "Confirm no domain / email / hosting exists — or note what's there",
+              "status": "todo",
+              "owner": "Adrian"
+            },
+            {
+              "id": "c-3",
+              "title": "Collect project photos (or agree on how/when Phil sends them)",
+              "status": "todo",
+              "owner": "Phil"
+            },
+            {
+              "id": "c-4",
+              "title": "Agree on Starter scope: pages, contact form, photo gallery, domain setup",
+              "status": "todo",
+              "owner": "Adrian"
+            },
+            {
+              "id": "c-5",
+              "title": "Agree on price and collect deposit",
+              "status": "todo",
+              "owner": "Adrian"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

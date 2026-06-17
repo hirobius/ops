@@ -1,0 +1,6 @@
+{
+  "scenario": "roundtrip",
+  "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "type": "selection.update",
+  "ttlMs": 5000
+}

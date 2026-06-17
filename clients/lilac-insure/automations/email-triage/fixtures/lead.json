@@ -1,0 +1,6 @@
+{
+  "expected": "lead",
+  "from": "forms@lilacinsure.com",
+  "subject": "New lead: Quote request from website",
+  "body": "Name: Jane Doe. Email: jane@example.com. Phone: 509-555-0100. Looking for a quote on auto and home. Best contact method: email."
+}

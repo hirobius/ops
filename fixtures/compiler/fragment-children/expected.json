@@ -1,0 +1,48 @@
+{
+  "ok": true,
+  "commands": [
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-div-1",
+      "parentId": "root",
+      "type": "FRAME",
+      "props": {
+        "layoutMode": "VERTICAL",
+        "fill": "semantic.color.surface.page",
+        "itemSpacing": "semantic.space.layout.tight",
+        "primaryAxisSizingMode": "AUTO",
+        "counterAxisSizingMode": "AUTO"
+      }
+    },
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsbutton-2",
+      "parentId": "jsx-div-1",
+      "type": "INSTANCE",
+      "componentName": "HdsButton",
+      "attributes": {
+        "variant": "primary",
+        "label": "A"
+      },
+      "figmaProperties": {
+        "Variant": "primary",
+        "Label": "A"
+      }
+    },
+    {
+      "action": "ADD_NODE",
+      "id": "jsx-hdsbutton-3",
+      "parentId": "jsx-div-1",
+      "type": "INSTANCE",
+      "componentName": "HdsButton",
+      "attributes": {
+        "variant": "secondary",
+        "label": "B"
+      },
+      "figmaProperties": {
+        "Variant": "secondary",
+        "Label": "B"
+      }
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hirobius.com/schemas/tenant-tokens.schema.json",
+  "title": "Hirobius Tenant Token Overlay",
+  "description": "Per-tenant DTCG partial overlay. Only semantic.*, component.*, and role.* tiers are permitted. The primitive.* tier is off-limits (R1). Every declared token path must exist in the base hirobius.tokens.json (R5). Validators enforce all rules listed in docs/architecture/tenant-token-overlay-format.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Must reference this schema file."
+    },
+    "$description": {
+      "type": "string",
+      "description": "Human-readable description of this tenant overlay."
+    },
+    "semantic": {
+      "$ref": "#/$defs/tokenGroup",
+      "description": "Semantic-tier overrides (semantic.*). Primary override surface for tenant brand colour, motion, spacing, etc."
+    },
+    "component": {
+      "$ref": "#/$defs/tokenGroup",
+      "description": "Component-tier overrides (component.*). Use only when semantic-tier overrides cannot express the required brand deviation."
+    },
+    "role": {
+      "$ref": "#/$defs/tokenGroup",
+      "description": "Role-tier overrides (role.*). Shadcn-style role aliases that map to semantic tokens."
+    }
+  },
+  "not": {
+    "required": ["primitive"],
+    "description": "The primitive tier is off-limits for tenant overrides. See R1 in docs/architecture/tenant-token-overlay-format.md."
+  },
+  "$defs": {
+    "tokenValue": {
+      "description": "A DTCG token leaf value. May be a string (color hex, dimension, alias ref), number, boolean, null, array, or composite object.",
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" },
+        { "type": "array" },
+        { "type": "object" }
+      ]
+    },
+    "figmaModes": {
+      "type": "object",
+      "description": "Figma Variables mode map. Keys are mode names (Light, Dark). Values are token values or alias refs.",
+      "properties": {
+        "Light": { "$ref": "#/$defs/tokenValue" },
+        "Dark": { "$ref": "#/$defs/tokenValue" }
+      },
+      "additionalProperties": { "$ref": "#/$defs/tokenValue" }
+    },
+    "figmaExtensions": {
+      "type": "object",
+      "description": "com.figma.variables extension block for mode-aware overrides.",
+      "properties": {
+        "modes": { "$ref": "#/$defs/figmaModes" },
+        "fontSize": { "type": "string" },
+        "note": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "extensions": {
+      "type": "object",
+      "description": "DTCG $extensions block. Tenant overlays may include com.figma.variables for mode-aware dark/light values.",
+      "properties": {
+        "com.figma.variables": { "$ref": "#/$defs/figmaExtensions" }
+      },
+      "additionalProperties": true
+    },
+    "tokenLeaf": {
+      "type": "object",
+      "description": "A DTCG leaf token. Must contain $value. May contain $type, $description, $extensions.",
+      "required": ["$value"],
+      "properties": {
+        "$value": { "$ref": "#/$defs/tokenValue" },
+        "$type": {
+          "type": "string",
+          "description": "DTCG token type. Optional at the leaf when inherited from a parent group.",
+          "enum": [
+            "color",
+            "dimension",
+            "fontFamily",
+            "fontWeight",
+            "duration",
+            "cubicBezier",
+            "number",
+            "boolean",
+            "string",
+            "shadow",
+            "gradient",
+            "typography",
+            "motion",
+            "elevation",
+            "fontStyle",
+            "fontVariant",
+            "fontStretch",
+            "letterSpacing",
+            "lineHeight"
+          ]
+        },
+        "$description": {
+          "type": "string"
+        },
+        "$extensions": { "$ref": "#/$defs/extensions" }
+      },
+      "additionalProperties": false
+    },
+    "tokenGroup": {
+      "type": "object",
+      "description": "A DTCG token group. Keys starting with $ are group-level metadata; all other keys are child groups or token leaves.",
+      "properties": {
+        "$type": {
+          "type": "string",
+          "description": "DTCG type inherited by all child tokens in this group.",
+          "enum": [
+            "color",
+            "dimension",
+            "fontFamily",
+            "fontWeight",
+            "duration",
+            "cubicBezier",
+            "number",
+            "boolean",
+            "string",
+            "shadow",
+            "gradient",
+            "typography",
+            "motion",
+            "elevation",
+            "fontStyle",
+            "fontVariant",
+            "fontStretch",
+            "letterSpacing",
+            "lineHeight"
+          ]
+        },
+        "$description": {
+          "type": "string"
+        },
+        "$extensions": { "$ref": "#/$defs/extensions" }
+      },
+      "additionalProperties": {
+        "description": "Child group or token leaf. Keys starting with $ are DTCG metadata; all other keys are token paths.",
+        "oneOf": [
+          { "$ref": "#/$defs/tokenLeaf" },
+          { "$ref": "#/$defs/tokenGroup" }
+        ]
+      }
+    }
+  }
+}

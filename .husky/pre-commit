@@ -1,0 +1,46 @@
+#!/usr/bin/env sh
+set -e
+
+echo "Running secrets scan..."
+gitleaks git --config .gitleaks.toml --staged --verbose
+
+echo "Running lint-staged (Prettier formatting on staged files)..."
+pnpm exec lint-staged
+
+echo "Running fast static analysis..."
+pnpm typecheck
+
+echo "Running lint (12i-quality-eslint-burndown complete — zero warnings/errors enforced)..."
+pnpm lint --max-warnings=0
+
+echo "Validating manifest schema..."
+# Not a registry gate (no registry entry) — invoked explicitly here.
+node scripts/validate-manifest.mjs
+
+echo "Checking guardrail registry is complete..."
+# Not a registry gate (no registry entry) — invoked explicitly here.
+node scripts/validate-guardrail-registry.mjs
+
+echo "Checking lockfile integrity (pnpm install --frozen-lockfile)..."
+pnpm install --frozen-lockfile --offline --prefer-offline --ignore-scripts --silent 2>/dev/null || (echo "Lockfile drift detected: run 'pnpm install' to resync pnpm-lock.yaml" && exit 1)
+
+echo "Checking file encoding (editorconfig-checker — charset utf-8 enforcement)..."
+pnpm exec editorconfig-checker
+
+echo "Running all pre-commit registry gates (15 gates, declaration order)..."
+# Single source of truth: reads docs/guardrails/registry.json --channel pre-commit.
+# Gate list and order are authoritative from the registry — never edit gate
+# invocations here directly. To add/remove a gate from pre-commit, update
+# registry.json firingChannel instead. Serial (no --parallel): order matters.
+#
+# Per-file scoping (unit 13g-2-validator-self-register): pass the staged
+# file list as --scope. Gates with a `glob` in registry.json run only when
+# at least one staged path matches; gates with `scope: "full-tree"` (or no
+# scope/glob) always run. See scripts/lib/gate-scope.mjs.
+SCOPE="$(git diff --cached --name-only | tr '\n' ',')"
+node scripts/run-gates.mjs --channel pre-commit --scope "$SCOPE"
+
+echo "Updating pre-commit structure hash..."
+# MUST remain last — updates the structural hash in registry.json so
+# check-validator-wiring can detect future tamper/bypass drift.
+node scripts/update-precommit-hash.mjs

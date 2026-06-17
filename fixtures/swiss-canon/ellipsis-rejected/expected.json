@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsText.children",
+      "code": "SWISS_ELLIPSIS",
+      "message": "HdsText uses three-period ellipsis \"...\"",
+      "suggestion": "Use the single-character ellipsis \"…\" (U+2026) for typographic correctness."
+    }
+  ]
+}

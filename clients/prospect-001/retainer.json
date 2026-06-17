@@ -1,0 +1,28 @@
+{
+  "model": "prospect",
+  "description": "Pre-retainer. No agreement in place yet. Pending first consult with Phil.",
+  "currentPhase": {
+    "phase": "pre-consult",
+    "scopedAt": 0,
+    "currency": "USD",
+    "status": "prospect"
+  },
+  "packageHypothesis": "Starter",
+  "estimatedScope": "$500–$1,000",
+  "hypothesisRationale": "Solo operator, newly licensed, set-it-and-forget-it mentality. Needs website + domain/hosting setup. No automation, no funnels. Conrad's exact framing: 'very, very basic mobile friendly simple shit.'",
+  "blockers": [
+    "First consult not yet scheduled"
+  ],
+  "futureTiers": [
+    {
+      "tier": "Starter — Website + Domain/Hosting",
+      "estimatedScope": "$500–$1,000",
+      "includes": ["3–5 page website", "Contact form", "Project photo gallery", "Domain + hosting setup", "Google Business Profile"]
+    },
+    {
+      "tier": "Growth (if business scales)",
+      "estimatedScope": "$1,500–$3,500",
+      "notes": "If Phil gets busy and wants lead capture, follow-up automation, or a booking form — upsell path is clear."
+    }
+  ]
+}

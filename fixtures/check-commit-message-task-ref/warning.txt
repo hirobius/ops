@@ -1,0 +1,3 @@
+feat(scope): add the thing
+
+Body without any task reference. Should warn (warn-mode) or fail (error-mode).

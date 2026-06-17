@@ -1,0 +1,9 @@
+{
+  "source": "figma-variables",
+  "tokens": {
+    "primitive": [
+      { "path": "primitive.color.neutral.50", "type": "color", "value": "#fafafa" },
+      { "path": "primitive.color.neutral.50", "type": "color", "value": "#000000" }
+    ]
+  }
+}

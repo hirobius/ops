@@ -1,0 +1,85 @@
+name: Quality gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: Typecheck, canon validators, and layout tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level moderate
+
+      - name: Build (catches Vite/asset issues)
+        run: pnpm build
+
+      - name: Bundle budget check (hard-fail)
+        # Budgets are +10% over 2026-05-01 baseline. Promoted from warn-mode
+        # after 2 clean PRs confirmed headroom (12o-perf-bundle-budget-hard-fail-promote).
+        # Exceeding a budget will fail the merge — this is intentional.
+        run: pnpm size-limit
+
+      - name: Build library artifact (catches barrel / type-emit regressions)
+        # pnpm build:lib emits dist/{hirobius-ui,cn,tokens,manifest}.js + tokens.css
+        # via vite.config.lib.ts. A breaking change to src/index.ts barrel exports
+        # would be caught here before it ships. Runs after the app build so the
+        # dist/ directory is fresh and not stale from a prior local run.
+        run: pnpm build:lib
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Manifest drift check
+        run: node scripts/check-manifest-drift.mjs
+
+      - name: Binding drift check
+        run: node scripts/check-binding-drift.mjs
+
+      - name: Source canon check
+        run: node scripts/check-source-canon.mjs
+
+      - name: Type coverage (≥99.9%)
+        # Replaced bespoke check-type-coverage-ratchet.mjs (99 LOC) with native type-coverage CLI.
+        # Coverage must stay ≥99.9% (101149/101250 baseline, 2026-05-06).
+        run: pnpm exec type-coverage --at-least 99.9
+
+      - name: CI-PR registry gates (ci-pr channel)
+        # Single source of truth: reads docs/guardrails/registry.json --channel ci-pr.
+        # Currently wired gates: audit-gate-purity, audit-strengths.
+        # To add/remove a gate from ci-pr, update registry.json firingChannel — do not
+        # add explicit invocations here. Runs with --parallel 4 for speed.
+        run: node scripts/run-gates.mjs --channel ci-pr --parallel 4
+
+      - name: Install Playwright (chromium only)
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Layout tests
+        run: pnpm test:layout

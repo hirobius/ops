@@ -1,0 +1,12 @@
+{
+  "name": "HDS Agent Bridge",
+  "id": "hds-agent-bridge-local",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["http://localhost:3005"],
+    "reasoning": "Communicates with a local Node.js bridge server to sync design tokens and trigger local LLM documentation builds."
+  }
+}

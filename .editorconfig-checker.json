@@ -1,0 +1,39 @@
+{
+  "Version": "v3.6.1",
+  "Verbose": false,
+  "Format": "",
+  "Debug": false,
+  "IgnoreDefaults": false,
+  "SpacesAfterTabs": false,
+  "NoColor": false,
+  "Exclude": [
+    "node_modules",
+    "\\.git",
+    "dist",
+    "\\.vercel",
+    "pnpm-lock\\.yaml",
+    "claude-config",
+    "\\.claude",
+    "starter-kit",
+    "data/",
+    "clients/",
+    "public/assets",
+    "scripts/poc",
+    "src/app/components/ComponentDocPage\\.tsx",
+    "src/app/components/lab/legacy-token-detail\\.tsx",
+    "src/app/components/mobius-scene\\.tsx",
+    "src/app/components/table\\.tsx",
+    "src/app/components/tag\\.tsx"
+  ],
+  "AllowedContentTypes": [],
+  "PassedFiles": [],
+  "Disable": {
+    "Charset": false,
+    "EndOfLine": true,
+    "Indentation": true,
+    "InsertFinalNewline": true,
+    "TrimTrailingWhitespace": true,
+    "IndentSize": true,
+    "MaxLineLength": true
+  }
+}

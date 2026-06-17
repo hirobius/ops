@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsText.color",
+      "code": "SWISS_MULTI_HUE_TEXT",
+      "message": "Sibling text-bearing elements use different hue families (content, accent) for hierarchy",
+      "suggestion": "Drive hierarchy with opacity on a single hue: semantic.color.content.{primary,secondary,tertiary}. One accent token per layout, not per text node."
+    }
+  ]
+}

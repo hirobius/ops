@@ -1,0 +1,43 @@
+#!/bin/sh
+# HDS pre-push gate
+# Runs the heavier validation suite before every push.
+# One failing check blocks the push.
+# Fix violations or add the appropriate suppression comment before retrying.
+
+echo "Running full HDS checks..."
+pnpm check:full
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Push blocked. Fix the violations above, then push again."
+  exit 1
+fi
+
+echo "Running a11y tests..."
+pnpm test:a11y
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Push blocked. Fix the a11y failures above, then push again."
+  exit 1
+fi
+
+echo "Running HDS self-heal..."
+pnpm run heal
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Push blocked. Fix the self-heal failures above, then push again."
+  exit 1
+fi
+
+echo "Running foundation visual parity..."
+node scripts/visual-ingest.mjs --foundation-parity
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Push blocked. Fix the visual parity failures above, then push again."
+  exit 1
+fi
+
+echo "All checks passed. Pushing."

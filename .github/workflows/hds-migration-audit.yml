@@ -1,0 +1,120 @@
+name: HDS V1→V2 Migration Audit
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+    paths:
+      - 'src/app/**'
+      - 'hirobius.tokens.json'
+      - 'scripts/audit-component-source.js'
+      - '.github/workflows/hds-migration-audit.yml'
+
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/app/**'
+      - 'hirobius.tokens.json'
+      - 'scripts/audit-component-source.js'
+
+  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  hds-migration-audit:
+    name: HDS Migration Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --frozen-lockfile
+
+      - name: HDS Migration Audit
+        id: audit
+        run: node scripts/audit-component-source.js
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hds-audit-report
+          path: scripts/audit-report.md
+          retention-days: 30
+
+      - name: Upload metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hds-audit-metrics
+          path: scripts/metrics.json
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const metricsPath = 'scripts/metrics.json';
+
+            if (!fs.existsSync(metricsPath)) {
+              console.log('Metrics file not found');
+              return;
+            }
+
+            const metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8'));
+            const status = metrics.totalViolations === 0 ? '✅' : '❌';
+
+            const body = [
+              `## ${status} HDS V1→V2 Migration Audit`,
+              '',
+              `| Metric | Value |`,
+              `|--------|-------|`,
+              `| Total Violations | ${metrics.totalViolations} |`,
+              `| Typography | ${metrics.typographyViolations} |`,
+              `| Spacing | ${metrics.spacingViolations} |`,
+              `| Last Updated | ${new Date(metrics.lastUpdated).toLocaleString()} |`,
+              '',
+              metrics.totalViolations === 0
+                ? '✅ System is clean — no V1 tokens or hardcoded spacing detected.'
+                : '❌ Violations found. Review the audit report above.',
+            ].join('\n');
+
+            // Find existing comment to update
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body.includes('HDS V1→V2 Migration Audit'));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Fail if violations found
+        if: steps.audit.outcome == 'failure'
+        run: |
+          echo "❌ HDS migration audit found violations. Check the report above."
+          exit 1

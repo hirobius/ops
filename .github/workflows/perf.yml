@@ -1,0 +1,48 @@
+name: Web Vitals budget
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: perf-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  perf-budget:
+    name: Lighthouse CI — LCP / CLS / TBT / FCP budgets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Install Chromium for Lighthouse
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Web Vitals budget (collect + assert)
+        # Fails the job if LCP > 1563ms, TBT > 328ms, CLS > 0.005, or FCP > 823ms.
+        # Thresholds are baseline median + 5% (captured 2026-05-02 on desktop preset).
+        # To update budgets: run pnpm perf:budget locally, read .lighthouseci/lhr-*.json,
+        # recompute medians, and edit .lighthouserc.json assertions.
+        run: |
+          CHROME=$(find ~/.cache/ms-playwright -name "chrome" -type f 2>/dev/null | sort -V | tail -1)
+          pnpm exec lhci collect --config=.lighthouserc.json --chromePath="$CHROME"
+          pnpm exec lhci assert --config=.lighthouserc.json

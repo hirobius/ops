@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "path": "HdsCard.radius",
+      "code": "SWISS_OVERSIZED_RADIUS",
+      "message": "HdsCard.radius=24 is too round for a structural element",
+      "suggestion": "Cards, inputs, frames, containers use radius 0/2/4/8 only. Pills (HdsBadge) may use larger radii."
+    }
+  ]
+}

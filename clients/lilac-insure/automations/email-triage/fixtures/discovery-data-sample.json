@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "purpose": "Synthetic inbox sample for testing discovery.mjs without real Graph API credentials. 12 messages roughly mirroring an insurance agency inbox — leads, carrier comms, vendor mail, claims, renewals, noise.",
+    "useFor": "node discovery.mjs --question A1 --from-fixture fixtures/discovery-data-sample.json"
+  },
+  "windowDescription": "Last 12 messages (synthetic, 7 days)",
+  "messages": [
+    { "id": "1", "receivedAt": "2026-04-28T14:02:00Z", "from": "forms@lilacinsure.com", "subject": "New lead: Quote request from website", "preview": "Name: Jane Doe. Email: jane@example.com. Looking for a quote on auto and home." },
+    { "id": "2", "receivedAt": "2026-04-28T15:30:00Z", "from": "conrad@lilacinsure.com", "subject": "Re: New lead: Quote request from website", "preview": "Hi Jane, thanks for reaching out. Let me pull together a quote for you. Conrad." },
+    { "id": "3", "receivedAt": "2026-04-29T09:14:00Z", "from": "underwriter@rtspecialty.com", "subject": "Submission #88421 — quote indication ready", "preview": "Please review the attached indication. Rate is locked through Friday." },
+    { "id": "4", "receivedAt": "2026-04-29T11:45:00Z", "from": "claims@progressive.com", "subject": "FNOL — Auto claim filed for policy 99-AUTO-123", "preview": "First notice of loss received. Insured reports a rear-end collision on I-90." },
+    { "id": "5", "receivedAt": "2026-04-30T08:20:00Z", "from": "renewals@safeco.com", "subject": "Renewal proposal ready — policy expires 2026-06-15", "preview": "Your client's home policy is up for renewal. Please review attached proposal." },
+    { "id": "6", "receivedAt": "2026-04-30T13:11:00Z", "from": "no-reply@ezlynx.com", "subject": "Scheduled maintenance window — Saturday 02:00 PT", "preview": "EZLynx will be unavailable for scheduled downtime from 02:00–04:00 PT." },
+    { "id": "7", "receivedAt": "2026-04-30T16:58:00Z", "from": "agent-bulletin@travelers.com", "subject": "April commission statement + 1099 reminder", "preview": "Your April commission report is attached. Reminder: 1099 forms available in agent portal." },
+    { "id": "8", "receivedAt": "2026-05-01T08:00:00Z", "from": "billing@libertymutual.com", "subject": "Notice of intent to cancel — non-payment / NSF", "preview": "Returned check received. Policy is scheduled for cancellation in 10 days." },
+    { "id": "9", "receivedAt": "2026-05-01T10:22:00Z", "from": "client.smith@example.com", "subject": "Need a copy of my insurance card", "preview": "Hi Conrad, can you send me a proof of insurance for my auto policy?" },
+    { "id": "10", "receivedAt": "2026-05-02T09:00:00Z", "from": "licensing@oic.wa.gov", "subject": "Producer license renewal due — CE credit required", "preview": "Your producer license is expiring 2026-08-30." },
+    { "id": "11", "receivedAt": "2026-05-02T15:33:00Z", "from": "newsletter@insurancemarketingweekly.com", "subject": "Limited time: save 20% on your agent CRM upgrade", "preview": "Exclusive offer for independent agents. Unsubscribe from this list." },
+    { "id": "12", "receivedAt": "2026-05-03T07:42:00Z", "from": "forms@lilacinsure.com", "subject": "New lead: commercial liability quote", "preview": "Name: Acme Roofing LLC. Looking for general liability for a small roofing business." }
+  ]
+}

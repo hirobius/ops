@@ -1,0 +1,64 @@
+{
+  "agents": [
+    {
+      "id": "claude",
+      "name": "Claude",
+      "handle": "@claude",
+      "role": "Lead Engineer & Architect",
+      "specialty": "Strategic decisions, architecture, code review, sub-agent dispatch",
+      "model": "claude-sonnet-4-6",
+      "provider": "Anthropic API",
+      "tier": "T4",
+      "color": "#7C3AED",
+      "monogram": "C",
+      "status": "active",
+      "note": "Interactive session lead. Only tier that handles brand, business logic, and ambiguous scope.",
+      "unitsSupervised": 253
+    },
+    {
+      "id": "hermes-agent",
+      "name": "Hermes",
+      "handle": "@hermes",
+      "role": "Autonomous Field Agent",
+      "specialty": "Mechanical edits, rename ops, registry scrubs, cron/baseline tasks",
+      "model": "hermes3:latest",
+      "provider": "Local Ollama",
+      "tier": "T1",
+      "color": "#10B981",
+      "monogram": "H",
+      "status": "active",
+      "note": "NousResearch Hermes 3. Skill-learning agent OS with SQLite episodic memory. Free to run.",
+      "unitsCompleted": null
+    },
+    {
+      "id": "qwen-worker",
+      "name": "Qwen",
+      "handle": "@qwen",
+      "role": "Senior Developer Agent",
+      "specialty": "Components, schemas, scripts, validators, bridge endpoints",
+      "model": "qwen2.5-coder:14b-hds",
+      "provider": "Local Ollama",
+      "tier": "T2/T3",
+      "color": "#F59E0B",
+      "monogram": "Q",
+      "status": "active",
+      "note": "Custom 14B coder model with 65K context override (qwen2.5-coder:14b-hds Modelfile). RTX 3060 runner.",
+      "unitsCompleted": null
+    },
+    {
+      "id": "sonnet-agent",
+      "name": "Sonnet Pod",
+      "handle": "@sonnet-pod",
+      "role": "Specialist Dispatch",
+      "specialty": "Isolated unit work requiring deletions or cross-file refactors; runs in worktree isolation",
+      "model": "claude-sonnet-4-6",
+      "provider": "Anthropic API (sub-agent)",
+      "tier": "T2/T3",
+      "color": "#6366F1",
+      "monogram": "S",
+      "status": "active",
+      "note": "Spawned by Claude via Agent tool. Always uses worktree isolation. Handles deletions + judgment tasks.",
+      "unitsCompleted": null
+    }
+  ]
+}

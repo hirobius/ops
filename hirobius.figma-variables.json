@@ -1,0 +1,5401 @@
+{
+  "version": "1.0",
+  "collections": [
+    {
+      "name": "Hirobius/Primitives",
+      "modes": ["Default"],
+      "variables": [
+        {
+          "name": "color/neutral/50",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-50)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.9803921568627451,
+              "g": 0.9803921568627451,
+              "b": 0.9803921568627451,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/100",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-100)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.9607843137254902,
+              "g": 0.9607843137254902,
+              "b": 0.9607843137254902,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/200",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-200)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.8980392156862745,
+              "g": 0.8980392156862745,
+              "b": 0.8980392156862745,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/300",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-300)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.8313725490196079,
+              "g": 0.8313725490196079,
+              "b": 0.8313725490196079,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/400",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-400)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.6392156862745098,
+              "g": 0.6392156862745098,
+              "b": 0.6392156862745098,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/500",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-500)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.45098039215686275,
+              "g": 0.45098039215686275,
+              "b": 0.45098039215686275,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/600",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-600)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.3215686274509804,
+              "g": 0.3215686274509804,
+              "b": 0.3215686274509804,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/700",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-700)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.25098039215686274,
+              "g": 0.25098039215686274,
+              "b": 0.25098039215686274,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/800",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-800)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.14901960784313725,
+              "g": 0.14901960784313725,
+              "b": 0.14901960784313725,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/850",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-850)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.10196078431372549,
+              "g": 0.10196078431372549,
+              "b": 0.10196078431372549,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/900",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-900)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.06666666666666667,
+              "g": 0.06666666666666667,
+              "b": 0.06666666666666667,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/950",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-950)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.0392156862745098,
+              "g": 0.0392156862745098,
+              "b": 0.0392156862745098,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/white",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-white)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 1,
+              "g": 1,
+              "b": 1,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/neutral/black",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the neutral range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-neutral-black)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/blue/50",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the blue range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-blue-50)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.911793844446615,
+              "g": 0.9484835848405401,
+              "b": 0.9999999999999999,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/blue/100",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the blue range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-blue-100)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.8483800431685675,
+              "g": 0.8964425654606397,
+              "b": 0.9999999999999999,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/blue/200",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the blue range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-blue-200)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.7621713764344297,
+              "g": 0.8435648986233755,
+              "b": 0.9999999999999999,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/blue/300",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the blue range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-blue-300)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.29968021779343396,
+              "g": 0.5195543959584241,
+              "b": 0.9999999999999999,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/blue/400",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the blue range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-blue-400)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.24900462731470052,
+              "g": 0.44867626018938184,
+              "b": 0.9999999999999999,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/blue/450",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the blue range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-blue-450)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.16948054034238821,
+              "g": 0.3147281522511006,
+              "b": 0.9999999999999999,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/blue/500",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the blue range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-blue-500)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.11764705882352941,
+              "g": 0.1803921568627451,
+              "b": 0.9921568627450981,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/blue/600",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the blue range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-blue-600)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.1030659125483169,
+              "g": 0.09629660043297641,
+              "b": 0.9491627125704546,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/blue/700",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the blue range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-blue-700)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.10036051287615605,
+              "g": 0.05873083293973171,
+              "b": 0.9349248946254042,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/blue/800",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the blue range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-blue-800)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.11575982293327061,
+              "g": 0.17112676490157766,
+              "b": 0.31662219873326547,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/blue/900",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the blue range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-blue-900)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.062010569189862315,
+              "g": 0.09881369063557605,
+              "b": 0.1948559498076533,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/red/50",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the red range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-red-50)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.996078431372549,
+              "g": 0.9490196078431372,
+              "b": 0.9490196078431372,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/red/400",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the red range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-red-400)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.9725490196078431,
+              "g": 0.44313725490196076,
+              "b": 0.44313725490196076,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/red/700",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the red range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-red-700)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.7254901960784313,
+              "g": 0.10980392156862745,
+              "b": 0.10980392156862745,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/red/950",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the red range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-red-950)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.27058823529411763,
+              "g": 0.0392156862745098,
+              "b": 0.0392156862745098,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/green/50",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the green range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-green-50)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.9254901960784314,
+              "g": 0.9921568627450981,
+              "b": 0.9607843137254902,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/green/400",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the green range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-green-400)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.20392156862745098,
+              "g": 0.8274509803921568,
+              "b": 0.6,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/green/700",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the green range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-green-700)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.01568627450980392,
+              "g": 0.47058823529411764,
+              "b": 0.3411764705882353,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/green/950",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the green range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-green-950)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.00784313725490196,
+              "g": 0.17254901960784313,
+              "b": 0.13333333333333333,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/amber/50",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the amber range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-amber-50)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 1,
+              "g": 0.984313725490196,
+              "b": 0.9215686274509803,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/amber/400",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the amber range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-amber-400)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.984313725490196,
+              "g": 0.7490196078431373,
+              "b": 0.1411764705882353,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/amber/800",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the amber range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-amber-800)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.5725490196078431,
+              "g": 0.25098039215686274,
+              "b": 0.054901960784313725,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/amber/950",
+          "resolvedType": "COLOR",
+          "description": "Specific value within the amber range at a defined lightness step.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-amber-950)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.27058823529411763,
+              "g": 0.10196078431372549,
+              "b": 0.011764705882352941,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/projectBrand/microsoftGameDev/100",
+          "resolvedType": "COLOR",
+          "description": "Light support tone for the Microsoft Game Dev project brand.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-projectBrand-microsoftGameDev-100)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.8980392156862745,
+              "g": 0.8980392156862745,
+              "b": 0.9882352941176471,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/projectBrand/microsoftGameDev/500",
+          "resolvedType": "COLOR",
+          "description": "Primary accent tone for the Microsoft Game Dev project brand.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-projectBrand-microsoftGameDev-500)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.42745098039215684,
+              "g": 0.19215686274509805,
+              "b": 0.984313725490196,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "color/projectBrand/microsoftGameDev/900",
+          "resolvedType": "COLOR",
+          "description": "Dark support tone for the Microsoft Game Dev project brand.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-color-projectBrand-microsoftGameDev-900)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.17497071413745116,
+              "g": 0,
+              "b": 0.3295387876351584,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "space/0",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-0)"
+          },
+          "valuesByMode": {
+            "Default": 0
+          }
+        },
+        {
+          "name": "space/1",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-1)"
+          },
+          "valuesByMode": {
+            "Default": 4
+          }
+        },
+        {
+          "name": "space/2",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-2)"
+          },
+          "valuesByMode": {
+            "Default": 8
+          }
+        },
+        {
+          "name": "space/3",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-3)"
+          },
+          "valuesByMode": {
+            "Default": 12
+          }
+        },
+        {
+          "name": "space/4",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-4)"
+          },
+          "valuesByMode": {
+            "Default": 16
+          }
+        },
+        {
+          "name": "space/5",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-5)"
+          },
+          "valuesByMode": {
+            "Default": 20
+          }
+        },
+        {
+          "name": "space/6",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-6)"
+          },
+          "valuesByMode": {
+            "Default": 24
+          }
+        },
+        {
+          "name": "space/7",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-7)"
+          },
+          "valuesByMode": {
+            "Default": 28
+          }
+        },
+        {
+          "name": "space/8",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-8)"
+          },
+          "valuesByMode": {
+            "Default": 32
+          }
+        },
+        {
+          "name": "space/10",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-10)"
+          },
+          "valuesByMode": {
+            "Default": 40
+          }
+        },
+        {
+          "name": "space/12",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-12)"
+          },
+          "valuesByMode": {
+            "Default": 48
+          }
+        },
+        {
+          "name": "space/16",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-16)"
+          },
+          "valuesByMode": {
+            "Default": 64
+          }
+        },
+        {
+          "name": "space/20",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-20)"
+          },
+          "valuesByMode": {
+            "Default": 80
+          }
+        },
+        {
+          "name": "space/24",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-24)"
+          },
+          "valuesByMode": {
+            "Default": 96
+          }
+        },
+        {
+          "name": "space/32",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-32)"
+          },
+          "valuesByMode": {
+            "Default": 128
+          }
+        },
+        {
+          "name": "space/px1",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-px1)"
+          },
+          "valuesByMode": {
+            "Default": 1
+          }
+        },
+        {
+          "name": "space/px2",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-px2)"
+          },
+          "valuesByMode": {
+            "Default": 2
+          }
+        },
+        {
+          "name": "space/px6",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-px6)"
+          },
+          "valuesByMode": {
+            "Default": 6
+          }
+        },
+        {
+          "name": "space/px10",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-space-px10)"
+          },
+          "valuesByMode": {
+            "Default": 10
+          }
+        },
+        {
+          "name": "blur/8",
+          "resolvedType": "FLOAT",
+          "description": "8px blur step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-blur-8)"
+          },
+          "valuesByMode": {
+            "Default": 8
+          }
+        },
+        {
+          "name": "blur/16",
+          "resolvedType": "FLOAT",
+          "description": "Fullscreen backdrop blur for portfolio lightbox overlays.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-blur-16)"
+          },
+          "valuesByMode": {
+            "Default": 16
+          }
+        },
+        {
+          "name": "radius/0",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["CORNER_RADIUS"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-radius-0)"
+          },
+          "valuesByMode": {
+            "Default": 0
+          }
+        },
+        {
+          "name": "radius/2",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["CORNER_RADIUS"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-radius-2)"
+          },
+          "valuesByMode": {
+            "Default": 2
+          }
+        },
+        {
+          "name": "radius/4",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["CORNER_RADIUS"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-radius-4)"
+          },
+          "valuesByMode": {
+            "Default": 4
+          }
+        },
+        {
+          "name": "radius/8",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["CORNER_RADIUS"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-radius-8)"
+          },
+          "valuesByMode": {
+            "Default": 8
+          }
+        },
+        {
+          "name": "radius/12",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["CORNER_RADIUS"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-radius-12)"
+          },
+          "valuesByMode": {
+            "Default": 12
+          }
+        },
+        {
+          "name": "radius/full",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["CORNER_RADIUS"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-radius-full)"
+          },
+          "valuesByMode": {
+            "Default": 9999
+          }
+        },
+        {
+          "name": "typography/family/primary",
+          "resolvedType": "STRING",
+          "description": "Body face: Satoshi (ITF). Self-hosted from /public/fonts/satoshi/. Replaces Clash Grotesk for better small-size legibility (open apertures, larger x-height). Falls back to system-ui sans-serif stack.",
+          "scopes": ["FONT_FAMILY"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-family-primary)"
+          },
+          "valuesByMode": {
+            "Default": "Satoshi"
+          }
+        },
+        {
+          "name": "typography/family/display",
+          "resolvedType": "STRING",
+          "description": "Display face: Clash Display ITF, bound to display/h1/h2/h3 composites.",
+          "scopes": ["FONT_FAMILY"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-family-display)"
+          },
+          "valuesByMode": {
+            "Default": "Clash Display"
+          }
+        },
+        {
+          "name": "typography/family/mono",
+          "resolvedType": "STRING",
+          "description": "Monospace face: Geist Mono. Falls back to Courier New, monospace.",
+          "scopes": ["FONT_FAMILY"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-family-mono)"
+          },
+          "valuesByMode": {
+            "Default": "Geist Mono"
+          }
+        },
+        {
+          "name": "typography/size/2xs",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-size-2xs)"
+          },
+          "valuesByMode": {
+            "Default": 10
+          }
+        },
+        {
+          "name": "typography/size/xs",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-size-xs)"
+          },
+          "valuesByMode": {
+            "Default": 13
+          }
+        },
+        {
+          "name": "typography/size/sm",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-size-sm)"
+          },
+          "valuesByMode": {
+            "Default": 15
+          }
+        },
+        {
+          "name": "typography/size/base",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-size-base)"
+          },
+          "valuesByMode": {
+            "Default": 17
+          }
+        },
+        {
+          "name": "typography/size/lg",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-size-lg)"
+          },
+          "valuesByMode": {
+            "Default": 20
+          }
+        },
+        {
+          "name": "typography/size/xl",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-size-xl)"
+          },
+          "valuesByMode": {
+            "Default": 24
+          }
+        },
+        {
+          "name": "typography/size/2xl",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-size-2xl)"
+          },
+          "valuesByMode": {
+            "Default": 30
+          }
+        },
+        {
+          "name": "typography/size/3xl",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-size-3xl)"
+          },
+          "valuesByMode": {
+            "Default": 36
+          }
+        },
+        {
+          "name": "typography/size/4xl",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-size-4xl)"
+          },
+          "valuesByMode": {
+            "Default": 48
+          }
+        },
+        {
+          "name": "typography/size/5xl",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-size-5xl)"
+          },
+          "valuesByMode": {
+            "Default": 80
+          }
+        },
+        {
+          "name": "typography/size/7xl",
+          "resolvedType": "FLOAT",
+          "description": "Swiss-canon display size. Static desktop value; fluid in theme.css.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-size-7xl)"
+          },
+          "valuesByMode": {
+            "Default": 72
+          }
+        },
+        {
+          "name": "typography/weight/light",
+          "resolvedType": "FLOAT",
+          "description": "Swiss-canon heading weight. Display and h1/h2 composites only.",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-weight-light)"
+          },
+          "valuesByMode": {
+            "Default": 300
+          }
+        },
+        {
+          "name": "typography/weight/regular",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-weight-regular)"
+          },
+          "valuesByMode": {
+            "Default": 400
+          }
+        },
+        {
+          "name": "typography/weight/medium",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-weight-medium)"
+          },
+          "valuesByMode": {
+            "Default": 500
+          }
+        },
+        {
+          "name": "typography/weight/semibold",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-weight-semibold)"
+          },
+          "valuesByMode": {
+            "Default": 600
+          }
+        },
+        {
+          "name": "typography/weight/bold",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-weight-bold)"
+          },
+          "valuesByMode": {
+            "Default": 700
+          }
+        },
+        {
+          "name": "typography/lineHeight/compact",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-lineHeight-compact)"
+          },
+          "valuesByMode": {
+            "Default": 0.95
+          }
+        },
+        {
+          "name": "typography/lineHeight/none",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-lineHeight-none)"
+          },
+          "valuesByMode": {
+            "Default": 1
+          }
+        },
+        {
+          "name": "typography/lineHeight/tight",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-lineHeight-tight)"
+          },
+          "valuesByMode": {
+            "Default": 1.25
+          }
+        },
+        {
+          "name": "typography/lineHeight/snug",
+          "resolvedType": "FLOAT",
+          "description": "Swiss-canon snug rhythm (10t-5). Used by h2/h3 composites for tight-but-readable heading lines.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-lineHeight-snug)"
+          },
+          "valuesByMode": {
+            "Default": 1.375
+          }
+        },
+        {
+          "name": "typography/lineHeight/normal",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-lineHeight-normal)"
+          },
+          "valuesByMode": {
+            "Default": 1.5
+          }
+        },
+        {
+          "name": "typography/lineHeight/relaxed",
+          "resolvedType": "FLOAT",
+          "description": "Swiss-canon relaxed rhythm (10t-5). Used by body/small/mono composites for long-form prose comfort.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-lineHeight-relaxed)"
+          },
+          "valuesByMode": {
+            "Default": 1.625
+          }
+        },
+        {
+          "name": "typography/letterSpacing/tighter",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-letterSpacing-tighter)"
+          },
+          "valuesByMode": {
+            "Default": -0.02
+          }
+        },
+        {
+          "name": "typography/letterSpacing/tight",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-letterSpacing-tight)"
+          },
+          "valuesByMode": {
+            "Default": -0.01
+          }
+        },
+        {
+          "name": "typography/letterSpacing/normal",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-letterSpacing-normal)"
+          },
+          "valuesByMode": {
+            "Default": 0
+          }
+        },
+        {
+          "name": "typography/letterSpacing/wide",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-letterSpacing-wide)"
+          },
+          "valuesByMode": {
+            "Default": 0.01
+          }
+        },
+        {
+          "name": "typography/letterSpacing/wider",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-letterSpacing-wider)"
+          },
+          "valuesByMode": {
+            "Default": 0.02
+          }
+        },
+        {
+          "name": "typography/letterSpacing/caps",
+          "resolvedType": "FLOAT",
+          "description": "All-caps tracking for eyebrow / kicker labels. Always pairs with text-transform: uppercase.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-typography-letterSpacing-caps)"
+          },
+          "valuesByMode": {
+            "Default": 0.06
+          }
+        },
+        {
+          "name": "duration/instant",
+          "resolvedType": "FLOAT",
+          "description": "Fixed elapsed time interval in milliseconds.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-duration-instant)"
+          },
+          "valuesByMode": {
+            "Default": 100
+          }
+        },
+        {
+          "name": "duration/short",
+          "resolvedType": "FLOAT",
+          "description": "Fixed elapsed time interval in milliseconds.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-duration-short)"
+          },
+          "valuesByMode": {
+            "Default": 150
+          }
+        },
+        {
+          "name": "duration/medium",
+          "resolvedType": "FLOAT",
+          "description": "Fixed elapsed time interval in milliseconds.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-duration-medium)"
+          },
+          "valuesByMode": {
+            "Default": 250
+          }
+        },
+        {
+          "name": "duration/long",
+          "resolvedType": "FLOAT",
+          "description": "Fixed elapsed time interval in milliseconds.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-duration-long)"
+          },
+          "valuesByMode": {
+            "Default": 400
+          }
+        },
+        {
+          "name": "easing/emphasized",
+          "resolvedType": "STRING",
+          "description": "Cubic bezier with balanced input and output tangents.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-easing-emphasized)"
+          },
+          "valuesByMode": {
+            "Default": "cubic-bezier(0.4, 0, 0.2, 1)"
+          }
+        },
+        {
+          "name": "easing/decelerate",
+          "resolvedType": "STRING",
+          "description": "Cubic bezier with steep initial gain and constrained tail velocity.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-easing-decelerate)"
+          },
+          "valuesByMode": {
+            "Default": "cubic-bezier(0, 0, 0.2, 1)"
+          }
+        },
+        {
+          "name": "easing/accelerate",
+          "resolvedType": "STRING",
+          "description": "Cubic bezier with restrained initial gain and steep terminal velocity.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-easing-accelerate)"
+          },
+          "valuesByMode": {
+            "Default": "cubic-bezier(0.4, 0, 1, 1)"
+          }
+        },
+        {
+          "name": "shadow/color",
+          "resolvedType": "COLOR",
+          "description": "HSL channels for shadow-color alpha compositing. Light: cool neutral; dark: black.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-shadow-color)"
+          },
+          "valuesByMode": {
+            "Default": {
+              "r": 0.1566,
+              "g": 0.1722,
+              "b": 0.2034,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "breakpoint/xs",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-breakpoint-xs)"
+          },
+          "valuesByMode": {
+            "Default": 375
+          }
+        },
+        {
+          "name": "breakpoint/sm",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-breakpoint-sm)"
+          },
+          "valuesByMode": {
+            "Default": 640
+          }
+        },
+        {
+          "name": "breakpoint/md",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-breakpoint-md)"
+          },
+          "valuesByMode": {
+            "Default": 768
+          }
+        },
+        {
+          "name": "breakpoint/lg",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-breakpoint-lg)"
+          },
+          "valuesByMode": {
+            "Default": 1024
+          }
+        },
+        {
+          "name": "breakpoint/xl",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-breakpoint-xl)"
+          },
+          "valuesByMode": {
+            "Default": 1280
+          }
+        },
+        {
+          "name": "size/8",
+          "resolvedType": "FLOAT",
+          "description": "8px size step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-8)"
+          },
+          "valuesByMode": {
+            "Default": 8
+          }
+        },
+        {
+          "name": "size/10",
+          "resolvedType": "FLOAT",
+          "description": "10px size step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-10)"
+          },
+          "valuesByMode": {
+            "Default": 10
+          }
+        },
+        {
+          "name": "size/12",
+          "resolvedType": "FLOAT",
+          "description": "12px size step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-12)"
+          },
+          "valuesByMode": {
+            "Default": 12
+          }
+        },
+        {
+          "name": "size/16",
+          "resolvedType": "FLOAT",
+          "description": "16px size step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-16)"
+          },
+          "valuesByMode": {
+            "Default": 16
+          }
+        },
+        {
+          "name": "size/20",
+          "resolvedType": "FLOAT",
+          "description": "20px size step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-20)"
+          },
+          "valuesByMode": {
+            "Default": 20
+          }
+        },
+        {
+          "name": "size/24",
+          "resolvedType": "FLOAT",
+          "description": "24px size step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-24)"
+          },
+          "valuesByMode": {
+            "Default": 24
+          }
+        },
+        {
+          "name": "size/32",
+          "resolvedType": "FLOAT",
+          "description": "32px size step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-32)"
+          },
+          "valuesByMode": {
+            "Default": 32
+          }
+        },
+        {
+          "name": "size/40",
+          "resolvedType": "FLOAT",
+          "description": "40px size step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-40)"
+          },
+          "valuesByMode": {
+            "Default": 40
+          }
+        },
+        {
+          "name": "size/48",
+          "resolvedType": "FLOAT",
+          "description": "48px size step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-48)"
+          },
+          "valuesByMode": {
+            "Default": 48
+          }
+        },
+        {
+          "name": "size/64",
+          "resolvedType": "FLOAT",
+          "description": "64px size step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-64)"
+          },
+          "valuesByMode": {
+            "Default": 64
+          }
+        },
+        {
+          "name": "size/80",
+          "resolvedType": "FLOAT",
+          "description": "80px size step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-80)"
+          },
+          "valuesByMode": {
+            "Default": 80
+          }
+        },
+        {
+          "name": "size/96",
+          "resolvedType": "FLOAT",
+          "description": "96px size step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-96)"
+          },
+          "valuesByMode": {
+            "Default": 96
+          }
+        },
+        {
+          "name": "size/interactive/min",
+          "resolvedType": "FLOAT",
+          "description": "Minimum interactive hit target size.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-interactive-min)"
+          },
+          "valuesByMode": {
+            "Default": 44
+          }
+        },
+        {
+          "name": "size/width/96",
+          "resolvedType": "FLOAT",
+          "description": "96px width step.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-width-96)"
+          },
+          "valuesByMode": {
+            "Default": 96
+          }
+        },
+        {
+          "name": "size/width/760",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-width-760)"
+          },
+          "valuesByMode": {
+            "Default": 760
+          }
+        },
+        {
+          "name": "size/width/1200",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-width-1200)"
+          },
+          "valuesByMode": {
+            "Default": 1200
+          }
+        },
+        {
+          "name": "size/width/50ch",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-size-width-50ch)"
+          },
+          "valuesByMode": {
+            "Default": 50
+          }
+        },
+        {
+          "name": "grid/columns/1",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-grid-columns-1)"
+          },
+          "valuesByMode": {
+            "Default": 1
+          }
+        },
+        {
+          "name": "grid/columns/2",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-grid-columns-2)"
+          },
+          "valuesByMode": {
+            "Default": 2
+          }
+        },
+        {
+          "name": "grid/columns/3",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-grid-columns-3)"
+          },
+          "valuesByMode": {
+            "Default": 3
+          }
+        },
+        {
+          "name": "zIndex/0",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-zIndex-0)"
+          },
+          "valuesByMode": {
+            "Default": 0
+          }
+        },
+        {
+          "name": "zIndex/10",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-zIndex-10)"
+          },
+          "valuesByMode": {
+            "Default": 10
+          }
+        },
+        {
+          "name": "zIndex/100",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-zIndex-100)"
+          },
+          "valuesByMode": {
+            "Default": 100
+          }
+        },
+        {
+          "name": "zIndex/1000",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-zIndex-1000)"
+          },
+          "valuesByMode": {
+            "Default": 1000
+          }
+        },
+        {
+          "name": "borderWidth/xs",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-borderWidth-xs)"
+          },
+          "valuesByMode": {
+            "Default": 1
+          }
+        },
+        {
+          "name": "borderWidth/sm",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-borderWidth-sm)"
+          },
+          "valuesByMode": {
+            "Default": 2
+          }
+        },
+        {
+          "name": "borderWidth/md",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--primitive-borderWidth-md)"
+          },
+          "valuesByMode": {
+            "Default": 4
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hirobius/Semantic",
+      "modes": ["Light", "Dark"],
+      "variables": [
+        {
+          "name": "color/surface/page",
+          "resolvedType": "COLOR",
+          "description": "Main page background",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-surface-page)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/white"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/white"
+            }
+          }
+        },
+        {
+          "name": "color/surface/raised",
+          "resolvedType": "COLOR",
+          "description": "Subtle elevated surface (cards, sections)",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-surface-raised)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/50"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/50"
+            }
+          }
+        },
+        {
+          "name": "color/surface/overlay",
+          "resolvedType": "COLOR",
+          "description": "Deeper surface layer",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-surface-overlay)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/100"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/100"
+            }
+          }
+        },
+        {
+          "name": "color/surface/inverse",
+          "resolvedType": "COLOR",
+          "description": "Inverted background for contrast sections",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-surface-inverse)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/black"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/black"
+            }
+          }
+        },
+        {
+          "name": "color/surface/accent",
+          "resolvedType": "COLOR",
+          "description": "Accent-colored background",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-surface-accent)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/500"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/500"
+            }
+          }
+        },
+        {
+          "name": "color/surface/accentSubtle",
+          "resolvedType": "COLOR",
+          "description": "Faint accent tint for hover states or highlights",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-surface-accentSubtle)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/50"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/50"
+            }
+          }
+        },
+        {
+          "name": "color/content/primary",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-content-primary)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/900"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/900"
+            }
+          }
+        },
+        {
+          "name": "color/content/secondary",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-content-secondary)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/600"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/600"
+            }
+          }
+        },
+        {
+          "name": "color/content/disabled",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-content-disabled)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/300"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/300"
+            }
+          }
+        },
+        {
+          "name": "color/content/inverse",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-content-inverse)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/100"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/100"
+            }
+          }
+        },
+        {
+          "name": "color/content/accent",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-content-accent)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/500"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/500"
+            }
+          }
+        },
+        {
+          "name": "color/content/onAccent",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-content-onAccent)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/white"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/white"
+            }
+          }
+        },
+        {
+          "name": "color/border/default",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-border-default)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/200"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/200"
+            }
+          }
+        },
+        {
+          "name": "color/border/subdued",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-border-subdued)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/200"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/200"
+            }
+          }
+        },
+        {
+          "name": "color/border/subtle",
+          "resolvedType": "COLOR",
+          "description": "Lowest-contrast border for resting hairline edges on flat surfaces.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-border-subtle)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/100"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/100"
+            }
+          }
+        },
+        {
+          "name": "color/border/strong",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-border-strong)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/300"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/neutral/300"
+            }
+          }
+        },
+        {
+          "name": "color/border/accent",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-border-accent)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/500"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/500"
+            }
+          }
+        },
+        {
+          "name": "color/feedback/error",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-feedback-error)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/red/700"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/red/700"
+            }
+          }
+        },
+        {
+          "name": "color/feedback/success",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-feedback-success)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/green/700"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/green/700"
+            }
+          }
+        },
+        {
+          "name": "color/feedback/warning",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-feedback-warning)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/amber/800"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/amber/800"
+            }
+          }
+        },
+        {
+          "name": "color/feedback/info",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-feedback-info)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/500"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/500"
+            }
+          }
+        },
+        {
+          "name": "color/feedback/bg/error",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-feedback-bg-error)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/red/50"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/red/50"
+            }
+          }
+        },
+        {
+          "name": "color/feedback/bg/success",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-feedback-bg-success)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/green/50"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/green/50"
+            }
+          }
+        },
+        {
+          "name": "color/feedback/bg/warning",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-feedback-bg-warning)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/amber/50"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/amber/50"
+            }
+          }
+        },
+        {
+          "name": "color/feedback/bg/info",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-color-feedback-bg-info)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/50"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/50"
+            }
+          }
+        },
+        {
+          "name": "space/subgrid/hairline",
+          "resolvedType": "FLOAT",
+          "description": "1px border offset and hairline spacing.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-subgrid-hairline)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/px1"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/px1"
+            }
+          }
+        },
+        {
+          "name": "space/subgrid/xs",
+          "resolvedType": "FLOAT",
+          "description": "2px vertical rhythm nudge and baseline adjustment.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-subgrid-xs)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/px2"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/px2"
+            }
+          }
+        },
+        {
+          "name": "space/subgrid/gap",
+          "resolvedType": "FLOAT",
+          "description": "4px cap-height and inline cluster spacing.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-subgrid-gap)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/1"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/1"
+            }
+          }
+        },
+        {
+          "name": "space/component/gap",
+          "resolvedType": "FLOAT",
+          "description": "8px label↔input rhythm and closely coupled control spacing.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-component-gap)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            }
+          }
+        },
+        {
+          "name": "space/component/medium",
+          "resolvedType": "FLOAT",
+          "description": "12px adjacent form fields and medium intra-component gaps.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-component-medium)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            }
+          }
+        },
+        {
+          "name": "space/component/padding",
+          "resolvedType": "FLOAT",
+          "description": "24px default inset for cards, forms, panels, and grouped surfaces.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-component-padding)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            }
+          }
+        },
+        {
+          "name": "space/layout/tight",
+          "resolvedType": "FLOAT",
+          "description": "16px default HdsStack gap and inter-component spacing.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-layout-tight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/4"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/4"
+            }
+          }
+        },
+        {
+          "name": "space/layout/normal",
+          "resolvedType": "FLOAT",
+          "description": "24px column gutters and sidebar gutter spacing.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-layout-normal)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            }
+          }
+        },
+        {
+          "name": "space/layout/gutter",
+          "resolvedType": "FLOAT",
+          "description": "24px column and region gutters (alias for layout.normal).",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-layout-gutter)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            }
+          }
+        },
+        {
+          "name": "space/layout/inset",
+          "resolvedType": "FLOAT",
+          "description": "32px major block separation and inset inter-component gaps.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-layout-inset)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/8"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/8"
+            }
+          }
+        },
+        {
+          "name": "space/layout/spacious",
+          "resolvedType": "FLOAT",
+          "description": "48px section break and whitespace separator between major content blocks.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-layout-spacious)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/12"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/12"
+            }
+          }
+        },
+        {
+          "name": "space/section/stack",
+          "resolvedType": "FLOAT",
+          "description": "80px vertical rhythm between page sections and major editorial blocks.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-section-stack)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/20"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/20"
+            }
+          }
+        },
+        {
+          "name": "space/section/inset",
+          "resolvedType": "FLOAT",
+          "description": "96px hero and landing-page inset padding.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-section-inset)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/24"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/24"
+            }
+          }
+        },
+        {
+          "name": "space/section/heroMax",
+          "resolvedType": "FLOAT",
+          "description": "128px maximum hero region padding for extra-large displays.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-section-heroMax)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/32"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/32"
+            }
+          }
+        },
+        {
+          "name": "space/sidebar/indent",
+          "resolvedType": "FLOAT",
+          "description": "12px indent level for nested sidebar and TOC groups.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-sidebar-indent)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            }
+          }
+        },
+        {
+          "name": "space/sidebar/gap",
+          "resolvedType": "FLOAT",
+          "description": "16px vertical spacing between items in sidebar and TOC stacks.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-sidebar-gap)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/4"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/4"
+            }
+          }
+        },
+        {
+          "name": "space/sidebar/sectionGap",
+          "resolvedType": "FLOAT",
+          "description": "12px spacing between sidebar sections and grouped rail blocks.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-sidebar-sectionGap)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            }
+          }
+        },
+        {
+          "name": "space/sidebar/railPadding",
+          "resolvedType": "FLOAT",
+          "description": "20px outer padding for sidebar and TOC rails.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-space-sidebar-railPadding)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/5"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/5"
+            }
+          }
+        },
+        {
+          "name": "layout/width/content",
+          "resolvedType": "FLOAT",
+          "description": "Max width for prose/content (760px). Use with HdsContainer for centered text blocks.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-layout-width-content)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/width/760"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/width/760"
+            }
+          }
+        },
+        {
+          "name": "layout/width/max",
+          "resolvedType": "FLOAT",
+          "description": "Max width for full-layout containers (1200px). Use with HdsContainer for page layouts.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-layout-width-max)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/width/1200"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/width/1200"
+            }
+          }
+        },
+        {
+          "name": "layout/container/maxWidth",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-layout-container-maxWidth)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/width/1200"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/width/1200"
+            }
+          }
+        },
+        {
+          "name": "layout/content/maxWidth",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-layout-content-maxWidth)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/width/760"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/width/760"
+            }
+          }
+        },
+        {
+          "name": "layout/prose/maxWidth",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-layout-prose-maxWidth)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/width/50ch"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/width/50ch"
+            }
+          }
+        },
+        {
+          "name": "layout/section/paddingY",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-layout-section-paddingY)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/20"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/20"
+            }
+          }
+        },
+        {
+          "name": "layout/grid/gap",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-layout-grid-gap)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/8"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/8"
+            }
+          }
+        },
+        {
+          "name": "layout/grid/columns/mobile",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-layout-grid-columns-mobile)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "grid/columns/1"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "grid/columns/1"
+            }
+          }
+        },
+        {
+          "name": "layout/grid/columns/tablet",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-layout-grid-columns-tablet)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "grid/columns/2"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "grid/columns/2"
+            }
+          }
+        },
+        {
+          "name": "layout/grid/columns/desktop",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-layout-grid-columns-desktop)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "grid/columns/3"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "grid/columns/3"
+            }
+          }
+        },
+        {
+          "name": "typography/lineHeight/none",
+          "resolvedType": "FLOAT",
+          "description": "Semantic alias for leading-none (1). Display text and badge spans.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-lineHeight-none)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/lineHeight/none"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/lineHeight/none"
+            }
+          }
+        },
+        {
+          "name": "docs/space/section",
+          "resolvedType": "FLOAT",
+          "description": "48px between H2 sections — generous section break for doc pages.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-docs-space-section)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/12"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/12"
+            }
+          }
+        },
+        {
+          "name": "docs/space/paragraph",
+          "resolvedType": "FLOAT",
+          "description": "24px between paragraphs — comfortable prose rhythm for long-form doc content.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-docs-space-paragraph)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            }
+          }
+        },
+        {
+          "name": "docs/space/inline",
+          "resolvedType": "FLOAT",
+          "description": "8px inline cluster spacing — gap between metadata badges, inline icons, doc-page chips.",
+          "scopes": ["GAP", "WIDTH_HEIGHT", "HORIZONTAL_PADDING", "VERTICAL_PADDING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-docs-space-inline)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            }
+          }
+        },
+        {
+          "name": "accent/rest",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-accent-rest)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/500"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/500"
+            }
+          }
+        },
+        {
+          "name": "accent/hover",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-accent-hover)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/600"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/600"
+            }
+          }
+        },
+        {
+          "name": "accent/pressed",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-accent-pressed)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/700"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/700"
+            }
+          }
+        },
+        {
+          "name": "accent/inactive",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-accent-inactive)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/200"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/200"
+            }
+          }
+        },
+        {
+          "name": "accent/disabled",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-accent-disabled)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/100"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/100"
+            }
+          }
+        },
+        {
+          "name": "accent/content",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-accent-content)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/500"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/500"
+            }
+          }
+        },
+        {
+          "name": "accent/contentHover",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-accent-contentHover)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/600"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/600"
+            }
+          }
+        },
+        {
+          "name": "accent/subtle",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-accent-subtle)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/50"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "color/blue/50"
+            }
+          }
+        },
+        {
+          "name": "radius/action",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["CORNER_RADIUS"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-radius-action)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "radius/12"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "radius/12"
+            }
+          }
+        },
+        {
+          "name": "borderWidth/default",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-borderWidth-default)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "borderWidth/xs"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "borderWidth/xs"
+            }
+          }
+        },
+        {
+          "name": "borderWidth/emphasis",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-borderWidth-emphasis)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "borderWidth/sm"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "borderWidth/sm"
+            }
+          }
+        },
+        {
+          "name": "typography/display/font-family",
+          "resolvedType": "STRING",
+          "description": "Display headline. 72px / Clash Display 500 / leading-none.",
+          "scopes": ["FONT_FAMILY"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-display-font-family)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/display"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/display"
+            }
+          }
+        },
+        {
+          "name": "typography/display/font-size",
+          "resolvedType": "FLOAT",
+          "description": "Display headline. 72px / Clash Display 500 / leading-none.",
+          "scopes": ["FONT_SIZE"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-display-font-size)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/7xl"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/7xl"
+            }
+          }
+        },
+        {
+          "name": "typography/display/font-weight",
+          "resolvedType": "FLOAT",
+          "description": "Display headline. 72px / Clash Display 500 / leading-none.",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-display-font-weight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            }
+          }
+        },
+        {
+          "name": "typography/display/letter-spacing",
+          "resolvedType": "FLOAT",
+          "description": "Display headline. 72px / Clash Display 500 / leading-none.",
+          "scopes": ["LETTER_SPACING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-display-letter-spacing)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/tight"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/tight"
+            }
+          }
+        },
+        {
+          "name": "typography/display/line-height",
+          "resolvedType": "FLOAT",
+          "description": "Display headline. 72px / Clash Display 500 / leading-none.",
+          "scopes": ["LINE_HEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-display-line-height)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/lineHeight/none"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/lineHeight/none"
+            }
+          }
+        },
+        {
+          "name": "typography/h1/font-family",
+          "resolvedType": "STRING",
+          "description": "Primary section headings (h1). 48px / Clash Display medium 500 / leading-tight.",
+          "scopes": ["FONT_FAMILY"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h1-font-family)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/display"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/display"
+            }
+          }
+        },
+        {
+          "name": "typography/h1/font-size",
+          "resolvedType": "FLOAT",
+          "description": "Primary section headings (h1). 48px / Clash Display medium 500 / leading-tight.",
+          "scopes": ["FONT_SIZE"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h1-font-size)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/4xl"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/4xl"
+            }
+          }
+        },
+        {
+          "name": "typography/h1/font-weight",
+          "resolvedType": "FLOAT",
+          "description": "Primary section headings (h1). 48px / Clash Display medium 500 / leading-tight.",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h1-font-weight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            }
+          }
+        },
+        {
+          "name": "typography/h1/letter-spacing",
+          "resolvedType": "FLOAT",
+          "description": "Primary section headings (h1). 48px / Clash Display medium 500 / leading-tight.",
+          "scopes": ["LETTER_SPACING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h1-letter-spacing)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/tight"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/tight"
+            }
+          }
+        },
+        {
+          "name": "typography/h1/line-height",
+          "resolvedType": "FLOAT",
+          "description": "Primary section headings (h1). 48px / Clash Display medium 500 / leading-tight.",
+          "scopes": ["LINE_HEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h1-line-height)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/lineHeight/tight"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/lineHeight/tight"
+            }
+          }
+        },
+        {
+          "name": "typography/h2/font-family",
+          "resolvedType": "STRING",
+          "description": "Secondary section headings (h2). 30px / Clash Display medium 500 / line-height 42px (integer-pixel snap; was snug 1.375 ratio = 41.25px fractional, the source of upstream sub-pixel drift in main content).",
+          "scopes": ["FONT_FAMILY"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h2-font-family)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/display"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/display"
+            }
+          }
+        },
+        {
+          "name": "typography/h2/font-size",
+          "resolvedType": "FLOAT",
+          "description": "Secondary section headings (h2). 30px / Clash Display medium 500 / line-height 42px (integer-pixel snap; was snug 1.375 ratio = 41.25px fractional, the source of upstream sub-pixel drift in main content).",
+          "scopes": ["FONT_SIZE"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h2-font-size)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/2xl"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/2xl"
+            }
+          }
+        },
+        {
+          "name": "typography/h2/font-weight",
+          "resolvedType": "FLOAT",
+          "description": "Secondary section headings (h2). 30px / Clash Display medium 500 / line-height 42px (integer-pixel snap; was snug 1.375 ratio = 41.25px fractional, the source of upstream sub-pixel drift in main content).",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h2-font-weight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            }
+          }
+        },
+        {
+          "name": "typography/h2/letter-spacing",
+          "resolvedType": "FLOAT",
+          "description": "Secondary section headings (h2). 30px / Clash Display medium 500 / line-height 42px (integer-pixel snap; was snug 1.375 ratio = 41.25px fractional, the source of upstream sub-pixel drift in main content).",
+          "scopes": ["LETTER_SPACING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h2-letter-spacing)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/tight"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/tight"
+            }
+          }
+        },
+        {
+          "name": "typography/h2/line-height",
+          "resolvedType": "FLOAT",
+          "description": "Secondary section headings (h2). 30px / Clash Display medium 500 / line-height 42px (integer-pixel snap; was snug 1.375 ratio = 41.25px fractional, the source of upstream sub-pixel drift in main content).",
+          "scopes": ["LINE_HEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h2-line-height)"
+          },
+          "valuesByMode": {
+            "Light": "42px",
+            "Dark": "42px"
+          }
+        },
+        {
+          "name": "typography/h3/font-family",
+          "resolvedType": "STRING",
+          "description": "Component and card headers (h3). 20px / Clash Display medium 500 / leading-snug.",
+          "scopes": ["FONT_FAMILY"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h3-font-family)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/display"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/display"
+            }
+          }
+        },
+        {
+          "name": "typography/h3/font-size",
+          "resolvedType": "FLOAT",
+          "description": "Component and card headers (h3). 20px / Clash Display medium 500 / leading-snug.",
+          "scopes": ["FONT_SIZE"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h3-font-size)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/lg"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/lg"
+            }
+          }
+        },
+        {
+          "name": "typography/h3/font-weight",
+          "resolvedType": "FLOAT",
+          "description": "Component and card headers (h3). 20px / Clash Display medium 500 / leading-snug.",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h3-font-weight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            }
+          }
+        },
+        {
+          "name": "typography/h3/letter-spacing",
+          "resolvedType": "FLOAT",
+          "description": "Component and card headers (h3). 20px / Clash Display medium 500 / leading-snug.",
+          "scopes": ["LETTER_SPACING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h3-letter-spacing)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/normal"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/normal"
+            }
+          }
+        },
+        {
+          "name": "typography/h3/line-height",
+          "resolvedType": "FLOAT",
+          "description": "Component and card headers (h3). 20px / Clash Display medium 500 / leading-snug.",
+          "scopes": ["LINE_HEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-h3-line-height)"
+          },
+          "valuesByMode": {
+            "Light": "28px",
+            "Dark": "28px"
+          }
+        },
+        {
+          "name": "typography/body/font-family",
+          "resolvedType": "STRING",
+          "description": "Body prose. 17px / Satoshi medium 500 / line-height 28px (was 1.625 ratio = 27.625px fractional → caused sub-pixel rendering at heavier weights) / measure capped at 60ch.",
+          "scopes": ["FONT_FAMILY"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-body-font-family)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/primary"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/primary"
+            }
+          }
+        },
+        {
+          "name": "typography/body/font-size",
+          "resolvedType": "FLOAT",
+          "description": "Body prose. 17px / Satoshi medium 500 / line-height 28px (was 1.625 ratio = 27.625px fractional → caused sub-pixel rendering at heavier weights) / measure capped at 60ch.",
+          "scopes": ["FONT_SIZE"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-body-font-size)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/base"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/base"
+            }
+          }
+        },
+        {
+          "name": "typography/body/font-weight",
+          "resolvedType": "FLOAT",
+          "description": "Body prose. 17px / Satoshi medium 500 / line-height 28px (was 1.625 ratio = 27.625px fractional → caused sub-pixel rendering at heavier weights) / measure capped at 60ch.",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-body-font-weight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            }
+          }
+        },
+        {
+          "name": "typography/body/letter-spacing",
+          "resolvedType": "FLOAT",
+          "description": "Body prose. 17px / Satoshi medium 500 / line-height 28px (was 1.625 ratio = 27.625px fractional → caused sub-pixel rendering at heavier weights) / measure capped at 60ch.",
+          "scopes": ["LETTER_SPACING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-body-letter-spacing)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/normal"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/normal"
+            }
+          }
+        },
+        {
+          "name": "typography/body/line-height",
+          "resolvedType": "FLOAT",
+          "description": "Body prose. 17px / Satoshi medium 500 / line-height 28px (was 1.625 ratio = 27.625px fractional → caused sub-pixel rendering at heavier weights) / measure capped at 60ch.",
+          "scopes": ["LINE_HEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-body-line-height)"
+          },
+          "valuesByMode": {
+            "Light": "28px",
+            "Dark": "28px"
+          }
+        },
+        {
+          "name": "typography/ui/font-family",
+          "resolvedType": "STRING",
+          "description": "UI / secondary running text: nav, form labels, sidebars, table cells, footnotes, image captions. 15px / Satoshi medium 500 / line-height 24px (integer-pixel snap; was 1.625 ratio = 24.375px fractional). Sentence case only — never uppercase.",
+          "scopes": ["FONT_FAMILY"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-ui-font-family)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/primary"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/primary"
+            }
+          }
+        },
+        {
+          "name": "typography/ui/font-size",
+          "resolvedType": "FLOAT",
+          "description": "UI / secondary running text: nav, form labels, sidebars, table cells, footnotes, image captions. 15px / Satoshi medium 500 / line-height 24px (integer-pixel snap; was 1.625 ratio = 24.375px fractional). Sentence case only — never uppercase.",
+          "scopes": ["FONT_SIZE"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-ui-font-size)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/sm"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/sm"
+            }
+          }
+        },
+        {
+          "name": "typography/ui/font-weight",
+          "resolvedType": "FLOAT",
+          "description": "UI / secondary running text: nav, form labels, sidebars, table cells, footnotes, image captions. 15px / Satoshi medium 500 / line-height 24px (integer-pixel snap; was 1.625 ratio = 24.375px fractional). Sentence case only — never uppercase.",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-ui-font-weight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            }
+          }
+        },
+        {
+          "name": "typography/ui/letter-spacing",
+          "resolvedType": "FLOAT",
+          "description": "UI / secondary running text: nav, form labels, sidebars, table cells, footnotes, image captions. 15px / Satoshi medium 500 / line-height 24px (integer-pixel snap; was 1.625 ratio = 24.375px fractional). Sentence case only — never uppercase.",
+          "scopes": ["LETTER_SPACING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-ui-letter-spacing)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/normal"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/normal"
+            }
+          }
+        },
+        {
+          "name": "typography/ui/line-height",
+          "resolvedType": "FLOAT",
+          "description": "UI / secondary running text: nav, form labels, sidebars, table cells, footnotes, image captions. 15px / Satoshi medium 500 / line-height 24px (integer-pixel snap; was 1.625 ratio = 24.375px fractional). Sentence case only — never uppercase.",
+          "scopes": ["LINE_HEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-ui-line-height)"
+          },
+          "valuesByMode": {
+            "Light": "24px",
+            "Dark": "24px"
+          }
+        },
+        {
+          "name": "typography/eyebrow/font-family",
+          "resolvedType": "STRING",
+          "description": "Eyebrow / kicker label. 13px / Satoshi medium 500 / tracking-caps (+0.06em) / line-height 20px (integer-pixel snap; was 1.5 ratio = 19.5px half-pixel) / UPPERCASE (baked into the token). Pre-title metadata, section overlines, badge labels — never sentences, never inline within prose.",
+          "scopes": ["FONT_FAMILY"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-eyebrow-font-family)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/primary"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/primary"
+            }
+          }
+        },
+        {
+          "name": "typography/eyebrow/font-size",
+          "resolvedType": "FLOAT",
+          "description": "Eyebrow / kicker label. 13px / Satoshi medium 500 / tracking-caps (+0.06em) / line-height 20px (integer-pixel snap; was 1.5 ratio = 19.5px half-pixel) / UPPERCASE (baked into the token). Pre-title metadata, section overlines, badge labels — never sentences, never inline within prose.",
+          "scopes": ["FONT_SIZE"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-eyebrow-font-size)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/xs"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/xs"
+            }
+          }
+        },
+        {
+          "name": "typography/eyebrow/font-weight",
+          "resolvedType": "FLOAT",
+          "description": "Eyebrow / kicker label. 13px / Satoshi medium 500 / tracking-caps (+0.06em) / line-height 20px (integer-pixel snap; was 1.5 ratio = 19.5px half-pixel) / UPPERCASE (baked into the token). Pre-title metadata, section overlines, badge labels — never sentences, never inline within prose.",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-eyebrow-font-weight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            }
+          }
+        },
+        {
+          "name": "typography/eyebrow/letter-spacing",
+          "resolvedType": "FLOAT",
+          "description": "Eyebrow / kicker label. 13px / Satoshi medium 500 / tracking-caps (+0.06em) / line-height 20px (integer-pixel snap; was 1.5 ratio = 19.5px half-pixel) / UPPERCASE (baked into the token). Pre-title metadata, section overlines, badge labels — never sentences, never inline within prose.",
+          "scopes": ["LETTER_SPACING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-eyebrow-letter-spacing)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/caps"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/caps"
+            }
+          }
+        },
+        {
+          "name": "typography/eyebrow/line-height",
+          "resolvedType": "FLOAT",
+          "description": "Eyebrow / kicker label. 13px / Satoshi medium 500 / tracking-caps (+0.06em) / line-height 20px (integer-pixel snap; was 1.5 ratio = 19.5px half-pixel) / UPPERCASE (baked into the token). Pre-title metadata, section overlines, badge labels — never sentences, never inline within prose.",
+          "scopes": ["LINE_HEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-eyebrow-line-height)"
+          },
+          "valuesByMode": {
+            "Light": "20px",
+            "Dark": "20px"
+          }
+        },
+        {
+          "name": "typography/mono/font-family",
+          "resolvedType": "STRING",
+          "description": "Monospace: code, token names, keyboard shortcuts. 13px / Geist Mono regular 400 / line-height 20px (integer-pixel snap; was 1.625 ratio = 21.125px fractional). Sits one ramp step below body to compensate for mono's optical heaviness. Stays at 400, exempt from the 500-only Satoshi/Clash rule.",
+          "scopes": ["FONT_FAMILY"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-mono-font-family)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/mono"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/family/mono"
+            }
+          }
+        },
+        {
+          "name": "typography/mono/font-size",
+          "resolvedType": "FLOAT",
+          "description": "Monospace: code, token names, keyboard shortcuts. 13px / Geist Mono regular 400 / line-height 20px (integer-pixel snap; was 1.625 ratio = 21.125px fractional). Sits one ramp step below body to compensate for mono's optical heaviness. Stays at 400, exempt from the 500-only Satoshi/Clash rule.",
+          "scopes": ["FONT_SIZE"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-mono-font-size)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/xs"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/xs"
+            }
+          }
+        },
+        {
+          "name": "typography/mono/font-weight",
+          "resolvedType": "FLOAT",
+          "description": "Monospace: code, token names, keyboard shortcuts. 13px / Geist Mono regular 400 / line-height 20px (integer-pixel snap; was 1.625 ratio = 21.125px fractional). Sits one ramp step below body to compensate for mono's optical heaviness. Stays at 400, exempt from the 500-only Satoshi/Clash rule.",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-mono-font-weight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/regular"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/regular"
+            }
+          }
+        },
+        {
+          "name": "typography/mono/letter-spacing",
+          "resolvedType": "FLOAT",
+          "description": "Monospace: code, token names, keyboard shortcuts. 13px / Geist Mono regular 400 / line-height 20px (integer-pixel snap; was 1.625 ratio = 21.125px fractional). Sits one ramp step below body to compensate for mono's optical heaviness. Stays at 400, exempt from the 500-only Satoshi/Clash rule.",
+          "scopes": ["LETTER_SPACING"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-mono-letter-spacing)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/normal"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/letterSpacing/normal"
+            }
+          }
+        },
+        {
+          "name": "typography/mono/line-height",
+          "resolvedType": "FLOAT",
+          "description": "Monospace: code, token names, keyboard shortcuts. 13px / Geist Mono regular 400 / line-height 20px (integer-pixel snap; was 1.625 ratio = 21.125px fractional). Sits one ramp step below body to compensate for mono's optical heaviness. Stays at 400, exempt from the 500-only Satoshi/Clash rule.",
+          "scopes": ["LINE_HEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--semantic-typography-mono-line-height)"
+          },
+          "valuesByMode": {
+            "Light": "20px",
+            "Dark": "20px"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hirobius/Component",
+      "modes": ["Light", "Dark"],
+      "variables": [
+        {
+          "name": "nav/bg",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-nav-bg)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/page"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/page"
+            }
+          }
+        },
+        {
+          "name": "nav/bgActive",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-nav-bgActive)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "accent/subtle"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "accent/subtle"
+            }
+          }
+        },
+        {
+          "name": "nav/borderActive",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-nav-borderActive)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/accent"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/accent"
+            }
+          }
+        },
+        {
+          "name": "nav/text",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-nav-text)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/secondary"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/secondary"
+            }
+          }
+        },
+        {
+          "name": "nav/textActive",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-nav-textActive)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/primary"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/primary"
+            }
+          }
+        },
+        {
+          "name": "nav/height",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-nav-height)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/16"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/16"
+            }
+          }
+        },
+        {
+          "name": "nav/paddingX",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-nav-paddingX)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            }
+          }
+        },
+        {
+          "name": "nav/paddingY",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-nav-paddingY)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            }
+          }
+        },
+        {
+          "name": "tag/background",
+          "resolvedType": "COLOR",
+          "description": "Base tag surface color.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-background)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "accent/subtle"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "accent/subtle"
+            }
+          }
+        },
+        {
+          "name": "tag/text",
+          "resolvedType": "COLOR",
+          "description": "Default tag text color.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-text)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/primary"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/primary"
+            }
+          }
+        },
+        {
+          "name": "tag/border",
+          "resolvedType": "COLOR",
+          "description": "Default tag border color.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-border)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/default"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/default"
+            }
+          }
+        },
+        {
+          "name": "tag/radius",
+          "resolvedType": "FLOAT",
+          "description": "Pill radius for the tag surface.",
+          "scopes": ["CORNER_RADIUS"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-radius)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "radius/full"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "radius/full"
+            }
+          }
+        },
+        {
+          "name": "tag/fontSize",
+          "resolvedType": "FLOAT",
+          "description": "Tag type size.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-fontSize)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/xs"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/xs"
+            }
+          }
+        },
+        {
+          "name": "tag/fontWeight",
+          "resolvedType": "FLOAT",
+          "description": "Tag label weight.",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-fontWeight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            }
+          }
+        },
+        {
+          "name": "tag/lineHeight",
+          "resolvedType": "FLOAT",
+          "description": "Readable label rhythm for tags.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-lineHeight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/lineHeight/normal"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/lineHeight/normal"
+            }
+          }
+        },
+        {
+          "name": "tag/minWidth",
+          "resolvedType": "FLOAT",
+          "description": "Minimum tag width.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-minWidth)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/48"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/48"
+            }
+          }
+        },
+        {
+          "name": "tag/minHeight",
+          "resolvedType": "FLOAT",
+          "description": "Minimum tag height.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-minHeight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            }
+          }
+        },
+        {
+          "name": "tag/paddingX",
+          "resolvedType": "FLOAT",
+          "description": "Horizontal padding inside the pill.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-paddingX)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            }
+          }
+        },
+        {
+          "name": "tag/paddingY",
+          "resolvedType": "FLOAT",
+          "description": "Vertical padding inside the pill.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-paddingY)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            }
+          }
+        },
+        {
+          "name": "tag/activeText",
+          "resolvedType": "COLOR",
+          "description": "Text color when the tag is active.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-activeText)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/onAccent"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/onAccent"
+            }
+          }
+        },
+        {
+          "name": "tag/activeBackground",
+          "resolvedType": "COLOR",
+          "description": "Active tag fill color.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-activeBackground)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "accent/rest"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "accent/rest"
+            }
+          }
+        },
+        {
+          "name": "tag/activeBorder",
+          "resolvedType": "COLOR",
+          "description": "Active tag border color.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-activeBorder)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "accent/rest"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "accent/rest"
+            }
+          }
+        },
+        {
+          "name": "tag/activeHover",
+          "resolvedType": "COLOR",
+          "description": "Active tag hover fill color.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-tag-activeHover)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "accent/hover"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "accent/hover"
+            }
+          }
+        },
+        {
+          "name": "badge/fontSize",
+          "resolvedType": "FLOAT",
+          "description": "Badge type size.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-badge-fontSize)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/xs"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/xs"
+            }
+          }
+        },
+        {
+          "name": "badge/fontWeight",
+          "resolvedType": "FLOAT",
+          "description": "Badge label weight.",
+          "scopes": ["FONT_WEIGHT"],
+          "codeSyntax": {
+            "WEB": "var(--component-badge-fontWeight)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/weight/medium"
+            }
+          }
+        },
+        {
+          "name": "badge/text",
+          "resolvedType": "COLOR",
+          "description": "Badge text color.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-badge-text)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/primary"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/primary"
+            }
+          }
+        },
+        {
+          "name": "badge/bg",
+          "resolvedType": "COLOR",
+          "description": "Badge background color.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-badge-bg)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/feedback/bg/info"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/feedback/bg/info"
+            }
+          }
+        },
+        {
+          "name": "badge/radius",
+          "resolvedType": "FLOAT",
+          "description": "Small rounded radius for badges.",
+          "scopes": ["CORNER_RADIUS"],
+          "codeSyntax": {
+            "WEB": "var(--component-badge-radius)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "radius/4"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "radius/4"
+            }
+          }
+        },
+        {
+          "name": "badge/height",
+          "resolvedType": "FLOAT",
+          "description": "Badge height.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-badge-height)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/20"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/20"
+            }
+          }
+        },
+        {
+          "name": "badge/minWidth",
+          "resolvedType": "FLOAT",
+          "description": "Badge minimum width.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-badge-minWidth)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/20"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/20"
+            }
+          }
+        },
+        {
+          "name": "badge/paddingY",
+          "resolvedType": "FLOAT",
+          "description": "Vertical padding inside the badge.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-badge-paddingY)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/px2"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/px2"
+            }
+          }
+        },
+        {
+          "name": "badge/paddingX",
+          "resolvedType": "FLOAT",
+          "description": "Horizontal padding inside the badge.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-badge-paddingX)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/px6"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/px6"
+            }
+          }
+        },
+        {
+          "name": "button/bg",
+          "resolvedType": "COLOR",
+          "description": "Primary button fill.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-bg)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/accent"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/accent"
+            }
+          }
+        },
+        {
+          "name": "button/bgHover",
+          "resolvedType": "COLOR",
+          "description": "Primary button hover fill.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-bgHover)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "accent/hover"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "accent/hover"
+            }
+          }
+        },
+        {
+          "name": "button/text",
+          "resolvedType": "COLOR",
+          "description": "Primary button text color.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-text)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/onAccent"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/onAccent"
+            }
+          }
+        },
+        {
+          "name": "button/radius",
+          "resolvedType": "FLOAT",
+          "description": "Button corner radius.",
+          "scopes": ["CORNER_RADIUS"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-radius)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "radius/action"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "radius/action"
+            }
+          }
+        },
+        {
+          "name": "button/paddingX",
+          "resolvedType": "FLOAT",
+          "description": "Horizontal button padding.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-paddingX)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/4"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/4"
+            }
+          }
+        },
+        {
+          "name": "button/paddingY",
+          "resolvedType": "FLOAT",
+          "description": "Vertical button padding.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-paddingY)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            }
+          }
+        },
+        {
+          "name": "button/size/sm/paddingX",
+          "resolvedType": "FLOAT",
+          "description": "Small button horizontal padding (8px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-sm-paddingX)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            }
+          }
+        },
+        {
+          "name": "button/size/sm/paddingY",
+          "resolvedType": "FLOAT",
+          "description": "Small button vertical padding (4px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-sm-paddingY)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/1"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/1"
+            }
+          }
+        },
+        {
+          "name": "button/size/sm/fontSize",
+          "resolvedType": "FLOAT",
+          "description": "Small button label size (13px).",
+          "scopes": ["FONT_SIZE"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-sm-fontSize)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/xs"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/xs"
+            }
+          }
+        },
+        {
+          "name": "button/size/sm/iconSize",
+          "resolvedType": "FLOAT",
+          "description": "Small button icon slot size (12px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-sm-iconSize)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/12"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/12"
+            }
+          }
+        },
+        {
+          "name": "button/size/sm/height",
+          "resolvedType": "FLOAT",
+          "description": "Small button height (28px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-sm-height)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/7"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/7"
+            }
+          }
+        },
+        {
+          "name": "button/size/sm/itemSpacing",
+          "resolvedType": "FLOAT",
+          "description": "Small button icon-to-label gap (4px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-sm-itemSpacing)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/1"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/1"
+            }
+          }
+        },
+        {
+          "name": "button/size/md/paddingX",
+          "resolvedType": "FLOAT",
+          "description": "Medium button horizontal padding (16px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-md-paddingX)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/4"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/4"
+            }
+          }
+        },
+        {
+          "name": "button/size/md/paddingY",
+          "resolvedType": "FLOAT",
+          "description": "Medium button vertical padding (12px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-md-paddingY)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            }
+          }
+        },
+        {
+          "name": "button/size/md/fontSize",
+          "resolvedType": "FLOAT",
+          "description": "Medium button label size (15px).",
+          "scopes": ["FONT_SIZE"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-md-fontSize)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/sm"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/sm"
+            }
+          }
+        },
+        {
+          "name": "button/size/md/iconSize",
+          "resolvedType": "FLOAT",
+          "description": "Medium button icon slot size (16px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-md-iconSize)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/16"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/16"
+            }
+          }
+        },
+        {
+          "name": "button/size/md/height",
+          "resolvedType": "FLOAT",
+          "description": "Medium button height (40px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-md-height)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/40"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/40"
+            }
+          }
+        },
+        {
+          "name": "button/size/md/itemSpacing",
+          "resolvedType": "FLOAT",
+          "description": "Medium button icon-to-label gap (8px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-md-itemSpacing)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            }
+          }
+        },
+        {
+          "name": "button/size/lg/paddingX",
+          "resolvedType": "FLOAT",
+          "description": "Large button horizontal padding (24px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-lg-paddingX)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            }
+          }
+        },
+        {
+          "name": "button/size/lg/paddingY",
+          "resolvedType": "FLOAT",
+          "description": "Large button vertical padding (16px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-lg-paddingY)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/4"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/4"
+            }
+          }
+        },
+        {
+          "name": "button/size/lg/fontSize",
+          "resolvedType": "FLOAT",
+          "description": "Large button label size (17px).",
+          "scopes": ["FONT_SIZE"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-lg-fontSize)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/base"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "typography/size/base"
+            }
+          }
+        },
+        {
+          "name": "button/size/lg/iconSize",
+          "resolvedType": "FLOAT",
+          "description": "Large button icon slot size (20px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-lg-iconSize)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/20"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/20"
+            }
+          }
+        },
+        {
+          "name": "button/size/lg/height",
+          "resolvedType": "FLOAT",
+          "description": "Large button height (48px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-lg-height)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/48"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "size/48"
+            }
+          }
+        },
+        {
+          "name": "button/size/lg/itemSpacing",
+          "resolvedType": "FLOAT",
+          "description": "Large button icon-to-label gap (8px).",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-size-lg-itemSpacing)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            }
+          }
+        },
+        {
+          "name": "button/primary/textDisabled",
+          "resolvedType": "COLOR",
+          "description": "Disabled primary button text color.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-primary-textDisabled)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/onAccent"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/onAccent"
+            }
+          }
+        },
+        {
+          "name": "button/primary/bgDisabled",
+          "resolvedType": "COLOR",
+          "description": "Disabled primary button fill.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-primary-bgDisabled)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/accentSubtle"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/accentSubtle"
+            }
+          }
+        },
+        {
+          "name": "button/secondary/bg/rest",
+          "resolvedType": "COLOR",
+          "description": "Secondary button fill.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-secondary-bg-rest)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/page"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/page"
+            }
+          }
+        },
+        {
+          "name": "button/secondary/bg/hover",
+          "resolvedType": "COLOR",
+          "description": "Secondary button hover fill.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-secondary-bg-hover)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/raised"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/raised"
+            }
+          }
+        },
+        {
+          "name": "button/secondary/bg/pressed",
+          "resolvedType": "COLOR",
+          "description": "Secondary button pressed fill.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-secondary-bg-pressed)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/overlay"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/overlay"
+            }
+          }
+        },
+        {
+          "name": "button/secondary/border/rest",
+          "resolvedType": "COLOR",
+          "description": "Secondary button border.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-secondary-border-rest)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/default"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/default"
+            }
+          }
+        },
+        {
+          "name": "button/secondary/border/hover",
+          "resolvedType": "COLOR",
+          "description": "Secondary button hover border.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-secondary-border-hover)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/default"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/default"
+            }
+          }
+        },
+        {
+          "name": "button/secondary/border/pressed",
+          "resolvedType": "COLOR",
+          "description": "Secondary button pressed border.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-secondary-border-pressed)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/default"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/default"
+            }
+          }
+        },
+        {
+          "name": "button/secondary/border/disabled",
+          "resolvedType": "COLOR",
+          "description": "Secondary button disabled border.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-secondary-border-disabled)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/subdued"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/subdued"
+            }
+          }
+        },
+        {
+          "name": "button/secondary/text",
+          "resolvedType": "COLOR",
+          "description": "Secondary button text color.",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-button-secondary-text)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/primary"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/primary"
+            }
+          }
+        },
+        {
+          "name": "input/bg",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-input-bg)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/raised"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/raised"
+            }
+          }
+        },
+        {
+          "name": "input/text",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-input-text)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/primary"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/content/primary"
+            }
+          }
+        },
+        {
+          "name": "input/border",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-input-border)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/default"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/default"
+            }
+          }
+        },
+        {
+          "name": "input/borderError",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-input-borderError)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/feedback/error"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/feedback/error"
+            }
+          }
+        },
+        {
+          "name": "input/radius",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["CORNER_RADIUS"],
+          "codeSyntax": {
+            "WEB": "var(--component-input-radius)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "radius/action"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "radius/action"
+            }
+          }
+        },
+        {
+          "name": "input/paddingX",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-input-paddingX)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/4"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/4"
+            }
+          }
+        },
+        {
+          "name": "input/paddingY",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-input-paddingY)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/3"
+            }
+          }
+        },
+        {
+          "name": "card/bg",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-card-bg)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/raised"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/surface/raised"
+            }
+          }
+        },
+        {
+          "name": "card/border",
+          "resolvedType": "COLOR",
+          "description": "",
+          "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+          "codeSyntax": {
+            "WEB": "var(--component-card-border)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/default"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Semantic",
+              "aliasVariable": "color/border/default"
+            }
+          }
+        },
+        {
+          "name": "card/radius",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["CORNER_RADIUS"],
+          "codeSyntax": {
+            "WEB": "var(--component-card-radius)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "radius/8"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "radius/8"
+            }
+          }
+        },
+        {
+          "name": "card/padding",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-card-padding)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/6"
+            }
+          }
+        },
+        {
+          "name": "card/gap",
+          "resolvedType": "FLOAT",
+          "description": "",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-card-gap)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "space/2"
+            }
+          }
+        },
+        {
+          "name": "lightbox/backdrop/blur",
+          "resolvedType": "FLOAT",
+          "description": "Backdrop blur applied behind fullscreen image lightboxes.",
+          "scopes": ["ALL_SCOPES"],
+          "codeSyntax": {
+            "WEB": "var(--component-lightbox-backdrop-blur)"
+          },
+          "valuesByMode": {
+            "Light": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "blur/16"
+            },
+            "Dark": {
+              "aliasCollection": "Hirobius/Primitives",
+              "aliasVariable": "blur/16"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

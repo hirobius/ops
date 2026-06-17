@@ -1,0 +1,14 @@
+{
+  "units": [
+    {
+      "id": "good-unit-complete",
+      "status": "approved",
+      "priority": 2,
+      "sprint": 1,
+      "cluster": "fixture-test",
+      "approval": "approved",
+      "description": "A well-formed unit with all required classifier fields.",
+      "validationCmd": "node scripts/validate-orchestration.mjs"
+    }
+  ]
+}

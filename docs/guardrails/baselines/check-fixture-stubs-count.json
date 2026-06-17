@@ -1,0 +1,6 @@
+{
+  "count": 85,
+  "updatedAt": "2026-05-06T04:55:00.000Z",
+  "sha": "pending",
+  "note": "Bumped to absorb 9 new gate stubs added in the industry-baseline gate batch (check-secrets, check-lockfile-integrity, check-licenses, check-format-staged, check-type-coverage-ratchet, check-knip-ratchet, audit-deps, audit-sbom, audit-bundle). Real fixtures pending — tracked in docs/guardrails/gate-audit-2026-05-06.md."
+}

@@ -1,0 +1,13 @@
+{
+  "scenario": "tampered",
+  "secret": "shared-bridge-secret-fixture",
+  "authEnabled": true,
+  "type": "selection.update",
+  "payload": {
+    "nodeIds": ["1:2"],
+    "page": "Page 1"
+  },
+  "tamper": {
+    "nodeIds": ["evil:0"]
+  }
+}

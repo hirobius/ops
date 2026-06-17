@@ -1,0 +1,24 @@
+{
+  "units": [
+    {
+      "id": "unit-explicit-overlap-a",
+      "status": "claimed",
+      "claimedBy": "agent-a",
+      "claimedAt": "2026-05-05T09:00:00.000Z",
+      "touches": ["src/app/components/HdsLayout.tsx", "scripts/check-manifest-drift.mjs"],
+      "description": "Refactors HdsLayout.",
+      "agentNotes": [],
+      "validationCmd": "node scripts/validate-manifest.mjs",
+      "dependsOn": []
+    },
+    {
+      "id": "unit-explicit-overlap-b",
+      "status": "approved",
+      "touches": ["src/app/components/HdsLayout.tsx", "docs/ai/AI_ORCHESTRATION.md"],
+      "description": "Also modifies HdsLayout for dark mode.",
+      "agentNotes": [],
+      "validationCmd": "node scripts/validate-manifest.mjs",
+      "dependsOn": []
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+// TODO: replace with real-violating-example for audit-figma-system
+// STUB — this file needs real violating content
