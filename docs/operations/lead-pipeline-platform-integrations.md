@@ -60,7 +60,7 @@ template or AI-generated, then published via a single API call.
 - **Timeouts.** Create+inject+publish can exceed a serverless window → use the
   **status-queue pattern**: the button sets `site_status='building'`; a worker/cron
   drains `building → published`. The board shows live status.
-- **Secrets server-only.** `DUDA_API_USER` / `DUDA_API_PASS` (Partner API
+- **Secrets server-only.** `DUDA_API_USER` / `DUDA_API_PASSWORD` (Partner API
   credentials, Basic auth) live in Vercel env, used only in `api/`/worker code.
 - **Idempotency.** Upsert on `duda_site_name`; re-running edits the existing site.
 - **Preview before publish (recommended).** Inject → leave unpublished → store the
@@ -147,7 +147,7 @@ v1 is scaffolded (stubs): `lib/duda/index.mjs` (`buildSite`/`publishSite`/`toDud
 Publish/Live actions on the board. `build-site` creates an **unpublished** site +
 injects content and stores `preview_url`; `publish-site` goes live and sets
 `live_url` + `published_at`. Going live = drop the real Duda Partner REST calls
-into `lib/duda` (env: `DUDA_API_USER` / `DUDA_API_PASS`).
+into `lib/duda` (env: `DUDA_API_USER` / `DUDA_API_PASSWORD`).
 
 ### Phased delivery
 
@@ -247,3 +247,76 @@ one is clearly authoritative.
 
 They can both ship: Duda produces the site that becomes a lead's `preview_url`;
 GHL (or in-house) drives the outreach that moves it to `sent → won`.
+
+---
+
+## Part A.1 — Duda delivery handoff (authoritative, 2026-06-18)
+
+The `hirobius/clients` Duda-delivery handoff (`docs/DUDA-DELIVERY.md` +
+`OPSHANDOFFDUDA.md`) is the authoritative spec for this layer; decision recorded in
+[ARCHITECTURE.md](../ARCHITECTURE.md). It refines the roadmap above — key points +
+how the scaffold here reconciles to it.
+
+### Lifecycle + contract
+
+- Lifecycle gains a **`rendered`** state: `sourced → generating → scored →
+  rendered → sent → won/lost`.
+- The render target consumes the **`ClientConfig`** contract (`hirobius/clients` →
+  `packages/schema`); the agent emits it. Public surface:
+  - `renderToDuda(config) → { dudaSiteName, previewUrl }` — creates an UNPUBLISHED
+    site from the per-preset template + injects content.
+  - `publishDudaSite(dudaSiteName, domain)` — flips live + attaches the domain
+    (the billed-on-"yes" step).
+- Per-preset template ids are env, not hardcoded — `DUDA_TPL_LANDSCAPING`,
+  `DUDA_TPL_JUNK`, `DUDA_TPL_PRESSURE`, `DUDA_TPL_CONCRETE`, keyed on
+  `config.brand.palettePreset`.
+
+### ClientConfig → Duda mapping (condensed; full table in clients `docs/DUDA-DELIVERY.md`)
+
+| `ClientConfig` | Duda mechanism |
+|---|---|
+| `business.{name,phone,email,address?}` | Business data fields |
+| `business.hours[]` | Business data schedule (verify strings vs structured) |
+| `business.serviceAreas[]` | Business data areas + LocalBusiness `areaServed` |
+| `brand.palettePreset` | Selects the pre-built Duda template |
+| `brand.cssVarOverrides` (`--brand-*`) | Site global colors via API — ⚠ risk #1 |
+| `brand.font` | Site global font (map 5 font ids → Duda fonts) |
+| `brand.radius` | Template CSS — ⚠ likely not per-site via API |
+| `layout.variant` (A/B) | Template choice (A image hero / B video hero) |
+| `layout.sectionOrder[]` | Frozen to canonical order in the template — ⚠ |
+| `services[]` | Duda Collection `services` (upload image, map icon) |
+| `gallery[]` {src,alt} | Duda Collection / gallery (upload + alt) |
+| `reviews[]` | Duda Collection `reviews` |
+| `copy.{heroHeadline,heroSub,ctaLabel,about}` | Content injection into named regions |
+| `hero.{image,videoSrc,videoPoster}` | Upload assets → hero widget |
+| `map.{staticImage?,embedQuery?}` | Duda native map widget |
+| `form.*` | **Drop** → Duda native form + spam protection; recipient = `business.email` |
+| `seo.{title,description,ogImage?}` | Per-page SEO + OG |
+| `seo.{city,region,siteUrl}` | LocalBusiness schema + custom domain |
+| LocalBusiness JSON-LD | Duda auto-schema, else header custom-code — ⚠ risk #2 |
+
+### ⚠ Spike first (gate before wiring for real)
+
+Before relying on `renderToDuda`, the handoff requires a spike against the demo
+config to resolve: (1) per-site colors/font via API; (2) custom JSON-LD injection;
+(3) `sectionOrder` frozen on Duda; (4) collection binding incl. images + alt;
+(5) form notifications + redirect. Acceptance criteria live in clients
+`docs/DUDA-DELIVERY.md`. **Gate this before scaling the board step.**
+
+### Reconciliation: current scaffold ↔ handoff
+
+The data model + flow already match (one Duda site per lead, unpublished preview →
+publish-on-yes, `duda_site_name` natural key). The deltas are naming + signature:
+
+| Handoff | Scaffolded here | Action to align |
+|---|---|---|
+| `renderToDuda(config)` | `buildSite(lead)` + `toDudaContent(lead)` | rename → `renderToDuda` taking `ClientConfig` (when the real agent/schema lands) |
+| `publishDudaSite(name, domain)` | `publishSite(name)` | add `domain` param |
+| `app/api/render-site/route.ts` (App Router) | `api/build-site.ts` (Vercel fn) | keep our function shape; rename file → `api/render-site.ts` |
+| `/api/publish-site` | `api/publish-site.ts` | matches |
+| `status='rendered'` → `'sent'` | separate `site_status` col (none→built→published) | **decision needed** — fold into `status` per handoff, keep extra cols as data |
+| `duda_site_name text unique` | shipped in `0002` ✓ | none |
+| `DUDA_TPL_*` preset ids | not yet | add the 4 env vars when templates exist |
+
+**Net:** small deltas, applied when the real engine is ported
+(`ops-lead-pipeline-go-live`) and gated by the spike — not a rebuild.

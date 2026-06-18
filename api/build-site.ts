@@ -14,7 +14,7 @@
  * Error:    { error, code? } with status 400/404/405/500/503
  *
  * Env (human-set, server-only): SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
- *   DUDA_API_USER, DUDA_API_PASS (used by the real lib/duda adapter).
+ *   DUDA_API_USER, DUDA_API_PASSWORD (used by the real lib/duda adapter).
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';

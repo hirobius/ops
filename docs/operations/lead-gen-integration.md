@@ -53,8 +53,12 @@ SUPABASE_URL                 # Supabase project URL
 SUPABASE_SERVICE_ROLE_KEY    # service-role key — SERVER ONLY, bypasses RLS, never shipped to client
 GOOGLE_PLACES_API_KEY        # used by the real puller (lib/lead-gen) — request the richer Place Details fields
 ANTHROPIC_API_KEY            # used by the real agent (lib/agent)
-DUDA_API_USER                # Duda Partner API (Basic auth) — used by the real lib/duda
-DUDA_API_PASS                # Duda Partner API password
+DUDA_API_USER                # Duda white-label API username (HTTP Basic) — used by the real lib/duda
+DUDA_API_PASSWORD            # Duda white-label API password
+DUDA_TPL_LANDSCAPING         # per-preset Duda template ids (keyed on config.brand.palettePreset)
+DUDA_TPL_JUNK                #   "
+DUDA_TPL_PRESSURE            #   "
+DUDA_TPL_CONCRETE            #   "
 ```
 
 ## Setup steps (human)

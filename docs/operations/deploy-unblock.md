@@ -59,7 +59,7 @@ Do this in the **same environment where the DS dep now resolves** (after Fix A):
    commit/PR). No manual `vercel deploy` needed.
 2. Set Vercel env (Production **and** Preview scope): `SUPABASE_URL`,
    `SUPABASE_SERVICE_ROLE_KEY`, `GOOGLE_PLACES_API_KEY`, `ANTHROPIC_API_KEY`,
-   `DUDA_API_USER`, `DUDA_API_PASS`. Without Supabase the board still renders — it
+   `DUDA_API_USER`, `DUDA_API_PASSWORD`. Without Supabase the board still renders — it
    shows the offline banner.
 3. Run migrations `0001_leads.sql` then `0002_lead_site_fields.sql` in Supabase.
 4. Validate locally first (now possible once DS resolves):
