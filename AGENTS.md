@@ -6,32 +6,32 @@ Project-level operating notes for code agents working in this repo.
 
 Read these first, depending on the task:
 
-- [CLAUDE.md](C:\Users\Adrian\Documents\adrian-milsap\CLAUDE.md)
+- [CLAUDE.md](./CLAUDE.md)
   Primary machine-readable entrypoint for HDS implementation work.
-- [DESIGN.md](C:\Users\Adrian\Documents\adrian-milsap\DESIGN.md)
+- [DESIGN.md](./DESIGN.md)
   Lean agent-facing visual system guidance.
-- [DESIGN-HANDOFF.md](C:\Users\Adrian\Documents\adrian-milsap\DESIGN-HANDOFF.md)
+- [DESIGN-HANDOFF.md](./DESIGN-HANDOFF.md)
   Verbose visual system mirror for brand, tokens, layout language, and design constraints.
-- [TASKS.md](C:\Users\Adrian\Documents\adrian-milsap\TASKS.md)
-  Active backlog and work status.
-- [TOKEN_GOVERNANCE.md](C:\Users\Adrian\Documents\adrian-milsap\TOKEN_GOVERNANCE.md)
+- [BACKLOG.md](./BACKLOG.md)
+  Active backlog and work status. (Supersedes the former `TASKS.md`.)
+- [TOKEN_GOVERNANCE.md](./TOKEN_GOVERNANCE.md)
   Token governance expectations and usage rules.
-- [SYSTEMS_REGISTRY.md](C:\Users\Adrian\Documents\adrian-milsap\SYSTEMS_REGISTRY.md)
+- [SYSTEMS_REGISTRY.md](./SYSTEMS_REGISTRY.md)
   System-level inventory and registry context.
-- [HDS_COMPLIANCE_LOG.md](C:\Users\Adrian\Documents\adrian-milsap\HDS_COMPLIANCE_LOG.md)
+- [HDS_COMPLIANCE_LOG.md](./HDS_COMPLIANCE_LOG.md)
   Compliance and audit trail for the design system.
-- [PROCESS.md](C:\Users\Adrian\Documents\adrian-milsap\PROCESS.md)
+- [PROCESS.md](./PROCESS.md)
   Project process/history context when workflow questions come up.
-- [README.md](C:\Users\Adrian\Documents\adrian-milsap\README.md)
+- [README.md](./README.md)
   General project setup and overview.
 
 ## Source Of Truth
 
-- Use [public/hds-manifest.json](C:\Users\Adrian\Documents\adrian-milsap\public\hds-manifest.json) for component inventory, categories, Figma links, and machine-readable docs metadata.
-- Use [src/app/data/component-api.json](C:\Users\Adrian\Documents\adrian-milsap\src\app\data\component-api.json) for generated prop tables and API reflection.
-- Use [hirobius.tokens.json](C:\Users\Adrian\Documents\adrian-milsap\hirobius.tokens.json) for token names and values.
-- Use [DESIGN.md](C:\Users\Adrian\Documents\adrian-milsap\DESIGN.md) for the lean agent-facing visual spec.
-- Use [DESIGN-HANDOFF.md](C:\Users\Adrian\Documents\adrian-milsap\DESIGN-HANDOFF.md) for the verbose human-readable mirror of the token and brand system.
+- Use [public/hds-manifest.json](./public/hds-manifest.json) for component inventory, categories, Figma links, and machine-readable docs metadata.
+- Use [src/app/data/component-api.json](./src/app/data/component-api.json) for generated prop tables and API reflection.
+- Use [hirobius.tokens.json](./hirobius.tokens.json) for token names and values.
+- Use [DESIGN.md](./DESIGN.md) for the lean agent-facing visual spec.
+- Use [DESIGN-HANDOFF.md](./DESIGN-HANDOFF.md) for the verbose human-readable mirror of the token and brand system.
 
 ## Script Reality
 
@@ -65,12 +65,12 @@ Common script groups that do exist:
 
 Portfolio image-led pages use explicit slot ids like `hero-01` and `asset-07`.
 
-- Drop new loose assets into [public/assets/_incoming](C:\Users\Adrian\Documents\adrian-milsap\public\assets\_incoming)
+- Drop new loose assets into [public/assets/_incoming](./public/assets/_incoming)
 - Treat that folder as a staging area only
 - Use `pnpm assets:convert` to batch-convert `_incoming` images to WebP before slotting when appropriate
 - Use `--keep-png <file>` for transparency-sensitive or explicitly preserved PNG assets
-- Move final mapped assets into permanent folders under [public/assets](C:\Users\Adrian\Documents\adrian-milsap\public\assets)
-- Move replaced live assets into [public/assets/_archive](C:\Users\Adrian\Documents\adrian-milsap\public\assets\_archive) instead of hard-deleting them
+- Move final mapped assets into permanent folders under [public/assets](./public/assets)
+- Move replaced live assets into [public/assets/_archive](./public/assets/_archive) instead of hard-deleting them
 - Update page slot manifests to assign assets to slots
 - Do not hardcode ad hoc inline image paths throughout page markup
 
@@ -88,6 +88,6 @@ Publishing behavior:
 
 ## Guidance Hygiene
 
-- Prefer updating this file and [CLAUDE.md](C:\Users\Adrian\Documents\adrian-milsap\CLAUDE.md) only with stable, repo-wide rules.
+- Prefer updating this file and [CLAUDE.md](./CLAUDE.md) only with stable, repo-wide rules.
 - Do not reference missing docs, folders, or workflows as if they already exist.
 - When the repo structure changes, update this file to match reality instead of preserving aspirational architecture.

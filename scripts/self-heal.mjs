@@ -18,13 +18,23 @@ const STATIC_CHECKS = [
   { name: 'LayoutIntegrity', command: 'pnpm test:layout' },
 ];
 
+// Ops dashboard smoke routes — derived from src/app/routes.tsx (the pages
+// OpsGate wraps). The former /hds/* and /lab/* paths were design-system doc
+// routes that now redirect to /ops; they belong to the standalone
+// @hirobius/design-system site, not this consumer app. OpsGate's DEV_BYPASS
+// lets these render under the dev server heal spins up.
 const DEFAULT_SMOKE_PATHS = [
-  '/hds/typography',
-  '/hds/color',
-  '/hds/spacing',
-  '/hds/shape',
-  '/hds/components',
-  '/lab/incubator',
+  '/info',
+  '/ops',
+  '/ops/staging',
+  '/ops/briefing',
+  '/ops/atlas',
+  '/ops/build',
+  '/ops/knowledge',
+  '/ops/sessions',
+  '/ops/kanban',
+  '/ops/clients',
+  '/admin/approvals',
 ];
 
 const BOILERPLATE_PATTERNS = [
