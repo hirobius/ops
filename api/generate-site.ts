@@ -78,6 +78,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         eval_pass: result.judge.pass,
         eval_notes: result.judge.notes,
         loop_iterations: result.loop.iterations,
+        // enrichment — fill what Places can't supply, without clobbering existing values
+        email: lead.email ?? result.enrichment.email,
+        logo_url: lead.logo_url ?? result.enrichment.logo_url,
+        social: lead.social ?? result.enrichment.social,
+        description: lead.description ?? result.enrichment.description,
       })
       .eq('id', leadId);
     if (updateError) {

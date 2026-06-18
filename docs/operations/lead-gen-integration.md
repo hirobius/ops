@@ -93,8 +93,13 @@ function signatures and return shapes stable (the routes and table depend on the
   (pagination stalls behind some egress proxies).
 - `lib/agent/index.mjs` ← `packages/agent/src/*` + `packages/schema`.
   `runPipeline({ name, city, region, category, phone, website })` →
-  `{ config, judge: { overall, pass, notes }, loop: { iterations } }`. Reads
-  `ANTHROPIC_API_KEY`.
+  `{ enrichment, config, judge: { overall, pass, notes }, loop: { iterations } }`.
+  Reads `ANTHROPIC_API_KEY`.
+- `lib/agent/enrich.mjs` ← `packages/agent/src/enrich`. `enrich(input)` →
+  `{ email, logo_url, social, description }` — the fields Places can't supply.
+  Real impl: parse the lead's website (mailto / favicon-og:image / JSON-LD
+  `sameAs`) + optional LLM pass. `generate-site` persists these to the lead
+  (coalesced, so existing values aren't clobbered) for the Duda build.
 
 ## Open items / hardening
 

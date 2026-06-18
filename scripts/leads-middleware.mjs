@@ -113,6 +113,10 @@ export function createLeadsMiddleware() {
               eval_pass: result.judge.pass,
               eval_notes: result.judge.notes,
               loop_iterations: result.loop.iterations,
+              email: lead.email ?? result.enrichment.email,
+              logo_url: lead.logo_url ?? result.enrichment.logo_url,
+              social: lead.social ?? result.enrichment.social,
+              description: lead.description ?? result.enrichment.description,
             })
             .eq('id', leadId);
           if (updateError) return sendJson(res, 500, { error: updateError.message });

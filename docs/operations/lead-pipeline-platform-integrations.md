@@ -135,8 +135,9 @@ summary is "Atmosphere"), so request them once.
 | Signals | `rating` / `review_count` / `price_level` / `business_status` | `rating` / `userRatingCount` / `priceLevel` / `businessStatus` |
 
 `lib/duda` → `toDudaContent(lead)` is the code-level source of truth for this
-mapping. Anything Places can't supply (email, logo, socials) is left for the
-enrichment step of the agent.
+mapping. Anything Places can't supply (email, logo, socials, a clean description)
+is filled by the agent's enrich step (`lib/agent/enrich.mjs`), which
+`generate-site` persists back onto the lead (coalesced — existing values win).
 
 ### Scaffold status (shipped on this branch)
 
