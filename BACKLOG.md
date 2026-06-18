@@ -57,7 +57,7 @@ Consolidated 2026-05-11 from `docs/ai/orchestration.json`,
 - `idea` **figma-plugin-planning-docs-save** — Save Figma DesignOps planning dumps to docs/figma-plugin/
 - `idea` **atlas-absorb-hds-docs** — Absorb HDS documentation into /ops/atlas
 
-## Ops / Agents _(14)_
+## Ops / Agents _(17)_
 
 - `ready` **t_be5c5b75** — AI-powered Build skills bundle (6 sub-skills)
 - `ready` **t_bc7081a8** — Daily task picker view — pick from 474 units, queue for today
@@ -73,6 +73,9 @@ Consolidated 2026-05-11 from `docs/ai/orchestration.json`,
 - `idea` **dashbd-visual-ingest-drag-drop** — Drag-drop image + video inputs for visual-ingest / page-clone buttons
 - `idea` **dashbd-auto-research** — Auto-research — scheduled research jobs that surface findings to /ops
 - `idea` **dashbd-task-pillar-classification** — Adaptive pillar/category field on orchestration units
+- `parked` **ops-agentic-review-loop** — Daily cron → analyze app (`audit-*`/`check-*` + optional LLM) → post refactor/improve findings to Discord with Proceed/Punt/Backlog CTAs → Proceed opens a GitHub issue that @mentions Claude → Claude Code session on a branch (no Claude API). Scrapped from active build 2026-06-18; design + 4 slices + decided dispatch in [docs/operations/agentic-ops-loop.md](./docs/operations/agentic-ops-loop.md). Safe start = Slice 1 (`scripts/daily-review.mjs` → `findings.jsonl` + Discord digest, no auto-dispatch). Related: `dashbd-auto-research`.
+- `blocked` **ops-dashboard-deploy-unblock** — `hirobius-ops` Vercel project has never built: `@hirobius/design-system` is a `file:../` dep missing in Vercel's single-repo clone (ENOENT, exit 254 — failed on the first `main` import) + `@supabase/supabase-js` lockfile drift. Fix: publish DS to a registry (or vendor built `dist`) → `pnpm install` → set env → run migrations. Runbook: [docs/operations/deploy-unblock.md](./docs/operations/deploy-unblock.md). Blocks everything going live.
+- `parked` **ops-lead-pipeline-go-live** — Lead-gen → agent → Duda pipeline is scaffolded (stubs) on `claude/laughing-ride-gja5xd`. To ship: port real Places (`lib/lead-gen`), agent + enrich (`lib/agent`), Duda (`lib/duda`); `pnpm install` (sync lockfile); run `0001`+`0002` migrations; set Supabase/Places/Anthropic/Duda env. Blocked by `ops-dashboard-deploy-unblock`. Docs: [lead-gen-integration.md](./docs/operations/lead-gen-integration.md), [lead-pipeline-platform-integrations.md](./docs/operations/lead-pipeline-platform-integrations.md), [lead-gen-test-plan.md](./docs/operations/lead-gen-test-plan.md).
 
 ## Security / Compliance _(3)_
 
@@ -99,7 +102,7 @@ Consolidated 2026-05-11 from `docs/ai/orchestration.json`,
 
 ---
 
-**Total: 69 open items.**
+**Total: 72 open items.**
 
 ## Conventions
 
