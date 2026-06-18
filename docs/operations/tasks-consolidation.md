@@ -20,18 +20,31 @@ Supabase `tasks` table — merging three sources:
 
 ## Scaffold (shipped on this branch)
 
-- `supabase/migrations/0003_tasks.sql` — provisional `tasks` (+ `task_events`)
-  table: `key` unique (idempotent upsert), `source`, status lifecycle, area/lane,
-  priority/due/owner/tags/sub_tasks/depends_on, soft-delete, agent-native claim +
-  `dispatch_url` columns, `meta` (original record). **Reconcile with ops-archive's
-  finalized `tasks.schema.sql` when the handoff lands.**
-- `scripts/import-tasks.mjs` — parses all three sources → normalized rows →
-  dedupes by `key` → dry-run output + (with `--write`) upserts into Supabase.
+Handoff **received** (briefing from `ops-archive`; artifacts on its
+`consolidation-handoff` branch). Schema + importer now match it.
+
+- `supabase/migrations/0003_tasks.sql` — the **finalized** schema from the handoff
+  (PG16-validated): `task_status` enum (`open|blocked|done`), namespaced unique
+  `key`, `source`/`native_key`, lane/group/phase/stage, reserved columns
+  (priority/due/owner/effort) + free `tags[]`, `deps[]`/`blocked_by[]`,
+  `notes`/`subtasks` jsonb, `import_flags[]`, `sort_order`, soft-delete, agent-native
+  `claimed_by`/`claimed_at`/`completed_at`/`pinged_at`; `tasks_touch` + `tasks_audit`
+  triggers; `task_events` audit table (+ `pg_notify('task_completed')` for the
+  Discord ping); `tasks_blocked` + `tasks_next` views; RLS on.
+- `scripts/import-tasks.mjs` — tracker rows are already schema-shaped → passed
+  through (minus the descriptive-only `is_done`); BACKLOG.md + clients are mapped
+  into the same columns; dedupe by `key`; dry-run by default; `--write` upserts.
+  Applies the handoff's default **DROP filter** (`leads-pipeline`, `client-record`,
+  `test-fixture`) unless `--include-all`. Verified locally: 62 backlog + 55 client
+  rows normalized cleanly to the enum.
 
 ## Run it (at cutover)
 
-1. Get the handoff from the `ops-archive` chat (the prompt was sent there). Drop its
-   `tasks.export.json` at **`data/tracker-tasks.export.json`** in this repo.
+1. Get `tasks.export.json` from the `ops-archive` repo's `consolidation-handoff`
+   branch (`consolidation-handoff/tasks.export.json`) — download it and drop it at
+   **`data/tracker-tasks.export.json`** here, OR add `ops-archive` to the agent's
+   scope so it can pull the branch directly. (Re-run the exporter at cutover for a
+   fresh snapshot.)
 2. Apply the migration: run `0003_tasks.sql` in Supabase (after `0001`/`0002`).
 3. Dry run: `node scripts/import-tasks.mjs` → review `data/tasks.normalized.json`
    and the printed by-source / by-status / collision summary.
@@ -40,12 +53,33 @@ Supabase `tasks` table — merging three sources:
 
 > `data/` is local I/O (export in, normalized out) — gitignore it; don't commit.
 
-## Status mapping (normalized)
+## Status mapping (3-value, finalized)
 
-`ready, blocked, parked, triage(needs-grilling), idea` (backlog) ·
-`done, todo, in_progress, blocked` (clients) · tracker statuses pass through
-(lowercased, spaces/dashes → `_`). Reconcile the canonical set against the
-tracker's `MAPPING.md` when it arrives, then tighten `0003` (enum or check).
+Canonical lifecycle is the enum **`open | blocked | done`**. The original is kept
+verbatim in `raw_status`:
+- backlog badges: `blocked`→blocked, (none done)→done, everything else
+  (`ready`/`idea`/`parked`/`needs-grilling`)→**open** (badge preserved in `raw_status`).
+- client tasks: `done`→done, `blocked`→blocked, `todo`/`in-progress`→**open**.
+- tracker: already `open|blocked|done` — passed through.
+Derived-blocked is recomputed live by the `tasks_blocked` view — the imported
+`blocked_by` is only a snapshot.
+
+## Merge caveats (from the handoff — defaults applied by the importer)
+
+- **leads (36)** → excluded (flag `leads-pipeline`); belong in the dashboard's
+  separate `leads` table. Optional follow-up: map them into `leads`.
+- **client-sites (4)** → excluded (`client-record` + `test-fixture`); they're client
+  *entities* (1 template + 3 fictional seeds), not tasks.
+- **HC-16/17/18** → excluded (`test-fixture`, fictional briefs).
+- **ops lane (25, `tracker-meta`)** → imported but **review**; it's the retiring
+  tracker's own build backlog (~14 already done) and overlaps this repo's backlog.
+- **learning (10) + career (8), `personal-lane`** → imported; decide whether the
+  command center should carry personal lanes (use `--include-all` is unrelated —
+  these aren't in the DROP set; triage post-import or filter by flag).
+- **done (19)** → imported as history (`status='done'`); skip later if undesired.
+
+Net with defaults: ~**101** tracker + 62 backlog + 55 client rows, then triage
+`tracker-meta` / `personal-lane` / done.
 
 ## Next (after import)
 
