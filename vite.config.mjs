@@ -12,6 +12,7 @@ import { createProposedSkillsMiddleware } from './scripts/proposed-skills-middle
 import { createServiceManagerMiddleware } from './scripts/service-manager-middleware.mjs';
 import { createCcPluginsMiddleware } from './scripts/cc-plugins-middleware.mjs';
 import { createResearchFeedMiddleware } from './scripts/research-feed-middleware.mjs';
+import { createLeadsMiddleware } from './scripts/leads-middleware.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const hdsManifestModuleId = 'virtual:hds-manifest';
@@ -19,6 +20,13 @@ const resolvedHdsManifestModuleId = `\0${hdsManifestModuleId}`;
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+
+  // Surface server-only secrets to the dev middleware (scripts/leads-middleware.mjs).
+  // loadEnv reads them from .env.local but does not inject them into process.env.
+  // Dev-only; production functions read Vercel env directly. Values are never logged.
+  for (const key of ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'GOOGLE_PLACES_API_KEY', 'ANTHROPIC_API_KEY']) {
+    if (!process.env[key] && env[key]) process.env[key] = env[key];
+  }
 
   return {
     define: {
@@ -99,6 +107,21 @@ export default defineConfig(({ mode }) => {
               res.end(JSON.stringify({ error: String(error?.message || error) }));
             }
           });
+        },
+      },
+      // Dev-only: leads pipeline — POST /api/pull-leads, POST /api/generate-site,
+      // GET /api/leads. Mirrors the production Vercel functions in api/* using the
+      // same lib/* logic (single source of truth). See scripts/leads-middleware.mjs.
+      // apply: 'serve' so prod builds never expose these — Vercel serves the
+      // api/* functions in production.
+      {
+        name: 'ops-leads-api',
+        apply: 'serve',
+        configureServer(server) {
+          const leads = createLeadsMiddleware();
+          server.middlewares.use('/api/pull-leads', leads.pull);
+          server.middlewares.use('/api/generate-site', leads.generate);
+          server.middlewares.use('/api/leads', leads.list);
         },
       },
       // Dev-only: POST /api/skills/:id — whitelisted skill runner that backs the
