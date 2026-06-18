@@ -16,17 +16,26 @@ successfully. Verified from the build logs — two failures, in order:
 > **old markdown tracker** — a different, simpler codebase. The dashboard you want
 > live is the `hirobius-ops` project. Decide which is canonical (see cleanup below).
 
-> **Update 2026-06-18 (DS session handoff).** The design-system repo now ships
-> **GitHub Packages distribution** — `origin/main` tip `23cfdae` *"Fix standalone
-> extraction: build, nav, SSR + GitHub Packages distribution (#1)"*, PR #1 merged,
-> prod green. That means **Option 1 below is no longer a "to build" — the publish
-> side is done.** The remaining work is purely on this repo's side: point the dep at
-> the published package, add `.npmrc`, set `NODE_AUTH_TOKEN` in Vercel, regenerate the
-> lockfile. Option 1 is now the recommended path (no vendoring needed).
+> **Update 2026-06-18 (DS session handoff + in-repo wiring done).** The design-system
+> repo ships **GitHub Packages distribution** — `origin/main` tip `23cfdae` *"Fix
+> standalone extraction: build, nav, SSR + GitHub Packages distribution (#1)"*, PR #1
+> merged, prod green. The published package is **`@hirobius/design-system@0.3.0`**
+> (read from the public repo's `package.json`; `publishConfig.registry` =
+> `https://npm.pkg.github.com`). Option 1 is the path; the publish side is done.
 >
-> One thing the handoff did **not** include is the published **version string**. Grab
-> it from the DS repo's `package.json` `version` (or `npm view @hirobius/design-system
-> version` against GitHub Packages) and drop it into the dep range below.
+> **Already committed on `claude/laughing-ride-gja5xd`** (Option 1 steps 1–2):
+> - `package.json` dep flipped `file:../hirobius-design-system` → `^0.3.0`.
+> - `.npmrc` added (`@hirobius` → GitHub Packages, auth via `${NODE_AUTH_TOKEN}`).
+>
+> **Remaining (human / DS-resolved env only):**
+> - Set `NODE_AUTH_TOKEN` (GitHub PAT with `read:packages`) in Vercel **and** in the
+>   local shell that runs install.
+> - Run `pnpm install` once → regenerates `pnpm-lock.yaml` (also picks up
+>   `@supabase/supabase-js`, clearing `ERR_PNPM_OUTDATED_LOCKFILE`). Commit the
+>   lockfile. The container here can't do this — no token, no registry egress, and
+>   secrets are human-only.
+> - That same install also unblocks `pnpm manifest:generate` for the 3 absorbed
+>   components (see `ds-migration-reconciliation.md`).
 
 ## Fix A — make `@hirobius/design-system` resolvable (pick one)
 

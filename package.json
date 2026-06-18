@@ -211,7 +211,7 @@
     "watch:metrics": "nodemon --watch src/app/components --watch src/app/pages --watch src/app/design-system --watch src/app/styles -e tsx,ts,css --exec \"node scripts/audit-tokens.mjs --full && node scripts/generate-manifest.mjs\""
   },
   "dependencies": {
-    "@hirobius/design-system": "file:../hirobius-design-system",
+    "@hirobius/design-system": "^0.3.0",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
