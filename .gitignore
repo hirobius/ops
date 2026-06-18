@@ -5,6 +5,9 @@ temp/
 .DS_Store
 *.local
 
+# Tasks-consolidation local I/O (tracker export in, normalized out) — see scripts/import-tasks.mjs
+data/
+
 # Vitest coverage HTML report (full artifacts) — only coverage-summary.json in tests/ is tracked
 coverage/
 
