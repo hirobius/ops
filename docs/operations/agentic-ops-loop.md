@@ -44,9 +44,10 @@ Status: proposal. Nothing built yet — slices below.
    **Proceed / Punt / Backlog** (+ "Open diff").
 3. **Interaction endpoint** — `api/discord-interactions.ts` (Vercel function)
    verifies Discord's Ed25519 signature, records the choice, acks.
-4. **Dispatch** — Proceed creates an agent task via the existing seam (write task →
-   Hetzner auto-assigner picks it up / kicks a Claude Code run). Agent works on a
-   branch, never main.
+4. **Dispatch** — Proceed opens/labels a **GitHub issue** that @mentions Claude (or
+   trips the Claude Code GitHub Action). GitHub turns that into a **Claude Code
+   session** on a branch — no Claude/Anthropic API plumbing on our side; the only
+   call we make is creating the issue. The agent works on a branch + PR, never main.
 5. **Close** — agent posts back to Discord (done + branch/PR link); finding marked
    resolved. Loop.
 
@@ -65,9 +66,12 @@ CTAs. Action from your phone (Discord) or the dashboard — same result.
 
 ## Open forks (decide before building)
 
-1. **Dispatch backbone** — Hetzner auto-assigner (exists) vs Claude Code web
-   sessions vs a new queue. The orchestration layer is "in flux" per CLAUDE.md;
-   this is the key call.
+1. **Dispatch backbone — DECIDED: Claude Code session via GitHub, no custom API.**
+   Proceed creates/labels a GitHub issue that @mentions Claude / trips the Claude
+   Code GitHub Action → a Claude Code session runs on a branch. The only call our
+   code makes is "create GitHub issue" (a PAT/app token); no Claude API, no session
+   orchestration to maintain. (Hetzner auto-assigner stays available only if a
+   non-interactive runner is ever needed.)
 2. **Findings source** — deterministic audits only (cheap, safe) vs + LLM synthesis
    (richer, costs tokens).
 3. **Cron host** — Vercel cron vs VPS cron.
