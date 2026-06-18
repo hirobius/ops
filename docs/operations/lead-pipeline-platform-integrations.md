@@ -67,18 +67,45 @@ template or AI-generated, then published via a single API call.
   preview/editor URL → a human reviews → then publish. Keeps a quality gate on the
   client-facing artifact.
 
-### Cost model — the thing to watch
+### Cost model — billing is per *published* site (previews are free)
 
-Duda bills **per site**, and this pipeline mints sites at lead scale.
+Duda bills **per published site beyond your plan's included count** — **unpublished
+sites do not bill**, and unpublishing stops the charge.
+([site subscription / billing](https://support.duda.co/hc/en-us/articles/26518336119063-Site-Management-Subscription-and-Deletion))
 API + white-label are on the **Agency ($52/mo)** and **White Label ($149/mo)**
-tiers; both include **4 sites**, extras ~**$17/site/mo**. A 14-day White-Label
-trial covers all features.
+tiers; both include **4 published sites**, extras ~**$17/published-site/mo**. A
+14-day White-Label trial covers all features.
 ([pricing](https://www.duda.co/pricing), [G2](https://www.g2.com/products/duda/pricing))
 
-→ Implication: **build sites lazily, publish only on intent.** Spinning up a Duda
-site for every sourced lead is a recurring per-site bill. Prefer: generate the
-*config* for all (cheap), but only create the *Duda site* for leads you're
-actually pitching (and unpublish/delete on `lost` to stop the meter).
+→ Implication: **previews are ~free; you pay on conversion.** Create unpublished
+spec sites for as many leads as you're pitching (no per-site charge), share their
+preview links, and only **publish** on a yes (subdomain, or a custom domain at
+sale). Leave-unpublished / delete the ones that don't convert. Cost then scales
+with **wins**, not outreach volume. (Confirm any account cap on the number of
+*unpublished* drafts before scaling to hundreds.)
+
+### Client previews (the spec-site play)
+
+Duda supports exactly the "build it → send a link → sell it → go live" motion:
+
+- **Unpublished sites get a shareable preview URL.** The editor's *Preview Link*
+  (All Devices / Desktop / Mobile) shows the site including unpublished changes and
+  can be copied + sent.
+  ([site settings / preview](https://support.duda.co/hc/en-us/articles/26519963676695-Site-Settings))
+- **Built-in approval** via **Site Comments** — share the preview, let clients leave
+  inline comments, with email notifications (Team / Agency / White Label).
+  ([Site Comments](https://www.duda.co/features/site-comments))
+- **Free until you publish** (see the cost model above).
+
+Pipeline flow: `build-site` creates the unpublished site + injects `config` →
+stores the preview URL in `leads.preview_url` → outreach sends the link → on a yes,
+a separate `publish-site` action goes live and flips `site_status='published'`.
+
+⚠️ **Verify before cold-outreach at scale:** confirm the plain *Preview Link* is
+viewable **without a Duda login** (the Site-Comments collaborator flow is auth'd;
+the preview link should be open — test one in an incognito window). If previews
+turn out to need auth, fall back to publishing to a throwaway
+`*.multiscreensite.com` subdomain (public, but counts as a published/billed site).
 
 ### Phased delivery
 
@@ -174,7 +201,7 @@ one is clearly authoritative.
 | Role in pipeline | Build + publish the **website** | **CRM + outreach** (+ optional resale) |
 | Maps to | `config` → live site, `preview_url` | `scored` lead → contact/opportunity, `sent` |
 | Recommended posture | **Build it** (Part A roadmap) | **Adapter-only, deferred** (Part B) |
-| Cost shape | per-site/mo (watch at scale) | per-tier/mo + usage |
+| Cost shape | per *published* site/mo (previews free) | per-tier/mo + usage |
 
 They can both ship: Duda produces the site that becomes a lead's `preview_url`;
 GHL (or in-house) drives the outreach that moves it to `sent → won`.
