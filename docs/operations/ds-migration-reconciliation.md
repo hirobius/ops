@@ -24,22 +24,47 @@ entire inventory (audited 2026-06-18):
   knowledge, research, logs, migrations, findings.
 - **Gate:** `src/app/components/OpsGate.tsx` + `src/lib/ops-gate.ts`.
 
-Intentionally NOT absorbed: `src/app/pages/hds/OpsPage.tsx` (orphaned "Workspace HQ"
-— ops has its own dashboard under `src/app/pages/ops/`).
+- **Components:** the 3 ops-flavored components the strip moved out of the package
+  (`agent-tag`, `approval-card`, `phase-header`) are now **absorbed locally** at
+  `src/app/components/` (see Gap A, resolved).
+
+Intentionally NOT absorbed (discarded — unneeded): `src/app/pages/hds/OpsPage.tsx`
+(orphaned "Workspace HQ", never routed; ops has its own dashboard under
+`src/app/pages/ops/`). Final reconciliation 2026-06-18 against both export tarballs
+(`ops-bundle` 191 files + `ops-4b` 55 files): **every** archived script, doc dir, and
+the b4 extras (`.husky/commit-msg`, `dispatch-unit` skill) were already present; the
+only missing-and-intended content was the 3 components. The archives carried nothing
+else this repo needed.
 
 ## Gaps to act on
 
-### A. ⚠️ Build-breaker — DS package drops 3 components ops imports
+### A. ✅ RESOLVED — DS package drops 3 components ops imports (absorbed 2026-06-18)
 The strip moves `agent-tag` / `approval-card` / `phase-header` OUT of the
-`@hirobius/design-system` package. Ops imports all three from the package:
-- `AgentTag`, `AgentTier` → `ops/SessionsSection.tsx`, `ops/SessionsPage.tsx`, `ops/SessionInputForm.tsx`
-- `ApprovalCard`, `ApprovalState`, `ApprovalUnitSummary` → `admin/Approvals.tsx`, `admin/ApprovalDetail.tsx`
-- `PhaseHeader`, `PhaseHeaderTone` → `ops/ClientDashboardPage.tsx`
+`@hirobius/design-system` package. Ops imported all three from the package — which
+would have broken typecheck/build the moment the strip PR merged. **Fixed by
+absorbing them into this repo:**
+- `src/app/components/agent-tag.tsx` — consumes DS primitives `Badge`, `Stack` +
+  `@hirobius/design-system/tokens`. Used by `ops/SessionsSection.tsx`,
+  `ops/SessionsPage.tsx`, `ops/SessionInputForm.tsx`.
+- `src/app/components/approval-card.tsx` — consumes DS primitives `Card`, `Button`,
+  `Tag` + ops-local `cn`. Used by `admin/Approvals.tsx`, `admin/ApprovalDetail.tsx`.
+- `src/app/components/phase-header.tsx` — self-contained (ops-local `cn` + semantic
+  CSS vars). Used by `ops/ClientDashboardPage.tsx`.
+- `src/lib/utils.ts` — new ops-local `cn` (clsx + tailwind-merge; backs the `./cn`
+  export map) so the absorbed components don't depend on the package's `cn` subpath.
 
-If DS republishes without them, ops typecheck/build breaks (5 files). **Decide:**
-keep them exported from DS (recommended — ops is the consumer), or vendor them into
-ops. Coordinate with the DS strip PR. Compounds the deploy-unblock blocker
-(`deploy-unblock.md`).
+All 6 consumer imports were repointed from `@hirobius/design-system` to the local
+relative paths. Only the moved symbols were repointed; all other DS primitives
+(`Badge`/`Stack`/`Card`/`Button`/`Tag`/`Page`/…) still come from the package
+(confirmed public exports). The 3 components carry `@internal` + `hds-bypass` headers
+matching the `OpsGate` precedent; `check-source-canon` passes.
+
+**Pending (DS-resolved env only):** run `pnpm manifest:generate` once `pnpm install`
+succeeds (needs the published DS package — see `deploy-unblock.md`) so the manifest +
+`component-api.json` register the 3 new components. They can't be generated in the
+agent container (no `node_modules`/`typescript`); this is the standard post-add step
+per CLAUDE.md, not a defect. `check-manifest-drift` already passes (it only governs
+`Hds*` compiler tags).
 
 ### B. `discord-bot.mjs` runtime bugs (present in OUR copy)
 - `getOrchSummary()` is called (~line 406) but never defined → ReferenceError on the

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { Page } from '@hirobius/design-system';
 import { Stack } from '@hirobius/design-system';
 import { TextLockup } from '@hirobius/design-system';
-import { ApprovalCard, type ApprovalUnitSummary, type ApprovalState } from '@hirobius/design-system';
+import { ApprovalCard, type ApprovalUnitSummary, type ApprovalState } from '../../components/approval-card';
 
 // 11a-3 — approval app list view.
 //
