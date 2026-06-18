@@ -11,6 +11,15 @@ export type LeadStatus =
   | 'won'
   | 'lost';
 
+export type SiteStatus =
+  | 'none'
+  | 'building'
+  | 'built'
+  | 'publishing'
+  | 'published'
+  | 'build_failed'
+  | 'publish_failed';
+
 export interface Lead {
   id: string;
   created_at: string;
@@ -27,6 +36,23 @@ export interface Lead {
   has_website: boolean | null;
   qualified: boolean | null;
   qualify_reason: string | null;
+  // richer sourcing fields (Places details → Duda business data)
+  street_address: string | null;
+  postal_code: string | null;
+  country: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  email: string | null;
+  hours: unknown;
+  photos: string[] | null;
+  logo_url: string | null;
+  social: Record<string, string> | null;
+  google_maps_url: string | null;
+  price_level: number | null;
+  business_status: string | null;
+  description: string | null;
+  types: string[] | null;
+  service_area: string | null;
   // generation (AI agent)
   status: LeadStatus;
   config: unknown;
@@ -37,6 +63,12 @@ export interface Lead {
   // outreach
   preview_url: string | null;
   sent_at: string | null;
+  // Duda site tracking (build → preview → publish)
+  duda_site_name: string | null;
+  editor_url: string | null;
+  live_url: string | null;
+  site_status: SiteStatus | null;
+  published_at: string | null;
 }
 
 export interface LeadsResponse {

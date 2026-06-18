@@ -107,6 +107,47 @@ the preview link should be open — test one in an incognito window). If preview
 turn out to need auth, fall back to publishing to a throwaway
 `*.multiscreensite.com` subdomain (public, but counts as a published/billed site).
 
+### Field mapping (Places → `leads` → Duda) — capture at scrape time
+
+Captured now (migration `0002_lead_site_fields.sql`) so a lead never needs
+re-scraping to build its site. Most map straight from one Google Places **Place
+Details** call — mind the field tiers (phone + hours are "Contact", editorial
+summary is "Atmosphere"), so request them once.
+([Places data fields](https://developers.google.com/maps/documentation/places/web-service/data-fields),
+[Duda business data](https://support.duda.co/hc/en-us/articles/26519957137687-Business-Data))
+
+| Duda business-data field | `leads` column | Places source |
+|---|---|---|
+| Business name | `name` | `displayName` |
+| Category / types | `category`, `types` | `primaryType` / `types` |
+| Description / about | `description` | `editorialSummary` |
+| Street address | `street_address` | `addressComponents` (number + route) |
+| City / region / postal / country | `city` / `region` / `postal_code` / `country` | `addressComponents` |
+| Geo (map + schema) | `latitude`, `longitude` | `location` |
+| Phone | `phone` | `nationalPhoneNumber` |
+| Email | `email` | enrichment (not in Places) |
+| Hours | `hours` | `regularOpeningHours` |
+| Photos / gallery | `photos` | `photos` (Place Photos) |
+| Logo | `logo_url` | enrichment / site favicon |
+| Social accounts | `social` | enrichment |
+| Maps link / schema | `google_maps_url` | `googleMapsUri` |
+| Service area | `service_area` | derived from metro |
+| Signals | `rating` / `review_count` / `price_level` / `business_status` | `rating` / `userRatingCount` / `priceLevel` / `businessStatus` |
+
+`lib/duda` → `toDudaContent(lead)` is the code-level source of truth for this
+mapping. Anything Places can't supply (email, logo, socials) is left for the
+enrichment step of the agent.
+
+### Scaffold status (shipped on this branch)
+
+v1 is scaffolded (stubs): `lib/duda/index.mjs` (`buildSite`/`publishSite`/`toDudaContent`),
+`api/build-site.ts` + `api/publish-site.ts` (dev-mirrored in
+`scripts/leads-middleware.mjs`), the `0002` schema columns, and Build/Preview/
+Publish/Live actions on the board. `build-site` creates an **unpublished** site +
+injects content and stores `preview_url`; `publish-site` goes live and sets
+`live_url` + `published_at`. Going live = drop the real Duda Partner REST calls
+into `lib/duda` (env: `DUDA_API_USER` / `DUDA_API_PASS`).
+
 ### Phased delivery
 
 - **v1** — `lib/duda` adapter + `POST /api/build-site` for one scored lead

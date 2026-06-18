@@ -24,7 +24,7 @@ import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from '../PageHeader';
 import { useLeads } from './useLeads';
 import { PullLeadsForm } from './PullLeadsForm';
-import type { Lead, LeadStatus } from './types';
+import type { Lead, LeadStatus, SiteStatus } from './types';
 
 type BadgeTone = 'success' | 'neutral' | 'warning' | 'danger';
 
@@ -61,6 +61,7 @@ function metaLine(lead: Lead): string {
 export default function LeadsPage() {
   const { leads, isOffline, isInitialLoading, lastUpdatedAt, refetch } = useLeads();
   const [generatingIds, setGeneratingIds] = useState<ReadonlySet<string>>(new Set());
+  const [siteBusyIds, setSiteBusyIds] = useState<ReadonlySet<string>>(new Set());
 
   const handleGenerate = useCallback(
     async (leadId: string) => {
@@ -84,6 +85,66 @@ export default function LeadsPage() {
     },
     [refetch],
   );
+
+  // Build (unpublished) or publish a lead's Duda site. One in-flight action per lead.
+  const handleSiteAction = useCallback(
+    async (leadId: string, endpoint: string) => {
+      setSiteBusyIds((prev) => new Set(prev).add(leadId));
+      try {
+        await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ leadId }),
+        });
+      } catch {
+        /* surfaced via row site_status on next poll */
+      } finally {
+        setSiteBusyIds((prev) => {
+          const next = new Set(prev);
+          next.delete(leadId);
+          return next;
+        });
+        refetch();
+      }
+    },
+    [refetch],
+  );
+
+  function renderSiteActions(lead: Lead) {
+    if (siteBusyIds.has(lead.id)) {
+      const publishing = lead.site_status === 'built' || lead.site_status === 'publish_failed';
+      return <span style={s.score}>{publishing ? 'Publishing…' : 'Building…'}</span>;
+    }
+    const st: SiteStatus = lead.site_status ?? 'none';
+    if (st === 'building') return <span style={s.score}>Building…</span>;
+    if (st === 'publishing') return <span style={s.score}>Publishing…</span>;
+    if (st === 'published') {
+      return lead.live_url ? (
+        <a href={lead.live_url} target="_blank" rel="noreferrer" style={s.linkAction}>Live ↗</a>
+      ) : null;
+    }
+    if (st === 'built' || st === 'publish_failed') {
+      return (
+        <>
+          {lead.preview_url && (
+            <a href={lead.preview_url} target="_blank" rel="noreferrer" style={s.linkAction}>Preview ↗</a>
+          )}
+          <button type="button" onClick={() => handleSiteAction(lead.id, '/api/publish-site')} style={s.genButton}>
+            {st === 'publish_failed' ? 'Retry publish' : 'Publish'}
+          </button>
+        </>
+      );
+    }
+    // 'none' / 'build_failed' — only offer build once there's a config to build from
+    if (lead.status === 'scored' || lead.config != null) {
+      return (
+        <button type="button" onClick={() => handleSiteAction(lead.id, '/api/build-site')} style={s.genButton}>
+          {st === 'build_failed' ? 'Retry build' : 'Build site'}
+        </button>
+      );
+    }
+    return null;
+  }
 
   const summary = useMemo(() => {
     if (!leads) return '';
@@ -152,6 +213,7 @@ export default function LeadsPage() {
                   >
                     {inFlight ? 'Generating…' : lead.status === 'sourced' ? 'Generate site' : 'Regenerate'}
                   </button>
+                  {renderSiteActions(lead)}
                 </div>
               </li>
             );
@@ -242,6 +304,12 @@ const s = {
     fontFamily: hds.monoFamily,
     fontSize: hds.fontSize.xs,
     color: 'var(--semantic-color-content-secondary)',
+  },
+  linkAction: {
+    ...hds.typeStyles.ui,
+    fontSize: hds.fontSize.xs,
+    color: 'var(--semantic-color-content-accent)',
+    textDecoration: 'none',
   },
   genButton: {
     ...hds.typeStyles.ui,

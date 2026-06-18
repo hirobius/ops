@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
   // Surface server-only secrets to the dev middleware (scripts/leads-middleware.mjs).
   // loadEnv reads them from .env.local but does not inject them into process.env.
   // Dev-only; production functions read Vercel env directly. Values are never logged.
-  for (const key of ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'GOOGLE_PLACES_API_KEY', 'ANTHROPIC_API_KEY']) {
+  for (const key of ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'GOOGLE_PLACES_API_KEY', 'ANTHROPIC_API_KEY', 'DUDA_API_USER', 'DUDA_API_PASS']) {
     if (!process.env[key] && env[key]) process.env[key] = env[key];
   }
 
@@ -121,6 +121,8 @@ export default defineConfig(({ mode }) => {
           const leads = createLeadsMiddleware();
           server.middlewares.use('/api/pull-leads', leads.pull);
           server.middlewares.use('/api/generate-site', leads.generate);
+          server.middlewares.use('/api/build-site', leads.build);
+          server.middlewares.use('/api/publish-site', leads.publish);
           server.middlewares.use('/api/leads', leads.list);
         },
       },

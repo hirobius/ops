@@ -18,6 +18,7 @@
 import { getServiceClient } from '../lib/supabase/server.mjs';
 import { pullLeads } from '../lib/lead-gen/index.mjs';
 import { runPipeline } from '../lib/agent/index.mjs';
+import { buildSite, publishSite } from '../lib/duda/index.mjs';
 
 const MAX_COUNT = 50;
 const DEFAULT_LIMIT = 200;
@@ -146,6 +147,68 @@ export function createLeadsMiddleware() {
           .limit(limit);
         if (error) return sendJson(res, 500, { error: error.message });
         return sendJson(res, 200, { leads: data ?? [] });
+      } catch (err) {
+        return sendJson(res, 500, { error: messageOf(err) });
+      }
+    },
+
+    // POST /api/build-site
+    build: async (req, res, next) => {
+      if (req.method !== 'POST') return next();
+      try {
+        const body = await readJson(req);
+        const leadId = typeof body.leadId === 'string' ? body.leadId.trim() : '';
+        if (!leadId) return sendJson(res, 400, { error: 'leadId is required' });
+        const sb = await clientOr503(res);
+        if (!sb) return;
+        const { data: lead, error: fetchError } = await sb.from('leads').select('*').eq('id', leadId).single();
+        if (fetchError || !lead) return sendJson(res, 404, { error: 'lead not found' });
+        await sb.from('leads').update({ site_status: 'building' }).eq('id', leadId);
+        try {
+          const result = await buildSite(lead);
+          const { error: updateError } = await sb.from('leads').update({
+            duda_site_name: result.duda_site_name,
+            preview_url: result.preview_url,
+            editor_url: result.editor_url,
+            site_status: 'built',
+          }).eq('id', leadId);
+          if (updateError) return sendJson(res, 500, { error: updateError.message });
+          return sendJson(res, 200, { ok: true, preview_url: result.preview_url });
+        } catch (err) {
+          await sb.from('leads').update({ site_status: 'build_failed' }).eq('id', leadId);
+          return sendJson(res, 500, { error: messageOf(err) });
+        }
+      } catch (err) {
+        return sendJson(res, 500, { error: messageOf(err) });
+      }
+    },
+
+    // POST /api/publish-site
+    publish: async (req, res, next) => {
+      if (req.method !== 'POST') return next();
+      try {
+        const body = await readJson(req);
+        const leadId = typeof body.leadId === 'string' ? body.leadId.trim() : '';
+        if (!leadId) return sendJson(res, 400, { error: 'leadId is required' });
+        const sb = await clientOr503(res);
+        if (!sb) return;
+        const { data: lead, error: fetchError } = await sb.from('leads').select('*').eq('id', leadId).single();
+        if (fetchError || !lead) return sendJson(res, 404, { error: 'lead not found' });
+        if (!lead.duda_site_name) return sendJson(res, 409, { error: 'no site to publish — build the site first', code: 'NO_SITE' });
+        await sb.from('leads').update({ site_status: 'publishing' }).eq('id', leadId);
+        try {
+          const result = await publishSite(lead.duda_site_name);
+          const { error: updateError } = await sb.from('leads').update({
+            site_status: 'published',
+            live_url: result.live_url,
+            published_at: new Date().toISOString(),
+          }).eq('id', leadId);
+          if (updateError) return sendJson(res, 500, { error: updateError.message });
+          return sendJson(res, 200, { ok: true, live_url: result.live_url });
+        } catch (err) {
+          await sb.from('leads').update({ site_status: 'publish_failed' }).eq('id', leadId);
+          return sendJson(res, 500, { error: messageOf(err) });
+        }
       } catch (err) {
         return sendJson(res, 500, { error: messageOf(err) });
       }

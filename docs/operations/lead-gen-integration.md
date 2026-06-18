@@ -25,7 +25,8 @@ brief's `app/api/<tool>/route.ts` shape becomes:
 |---|---|
 | Data model | `supabase/migrations/0001_leads.sql` (`leads` table, status lifecycle, `place_id` unique key, RLS on) |
 | Server libs | `lib/supabase/server.mjs`, `lib/lead-gen/index.mjs` (stub), `lib/agent/index.mjs` (stub) |
-| Runner (prod) | `api/pull-leads.ts`, `api/generate-site.ts`, `api/leads.ts` |
+| Runner (prod) | `api/pull-leads.ts`, `api/generate-site.ts`, `api/build-site.ts`, `api/publish-site.ts`, `api/leads.ts` |
+| Site build (Duda) | `lib/duda/index.mjs` (`buildSite`/`publishSite`/`toDudaContent`, stub); schema `supabase/migrations/0002_lead_site_fields.sql` |
 | Runner (dev) | `scripts/leads-middleware.mjs` + `vite.config.mjs` plugin |
 | Render | `src/app/pages/ops/leads/` (`LeadsPage.tsx`, `PullLeadsForm.tsx`, `useLeads.ts`, `types.ts`); route + nav in `routes.tsx` and `SurfacesRail.tsx` |
 
@@ -35,7 +36,12 @@ Flow:
    sourcing (one page) → upsert to `leads` (status `sourced`, dedupe on `place_id`).
 2. **Generate site** (`POST /api/generate-site` `{ leadId }`) → agent runs on one
    lead → row gets `config`, `eval_*`, `loop_iterations`, status `scored`.
-3. **Board** polls `GET /api/leads` every 5s and renders live status.
+3. **Build site** (`POST /api/build-site` `{ leadId }`) → Duda creates an
+   **unpublished** site + injects content → row gets `duda_site_name`,
+   `preview_url`, `editor_url`, `site_status='built'`. Send the preview link.
+4. **Publish site** (`POST /api/publish-site` `{ leadId }`, on conversion) → goes
+   live → `live_url`, `published_at`, `site_status='published'`.
+5. **Board** polls `GET /api/leads` every 5s and renders live status.
 
 ## Environment variables (server-only)
 
@@ -45,8 +51,10 @@ An agent never writes `.env*` — a human sets these.
 ```
 SUPABASE_URL                 # Supabase project URL
 SUPABASE_SERVICE_ROLE_KEY    # service-role key — SERVER ONLY, bypasses RLS, never shipped to client
-GOOGLE_PLACES_API_KEY        # used by the real puller (lib/lead-gen)
+GOOGLE_PLACES_API_KEY        # used by the real puller (lib/lead-gen) — request the richer Place Details fields
 ANTHROPIC_API_KEY            # used by the real agent (lib/agent)
+DUDA_API_USER                # Duda Partner API (Basic auth) — used by the real lib/duda
+DUDA_API_PASS                # Duda Partner API password
 ```
 
 ## Setup steps (human)
@@ -56,9 +64,9 @@ ANTHROPIC_API_KEY            # used by the real agent (lib/agent)
    `@hirobius/design-system` is present (the integration session couldn't run
    installs). Run `pnpm install`, then commit the updated `pnpm-lock.yaml`.
    **Vercel/CI builds will fail on the frozen lockfile until this is committed.**
-2. **Create the Supabase table.** Either run the SQL in
-   `supabase/migrations/0001_leads.sql` in the Supabase SQL editor, or, with the
-   Supabase CLI linked to the project: `supabase db push`.
+2. **Create the Supabase table.** Run both migrations in order —
+   `supabase/migrations/0001_leads.sql` then `0002_lead_site_fields.sql` — in the
+   Supabase SQL editor, or, with the Supabase CLI linked: `supabase db push`.
 3. **Set the four env vars** above (Vercel + `.env.local`).
 4. **Deploy** (Vercel) for production, or `pnpm dev` for local.
 
