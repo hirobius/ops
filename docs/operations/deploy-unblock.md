@@ -16,6 +16,18 @@ successfully. Verified from the build logs — two failures, in order:
 > **old markdown tracker** — a different, simpler codebase. The dashboard you want
 > live is the `hirobius-ops` project. Decide which is canonical (see cleanup below).
 
+> **Update 2026-06-18 (DS session handoff).** The design-system repo now ships
+> **GitHub Packages distribution** — `origin/main` tip `23cfdae` *"Fix standalone
+> extraction: build, nav, SSR + GitHub Packages distribution (#1)"*, PR #1 merged,
+> prod green. That means **Option 1 below is no longer a "to build" — the publish
+> side is done.** The remaining work is purely on this repo's side: point the dep at
+> the published package, add `.npmrc`, set `NODE_AUTH_TOKEN` in Vercel, regenerate the
+> lockfile. Option 1 is now the recommended path (no vendoring needed).
+>
+> One thing the handoff did **not** include is the published **version string**. Grab
+> it from the DS repo's `package.json` `version` (or `npm view @hirobius/design-system
+> version` against GitHub Packages) and drop it into the dep range below.
+
 ## Fix A — make `@hirobius/design-system` resolvable (pick one)
 
 ### Option 1 — Publish the package *(recommended; fixes CI, Vercel, fresh clones)*
