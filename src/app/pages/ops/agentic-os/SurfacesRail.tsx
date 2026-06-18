@@ -25,6 +25,7 @@ const TILES: readonly SurfaceTile[] = [
   { to: '/ops/atlas', label: 'Atlas', description: 'Components · tokens · pipeline · strength' },
   { to: '/ops/kanban', label: 'Kanban', description: 'Live unit board — claim, track, ship' },
   { to: '/ops/leads', label: 'Leads', description: 'Pull local businesses · generate sites · track outreach' },
+  { to: '/ops/tasks', label: 'Tasks', description: 'Consolidated task board — tracker + backlog + clients' },
   { to: '/ops/build', label: 'Build', description: 'Pipeline stats · cost burn · agent audit' },
   { to: '/ops/knowledge', label: 'Knowledge', description: 'Build · Grow · Run — ops pillar hub' },
   {

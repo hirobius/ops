@@ -13,6 +13,7 @@ import { createServiceManagerMiddleware } from './scripts/service-manager-middle
 import { createCcPluginsMiddleware } from './scripts/cc-plugins-middleware.mjs';
 import { createResearchFeedMiddleware } from './scripts/research-feed-middleware.mjs';
 import { createLeadsMiddleware } from './scripts/leads-middleware.mjs';
+import { createTasksMiddleware } from './scripts/tasks-middleware.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const hdsManifestModuleId = 'virtual:hds-manifest';
@@ -24,7 +25,7 @@ export default defineConfig(({ mode }) => {
   // Surface server-only secrets to the dev middleware (scripts/leads-middleware.mjs).
   // loadEnv reads them from .env.local but does not inject them into process.env.
   // Dev-only; production functions read Vercel env directly. Values are never logged.
-  for (const key of ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'GOOGLE_PLACES_API_KEY', 'ANTHROPIC_API_KEY', 'DUDA_API_USER', 'DUDA_API_PASSWORD']) {
+  for (const key of ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'GOOGLE_PLACES_API_KEY', 'ANTHROPIC_API_KEY', 'DUDA_API_USER', 'DUDA_API_PASSWORD', 'GITHUB_TOKEN', 'GITHUB_REPO']) {
     if (!process.env[key] && env[key]) process.env[key] = env[key];
   }
 
@@ -124,6 +125,17 @@ export default defineConfig(({ mode }) => {
           server.middlewares.use('/api/build-site', leads.build);
           server.middlewares.use('/api/publish-site', leads.publish);
           server.middlewares.use('/api/leads', leads.list);
+        },
+      },
+      // Dev-only: consolidated tasks board — GET /api/tasks, POST /api/task-action.
+      // Mirrors the prod Vercel functions via the same lib/tasks logic.
+      {
+        name: 'ops-tasks-api',
+        apply: 'serve',
+        configureServer(server) {
+          const tasks = createTasksMiddleware();
+          server.middlewares.use('/api/task-action', tasks.action);
+          server.middlewares.use('/api/tasks', tasks.list);
         },
       },
       // Dev-only: POST /api/skills/:id — whitelisted skill runner that backs the

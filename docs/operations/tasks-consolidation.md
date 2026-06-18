@@ -78,14 +78,28 @@ Derived-blocked is recomputed live by the `tasks_blocked` view — the imported
   these aren't in the DROP set; triage post-import or filter by flag).
 - **done (19)** → imported as history (`status='done'`); skip later if undesired.
 
-Net with defaults: ~**101** tracker + 62 backlog + 55 client rows, then triage
-`tracker-meta` / `personal-lane` / done.
+Net with defaults (verified by dry-run against the real export): **105** tracker +
+**65** backlog + **55** client = **225** rows, 0 key collisions. (The handoff's
+"~101 tracker" estimate was off by 4 — the real drop is exactly 43 = leads 36 +
+client-sites 4 + HC-16/17/18.) Then triage `tracker-meta` / `personal-lane` / done.
 
-## Next (after import)
+## Board — `/ops/tasks` (shipped)
 
-- `/ops/tasks` board (mirror the leads pattern) reading the `tasks` table — the new
-  single source of truth, with the same Proceed/Punt/Backlog CTAs as the agentic
-  loop (`agentic-ops-loop.md`). Tasks + findings share one store.
+Built on the leads-board pattern (reads the `tasks` table, mutates via the API):
+- `api/tasks.ts` (GET) + `api/task-action.ts` (POST) — prod Vercel functions;
+  dev-mirrored by `scripts/tasks-middleware.mjs` via the shared `lib/tasks/actions.mjs`.
+- `src/app/pages/ops/tasks/` — `TasksPage.tsx` (lane-grouped, status/source filters),
+  `useTasks.ts` (poll), `types.ts`. Route + nav + route-coverage wired.
+- CTAs per task: **Done/Reopen**, **Trash** (soft-delete), and **Dispatch** — opens a
+  GitHub issue that @mentions Claude (the agentic-loop hand-off; no Claude API).
+  Dispatch needs `GITHUB_TOKEN` (+ optional `GITHUB_REPO`, default `hirobius/ops`).
+- Shows live only after `0003_tasks.sql` is applied + the import runs; until then
+  the board renders its offline notice.
+
+## Next
+
 - Retire `BACKLOG.md` to a thin pointer at the board; archive `clients/*/tasks.json`
   once mirrored (or keep client task editing client-side and sync).
 - Reconcile `0003` with the tracker schema; add any agent-native columns we kept.
+- Wire the daily-review findings into the same store (the agentic loop) — tasks +
+  findings, one board.

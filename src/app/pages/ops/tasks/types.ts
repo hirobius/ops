@@ -1,0 +1,46 @@
+/**
+ * Types for the /ops/tasks board. Mirrors the consolidated Supabase `tasks` table
+ * (supabase/migrations/0003_tasks.sql). Read via GET /api/tasks; mutated via
+ * POST /api/task-action.
+ */
+
+export type TaskStatus = 'open' | 'blocked' | 'done';
+
+export interface Task {
+  id: string;
+  key: string;
+  source: string; // tracker | backlog | client
+  native_key: string | null;
+  lane: string;
+  group: string | null;
+  phase: string | null;
+  title: string;
+  status: TaskStatus;
+  raw_status: string | null;
+  derived: string | null;
+  stage: string | null;
+  priority: 'high' | 'med' | 'low' | null;
+  due: string | null;
+  owner: string | null;
+  effort: 'S' | 'M' | 'L' | null;
+  tags: string[] | null;
+  deps: string[] | null;
+  blocked_by: string[] | null;
+  notes: unknown;
+  subtasks: unknown;
+  import_flags: string[] | null;
+  sort_order: number | null;
+  claimed_by: string | null;
+  claimed_at: string | null;
+  completed_at: string | null;
+  dispatch_url: string | null;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type TaskAction = 'done' | 'reopen' | 'claim' | 'unclaim' | 'trash' | 'restore' | 'dispatch';
+
+export interface TasksResponse {
+  tasks: Task[];
+}
