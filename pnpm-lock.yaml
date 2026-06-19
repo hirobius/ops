@@ -15,8 +15,8 @@ importers:
   .:
     dependencies:
       '@hirobius/design-system':
-        specifier: file:../hirobius-design-system
-        version: file:../hirobius-design-system(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(@types/three@0.183.1)(use-sync-external-store@1.6.0(react@18.3.1))
+        specifier: ^0.4.0
+        version: 0.4.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(@types/three@0.183.1)(react-dom@18.3.1(react@18.3.1))(react-router@7.13.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
       '@radix-ui/react-dialog':
         specifier: ^1.1.15
         version: 1.1.15(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -675,9 +675,13 @@ packages:
   '@formatjs/intl-localematcher@0.6.2':
     resolution: {integrity: sha512-XOMO2Hupl0wdd172Y06h6kLpBz6Dv+J4okPLl4LPtzbr8f66WbIoy4ev98EBuZ6ZK4h5ydTN6XneT4QVpD7cdA==}
 
-  '@hirobius/design-system@file:../hirobius-design-system':
-    resolution: {directory: ../hirobius-design-system, type: directory}
+  '@hirobius/design-system@0.4.0':
+    resolution: {integrity: sha512-zb83TG1smK8m/fvMavsGrjwJiyO4XOq6ZQgs/YOZdn8hKkK6kG6hs0yWgUXrKEqZvQmhQwimFAGe23V95AR6zw==, tarball: https://npm.pkg.github.com/download/@hirobius/design-system/0.4.0/213e12daf8e3be9206e948df1490e55bf3069cfd}
     engines: {node: '>=20', pnpm: '>=8'}
+    peerDependencies:
+      react: ^18.3.0 || ^19.0.0
+      react-dom: ^18.3.0 || ^19.0.0
+      react-router: ^7.0.0
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -6310,7 +6314,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@hirobius/design-system@file:../hirobius-design-system(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(@types/three@0.183.1)(use-sync-external-store@1.6.0(react@18.3.1))':
+  '@hirobius/design-system@0.4.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(@types/three@0.183.1)(react-dom@18.3.1(react@18.3.1))(react-router@7.13.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))':
     dependencies:
       '@radix-ui/react-dialog': 1.1.15(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-slot': 1.2.4(@types/react@18.3.28)(react@18.3.1)
