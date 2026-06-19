@@ -157,7 +157,13 @@ function BandLabel({ children }: { children: React.ReactNode }) {
 
 function ApiCard({ label, sub, href }: { label: string; sub: string; href: string }) {
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hds-focus"
+      style={{ textDecoration: 'none' }}
+    >
       <Surface
         padding="item"
         style={{
@@ -677,7 +683,7 @@ const s = {
   pkgItem: {
     ...hds.typeStyles.ui,
     color: 'var(--semantic-color-content-primary)',
-    marginBottom: '6px',
+    marginBottom: hds.space.px6,
   },
   pkgBestFor: { ...hds.typeStyles.ui, color: 'var(--semantic-color-content-secondary)', margin: 0 },
 } satisfies Record<string, CSSProperties>;

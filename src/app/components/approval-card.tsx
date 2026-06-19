@@ -2,6 +2,8 @@
 // Approval inbox card + shared approval types. These are ops/orchestration
 // domain concerns (not generic design-system primitives), so they live in the
 // ops app rather than @hirobius/design-system. Built from DS primitives.
+// motion-ok: hover/press/focus feedback is owned by the composed DS Button/Card
+// primitives; this card adds no state-changing elements of its own.
 import { Card, Tag, Button } from '@hirobius/design-system';
 
 /** Lifecycle state of an orchestration unit's approval. */

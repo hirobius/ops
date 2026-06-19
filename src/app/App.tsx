@@ -23,7 +23,12 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
     if (error)
       return (
         <div
-          style={{ padding: 32, fontFamily: hds.monoFamily, whiteSpace: 'pre-wrap', color: 'red' }}
+          style={{
+            padding: hds.space.px32,
+            fontFamily: hds.monoFamily,
+            whiteSpace: 'pre-wrap',
+            color: 'red',
+          }}
         >
           {' '}
           {/* spacing-ok: error boundary fallback, not a UI component */}
