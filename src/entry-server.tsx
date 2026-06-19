@@ -14,10 +14,12 @@
 import { renderToString } from 'react-dom/server';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { MotionConfig } from 'motion/react';
-import { TenantProvider } from '@hirobius/design-system/contexts';
-import { LanguageProvider } from '@hirobius/design-system/contexts';
-import { ThemeProvider } from '@hirobius/design-system/contexts';
-import { FontProvider } from '@hirobius/design-system/contexts';
+import {
+  TenantProvider,
+  LanguageProvider,
+  ThemeProvider,
+  FontProvider,
+} from '@hirobius/design-system/contexts';
 
 // Direct (non-lazy) imports so renderToString resolves them synchronously
 import InfoPageWrapper from './app/pages/InfoPageWrapper';

@@ -10,8 +10,8 @@
 // ref-ok: OpsGate is a self-contained auth screen; the password input is internal state and not composable
 import { useEffect, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router';
-import { getStoredAccess, setStoredAccess, verifyPassword } from '../../lib/ops-gate';
 import hds from '@hirobius/design-system/tokens';
+import { getStoredAccess, setStoredAccess, verifyPassword } from '../../lib/ops-gate';
 
 const opsGateStyles = {
   submitBtnBase: {
@@ -154,7 +154,11 @@ export default function OpsGate({ children }: OpsGateProps) {
           type="submit"
           disabled={checking || input.length === 0}
           className="hds-focus"
-          style={{ ...opsGateStyles.submitBtnBase, cursor: checking || input.length === 0 ? 'not-allowed' : 'pointer', opacity: checking || input.length === 0 ? 0.5 : 1 }}
+          style={{
+            ...opsGateStyles.submitBtnBase,
+            cursor: checking || input.length === 0 ? 'not-allowed' : 'pointer',
+            opacity: checking || input.length === 0 ? 0.5 : 1,
+          }}
         >
           {checking ? 'Checking…' : 'Continue'}
         </button>

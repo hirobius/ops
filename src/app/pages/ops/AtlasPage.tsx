@@ -15,10 +15,15 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Page } from '@hirobius/design-system';
-import { Surface } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@hirobius/design-system';
+import {
+  Page,
+  Surface,
+  Stack,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from '@hirobius/design-system';
 import PipelineDag from './atlas/pipeline-dag';
 import ComponentGraph from './atlas/component-graph';
 import TokensTab from './atlas/tokens-tab';

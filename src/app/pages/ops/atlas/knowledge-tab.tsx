@@ -10,8 +10,7 @@
  */
 
 import React from 'react';
-import { Card } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
+import { Card, Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 
 // ── Import knowledge READMEs ─────────────────────────────────────────────────

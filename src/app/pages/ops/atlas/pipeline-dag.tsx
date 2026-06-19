@@ -25,9 +25,10 @@ import React, {
   useMemo,
 } from 'react';
 import { Stack } from '@hirobius/design-system';
-import legacyTaskArchive from '../../../../../docs/ai/_archive/legacy-task-systems-2026-05-11.json';
-const orchestrationRaw = legacyTaskArchive.sources.orchestration;
 import hds from '@hirobius/design-system/tokens';
+import legacyTaskArchive from '../../../../../docs/ai/_archive/legacy-task-systems-2026-05-11.json';
+
+const orchestrationRaw = legacyTaskArchive.sources.orchestration;
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

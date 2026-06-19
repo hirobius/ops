@@ -13,9 +13,7 @@
 
 import { useState } from 'react';
 import { Bot } from 'lucide-react';
-import { Page } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
-import { Icon } from '@hirobius/design-system';
+import { Page, Stack, Icon } from '@hirobius/design-system';
 import { AgentTag } from '../../components/agent-tag';
 import { PageHeader } from './PageHeader';
 import { CLIENT_REGISTRY, CLIENT_SLUGS } from './clientRegistry';

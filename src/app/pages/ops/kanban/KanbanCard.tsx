@@ -2,8 +2,7 @@
 /* eslint-disable react-hooks/purity -- Date.now() in render is intentional for live relative timestamps in kanban cards */
 
 import { useState, type CSSProperties } from 'react';
-import { Card } from '@hirobius/design-system';
-import { Badge } from '@hirobius/design-system';
+import { Card, Badge } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import type { KanbanTask, KanbanWarningsSummary } from './types';
 import type { ThreadDecoration } from './threads-types';

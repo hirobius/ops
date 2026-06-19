@@ -24,8 +24,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router';
-import { Badge } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
+import { Badge, Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 
 import routesSource from '../../../routes.tsx?raw';

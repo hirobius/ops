@@ -18,21 +18,18 @@
 
 import React from 'react';
 import type { CSSProperties } from 'react';
-import { Card }     from '@hirobius/design-system';
-import { Badge }    from '@hirobius/design-system';
-import { Stack }    from '@hirobius/design-system';
-import { Field }       from '@hirobius/design-system';
-import hds             from '@hirobius/design-system/tokens';
-import postureRaw      from '../../data/security-posture.json';
+import { Card, Badge, Stack, Field } from '@hirobius/design-system';
+import hds from '@hirobius/design-system/tokens';
+import postureRaw from '../../data/security-posture.json';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface AuditCounts {
   critical: number | null;
-  high:     number | null;
+  high: number | null;
   moderate: number | null;
-  low:      number | null;
-  total:    number | null;
+  low: number | null;
+  total: number | null;
   lastRunDate: string | null;
 }
 
@@ -40,7 +37,7 @@ interface SecurityPosture {
   generatedAt: string;
   audit: AuditCounts;
   auditLog: { lastEntryDate: string | null; grade: string | null };
-  agentLog:  { lastTimestamp: string | null; lastUnitId: string | null; lastOutcome: string | null };
+  agentLog: { lastTimestamp: string | null; lastUnitId: string | null; lastOutcome: string | null };
 }
 
 // Vite eagerly resolves JSON imports — cast is safe here.
@@ -67,8 +64,11 @@ function fmtTimestamp(iso: string | null): string {
   if (!iso) return '—';
   try {
     return new Date(iso).toLocaleString('en-US', {
-      year: 'numeric', month: 'short', day: 'numeric',
-      hour: 'numeric', minute: '2-digit',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
     });
   } catch {
     return iso;
@@ -93,9 +93,7 @@ export function SecurityPostureWidget() {
         metadata={<Badge tone={gradeTone(auditLog.grade)}>{auditLog.grade ?? '—'}</Badge>}
       >
         <Card.Title>Security Posture</Card.Title>
-        <Card.Description>
-          Last sidecar: {fmtDate(audit.lastRunDate) ?? '—'}
-        </Card.Description>
+        <Card.Description>Last sidecar: {fmtDate(audit.lastRunDate) ?? '—'}</Card.Description>
       </Card.Header>
       <Card.Body>
         <Stack direction="row" gap="gap" style={{ flexWrap: 'wrap' }}>
@@ -124,8 +122,8 @@ export function SecurityPostureWidget() {
       <Card.Body>
         <div style={s.metaGrid}>
           <Field label="Last audit entry" value={fmtDate(auditLog.lastEntryDate)} />
-          <Field label="Last agent run"   value={fmtTimestamp(agentLog.lastTimestamp)} />
-          <Field label="Unit"             value={agentLog.lastUnitId ?? '—'} />
+          <Field label="Last agent run" value={fmtTimestamp(agentLog.lastTimestamp)} />
+          <Field label="Unit" value={agentLog.lastUnitId ?? '—'} />
           <Field
             label="Outcome"
             value={agentLog.lastOutcome ?? '—'}
@@ -135,7 +133,9 @@ export function SecurityPostureWidget() {
       </Card.Body>
       {neverRun && (
         <Card.Footer>
-          <p style={s.notYetRun}>Sidecar not generated — run <code style={s.code}>pnpm audit:sidecar</code> to populate</p>
+          <p style={s.notYetRun}>
+            Sidecar not generated — run <code style={s.code}>pnpm audit:sidecar</code> to populate
+          </p>
         </Card.Footer>
       )}
     </Card>
@@ -145,12 +145,29 @@ export function SecurityPostureWidget() {
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const s = {
-  widget:   { display: 'flex', flexDirection: 'column', gap: hds.semantic.space.component.gap },
-  header:   { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' },
-  title:    { ...hds.typeStyles.ui, margin: 0, color: 'var(--semantic-color-content-primary)' } as CSSProperties,
-  subtitle: { ...hds.typeStyles.caption, margin: 0, color: 'var(--semantic-color-content-secondary)' } as CSSProperties,
-  divider:  { height: '1px', background: 'var(--semantic-color-border-default)' },
-  metaGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: hds.semantic.space.component.gap },
-  notYetRun:{ ...hds.typeStyles.caption, margin: 0, color: 'var(--semantic-color-content-tertiary)', fontStyle: 'italic' } as CSSProperties,
-  code:     { fontFamily: 'var(--font-mono, monospace)', fontSize: '11px' },
+  widget: { display: 'flex', flexDirection: 'column', gap: hds.semantic.space.component.gap },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' },
+  title: {
+    ...hds.typeStyles.ui,
+    margin: 0,
+    color: 'var(--semantic-color-content-primary)',
+  } as CSSProperties,
+  subtitle: {
+    ...hds.typeStyles.caption,
+    margin: 0,
+    color: 'var(--semantic-color-content-secondary)',
+  } as CSSProperties,
+  divider: { height: '1px', background: 'var(--semantic-color-border-default)' },
+  metaGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+    gap: hds.semantic.space.component.gap,
+  },
+  notYetRun: {
+    ...hds.typeStyles.caption,
+    margin: 0,
+    color: 'var(--semantic-color-content-tertiary)',
+    fontStyle: 'italic',
+  } as CSSProperties,
+  code: { fontFamily: 'var(--font-mono, monospace)', fontSize: '11px' },
 } satisfies Record<string, CSSProperties>;

@@ -2,8 +2,7 @@
 
 import { useMemo, useState, type CSSProperties } from 'react';
 import hds from '@hirobius/design-system/tokens';
-import { Badge } from '@hirobius/design-system';
-import { Button } from '@hirobius/design-system';
+import { Badge, Button } from '@hirobius/design-system';
 import type { ProposedUnitEntry } from './threads-types';
 import { promoteProposedUnit, type PromoteResult } from './promoteThread';
 import { PromotePopover } from './PromotePopover';

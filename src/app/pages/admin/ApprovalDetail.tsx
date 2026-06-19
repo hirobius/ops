@@ -1,12 +1,6 @@
 import * as React from 'react';
 import { useParams, Link, useNavigate } from 'react-router';
-import { Page } from "@hirobius/design-system";
-import { Stack } from '@hirobius/design-system';
-import { TextLockup } from '@hirobius/design-system';
-import { Card } from '@hirobius/design-system';
-import { Button } from '@hirobius/design-system';
-import { Field } from '@hirobius/design-system';
-import { Tag } from '@hirobius/design-system';
+import { Page, Stack, TextLockup, Card, Button, Field, Tag } from '@hirobius/design-system';
 import type { ApprovalState } from '../../components/approval-card';
 
 // 11a-4 — approval app detail view.
@@ -116,16 +110,10 @@ function diffEdits(unit: OrchestrationUnit, edited: EditableFields): ApprovalEdi
   if ((unit.description ?? '') !== edited.description) {
     diff.description = edited.description;
   }
-  if (
-    typeof edited.priority === 'number' &&
-    edited.priority !== (unit.priority ?? null)
-  ) {
+  if (typeof edited.priority === 'number' && edited.priority !== (unit.priority ?? null)) {
     diff.priority = edited.priority;
   }
-  if (
-    typeof edited.sprint === 'number' &&
-    edited.sprint !== (unit.sprint ?? null)
-  ) {
+  if (typeof edited.sprint === 'number' && edited.sprint !== (unit.sprint ?? null)) {
     diff.sprint = edited.sprint;
   }
   const original = Array.isArray(unit.agentNotes) ? unit.agentNotes : [];
@@ -140,7 +128,10 @@ function diffEdits(unit: OrchestrationUnit, edited: EditableFields): ApprovalEdi
 
 async function postApproval(id: string, approval: ApprovalState, edits: ApprovalEditDiff) {
   const hasEdits = Object.keys(edits).length > 0;
-  const payload: { id: string; approval: ApprovalState; edits?: ApprovalEditDiff } = { id, approval };
+  const payload: { id: string; approval: ApprovalState; edits?: ApprovalEditDiff } = {
+    id,
+    approval,
+  };
   if (hasEdits) payload.edits = edits;
   const r = await fetch(`${BRIDGE_BASE}/orchestration/approve`, {
     method: 'POST',
@@ -189,10 +180,7 @@ export default function ApprovalDetailPage() {
     };
   }, [id]);
 
-  const unit = React.useMemo(
-    () => state.units.find((u) => u.id === id) ?? null,
-    [state.units, id],
-  );
+  const unit = React.useMemo(() => state.units.find((u) => u.id === id) ?? null, [state.units, id]);
 
   const dependsOnUnits = React.useMemo(() => {
     if (!unit?.dependsOn) return [] as Array<{ id: string; unit: OrchestrationUnit | null }>;
@@ -220,7 +208,9 @@ export default function ApprovalDetailPage() {
         const editsApplied = result.editsApplied?.join(', ') ?? '';
         const messageParts = [
           `Marked ${result.id} as ${result.approval}.`,
-          result.statusFlipped ? `Status flipped ${result.previousStatus} → ${result.currentStatus}.` : '',
+          result.statusFlipped
+            ? `Status flipped ${result.previousStatus} → ${result.currentStatus}.`
+            : '',
           editsApplied ? `Edits applied: ${editsApplied}.` : '',
         ].filter(Boolean);
         setState((prev) => ({
@@ -285,7 +275,11 @@ export default function ApprovalDetailPage() {
       <Page>
         <Stack gap="spacious">
           <Stack gap="tight">
-            <Link to="/admin/approvals" className="text-sm underline hover:no-underline" data-role="back-link">
+            <Link
+              to="/admin/approvals"
+              className="text-sm underline hover:no-underline"
+              data-role="back-link"
+            >
               ← Back to inbox
             </Link>
             <TextLockup
@@ -324,7 +318,9 @@ export default function ApprovalDetailPage() {
               <textarea
                 className="min-h-48 w-full rounded-md border border-input bg-background p-3 text-sm"
                 value={edited.description}
-                onChange={(e) => setEdited((prev) => prev ? { ...prev, description: e.target.value } : prev)}
+                onChange={(e) =>
+                  setEdited((prev) => (prev ? { ...prev, description: e.target.value } : prev))
+                }
                 disabled={state.pending}
                 data-role="description-input"
                 aria-label="Unit description"
@@ -348,14 +344,16 @@ export default function ApprovalDetailPage() {
                     value={edited.priority ?? ''}
                     onChange={(e) => {
                       const v = e.target.value === '' ? null : Number(e.target.value);
-                      setEdited((prev) => prev ? { ...prev, priority: v } : prev);
+                      setEdited((prev) => (prev ? { ...prev, priority: v } : prev));
                     }}
                     disabled={state.pending}
                     data-role="priority-input"
                   >
                     <option value="">—</option>
                     {[1, 2, 3, 4, 5].map((n) => (
-                      <option key={n} value={n}>{n}</option>
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
                     ))}
                   </select>
                 </label>
@@ -366,14 +364,16 @@ export default function ApprovalDetailPage() {
                     value={edited.sprint ?? ''}
                     onChange={(e) => {
                       const v = e.target.value === '' ? null : Number(e.target.value);
-                      setEdited((prev) => prev ? { ...prev, sprint: v } : prev);
+                      setEdited((prev) => (prev ? { ...prev, sprint: v } : prev));
                     }}
                     disabled={state.pending}
                     data-role="sprint-input"
                   >
                     <option value="">—</option>
                     {[0, 1, 2, 3, 4, 5, 6].map((n) => (
-                      <option key={n} value={n}>{n}</option>
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
                     ))}
                   </select>
                 </label>
@@ -385,7 +385,8 @@ export default function ApprovalDetailPage() {
             <Card.Header>
               <Card.Title>Agent notes</Card.Title>
               <Card.Description>
-                One per line. Notes that capture caveats, gotchas, and design decisions for the executing agent.
+                One per line. Notes that capture caveats, gotchas, and design decisions for the
+                executing agent.
               </Card.Description>
             </Card.Header>
             <Card.Body>
@@ -393,7 +394,11 @@ export default function ApprovalDetailPage() {
                 className="min-h-32 w-full rounded-md border border-input bg-background p-3 text-sm font-mono"
                 value={edited.agentNotes.join('\n')}
                 onChange={(e) =>
-                  setEdited((prev) => prev ? { ...prev, agentNotes: e.target.value.split('\n').filter(Boolean) } : prev)
+                  setEdited((prev) =>
+                    prev
+                      ? { ...prev, agentNotes: e.target.value.split('\n').filter(Boolean) }
+                      : prev,
+                  )
                 }
                 disabled={state.pending}
                 data-role="agent-notes-input"
@@ -408,10 +413,10 @@ export default function ApprovalDetailPage() {
             </Card.Header>
             <Card.Body>
               <div className="grid gap-4 md:grid-cols-2" data-role="spec-metadata">
-                <Field label="Source"             value={unit.source ?? '—'} />
-                <Field label="Estimate"           value={unit.estimate ?? '—'} />
+                <Field label="Source" value={unit.source ?? '—'} />
+                <Field label="Estimate" value={unit.estimate ?? '—'} />
                 <Field label="Validation command" value={unit.validationCmd ?? '—'} mono />
-                <Field label="Completed at"       value={unit.completedAt ?? '—'} />
+                <Field label="Completed at" value={unit.completedAt ?? '—'} />
               </div>
             </Card.Body>
           </Card>
@@ -425,7 +430,9 @@ export default function ApprovalDetailPage() {
                 <Field label="Inputs" data-role="inputs-list">
                   {unit.inputs && unit.inputs.length > 0 ? (
                     <ul className="m-0 space-y-1 font-mono text-xs">
-                      {unit.inputs.map((input) => <li key={input}>{input}</li>)}
+                      {unit.inputs.map((input) => (
+                        <li key={input}>{input}</li>
+                      ))}
                     </ul>
                   ) : (
                     <span className="text-muted-foreground">No inputs declared.</span>
@@ -434,7 +441,9 @@ export default function ApprovalDetailPage() {
                 <Field label="Outputs" data-role="outputs-list">
                   {unit.outputs && unit.outputs.length > 0 ? (
                     <ul className="m-0 space-y-1 font-mono text-xs">
-                      {unit.outputs.map((output) => <li key={output}>{output}</li>)}
+                      {unit.outputs.map((output) => (
+                        <li key={output}>{output}</li>
+                      ))}
                     </ul>
                   ) : (
                     <span className="text-muted-foreground">No outputs declared.</span>
@@ -465,7 +474,9 @@ export default function ApprovalDetailPage() {
                         {depId}
                       </Link>
                       <span className="text-muted-foreground">
-                        {depUnit ? `${depUnit.name} (${depUnit.status ?? 'unknown'})` : 'unit not found'}
+                        {depUnit
+                          ? `${depUnit.name} (${depUnit.status ?? 'unknown'})`
+                          : 'unit not found'}
                       </span>
                     </li>
                   ))}
@@ -478,7 +489,8 @@ export default function ApprovalDetailPage() {
             <Card.Header>
               <Card.Title>Decision</Card.Title>
               <Card.Description>
-                Approve flips status proposed → pending; the next autonomous session executes. Edits are persisted with the mutation.
+                Approve flips status proposed → pending; the next autonomous session executes. Edits
+                are persisted with the mutation.
                 {hasEdits ? ' Pending edits will ride along.' : ''}
               </Card.Description>
             </Card.Header>

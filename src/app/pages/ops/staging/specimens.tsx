@@ -15,9 +15,7 @@
 import type { ReactNode } from 'react';
 import { ArrowRight } from 'lucide-react';
 
-import { Surface } from '@hirobius/design-system';
-import { Card } from '@hirobius/design-system';
-import { Badge } from '@hirobius/design-system';
+import { Surface, Card, Badge } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 
 import { PageHeader } from '../PageHeader';
@@ -566,10 +564,14 @@ export const SPECIMENS: Specimen[] = [
           gap: hds.space.px8,
         }}
       >
-        <RankedMetricTile label="Intelligence" value="26.3" rank="#321 / 544" /> {/* audit-ok: rank label, not hex color */}
-        <RankedMetricTile label="Input cost" value="$0.13" rank="#217 / 544" /> {/* audit-ok: rank label, not hex color */}
-        <RankedMetricTile label="Output cost" value="$0.40" rank="#211 / 544" /> {/* audit-ok: rank label, not hex color */}
-        <RankedMetricTile label="Context" value="131K" rank="#202 / 544" /> {/* audit-ok: rank label, not hex color */}
+        <RankedMetricTile label="Intelligence" value="26.3" rank="#321 / 544" />{' '}
+        {/* audit-ok: rank label, not hex color */}
+        <RankedMetricTile label="Input cost" value="$0.13" rank="#217 / 544" />{' '}
+        {/* audit-ok: rank label, not hex color */}
+        <RankedMetricTile label="Output cost" value="$0.40" rank="#211 / 544" />{' '}
+        {/* audit-ok: rank label, not hex color */}
+        <RankedMetricTile label="Context" value="131K" rank="#202 / 544" />{' '}
+        {/* audit-ok: rank label, not hex color */}
       </div>
     ),
   },

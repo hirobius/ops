@@ -17,12 +17,18 @@
 
 import { useMemo, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { Bot, AlertCircle, CheckCircle2, MessageSquare, HelpCircle, ShieldCheck } from 'lucide-react';
+import {
+  Bot,
+  AlertCircle,
+  CheckCircle2,
+  MessageSquare,
+  HelpCircle,
+  ShieldCheck,
+} from 'lucide-react';
 import hds from '@hirobius/design-system/tokens';
-import { Stack } from '@hirobius/design-system';
+import { Stack, Icon } from '@hirobius/design-system';
 import { ActivityFeed, type ActivityEvent, type ActivityStatus } from '@hirobius/design-system';
 import { AgentTag, type AgentTier } from '../../components/agent-tag';
-import { Icon } from '@hirobius/design-system';
 import type { ClientFiles, ClientTask } from './clientTypes';
 import { PodTail } from './PodTail';
 
@@ -31,37 +37,38 @@ import { PodTail } from './PodTail';
  *  the `liveEvents` prop. */
 export type SessionEvent = ActivityEvent & {
   _client?: string;
-  _tier?:   AgentTier;
-  _status:  ActivityStatus;
+  _tier?: AgentTier;
+  _status: ActivityStatus;
   _taskId?: string;
 };
 
 // ── Inputs ─────────────────────────────────────────────────────────────────────
 
-const _routingLog = import.meta.glob<string>(
-  '../../../../docs/ai/routing-log.jsonl',
-  { eager: true, query: '?raw', import: 'default' },
-);
+const _routingLog = import.meta.glob<string>('../../../../docs/ai/routing-log.jsonl', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+});
 
 interface RoutingLogEntry {
-  at:           string;
-  assigner?:    string;
-  gate?:        string;
-  client?:      string;
-  verdict?:     'task' | 'not-task' | 'ambiguous' | 'cleared' | 'rejected';
-  taskId?:      string;
-  phaseId?:     string;
-  tier?:        string;
-  model?:       string;
-  effort?:      string;
-  privacy?:     string;
-  capability?:  string;
-  rationale?:   string;
-  reason?:      string;
+  at: string;
+  assigner?: string;
+  gate?: string;
+  client?: string;
+  verdict?: 'task' | 'not-task' | 'ambiguous' | 'cleared' | 'rejected';
+  taskId?: string;
+  phaseId?: string;
+  tier?: string;
+  model?: string;
+  effort?: string;
+  privacy?: string;
+  capability?: string;
+  rationale?: string;
+  reason?: string;
   inputDigest?: string;
-  spent?:       number;
-  projected?:   number;
-  ceiling?:     number;
+  spent?: number;
+  projected?: number;
+  ceiling?: number;
   costCeiling?: number;
 }
 
@@ -73,7 +80,11 @@ function parseLog(): RoutingLogEntry[] {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      try { return JSON.parse(line) as RoutingLogEntry; } catch { return null; }
+      try {
+        return JSON.parse(line) as RoutingLogEntry;
+      } catch {
+        return null;
+      }
     })
     .filter((entry): entry is RoutingLogEntry => entry !== null);
 }
@@ -99,19 +110,24 @@ function statusFor(entry: RoutingLogEntry, task: ClientTask | null): ActivitySta
   if (entry.verdict === 'not-task') return 'neutral';
   if (entry.verdict === 'ambiguous') return 'warning';
   switch (task?.dispatchState) {
-    case 'failed':           return 'error';
-    case 'awaiting-review':  return 'warning';
-    case 'done':             return 'success';
-    case 'running':          return 'info';
-    default:                 return 'info';
+    case 'failed':
+      return 'error';
+    case 'awaiting-review':
+      return 'warning';
+    case 'done':
+      return 'success';
+    case 'running':
+      return 'info';
+    default:
+      return 'info';
   }
 }
 
 function iconFor(entry: RoutingLogEntry, task: ClientTask | null): ReactNode {
-  if (entry.verdict === 'rejected')   return <Icon icon={AlertCircle} size="medium" />;
-  if (entry.verdict === 'not-task')   return <Icon icon={MessageSquare} size="medium" />;
-  if (entry.verdict === 'ambiguous')  return <Icon icon={HelpCircle} size="medium" />;
-  if (entry.verdict === 'cleared')    return <Icon icon={ShieldCheck} size="medium" />;
+  if (entry.verdict === 'rejected') return <Icon icon={AlertCircle} size="medium" />;
+  if (entry.verdict === 'not-task') return <Icon icon={MessageSquare} size="medium" />;
+  if (entry.verdict === 'ambiguous') return <Icon icon={HelpCircle} size="medium" />;
+  if (entry.verdict === 'cleared') return <Icon icon={ShieldCheck} size="medium" />;
   if (task?.dispatchState === 'done') return <Icon icon={CheckCircle2} size="medium" />;
   return <Icon icon={Bot} size="medium" />;
 }
@@ -124,8 +140,10 @@ function tierFor(entry: RoutingLogEntry, task: ClientTask | null): AgentTier {
 
 function deriveTierFromModel(model: string | undefined): AgentTier {
   if (!model) return 'open-local';
-  if (model.startsWith('gemma') || model.startsWith('hermes') || model.startsWith('qwen')) return 'open-local';
-  if (model.startsWith('haiku') || model.startsWith('sonnet') || model.startsWith('opus')) return 'closed-frontier';
+  if (model.startsWith('gemma') || model.startsWith('hermes') || model.startsWith('qwen'))
+    return 'open-local';
+  if (model.startsWith('haiku') || model.startsWith('sonnet') || model.startsWith('opus'))
+    return 'closed-frontier';
   return 'open-local';
 }
 
@@ -138,58 +156,53 @@ function formatTimestamp(iso: string): string {
 // ── Event composition ──────────────────────────────────────────────────────────
 
 interface ComposeArgs {
-  entries:  RoutingLogEntry[];
+  entries: RoutingLogEntry[];
   registry: Record<string, ClientFiles>;
 }
 
 function composeEvents({ entries, registry }: ComposeArgs): SessionEvent[] {
   return entries
     .slice()
-    .reverse()  // newest first
+    .reverse() // newest first
     .map((entry) => {
       const clientFiles = entry.client ? registry[entry.client] : undefined;
-      const task        = entry.taskId && clientFiles?.tasks
-        ? findTask(clientFiles.tasks, entry.taskId)
-        : null;
-      const tier   = tierFor(entry, task);
+      const task =
+        entry.taskId && clientFiles?.tasks ? findTask(clientFiles.tasks, entry.taskId) : null;
+      const tier = tierFor(entry, task);
       const status = statusFor(entry, task);
-      const meta   = task && entry.verdict === 'task' && task.assignee
-        ? (
-            <AgentTag
-              assignee={task.assignee}
-              modelTier={tier}
-              costSpent={task.costSpent ?? 0}
-              costCeiling={task.costCeiling ?? 0}
-            />
-          )
-        : null;
+      const meta =
+        task && entry.verdict === 'task' && task.assignee ? (
+          <AgentTag
+            assignee={task.assignee}
+            modelTier={tier}
+            costSpent={task.costSpent ?? 0}
+            costCeiling={task.costCeiling ?? 0}
+          />
+        ) : null;
 
       return {
-        id:          `${entry.at}-${entry.taskId ?? entry.verdict ?? 'evt'}`,
-        title:       task?.title
-                       ?? (entry.inputDigest ? entry.inputDigest.slice(0, 80) : verdictTitle(entry)),
-        description: entry.rationale
-                       ?? entry.reason
-                       ?? entry.inputDigest
-                       ?? '—',
-        timestamp:   formatTimestamp(entry.at),
-        category:    entry.client ?? entry.gate ?? entry.assigner ?? '—',
-        icon:        iconFor(entry, task),
+        id: `${entry.at}-${entry.taskId ?? entry.verdict ?? 'evt'}`,
+        title:
+          task?.title ?? (entry.inputDigest ? entry.inputDigest.slice(0, 80) : verdictTitle(entry)),
+        description: entry.rationale ?? entry.reason ?? entry.inputDigest ?? '—',
+        timestamp: formatTimestamp(entry.at),
+        category: entry.client ?? entry.gate ?? entry.assigner ?? '—',
+        icon: iconFor(entry, task),
         status,
         meta,
-        _client:     entry.client,
-        _tier:       tier,
-        _status:     status,
-        _taskId:     entry.taskId,
+        _client: entry.client,
+        _tier: tier,
+        _status: status,
+        _taskId: entry.taskId,
       };
     });
 }
 
 function verdictTitle(entry: RoutingLogEntry): string {
-  if (entry.verdict === 'not-task')   return 'Not a task';
-  if (entry.verdict === 'ambiguous')  return 'Ambiguous input';
-  if (entry.verdict === 'rejected')   return 'Dispatch rejected by cost gate';
-  if (entry.verdict === 'cleared')    return 'Cost gate cleared';
+  if (entry.verdict === 'not-task') return 'Not a task';
+  if (entry.verdict === 'ambiguous') return 'Ambiguous input';
+  if (entry.verdict === 'rejected') return 'Dispatch rejected by cost gate';
+  if (entry.verdict === 'cleared') return 'Cost gate cleared';
   return entry.taskId ?? 'Routing event';
 }
 
@@ -210,24 +223,26 @@ interface SessionsSectionProps {
 }
 
 const STATUS_FILTERS: Array<{ value: ActivityStatus | 'all'; label: string }> = [
-  { value: 'all',     label: 'All'      },
-  { value: 'info',    label: 'Queued'   },
-  { value: 'warning', label: 'Review'   },
-  { value: 'success', label: 'Done'     },
-  { value: 'error',   label: 'Failed'   },
+  { value: 'all', label: 'All' },
+  { value: 'info', label: 'Queued' },
+  { value: 'warning', label: 'Review' },
+  { value: 'success', label: 'Done' },
+  { value: 'error', label: 'Failed' },
 ];
 
 const TIER_FILTERS: Array<{ value: AgentTier | 'all'; label: string }> = [
-  { value: 'all',              label: 'All tiers'        },
-  { value: 'open-local',       label: 'Open · local'     },
-  { value: 'closed-frontier',  label: 'Closed · frontier'},
+  { value: 'all', label: 'All tiers' },
+  { value: 'open-local', label: 'Open · local' },
+  { value: 'closed-frontier', label: 'Closed · frontier' },
 ];
 
-export function SessionsSection({ registry, compact = false, inputPanel, liveEvents }: SessionsSectionProps) {
-  const baseEvents = useMemo(
-    () => composeEvents({ entries: parseLog(), registry }),
-    [registry],
-  );
+export function SessionsSection({
+  registry,
+  compact = false,
+  inputPanel,
+  liveEvents,
+}: SessionsSectionProps) {
+  const baseEvents = useMemo(() => composeEvents({ entries: parseLog(), registry }), [registry]);
 
   const allEvents = useMemo(() => {
     if (!liveEvents?.length) return baseEvents;
@@ -248,18 +263,18 @@ export function SessionsSection({ registry, compact = false, inputPanel, liveEve
     return ['all', ...Array.from(set).sort()];
   }, [allEvents]);
 
-  const [client, setClient]   = useState<string>('all');
-  const [status, setStatus]   = useState<ActivityStatus | 'all'>('all');
-  const [tier,   setTier]     = useState<AgentTier | 'all'>('all');
-  const [search, setSearch]   = useState<string>('');
+  const [client, setClient] = useState<string>('all');
+  const [status, setStatus] = useState<ActivityStatus | 'all'>('all');
+  const [tier, setTier] = useState<AgentTier | 'all'>('all');
+  const [search, setSearch] = useState<string>('');
 
   const filtered = useMemo(() => {
     if (compact) return allEvents.slice(0, 5);
     const q = search.trim().toLowerCase();
     return allEvents.filter((e) => {
-      if (client !== 'all' && e._client !== client)        return false;
-      if (status !== 'all' && e._status !== status)        return false;
-      if (tier   !== 'all' && e._tier   !== tier)          return false;
+      if (client !== 'all' && e._client !== client) return false;
+      if (status !== 'all' && e._status !== status) return false;
+      if (tier !== 'all' && e._tier !== tier) return false;
       if (q && !`${e.title} ${e.description}`.toLowerCase().includes(q)) return false;
       return true;
     });
@@ -291,9 +306,16 @@ export function SessionsSection({ registry, compact = false, inputPanel, liveEve
     return (
       <Stack direction="column" gap="gap">
         {inputPanel}
-        <p style={{ ...hds.typeStyles.body, color: 'var(--semantic-color-content-secondary)', margin: 0 }}>
+        <p
+          style={{
+            ...hds.typeStyles.body,
+            color: 'var(--semantic-color-content-secondary)',
+            margin: 0,
+          }}
+        >
           No routing events yet. Pipe a task through{' '}
-          <code style={{ ...hds.typeStyles.mono }}>scripts/auto-assigner.mjs</code> or send a message via Discord, Telegram, or the input above.
+          <code style={{ ...hds.typeStyles.mono }}>scripts/auto-assigner.mjs</code> or send a
+          message via Discord, Telegram, or the input above.
         </p>
       </Stack>
     );
@@ -301,7 +323,6 @@ export function SessionsSection({ registry, compact = false, inputPanel, liveEve
 
   return (
     <Stack direction="column" gap="gap">
-
       {inputPanel}
 
       {/* Filter chip bands + search — hidden in compact mode (preview surface). */}
@@ -341,13 +362,18 @@ export function SessionsSection({ registry, compact = false, inputPanel, liveEve
       {/* Feed — in-flight events get an inline PodTail (pod-tail polled
           stdout), one event at a time, per 13w-ops-13a-live-pod-tail. */}
       {withTails.length === 0 ? (
-        <p style={{ ...hds.typeStyles.body, color: 'var(--semantic-color-content-secondary)', margin: 0 }}>
+        <p
+          style={{
+            ...hds.typeStyles.body,
+            color: 'var(--semantic-color-content-secondary)',
+            margin: 0,
+          }}
+        >
           No events match the current filters.
         </p>
       ) : (
         <ActivityFeed events={withTails} />
       )}
-
     </Stack>
   );
 }
@@ -357,12 +383,14 @@ export function SessionsSection({ registry, compact = false, inputPanel, liveEve
 function ChipRow({ label, children }: { label: string; children: ReactNode }) {
   return (
     <Stack direction="row" gap="gap" align="center" wrap="wrap">
-      <span style={{
-        ...hds.typeStyles.eyebrow,
-        margin: 0,
-        color:  'var(--semantic-color-content-secondary)',
-        minWidth: '4ch',
-      }}>
+      <span
+        style={{
+          ...hds.typeStyles.eyebrow,
+          margin: 0,
+          color: 'var(--semantic-color-content-secondary)',
+          minWidth: '4ch',
+        }}
+      >
         {label}
       </span>
       {children}
@@ -370,7 +398,15 @@ function ChipRow({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -379,14 +415,16 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       // inline-ok: border, background, and color are all conditional on active state
       style={{
         ...hds.typeStyles.ui,
-        padding:      '4px 10px',
+        padding: '4px 10px',
         borderRadius: hds.borderRadius[8],
-        border:       active
-                        ? '1px solid var(--semantic-color-content-accent)'
-                        : '1px solid var(--semantic-color-border-subdued)',
-        background:   active ? 'var(--semantic-color-feedback-bg-info)' : 'transparent',
-        color:        active ? 'var(--semantic-color-feedback-info)'    : 'var(--semantic-color-content-primary)',
-        cursor:       'pointer',
+        border: active
+          ? '1px solid var(--semantic-color-content-accent)'
+          : '1px solid var(--semantic-color-border-subdued)',
+        background: active ? 'var(--semantic-color-feedback-bg-info)' : 'transparent',
+        color: active
+          ? 'var(--semantic-color-feedback-info)'
+          : 'var(--semantic-color-content-primary)',
+        cursor: 'pointer',
       }}
     >
       {children}
@@ -396,11 +434,11 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 
 const searchInputStyle: CSSProperties = {
   ...hds.typeStyles.body,
-  padding:      '8px 12px',
+  padding: '8px 12px',
   borderRadius: hds.borderRadius[8],
-  border:       '1px solid var(--semantic-color-border-default)',
-  background:   'transparent',
-  color:        'var(--semantic-color-content-primary)',
-  width:        '100%',
-  maxWidth:     '480px',
+  border: '1px solid var(--semantic-color-border-default)',
+  background: 'transparent',
+  color: 'var(--semantic-color-content-primary)',
+  width: '100%',
+  maxWidth: '480px',
 };

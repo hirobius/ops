@@ -3,24 +3,37 @@ import { RouterProvider } from 'react-router';
 import { MotionConfig } from 'motion/react';
 // Phosphor IconContext removed — Lucide icons accept individual size/color/strokeWidth props
 import hds from '@hirobius/design-system/tokens';
-import { FontProvider } from '@hirobius/design-system/contexts';
-import { LanguageProvider } from '@hirobius/design-system/contexts';
-import { TenantProvider } from '@hirobius/design-system/contexts';
-import { ThemeProvider } from '@hirobius/design-system/contexts';
+import {
+  FontProvider,
+  LanguageProvider,
+  TenantProvider,
+  ThemeProvider,
+} from '@hirobius/design-system/contexts';
 import { router } from './routes';
 
 const HDS_XRAY_BODY_ATTRIBUTE = 'data-hds-xray';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
-  static getDerivedStateFromError(error: Error) { return { error }; }
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
   render() {
     const { error } = this.state;
-    if (error) return (
-      <div style={{ padding: 32, fontFamily: hds.monoFamily, whiteSpace: 'pre-wrap', color: 'red' }}> {/* spacing-ok: error boundary fallback, not a UI component */}
-        <strong>Runtime error:</strong>{'\n'}{(error as Error).message}{'\n\n'}{(error as Error).stack}
-      </div>
-    );
+    if (error)
+      return (
+        <div
+          style={{ padding: 32, fontFamily: hds.monoFamily, whiteSpace: 'pre-wrap', color: 'red' }}
+        >
+          {' '}
+          {/* spacing-ok: error boundary fallback, not a UI component */}
+          <strong>Runtime error:</strong>
+          {'\n'}
+          {(error as Error).message}
+          {'\n\n'}
+          {(error as Error).stack}
+        </div>
+      );
     return this.props.children;
   }
 }
@@ -35,12 +48,12 @@ function GlobalXRayMode() {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       const target = event.target;
-      const isEditableTarget = target instanceof HTMLElement && (
-        target.isContentEditable ||
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.tagName === 'SELECT'
-      );
+      const isEditableTarget =
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT');
 
       if (event.repeat || isEditableTarget || !event.shiftKey || event.key.toLowerCase() !== 'x') {
         return;

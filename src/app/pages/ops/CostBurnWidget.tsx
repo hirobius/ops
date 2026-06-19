@@ -18,11 +18,9 @@
 /* hds-bypass: ops-internal widget. Inline styles intentional for data-driven SVG dimensions. */
 
 import React, { useMemo, useState } from 'react';
-import { Card } from '@hirobius/design-system';
-import { Stat } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
-import { useIsMobile } from '../../hooks/useIsMobile';
+import { Card, Stat, Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 // ── Raw data imports ───────────────────────────────────────────────────────────
 

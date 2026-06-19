@@ -21,9 +21,7 @@
  */
 
 import React from 'react';
-import { Badge } from '@hirobius/design-system';
-import { Card } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
+import { Badge, Card, Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import strengthRaw from '../../../../../docs/guardrails/strength-report.json';
 import historyRaw from '../../../../../docs/guardrails/strength-history.jsonl?raw';

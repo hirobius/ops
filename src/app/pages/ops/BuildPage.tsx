@@ -22,12 +22,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Activity as ActivityIcon, AlertCircle, CheckCircle2, RotateCw } from 'lucide-react';
 
 import hds from '@hirobius/design-system/tokens';
-import { Stack } from '@hirobius/design-system';
-import { Page } from '@hirobius/design-system';
-import { Surface } from '@hirobius/design-system';
-import { Card } from '@hirobius/design-system';
-import { Badge } from '@hirobius/design-system';
-import { Icon } from '@hirobius/design-system';
+import { Stack, Page, Surface, Card, Badge, Icon } from '@hirobius/design-system';
 import { ActivityFeed, type ActivityEvent } from '@hirobius/design-system';
 import { useIsMobile } from '../../hooks/useIsMobile';
 

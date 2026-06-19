@@ -1,7 +1,4 @@
-import { Page } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
-import { Surface } from '@hirobius/design-system';
-import { TextLockup } from '@hirobius/design-system';
+import { Page, Stack, Surface, TextLockup } from '@hirobius/design-system';
 
 export default function IncubatorPage() {
   return (

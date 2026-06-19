@@ -27,8 +27,7 @@
 
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 
-import { Page } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
+import { Page, Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 
 import { PageHeader } from '../PageHeader';
