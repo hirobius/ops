@@ -15,8 +15,8 @@ importers:
   .:
     dependencies:
       '@hirobius/design-system':
-        specifier: ^0.4.1
-        version: 0.4.1(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(@types/three@0.183.1)(react-dom@18.3.1(react@18.3.1))(react-router@7.13.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
+        specifier: ^0.5.0
+        version: 0.5.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react-router@7.13.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-dialog':
         specifier: ^1.1.15
         version: 1.1.15(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -675,8 +675,8 @@ packages:
   '@formatjs/intl-localematcher@0.6.2':
     resolution: {integrity: sha512-XOMO2Hupl0wdd172Y06h6kLpBz6Dv+J4okPLl4LPtzbr8f66WbIoy4ev98EBuZ6ZK4h5ydTN6XneT4QVpD7cdA==}
 
-  '@hirobius/design-system@0.4.1':
-    resolution: {integrity: sha512-szC8awlBGVoMVpylM/YMsBzu8R9Gc5mNxjtuihe6YR/bS4ZBppD5cXxAGDSWFTemFHKovzCaCWeoNcUkNY4eSA==, tarball: https://npm.pkg.github.com/download/@hirobius/design-system/0.4.1/5493c95b5d5fb5db047b03de71a0b9350fa8eac0}
+  '@hirobius/design-system@0.5.0':
+    resolution: {integrity: sha512-QyBu+4DIg177QD02uErVN19JK0bMalaR0wgCPNSLyagwCX33FcucejAJCmoNjFijLsD2IDKw1oGg3MhpEhpNqA==, tarball: https://npm.pkg.github.com/download/@hirobius/design-system/0.5.0/0a3bcb5aebf324ddf945a9c0ef6b8a92cddd4de8}
     engines: {node: '>=20', pnpm: '>=8'}
     peerDependencies:
       react: ^18.3.0 || ^19.0.0
@@ -6335,41 +6335,23 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@hirobius/design-system@0.4.1(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(@types/three@0.183.1)(react-dom@18.3.1(react@18.3.1))(react-router@7.13.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))':
+  '@hirobius/design-system@0.5.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react-router@7.13.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-dialog': 1.1.15(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-slot': 1.2.4(@types/react@18.3.28)(react@18.3.1)
       '@radix-ui/react-tabs': 1.1.13(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@react-three/drei': 9.122.0(@react-three/fiber@8.18.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.183.2))(@types/react@18.3.28)(@types/three@0.183.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.183.2)(use-sync-external-store@1.6.0(react@18.3.1))
-      '@react-three/fiber': 8.18.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.183.2)
-      '@react-three/postprocessing': 2.19.1(@react-three/fiber@8.18.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.183.2))(@types/three@0.183.1)(react@18.3.1)(three@0.183.2)
       class-variance-authority: 0.7.1
       clsx: 2.1.1
-      cors: 2.8.6
-      express: 5.2.1
-      fuse.js: 7.1.0
       lucide-react: 0.487.0(react@18.3.1)
       motion: 12.23.24(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      postprocessing: 6.39.0(three@0.183.2)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-router: 7.13.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       tailwind-merge: 3.5.0
-      three: 0.183.2
-      zustand: 5.0.12(@types/react@18.3.28)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
       - '@types/react'
       - '@types/react-dom'
-      - '@types/three'
-      - expo
-      - expo-asset
-      - expo-file-system
-      - expo-gl
-      - immer
-      - react-native
-      - supports-color
-      - use-sync-external-store
 
   '@humanfs/core@0.19.2':
     dependencies:
