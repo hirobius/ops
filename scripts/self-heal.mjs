@@ -13,7 +13,7 @@ const STATIC_CHECKS = [
   { name: 'Typecheck', command: 'pnpm typecheck' },
   { name: 'TokenAndLayoutAudit', command: 'pnpm check:ghost-tokens' },
   { name: 'ContrastAudit', command: 'pnpm check:contrast' },
-  { name: 'AriaLabelAudit', command: 'pnpm check:aria' },
+  { name: 'AriaLabelAudit', command: 'pnpm check:a11y' },
   { name: 'AccessibilityPages', command: 'pnpm test:a11y' },
   { name: 'LayoutIntegrity', command: 'pnpm test:layout' },
 ];
