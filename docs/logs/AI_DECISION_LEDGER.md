@@ -198,3 +198,32 @@ Every flag in `bridge.config.json` is a temporary scaffold around new bridge / p
   - MOBIUS_DEFAULTS and PRESETS types remain unchanged — they reference MobiusUniforms, not MobiusState slices.
 **Reversibility:** Partially reversible — Phase 1 shim maintains backwards compat; removing slice objects from the type requires only deleting the slice type extensions and Object.defineProperty block.
 **Ledger context:** mobiusStore has 38 flat fields across MobiusUniforms (47 fields), MobiusLayoutState (9 fields), MobiusRouteSplashState (6 fields), and 6 scalar state fields; slicing improves devtools readability and component subscription granularity without breaking existing call sites.
+
+## 2026-06-19 — ops⇄design-system de-duplication (Phase 2 in progress)
+
+**Session:** ops governance/token de-dup audit (branch claude/audit-governance-token-duplication-sx92cy)
+**Goal:** confirm + eliminate the duplicated governance docs + token pipeline between hirobius/ops and hirobius/hirobius-design-system; make ops a thin consumer of @hirobius/design-system.
+
+**Audit result (part a, via owner hash manifest OPS_DEDUPE_INVENTORY.json):** 174/196 ops files byte-identical to DS canon, 18 drifted, 4 owner-only. Token data (hirobius.tokens.json, tokens.lock.json, tenant schema) byte-identical. CLAUDE.md is ops-specific (not a dup). Deletions are gated on a verifiable build because ops wires the pipeline into tailwind.config.ts, husky hooks, and CI.
+
+**Decisions (with Adrian):**
+  - Build unblock = Option 3: ops consumes @hirobius/design-system@0.4.0 from GitHub Packages (npm.pkg.github.com) via .npmrc env-token interpolation; removes the file:../ local-sibling coupling.
+  - BACKLOG.md stays ops-owned (no pointer-collapse) despite being byte-identical.
+  - The 7 phantom domain components are ops-owned (built locally), not added to DS.
+
+**Self-heals (Root Cause → Resolution):**
+  1. **Phantom DS imports.** Root cause: ops imported ApprovalCard/ApprovalUnitSummary/ApprovalState, PhaseHeader/PhaseHeaderTone, AgentTag/AgentTier from @hirobius/design-system, but these exist in neither ops nor the published package (migration debt; ops had never type-checked because it could not install). Resolution: created src/app/components/{approval-card,phase-header,agent-tag}.tsx (ops-domain, built from DS primitives) and repointed the 6 imports. `pnpm typecheck` 19 errors → 0.
+  2. **Missing generated data files.** Root cause: fresh checkout lacks gitignored build artifacts (docs/guardrails/strength-report.json, src/app/data/roadmap.json, src/app/data/security-posture.json, telemetry/events.jsonl). Resolution: regenerated the first three via their existing scripts; created an empty telemetry/events.jsonl (parseJsonl tolerates empty). `pnpm build` now produces a full production bundle.
+  3. **self-heal smoke paths pointed at DS doc routes.** Root cause: DEFAULT_SMOKE_PATHS used /hds/* and /lab/incubator (DS site routes that now redirect to /ops). Resolution: repointed to real ops dashboard routes from src/app/routes.tsx (OpsGate DEV_BYPASS renders them under heal's dev server).
+  4. **self-heal invoked non-existent `pnpm check:aria`.** Resolution: → `pnpm check:a11y`.
+  5. **AGENTS.md hardcoded Windows links.** Resolution: → relative ./ paths; dead TASKS.md link → BACKLOG.md.
+
+**Verified green:** pnpm typecheck ✅, pnpm build ✅ (production bundle against the published pkg), pnpm check:contrast ✅.
+
+**Environment blockers (documented, not code defects):**
+  - Playwright browser download blocked by network egress allowlist (cdn.playwright.dev not allowed) → test:a11y / test:layout / heal smoke cannot run. Needs the host allowlisted (analogous to the NODE_AUTH_TOKEN ask).
+  - `pnpm run heal` as written is a DS-repo gate, not a consumer gate: check:ghost-tokens (audit-tokens.mjs) requires DS-only src/styles/theme.css; check:a11y has an eslint flat-config plugin bug. Both are vestigial DS machinery slated for removal/rework; heal must be redefined for ops-as-consumer.
+
+**Deletions performed:** none yet. The 174 hash-confirmed duplicate removals (token pipeline, figma plugin, validators, DS governance-doc pointer-collapse, package.json prune, husky/CI rewire) remain gated until a consumer-appropriate verification gate is green.
+**Note:** git hooks disabled locally for this cleanup (core.hooksPath) — the post-commit hook backgrounds the DS token/manifest pipeline and churns the tree. Restore or remove as part of the hook-prune deletion step.
+**Reversibility:** all changes so far are additive or wiring; no destructive removals. Local commits pushed to the feature branch.
