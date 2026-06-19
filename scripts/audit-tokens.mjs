@@ -54,13 +54,19 @@ const jsonMode = args.has('--json');
 // check-token-paths and check-source-canon, which DO emit canonical
 // violations — so the closure plan still has rich material to act on.
 if (jsonMode) {
-  process.stdout.write(JSON.stringify({
-    violations: [],
-    summary: {
-      note: 'audit-tokens --json shape compliance only (per 13p-9); full per-mode wiring is follow-on work',
-    },
-    ok: true,
-  }, null, 2) + '\n');
+  process.stdout.write(
+    JSON.stringify(
+      {
+        violations: [],
+        summary: {
+          note: 'audit-tokens --json shape compliance only (per 13p-9); full per-mode wiring is follow-on work',
+        },
+        ok: true,
+      },
+      null,
+      2,
+    ) + '\n',
+  );
   process.exit(0);
 }
 
@@ -76,7 +82,9 @@ function runScanSource() {
   if (!Array.isArray(patterns) || patterns.length === 0) {
     // No deprecation patterns declared in the manifest — nothing to scan.
     // This is a normal post-cleanup state, not a failure.
-    console.log('audit-tokens --scan-source: no manifest.deprecations.patterns declared, skipping scan.');
+    console.log(
+      'audit-tokens --scan-source: no manifest.deprecations.patterns declared, skipping scan.',
+    );
     process.exit(0);
   }
 
@@ -209,7 +217,9 @@ function runScanSource() {
     };
   }
 
-  console.log('🕵️‍♂️ Starting HDS Component Source Audit (deprecated patterns + hardcoded values)...\n');
+  console.log(
+    '🕵️‍♂️ Starting HDS Component Source Audit (deprecated patterns + hardcoded values)...\n',
+  );
   console.log('================================================');
 
   TARGET_DIRS.forEach((dir) => {
@@ -232,7 +242,9 @@ function runScanSource() {
   if (totalViolations === 0) {
     console.log('✅ Audit complete: Zero violations found! Your system is clean.');
   } else {
-    console.log(`❌ Audit complete: Found ${totalViolations} violations across ${Object.keys(fileViolations).length} files.`);
+    console.log(
+      `❌ Audit complete: Found ${totalViolations} violations across ${Object.keys(fileViolations).length} files.`,
+    );
     console.log(`   • Typography violations: ${typographyViolations}`);
     console.log(`   • Spacing violations: ${spacingViolations}`);
     console.log(`   • Compositional violations: ${compositionalViolations}`);
@@ -248,19 +260,38 @@ function runScanSource() {
   process.exit(0);
 }
 
-const ALLOWED_KEYWORDS = new Set(['none', 'inherit', 'initial', 'unset', 'revert', 'auto', 'normal', 'currentcolor', 'transparent']);
+const ALLOWED_KEYWORDS = new Set([
+  'none',
+  'inherit',
+  'initial',
+  'unset',
+  'revert',
+  'auto',
+  'normal',
+  'currentcolor',
+  'transparent',
+]);
 const TOKEN_LIKE_RE = /\bvar\(--|\bclamp\(|\bcalc\(|\bmin\(|\bmax\(/i;
 const ABSOLUTE_LENGTH_RE = /(?:^|[^-])(?:\d+(?:\.\d+)?)(?:px|rem|em|ch|pc|pt|cm|mm|in|q)\b/i;
-const COLOR_LITERAL_RE = /(?:#(?:[0-9a-f]{3,8})\b|\brgba?\(|\bhsla?\(|\boklch\(|\boklab\(|\blab\(|\blch\(|\bhwb\()/i;
-const SEMANTIC_SCOPE_DIRS = [join(ROOT, 'src', 'app', 'components'), join(ROOT, 'src', 'app', 'pages'), join(ROOT, 'src', 'app', 'design-system')];
+const COLOR_LITERAL_RE =
+  /(?:#(?:[0-9a-f]{3,8})\b|\brgba?\(|\bhsla?\(|\boklch\(|\boklab\(|\blab\(|\blch\(|\bhwb\()/i;
+const SEMANTIC_SCOPE_DIRS = [
+  join(ROOT, 'src', 'app', 'components'),
+  join(ROOT, 'src', 'app', 'pages'),
+  join(ROOT, 'src', 'app', 'design-system'),
+];
 const PRIMITIVE_SPACE_RE = /\b(?:hds|primitive)\.space\.[A-Za-z0-9_-]+/g;
-const PRIMITIVE_TYPO_RE = /\b(?:hds\.(?:fontSize|fontWeight|lineHeight|letterSpacing)\.[A-Za-z0-9_-]+|primitive\.typography\.[A-Za-z0-9_.-]+)/g;
-const PRIMITIVE_COLOR_RE = /\b(?:hds\.color\.(?:brandPressed|brandRGB|brand|white|blue(?:\.[A-Za-z0-9_-]+)*)|primitive\.color\.[A-Za-z0-9_.-]+)/g;
+const PRIMITIVE_TYPO_RE =
+  /\b(?:hds\.(?:fontSize|fontWeight|lineHeight|letterSpacing)\.[A-Za-z0-9_-]+|primitive\.typography\.[A-Za-z0-9_.-]+)/g;
+const PRIMITIVE_COLOR_RE =
+  /\b(?:hds\.color\.(?:brandPressed|brandRGB|brand|white|blue(?:\.[A-Za-z0-9_-]+)*)|primitive\.color\.[A-Za-z0-9_.-]+)/g;
 const PRIMITIVE_CSS_VAR_RE = /var\(--primitive-(?:space|typography|color)-[A-Za-z0-9-]+\)/g;
-const SEMANTIC_USE_RE = /\b(?:hds\.layout\.[A-Za-z0-9_.-]+|hds\.typeStyles\.[A-Za-z0-9_.-]+|semantic\.[A-Za-z0-9_.-]+|var\(--semantic-[A-Za-z0-9-]+\)|var\(--component-[A-Za-z0-9-]+\))/g;
+const SEMANTIC_USE_RE =
+  /\b(?:hds\.layout\.[A-Za-z0-9_.-]+|hds\.typeStyles\.[A-Za-z0-9_.-]+|semantic\.[A-Za-z0-9_.-]+|var\(--semantic-[A-Za-z0-9-]+\)|var\(--component-[A-Za-z0-9-]+\))/g;
 // RESPONSIVE_WIDTH_PROP_RE: reserved for future width audit pass
 const RESPONSIVE_MEDIA_RE = /@media\b/g;
-const GOVERNED_HELPER_VAR_RE = /var\(--hds-(fill|hover|border|rule|color-brand|accent|surface-page|surface-raised|surface-control|surface-control-hover|brand-tint|accent-content|accent-content-hover)\)/g;
+const GOVERNED_HELPER_VAR_RE =
+  /var\(--hds-(fill|hover|border|rule|color-brand|accent|surface-page|surface-raised|surface-control|surface-control-hover|brand-tint|accent-content|accent-content-hover)\)/g;
 const HELPER_VAR_REPLACEMENTS = {
   'var(--hds-fill)': 'var(--semantic-color-surface-raised)',
   'var(--hds-hover)': 'var(--semantic-color-surface-accentSubtle)',
@@ -335,13 +366,11 @@ const MOTION_PROPERTIES = new Set([
   'animation-timing-function',
 ]);
 
-const STRUCTURE_PROPERTIES = new Set([
-  'box-shadow',
-  'border-radius',
-  'z-index',
-]);
-const INLINE_STYLE_PROP_RE = /(?:^|[,\s{])(?:width|minWidth|maxWidth|height|minHeight|maxHeight|top|right|bottom|left|inset(?:Block|Inline)?|margin(?:Top|Right|Bottom|Left)?|padding(?:Top|Right|Bottom|Left)?|gap|rowGap|columnGap|borderRadius|fontSize)\s*:\s*([^,}\n]+)/g;
-const MONO_PROSE_TAG_RE = /<(p|span|figcaption|label|li|td|th|small|strong|em|dd|dt)\b([^>]*)>([\s\S]*?)<\/\1>/g;
+const STRUCTURE_PROPERTIES = new Set(['box-shadow', 'border-radius', 'z-index']);
+const INLINE_STYLE_PROP_RE =
+  /(?:^|[,\s{])(?:width|minWidth|maxWidth|height|minHeight|maxHeight|top|right|bottom|left|inset(?:Block|Inline)?|margin(?:Top|Right|Bottom|Left)?|padding(?:Top|Right|Bottom|Left)?|gap|rowGap|columnGap|borderRadius|fontSize)\s*:\s*([^,}\n]+)/g;
+const MONO_PROSE_TAG_RE =
+  /<(p|span|figcaption|label|li|td|th|small|strong|em|dd|dt)\b([^>]*)>([\s\S]*?)<\/\1>/g;
 
 function* walk(node, path = []) {
   if (!node || typeof node !== 'object') return;
@@ -368,11 +397,11 @@ function collectSemanticTokenPaths(node, path = [], results = []) {
   if (path.length > 0) {
     const hasValue = '$value' in node;
     const isCompositeReadable =
-      !hasValue
-      && path[0] === 'semantic'
-      && (path[1] === 'typography' || path[1] === 'motion')
-      && children.length > 0
-      && children.every(([, child]) => isLeafTokenNode(child));
+      !hasValue &&
+      path[0] === 'semantic' &&
+      (path[1] === 'typography' || path[1] === 'motion') &&
+      children.length > 0 &&
+      children.every(([, child]) => isLeafTokenNode(child));
 
     if (hasValue || isCompositeReadable) {
       results.push(pathLabel);
@@ -434,7 +463,9 @@ function buildUsageMap(semanticTokenPaths, files) {
 
   for (const entry of Object.values(usageMap)) {
     entry.files = [...new Set(entry.files)].sort((a, b) => a.localeCompare(b));
-    entry.fileReferences.sort((a, b) => b.references - a.references || a.file.localeCompare(b.file));
+    entry.fileReferences.sort(
+      (a, b) => b.references - a.references || a.file.localeCompare(b.file),
+    );
   }
 
   return usageMap;
@@ -465,7 +496,9 @@ function hasLiteralColor(value) {
 }
 
 function extractComponentVars(cssText) {
-  return [...new Set([...cssText.matchAll(/--component-[A-Za-z0-9-]+/g)].map(match => match[0]))].sort();
+  return [
+    ...new Set([...cssText.matchAll(/--component-[A-Za-z0-9-]+/g)].map((match) => match[0])),
+  ].sort();
 }
 
 function getForbiddenOverrideReason(prop, value) {
@@ -474,46 +507,70 @@ function getForbiddenOverrideReason(prop, value) {
 
   if (TYPOGRAPHY_PROPERTIES.has(lowerProp)) {
     if (lowerProp === 'text-transform') {
-      return isAllowedKeyword(normalizedValue) ? null : 'Text transform should come from typography tokens.';
+      return isAllowedKeyword(normalizedValue)
+        ? null
+        : 'Text transform should come from typography tokens.';
     }
     if (lowerProp === 'line-height') {
-      return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue) ? null : 'Line height should come from typography tokens.';
+      return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue)
+        ? null
+        : 'Line height should come from typography tokens.';
     }
     if (lowerProp === 'letter-spacing') {
-      return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue) ? null : 'Letter spacing should come from typography tokens.';
+      return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue)
+        ? null
+        : 'Letter spacing should come from typography tokens.';
     }
     if (lowerProp === 'font-weight') {
-      return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue) ? null : 'Font weight should come from typography tokens.';
+      return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue)
+        ? null
+        : 'Font weight should come from typography tokens.';
     }
     if (lowerProp === 'font-family') {
-      return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue) ? null : 'Font family should come from typography tokens.';
+      return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue)
+        ? null
+        : 'Font family should come from typography tokens.';
     }
     if (lowerProp === 'font-size') {
-      return isTokenLike(normalizedValue) || !hasHardcodedLength(normalizedValue) ? null : 'Font size should come from typography tokens.';
+      return isTokenLike(normalizedValue) || !hasHardcodedLength(normalizedValue)
+        ? null
+        : 'Font size should come from typography tokens.';
     }
   }
 
   if (COLOR_PROPERTIES.has(lowerProp)) {
-    return hasLiteralColor(normalizedValue) ? 'Color values should come from semantic color tokens.' : null;
+    return hasLiteralColor(normalizedValue)
+      ? 'Color values should come from semantic color tokens.'
+      : null;
   }
 
   if (LAYER_PROPERTIES.has(lowerProp)) {
-    return isTokenLike(normalizedValue) || !hasHardcodedLength(normalizedValue) ? null : 'Spacing and measure should come from layout or space tokens.';
+    return isTokenLike(normalizedValue) || !hasHardcodedLength(normalizedValue)
+      ? null
+      : 'Spacing and measure should come from layout or space tokens.';
   }
 
   if (MOTION_PROPERTIES.has(lowerProp)) {
-    return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue) ? null : 'Motion timing should come from motion tokens.';
+    return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue)
+      ? null
+      : 'Motion timing should come from motion tokens.';
   }
 
   if (STRUCTURE_PROPERTIES.has(lowerProp)) {
     if (lowerProp === 'z-index') {
-      return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue) ? null : 'Z-index should come from elevation tokens.';
+      return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue)
+        ? null
+        : 'Z-index should come from elevation tokens.';
     }
     if (lowerProp === 'border-radius') {
-      return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue) ? null : 'Border radius should come from radius tokens.';
+      return isTokenLike(normalizedValue) || isAllowedKeyword(normalizedValue)
+        ? null
+        : 'Border radius should come from radius tokens.';
     }
     if (lowerProp === 'box-shadow') {
-      return isTokenLike(normalizedValue) || normalizedValue === 'none' ? null : 'Box shadow should come from elevation tokens.';
+      return isTokenLike(normalizedValue) || normalizedValue === 'none'
+        ? null
+        : 'Box shadow should come from elevation tokens.';
     }
   }
 
@@ -534,8 +591,9 @@ function scanForbiddenOverrides(cssText, fileLabel) {
 
     // Allow per-line CSS suppression via /* audit-ok: reason */ or /* hds-bypass: reason */ or /* spacing-ok: reason */
     const prevLine = index > 0 ? lines[index - 1] : '';
-    const isSuppressed = /\/\*\s*(?:audit-ok|hds-bypass|spacing-ok):/i.test(line)
-      || /\/\*\s*(?:audit-ok|hds-bypass|spacing-ok):/i.test(prevLine);
+    const isSuppressed =
+      /\/\*\s*(?:audit-ok|hds-bypass|spacing-ok):/i.test(line) ||
+      /\/\*\s*(?:audit-ok|hds-bypass|spacing-ok):/i.test(prevLine);
 
     const declarations = [...line.matchAll(/([a-z-]+)\s*:\s*([^;{}]+);/gi)];
     for (const match of declarations) {
@@ -578,7 +636,7 @@ function listTsxFiles(dirOrDirs, exts = ['.tsx']) {
         files.push(...listTsxFiles(fullPath, exts));
         continue;
       }
-      if (entry.isFile() && exts.some(ext => fullPath.endsWith(ext))) files.push(fullPath);
+      if (entry.isFile() && exts.some((ext) => fullPath.endsWith(ext))) files.push(fullPath);
     }
   }
 
@@ -600,7 +658,8 @@ function listSourceFiles(dirOrDirs, extensions = ['.ts', '.tsx']) {
         files.push(...listSourceFiles(fullPath, extensions));
         continue;
       }
-      if (entry.isFile() && extensions.some((extension) => fullPath.endsWith(extension))) files.push(fullPath);
+      if (entry.isFile() && extensions.some((extension) => fullPath.endsWith(extension)))
+        files.push(fullPath);
     }
   }
 
@@ -633,7 +692,8 @@ function scanGovernedHelperVarViolations(rootDir) {
           selector: 'governed source',
           prop: 'legacy helper var',
           value: helperVar,
-          reason: 'Governed HDS code should use real token-backed semantic or component vars instead of theme-only helper aliases.',
+          reason:
+            'Governed HDS code should use real token-backed semantic or component vars instead of theme-only helper aliases.',
           expected: HELPER_VAR_REPLACEMENTS[helperVar] ?? 'var(--semantic-...)',
         });
       }
@@ -688,7 +748,11 @@ function scanInlineStyleViolations(rootDir) {
       const tag = match[1];
       const openingTag = match[2] ?? '';
       const content = stripTags(match[3] ?? '');
-      if (!/style=\{\{[\s\S]*?(?:hds\.typeStyles\.mono(?:Xs|Sm)?|fontFamily:\s*hds\.monoFamily|var\(--primitive-typography-family-mono\))[\s\S]*?\}\}/.test(openingTag)) {
+      if (
+        !/style=\{\{[\s\S]*?(?:hds\.typeStyles\.mono(?:Xs|Sm)?|fontFamily:\s*hds\.monoFamily|var\(--primitive-typography-family-mono\))[\s\S]*?\}\}/.test(
+          openingTag,
+        )
+      ) {
         continue;
       }
       if (tag.toLowerCase() === 'code') continue;
@@ -703,7 +767,8 @@ function scanInlineStyleViolations(rootDir) {
         selector: `${tag} mono prose`,
         prop: 'fontFamily',
         value: 'var(--primitive-typography-family-mono)',
-        reason: 'Long-form prose should use semantic typography.body or caption instead of the mono stack.',
+        reason:
+          'Long-form prose should use semantic typography.body or caption instead of the mono stack.',
         expected: wordCount > 10 ? 'semantic.typography.body' : 'semantic.typography.caption',
       });
     }
@@ -768,7 +833,8 @@ function scanInlineStyleViolations(rootDir) {
         const propMatch = match[0].match(/([A-Za-z][A-Za-z0-9]*)\s*:/);
         const prop = propMatch?.[1] ?? 'unknown';
         const normalized = value.replace(/^[{'\"]|[}'\"]$/g, '');
-        const hasToken = /var\(|hds\.|tokens\./i.test(normalized) || /\b(calc|clamp)\(/i.test(normalized);
+        const hasToken =
+          /var\(|hds\.|tokens\./i.test(normalized) || /\b(calc|clamp)\(/i.test(normalized);
         const isZero = /^0(?:px)?$/i.test(normalized);
         const hardcodedLength = !isZero && /^(?:-?\d+(?:\.\d+)?px)$/i.test(normalized);
 
@@ -779,7 +845,8 @@ function scanInlineStyleViolations(rootDir) {
             selector: 'inline style',
             prop,
             value: normalized,
-            reason: 'Inline spacing and measure should come from tokens or an explicit hds-bypass comment.',
+            reason:
+              'Inline spacing and measure should come from tokens or an explicit hds-bypass comment.',
           });
 
           if (prop === 'width' || prop === 'minWidth' || prop === 'maxWidth') {
@@ -789,7 +856,8 @@ function scanInlineStyleViolations(rootDir) {
               selector: 'inline style',
               prop,
               value: normalized,
-              reason: 'Responsive widths should come from semantic layout tokens or fluid CSS, not fixed pixel values.',
+              reason:
+                'Responsive widths should come from semantic layout tokens or fluid CSS, not fixed pixel values.',
             });
           }
         }
@@ -798,7 +866,12 @@ function scanInlineStyleViolations(rootDir) {
       for (const match of block.matchAll(SEMANTIC_USE_RE)) {
         const token = match[0];
         semanticAlignedHits += 1;
-        if (/^hds\.(?:layout|typeStyles)\./.test(token) || /^semantic\./.test(token) || /^var\(--semantic-/.test(token) || /^var\(--component-/.test(token)) {
+        if (
+          /^hds\.(?:layout|typeStyles)\./.test(token) ||
+          /^semantic\./.test(token) ||
+          /^var\(--semantic-/.test(token) ||
+          /^var\(--component-/.test(token)
+        ) {
           continue;
         }
       }
@@ -810,7 +883,7 @@ function scanInlineStyleViolations(rootDir) {
         lineNumber,
         'semantic',
         'Direct spacing should map to a semantic space alias before reaching a primitive token.',
-        value => ({
+        (value) => ({
           prop: 'spacing',
           expected: value.replace(/^hds\.space\./, 'semantic.space.'),
         }),
@@ -823,7 +896,7 @@ function scanInlineStyleViolations(rootDir) {
         lineNumber,
         'semantic',
         'Direct typography sizing should map to a semantic typography alias before reaching a primitive token.',
-        value => ({
+        (value) => ({
           prop: 'typography',
           expected: value
             .replace(/^hds\.fontSize\./, 'semantic.typography.')
@@ -841,7 +914,7 @@ function scanInlineStyleViolations(rootDir) {
         lineNumber,
         'semantic',
         'Direct color values should map to semantic color tokens before reaching a primitive or hex literal.',
-        value => ({
+        (value) => ({
           prop: 'color',
           expected: value
             .replace(/^hds\.color\./, 'semantic.color.')
@@ -856,7 +929,7 @@ function scanInlineStyleViolations(rootDir) {
         lineNumber,
         'semantic',
         'Primitive CSS variables should be replaced by semantic aliases in component and docs surfaces.',
-        value => ({
+        (value) => ({
           prop: 'cssVar',
           expected: value.replace(/^var\(--primitive-/, 'var(--semantic-'),
         }),
@@ -871,7 +944,8 @@ function scanInlineStyleViolations(rootDir) {
         selector: 'component media query',
         prop: '@media',
         value: match[0],
-        reason: 'Component and page files should prefer semantic layout tokens over local media queries when a shared responsive primitive exists.',
+        reason:
+          'Component and page files should prefer semantic layout tokens over local media queries when a shared responsive primitive exists.',
       });
     }
   }
@@ -897,6 +971,12 @@ function getIntegrityGrade(score) {
 const tokens = JSON.parse(readFileSync(join(ROOT, 'hirobius.tokens.json'), 'utf8'));
 const themeCssPath = join(ROOT, 'src', 'styles', 'theme.css');
 const tokensCssPath = join(ROOT, 'src', 'styles', 'tokens.css');
+if (!existsSync(tokensCssPath)) {
+  console.log(
+    'audit-tokens: src/styles/tokens.css absent (ops-as-consumer builds no token CSS) — skip',
+  );
+  process.exit(0);
+}
 const themeCss = readFileSync(themeCssPath, 'utf8');
 const tokensCss = readFileSync(tokensCssPath, 'utf8');
 const semanticScopeFiles = [
@@ -913,11 +993,11 @@ const generatedVars = new Set(extractComponentVars(tokensCss));
 const ghostTokens = forbiddenOnly
   ? []
   : themeVars
-      .map(cssVar => {
+      .map((cssVar) => {
         const tokenPath = fromCssVar(cssVar);
         return { cssVar, tokenPath };
       })
-      .filter(entry => !componentPaths.has(entry.tokenPath));
+      .filter((entry) => !componentPaths.has(entry.tokenPath));
 
 const themeForbiddenOverrides = scanForbiddenOverrides(themeCss, 'src/styles/theme.css');
 const styleAudit = scanInlineStyleViolations(SEMANTIC_SCOPE_DIRS);
@@ -934,16 +1014,20 @@ const forbiddenOverrides = [
   ...helperVarViolations,
 ];
 const semanticIntegrityTotal = semanticPrimitiveHits + semanticAlignedHits;
-const semanticIntegrityScore = semanticIntegrityTotal === 0
-  ? 100
-  : Math.round((semanticAlignedHits / semanticIntegrityTotal) * 100);
+const semanticIntegrityScore =
+  semanticIntegrityTotal === 0
+    ? 100
+    : Math.round((semanticAlignedHits / semanticIntegrityTotal) * 100);
 const semanticIntegrityGrade = getIntegrityGrade(semanticIntegrityScore);
 const semanticUsageEntries = Object.values(semanticUsageMap);
-const semanticDeadWood = semanticUsageEntries.filter(entry => entry.totalReferences === 0).length;
-const semanticHighBlastRadius = semanticUsageEntries.filter(entry => entry.totalReferences >= 10).length;
-const semanticMaxBlastRadiusEntry = semanticUsageEntries.reduce((maxEntry, entry) => (
-  entry.totalReferences > maxEntry.totalReferences ? entry : maxEntry
-), semanticUsageEntries[0] ?? { tokenPath: '', totalReferences: 0, files: [], fileReferences: [] });
+const semanticDeadWood = semanticUsageEntries.filter((entry) => entry.totalReferences === 0).length;
+const semanticHighBlastRadius = semanticUsageEntries.filter(
+  (entry) => entry.totalReferences >= 10,
+).length;
+const semanticMaxBlastRadiusEntry = semanticUsageEntries.reduce(
+  (maxEntry, entry) => (entry.totalReferences > maxEntry.totalReferences ? entry : maxEntry),
+  semanticUsageEntries[0] ?? { tokenPath: '', totalReferences: 0, files: [], fileReferences: [] },
+);
 const auditReport = {
   generatedAt: new Date().toISOString(),
   ghostComponentVars: ghostTokens,
@@ -988,26 +1072,33 @@ const auditReport = {
 };
 writeFileSync(auditReportPath, `${JSON.stringify(auditReport, null, 2)}\n`);
 
-const missingGeneratedTokens = full && !forbiddenOnly
-  ? [...componentPaths]
-      .map(tokenPath => ({
-        tokenPath,
-        cssVar: toCssVar(tokenPath),
-      }))
-      .filter(entry => !generatedVars.has(entry.cssVar))
-  : [];
+const missingGeneratedTokens =
+  full && !forbiddenOnly
+    ? [...componentPaths]
+        .map((tokenPath) => ({
+          tokenPath,
+          cssVar: toCssVar(tokenPath),
+        }))
+        .filter((entry) => !generatedVars.has(entry.cssVar))
+    : [];
 
 if (fix && ghostTokens.length > 0) {
   const lines = themeCss.split(/\r?\n/);
-  const ghostSet = new Set(ghostTokens.map(entry => entry.cssVar));
+  const ghostSet = new Set(ghostTokens.map((entry) => entry.cssVar));
   const nextLines = [];
 
   for (const line of lines) {
-    if ([...ghostSet].some(cssVar => line.includes(cssVar))) continue;
+    if ([...ghostSet].some((cssVar) => line.includes(cssVar))) continue;
     nextLines.push(line);
   }
 
-  writeFileSync(themeCssPath, `${nextLines.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd()}\n`);
+  writeFileSync(
+    themeCssPath,
+    `${nextLines
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trimEnd()}\n`,
+  );
 }
 
 if (reportOnly) {
@@ -1054,8 +1145,16 @@ if (reportOnly) {
   process.exit(0);
 }
 
-if (ghostTokens.length === 0 && missingGeneratedTokens.length === 0 && forbiddenOverrides.length === 0 && monoProseViolations.length === 0 && responsiveViolations.length === 0) {
-  console.log('OK audit-tokens - no ghost component vars, no forbidden overrides, no mono-prose drift, no responsiveness violations, and generated CSS is in sync');
+if (
+  ghostTokens.length === 0 &&
+  missingGeneratedTokens.length === 0 &&
+  forbiddenOverrides.length === 0 &&
+  monoProseViolations.length === 0 &&
+  responsiveViolations.length === 0
+) {
+  console.log(
+    'OK audit-tokens - no ghost component vars, no forbidden overrides, no mono-prose drift, no responsiveness violations, and generated CSS is in sync',
+  );
   process.exit(0);
 }
 
@@ -1066,7 +1165,9 @@ if (ghostTokens.length > 0) {
   for (const ghost of ghostTokens) {
     console.error(`    ${ghost.cssVar}`);
     console.error(`      JSON path: ${ghost.tokenPath}`);
-    console.error(`      Fix: remove the CSS bridge var or define the token in hirobius.tokens.json\n`);
+    console.error(
+      `      Fix: remove the CSS bridge var or define the token in hirobius.tokens.json\n`,
+    );
   }
 }
 
@@ -1091,7 +1192,9 @@ if (semanticMappingViolations.length > 0) {
     console.error(`      ${entry.prop}: ${entry.value}`);
     console.error(`      Expected: ${entry.expected}`);
     console.error(`      Reason: ${entry.reason}`);
-      console.error(`      Fix: replace this primitive usage with the semantic alias that matches the surrounding component role.\n`);
+    console.error(
+      `      Fix: replace this primitive usage with the semantic alias that matches the surrounding component role.\n`,
+    );
   }
 }
 
@@ -1103,7 +1206,9 @@ if (monoProseViolations.length > 0) {
     console.error(`      ${entry.prop}: ${entry.value}`);
     console.error(`      Expected: ${entry.expected}`);
     console.error(`      Reason: ${entry.reason}`);
-    console.error(`      Fix: replace mono prose with the matching semantic body or caption token.\n`);
+    console.error(
+      `      Fix: replace mono prose with the matching semantic body or caption token.\n`,
+    );
   }
 }
 
@@ -1114,7 +1219,9 @@ if (responsiveViolations.length > 0) {
     console.error(`      ${entry.selector}`);
     console.error(`      ${entry.prop}: ${entry.value}`);
     console.error(`      Reason: ${entry.reason}`);
-    console.error(`      Fix: move the responsive behavior into semantic layout tokens or shared layout primitives.\n`);
+    console.error(
+      `      Fix: move the responsive behavior into semantic layout tokens or shared layout primitives.\n`,
+    );
   }
 }
 

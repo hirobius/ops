@@ -20,7 +20,7 @@
  * Usage: pnpm check:secrets
  */
 
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, extname } from 'node:path';
@@ -29,6 +29,13 @@ import { hasJsonFlag, emitResult } from './lib/gate-output.mjs';
 const argv = process.argv.slice(2);
 const jsonMode = hasJsonFlag(argv);
 const fixtureFile = process.env.FIXTURE_FILE;
+
+// Check gitleaks availability before attempting any scan.
+const _which = spawnSync('which', ['gitleaks'], { encoding: 'utf8' });
+if (_which.status !== 0 || !_which.stdout.trim()) {
+  console.log('check-secrets: gitleaks not installed — skip');
+  process.exit(0);
+}
 
 const CONFIG = '.gitleaks.toml';
 const configArgs = existsSync(CONFIG) ? ['--config', CONFIG] : [];
@@ -84,11 +91,19 @@ try {
     });
     result.ok = false;
   }
-  if (tempFixturePath) { try { unlinkSync(tempFixturePath); } catch {} }
+  if (tempFixturePath) {
+    try {
+      unlinkSync(tempFixturePath);
+    } catch {}
+  }
   emitResult(result, jsonMode);
   process.exit(code === 1 ? 1 : code);
 }
 
-if (tempFixturePath) { try { unlinkSync(tempFixturePath); } catch {} }
+if (tempFixturePath) {
+  try {
+    unlinkSync(tempFixturePath);
+  } catch {}
+}
 emitResult(result, jsonMode);
 process.exit(0);

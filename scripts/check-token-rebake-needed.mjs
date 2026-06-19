@@ -81,7 +81,10 @@ export function stripManifestTimestamp(json) {
     // rebake-check loop on every commit.
     const TS_KEYS = new Set(['generated', 'generatedAt', 'capturedAt']);
     const walk = (node) => {
-      if (Array.isArray(node)) { for (const v of node) walk(v); return; }
+      if (Array.isArray(node)) {
+        for (const v of node) walk(v);
+        return;
+      }
       if (node && typeof node === 'object') {
         for (const k of Object.keys(node)) {
           if (TS_KEYS.has(k)) delete node[k];
@@ -111,17 +114,24 @@ function fileDiffersFromHead(file) {
   // matching EITHER head OR staged-index — the staged version is what's
   // about to land in the next commit, so it's the correct reference for
   // "are the generated outputs in sync with the build chain?".
-  const norm = (s) => s == null ? null : (file === 'public/hds-manifest.json' ? stripManifestTimestamp(s) : s);
+  const norm = (s) =>
+    s == null ? null : file === 'public/hds-manifest.json' ? stripManifestTimestamp(s) : s;
   const wtNorm = norm(wtContent);
   if (norm(headContent) === wtNorm) return { differs: false };
   if (norm(stagedContent) === wtNorm) return { differs: false };
-  const reason = file === 'public/hds-manifest.json'
-    ? 'content differs (timestamp ignored)'
-    : 'content differs';
+  const reason =
+    file === 'public/hds-manifest.json' ? 'content differs (timestamp ignored)' : 'content differs';
   return { differs: true, reason };
 }
 
 function main() {
+  if (!fs.existsSync(path.join(ROOT, 'src/app/design-system/generated-tokens.ts'))) {
+    console.log(
+      'check-token-rebake-needed: src/app/design-system/generated-tokens.ts absent — skip',
+    );
+    return 0;
+  }
+
   if (VERBOSE) process.stderr.write('Running scripts/generate-manifest.mjs ...\n');
   run('node scripts/generate-manifest.mjs');
   if (VERBOSE) process.stderr.write('Running scripts/build-tokens.mjs ...\n');
@@ -151,8 +161,7 @@ function main() {
   return 1;
 }
 
-const isMain =
-  process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   process.exit(main());
 }

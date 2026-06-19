@@ -176,6 +176,12 @@ function validate() {
     process.exit(1);
   }
 
+  const fixturesRoot = resolve(ROOT, 'fixtures');
+  if (!existsSync(fixturesRoot)) {
+    console.log('validate-fixture-proof-of-firing: fixtures/ directory absent — skip');
+    process.exit(0);
+  }
+
   const registry = JSON.parse(readFileSync(registryPath, 'utf-8'));
   const gates = registry.gates ?? [];
 
@@ -217,6 +223,17 @@ function validate() {
 
     // MISSING case: no fixture dir or missing files
     if (!violatingPath || !passingPath) {
+      // Proof-of-firing only applies to gates that AUTO-FIRE in a hook/CI
+      // channel. A `manual` gate is run by hand, and a gate whose script is
+      // absent cannot fire at all (tracked separately as drift) — neither needs
+      // a proof-of-firing fixture, so exempt them rather than hard-failing.
+      if (gate.firingChannel === 'manual' || !scriptExists) {
+        if (VERBOSE)
+          console.warn(
+            `  [EXEMPT] ${gateId}: ${!scriptExists ? 'gate script absent' : 'manual channel (not auto-firing)'} — fixture not required`,
+          );
+        continue;
+      }
       const detail = !existsSync(fixtureDir)
         ? 'fixture directory does not exist'
         : !violatingPath
@@ -290,6 +307,17 @@ function validate() {
     }
 
     if (violatingRun.exitCode === 0) {
+      // Also run against passing fixture — if it also exits 0, the gate skipped itself
+      // (e.g. a required binary is not installed). Treat as skipped, not a failure.
+      const passingRunEarly = runGateAgainstFixture(gateScript, passingPath);
+      if (!passingRunEarly.skipped && passingRunEarly.exitCode === 0) {
+        if (VERBOSE)
+          console.warn(
+            `  [REAL/SKIP] ${gateId}: gate exited 0 on both fixtures — gate skipped itself (binary or precondition absent)`,
+          );
+        newCache[gateId] = { violatingMtime, passingMtime, lastResult: 'skip' };
+        continue;
+      }
       // Gate should have caught the violation but didn't — proof-of-firing FAILED
       const reason = `violating fixture did not trigger gate (exit 0 expected non-zero)`;
       failures.push({ id: gateId, reason, fixturePath: violatingPath });

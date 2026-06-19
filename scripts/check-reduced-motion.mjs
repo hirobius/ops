@@ -29,7 +29,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-const ROOT     = process.cwd();
+const ROOT = process.cwd();
 const failures = [];
 
 // ── Duration tokens that MUST be zeroed in the reduced-motion block ───────────
@@ -52,14 +52,20 @@ const THEME_CSS = join(ROOT, 'src/styles/theme.css');
 try {
   const css = readFileSync(THEME_CSS, 'utf-8');
 
+  if (!css.includes('--primitive-duration')) {
+    console.log('check-reduced-motion: theme.css has no --primitive-duration vars — skip');
+    process.exit(0);
+  }
+
   if (!css.includes('@media (prefers-reduced-motion')) {
     failures.push({
       file: 'src/styles/theme.css',
-      msg:  'Missing @media (prefers-reduced-motion: reduce) block.\n'
-          + '       Add a block that zeroes the primitive and semantic motion duration vars:\n\n'
-          + '       @media (prefers-reduced-motion: reduce) {\n'
-          + '         :root { --primitive-duration-instant: 0s; ... }\n'
-          + '       }',
+      msg:
+        'Missing @media (prefers-reduced-motion: reduce) block.\n' +
+        '       Add a block that zeroes the primitive and semantic motion duration vars:\n\n' +
+        '       @media (prefers-reduced-motion: reduce) {\n' +
+        '         :root { --primitive-duration-instant: 0s; ... }\n' +
+        '       }',
     });
   } else {
     // Extract all content inside @media (prefers-reduced-motion) blocks.
@@ -82,8 +88,9 @@ try {
       if (!blockContent.includes(varName)) {
         failures.push({
           file: 'src/styles/theme.css',
-          msg:  `prefers-reduced-motion block is missing override for ${varName}.\n`
-              + `       Add: ${varName}: 0s; inside the @media block.`,
+          msg:
+            `prefers-reduced-motion block is missing override for ${varName}.\n` +
+            `       Add: ${varName}: 0s; inside the @media block.`,
         });
       }
     }
@@ -102,19 +109,21 @@ try {
   if (!root.includes('MotionConfig')) {
     failures.push({
       file: 'src/app/App.tsx',
-      msg:  'Missing <MotionConfig reducedMotion="user">.\n'
-          + '       Import MotionConfig from "motion/react" and wrap the root tree:\n\n'
-          + '       <MotionConfig reducedMotion="user">\n'
-          + '         <ErrorBoundary>...</ErrorBoundary>\n'
-          + '       </MotionConfig>\n\n'
-          + '       This makes ALL motion/react animations respect prefers-reduced-motion\n'
-          + '       automatically — no per-component code changes needed.',
+      msg:
+        'Missing <MotionConfig reducedMotion="user">.\n' +
+        '       Import MotionConfig from "motion/react" and wrap the root tree:\n\n' +
+        '       <MotionConfig reducedMotion="user">\n' +
+        '         <ErrorBoundary>...</ErrorBoundary>\n' +
+        '       </MotionConfig>\n\n' +
+        '       This makes ALL motion/react animations respect prefers-reduced-motion\n' +
+        '       automatically — no per-component code changes needed.',
     });
   } else if (!root.includes('reducedMotion')) {
     failures.push({
       file: 'src/app/App.tsx',
-      msg:  'MotionConfig found but reducedMotion prop is missing.\n'
-          + '       Add reducedMotion="user" to the MotionConfig element.',
+      msg:
+        'MotionConfig found but reducedMotion prop is missing.\n' +
+        '       Add reducedMotion="user" to the MotionConfig element.',
     });
   }
 } catch {
@@ -129,8 +138,12 @@ if (failures.length === 0) {
 } else {
   console.error(`\n✗ Reduced motion check failed — ${failures.length} issue(s).\n`);
   console.error('  Motion sensitivity affects 10–35% of users. Both layers must be covered:\n');
-  console.error('    Layer 1: @media (prefers-reduced-motion) in theme.css — fixes CSS transitions');
-  console.error('    Layer 2: <MotionConfig reducedMotion="user"> in App.tsx — fixes JS animations\n');
+  console.error(
+    '    Layer 1: @media (prefers-reduced-motion) in theme.css — fixes CSS transitions',
+  );
+  console.error(
+    '    Layer 2: <MotionConfig reducedMotion="user"> in App.tsx — fixes JS animations\n',
+  );
 
   for (const { file, msg } of failures) {
     console.error(`  ${file}`);

@@ -11,10 +11,15 @@
  * Escape hatch: add `// font-ok: <reason>` on the offending line.
  */
 
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 const ROOT = process.cwd();
+
+if (!existsSync(join(ROOT, 'src/app/pages/hds'))) {
+  console.log('check-mono-roles: src/app/pages/hds absent — skip');
+  process.exit(0);
+}
 
 const PROSE_SURFACES = [
   'src/app/pages/hds/ColorPage.tsx',
@@ -47,7 +52,9 @@ for (const rel of PROSE_SURFACES) {
 
       console.error(`✕ mono role drift  ${rel}:${i + 1}`);
       console.error(`    ${line.trim()}`);
-      console.error('    → Use InlineCode for prose-adjacent technical references, or revert to normal body/caption styling.');
+      console.error(
+        '    → Use InlineCode for prose-adjacent technical references, or revert to normal body/caption styling.',
+      );
       violations++;
       break;
     }

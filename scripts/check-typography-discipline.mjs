@@ -140,49 +140,33 @@ if ((RUN_ALL || FONT_FILES_ONLY) && !isFixtureMode) {
   const PUBLIC_DIR = join(ROOT, 'public');
 
   if (!existsSync(FONTS_CSS_PATH)) {
-    if (jsonMode) {
-      emitResult(
-        {
-          violations: [
-            {
-              file: 'src/styles/fonts.css',
-              line: null,
-              rule: 'font-file-missing-css',
-              severity: 'error',
-              message: 'src/styles/fonts.css is missing',
-            },
-          ],
-          summary: { total: 1 },
-          ok: false,
-        },
-        true,
-      );
-      process.exit(1);
-    }
-    console.error('\n✗ Typography discipline — src/styles/fonts.css is missing.\n');
-    process.exit(1);
-  }
+    console.log(
+      'check-typography-discipline: src/styles/fonts.css absent (DS package provides fonts) — skip font-files check',
+    );
+    // fonts.css is provided by the DS package in ops; skip only this sub-check.
+    // Fall through to let Check 3 (typography-overrides) run normally below.
+  } else {
+    const cssContent = readFileSync(FONTS_CSS_PATH, 'utf8');
+    const urlPattern = /src:\s*url\(["']?([^)"']+)["']?\)/g;
+    const matches = [...cssContent.matchAll(urlPattern)];
+    const checkedPaths = new Set();
 
-  const cssContent = readFileSync(FONTS_CSS_PATH, 'utf8');
-  const urlPattern = /src:\s*url\(["']?([^)"']+)["']?\)/g;
-  const matches = [...cssContent.matchAll(urlPattern)];
-  const checkedPaths = new Set();
+    for (const match of matches) {
+      const urlPath = match[1];
+      const resolvedPath = join(PUBLIC_DIR, urlPath.startsWith('/') ? urlPath.slice(1) : urlPath);
+      if (checkedPaths.has(resolvedPath)) continue;
+      checkedPaths.add(resolvedPath);
 
-  for (const match of matches) {
-    const urlPath = match[1];
-    const resolvedPath = join(PUBLIC_DIR, urlPath.startsWith('/') ? urlPath.slice(1) : urlPath);
-    if (checkedPaths.has(resolvedPath)) continue;
-    checkedPaths.add(resolvedPath);
-
-    if (!existsSync(resolvedPath)) {
-      allViolations.push({
-        file: 'src/styles/fonts.css',
-        line: null,
-        rule: 'font-file-missing',
-        severity: 'error',
-        message: `@font-face references missing file: ${urlPath}`,
-        resolvedPath,
-      });
+      if (!existsSync(resolvedPath)) {
+        allViolations.push({
+          file: 'src/styles/fonts.css',
+          line: null,
+          rule: 'font-file-missing',
+          severity: 'error',
+          message: `@font-face references missing file: ${urlPath}`,
+          resolvedPath,
+        });
+      }
     }
   }
 }

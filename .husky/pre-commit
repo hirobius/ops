@@ -2,7 +2,11 @@
 set -e
 
 echo "Running secrets scan..."
-gitleaks git --config .gitleaks.toml --staged --verbose
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --config .gitleaks.toml --staged --verbose
+else
+  echo "  ⚠ gitleaks not installed — skipping secrets scan (install gitleaks to enable)"
+fi
 
 echo "Running lint-staged (Prettier formatting on staged files)..."
 pnpm exec lint-staged

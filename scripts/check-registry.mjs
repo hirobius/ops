@@ -13,13 +13,18 @@
  * Or:  pnpm check:registry
  */
 
-import { readFileSync, readdirSync, statSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const REGISTRY = join(ROOT, 'src', 'app', 'data', 'hds-registry.json');
+
+if (!existsSync(REGISTRY)) {
+  console.log('check-registry: src/app/data/hds-registry.json absent — skip');
+  process.exit(0);
+}
 const PAGES_DIR = join(ROOT, 'src', 'app', 'pages', 'hds');
 
 const EXCLUDE = new Set([

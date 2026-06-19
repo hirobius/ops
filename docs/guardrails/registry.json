@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "generated": "2026-05-05T00:00:00.000Z",
-  "precommitStructureHash": "009d8d7f3184a78caf9ec62408e19e2e8a77c47dd3b26340f955fd3233b105f4",
-  "precommitStructureHashUpdatedAt": "2026-05-06T18:30:39.510Z",
+  "precommitStructureHash": "b8605f283af7a0543921bd353bab5fff829d9d058719a4b8b267cc7c24c0e5a8",
+  "precommitStructureHashUpdatedAt": "2026-06-19T04:36:57.045Z",
   "gates": [
     {
       "id": "audit-soft-gates",

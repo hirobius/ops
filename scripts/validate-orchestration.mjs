@@ -37,10 +37,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const isFixtureMode = process.argv.includes('--fixture-mode') || process.env.HDS_FIXTURE_MODE === '1';
-const ORCHESTRATION_PATH = (isFixtureMode && process.env.FIXTURE_FILE)
-  ? path.resolve(process.env.FIXTURE_FILE)
-  : path.join(ROOT, 'docs/ai/orchestration.json');
+const isFixtureMode =
+  process.argv.includes('--fixture-mode') || process.env.HDS_FIXTURE_MODE === '1';
+const ORCHESTRATION_PATH =
+  isFixtureMode && process.env.FIXTURE_FILE
+    ? path.resolve(process.env.FIXTURE_FILE)
+    : path.join(ROOT, 'docs/ai/orchestration.json');
 
 const SOFT = process.argv.includes('--soft');
 const VERBOSE = process.argv.includes('--verbose');
@@ -69,11 +71,11 @@ export const SPRINT_MAX = 6;
  * regardless of whether the unit's work exists is not a verification.
  */
 export const FORBIDDEN_VALIDATION_PATTERNS = [
-  /^\s*$/,                    // empty string or whitespace only
-  /^echo\b/,                  // any echo command
-  /^true\s*$/,                // bare `true`
-  /^exit\s+0\s*$/,            // bare `exit 0`
-  /^:\s*$/,                   // shell no-op `:`
+  /^\s*$/, // empty string or whitespace only
+  /^echo\b/, // any echo command
+  /^true\s*$/, // bare `true`
+  /^exit\s+0\s*$/, // bare `exit 0`
+  /^:\s*$/, // shell no-op `:`
 ];
 
 /**
@@ -112,7 +114,11 @@ export function validateUnit(u) {
 
   if (u.priority === undefined || u.priority === null) {
     failures.push({ id: u.id, code: 'MISSING_PRIORITY', message: 'priority is required (1..5)' });
-  } else if (!Number.isInteger(u.priority) || u.priority < PRIORITY_MIN || u.priority > PRIORITY_MAX) {
+  } else if (
+    !Number.isInteger(u.priority) ||
+    u.priority < PRIORITY_MIN ||
+    u.priority > PRIORITY_MAX
+  ) {
     failures.push({
       id: u.id,
       code: 'BAD_PRIORITY',
@@ -131,11 +137,19 @@ export function validateUnit(u) {
   }
 
   if (typeof u.cluster !== 'string' || u.cluster.trim().length === 0) {
-    failures.push({ id: u.id, code: 'MISSING_CLUSTER', message: 'cluster is required (non-empty string)' });
+    failures.push({
+      id: u.id,
+      code: 'MISSING_CLUSTER',
+      message: 'cluster is required (non-empty string)',
+    });
   }
 
   if (typeof u.approval !== 'string' || u.approval.length === 0) {
-    failures.push({ id: u.id, code: 'MISSING_APPROVAL', message: 'approval is required (proposed|approved|denied|needs-grilling)' });
+    failures.push({
+      id: u.id,
+      code: 'MISSING_APPROVAL',
+      message: 'approval is required (proposed|approved|denied|needs-grilling)',
+    });
   } else if (!APPROVAL_VALUES.has(u.approval)) {
     failures.push({
       id: u.id,
@@ -158,7 +172,8 @@ export function validateUnit(u) {
       failures.push({
         id: u.id,
         code: 'MISSING_CLAIMED_BY',
-        message: 'status=claimed requires claimedBy (non-empty string identifying the agent/session)',
+        message:
+          'status=claimed requires claimedBy (non-empty string identifying the agent/session)',
       });
     }
     if (typeof u.claimedAt !== 'string' || Number.isNaN(Date.parse(u.claimedAt))) {
@@ -207,6 +222,15 @@ export function validateUnitStrictValidation(u) {
 }
 
 function main() {
+  // ops-as-consumer has no docs/ai/orchestration.json (the DS-repo unit DB), so
+  // skip gracefully instead of crashing on the missing file. Fixture-mode
+  // (FIXTURE_FILE) still runs so the proof-of-firing fixture works.
+  if (!isFixtureMode && !fs.existsSync(ORCHESTRATION_PATH)) {
+    console.log(
+      'validate-orchestration: docs/ai/orchestration.json absent (ops-as-consumer) — skip',
+    );
+    process.exit(0);
+  }
   const orch = loadOrchestration();
   const units = orch.units;
 
@@ -241,7 +265,9 @@ function main() {
     console.warn(`⚠ ${tag}[${w.code}] ${w.message}`);
   }
   if (softWarnings.length > 0) {
-    console.warn(`(${softWarnings.length} legacy schema warning(s) — non-blocking until burndown unit lands.)`);
+    console.warn(
+      `(${softWarnings.length} legacy schema warning(s) — non-blocking until burndown unit lands.)`,
+    );
   }
 
   if (hardFailures.length === 0 && (strictViolators.length === 0 || !STRICT_VALIDATION)) {
@@ -254,10 +280,14 @@ function main() {
         for (const w of warnStrictViolators) {
           console.warn(`⚠ ${w.id}: [${w.code}] ${w.message}`);
         }
-        console.warn(`(${warnStrictViolators.length} approved unit(s) have verificationNotes TODOs — tighten before claiming.)`);
+        console.warn(
+          `(${warnStrictViolators.length} approved unit(s) have verificationNotes TODOs — tighten before claiming.)`,
+        );
       }
       if (hardStrictViolators.length === 0) {
-        console.log(`OK — strict-validation passed (${approvedCount} approved unit(s) have valid validationCmd)`);
+        console.log(
+          `OK — strict-validation passed (${approvedCount} approved unit(s) have valid validationCmd)`,
+        );
         process.exit(0);
       }
     } else {
@@ -272,7 +302,9 @@ function main() {
     console[SOFT ? 'warn' : 'error'](`${label}${tag}[${f.code}] ${f.message}`);
   }
   if (hardFailures.length > 0) {
-    console[SOFT ? 'warn' : 'error'](`\n${hardFailures.length} schema violation(s) across ${targets.length} active unit(s).`);
+    console[SOFT ? 'warn' : 'error'](
+      `\n${hardFailures.length} schema violation(s) across ${targets.length} active unit(s).`,
+    );
   }
 
   // Print strict-validation failures
@@ -284,21 +316,27 @@ function main() {
       console.warn(`⚠ ${w.id}: [${w.code}] ${w.message}`);
     }
     if (warnStrictViolators.length > 0) {
-      console.warn(`(${warnStrictViolators.length} approved unit(s) have verificationNotes TODOs — tighten before claiming.)`);
+      console.warn(
+        `(${warnStrictViolators.length} approved unit(s) have verificationNotes TODOs — tighten before claiming.)`,
+      );
     }
 
     for (const f of hardStrictViolators) {
       console.error(`✗ ${f.id}: [${f.code}] ${f.message}`);
     }
     if (hardStrictViolators.length > 0) {
-      console.error(`\n${hardStrictViolators.length} approved unit(s) missing real validationCmd (--strict-validation).`);
+      console.error(
+        `\n${hardStrictViolators.length} approved unit(s) missing real validationCmd (--strict-validation).`,
+      );
       console.error('Fix: add a validationCmd that would catch the unit not being done.');
       console.error('Or add a verificationNotes field with a TODO to downgrade to warn.');
     }
   }
 
   if (SOFT) {
-    console.warn('(--soft mode: exiting 0. Drop --soft once existing violations are fixed — see 11a-1 STOP CONDITION.)');
+    console.warn(
+      '(--soft mode: exiting 0. Drop --soft once existing violations are fixed — see 11a-1 STOP CONDITION.)',
+    );
     process.exit(0);
   }
 
@@ -313,8 +351,7 @@ function main() {
   process.exit(0);
 }
 
-const isMain =
-  process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   main();
 }
