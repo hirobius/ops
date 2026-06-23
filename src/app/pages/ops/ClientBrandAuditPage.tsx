@@ -7,7 +7,7 @@
  * Renders clients/<slug>/brand-audit.json as a printable slide deck.
  * Each section is a deck-slide div with page-break-before: always under
  * @media print, so save-as-PDF produces a one-touchpoint-per-page document
- * Conrad can read in 5 minutes or hand to a designer.
+ * the client can read in 5 minutes or hand to a designer.
  *
  * Sections:
  *   1. Cover (name, prepared-by, date)

@@ -4,7 +4,7 @@
 /**
  * ClientReportPage — /ops/clients/:slug/report
  *
- * Weekly status digest for the client (Conrad, etc.). Same data source as
+ * Weekly status digest for the client (the client, etc.). Same data source as
  * ClientDashboardPage but translated into plain language: no operator jargon,
  * no env keys, no dispatch state, no "scaffolded" badge soup. The URL is
  * stable and bookmark-able so the weekly status email points at it.
@@ -156,7 +156,7 @@ function tone(status: string | undefined): Tone {
   return STATUS_TONE[status ?? ''] ?? 'neutral';
 }
 
-// Workflow promotion state — one of three Conrad-readable strings.
+// Workflow promotion state — one of three the client-readable strings.
 type WorkflowState = { label: string; tone: Tone };
 function workflowState(mode: string | undefined): WorkflowState {
   if (mode === 'production') return { label: 'Live', tone: 'success' };
@@ -395,7 +395,7 @@ function pickClientBlockers(data: ClientFiles): ClientBlocker[] {
   const out: ClientBlocker[] = [];
   const clientName = (data.meta.contact?.name ?? '').toLowerCase();
 
-  // Retainer-level blockers — these are explicit and Conrad-facing.
+  // Retainer-level blockers — these are explicit and the client-facing.
   for (const b of data.retainer?.blockers ?? []) {
     out.push({ id: `retainer-${out.length}`, text: b, source: 'retainer' });
   }

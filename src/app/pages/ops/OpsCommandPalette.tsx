@@ -26,9 +26,7 @@ export interface OpsCommandPaletteProps {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const DEFAULT_CLIENT = CLIENT_SLUGS.includes('lilac-insure')
-  ? 'lilac-insure'
-  : (CLIENT_SLUGS[0] ?? '');
+const DEFAULT_CLIENT = CLIENT_SLUGS[0] ?? '';
 
 /** @public */
 export function OpsCommandPalette({ open, onOpenChange }: OpsCommandPaletteProps) {

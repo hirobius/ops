@@ -5828,7 +5828,7 @@
             "13y-0-fix-broken-gates"
           ],
           "safeForUnattended": false,
-          "description": "check-public-api reports 4 breaking changes: ./app/components/{HdsButton, HdsButtonGroup, HdsSurface, Surface} removed from public exports. Replacements exist (./app/components/{button, callout, field, stat, status-list-item, surface} added). Decision: (a) bump major version + run pnpm api:update to accept, OR (b) restore the old exports as alias re-exports for backwards-compat. Adrian-attended because this is a public-API decision with downstream consumer impact (CC, lilac-insure, ranch-foundation).",
+          "description": "check-public-api reports 4 breaking changes: ./app/components/{HdsButton, HdsButtonGroup, HdsSurface, Surface} removed from public exports. Replacements exist (./app/components/{button, callout, field, stat, status-list-item, surface} added). Decision: (a) bump major version + run pnpm api:update to accept, OR (b) restore the old exports as alias re-exports for backwards-compat. Adrian-attended because this is a public-API decision with downstream consumer impact (CC, client-a, client-b).",
           "validationCmd": "node scripts/check-public-api.mjs",
           "agentNotes": [
             "Adrian-attended only — do not auto-dispatch.",
@@ -19044,7 +19044,7 @@
       {
         "id": "13y-20-public-api-decision",
         "title": "Resolve 4 public-API breaking changes (HdsButton/HdsButtonGroup/HdsSurface/Surface removed)",
-        "body": "# Resolve 4 public-API breaking changes (HdsButton/HdsButtonGroup/HdsSurface/Surface removed)\n\ncheck-public-api reports 4 breaking changes: ./app/components/{HdsButton, HdsButtonGroup, HdsSurface, Surface} removed from public exports. Replacements exist (./app/components/{button, callout, field, stat, status-list-item, surface} added). Decision: (a) bump major version + run pnpm api:update to accept, OR (b) restore the old exports as alias re-exports for backwards-compat. Adrian-attended because this is a public-API decision with downstream consumer impact (CC, lilac-insure, ranch-foundation).\n\n## Agent notes\n- Adrian-attended only — do not auto-dispatch.\n- Recommended path: (b) re-export aliases to avoid breaking the in-flight CC consumer. Add `export { Button as HdsButton } from \"./button\"` for each removed export.\n\n## Validation command\n```\nnode scripts/check-public-api.mjs\n```\n\n## Depends on (from orchestration.json)\n- 13y-0-fix-broken-gates\n\n## Original metadata\n```json\n{\n  \"phase\": \"13-ops-command-center\",\n  \"cluster\": \"13y-debt-burndown\",\n  \"tier\": \"T3\",\n  \"safeForUnattended\": false,\n  \"priority\": 2,\n  \"sprint\": 6,\n  \"hitl\": true\n}\n```\n\n---\n\n## Definition of Done (Hirobius gate)\n\nBefore calling `kanban_complete`, you MUST run the audit:\n\n```bash\nnode /home/adrian/projects/adrian-milsap/scripts/audit-batch-deliverables.mjs --task-id \"$HERMES_KANBAN_TASK\"\n```\n\nIf exit code is non-zero, call `kanban_block` with the audit output and DO NOT complete. See skill: `hirobius/audit-batch-deliverables`.\n",
+        "body": "# Resolve 4 public-API breaking changes (HdsButton/HdsButtonGroup/HdsSurface/Surface removed)\n\ncheck-public-api reports 4 breaking changes: ./app/components/{HdsButton, HdsButtonGroup, HdsSurface, Surface} removed from public exports. Replacements exist (./app/components/{button, callout, field, stat, status-list-item, surface} added). Decision: (a) bump major version + run pnpm api:update to accept, OR (b) restore the old exports as alias re-exports for backwards-compat. Adrian-attended because this is a public-API decision with downstream consumer impact (CC, client-a, client-b).\n\n## Agent notes\n- Adrian-attended only — do not auto-dispatch.\n- Recommended path: (b) re-export aliases to avoid breaking the in-flight CC consumer. Add `export { Button as HdsButton } from \"./button\"` for each removed export.\n\n## Validation command\n```\nnode scripts/check-public-api.mjs\n```\n\n## Depends on (from orchestration.json)\n- 13y-0-fix-broken-gates\n\n## Original metadata\n```json\n{\n  \"phase\": \"13-ops-command-center\",\n  \"cluster\": \"13y-debt-burndown\",\n  \"tier\": \"T3\",\n  \"safeForUnattended\": false,\n  \"priority\": 2,\n  \"sprint\": 6,\n  \"hitl\": true\n}\n```\n\n---\n\n## Definition of Done (Hirobius gate)\n\nBefore calling `kanban_complete`, you MUST run the audit:\n\n```bash\nnode /home/adrian/projects/adrian-milsap/scripts/audit-batch-deliverables.mjs --task-id \"$HERMES_KANBAN_TASK\"\n```\n\nIf exit code is non-zero, call `kanban_block` with the audit output and DO NOT complete. See skill: `hirobius/audit-batch-deliverables`.\n",
         "assignee": "reviewer",
         "status": "done",
         "priority": 2,
@@ -19940,7 +19940,7 @@
       {
         "id": "t_33368407",
         "title": "Token-gated /c/:slug client portal",
-        "body": "Proposed-Unit: client-facing-portal-route\nUrgency: eventually\n\nNo client-FACING route exists today (/ops/clients/<slug> is internal-only ClientDashboardPage). Build /c/:slug?token=… single-page route: live preview iframe + milestone list + lightweight feedback form. Strategy aligned with memory project_client_portal.md ('show live site only, simple password-gate, lightweight feedback form'). Skip microsites/subdomains — adds infra cost (separate builds, DNS, deployment) not worth the boundary today.\n\nValidation: pnpm typecheck && pnpm test:layout\n\nAgent notes:\n- Token = HMAC of slug + secret; rotated per-engagement\n- Server-side validation OR frontend-only check (acceptable for low-stakes private URLs)\n- First clients to wire: lilac-insure, the-ranch-foundation",
+        "body": "Proposed-Unit: client-facing-portal-route\nUrgency: eventually\n\nNo client-FACING route exists today (/ops/clients/<slug> is internal-only ClientDashboardPage). Build /c/:slug?token=… single-page route: live preview iframe + milestone list + lightweight feedback form. Strategy aligned with memory project_client_portal.md ('show live site only, simple password-gate, lightweight feedback form'). Skip microsites/subdomains — adds infra cost (separate builds, DNS, deployment) not worth the boundary today.\n\nValidation: pnpm typecheck && pnpm test:layout\n\nAgent notes:\n- Token = HMAC of slug + secret; rotated per-engagement\n- Server-side validation OR frontend-only check (acceptable for low-stakes private URLs)\n- First clients to wire: client-a, client-b",
         "assignee": "architect",
         "status": "done",
         "priority": 0,
@@ -19953,7 +19953,7 @@
         "claim_lock": null,
         "claim_expires": null,
         "tenant": null,
-        "result": "Shipped /c/:slug route + HMAC token check + scripts/generate-portal-token.mjs CLI. lilac-insure / the-ranch-foundation can be tokenized via the CLI. Frontend-only HMAC per agent notes. Commit cc4b1327 on worktree-agent-a1509630cff7ecef6.",
+        "result": "Shipped /c/:slug route + HMAC token check + scripts/generate-portal-token.mjs CLI. client-a / client-b can be tokenized via the CLI. Frontend-only HMAC per agent notes. Commit cc4b1327 on worktree-agent-a1509630cff7ecef6.",
         "idempotency_key": "proposed-unit-client-facing-portal-route",
         "consecutive_failures": 0,
         "worker_pid": null,
@@ -24611,7 +24611,7 @@
           "agentNotes": [
             "Token = HMAC of slug + secret; rotated per-engagement",
             "Server-side validation OR frontend-only check (acceptable for low-stakes private URLs)",
-            "First clients to wire: lilac-insure, the-ranch-foundation"
+            "First clients to wire: client-a, client-b"
           ],
           "tier": "T2",
           "model": "sonnet",

@@ -93,6 +93,13 @@ clients/*/automations/_log.jsonl
 # Per-client inbox discovery output — may contain tenant-specific summaries
 clients/*/inbox-discovery-results/
 
+# Real client workspaces hold PII / business-confidential data — never commit
+# (backed up out-of-band; only the _template scaffold is tracked).
+clients/*
+!clients/_template/
+# Generated client task-routing log (client names + task content)
+docs/ai/routing-log.jsonl
+
 # Local agent state — never committed
 .agents/
 .claude/skills/

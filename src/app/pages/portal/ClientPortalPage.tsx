@@ -58,7 +58,7 @@ const clientPortalStyles = {
 //
 // The kanban agent notes spec mentions reading `clients/<slug>/status.json`
 // for milestones. None of the existing clients have this file authored yet
-// (lilac-insure / the-ranch-foundation / prospect-001). Vite's
+// (client-a / client-b / client-c). Vite's
 // import.meta.glob discovers the file at build time when present; if absent
 // the resulting record has no entry for the slug and we fall back to
 // EmptyState. This is a vertical seam — once Adrian writes a real
@@ -387,7 +387,7 @@ function FeedbackSection({ slug }: FeedbackSectionProps) {
             />
             {state === 'sent' && (
               <Alert variant="success" title="Thanks">
-                We received your note. Conrad / Adrian will follow up by email.
+                We received your note. Adrian will follow up by email.
               </Alert>
             )}
             {state === 'error' && (

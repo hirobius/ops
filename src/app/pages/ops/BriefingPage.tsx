@@ -26,7 +26,14 @@ import hds from '@hirobius/design-system/tokens';
 import legacyTaskArchive from '../../../../docs/ai/_archive/legacy-task-systems-2026-05-11.json';
 const orchestration = legacyTaskArchive.sources.orchestration;
 import bizOps from '../../../../docs/business/biz-ops.json';
-import routingLogRaw from '../../../../docs/ai/routing-log.jsonl?raw';
+// routing-log.jsonl holds per-client task PII and is gitignored; this glob tolerates
+// its absence (yields '' in clean/prod builds) instead of a hard import failure.
+const _routingLogGlob = import.meta.glob<string>('../../../../docs/ai/routing-log.jsonl', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+});
+const routingLogRaw = (Object.values(_routingLogGlob)[0] as string | undefined) ?? '';
 import { PageHeader } from './PageHeader';
 import { CLIENT_REGISTRY } from './clientRegistry';
 
