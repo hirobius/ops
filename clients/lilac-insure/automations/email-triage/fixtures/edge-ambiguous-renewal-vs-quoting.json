@@ -1,7 +1,0 @@
-{
-  "expected": "renewal",
-  "_note": "Edge case: from carrier domain (matches quoting + carrier-ops) BUT subject says 'renewal'. Renewal keyword should win the tie thanks to multiple subject hits.",
-  "from": "submissions@rpsins.com",
-  "subject": "Renewal proposal — expires 2026-07-01, please review",
-  "body": "Policy renews on 2026-07-01. Up for renewal. Please review attached proposal."
-}

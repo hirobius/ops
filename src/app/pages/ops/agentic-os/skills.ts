@@ -234,7 +234,7 @@ export const SKILLS: SkillSpec[] = [
     input: {
       kind: 'slug',
       label: 'Client slug',
-      placeholder: 'lilac-insure',
+      placeholder: 'client-slug',
     },
   },
   // Self — recruiter-facing artefacts
@@ -254,7 +254,7 @@ export const SKILLS: SkillSpec[] = [
     input: {
       kind: 'slug',
       label: 'Notes path or client slug',
-      placeholder: 'lilac-insure',
+      placeholder: 'client-slug',
     },
   },
   // Knowledge — ingestion
