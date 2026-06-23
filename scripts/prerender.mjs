@@ -68,51 +68,11 @@ try {
 
 const SITE_ORIGIN = 'https://adrianmilsap.com';
 
+// Only /info has an SSR render (see entry-server.tsx SSR_ROUTES); the portfolio /
+// case-study / sketch routes were removed in the ops extraction. render() now
+// returns an empty body for anything not in SSR_ROUTES, so even if this list drifts
+// the SPA shell (index.html) stays clean.
 const ROUTES = [
-  {
-    url: '/',
-    outFile: 'index.html',
-    title: 'Adrian Milsap — Design Engineer',
-    description:
-      'Design engineer specializing in design systems, component architecture, and creative engineering. 8+ years at Microsoft building Xbox and Microsoft Game Developer design systems.',
-    ogImage: '/assets/xds-overview.webp',
-    ogType: 'website',
-  },
-  {
-    url: '/microsoft-design-systems',
-    outFile: 'microsoft-design-systems/index.html',
-    title: 'Microsoft Design Systems — Adrian Milsap',
-    description:
-      'How Adrian Milsap led design system work across Xbox and Microsoft Game Developer studios — scalable token-based component architecture used by 200+ designers and engineers.',
-    ogImage: '/assets/xds-overview.webp',
-    ogType: 'article',
-  },
-  {
-    url: '/case-studies/hirobius',
-    outFile: 'case-studies/hirobius/index.html',
-    title: 'Hirobius Design System — Adrian Milsap',
-    description:
-      'Building a self-governing design system from scratch: token architecture, automated audit pipelines, multi-brand theming, and AI-assisted component generation.',
-    ogImage: '/assets/xds-overview.webp',
-    ogType: 'article',
-  },
-  {
-    url: '/visuals',
-    outFile: 'visuals/index.html',
-    title: 'Visual Design — Adrian Milsap',
-    description: 'Motion design, generative art, and visual design work by Adrian Milsap.',
-    ogImage: '/assets/xds-overview.webp',
-    ogType: 'website',
-  },
-  {
-    url: '/case-studies/the-ranch-foundation',
-    outFile: 'case-studies/the-ranch-foundation/index.html',
-    title: 'The Ranch Foundation — Adrian Milsap',
-    description:
-      'Hirobius design and automation work for The Ranch Foundation — a nonprofit serving communities in the Pacific Northwest.',
-    ogImage: '/assets/xds-overview.webp',
-    ogType: 'article',
-  },
   {
     url: '/info',
     outFile: 'info/index.html',
@@ -120,51 +80,6 @@ const ROUTES = [
     description:
       'About Adrian Milsap — design engineer, builder of design systems, and creative technologist.',
     ogImage: '/assets/adrian.webp',
-    ogType: 'website',
-  },
-  {
-    url: '/vibe-sketchbook/logo-lab',
-    outFile: 'vibe-sketchbook/logo-lab/index.html',
-    title: 'Logo Lab — Vibe Sketchbook — Adrian Milsap',
-    description:
-      'Interactive logo-lab sketch: exploratory typography and form-making experiments from the Vibe Sketchbook.',
-    ogImage: '/assets/xds-overview.webp',
-    ogType: 'website',
-  },
-  {
-    url: '/vibe-sketchbook/particle-tunnel',
-    outFile: 'vibe-sketchbook/particle-tunnel/index.html',
-    title: 'Particle Tunnel — Vibe Sketchbook — Adrian Milsap',
-    description:
-      'Interactive particle-tunnel sketch: GPU-accelerated motion experiments from the Vibe Sketchbook.',
-    ogImage: '/assets/xds-overview.webp',
-    ogType: 'website',
-  },
-  {
-    url: '/vibe-sketchbook/morph-tiles',
-    outFile: 'vibe-sketchbook/morph-tiles/index.html',
-    title: 'Morph Tiles — Vibe Sketchbook — Adrian Milsap',
-    description:
-      'Interactive morph-tiles sketch: grid-based morphing animations from the Vibe Sketchbook.',
-    ogImage: '/assets/xds-overview.webp',
-    ogType: 'website',
-  },
-  {
-    url: '/vibe-sketchbook/kinetic-type',
-    outFile: 'vibe-sketchbook/kinetic-type/index.html',
-    title: 'Kinetic Type — Vibe Sketchbook — Adrian Milsap',
-    description:
-      'Interactive kinetic-type sketch: motion typography studies from the Vibe Sketchbook.',
-    ogImage: '/assets/xds-overview.webp',
-    ogType: 'website',
-  },
-  {
-    url: '/vibe-sketchbook/three-scene',
-    outFile: 'vibe-sketchbook/three-scene/index.html',
-    title: 'Three Scene — Vibe Sketchbook — Adrian Milsap',
-    description:
-      'Interactive Three.js scene: 3D composition and shader experiments from the Vibe Sketchbook.',
-    ogImage: '/assets/xds-overview.webp',
     ogType: 'website',
   },
 ];
