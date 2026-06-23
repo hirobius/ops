@@ -3,10 +3,15 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
 import { useParams } from 'react-router';
-import { Page, Stack, Badge, Callout, TileGrid, EmptyState } from '@hirobius/design-system';
+import { Page } from '@hirobius/design-system';
+import { Stack } from '@hirobius/design-system';
+import { Badge } from '@hirobius/design-system';
+import { Callout } from '@hirobius/design-system';
 import { StatusTile, type StatusTileTone } from '@hirobius/design-system';
-import hds from '@hirobius/design-system/tokens';
+import { TileGrid } from '@hirobius/design-system';
 import { PhaseHeader, type PhaseHeaderTone } from '../../components/phase-header';
+import { EmptyState } from '@hirobius/design-system';
+import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from './PageHeader';
 
 // Domain-status → Badge tone. Owns the mapping; renderer is the canonical

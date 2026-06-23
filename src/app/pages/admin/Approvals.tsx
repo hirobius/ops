@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router';
-import { Page, Stack, TextLockup } from '@hirobius/design-system';
+import { Page } from '@hirobius/design-system';
+import { Stack } from '@hirobius/design-system';
+import { TextLockup } from '@hirobius/design-system';
 import {
   ApprovalCard,
   type ApprovalUnitSummary,

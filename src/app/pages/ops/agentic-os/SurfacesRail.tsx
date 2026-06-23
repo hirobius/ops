@@ -24,6 +24,16 @@ export interface SurfaceTile {
 const TILES: readonly SurfaceTile[] = [
   { to: '/ops/atlas', label: 'Atlas', description: 'Components · tokens · pipeline · strength' },
   { to: '/ops/kanban', label: 'Kanban', description: 'Live unit board — claim, track, ship' },
+  {
+    to: '/ops/leads',
+    label: 'Leads',
+    description: 'Pull local businesses · generate sites · track outreach',
+  },
+  {
+    to: '/ops/tasks',
+    label: 'Tasks',
+    description: 'Consolidated task board — tracker + backlog + clients',
+  },
   { to: '/ops/build', label: 'Build', description: 'Pipeline stats · cost burn · agent audit' },
   { to: '/ops/knowledge', label: 'Knowledge', description: 'Build · Grow · Run — ops pillar hub' },
   {
@@ -42,7 +52,11 @@ export function SurfacesRail() {
             <span style={s.tileLabel}>{t.label}</span>
             <span style={s.tileDesc}>{t.description}</span>
           </Stack>
-          <ArrowRight size={14} color="var(--semantic-color-content-secondary)" aria-hidden="true" />
+          <ArrowRight
+            size={14}
+            color="var(--semantic-color-content-secondary)"
+            aria-hidden="true"
+          />
         </Link>
       ))}
     </nav>
@@ -53,7 +67,7 @@ const s = {
   row: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-    gap:                 hds.space.px12,
+    gap: hds.space.px12,
   } as CSSProperties,
   tile: {
     display: 'flex',
@@ -64,8 +78,8 @@ const s = {
     background: 'var(--semantic-color-surface-raised)',
     borderRadius: hds.borderRadius[8],
     textDecoration: 'none' as const,
-    color:          'inherit',
-    minWidth:       0,
+    color: 'inherit',
+    minWidth: 0,
   } as CSSProperties,
   tileLabel: {
     ...hds.typeStyles.body,
@@ -77,6 +91,6 @@ const s = {
     color: 'var(--semantic-color-content-secondary)',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    whiteSpace:   'nowrap' as const,
+    whiteSpace: 'nowrap' as const,
   } as CSSProperties,
 };

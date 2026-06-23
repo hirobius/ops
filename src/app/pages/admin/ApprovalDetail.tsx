@@ -1,6 +1,12 @@
 import * as React from 'react';
 import { useParams, Link, useNavigate } from 'react-router';
-import { Page, Stack, TextLockup, Card, Button, Field, Tag } from '@hirobius/design-system';
+import { Page } from '@hirobius/design-system';
+import { Stack } from '@hirobius/design-system';
+import { TextLockup } from '@hirobius/design-system';
+import { Card } from '@hirobius/design-system';
+import { Button } from '@hirobius/design-system';
+import { Field } from '@hirobius/design-system';
+import { Tag } from '@hirobius/design-system';
 import type { ApprovalState } from '../../components/approval-card';
 
 // 11a-4 — approval app detail view.

@@ -26,9 +26,10 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import hds from '@hirobius/design-system/tokens';
-import { Stack, Icon } from '@hirobius/design-system';
+import { Stack } from '@hirobius/design-system';
 import { ActivityFeed, type ActivityEvent, type ActivityStatus } from '@hirobius/design-system';
 import { AgentTag, type AgentTier } from '../../components/agent-tag';
+import { Icon } from '@hirobius/design-system';
 import type { ClientFiles, ClientTask } from './clientTypes';
 import { PodTail } from './PodTail';
 
