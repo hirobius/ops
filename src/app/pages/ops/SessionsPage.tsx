@@ -22,9 +22,7 @@ import { CLIENT_REGISTRY, CLIENT_SLUGS } from './clientRegistry';
 import { SessionsSection, type SessionEvent } from './SessionsSection';
 import { SessionInputForm, type AssignerResult } from './SessionInputForm';
 
-const DEFAULT_CLIENT = CLIENT_SLUGS.includes('lilac-insure')
-  ? 'lilac-insure'
-  : (CLIENT_SLUGS[0] ?? 'lilac-insure');
+const DEFAULT_CLIENT = CLIENT_SLUGS[0] ?? '';
 
 function formatTimestamp(iso: string): string {
   const d = new Date(iso);

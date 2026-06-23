@@ -1,7 +1,0 @@
-{
-  "expected": "claim",
-  "_note": "Client reports an accident — should classify as claim despite no carrier-claims domain. Subject + body keywords carry it.",
-  "from": "client@example.com",
-  "subject": "I was in an accident — need to file a claim",
-  "body": "Hi Conrad, I was in an accident on Division St. No injuries. Need to report a loss / file a claim ASAP."
-}
