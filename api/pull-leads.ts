@@ -24,6 +24,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { requireOpsAuth } from '../lib/ops-auth.mjs';
 import { getServiceClient } from '../lib/supabase/server.mjs';
 import { pullLeads } from '../lib/lead-gen/index.mjs';
 
@@ -31,6 +32,11 @@ const MAX_BODY_BYTES = 16 * 1024; // 16 KB
 const MAX_COUNT = 50;
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+  // Server-side /ops gate — reject callers without a valid ops session cookie.
+  if (!requireOpsAuth(req)) {
+    res.status(401).json({ error: 'Unauthorized.', code: 'UNAUTHENTICATED' });
+    return;
+  }
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed. Use POST.' });
     return;

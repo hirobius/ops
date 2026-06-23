@@ -13,12 +13,18 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { requireOpsAuth } from '../lib/ops-auth.mjs';
 import { getServiceClient } from '../lib/supabase/server.mjs';
 
 const DEFAULT_LIMIT = 1000;
 const MAX_LIMIT = 2000;
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+  // Server-side /ops gate — reject callers without a valid ops session cookie.
+  if (!requireOpsAuth(req)) {
+    res.status(401).json({ error: 'Unauthorized.', code: 'UNAUTHENTICATED' });
+    return;
+  }
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed. Use GET.' });
     return;
