@@ -11,52 +11,34 @@
  *
  * Request:  { leadId: string }
  * Success:  { ok: true, preview_url: string }
- * Error:    { error, code? } with status 400/404/405/500/503
+ * Error:    { error, code? } with status 400/401/404/405/500/503
+ *
+ * Auth + method + Supabase acquisition are owned by lib/api/handler (ADR-0004).
+ * The 'building' → 'built' / rollback-to-'build_failed' state machine stays here.
  *
  * Env (human-set, server-only): SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
  *   DUDA_API_USER, DUDA_API_PASSWORD (used by the real lib/duda adapter).
  */
 
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { requireOpsAuth } from '../lib/ops-auth.mjs';
-import { getServiceClient } from '../lib/supabase/server.mjs';
+import type { VercelRequest } from '@vercel/node';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { withOpsHandler, withServiceClient, messageOf, type HandlerResult } from '../lib/api/handler';
 import { buildSite } from '../lib/duda/index.mjs';
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  // Server-side /ops gate — reject callers without a valid ops session cookie.
-  if (!requireOpsAuth(req)) {
-    res.status(401).json({ error: 'Unauthorized.', code: 'UNAUTHENTICATED' });
-    return;
-  }
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed. Use POST.' });
-    return;
-  }
-
+export async function buildSiteHandler(
+  sb: SupabaseClient,
+  req: VercelRequest,
+): Promise<HandlerResult> {
   const body = req.body as { leadId?: unknown } | undefined;
   const leadId = typeof body?.leadId === 'string' ? body.leadId.trim() : '';
-  if (!leadId) {
-    res.status(400).json({ error: 'leadId is required' });
-    return;
-  }
-
-  let sb;
-  try {
-    sb = await getServiceClient();
-  } catch (err) {
-    res.status(503).json({ error: messageOf(err), code: 'ENV_MISSING_SUPABASE' });
-    return;
-  }
+  if (!leadId) return { status: 400, body: { error: 'leadId is required' } };
 
   const { data: lead, error: fetchError } = await sb
     .from('leads')
     .select('*')
     .eq('id', leadId)
     .single();
-  if (fetchError || !lead) {
-    res.status(404).json({ error: 'lead not found' });
-    return;
-  }
+  if (fetchError || !lead) return { status: 404, body: { error: 'lead not found' } };
 
   await sb.from('leads').update({ site_status: 'building' }).eq('id', leadId);
 
@@ -71,17 +53,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         site_status: 'built',
       })
       .eq('id', leadId);
-    if (updateError) {
-      res.status(500).json({ error: updateError.message });
-      return;
-    }
-    res.status(200).json({ ok: true, preview_url: result.preview_url });
+    if (updateError) return { status: 500, body: { error: updateError.message } };
+
+    return { status: 200, body: { ok: true, preview_url: result.preview_url } };
   } catch (err) {
     await sb.from('leads').update({ site_status: 'build_failed' }).eq('id', leadId);
-    res.status(500).json({ error: messageOf(err) });
+    return { status: 500, body: { error: messageOf(err) } };
   }
 }
 
-function messageOf(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
+export default withOpsHandler('POST', withServiceClient(buildSiteHandler));

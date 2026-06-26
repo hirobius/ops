@@ -9,55 +9,37 @@
  *
  * Request:  { leadId: string }
  * Success:  { ok: true, live_url: string }
- * Error:    { error, code? } with status 400/404/405/409/500/503
+ * Error:    { error, code? } with status 400/401/404/405/409/500/503
+ *
+ * Auth + method + Supabase acquisition are owned by lib/api/handler (ADR-0004).
+ * The 'publishing' → 'published' / rollback-to-'publish_failed' state machine
+ * stays here.
  *
  * Env (human-set, server-only): SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
  *   DUDA_API_USER, DUDA_API_PASSWORD (used by the real lib/duda adapter).
  */
 
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { requireOpsAuth } from '../lib/ops-auth.mjs';
-import { getServiceClient } from '../lib/supabase/server.mjs';
+import type { VercelRequest } from '@vercel/node';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { withOpsHandler, withServiceClient, messageOf, type HandlerResult } from '../lib/api/handler';
 import { publishSite } from '../lib/duda/index.mjs';
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  // Server-side /ops gate — reject callers without a valid ops session cookie.
-  if (!requireOpsAuth(req)) {
-    res.status(401).json({ error: 'Unauthorized.', code: 'UNAUTHENTICATED' });
-    return;
-  }
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed. Use POST.' });
-    return;
-  }
-
+export async function publishSiteHandler(
+  sb: SupabaseClient,
+  req: VercelRequest,
+): Promise<HandlerResult> {
   const body = req.body as { leadId?: unknown } | undefined;
   const leadId = typeof body?.leadId === 'string' ? body.leadId.trim() : '';
-  if (!leadId) {
-    res.status(400).json({ error: 'leadId is required' });
-    return;
-  }
-
-  let sb;
-  try {
-    sb = await getServiceClient();
-  } catch (err) {
-    res.status(503).json({ error: messageOf(err), code: 'ENV_MISSING_SUPABASE' });
-    return;
-  }
+  if (!leadId) return { status: 400, body: { error: 'leadId is required' } };
 
   const { data: lead, error: fetchError } = await sb
     .from('leads')
     .select('*')
     .eq('id', leadId)
     .single();
-  if (fetchError || !lead) {
-    res.status(404).json({ error: 'lead not found' });
-    return;
-  }
+  if (fetchError || !lead) return { status: 404, body: { error: 'lead not found' } };
   if (!lead.duda_site_name) {
-    res.status(409).json({ error: 'no site to publish — build the site first', code: 'NO_SITE' });
-    return;
+    return { status: 409, body: { error: 'no site to publish — build the site first', code: 'NO_SITE' } };
   }
 
   await sb.from('leads').update({ site_status: 'publishing' }).eq('id', leadId);
@@ -72,17 +54,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         published_at: new Date().toISOString(),
       })
       .eq('id', leadId);
-    if (updateError) {
-      res.status(500).json({ error: updateError.message });
-      return;
-    }
-    res.status(200).json({ ok: true, live_url: result.live_url });
+    if (updateError) return { status: 500, body: { error: updateError.message } };
+
+    return { status: 200, body: { ok: true, live_url: result.live_url } };
   } catch (err) {
     await sb.from('leads').update({ site_status: 'publish_failed' }).eq('id', leadId);
-    res.status(500).json({ error: messageOf(err) });
+    return { status: 500, body: { error: messageOf(err) } };
   }
 }
 
-function messageOf(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
+export default withOpsHandler('POST', withServiceClient(publishSiteHandler));

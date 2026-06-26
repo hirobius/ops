@@ -9,53 +9,34 @@
  *
  * Query:    ?limit=<n> (default 1000, max 2000) · ?include_done=1 · ?include_deleted=1
  * Success:  { tasks: Task[] }
- * Error:    { error, code? } with status 405/500/503
+ * Error:    { error, code? } with status 401/405/500/503
+ *
+ * Auth + method + Supabase acquisition are owned by lib/api/handler (ADR-0004).
  */
 
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { requireOpsAuth } from '../lib/ops-auth.mjs';
-import { getServiceClient } from '../lib/supabase/server.mjs';
+import type { VercelRequest } from '@vercel/node';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler';
 
 const DEFAULT_LIMIT = 1000;
 const MAX_LIMIT = 2000;
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  // Server-side /ops gate — reject callers without a valid ops session cookie.
-  if (!requireOpsAuth(req)) {
-    res.status(401).json({ error: 'Unauthorized.', code: 'UNAUTHENTICATED' });
-    return;
-  }
-  if (req.method !== 'GET') {
-    res.status(405).json({ error: 'Method not allowed. Use GET.' });
-    return;
-  }
-
+export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Promise<HandlerResult> {
   const limit = clampLimit(pick(req.query.limit));
   const includeDeleted = pick(req.query.include_deleted) === '1';
 
-  let sb;
-  try {
-    sb = await getServiceClient();
-  } catch (err) {
-    res.status(503).json({ error: messageOf(err), code: 'ENV_MISSING_SUPABASE' });
-    return;
-  }
+  let q = sb.from('tasks').select('*');
+  if (!includeDeleted) q = q.is('deleted_at', null);
 
-  let q = sb
-    .from('tasks')
-    .select('*')
+  const { data, error } = await q
     .order('status', { ascending: true })
     .order('sort_order', { ascending: true })
     .limit(limit);
-  if (!includeDeleted) q = q.is('deleted_at', null);
-
-  const { data, error } = await q;
-  if (error) {
-    res.status(500).json({ error: error.message });
-    return;
-  }
-  res.status(200).json({ tasks: data ?? [] });
+  if (error) return { status: 500, body: { error: error.message } };
+  return { status: 200, body: { tasks: data ?? [] } };
 }
+
+export default withOpsHandler('GET', withServiceClient(tasksHandler));
 
 function pick(v: unknown): string | undefined {
   return Array.isArray(v) ? v[0] : typeof v === 'string' ? v : undefined;
@@ -64,7 +45,4 @@ function clampLimit(raw: string | undefined): number {
   const n = raw ? Number(raw) : NaN;
   if (!Number.isFinite(n)) return DEFAULT_LIMIT;
   return Math.max(1, Math.min(Math.floor(n), MAX_LIMIT));
-}
-function messageOf(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }

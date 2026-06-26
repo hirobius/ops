@@ -13,49 +13,31 @@
  * GITHUB_TOKEN (repo Issues: write); 503 if unset.
  *
  * In dev, the same contract is served by scripts/tasks-middleware.mjs.
- * Success:  { ok: true, ...extra } · Error: { error, code? } 400/404/405/500/503
+ * Success:  { ok: true, ...extra } · Error: { error, code? } 400/401/404/405/500/503
+ *
+ * Auth + method + Supabase acquisition are owned by lib/api/handler (ADR-0004);
+ * the row-mutation logic lives in lib/tasks/actions.mjs (already returns {status, body}).
  *
  * Env (server-only): SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
  *   GITHUB_TOKEN (+ optional GITHUB_REPO, default 'hirobius/ops') for dispatch.
  */
 
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { requireOpsAuth } from '../lib/ops-auth.mjs';
-import { getServiceClient } from '../lib/supabase/server.mjs';
+import type { VercelRequest } from '@vercel/node';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler';
 import { applyTaskAction } from '../lib/tasks/actions.mjs';
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  // Server-side /ops gate — reject callers without a valid ops session cookie.
-  if (!requireOpsAuth(req)) {
-    res.status(401).json({ error: 'Unauthorized.', code: 'UNAUTHENTICATED' });
-    return;
-  }
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed. Use POST.' });
-    return;
-  }
-
+export async function taskActionHandler(
+  sb: SupabaseClient,
+  req: VercelRequest,
+): Promise<HandlerResult> {
   const body = req.body as { key?: unknown; action?: unknown; actor?: unknown } | undefined;
   const key = typeof body?.key === 'string' ? body.key.trim() : '';
   const action = typeof body?.action === 'string' ? body.action.trim() : '';
   const actor = typeof body?.actor === 'string' ? body.actor.trim() : 'adrian';
-  if (!key || !action) {
-    res.status(400).json({ error: 'key and action are required' });
-    return;
-  }
+  if (!key || !action) return { status: 400, body: { error: 'key and action are required' } };
 
-  let sb;
-  try {
-    sb = await getServiceClient();
-  } catch (err) {
-    res.status(503).json({ error: messageOf(err), code: 'ENV_MISSING_SUPABASE' });
-    return;
-  }
-
-  const result = await applyTaskAction(sb, { key, action, actor });
-  res.status(result.status).json(result.body);
+  return applyTaskAction(sb, { key, action, actor });
 }
 
-function messageOf(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
+export default withOpsHandler('POST', withServiceClient(taskActionHandler));

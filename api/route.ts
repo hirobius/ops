@@ -8,8 +8,12 @@
  * ── Architecture (Plan §E, Option A) ────────────────────────────────────────
  * This function is a PROXY — it forwards requests to a Hetzner-hosted assigner
  * process (scripts/auto-assigner.mjs). It does NOT spawn child_process; Vercel's
- * filesystem is read-only and the assigner mutates clients/*/tasks.json.
+ * filesystem is read-only and the assigner mutates clients in clients/[slug]/tasks.json.
  * See docs/operations/vps-deployment.md for Hetzner setup.
+ *
+ * The OUTLIER among the guarded routes: it needs auth + method but NO Supabase
+ * client, so it uses withOpsHandler directly (skips withServiceClient). It keeps
+ * its own env (503) and upstream (502) handling and returns { status, body }.
  *
  * ── Environment Variables (set by human in Vercel dashboard — never in .env) ─
  *   HIROBIUS_BRIDGE_URL   Full URL of the Hetzner assigner endpoint,
@@ -23,7 +27,7 @@
  * ── Request / Response (matches dev middleware shape) ───────────────────────
  *   POST body:  { text: string, client: string }
  *   Success:    { code: number, result: unknown, stderr: string }
- *   Error:      { error: string } with status 400/503/502
+ *   Error:      { error: string } with status 400/401/503/502
  *
  * ── HMAC signing ────────────────────────────────────────────────────────────
  *   Authorization: HMAC <hex>
@@ -31,68 +35,51 @@
  */
 
 import { createHmac } from 'crypto';
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { requireOpsAuth } from '../lib/ops-auth.mjs';
+import type { VercelRequest } from '@vercel/node';
+import { withOpsHandler, messageOf, type HandlerResult } from '../lib/api/handler';
 
 /** Maximum body size accepted (bytes). */
 const MAX_BODY_BYTES = 64 * 1024; // 64 KB
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  // Server-side /ops gate — reject callers without a valid ops session cookie.
-  if (!requireOpsAuth(req)) {
-    res.status(401).json({ error: 'Unauthorized.', code: 'UNAUTHENTICATED' });
-    return;
-  }
-  // ── Method guard ──────────────────────────────────────────────────────────
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed. Use POST.' });
-    return;
-  }
-
+export async function routeHandler(req: VercelRequest): Promise<HandlerResult> {
   // ── Env guard ─────────────────────────────────────────────────────────────
   const bridgeUrl = process.env.HIROBIUS_BRIDGE_URL;
   const bridgeSecret = process.env.HDS_BRIDGE_SECRET;
 
   if (!bridgeUrl) {
-    res.status(503).json({
-      error: 'HIROBIUS_BRIDGE_URL is not set. Add it in the Vercel project environment variables. See docs/operations/vps-deployment.md for Hetzner setup.',
-      code: 'ENV_MISSING_BRIDGE_URL',
-    });
-    return;
+    return {
+      status: 503,
+      body: {
+        error:
+          'HIROBIUS_BRIDGE_URL is not set. Add it in the Vercel project environment variables. See docs/operations/vps-deployment.md for Hetzner setup.',
+        code: 'ENV_MISSING_BRIDGE_URL',
+      },
+    };
   }
-
   if (!bridgeSecret) {
-    res.status(503).json({
-      error: 'HDS_BRIDGE_SECRET is not set. Add the shared HMAC secret in the Vercel project environment variables. It must match the secret on the Hetzner assigner.',
-      code: 'ENV_MISSING_BRIDGE_SECRET',
-    });
-    return;
+    return {
+      status: 503,
+      body: {
+        error:
+          'HDS_BRIDGE_SECRET is not set. Add the shared HMAC secret in the Vercel project environment variables. It must match the secret on the Hetzner assigner.',
+        code: 'ENV_MISSING_BRIDGE_SECRET',
+      },
+    };
   }
 
   // ── Body parsing ─────────────────────────────────────────────────────────
-  // Vercel auto-parses JSON bodies when Content-Type is application/json.
-  // req.body is available directly.
   const body = req.body as { text?: unknown; client?: unknown } | undefined;
-
   const text = typeof body?.text === 'string' ? body.text.trim() : '';
   const client = typeof body?.client === 'string' ? body.client.trim() : '';
 
-  if (!text || !client) {
-    res.status(400).json({ error: 'text and client are required' });
-    return;
-  }
-
+  if (!text || !client) return { status: 400, body: { error: 'text and client are required' } };
   if (Buffer.byteLength(text, 'utf8') > MAX_BODY_BYTES) {
-    res.status(400).json({ error: 'text exceeds maximum allowed size (64 KB)' });
-    return;
+    return { status: 400, body: { error: 'text exceeds maximum allowed size (64 KB)' } };
   }
 
   // ── HMAC signing ─────────────────────────────────────────────────────────
-  const payload = { text, client };
-  const payloadJson = JSON.stringify(payload);
-  const hmacHex = createHmac('sha256', bridgeSecret)
-    .update(payloadJson)
-    .digest('hex');
+  const payloadJson = JSON.stringify({ text, client });
+  const hmacHex = createHmac('sha256', bridgeSecret).update(payloadJson).digest('hex');
 
   // ── Proxy to Hetzner ─────────────────────────────────────────────────────
   let upstreamRes: Response;
@@ -101,20 +88,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `HMAC ${hmacHex}`,
+        Authorization: `HMAC ${hmacHex}`,
       },
       body: payloadJson,
       // Vercel hobby timeout is 10s. Assigner returns in <2s, fits.
       signal: AbortSignal.timeout(9000),
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    res.status(502).json({
-      error: `Upstream assigner unreachable: ${message}`,
-      code: 'UPSTREAM_UNREACHABLE',
-      stderr: '',
-    });
-    return;
+    return {
+      status: 502,
+      body: { error: `Upstream assigner unreachable: ${messageOf(err)}`, code: 'UPSTREAM_UNREACHABLE', stderr: '' },
+    };
   }
 
   // ── Forward upstream response ────────────────────────────────────────────
@@ -127,17 +111,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     } catch {
       upstreamBody = { code: 0, result: null, stderr: '' };
     }
-    res.status(200).json(upstreamBody);
-  } else {
-    // Upstream error: return a compatible error envelope.
-    let errText = '';
-    try {
-      errText = await upstreamRes.text();
-    } catch { /* ignore */ }
-    res.status(502).json({
-      error: `Assigner returned HTTP ${upstreamRes.status}`,
-      code: upstreamRes.status,
-      stderr: errText.slice(0, 500),
-    });
+    return { status: 200, body: upstreamBody };
   }
+
+  // Upstream error: return a compatible error envelope.
+  let errText = '';
+  try {
+    errText = await upstreamRes.text();
+  } catch {
+    /* ignore */
+  }
+  return {
+    status: 502,
+    body: { error: `Assigner returned HTTP ${upstreamRes.status}`, code: upstreamRes.status, stderr: errText.slice(0, 500) },
+  };
 }
+
+export default withOpsHandler('POST', routeHandler);
