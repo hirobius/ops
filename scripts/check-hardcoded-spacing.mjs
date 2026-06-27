@@ -36,18 +36,15 @@
  * Or:  pnpm check:spacing
  */
 
-import { readFileSync, readdirSync, statSync } from 'fs';
-import { join, dirname, extname, resolve } from 'path';
+import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { hasJsonFlag, emitResult } from './lib/gate-output.mjs';
+import { scanFiles } from './lib/source-scanner.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const SRC  = join(ROOT, 'src', 'app');
 const jsonMode = hasJsonFlag(process.argv);
-
-const isFixtureMode = process.argv.includes('--fixture-mode') || process.env.HDS_FIXTURE_MODE === '1';
-const fixtureFile = process.env.FIXTURE_FILE;
 
 // ── Properties that carry spacing (not dimensions/visual sizes) ──────────────
 const SPACING_PROPS = new Set([
@@ -66,20 +63,6 @@ const DIMENSION_PROPS = new Set([
   'borderWidth', 'borderRadius', 'strokeWidth', 'r', 'cx', 'cy',
 ]);
 
-// ── File collector ─────────────────────────────────────────────────────────
-function collectFiles(dir, results = []) {
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) {
-      if (entry === 'data' || entry === 'node_modules') continue;
-      collectFiles(full, results);
-    } else if (extname(entry) === '.tsx' || extname(entry) === '.ts') {
-      results.push(full);
-    }
-  }
-  return results;
-}
-
 // ── Detection regex ──────────────────────────────────────────────────────────
 // Matches: propName: '16px' or propName: "16px" in style objects
 const PX_STRING = /(\w+)\s*:\s*['"](\d+(?:\.\d+)?)px['"]/g;
@@ -88,43 +71,41 @@ const PX_STRING = /(\w+)\s*:\s*['"](\d+(?:\.\d+)?)px['"]/g;
 // Only flags values 4–200 on known spacing props
 const BARE_NUM = /(\w+)\s*:\s*(\d+)\s*[,\n}]/g;
 
-const violations = [];
+const violations = scanFiles({
+  roots: [SRC],
+  extensions: ['.ts', '.tsx'],
+  skipDirs: ['data', 'node_modules'],
+  check(lines, rel, push) {
+    lines.forEach((line, i) => {
+      // Skip comments and lines already using token vars
+      if (line.trim().startsWith('//') || line.trim().startsWith('*')) return;
+      if (line.includes('hds.space.') || line.includes('hds.density.') ||
+          line.includes('var(--') || line.includes('hds.layout.') ||
+          line.includes('spacing-ok') || line.includes('audit-ok')) return;
 
-const filesToScan = isFixtureMode && fixtureFile ? [resolve(fixtureFile)] : collectFiles(SRC);
+      // Check px string patterns
+      for (const m of line.matchAll(PX_STRING)) {
+        const [, prop, val] = m;
+        const px = parseFloat(val);
+        if (DIMENSION_PROPS.has(prop)) continue;
+        if (!SPACING_PROPS.has(prop))  continue;
+        if (px > 200) continue; // viewport-scale values
+        push({ file: rel, line: i + 1, prop, val: `${val}px`, raw: line.trim().slice(0, 100) });
+      }
 
-for (const file of filesToScan) {
-  const rel   = file.replace(ROOT + '\\', '').replace(ROOT + '/', '');
-  const lines = readFileSync(file, 'utf8').split('\n');
-
-  lines.forEach((line, i) => {
-    // Skip comments and lines already using token vars
-    if (line.trim().startsWith('//') || line.trim().startsWith('*')) return;
-    if (line.includes('hds.space.') || line.includes('hds.density.') ||
-        line.includes('var(--') || line.includes('hds.layout.') ||
-        line.includes('spacing-ok') || line.includes('audit-ok')) return;
-
-    // Check px string patterns
-    for (const m of line.matchAll(PX_STRING)) {
-      const [, prop, val] = m;
-      const px = parseFloat(val);
-      if (DIMENSION_PROPS.has(prop)) continue;
-      if (!SPACING_PROPS.has(prop))  continue;
-      if (px > 200) continue; // viewport-scale values
-      violations.push({ file: rel, line: i + 1, prop, val: `${val}px`, raw: line.trim().slice(0, 100) });
-    }
-
-    // Check bare number patterns on known spacing props
-    for (const m of line.matchAll(BARE_NUM)) {
-      const [, prop, val] = m;
-      const px = parseInt(val, 10);
-      if (!SPACING_PROPS.has(prop)) continue;
-      if (px < 4 || px > 200) continue;         // 0-3 = micro, >200 = viewport
-      if (px % 2 !== 0) continue;               // non-grid values, skip
-      if (line.includes('duration') || line.includes('delay')) continue;
-      violations.push({ file: rel, line: i + 1, prop, val: String(px), raw: line.trim().slice(0, 100) });
-    }
-  });
-}
+      // Check bare number patterns on known spacing props
+      for (const m of line.matchAll(BARE_NUM)) {
+        const [, prop, val] = m;
+        const px = parseInt(val, 10);
+        if (!SPACING_PROPS.has(prop)) continue;
+        if (px < 4 || px > 200) continue;         // 0-3 = micro, >200 = viewport
+        if (px % 2 !== 0) continue;               // non-grid values, skip
+        if (line.includes('duration') || line.includes('delay')) continue;
+        push({ file: rel, line: i + 1, prop, val: String(px), raw: line.trim().slice(0, 100) });
+      }
+    });
+  },
+});
 
 // ── Report ────────────────────────────────────────────────────────────────────
 if (jsonMode) {
