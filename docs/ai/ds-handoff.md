@@ -118,6 +118,20 @@ or wastes the next 6 months of velocity.
 
 ---
 
+## Task 3 — export the Badge `tone` union from the DS (small, high-leverage)
+
+The DS Badge component's `tone` prop is an inline union
+(`'neutral' | 'info' | 'success' | 'danger' | 'warning'`) that isn't exported. As a
+result **~12 files in `hirobius/ops` hand-redeclare `type BadgeTone = …`** (and a
+couple redeclare the StatusTile tone). Export the union as a named type from the DS
+(e.g. `export type BadgeTone` beside Badge, re-exported from the package root) so
+consumers import it instead of copying it. Surfaced while consolidating the ops
+status-badge logic (ops candidate #7, commit on `claude/relaxed-ramanujan-vvhqf8`).
+
+**Validation:** `import type { BadgeTone } from '@hirobius/design-system'` resolves in ops.  ·  **Depends on:** none
+
+---
+
 ## What was left out (and why)
 
 You scoped this to **DS-repo-only**, so these were intentionally dropped:

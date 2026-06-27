@@ -112,49 +112,12 @@ for (const slug of Object.keys(REGISTRY)) {
 }
 
 // ── Plain-language translation ────────────────────────────────────────────────
-// Keys are operator-side status strings; values are what the client reads.
+// Status tone + client-facing labels live in the shared statusPresentation module.
+import { statusTone, statusLabel, type BadgeTone } from '../../lib/statusPresentation';
 
-const STATUS_LABEL: Record<string, string> = {
-  done: 'Done',
-  complete: 'Done',
-  'in-progress': 'In progress',
-  blocked: 'Waiting on you',
-  'not-started': 'Not started',
-  todo: 'Not started',
-  planned: 'Planned',
-  evaluating: 'Evaluating',
-  scaffolded: 'Built, awaiting access',
-  'pending-access': 'Awaiting access',
-  'pending-activation': 'Awaiting activation',
-  deferred: 'Deferred',
-  unknown: 'Unknown',
-  'phase-2-candidate': 'Planned for Phase 2',
-};
-
-type Tone = 'neutral' | 'info' | 'success' | 'danger' | 'warning';
-const STATUS_TONE: Record<string, Tone> = {
-  done: 'success',
-  complete: 'success',
-  'in-progress': 'warning',
-  blocked: 'danger',
-  'not-started': 'neutral',
-  todo: 'neutral',
-  planned: 'info',
-  evaluating: 'info',
-  scaffolded: 'info',
-  'pending-access': 'warning',
-  'pending-activation': 'warning',
-  deferred: 'neutral',
-  unknown: 'neutral',
-  'phase-2-candidate': 'info',
-};
-
-function label(status: string | undefined): string {
-  return STATUS_LABEL[status ?? ''] ?? status ?? '—';
-}
-function tone(status: string | undefined): Tone {
-  return STATUS_TONE[status ?? ''] ?? 'neutral';
-}
+type Tone = BadgeTone;
+const tone = (status: string | undefined): Tone => statusTone(status);
+const label = (status: string | undefined): string => statusLabel(status, 'client');
 
 // Workflow promotion state — one of three the client-readable strings.
 type WorkflowState = { label: string; tone: Tone };
