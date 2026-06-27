@@ -21,6 +21,7 @@ import React, { useMemo, useState } from 'react';
 import { Card, Stat, Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { parseJsonlLines } from '../../lib/jsonl';
 
 // ── Raw data imports ───────────────────────────────────────────────────────────
 
@@ -77,17 +78,7 @@ interface TasksFile {
 // ── Parse routing log ──────────────────────────────────────────────────────────
 
 function parseRoutingLog(): RoutingEntry[] {
-  return routingLogRaw
-    .split('\n')
-    .filter(Boolean)
-    .map((line) => {
-      try {
-        return JSON.parse(line) as RoutingEntry;
-      } catch {
-        return null;
-      }
-    })
-    .filter((e): e is RoutingEntry => e !== null);
+  return parseJsonlLines<RoutingEntry>(routingLogRaw);
 }
 
 // ── Parse tasks glob ───────────────────────────────────────────────────────────

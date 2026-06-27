@@ -32,6 +32,7 @@ import { AgentTag, type AgentTier } from '../../components/agent-tag';
 import { Icon } from '@hirobius/design-system';
 import type { ClientFiles, ClientTask } from './clientTypes';
 import { PodTail } from './PodTail';
+import { parseJsonlLines } from '../../lib/jsonl';
 
 /** SessionEvent extends ActivityEvent with internal filter keys. Exported so
  *  SessionsPage can build optimistic events client-side and pass them via
@@ -74,20 +75,7 @@ interface RoutingLogEntry {
 }
 
 function parseLog(): RoutingLogEntry[] {
-  const raw = Object.values(_routingLog)[0] ?? '';
-  if (!raw) return [];
-  return raw
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      try {
-        return JSON.parse(line) as RoutingLogEntry;
-      } catch {
-        return null;
-      }
-    })
-    .filter((entry): entry is RoutingLogEntry => entry !== null);
+  return parseJsonlLines<RoutingLogEntry>(Object.values(_routingLog)[0] ?? '');
 }
 
 // ── Task lookup ────────────────────────────────────────────────────────────────

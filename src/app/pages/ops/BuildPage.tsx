@@ -32,6 +32,7 @@ import auditLogRaw from '../../../../docs/security/agent-audit-log.jsonl?raw';
 import registryRaw from '../../../../docs/guardrails/registry.json';
 import { PageHeader } from './PageHeader';
 import CostBurnWidget from './CostBurnWidget';
+import { parseJsonlLines } from '../../lib/jsonl';
 
 // ── Pipeline stats ────────────────────────────────────────────────────────────
 
@@ -65,18 +66,7 @@ interface AuditEntry {
 }
 
 function parseAuditLog(raw: string): AuditEntry[] {
-  return raw
-    .trim()
-    .split('\n')
-    .filter(Boolean)
-    .map((line) => {
-      try {
-        return JSON.parse(line) as AuditEntry;
-      } catch {
-        return null;
-      }
-    })
-    .filter((x): x is AuditEntry => x !== null);
+  return parseJsonlLines<AuditEntry>(raw);
 }
 
 function auditEntryToActivity(e: AuditEntry, idx: number): ActivityEvent {
@@ -235,18 +225,7 @@ export default function BuildPage() {
       .then((r) => (r.ok ? r.text() : Promise.reject(new Error('not-found'))))
       .then((text) => {
         if (cancelled) return;
-        const events: RetryEvent[] = text
-          .trim()
-          .split('\n')
-          .filter(Boolean)
-          .map((line) => {
-            try {
-              return JSON.parse(line) as RetryEvent;
-            } catch {
-              return null;
-            }
-          })
-          .filter((x): x is RetryEvent => x !== null);
+        const events = parseJsonlLines<RetryEvent>(text);
         const recent = events
           .filter((e) => e.event?.startsWith('retry.'))
           .slice(-20)
