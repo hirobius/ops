@@ -24,6 +24,7 @@ import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from '../PageHeader';
 import { useLeads } from './useLeads';
 import { PullLeadsForm } from './PullLeadsForm';
+import { opsApi } from '../../../lib/opsApi';
 import type { Lead, LeadStatus, SiteStatus } from './types';
 
 type BadgeTone = 'success' | 'neutral' | 'warning' | 'danger';
@@ -67,11 +68,7 @@ export default function LeadsPage() {
     async (leadId: string) => {
       setGeneratingIds((prev) => new Set(prev).add(leadId));
       try {
-        await fetch('/api/generate-site', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ leadId }),
-        });
+        await opsApi.post('/api/generate-site', { leadId });
       } catch {
         /* surfaced via row status on next poll */
       } finally {
@@ -91,11 +88,7 @@ export default function LeadsPage() {
     async (leadId: string, endpoint: string) => {
       setSiteBusyIds((prev) => new Set(prev).add(leadId));
       try {
-        await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ leadId }),
-        });
+        await opsApi.post(endpoint, { leadId });
       } catch {
         /* surfaced via row site_status on next poll */
       } finally {

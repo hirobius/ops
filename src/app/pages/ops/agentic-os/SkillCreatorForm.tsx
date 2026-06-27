@@ -21,6 +21,7 @@
 import { useCallback, useEffect, useState, type CSSProperties, type FormEvent } from 'react';
 import { Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
+import { opsApi } from '../../../lib/opsApi';
 
 type SubmitState =
   | { kind: 'idle' }
@@ -70,15 +71,11 @@ export function SkillCreatorForm() {
       }
       setState({ kind: 'submitting' });
       try {
-        const res = await fetch('/api/proposed-skills', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: trimmedName,
-            description: trimmedDescription,
-            expectedOutput: expectedOutput.trim(),
-            requestedBy: 'adrian',
-          }),
+        const res = await opsApi.post('/api/proposed-skills', {
+          name: trimmedName,
+          description: trimmedDescription,
+          expectedOutput: expectedOutput.trim(),
+          requestedBy: 'adrian',
         });
         const body = (await res.json().catch(() => ({}))) as {
           ok?: boolean;

@@ -1,4 +1,5 @@
 import type { LooseThread, ProposedUnitEntry, PromoteTarget } from './threads-types';
+import { opsApi } from '../../../lib/opsApi';
 
 const ENDPOINT = '/api/hermes/tasks';
 
@@ -37,11 +38,7 @@ interface PromoteProposedUnitInput extends BasePromoteInput {
 async function postTask(body: CreateTaskBody): Promise<PromoteResult> {
   let res: Response;
   try {
-    res = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+    res = await opsApi.post(ENDPOINT, body);
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }

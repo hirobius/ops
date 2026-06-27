@@ -292,18 +292,13 @@ export interface SkillResponse {
   error?: string;
 }
 
+import { opsApi } from '../../../lib/opsApi';
+
 export async function runSkill(id: SkillId, input?: string): Promise<SkillResponse> {
   const start = Date.now();
   const hasInput = typeof input === 'string' && input.length > 0;
-  const init: RequestInit = hasInput
-    ? {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input }),
-      }
-    : { method: 'POST' };
   try {
-    const res = await fetch(`/api/skills/${id}`, init);
+    const res = await opsApi.post(`/api/skills/${id}`, hasInput ? { input } : undefined);
     const body = (await res.json()) as SkillResponse;
     return body;
   } catch (err) {

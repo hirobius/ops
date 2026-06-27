@@ -22,6 +22,7 @@ import { Badge } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from '../PageHeader';
 import { useTasks } from './useTasks';
+import { opsApi } from '../../../lib/opsApi';
 import type { Task, TaskStatus, TaskAction } from './types';
 
 type BadgeTone = 'success' | 'neutral' | 'warning' | 'danger';
@@ -71,11 +72,7 @@ export default function TasksPage() {
     async (key: string, action: TaskAction) => {
       setBusyKeys((prev) => new Set(prev).add(key));
       try {
-        await fetch('/api/task-action', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ key, action }),
-        });
+        await opsApi.post('/api/task-action', { key, action });
       } catch {
         /* surfaced on next poll */
       } finally {

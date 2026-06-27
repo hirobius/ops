@@ -13,6 +13,7 @@ import { useState, type CSSProperties, type FormEvent } from 'react';
 import { Stack } from '@hirobius/design-system';
 import { Badge } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
+import { opsApi } from '../../../lib/opsApi';
 
 type SubmitStatus =
   | { kind: 'idle' }
@@ -37,10 +38,10 @@ export function PullLeadsForm({ onInserted }: PullLeadsFormProps) {
     if (!canSubmit) return;
     setStatus({ kind: 'sending' });
     try {
-      const response = await fetch('/api/pull-leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ niche: niche.trim(), metro: metro.trim(), count }),
+      const response = await opsApi.post('/api/pull-leads', {
+        niche: niche.trim(),
+        metro: metro.trim(),
+        count,
       });
       const data = (await response.json()) as { inserted?: number; error?: string };
       if (response.ok && typeof data.inserted === 'number') {

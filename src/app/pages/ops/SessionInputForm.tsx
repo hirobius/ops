@@ -12,6 +12,7 @@ import { useState, type CSSProperties, type FormEvent } from 'react';
 import { Stack, Badge } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import type { AgentTier } from '../../components/agent-tag';
+import { opsApi } from '../../lib/opsApi';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -60,11 +61,7 @@ export function SessionInputForm({ clients, defaultClient, onResult }: SessionIn
     if (!value) return;
     setStatus({ kind: 'sending' });
     try {
-      const response = await fetch('/api/route', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: value, client }),
-      });
+      const response = await opsApi.post('/api/route', { text: value, client });
       const data = (await response.json()) as {
         code: number;
         result: AssignerResult | null;
