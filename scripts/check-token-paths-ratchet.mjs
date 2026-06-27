@@ -34,31 +34,19 @@ import { join, relative, dirname, extname, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { hasJsonFlag, emitResult } from './lib/gate-output.mjs';
+import { loadTokens, getByPath, walkLeafPaths } from './lib/token-resolver.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
 // ─── Token-path scanning helpers ─────────────────────────────────────────────
 
-function walkTokenTree(obj, prefix, out) {
-  if (!obj || typeof obj !== 'object') return;
-  if ('$value' in obj) {
-    out.add(prefix.join('.'));
-    return;
-  }
-  for (const [k, v] of Object.entries(obj)) {
-    if (k.startsWith('$')) continue;
-    walkTokenTree(v, [...prefix, k], out);
-  }
-}
-
 function loadValidPaths() {
-  const tokens = JSON.parse(readFileSync(join(ROOT, 'hirobius.tokens.json'), 'utf8'));
-  const paths = new Set();
-  walkTokenTree(tokens, [], paths);
+  const tokens = loadTokens();
+  const paths = new Set(walkLeafPaths(tokens));
   const composites = [...paths];
   for (const p of composites) {
-    const node = p.split('.').reduce((acc, seg) => acc?.[seg], tokens);
+    const node = getByPath(tokens, p);
     const value = node?.$value;
     if (value && typeof value === 'object' && !Array.isArray(value)) {
       for (const sub of Object.keys(value)) {
