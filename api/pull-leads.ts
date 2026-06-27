@@ -26,6 +26,7 @@ import type { VercelRequest } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler';
 import { pullLeads } from '../lib/lead-gen/index.mjs';
+import { upsertLeads } from '../lib/supabase/leads.mjs';
 
 const MAX_BODY_BYTES = 16 * 1024; // 16 KB
 const MAX_COUNT = 50;
@@ -46,7 +47,7 @@ export async function pullLeadsHandler(
 
   const leads = await pullLeads({ niche, metro, max: count });
   const rows = leads.map((l) => ({ ...l, status: 'sourced' as const }));
-  const { error } = await sb.from('leads').upsert(rows, { onConflict: 'place_id' });
+  const { error } = await upsertLeads(sb, rows);
   if (error) return { status: 500, body: { error: error.message } };
   return { status: 200, body: { inserted: rows.length } };
 }

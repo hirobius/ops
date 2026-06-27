@@ -19,17 +19,14 @@
 import type { VercelRequest } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler';
+import { listLeads } from '../lib/supabase/leads.mjs';
 
 const DEFAULT_LIMIT = 200;
 const MAX_LIMIT = 500;
 
 export async function leadsHandler(sb: SupabaseClient, req: VercelRequest): Promise<HandlerResult> {
   const rawLimit = Array.isArray(req.query.limit) ? req.query.limit[0] : req.query.limit;
-  const { data, error } = await sb
-    .from('leads')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(clampLimit(rawLimit));
+  const { data, error } = await listLeads(sb, clampLimit(rawLimit));
 
   if (error) return { status: 500, body: { error: error.message } };
   return { status: 200, body: { leads: data ?? [] } };
