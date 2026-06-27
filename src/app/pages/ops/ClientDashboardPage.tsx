@@ -33,6 +33,7 @@ import type {
   ClientWorkflowConfig,
   ClientWorkflow,
 } from './clientTypes';
+import { buildClientRegistry } from './clientRegistry';
 
 const _metas = import.meta.glob<{ default: ClientMeta }>('../../../../clients/*/meta.json', {
   eager: true,
@@ -60,57 +61,15 @@ const _workflows = import.meta.glob<{ default: ClientWorkflowConfig }>(
   { eager: true },
 );
 
-function slugOf(p: string) {
-  return p.match(/clients\/([^/]+)\//)?.[1] ?? '';
-}
-function workflowOf(p: string) {
-  const m = p.match(/clients\/([^/]+)\/automations\/([^/]+)\/config\.json/);
-  return m ? { slug: m[1], workflowId: m[2] } : null;
-}
-
-const CLIENT_REGISTRY: Record<string, ClientFiles> = {};
-// Skip slugs starting with `_` (e.g. `_template/`) — those are scaffolding,
-// not real clients, and shouldn't appear in the dashboard.
-function shouldRegister(slug: string) {
-  return Boolean(slug) && !slug.startsWith('_');
-}
-
-for (const [p, m] of Object.entries(_metas)) {
-  const s = slugOf(p);
-  if (shouldRegister(s)) CLIENT_REGISTRY[s] = { meta: m.default };
-}
-for (const [p, m] of Object.entries(_tasks)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].tasks = m.default;
-}
-for (const [p, m] of Object.entries(_checks)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].checklist = m.default;
-}
-for (const [p, m] of Object.entries(_retains)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].retainer = m.default;
-}
-for (const [p, m] of Object.entries(_goals)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].goals = m.default;
-}
-for (const [p, m] of Object.entries(_autoCfgs)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].automationConfig = m.default;
-}
-for (const [p, m] of Object.entries(_workflows)) {
-  const r = workflowOf(p);
-  if (!r || !shouldRegister(r.slug) || !CLIENT_REGISTRY[r.slug]) continue;
-  const wf = { id: r.workflowId, config: m.default };
-  CLIENT_REGISTRY[r.slug].workflows = [...(CLIENT_REGISTRY[r.slug].workflows ?? []), wf];
-}
-// Sort workflows by id for stable rendering
-for (const slug of Object.keys(CLIENT_REGISTRY)) {
-  if (CLIENT_REGISTRY[slug].workflows) {
-    CLIENT_REGISTRY[slug].workflows!.sort((a, b) => a.id.localeCompare(b.id));
-  }
-}
+const CLIENT_REGISTRY = buildClientRegistry({
+  metas: _metas,
+  tasks: _tasks,
+  checks: _checks,
+  retains: _retains,
+  goals: _goals,
+  autoCfgs: _autoCfgs,
+  workflows: _workflows,
+});
 
 // ── Status colours ─────────────────────────────────────────────────────────────
 

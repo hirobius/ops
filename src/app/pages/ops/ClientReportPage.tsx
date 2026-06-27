@@ -32,10 +32,11 @@ import type {
   ClientWorkflowConfig,
   ClientWorkflow,
 } from './clientTypes';
+import { buildClientRegistry } from './clientRegistry';
 
 // ── Manifest-driven registry (same shape as ClientDashboardPage) ──────────────
-// Duplicated rather than refactored shared because the Vite glob has to live
-// in the consuming module to be statically resolved at build time.
+// The glob() calls stay here (Vite statically analyses them at build time); the
+// assembly loop is shared via buildClientRegistry.
 
 const _metas = import.meta.glob<{ default: ClientMeta }>('../../../../clients/*/meta.json', {
   eager: true,
@@ -63,53 +64,15 @@ const _workflows = import.meta.glob<{ default: ClientWorkflowConfig }>(
   { eager: true },
 );
 
-function slugOf(p: string) {
-  return p.match(/clients\/([^/]+)\//)?.[1] ?? '';
-}
-function workflowOf(p: string) {
-  const m = p.match(/clients\/([^/]+)\/automations\/([^/]+)\/config\.json/);
-  return m ? { slug: m[1], workflowId: m[2] } : null;
-}
-function shouldRegister(slug: string) {
-  return Boolean(slug) && !slug.startsWith('_');
-}
-
-const REGISTRY: Record<string, ClientFiles> = {};
-for (const [p, m] of Object.entries(_metas)) {
-  const s = slugOf(p);
-  if (shouldRegister(s)) REGISTRY[s] = { meta: m.default };
-}
-for (const [p, m] of Object.entries(_tasks)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && REGISTRY[s]) REGISTRY[s].tasks = m.default;
-}
-for (const [p, m] of Object.entries(_checks)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && REGISTRY[s]) REGISTRY[s].checklist = m.default;
-}
-for (const [p, m] of Object.entries(_retains)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && REGISTRY[s]) REGISTRY[s].retainer = m.default;
-}
-for (const [p, m] of Object.entries(_goals)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && REGISTRY[s]) REGISTRY[s].goals = m.default;
-}
-for (const [p, m] of Object.entries(_autoCfgs)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && REGISTRY[s]) REGISTRY[s].automationConfig = m.default;
-}
-for (const [p, m] of Object.entries(_workflows)) {
-  const r = workflowOf(p);
-  if (!r || !shouldRegister(r.slug) || !REGISTRY[r.slug]) continue;
-  REGISTRY[r.slug].workflows = [
-    ...(REGISTRY[r.slug].workflows ?? []),
-    { id: r.workflowId, config: m.default },
-  ];
-}
-for (const slug of Object.keys(REGISTRY)) {
-  if (REGISTRY[slug].workflows) REGISTRY[slug].workflows!.sort((a, b) => a.id.localeCompare(b.id));
-}
+const REGISTRY = buildClientRegistry({
+  metas: _metas,
+  tasks: _tasks,
+  checks: _checks,
+  retains: _retains,
+  goals: _goals,
+  autoCfgs: _autoCfgs,
+  workflows: _workflows,
+});
 
 // ── Plain-language translation ────────────────────────────────────────────────
 // Status tone + client-facing labels live in the shared statusPresentation module.
