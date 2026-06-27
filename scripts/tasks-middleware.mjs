@@ -12,6 +12,7 @@
 
 import { getServiceClient } from '../lib/supabase/server.mjs';
 import { applyTaskAction } from '../lib/tasks/actions.mjs';
+import { makeGitHubPort } from '../lib/github/issues.mjs';
 
 const MAX_LIMIT = 2000;
 
@@ -82,7 +83,7 @@ export function createTasksMiddleware() {
         const sb = await clientOr503(res);
         if (!sb) return;
 
-        const result = await applyTaskAction(sb, { key, action, actor });
+        const result = await applyTaskAction(sb, { key, action, actor }, { github: makeGitHubPort() });
         return sendJson(res, result.status, result.body);
       } catch (err) {
         return sendJson(res, 500, { error: messageOf(err) });

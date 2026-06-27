@@ -26,6 +26,7 @@ import type { VercelRequest } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler';
 import { applyTaskAction } from '../lib/tasks/actions.mjs';
+import { makeGitHubPort } from '../lib/github/issues.mjs';
 
 export async function taskActionHandler(
   sb: SupabaseClient,
@@ -37,7 +38,7 @@ export async function taskActionHandler(
   const actor = typeof body?.actor === 'string' ? body.actor.trim() : 'adrian';
   if (!key || !action) return { status: 400, body: { error: 'key and action are required' } };
 
-  return applyTaskAction(sb, { key, action, actor });
+  return applyTaskAction(sb, { key, action, actor }, { github: makeGitHubPort() });
 }
 
 export default withOpsHandler('POST', withServiceClient(taskActionHandler));
