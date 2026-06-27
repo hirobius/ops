@@ -11,6 +11,7 @@
  */
 
 import { getServiceClient } from '../lib/supabase/server.mjs';
+import { listTasks } from '../lib/supabase/tasks.mjs';
 import { applyTaskAction } from '../lib/tasks/actions.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
 
@@ -54,15 +55,7 @@ export function createTasksMiddleware() {
         const sb = await clientOr503(res);
         if (!sb) return;
 
-        let q = sb
-          .from('tasks')
-          .select('*')
-          .order('status', { ascending: true })
-          .order('sort_order', { ascending: true })
-          .limit(limit);
-        if (!includeDeleted) q = q.is('deleted_at', null);
-
-        const { data, error } = await q;
+        const { data, error } = await listTasks(sb, { limit, includeDeleted });
         if (error) return sendJson(res, 500, { error: error.message });
         return sendJson(res, 200, { tasks: data ?? [] });
       } catch (err) {

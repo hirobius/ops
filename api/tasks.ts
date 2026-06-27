@@ -17,6 +17,7 @@
 import type { VercelRequest } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler';
+import { listTasks } from '../lib/supabase/tasks.mjs';
 
 const DEFAULT_LIMIT = 1000;
 const MAX_LIMIT = 2000;
@@ -25,13 +26,7 @@ export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Prom
   const limit = clampLimit(pick(req.query.limit));
   const includeDeleted = pick(req.query.include_deleted) === '1';
 
-  let q = sb.from('tasks').select('*');
-  if (!includeDeleted) q = q.is('deleted_at', null);
-
-  const { data, error } = await q
-    .order('status', { ascending: true })
-    .order('sort_order', { ascending: true })
-    .limit(limit);
+  const { data, error } = await listTasks(sb, { limit, includeDeleted });
   if (error) return { status: 500, body: { error: error.message } };
   return { status: 200, body: { tasks: data ?? [] } };
 }
