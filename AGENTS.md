@@ -37,6 +37,8 @@ Read these first, depending on the task:
 
 This repo currently uses a flat `scripts/` toolchain.
 
+To find a script by what it does, read **`scripts/INDEX.md`** (human) or **`scripts/INDEX.json`** (machine) — a generated, categorised map of every script with its one-line purpose, `pnpm` alias, and firing channel. It also documents the prefix taxonomy (`check-`/`audit-`/`validate-`/`verify-`/`build-`/`generate-`/`sync-`). Regenerate with `pnpm scripts:index` (also runs inside `pnpm manifest:generate`).
+
 Do not assume a domain-based `scripts/<area>/SCRIPT.md` structure exists unless it has actually been added to the repo.
 
 Common script groups that do exist:
@@ -45,7 +47,7 @@ Common script groups that do exist:
   - `scripts/build-tokens.mjs`
   - `scripts/build-handoff.mjs`
   - `scripts/build-design-md.mjs`
-  - `scripts/build-llms-txt.mjs`
+  - `scripts/generate-llms-txt.mjs`
   - `scripts/generate-manifest.mjs`
   - `scripts/generate-component-api.mjs`
 - Verification and checks:

@@ -1,0 +1,2087 @@
+{
+  "generatedBy": "scripts/generate-script-index.mjs",
+  "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
+  "totalScripts": 185,
+  "taxonomy": {
+    "check": {
+      "category": "gate",
+      "meaning": "Strict deterministic gate — fast pass/fail, fires on a channel (pre-commit / CI)."
+    },
+    "audit": {
+      "category": "audit",
+      "meaning": "Health / compliance scan — broader, often slower or advisory (soft / manual channel)."
+    },
+    "validate": {
+      "category": "validate",
+      "meaning": "Schema / structure validation — asserts a file or JSON matches its contract."
+    },
+    "verify": {
+      "category": "verify",
+      "meaning": "Post-build verification — confirms a build step produced correct output."
+    },
+    "build": {
+      "category": "build",
+      "meaning": "Artifact builder — compiles source into a committed or served artifact."
+    },
+    "generate": {
+      "category": "generate",
+      "meaning": "Content generator — derives a file (manifest, docs, index) from source."
+    },
+    "sync": {
+      "category": "sync",
+      "meaning": "Synchronizer — reconciles one source of truth into another."
+    },
+    "test": {
+      "category": "test",
+      "meaning": "Test runner — integration / smoke / unit checks."
+    },
+    "figma": {
+      "category": "figma",
+      "meaning": "Figma bridge — design-system sync, diff, or canvas ops."
+    }
+  },
+  "categoryCounts": {
+    "other": 75,
+    "audit": 18,
+    "build": 9,
+    "gate": 47,
+    "figma": 4,
+    "generate": 15,
+    "sync": 5,
+    "test": 6,
+    "validate": 4,
+    "verify": 2
+  },
+  "scripts": [
+    {
+      "name": "a11y-schema-check.mjs",
+      "category": "other",
+      "prefix": null,
+      "purpose": "Validates the a11yRules schema in public/hds-manifest.json against the WCAG 2.1 AA baseline defined in docs/ai/AGENT_GUIDELINES.md.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "activity-log.mjs",
+      "category": "other",
+      "prefix": "activity",
+      "purpose": "scope, ready to paste into a LinkedIn 'now' note, portfolio update, or interview-brief recap.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "audit-batch-deliverables.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Deterministic post-batch audit. Given a list of unit IDs (or all units marked `done` since the last audit), confirm that each unit's deliverable actually matches its spec — beyond just \"validationCmd exited 0\".",
+      "pnpm": [],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-bundle.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Generates a bundle composition report at docs/perf/bundle-report.html using vite-bundle-visualizer. Manual channel — artifact, not gating. Complements size-limit (which gates total size) by showing which",
+      "pnpm": [
+        "audit:bundle"
+      ],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-claims.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "audit-claims — detect stale claimed units in docs/ai/orchestration.json.",
+      "pnpm": [],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-component-integrity.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Merged from: audit-components.mjs — token compliance audit for HDS components check-component-completeness.mjs — manifest completeness for LLM use",
+      "pnpm": [
+        "api:check",
+        "api:update",
+        "check:docs",
+        "check:fast",
+        "check:full",
+        "check:full",
+        "pretest",
+        "tokens:audit"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-deps.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Dependency vulnerability audit. Wraps `pnpm audit --audit-level moderate json` and translates each advisory into a registry violation. Network required — manual channel only (too slow for pre-commit). The same check",
+      "pnpm": [
+        "audit:deps"
+      ],
+      "gate": {
+        "channel": "pnpm-meta",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-exceptions.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Walk a directory recursively and collect all source files.",
+      "pnpm": [],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-figma-system.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Read-only Figma sync audit for the Hirobius repo.",
+      "pnpm": [
+        "figma:audit"
+      ],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-gate-purity.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "audit-gate-purity — static scan for impurity patterns in every registered gate.",
+      "pnpm": [],
+      "gate": {
+        "channel": "ci-pr",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-gate-replaceability.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Reads docs/guardrails/registry.json, walks every registered gate, and produces a per-gate replaceability verdict with the most likely industry-tool replacement.",
+      "pnpm": [
+        "audit:gate-replaceability"
+      ],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-gates-supportjson.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Meta-gate ratchet for the `--json` rollout (per unit 13p-8). For each registered gate that is NOT in the pnpm-meta channel (skipped for cost), spawn `node <gateScript> --json` with a 30s timeout, capture stdout, and",
+      "pnpm": [],
+      "gate": {
+        "channel": "ci-pr",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-guardrails.js",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Scans the repository for the four pillars of a self-healing system: 1. AI Guardrails (CLAUDE.md, .cursorrules) 2. Linter Rules (ESLint, stylelint) 3. Gatekeepers (pre-commit hooks, lint-staged)",
+      "pnpm": [
+        "watch:guardrails"
+      ],
+      "gate": null
+    },
+    {
+      "name": "audit-orphan-wip.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Scans every branch ahead of main and reports which feature branches have commits NOT linked to a Hermes Kanban task via a `Refs:` line. Companion to scripts/check-commit-message-task-ref.mjs, which catches new orphans",
+      "pnpm": [],
+      "gate": {
+        "channel": "manual",
+        "severity": "info"
+      }
+    },
+    {
+      "name": "audit-pages.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Token compliance auditor for page surfaces. This is intentionally looser than audit-components.mjs:",
+      "pnpm": [
+        "check:full",
+        "tokens:audit:pages"
+      ],
+      "gate": {
+        "channel": "pnpm-meta",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-sbom.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Generates a CycloneDX Software Bill of Materials at docs/security/sbom.json. Manual channel — produces an artifact, not a gate. Useful for the GRC narrative and supply-chain review.",
+      "pnpm": [
+        "audit:sbom"
+      ],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-soft-gates.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Soft-gates audit: identifies every registered gate in docs/guardrails/registry.json that does NOT fire on a strict channel (pre-commit / pre-push / ci-pr), runs each",
+      "pnpm": [
+        "audit:soft-gates"
+      ],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-strengths.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Verifies that each documented differentiator in docs/architecture/strengths-and-differentiators.md is still real.",
+      "pnpm": [],
+      "gate": {
+        "channel": "ci-pr",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-tiers.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Heuristic tier classifier for every src/app/components/Hds*.tsx (and recursive subdirs like src/app/components/lab/). Proposes one of: primitive | pattern | template | utility.",
+      "pnpm": [],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-tokens.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Audits CSS token bridges and visual overrides against the JSON token source of truth.",
+      "pnpm": [
+        "check:fast",
+        "check:forbidden-overrides",
+        "check:full",
+        "check:ghost-tokens",
+        "check:semantic-report",
+        "check:tokens",
+        "sync",
+        "sync:health",
+        "tokens",
+        "watch:metrics"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "auth-middleware.mjs",
+      "category": "other",
+      "prefix": "auth",
+      "purpose": "HMAC authentication middleware for the bridge (build unit p5-3). Layered on top of the p5-1 envelope and p5-2 correlation work.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "auto-assigner.mjs",
+      "category": "other",
+      "prefix": "auto",
+      "purpose": "(no header description)",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "auto-research.mjs",
+      "category": "other",
+      "prefix": "auto",
+      "purpose": "query against a local Ollama model, persisting findings to docs/research/findings/<query-id>/<timestamp>.md.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "batch-scan.mjs",
+      "category": "other",
+      "prefix": "batch",
+      "purpose": "Visits every route on the target deployment, injects the headless scanner into the live DOM, deduplicates findings, and writes one fix-prompt file per route to scans/.",
+      "pnpm": [
+        "scan",
+        "scan:local"
+      ],
+      "gate": null
+    },
+    {
+      "name": "build-design-md.mjs",
+      "category": "build",
+      "prefix": "build",
+      "purpose": "Reads DESIGN.source.md (hand-authored template with auto markers), fills the marker blocks from hirobius.tokens.json and public/hds-manifest.json, and writes the assembled result to DESIGN.md at the repo root.",
+      "pnpm": [
+        "sync",
+        "sync:health",
+        "tokens"
+      ],
+      "gate": null
+    },
+    {
+      "name": "build-figma-masters.mjs",
+      "category": "build",
+      "prefix": "build",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "ui:masters"
+      ],
+      "gate": null
+    },
+    {
+      "name": "build-figma-variables.mjs",
+      "category": "build",
+      "prefix": "build",
+      "purpose": "Converts hirobius.tokens.json (W3C DTCG 2025.10) into: hirobius.figma-variables.json — plugin-compatible import file (Variables Import/Export) hirobius.figma-variables-api.json — Figma REST API POST payload (for…",
+      "pnpm": [
+        "figma-variables",
+        "sync"
+      ],
+      "gate": null
+    },
+    {
+      "name": "build-handoff.mjs",
+      "category": "build",
+      "prefix": "build",
+      "purpose": "Auto-regenerates token reference tables in DESIGN-HANDOFF.md from hirobius.tokens.json. Sections between <!-- auto:start:SECTION --> and <!-- auto:end:SECTION --> markers are replaced on every run.",
+      "pnpm": [
+        "sync",
+        "tokens"
+      ],
+      "gate": null
+    },
+    {
+      "name": "build-hds-tokens.mjs",
+      "category": "build",
+      "prefix": "build",
+      "purpose": "Produces two drop-in artifacts for consuming projects:",
+      "pnpm": [
+        "tokens:build"
+      ],
+      "gate": null
+    },
+    {
+      "name": "build-roadmap-data.mjs",
+      "category": "build",
+      "prefix": "build",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "check:fast",
+        "roadmap:data",
+        "sync:health"
+      ],
+      "gate": null
+    },
+    {
+      "name": "build-token-index.mjs",
+      "category": "build",
+      "prefix": "build",
+      "purpose": "Static analysis script that walks src/ for token references and produces src/app/design-system/token-usage-map.json — a committed artefact consumed by headless token-scan workflows and fix-prompt generation.",
+      "pnpm": [
+        "tokens:index"
+      ],
+      "gate": null
+    },
+    {
+      "name": "build-token-quick-reference.mjs",
+      "category": "build",
+      "prefix": "build",
+      "purpose": "Reads hirobius.tokens.json and extracts representative examples from each semantic token category, generating a concise lookup table for inclusion in public/llms.txt.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "build-tokens.mjs",
+      "category": "build",
+      "prefix": "build",
+      "purpose": "Compiles hirobius.tokens.json (W3C DTCG 2025.10) into: src/styles/tokens.css — CSS custom properties src/app/design-system/generated-tokens.ts — TypeScript constants",
+      "pnpm": [
+        "check:fast",
+        "check:full",
+        "sync",
+        "sync:health",
+        "tokens",
+        "tokens:verify"
+      ],
+      "gate": null
+    },
+    {
+      "name": "case-study-draft.mjs",
+      "category": "other",
+      "prefix": "case",
+      "purpose": "Context/Problem/Approach/Outcome/Artefacts case-study record.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "cc-plugins-middleware.mjs",
+      "category": "other",
+      "prefix": "cc",
+      "purpose": "Dev-only middleware: GET /api/cc-plugins Enumerates installed Claude Code skills from: ~/.claude/skills/ (global user skills) {cwd}/.claude/skills/ (project-scoped skills)",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "check-asset-manifest.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Guards the asset layer before large-scale visual population begins.",
+      "pnpm": [
+        "check:assets",
+        "check:fast",
+        "check:full"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-attributions.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Keeps the attribution registry machine-checkable.",
+      "pnpm": [
+        "check:attributions",
+        "check:full"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-binding-drift.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Soft gate that catches the failure mode where a component starts referencing a component-tier CSS variable that the masters pipeline doesn't know to bind. For each Hds*.tsx whose spec has a populated",
+      "pnpm": [
+        "check:binding-drift",
+        "pretest"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-brand.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Validates that all living documentation files are in sync with the current brand values in hirobius.tokens.json. Exits non-zero if stale values found.",
+      "pnpm": [
+        "check:brand",
+        "check:fast",
+        "check:full"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-code-connect.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "CI check: every Figma component with a Code Connect mapping (.figma.tsx) has a corresponding React component, and vice versa.",
+      "pnpm": [
+        "check:code-connect"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-commit-message-task-ref.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Validates that commits on feature branches reference an open Hermes Kanban task via a `Refs: <task-id>` line in the commit body. Soft-warn by default; promote to error via KANBAN_REF_ENFORCE=error.",
+      "pnpm": [],
+      "gate": {
+        "channel": "commit-msg",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-contrast.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "WCAG 2.1 contrast ratio checker for HDS semantic color pairs. Reads hirobius.tokens.json, resolves primitive + semantic color aliases, and reports contrast ratios for critical text/bg pairings in both",
+      "pnpm": [
+        "check:contrast",
+        "check:full"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-css-integrity.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Verifies that hand-authored bridge vars in theme.css stay in sync with the token source of truth in hirobius.tokens.json.",
+      "pnpm": [
+        "check:css",
+        "check:fast",
+        "check:full"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-dimensions.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Hirobius Design System - Fixed Dimension Checker",
+      "pnpm": [
+        "check:dimensions",
+        "check:fast",
+        "check:full"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-doc-structure.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Validates structural invariants of HDS documentation pages.",
+      "pnpm": [
+        "check:doc-structure",
+        "check:full"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-exemptions.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Keeps escape hatches visible and well-formed.",
+      "pnpm": [
+        "check:exemptions",
+        "check:full"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-fixture-stubs-ratchet.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Reads the current withStubFixtures count from validate-fixture-proof-of-firing (--json mode) and enforces that this count strictly decreases over time. The",
+      "pnpm": [],
+      "gate": {
+        "channel": "ci-pr",
+        "severity": "error"
+      }
+    },
+    {
+      "name": "check-focus-states.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "A11y focus state checker for HDS components and pages. Every interactive element must have a visible focus indicator.",
+      "pnpm": [
+        "check:focus",
+        "check:full"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-frozen-demos.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Guardrail for docs preview surfaces.",
+      "pnpm": [
+        "check:docs"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-hardcoded-breakpoints.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Hardcoded Breakpoint Checker",
+      "pnpm": [
+        "check:breakpoints",
+        "check:fast",
+        "check:full"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-hardcoded-colors.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Catches hardcoded color values in non-CSS color contexts that bypass the CSS custom property cascade and are invisible to check-inline-styles / check-tier-bypass.",
+      "pnpm": [
+        "check:colors",
+        "check:full",
+        "check:tokens"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-hardcoded-spacing.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Hardcoded Spacing Checker",
+      "pnpm": [
+        "check:fast",
+        "check:full",
+        "check:spacing",
+        "check:tokens"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-legacy-hds-vars.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "check:fast",
+        "check:full"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-licenses.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "License compliance gate. Runs `pnpm licenses list --prod --json` and filters against a deny-list of copyleft / restrictive licenses (GPL/AGPL/LGPL/SSPL/BUSL/EUPL/OSL/CC-BY-NC/CDDL).",
+      "pnpm": [
+        "check:licenses"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "error"
+      }
+    },
+    {
+      "name": "check-link-integrity.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Merged from: check-doc-references.mjs — active docs do not point at missing local files check-external-links.mjs — external <a href> URLs return non-4xx",
+      "pnpm": [
+        "check:doc-refs",
+        "check:fast",
+        "check:fast",
+        "check:full",
+        "check:routes"
+      ],
+      "gate": {
+        "channel": "pnpm-meta",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-manifest-drift.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "check:fast",
+        "check:full",
+        "check:manifest-drift",
+        "pretest"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-manifest-schema-semver.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Compares the current manifest/schema.json against manifest/schema.lock.json and flags breaking changes (property removals, type tightenings) as semver violations.",
+      "pnpm": [
+        "pretest"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-mono-roles.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Prevents ornamental/raw monospace from creeping back into prose-heavy surfaces that should rely on InlineCode or normal body/caption styling instead.",
+      "pnpm": [
+        "check:fast",
+        "check:full",
+        "check:mono-roles"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-motion.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Verifies that interactive components ship with motion feedback — the HDS standard that every user action has a visible, token-timed response.",
+      "pnpm": [
+        "check:full",
+        "check:micromotion"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-og-meta.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Static analysis validator for OG meta tags in index.html.",
+      "pnpm": [
+        "check:full"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-page-shell.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Forbids direct Container usage in src/app/pages/**. Pages must use Page (which wraps Container + applies the canonical vertical padding) so every page lands with consistent breathing room against the viewport edges.",
+      "pnpm": [
+        "check:full",
+        "check:page-shell"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-reduced-motion.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Verifies that the HDS motion system respects prefers-reduced-motion at both layers:",
+      "pnpm": [
+        "check:full",
+        "check:motion"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-ref-forwarding.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Verifies that HDS components rendering native form controls forward their ref to the underlying DOM element.",
+      "pnpm": [
+        "check:fast",
+        "check:full",
+        "check:refs"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-registry.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Validates that hds-registry.json is complete and up-to-date.",
+      "pnpm": [
+        "check:fast",
+        "check:full",
+        "check:registry",
+        "pretest"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-route-coverage.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "layout-integrity test set. Adrian directive 2026-05-04: no exceptions.",
+      "pnpm": [
+        "test:layout"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-route-smoke.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "check:release",
+        "check:route-smoke"
+      ],
+      "gate": {
+        "channel": "pnpm-meta",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-secrets.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Pre-commit secrets scanner — wraps the `gitleaks` binary and registers it in docs/guardrails/registry.json so it shows up in audits and fixture-proof",
+      "pnpm": [
+        "check:secrets"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "error"
+      }
+    },
+    {
+      "name": "check-security-baseline.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Local security and dependency hygiene baseline.",
+      "pnpm": [
+        "check:full",
+        "check:security"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-snapshot-staleness.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "committed baseline JSON is older than any of its source files. The intent: catch baselines that should have been regenerated after a source change but weren't.",
+      "pnpm": [],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-source-canon.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Source-side companion to validators/swiss-canon.mjs. The JSX validator",
+      "pnpm": [
+        "pretest"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-style-discipline.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Merged from: check-inline-styles.mjs + check-style-prop-values.mjs + check-css-values.mjs",
+      "pnpm": [
+        "check:css-values",
+        "check:fast",
+        "check:full",
+        "check:inline-styles",
+        "check:release",
+        "check:style-props"
+      ],
+      "gate": {
+        "channel": "pnpm-meta",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-template-source-of-truth.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Prevents direct edits to auto-generated output files by checking that if an output file has been modified, the corresponding generator script is also modified in the same changeset.",
+      "pnpm": [
+        "check:fast",
+        "check:template-sot"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-tenant-tokens.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Validates every tenants/<slug>/tokens.json against HDS structural rules.",
+      "pnpm": [
+        "pretest"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-tier-bypass.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Enforces the primitive → semantic → component aliasing hierarchy in source files. Direct use of var(--primitive-*) in component and page files bypasses the semantic",
+      "pnpm": [
+        "check:fast",
+        "check:full",
+        "check:tier-bypass",
+        "check:tokens"
+      ],
+      "gate": {
+        "channel": "pnpm-meta",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-token-descriptions.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Default mode: Enforces token description quality in hirobius.tokens.json: Every $type-bearing token node SHOULD have a \"$description\" field. No description may be blank or whitespace-only.",
+      "pnpm": [
+        "check:docs",
+        "check:full",
+        "check:token-descriptions"
+      ],
+      "gate": {
+        "channel": "pnpm-meta",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-token-paths-ratchet.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Default mode (pre-commit / scan): Scans src/** for string references to design-token paths ({primitive,semantic,component,role}.x.y.z) and asserts each resolves",
+      "pnpm": [],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "error"
+      }
+    },
+    {
+      "name": "check-token-rebake-needed.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Pre-commit guard: ensure generated token outputs are in sync with `hirobius.tokens.json`. A commit that edits the source but skips the rebake silently ships drift; this catches that.",
+      "pnpm": [],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-token-renames.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Compares the current hirobius.tokens.json leaf paths against the committed baseline in tokens.lock.json. Any path present in the baseline but missing from the current tree is a potential breaking rename.",
+      "pnpm": [
+        "check:full",
+        "check:token-renames"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-token-structure.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Validates hirobius.tokens.json for structural correctness. Catches two categories of architectural error:",
+      "pnpm": [
+        "check:full",
+        "check:token-structure"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-typography-discipline.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Merged from: check-hardcoded-fonts.mjs + check-font-files.mjs + audit-typography-overrides.mjs",
+      "pnpm": [
+        "check:fast",
+        "check:font-files",
+        "check:fonts",
+        "check:full",
+        "check:tokens",
+        "tokens"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-unresponsive-grids.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Unresponsive Grid Checker",
+      "pnpm": [
+        "check:full",
+        "check:grids"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-validator-wiring.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Meta-validator. Asserts every gate registered in docs/guardrails/registry.json has a `firingChannel` value that actually matches reality — i.e. the channel claims `pre-commit` only",
+      "pnpm": [],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "classify-pillars.mjs",
+      "category": "other",
+      "prefix": "classify",
+      "purpose": "BUILD / GROW / RUN pillar field on orchestration units + kanban tasks.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "client-digest.mjs",
+      "category": "other",
+      "prefix": "client",
+      "purpose": "Walks the last N days of git log restricted to clients/<slug>/, buckets commits into shipped / next / blocker / other, and emits a markdown email draft ready to paste. Solo agencies live on perceived momentum; this",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "component-discovery.mjs",
+      "category": "other",
+      "prefix": "component",
+      "purpose": "(no header description)",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "convert-incoming-assets.mjs",
+      "category": "other",
+      "prefix": "convert",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "assets:convert"
+      ],
+      "gate": null
+    },
+    {
+      "name": "correlation.mjs",
+      "category": "other",
+      "prefix": null,
+      "purpose": "Request/response correlation Map used by `scripts/hds-bridge.mjs`. Build unit p5-2.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "cost-ceiling-gate.mjs",
+      "category": "other",
+      "prefix": "cost",
+      "purpose": "Hard cost ceiling enforcement. Refuses dispatch when `task.costSpent + projected > task.costCeiling` (USD).",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "derive-routes.mjs",
+      "category": "other",
+      "prefix": "derive",
+      "purpose": "Auto-derive the route list from: 1. src/app/routes.tsx (the React Router config) 2. src/app/data/component-api.json (component doc pages)",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "discord-bot.mjs",
+      "category": "other",
+      "prefix": "discord",
+      "purpose": "Hirobius HQ — Discord bot with Claude API integration.",
+      "pnpm": [
+        "bot"
+      ],
+      "gate": null
+    },
+    {
+      "name": "dispatch-pod.mjs",
+      "category": "other",
+      "prefix": "dispatch",
+      "purpose": "Worktree-isolation verification for sub-agent dispatch.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "enrich-manifest.mjs",
+      "category": "other",
+      "prefix": "enrich",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "manifest:generate",
+        "sync:health"
+      ],
+      "gate": null
+    },
+    {
+      "name": "ensure-ops-data.mjs",
+      "category": "other",
+      "prefix": "ensure",
+      "purpose": "Makes a clean checkout of @hirobius/ops buildable.",
+      "pnpm": [
+        "prebuild",
+        "predev",
+        "pretypecheck"
+      ],
+      "gate": null
+    },
+    {
+      "name": "figma-bridge-smoke.mjs",
+      "category": "figma",
+      "prefix": "figma",
+      "purpose": "End-to-end smoke test for the HDS Figma bridge pipeline (kanban t_d068769e).",
+      "pnpm": [
+        "figma:bridge:smoke"
+      ],
+      "gate": null
+    },
+    {
+      "name": "figma-diff.mjs",
+      "category": "figma",
+      "prefix": "figma",
+      "purpose": "Structure-agnostic: recursively computes added/removed/changed keyed by JSON pointer.",
+      "pnpm": [
+        "figma:diff"
+      ],
+      "gate": null
+    },
+    {
+      "name": "figma-library-generate.mjs",
+      "category": "figma",
+      "prefix": "figma",
+      "purpose": "Authoritative write-path: hirobius.tokens.json → Figma Variables REST API payload.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "figma-parity-check.mjs",
+      "category": "figma",
+      "prefix": "figma",
+      "purpose": "Compares Figma component metadata (names, variants) with the manifest componentSpecs (and utilities), reporting three classes of mismatch:",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "generate-changelog.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "Parse git log using conventional-commit format and generate CHANGELOG.md. Groups commits by type (feat/fix/perf/refactor/docs/test/chore/other). Respects git tags; unreleased commits appear in an \"Unreleased\" section.",
+      "pnpm": [
+        "changelog:generate"
+      ],
+      "gate": null
+    },
+    {
+      "name": "generate-closure-plan.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "Auto-regenerates the per-row table in `docs/guardrails/full-strictness-closure-plan.md` from `docs/guardrails/full-strictness-inventory.json`. Per unit 13p-10.",
+      "pnpm": [
+        "closure:plan",
+        "closure:plan:check"
+      ],
+      "gate": null
+    },
+    {
+      "name": "generate-component-api.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "Builds a JSON manifest of exported component props from src/app/components/*.tsx using react-docgen-typescript.",
+      "pnpm": [
+        "docs:api",
+        "manifest:generate",
+        "sync:health"
+      ],
+      "gate": null
+    },
+    {
+      "name": "generate-component-changelogs.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "Generates public/component-changelogs.json by cross-referencing each component slug in src/app/data/component-api.json with git log history.",
+      "pnpm": [
+        "docs:changelogs"
+      ],
+      "gate": null
+    },
+    {
+      "name": "generate-llms-txt.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "Generates the machine-readable HDS system map for AI agents. Source inputs: public/hds-manifest.json src/app/data/component-api.json hirobius.tokens.json (token source of truth; referenced, not inlined)",
+      "pnpm": [
+        "docs:llms",
+        "llms:generate",
+        "tokens"
+      ],
+      "gate": null
+    },
+    {
+      "name": "generate-manifest-projection.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "hds-manifest.json for agent/LLM consumption.",
+      "pnpm": [
+        "manifest:project"
+      ],
+      "gate": null
+    },
+    {
+      "name": "generate-manifest.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "Keeps public/hds-manifest.json self-driving by recursively scanning the source tree for governed HDS components and documentation utilities.",
+      "pnpm": [
+        "manifest:generate",
+        "sync:health",
+        "tokens",
+        "watch:metrics"
+      ],
+      "gate": null
+    },
+    {
+      "name": "generate-portal-token.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "generate-portal-token — mint a /c/:slug?token=… HMAC token for a client.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "generate-script-index.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "Generates a machine- + human-readable index of every script in scripts/ so an agent (or human) can find \"the script that does X\" without grepping ~180 files. Merges three sources:",
+      "pnpm": [
+        "manifest:generate",
+        "scripts:index"
+      ],
+      "gate": null
+    },
+    {
+      "name": "generate-security-posture.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "Builds src/app/data/security-posture.json from three real data sources: 1. pnpm audit --json → open finding counts per severity 2. docs/security/audit-log.md → last entry date + derived grade",
+      "pnpm": [
+        "audit:sidecar"
+      ],
+      "gate": null
+    },
+    {
+      "name": "generate-sitemap.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "Generates public/sitemap.xml from the route list derived from the component registry and static routes (via derive-routes.mjs).",
+      "pnpm": [
+        "sitemap:generate"
+      ],
+      "gate": null
+    },
+    {
+      "name": "generate-strength-report.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "Pure observer — reads source data and emits two report artifacts: docs/guardrails/strength-report.md (human-readable dashboard) docs/guardrails/strength-report.json (LLM-readable structured state)",
+      "pnpm": [
+        "strength",
+        "strength:snapshot"
+      ],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "generate-system-atlas.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "Builds a text-ready markdown atlas of the HDS source graph for case-study writing and future refactor planning.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "generate-to-figma.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "ui:fix",
+        "ui:gen"
+      ],
+      "gate": null
+    },
+    {
+      "name": "generate-visual-catalog.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "catalog"
+      ],
+      "gate": null
+    },
+    {
+      "name": "google-auth.mjs",
+      "category": "other",
+      "prefix": "google",
+      "purpose": "One-time OAuth setup: generates a Google refresh token with Gmail + Drive scope.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "gpt-knowledge.mjs",
+      "category": "other",
+      "prefix": "gpt",
+      "purpose": "Ingests ChatGPT export zips (already extracted to ~/hirobius-knowledge-raw/) into the three-pillar knowledge base under docs/knowledge/.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "haiku-agent.mjs",
+      "category": "other",
+      "prefix": "haiku",
+      "purpose": "Autonomous unit executor powered by Claude Haiku 4.5 via Anthropic API. Same orchestration protocol as hermes-unit — claim/done state machine, scoping-discipline system prompt — but uses the Anthropic Messages API",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "hds-bridge.mjs",
+      "category": "other",
+      "prefix": "hds",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "bridge"
+      ],
+      "gate": null
+    },
+    {
+      "name": "hds-jsx-compiler.mjs",
+      "category": "other",
+      "prefix": "hds",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "test:compiler"
+      ],
+      "gate": null
+    },
+    {
+      "name": "hds-lint.js",
+      "category": "other",
+      "prefix": "hds",
+      "purpose": "Hirobius Design System - Automated System Linter",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "headless-scan.browser.js",
+      "category": "other",
+      "prefix": "headless",
+      "purpose": "(no header description)",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "import-tasks.mjs",
+      "category": "other",
+      "prefix": "import",
+      "purpose": "Targets the FINALIZED schema in supabase/migrations/0003_tasks.sql (from the ops-archive consolidation-handoff). Three sources, collision-free namespaced keys:",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "kanban-start.mjs",
+      "category": "other",
+      "prefix": "kanban",
+      "purpose": "Single-command \"I'm starting work\" helper. Combines: hermes kanban create <title> --triage --workspace worktree git worktree add .worktrees/<short-id> -b feat/<short-id>-<slug>",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "leads-middleware.mjs",
+      "category": "other",
+      "prefix": "leads",
+      "purpose": "Backs the /ops Leads board under `pnpm dev` (Vite). It reuses the EXACT same logic modules as the production Vercel functions — lib/supabase/leads (the",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "llm-stream-bridge.mjs",
+      "category": "other",
+      "prefix": "llm",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "figma:stream"
+      ],
+      "gate": null
+    },
+    {
+      "name": "meeting-to-tasks.mjs",
+      "category": "other",
+      "prefix": "meeting",
+      "purpose": "meeting transcript, append them to docs/ai/proposed-units.jsonl.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "merge-squash.mjs",
+      "category": "other",
+      "prefix": "merge",
+      "purpose": "Automates the squash-merge-with-baseline-tag protocol for fix/* → main. Full protocol: docs/operations/squash-merge-protocol.md",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "migrate-backlogs-to-hermes.mjs",
+      "category": "other",
+      "prefix": "migrate",
+      "purpose": "Pushes all task backlogs into Hermes Kanban boards.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "migrate-orchestration-to-hermes.mjs",
+      "category": "other",
+      "prefix": "migrate",
+      "purpose": "Pushes outstanding orchestration.json units into the Hermes Kanban board.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "normalize-figma-snapshot.mjs",
+      "category": "other",
+      "prefix": "normalize",
+      "purpose": "Convert transport-specific Figma export JSON into the stable snapshot shape used by `scripts/audit-figma-system.mjs`.",
+      "pnpm": [
+        "figma:snapshot"
+      ],
+      "gate": null
+    },
+    {
+      "name": "page-clone.mjs",
+      "category": "other",
+      "prefix": "page",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "clone:page"
+      ],
+      "gate": null
+    },
+    {
+      "name": "parse-bookmarks.mjs",
+      "category": "other",
+      "prefix": "parse",
+      "purpose": "Parses Chrome/Edge bookmark HTML exports into structured markdown files organized by BUILD / GROW / RUN pillar.",
+      "pnpm": [
+        "knowledge:bookmarks"
+      ],
+      "gate": null
+    },
+    {
+      "name": "persist-learned-rule.mjs",
+      "category": "other",
+      "prefix": "persist",
+      "purpose": "Append a learned-rule entry to docs/ai/learned-rules.jsonl, the append-only canon for hermes post-mortem distillation output. Each entry is one JSON line, schema:",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "prerender.mjs",
+      "category": "other",
+      "prefix": null,
+      "purpose": "Static pre-render script.",
+      "pnpm": [
+        "build:prerender"
+      ],
+      "gate": null
+    },
+    {
+      "name": "print-health-commit.mjs",
+      "category": "other",
+      "prefix": "print",
+      "purpose": "Prints a copyable commit message that includes the current system integrity grade from the latest token audit.",
+      "pnpm": [
+        "health-commit"
+      ],
+      "gate": null
+    },
+    {
+      "name": "process-call-recording.mjs",
+      "category": "other",
+      "prefix": "process",
+      "purpose": "Download, extract, and transcribe call recording ZIPs from Google Drive. Point it at a folder ID and it processes every unread ZIP inside. Point it at a single file ID and it processes just that one.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "project-component-spec.mjs",
+      "category": "other",
+      "prefix": "project",
+      "purpose": "Walks a flagship HDS component .tsx file with the TypeScript AST and projects a componentSpec shape from source. Used as a drift detector against the hand-authored manifest entries written by build-tokens.mjs.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "promote-learned-rule.mjs",
+      "category": "other",
+      "prefix": "promote",
+      "purpose": "Interactive walker over docs/ai/learned-rules.jsonl. For each unprommoted entry (no `promotedAt` field), prompts Adrian to promote it to a real registry entry in docs/guardrails/registry.json. The actual flip from",
+      "pnpm": [
+        "guardrail:learned-rules",
+        "guardrail:promote-rule"
+      ],
+      "gate": null
+    },
+    {
+      "name": "promote-to-core.mjs",
+      "category": "other",
+      "prefix": "promote",
+      "purpose": "4-check Promotion Checklist: 1. no-hex-colors — no raw `#RRGGBB` / `#RGB` outside of comments 2. uses-tokens — at least one `var(--semantic-…)` or `var(--primitive-…)`",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "promote.mjs",
+      "category": "other",
+      "prefix": null,
+      "purpose": "(no header description)",
+      "pnpm": [
+        "promote"
+      ],
+      "gate": null
+    },
+    {
+      "name": "proposed-skills-middleware.mjs",
+      "category": "other",
+      "prefix": "proposed",
+      "purpose": "Dev-only HTTP middleware for the `/ops` \"new skill\" capture seam. Mirrors scripts/proposed-units-middleware.mjs (the proposed-units inbox) but for skill ideas. Adrian describes a skill in natural language; we",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "proposed-units-middleware.mjs",
+      "category": "other",
+      "prefix": "proposed",
+      "purpose": "Dev-only HTTP middleware that surfaces docs/ai/proposed-units.jsonl — the append-only seam where dispatched agents propose new units that haven't been promoted to Hermes tasks yet — to the /ops/kanban page.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "record-health.mjs",
+      "category": "other",
+      "prefix": "record",
+      "purpose": "Appends the current token audit snapshot to the health history log so the Overview rail can track trend over time.",
+      "pnpm": [
+        "check:semantic-report",
+        "health:record"
+      ],
+      "gate": null
+    },
+    {
+      "name": "refresh-firing-stats.mjs",
+      "category": "other",
+      "prefix": "refresh",
+      "purpose": "Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and updates per-gate `lastFiringAt` and `lastViolationAt` fields in",
+      "pnpm": [
+        "guardrail:firing-stats"
+      ],
+      "gate": null
+    },
+    {
+      "name": "research-feed-middleware.mjs",
+      "category": "other",
+      "prefix": "research",
+      "purpose": "Dev-only HTTP middleware: GET /api/research-feed Returns a flat, time-sorted list of recent auto-research findings so the /ops \"Research\" disclosure can render a feed without parsing markdown",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "run-gates.mjs",
+      "category": "other",
+      "prefix": "run",
+      "purpose": "Single source of truth for \"which gates run on which channel.\"",
+      "pnpm": [
+        "closure:plan"
+      ],
+      "gate": null
+    },
+    {
+      "name": "run-validator-tests.mjs",
+      "category": "other",
+      "prefix": "run",
+      "purpose": "Fixture-driven test runner for validators and pipeline units. Uses Node built-in node:test — no external test dependencies.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "sales-pipeline.mjs",
+      "category": "other",
+      "prefix": "sales",
+      "purpose": "with the recommended next touch.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "sales-proposal.mjs",
+      "category": "other",
+      "prefix": "sales",
+      "purpose": "Deterministic v1: keyword-routes the scope to Tier 1/2/3 and emits a markdown quote table. Designed for the SkillTile input-shell (kind: 'text') — receives the scope as a single argv string via the skill-runner",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "scaffold-component.mjs",
+      "category": "other",
+      "prefix": "scaffold",
+      "purpose": "Creates a Swiss-canonical component skeleton from templates/component-template.tsx, plus a manifest stub and a fixture stub under fixtures/swiss-canon/<name>-clean/. The scaffolder makes",
+      "pnpm": [
+        "scaffold:component"
+      ],
+      "gate": null
+    },
+    {
+      "name": "scaffold-tenant.mjs",
+      "category": "other",
+      "prefix": "scaffold",
+      "purpose": "Bootstraps a new HDS tenant directory from tenants/_template. Emits tenants/<slug>/tokens.json + tenants/<slug>/metadata.json + tenants/<slug>/README.md pre-filled with the supplied brand args.",
+      "pnpm": [
+        "scaffold:tenant"
+      ],
+      "gate": null
+    },
+    {
+      "name": "self-heal.mjs",
+      "category": "other",
+      "prefix": "self",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "heal",
+        "heal:smoke"
+      ],
+      "gate": null
+    },
+    {
+      "name": "service-manager-middleware.mjs",
+      "category": "other",
+      "prefix": "service",
+      "purpose": "Dev-only Connect middleware for /api/services/*. Mounted at /api/services in vite.config.mjs; req.url is the suffix.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "setup-hooks.mjs",
+      "category": "other",
+      "prefix": "setup",
+      "purpose": "Activates Husky as the repo's hook path.",
+      "pnpm": [
+        "prepare"
+      ],
+      "gate": null
+    },
+    {
+      "name": "skill-runner-middleware.mjs",
+      "category": "other",
+      "prefix": "skill",
+      "purpose": "Dev-only HTTP middleware that runs a whitelisted set of repo scripts in response to POST /api/skills/:id from the /ops dashboard.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "snapshot-token-paths.mjs",
+      "category": "other",
+      "prefix": "snapshot",
+      "purpose": "Reads hirobius.tokens.json, walks the DTCG token tree, and emits a sorted flat list of all leaf token paths (e.g. \"semantic.color.surface.raised\").",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "swiss-canon-check.mjs",
+      "category": "other",
+      "prefix": "swiss",
+      "purpose": "Swiss design canon gap report for the Hirobius Design System.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "sync-asset-manifest.mjs",
+      "category": "sync",
+      "prefix": "sync",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "assets:manifest",
+        "check:fast",
+        "check:full",
+        "sync:health"
+      ],
+      "gate": null
+    },
+    {
+      "name": "sync-client-emails.mjs",
+      "category": "sync",
+      "prefix": "sync",
+      "purpose": "Gmail-based email sync for Hirobius client workspaces. Uses the Gmail MCP server (already connected in Claude Code sessions) via a local bridge endpoint, OR falls back to the Gmail REST API with OAuth.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "sync-hds-registry.mjs",
+      "category": "sync",
+      "prefix": "sync",
+      "purpose": "Keeps src/app/data/hds-registry.json in sync with the actual HDS page files.",
+      "pnpm": [
+        "tokens"
+      ],
+      "gate": null
+    },
+    {
+      "name": "sync-icons.mjs",
+      "category": "sync",
+      "prefix": "sync",
+      "purpose": "Scans src/ for lucide-react imports and emits a registry of the icon exports currently used by the app.",
+      "pnpm": [
+        "icons:sync"
+      ],
+      "gate": null
+    },
+    {
+      "name": "sync-system-health.mjs",
+      "category": "sync",
+      "prefix": "sync",
+      "purpose": "Reads the latest generated system artifacts, synchronizes health telemetry into public/hds-manifest.json, records history when the score changes, and only",
+      "pnpm": [
+        "sync:health"
+      ],
+      "gate": null
+    },
+    {
+      "name": "tasks-middleware.mjs",
+      "category": "other",
+      "prefix": "tasks",
+      "purpose": "Reuses lib/tasks/actions.mjs (same logic as the prod functions). Wired in vite.config.mjs with apply:'serve' so it never ships to prod.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "telegram-bot.mjs",
+      "category": "other",
+      "prefix": "telegram",
+      "purpose": "Telegram adapter for the Hirobius HQ auto-assigner. Mirrors scripts/discord-bot.mjs message routing — same backend, different transport. Both can run side-by-side; both write to the same",
+      "pnpm": [
+        "telegram"
+      ],
+      "gate": null
+    },
+    {
+      "name": "telemetry-report.mjs",
+      "category": "other",
+      "prefix": "telemetry",
+      "purpose": "Reads telemetry/events.jsonl and prints a generation-health summary: total generations, success / exhausted breakdown, success rate retry-exhaustion rate (over rolling 24 h, production-tagged)",
+      "pnpm": [
+        "telemetry:report"
+      ],
+      "gate": null
+    },
+    {
+      "name": "test-bridge-endpoints.mjs",
+      "category": "test",
+      "prefix": "test",
+      "purpose": "Validates the 11a-2 orchestration approval endpoints:",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "test-doc-pages-snapshot.mjs",
+      "category": "test",
+      "prefix": "test",
+      "purpose": "9d-10: Visual-regression baseline for the doc-site source surface.",
+      "pnpm": [
+        "pretest"
+      ],
+      "gate": null
+    },
+    {
+      "name": "test-figma-masters-snapshot.mjs",
+      "category": "test",
+      "prefix": "test",
+      "purpose": "Visual-regression baseline for pipeline/figma-masters-batch.mjs. The pipeline is a pure JS→JSON projection (no Figma APIs called from Node), so we capture buildMastersBatch() output as canonical JSON and",
+      "pnpm": [
+        "check:figma-snapshot",
+        "check:figma-snapshot:update",
+        "pretest"
+      ],
+      "gate": null
+    },
+    {
+      "name": "test-phase1.mjs",
+      "category": "test",
+      "prefix": "test",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "test:phase1"
+      ],
+      "gate": null
+    },
+    {
+      "name": "test-prompt-regression.mjs",
+      "category": "test",
+      "prefix": "test",
+      "purpose": "Regression suite for LLM prompt outputs. Walks fixtures/llm-prompts/<slug>/ directories. Each must contain:",
+      "pnpm": [
+        "test:prompts"
+      ],
+      "gate": null
+    },
+    {
+      "name": "test-retry-loop.mjs",
+      "category": "test",
+      "prefix": "test",
+      "purpose": "Tests the retry loop with a mocked LLM. No network calls.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "threads-middleware.mjs",
+      "category": "other",
+      "prefix": "threads",
+      "purpose": "Dev-only HTTP middleware that surfaces \"open work threads\" to the /ops/kanban page so it can correlate Hermes tasks with Adrian's git worktrees and active Claude Code sessions.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "triage-approved.mjs",
+      "category": "other",
+      "prefix": "triage",
+      "purpose": "Triage actions for orchestration's `approved` bucket. Complements `_retired-2026-05-06/list-eligible.mjs` (which just lists eligible units) and `audit-claims.mjs` (which finds stale `claimed` units). This script",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "ui-lint.mjs",
+      "category": "other",
+      "prefix": "ui",
+      "purpose": "p6-2: thin CLI wrapper around GET http://localhost:3005/lint. Asks the bridge to run the validator suite over its current in-memory selection and prints findings. Exits non-zero when findings are non-empty so it",
+      "pnpm": [
+        "ui:lint"
+      ],
+      "gate": null
+    },
+    {
+      "name": "update-commit-history.mjs",
+      "category": "other",
+      "prefix": "update",
+      "purpose": "Generate recent commit history for HistoryCard consumption.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "update-journal.mjs",
+      "category": "other",
+      "prefix": "update",
+      "purpose": "Appends a systems-ledger entry to docs/SYSTEMS-LOG.md using the latest token audit report and health history snapshot.",
+      "pnpm": [
+        "health-log"
+      ],
+      "gate": null
+    },
+    {
+      "name": "update-precommit-hash.mjs",
+      "category": "other",
+      "prefix": "update",
+      "purpose": "Recompute the canonical SHA-256 of .husky/pre-commit and write it to docs/guardrails/registry.json as `precommitStructureHash`.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "validate-fixture-proof-of-firing.mjs",
+      "category": "validate",
+      "prefix": "validate",
+      "purpose": "Meta-validator: walks docs/guardrails/registry.json and for every registered gate asserts that a fixture pair exists in fixtures/<gate-id>/.",
+      "pnpm": [],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "error"
+      }
+    },
+    {
+      "name": "validate-guardrail-registry.mjs",
+      "category": "validate",
+      "prefix": "validate",
+      "purpose": "Asserts that every scripts/check-*.mjs and scripts/audit-*.mjs file has a corresponding entry in docs/guardrails/registry.json.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "validate-manifest.mjs",
+      "category": "validate",
+      "prefix": "validate",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "check:fast",
+        "check:full",
+        "prebuild",
+        "pretest",
+        "validate:manifest"
+      ],
+      "gate": null
+    },
+    {
+      "name": "validate-orchestration.mjs",
+      "category": "validate",
+      "prefix": "validate",
+      "purpose": "Validates docs/ai/orchestration.json schema extension landed for the approval-app meta-cluster (11-A). Every non-done unit must carry the four classifier fields the approval app reads:",
+      "pnpm": [],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "error"
+      }
+    },
+    {
+      "name": "verify-roadmap-sync.mjs",
+      "category": "verify",
+      "prefix": "verify",
+      "purpose": "Verify that roadmap.json summary counts match the displayed items in each section. This prevents drift between the top-level summary and the actual section data.",
+      "pnpm": [
+        "roadmap:data",
+        "roadmap:verify",
+        "sync:health"
+      ],
+      "gate": null
+    },
+    {
+      "name": "verify-tokens.mjs",
+      "category": "verify",
+      "prefix": "verify",
+      "purpose": "Verifies that hirobius.tokens.json compiles correctly to: tokens.css — every JSON token has a CSS var; semantic vars reference upstream generated-tokens.ts — every non-composite token has a TS var() reference",
+      "pnpm": [
+        "check:fast",
+        "check:full",
+        "tokens:verify"
+      ],
+      "gate": null
+    },
+    {
+      "name": "video-clone.mjs",
+      "category": "other",
+      "prefix": "video",
+      "purpose": "(no header description)",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "visual-ingest.mjs",
+      "category": "other",
+      "prefix": "visual",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "visual-ingest"
+      ],
+      "gate": null
+    },
+    {
+      "name": "watch-roadmap.mjs",
+      "category": "other",
+      "prefix": "watch",
+      "purpose": "(no header description)",
+      "pnpm": [
+        "roadmap:watch"
+      ],
+      "gate": null
+    },
+    {
+      "name": "youtube-knowledge.mjs",
+      "category": "other",
+      "prefix": "youtube",
+      "purpose": "Fetches liked + Watch Later videos from multiple Google accounts, gets transcripts, summarizes via local Hermes, writes structured markdown to data/knowledge/grow/youtube/.",
+      "pnpm": [
+        "knowledge:youtube",
+        "knowledge:youtube:auth",
+        "knowledge:youtube:digest"
+      ],
+      "gate": null
+    }
+  ]
+}
