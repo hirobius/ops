@@ -19,7 +19,7 @@
  *
  * Env (set by the human in the Vercel dashboard — never in .env by an agent):
  *   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY   server-side writes
- *   GOOGLE_PLACES_API_KEY                      used by the real puller (lib/lead-gen)
+ *   OUTSCRAPER_API_KEY                         lead sourcing (lib/lead-gen); unset → mock rows
  */
 
 import type { VercelRequest } from '@vercel/node';
