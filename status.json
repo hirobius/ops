@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2026-07-02T19:30:00Z",
+  "updatedAt": "2026-07-02T22:00:00Z",
   "phase": "active",
-  "headline": "Fleet hub fully live \u2014 /ops preview green, login works, /ops/projects renders all 10 repos + their status.json (VERCEL_TOKEN + GITHUB_TOKEN active)",
+  "headline": "Fleet hub live + architecture scrub Tier 1/2 shipped (8 batches: ~30 dead files/deps gone, CI unbroken on main, -1MB bundle, 9 serverless fns)",
   "next": [
-    "First real lead run: pull Access Tech leads -> generate -> eyeball config (verifies OUTSCRAPER + ANTHROPIC + Supabase)",
-    "Task importer + approvals inbox/run log + tier dispatch (#8, #13)",
-    "Vercel Pro before the importer adds routes (durable fix for the 12-fn cap)"
+    "HDS cutover on the /ops survivor list (shared chrome first: PageHeader = 16/17 pages)",
+    "First real lead run: pull Access Tech leads -> generate -> eyeball config",
+    "Discord always-on + fleet-aware (#15); task importer + alerts (#8/#11); Tier 3/4 scrub follow-ups"
   ],
   "blocked": [
     "main branch stale + fails invalid_engines_value; production waits on feature->main merge (PR #1)"
