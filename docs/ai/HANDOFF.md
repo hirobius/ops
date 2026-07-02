@@ -19,7 +19,10 @@ _Last updated: 2026-07-02 · branch `claude/relaxed-ramanujan-vvhqf8` (all work 
   `ClientConfig` contract in `lib/schema`). Render seam emits `client.config.ts`
   + deploy commands (`/api/render-site`).
 - **New surfaces**: `/ops/digest` (newsletter intel, JSONs in `src/app/digests/`),
-  `/ops/projects` (live Vercel fleet — needs `VERCEL_TOKEN`).
+  `/ops/projects` (live Vercel fleet — needs `VERCEL_TOKEN`; also renders each
+  repo's root `status.json` — phase · headline · blocked — once `GITHUB_TOKEN`
+  is set). Fleet-status convention: every repo keeps `status.json` at root
+  (ops's own is the reference).
 - **Decision record**: `docs/ARCHITECTURE.md` (2026-06-30 reversal — Astro is
   production, Duda retired). Execution plan: `docs/operations/ops-astro-cutover-plan.md`.
 
@@ -65,13 +68,14 @@ Keys are set by Adrian only (never read/write `.env*`). Never `git push` to
 main; feature branch only. Never run deploys or `pnpm check:release`. Update
 this file before ending a work session.
 
-## Universal repo-onboarding prompt (copy-paste per client repo)
+## Universal repo-onboarding prompt (copy-paste per client repo — the ONE prompt)
 
 Run this verbatim in a Claude Code session scoped to the target repo (queue
-item 3). It is self-contained — no other context needed.
+item 3). Self-contained: consolidates tasks, creates the status file, wires the
+pointer. Send once per repo.
 
 ```
-Onboard this repo into the Hirobius fleet hub (hirobius/ops). Three jobs:
+Onboard this repo into the Hirobius fleet hub (hirobius/ops). Four jobs:
 
 1. CONSOLIDATE TASKS → GITHUB ISSUES. Audit this repo for every open/implied
    task: TODO/FIXME comments, tasks.json or TODO.md files, unchecked README
@@ -81,26 +85,43 @@ Onboard this repo into the Hirobius fleet hub (hirobius/ops). Three jobs:
    open issues instead of double-filing. GitHub Issues are this repo's task
    source of truth — the ops hub imports them automatically.
 
-2. ADD THE FLEET POINTER. Create or append to CLAUDE.md at the repo root:
+2. CREATE THE STATUS FILE. From what the audit showed, write `status.json` at
+   the repo root — the ops fleet dashboard reads this file from the default
+   branch. Exactly this shape (all narrative fields short):
+
+   {
+     "updatedAt": "<ISO timestamp now>",
+     "phase": "active | prelaunch | live | maintenance | paused",
+     "headline": "one line: where this project truly stands",
+     "next": ["up to 3 bullets of what's next"],
+     "blocked": ["only real blockers, else empty array"]
+   }
+
+3. ADD THE FLEET POINTER. Create or append to CLAUDE.md at the repo root:
 
    ## Fleet hub
    This repo is part of the Hirobius fleet. The operations hub is the
    hirobius/ops repo: fleet state at /api/projects, consolidated tasks at
    /ops/tasks (this repo's GitHub Issues sync there), current cross-project
-   state in docs/ai/HANDOFF.md (in ops). Track new work as GitHub Issues in
-   THIS repo — never a local TODO file. Read the ops HANDOFF before
-   cross-project decisions.
+   state in docs/ai/HANDOFF.md (in ops). Conventions for every session here:
+   (a) track new work as GitHub Issues in THIS repo — never a local TODO
+   file; (b) before ending any session that changed project state, update
+   root status.json (updatedAt, phase, headline, next, blocked) — the ops
+   dashboard renders it; (c) read the ops HANDOFF before cross-project
+   decisions.
 
-3. REPORT. Reply with: issues created (numbers + titles), issues skipped as
-   duplicates, and anything found that needs a human decision (do NOT decide
-   it yourself).
+4. REPORT. Reply with: issues created (numbers + titles), issues skipped as
+   duplicates, the status.json you wrote, and anything found that needs a
+   human decision (do NOT decide it yourself).
 
-Guardrails: work on a branch and push it (open a PR if the repo has branch
-protections; otherwise a plain branch push is fine). Do not touch .env* files,
-secrets, or deploy config. Do not refactor code — this is inventory + wiring
-only.
+Guardrails: work on a branch and push it; merge to the default branch if the
+repo has no protections (status.json must land on the default branch to be
+visible to the fleet dashboard), otherwise open a PR. Do not touch .env*
+files, secrets, or deploy config. Do not refactor code — this is inventory +
+wiring only.
 ```
 
 ## Done log (one line each, newest first)
 
+- 2026-07-02 (later): fleet-status layer — per-repo root status.json rendered on /ops/projects (token-gated, TTL-cached) · combined one-shot onboarding prompt (tasks + status + pointer) · HANDOFF.md system + CLAUDE.md routing repointed off the retired night-shift loop.
 - 2026-07-02: /ops/projects + /api/projects (fleet hub v1) · /ops/digest + first digest · Outscraper lead-gen · vendored agent+schema · render seam + /api/render-site · Astro decision recorded + cutover plan · script INDEX (#13-15) · architecture review #1-12 shipped.

@@ -80,9 +80,10 @@ When asked to perform a task, read the corresponding file BEFORE writing code:
 retired night-shift protocol in OPERATOR_BRIEF.md or `orchestration.json`.
 
 **Before ending any session that did real work:** update `docs/ai/HANDOFF.md`
-in place (Now / Next / Parked / one Done-log line) and include it in the final
-commit. This file is the handoff — if it is stale, the next session starts
-blind.
+in place (Now / Next / Parked / one Done-log line) AND refresh root
+`status.json` (updatedAt / phase / headline / next / blocked — the fleet
+dashboard renders it), and include both in the final commit. If these are
+stale, the next session starts blind.
 
 ## 🛠️ Core Commands
 

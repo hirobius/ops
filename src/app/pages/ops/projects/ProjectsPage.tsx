@@ -32,12 +32,21 @@ interface ProjectDeployment {
   commit: ProjectCommit;
 }
 
+interface RepoStatus {
+  updatedAt: string | null;
+  phase: string | null;
+  headline: string | null;
+  next: string[];
+  blocked: string[];
+}
+
 interface ProjectStatus {
   id: string;
   name: string;
   framework: string | null;
   updatedAt: number | null;
   latestDeployment: ProjectDeployment | null;
+  repoStatus: RepoStatus | null;
 }
 
 interface ProjectsResponse {
@@ -113,6 +122,17 @@ export default function ProjectsPage() {
                       {d?.commit.ref ? `${d.commit.ref} · ` : ''}
                       {d?.commit.message ?? 'no deployments yet'}
                     </span>
+                    {p.repoStatus ? (
+                      <span style={s.statusRow}>
+                        {p.repoStatus.phase ? <span style={s.phase}>{p.repoStatus.phase}</span> : null}
+                        {p.repoStatus.headline ? (
+                          <span style={s.headline}>{p.repoStatus.headline}</span>
+                        ) : null}
+                        {p.repoStatus.blocked.length > 0 ? (
+                          <span style={s.blocked}>⚠ blocked: {p.repoStatus.blocked[0]}</span>
+                        ) : null}
+                      </span>
+                    ) : null}
                   </div>
                   <div style={s.rowSide}>
                     <span style={{ ...s.state, color: STATE_COLOR[d?.state ?? ''] ?? 'var(--semantic-color-content-secondary)' }}>
@@ -198,6 +218,27 @@ const s = {
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap' as const,
     maxWidth: '48rem',
+  },
+  statusRow: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: hds.space.px8,
+    flexWrap: 'wrap' as const,
+  },
+  phase: {
+    fontFamily: hds.monoFamily,
+    fontSize: hds.fontSize.xs,
+    color: 'var(--semantic-color-content-accent)',
+    textTransform: 'uppercase' as const,
+  },
+  headline: {
+    ...hds.typeStyles.bodySmall,
+    color: 'var(--semantic-color-content-primary)',
+  },
+  blocked: {
+    fontFamily: hds.monoFamily,
+    fontSize: hds.fontSize.xs,
+    color: 'var(--semantic-color-feedback-warning)',
   },
   rowSide: {
     display: 'flex',

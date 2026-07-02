@@ -1,0 +1,11 @@
+{
+  "updatedAt": "2026-07-02T05:30:00Z",
+  "phase": "active",
+  "headline": "Fleet hub build-out: engine real (awaiting keys), projects + digest + handoff shipped",
+  "next": [
+    "Keys into Vercel env (Adrian) — unlocks leads, agent, projects, statuses",
+    "Task importer + OPS_AGENT_KEY machine auth",
+    "Astro cutover Part B (deploy worker, status migration, Duda removal)"
+  ],
+  "blocked": []
+}
