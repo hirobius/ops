@@ -4,7 +4,7 @@
 > Regenerate with `pnpm scripts:index`. Deterministic (no timestamps), so it
 > only changes when scripts do.
 
-**185 scripts** across 10 categories.
+**179 scripts** across 10 categories.
 
 ## Prefix taxonomy
 
@@ -158,11 +158,10 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `sync-icons.mjs` | Scans src/ for lucide-react imports and emits a registry of the icon exports currently used by the app. | `icons:sync` | — |
 | `sync-system-health.mjs` | Reads the latest generated system artifacts, synchronizes health telemetry into public/hds-manifest.json, records history when the score changes, and only | `sync:health` | — |
 
-## test (6)
+## test (5)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
-| `test-bridge-endpoints.mjs` | Validates the 11a-2 orchestration approval endpoints: | — | — |
 | `test-doc-pages-snapshot.mjs` | 9d-10: Visual-regression baseline for the doc-site source surface. | `pretest` | — |
 | `test-figma-masters-snapshot.mjs` | Visual-regression baseline for pipeline/figma-masters-batch.mjs. The pipeline is a pure JS→JSON projection (no Figma APIs called from Node), so we capture buildMastersBatch() output as canonical JSON and | `check:figma-snapshot`, `check:figma-snapshot:update`, `pretest` | — |
 | `test-phase1.mjs` | (no header description) | `test:phase1` | — |
@@ -178,11 +177,10 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `figma-library-generate.mjs` | Authoritative write-path: hirobius.tokens.json → Figma Variables REST API payload. | — | — |
 | `figma-parity-check.mjs` | Compares Figma component metadata (names, variants) with the manifest componentSpecs (and utilities), reporting three classes of mismatch: | — | — |
 
-## other (75)
+## other (70)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
-| `a11y-schema-check.mjs` | Validates the a11yRules schema in public/hds-manifest.json against the WCAG 2.1 AA baseline defined in docs/ai/AGENT_GUIDELINES.md. | — | — |
 | `activity-log.mjs` | scope, ready to paste into a LinkedIn 'now' note, portfolio update, or interview-brief recap. | — | — |
 | `auth-middleware.mjs` | HMAC authentication middleware for the bridge (build unit p5-3). Layered on top of the p5-1 envelope and p5-2 correlation work. | — | — |
 | `auto-assigner.mjs` | (no header description) | — | — |
@@ -202,7 +200,6 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `enrich-manifest.mjs` | (no header description) | `manifest:generate`, `sync:health` | — |
 | `ensure-ops-data.mjs` | Makes a clean checkout of @hirobius/ops buildable. | `prebuild`, `predev`, `pretypecheck` | — |
 | `google-auth.mjs` | One-time OAuth setup: generates a Google refresh token with Gmail + Drive scope. | — | — |
-| `gpt-knowledge.mjs` | Ingests ChatGPT export zips (already extracted to ~/hirobius-knowledge-raw/) into the three-pillar knowledge base under docs/knowledge/. | — | — |
 | `haiku-agent.mjs` | Autonomous unit executor powered by Claude Haiku 4.5 via Anthropic API. Same orchestration protocol as hermes-unit — claim/done state machine, scoping-discipline system prompt — but uses the Anthropic Messages API | — | — |
 | `hds-bridge.mjs` | (no header description) | `bridge` | — |
 | `hds-jsx-compiler.mjs` | (no header description) | `test:compiler` | — |
@@ -214,7 +211,6 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `llm-stream-bridge.mjs` | (no header description) | `figma:stream` | — |
 | `meeting-to-tasks.mjs` | meeting transcript, append them to docs/ai/proposed-units.jsonl. | — | — |
 | `merge-squash.mjs` | Automates the squash-merge-with-baseline-tag protocol for fix/* → main. Full protocol: docs/operations/squash-merge-protocol.md | — | — |
-| `migrate-backlogs-to-hermes.mjs` | Pushes all task backlogs into Hermes Kanban boards. | — | — |
 | `migrate-orchestration-to-hermes.mjs` | Pushes outstanding orchestration.json units into the Hermes Kanban board. | — | — |
 | `normalize-figma-snapshot.mjs` | Convert transport-specific Figma export JSON into the stable snapshot shape used by `scripts/audit-figma-system.mjs`. | `figma:snapshot` | — |
 | `page-clone.mjs` | (no header description) | `clone:page` | — |
@@ -223,7 +219,6 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `prerender.mjs` | Static pre-render script. | `build:prerender` | — |
 | `print-health-commit.mjs` | Prints a copyable commit message that includes the current system integrity grade from the latest token audit. | `health-commit` | — |
 | `process-call-recording.mjs` | Download, extract, and transcribe call recording ZIPs from Google Drive. Point it at a folder ID and it processes every unread ZIP inside. Point it at a single file ID and it processes just that one. | — | — |
-| `project-component-spec.mjs` | Walks a flagship HDS component .tsx file with the TypeScript AST and projects a componentSpec shape from source. Used as a drift detector against the hand-authored manifest entries written by build-tokens.mjs. | — | — |
 | `promote-learned-rule.mjs` | Interactive walker over docs/ai/learned-rules.jsonl. For each unprommoted entry (no `promotedAt` field), prompts Adrian to promote it to a real registry entry in docs/guardrails/registry.json. The actual flip from | `guardrail:learned-rules`, `guardrail:promote-rule` | — |
 | `promote-to-core.mjs` | 4-check Promotion Checklist: 1. no-hex-colors — no raw `#RRGGBB` / `#RGB` outside of comments 2. uses-tokens — at least one `var(--semantic-…)` or `var(--primitive-…)` | — | — |
 | `promote.mjs` | (no header description) | `promote` | — |
@@ -250,7 +245,6 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `threads-middleware.mjs` | Dev-only HTTP middleware that surfaces "open work threads" to the /ops/kanban page so it can correlate Hermes tasks with Adrian's git worktrees and active Claude Code sessions. | — | — |
 | `triage-approved.mjs` | Triage actions for orchestration's `approved` bucket. Complements `_retired-2026-05-06/list-eligible.mjs` (which just lists eligible units) and `audit-claims.mjs` (which finds stale `claimed` units). This script | — | — |
 | `ui-lint.mjs` | p6-2: thin CLI wrapper around GET http://localhost:3005/lint. Asks the bridge to run the validator suite over its current in-memory selection and prints findings. Exits non-zero when findings are non-empty so it | `ui:lint` | — |
-| `update-commit-history.mjs` | Generate recent commit history for HistoryCard consumption. | — | — |
 | `update-journal.mjs` | Appends a systems-ledger entry to docs/SYSTEMS-LOG.md using the latest token audit report and health history snapshot. | `health-log` | — |
 | `update-precommit-hash.mjs` | Recompute the canonical SHA-256 of .husky/pre-commit and write it to docs/guardrails/registry.json as `precommitStructureHash`. | — | — |
 | `video-clone.mjs` | (no header description) | — | — |

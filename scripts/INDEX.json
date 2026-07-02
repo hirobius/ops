@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 185,
+  "totalScripts": 179,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,26 +41,18 @@
     }
   },
   "categoryCounts": {
-    "other": 75,
+    "other": 70,
     "audit": 18,
     "build": 9,
     "gate": 47,
     "figma": 4,
     "generate": 15,
     "sync": 5,
-    "test": 6,
+    "test": 5,
     "validate": 4,
     "verify": 2
   },
   "scripts": [
-    {
-      "name": "a11y-schema-check.mjs",
-      "category": "other",
-      "prefix": null,
-      "purpose": "Validates the a11yRules schema in public/hds-manifest.json against the WCAG 2.1 AA baseline defined in docs/ai/AGENT_GUIDELINES.md.",
-      "pnpm": [],
-      "gate": null
-    },
     {
       "name": "activity-log.mjs",
       "category": "other",
@@ -1414,14 +1406,6 @@
       "gate": null
     },
     {
-      "name": "gpt-knowledge.mjs",
-      "category": "other",
-      "prefix": "gpt",
-      "purpose": "Ingests ChatGPT export zips (already extracted to ~/hirobius-knowledge-raw/) into the three-pillar knowledge base under docs/knowledge/.",
-      "pnpm": [],
-      "gate": null
-    },
-    {
       "name": "haiku-agent.mjs",
       "category": "other",
       "prefix": "haiku",
@@ -1516,14 +1500,6 @@
       "gate": null
     },
     {
-      "name": "migrate-backlogs-to-hermes.mjs",
-      "category": "other",
-      "prefix": "migrate",
-      "purpose": "Pushes all task backlogs into Hermes Kanban boards.",
-      "pnpm": [],
-      "gate": null
-    },
-    {
       "name": "migrate-orchestration-to-hermes.mjs",
       "category": "other",
       "prefix": "migrate",
@@ -1594,14 +1570,6 @@
       "category": "other",
       "prefix": "process",
       "purpose": "Download, extract, and transcribe call recording ZIPs from Google Drive. Point it at a folder ID and it processes every unread ZIP inside. Point it at a single file ID and it processes just that one.",
-      "pnpm": [],
-      "gate": null
-    },
-    {
-      "name": "project-component-spec.mjs",
-      "category": "other",
-      "prefix": "project",
-      "purpose": "Walks a flagship HDS component .tsx file with the TypeScript AST and projects a componentSpec shape from source. Used as a drift detector against the hand-authored manifest entries written by build-tokens.mjs.",
       "pnpm": [],
       "gate": null
     },
@@ -1866,14 +1834,6 @@
       "gate": null
     },
     {
-      "name": "test-bridge-endpoints.mjs",
-      "category": "test",
-      "prefix": "test",
-      "purpose": "Validates the 11a-2 orchestration approval endpoints:",
-      "pnpm": [],
-      "gate": null
-    },
-    {
       "name": "test-doc-pages-snapshot.mjs",
       "category": "test",
       "prefix": "test",
@@ -1947,14 +1907,6 @@
       "pnpm": [
         "ui:lint"
       ],
-      "gate": null
-    },
-    {
-      "name": "update-commit-history.mjs",
-      "category": "other",
-      "prefix": "update",
-      "purpose": "Generate recent commit history for HistoryCard consumption.",
-      "pnpm": [],
       "gate": null
     },
     {
