@@ -19,8 +19,10 @@
  *   - docs/guardrails/registry.json           --json compliance
  */
 
-import legacyTaskArchive from '../../../../../docs/ai/_archive/legacy-task-systems-2026-05-11.json';
-const orchestration = legacyTaskArchive.sources.orchestration;
+// Legacy orchestration archive retired 2026-07-02 — units now live in Hermes Kanban.
+// Empty stub keeps the derived dashboard values rendering (empty state) for the HDS
+// cutover to redesign, and drops the ~1 MB archive JSON from the app bundle.
+const orchestration = { units: [] };
 import watchdogDecisionsRaw from '../../../../../docs/ai/swarm-watchdog-decisions.jsonl?raw';
 import agentAuditRaw from '../../../../../docs/security/agent-audit-log.jsonl?raw';
 // routing-log.jsonl holds per-client task PII and is gitignored; this glob tolerates

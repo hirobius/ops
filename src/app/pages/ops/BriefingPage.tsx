@@ -23,8 +23,10 @@ import type { CSSProperties } from 'react';
 import { Page, Stack, Badge, Stat } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 
-import legacyTaskArchive from '../../../../docs/ai/_archive/legacy-task-systems-2026-05-11.json';
-const orchestration = legacyTaskArchive.sources.orchestration;
+// Legacy orchestration archive retired 2026-07-02 — units now live in Hermes Kanban.
+// Empty stub keeps the stale-claims / burning blocks rendering (empty) for the HDS
+// cutover to redesign; drops the ~1 MB archive JSON from the app bundle.
+const orchestration = { units: [] };
 import bizOps from '../../../../docs/business/biz-ops.json';
 // routing-log.jsonl holds per-client task PII and is gitignored; this glob tolerates
 // its absence (yields '' in clean/prod builds) instead of a hard import failure.

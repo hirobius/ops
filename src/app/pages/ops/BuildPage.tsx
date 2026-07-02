@@ -26,8 +26,10 @@ import { Stack, Page, Surface, Card, Badge, Icon } from '@hirobius/design-system
 import { ActivityFeed, type ActivityEvent } from '@hirobius/design-system';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
-import legacyTaskArchive from '../../../../docs/ai/_archive/legacy-task-systems-2026-05-11.json';
-const orchestration = legacyTaskArchive.sources.orchestration;
+// Legacy orchestration archive retired 2026-07-02 — units now live in Hermes Kanban.
+// Empty stub keeps the pipeline-stats block rendering (empty) for the HDS cutover to
+// redesign; drops the ~1 MB archive JSON from the app bundle.
+const orchestration = { units: [] };
 import auditLogRaw from '../../../../docs/security/agent-audit-log.jsonl?raw';
 import registryRaw from '../../../../docs/guardrails/registry.json';
 import { PageHeader } from './PageHeader';

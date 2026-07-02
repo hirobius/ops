@@ -26,9 +26,9 @@ import React, {
 } from 'react';
 import { Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
-import legacyTaskArchive from '../../../../../docs/ai/_archive/legacy-task-systems-2026-05-11.json';
-
-const orchestrationRaw = legacyTaskArchive.sources.orchestration;
+// Legacy orchestration archive retired 2026-07-02 — units now live in Hermes Kanban.
+// Empty stub keeps the DAG rendering (empty) for the HDS cutover; drops ~1 MB from bundle.
+const orchestrationRaw = { units: [] };
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

@@ -6,8 +6,9 @@ import type { CSSProperties } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { Page, Surface, Stack, Card, Badge, Stat } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
-import legacyTaskArchive from '../../../../docs/ai/_archive/legacy-task-systems-2026-05-11.json';
-const orchestration = legacyTaskArchive.sources.orchestration;
+// Legacy orchestration archive retired 2026-07-02 — units now live in Hermes Kanban.
+// Empty stub (this legacy page is itself a deletion candidate); drops ~1 MB from bundle.
+const orchestration = { units: [] };
 import { PageHeader } from './PageHeader';
 import { SecurityPostureWidget } from './SecurityPostureWidget';
 import { SessionsSection } from './SessionsSection';
