@@ -1,0 +1,4 @@
+[submodule "clients/lilac-insure"]
+	path = clients/lilac-insure
+	url = https://github.com/hirobius/lilac-insure.git
+	branch = claude/lilac-repo-client-prep-owq2qa
