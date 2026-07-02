@@ -30,6 +30,24 @@ _Last updated: 2026-07-02 (fleet hub went live) · branch `claude/relaxed-ramanu
 - **Decision record**: `docs/ARCHITECTURE.md` (2026-06-30 reversal — Astro is
   production, Duda retired). Execution plan: `docs/operations/ops-astro-cutover-plan.md`.
 
+## Adrian's open actions (his court — one-time, not blocked on a session)
+
+- **Run the lilac-insure onboarding prompt** → stands up the client repo to fleet
+  spec + files its tasks (the "New client-work repo procedure" below is the prompt).
+- **File the Alert Figma-drift issue** in `hirobius/hirobius-design-system` (a
+  ready prompt was handed over): tone-colored title + border, danger→`circle-alert`;
+  Figma node 33:34. Alert lives in the DS repo, not ops — that's where it lands.
+- **Run the ops-history PII scrub** — `git filter-repo` runbook (dry-run-verified)
+  removes `clients/{lilac-insure,prospect-001,the-ranch-foundation}` +
+  `docs/ai/routing-log.jsonl` from all history, then force-push. ops is private → hygiene.
+- **Vercel (#18)**: disable preview Deployment Protection (the "404" cause — app
+  self-gates via `OPS_GATE_PASSWORD`) + evaluate Pro before more `api/` routes land.
+- **Set `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in Vercel** — `/ops/leads` +
+  `/ops/tasks` are offline without it (#16); apply `supabase/migrations`.
+- **Delete the 2 Error deployments** (`dpl_En1J6…`, `dpl_7D3tk…`) — dashboard tidy.
+- **Confirm the 2 `.ps1` scripts** (bridge-wsl2-port, setup-cron-windows) are safe
+  to delete — the Tier-2 scrub held them (possible personal tooling).
+
 ## Next (ordered queue)
 
 1. **Env vars — login gate + VERCEL_TOKEN + GITHUB_TOKEN verified live; the
