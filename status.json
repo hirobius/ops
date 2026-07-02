@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-07-02T07:15:00Z",
+  "updatedAt": "2026-07-02T10:15:00Z",
   "phase": "active",
-  "headline": "Fleet hub live (awaiting keys); delegation backlog #8-14 filed; north star recorded",
+  "headline": "Deploy unblocked: consolidated leads routes (13\u219210 fns) under Hobby cap; awaiting keys",
   "next": [
-    "Keys into Vercel env (Adrian) \u2014 unlocks leads, agent, projects, statuses",
+    "Confirm deploy READY + keys active \u2014 /ops/projects should light up",
     "Task importer + approvals inbox/run log + tier dispatch (#8, #13)",
     "First live lead\u2192generate run, then outreach v1 (#9)"
   ],

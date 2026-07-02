@@ -119,7 +119,7 @@ export default defineConfig(({ mode }) => {
           });
         },
       },
-      // Dev-only: leads pipeline — POST /api/pull-leads, POST /api/generate-site,
+      // Dev-only: leads pipeline — POST /api/pull-leads, POST /api/lead-action,
       // GET /api/leads. Mirrors the production Vercel functions in api/* using the
       // same lib/* logic (single source of truth). See scripts/leads-middleware.mjs.
       // apply: 'serve' so prod builds never expose these — Vercel serves the
@@ -130,9 +130,7 @@ export default defineConfig(({ mode }) => {
         configureServer(server) {
           const leads = createLeadsMiddleware();
           server.middlewares.use('/api/pull-leads', leads.pull);
-          server.middlewares.use('/api/generate-site', leads.generate);
-          server.middlewares.use('/api/build-site', leads.build);
-          server.middlewares.use('/api/publish-site', leads.publish);
+          server.middlewares.use('/api/lead-action', leads.action);
           server.middlewares.use('/api/leads', leads.list);
         },
       },

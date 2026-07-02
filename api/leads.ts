@@ -25,7 +25,7 @@ const DEFAULT_LIMIT = 200;
 const MAX_LIMIT = 500;
 
 export async function leadsHandler(sb: SupabaseClient, req: VercelRequest): Promise<HandlerResult> {
-  const rawLimit = Array.isArray(req.query.limit) ? req.query.limit[0] : req.query.limit;
+  const rawLimit = Array.isArray(req.query['limit']) ? req.query['limit'][0] : req.query['limit'];
   const { data, error } = await listLeads(sb, clampLimit(rawLimit));
 
   if (error) return { status: 500, body: { error: error.message } };

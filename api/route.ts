@@ -43,8 +43,8 @@ const MAX_BODY_BYTES = 64 * 1024; // 64 KB
 
 export async function routeHandler(req: VercelRequest): Promise<HandlerResult> {
   // ── Env guard ─────────────────────────────────────────────────────────────
-  const bridgeUrl = process.env.HIROBIUS_BRIDGE_URL;
-  const bridgeSecret = process.env.HDS_BRIDGE_SECRET;
+  const bridgeUrl = process.env['HIROBIUS_BRIDGE_URL'];
+  const bridgeSecret = process.env['HDS_BRIDGE_SECRET'];
 
   if (!bridgeUrl) {
     return {

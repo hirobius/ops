@@ -72,9 +72,17 @@ _Last updated: 2026-07-02 · branch `claude/relaxed-ramanujan-vvhqf8` (all work 
   validate touched files by filtering typecheck output.
 - **Vercel build ≠ local `vite build`.** Vercel type-checks every `api/*.ts`
   serverless function; `vite build` does not. So a green local build can still
-  fail on Vercel. `@vercel/node` + `@types/node` are now installed (fixes the
-  function typecheck); if you touch api/ types, verify with
-  `pnpm exec tsc --skipLibCheck --types node api/*.ts`, not just vite build.
+  fail on Vercel. If you touch api/ types, run **`pnpm typecheck:api`
+  (EXIT 0 required)** — it uses `tsconfig.api-check.json` (the real compiler
+  options over `api/**`), the correct deploy-parity gate. (Do NOT use the old
+  `tsc --types node api/*.ts` form — dropping the project config yields false
+  `noImplicitAny`/TS7016 noise on the `.mjs` imports.)
+- **Vercel Hobby plan caps at 12 serverless functions/deployment.** We sit at
+  **10** (`ls api/*.ts`). The 4 lead-lifecycle routes were consolidated into one
+  `api/lead-action.ts` dispatcher (POST `{leadId, action}`) to buy headroom.
+  Adding endpoints (importer, outreach, alerts — #8/#9/#11) will re-hit the cap;
+  the durable fix is **Vercel Pro** (raises the limit + concurrency). Until then,
+  consolidate rather than add new `api/*.ts` files.
 - `docs/ai/OPERATOR_BRIEF.md` + night-shift loop + `orchestration.json` are
   RETIRED — do not execute them.
 
@@ -167,6 +175,7 @@ wiring only.
 
 ## Done log (one line each, newest first)
 
+- 2026-07-02 (deploy fix 2): the 38de046 deploy cleared the typecheck but then hit `exceeded_serverless_functions_per_deployment` (Hobby cap 12, we had 13). Consolidated the 4 lead-lifecycle routes (generate/build/publish/render-site) into one `api/lead-action.ts` POST dispatcher → 10 functions. Repointed LeadsPage callers + the dev middleware (scripts/leads-middleware.mjs, one `action` handler) + vite.config wiring. Added `pnpm typecheck:api` (tsconfig.api-check.json) as the real deploy-parity gate + fixed 7 pre-existing TS4111 so it's fully green. 41 api tests green, app build green.
 - 2026-07-02 (deploy fix): branch had been ERROR-deploying for 7 commits (since d454856 /ops/projects) — Vercel type-checks api/*.ts functions and `@vercel/node`/`@types/node` were missing. Installed both; function typecheck now 0 blocking errors, app build green. This is why the preview looked stale + env vars weren't taking effect.
 - 2026-07-02 (newsletter sweep): mined all 10 "The Code" editions (Jun 18–Jul 1) → filed ops issues #3–#7 (Playwright MCP self-verify · HTML plans/PR artifacts convention · blast-radius pre-edit hook · CLAUDE.md diet per Anthropic steering guide · lib/agent Sonnet-5 tiering + prompt audit). Judgment calls (cheap-model routing, observability, importer autonomy dial) parked pending Adrian.
 - 2026-07-02 (later): fleet-status layer — per-repo root status.json rendered on /ops/projects (token-gated, TTL-cached) · combined one-shot onboarding prompt (tasks + status + pointer) · HANDOFF.md system + CLAUDE.md routing repointed off the retired night-shift loop.

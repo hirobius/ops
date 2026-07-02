@@ -23,8 +23,8 @@ const DEFAULT_LIMIT = 1000;
 const MAX_LIMIT = 2000;
 
 export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Promise<HandlerResult> {
-  const limit = clampLimit(pick(req.query.limit));
-  const includeDeleted = pick(req.query.include_deleted) === '1';
+  const limit = clampLimit(pick(req.query['limit']));
+  const includeDeleted = pick(req.query['include_deleted']) === '1';
 
   const { data, error } = await listTasks(sb, { limit, includeDeleted });
   if (error) return { status: 500, body: { error: error.message } };

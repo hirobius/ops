@@ -8,13 +8,14 @@
  * state machines (and carried the same stranded-status bug); now it delegates.
  * Wired in vite.config.mjs with `apply: 'serve'` so it never ships to prod.
  *
- * Endpoints (match api/pull-leads.ts, api/generate-site.ts, api/leads.ts,
- * api/build-site.ts, api/publish-site.ts):
- *   POST /api/pull-leads     { niche, metro, count? } → { inserted }
- *   POST /api/generate-site  { leadId }               → { ok, score, pass }
- *   POST /api/build-site     { leadId }               → { ok, preview_url }
- *   POST /api/publish-site   { leadId }               → { ok, live_url }
- *   GET  /api/leads          ?limit=<n>               → { leads }
+ * Endpoints (match api/pull-leads.ts, api/lead-action.ts, api/leads.ts):
+ *   POST /api/pull-leads     { niche, metro, count? }        → { inserted }
+ *   POST /api/lead-action    { leadId, action, previewUrl? } → per-action result
+ *     action 'generate' → { ok, score, pass }
+ *     action 'build'    → { ok, preview_url }
+ *     action 'publish'  → { ok, live_url }
+ *     action 'render'   → { ok, rendered, slug, preset, configFile, commands }
+ *   GET  /api/leads          ?limit=<n>                      → { leads }
  *
  * Requires SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY in process.env (vite.config
  * copies them from .env.local). Missing env → 503 with a clear message.
@@ -22,8 +23,15 @@
 
 import { getServiceClient } from '../lib/supabase/server.mjs';
 import { listLeads, upsertLeads } from '../lib/supabase/leads.mjs';
-import { generateLeadSite, buildLeadSite, publishLeadSite } from '../lib/leads/pipeline.mjs';
+import {
+  generateLeadSite,
+  buildLeadSite,
+  publishLeadSite,
+  renderLeadSite,
+} from '../lib/leads/pipeline.mjs';
 import { pullLeads } from '../lib/lead-gen/index.mjs';
+
+const LEAD_ACTIONS = ['generate', 'build', 'publish', 'render'];
 
 const MAX_COUNT = 50;
 const DEFAULT_LIMIT = 200;
@@ -56,17 +64,6 @@ async function clientOr503(res) {
   }
 }
 
-/** Parse a `{ leadId }` body; send a 400 and return '' if missing. */
-async function readLeadId(req, res) {
-  const body = await readJson(req);
-  const leadId = typeof body.leadId === 'string' ? body.leadId.trim() : '';
-  if (!leadId) {
-    sendJson(res, 400, { error: 'leadId is required' });
-    return '';
-  }
-  return leadId;
-}
-
 export function createLeadsMiddleware() {
   return {
     // POST /api/pull-leads
@@ -92,15 +89,38 @@ export function createLeadsMiddleware() {
       }
     },
 
-    // POST /api/generate-site
-    generate: async (req, res, next) => {
+    // POST /api/lead-action — dispatch on { action } (mirrors api/lead-action.ts)
+    action: async (req, res, next) => {
       if (req.method !== 'POST') return next();
       try {
-        const leadId = await readLeadId(req, res);
-        if (!leadId) return;
+        const body = await readJson(req);
+        const leadId = typeof body.leadId === 'string' ? body.leadId.trim() : '';
+        if (!leadId) return sendJson(res, 400, { error: 'leadId is required' });
+
+        const action = typeof body.action === 'string' ? body.action : '';
+        if (!LEAD_ACTIONS.includes(action)) {
+          return sendJson(res, 400, {
+            error: `action must be one of: ${LEAD_ACTIONS.join(', ')}`,
+          });
+        }
+
         const sb = await clientOr503(res);
         if (!sb) return;
-        const result = await generateLeadSite(sb, leadId);
+
+        let result;
+        if (action === 'generate') {
+          result = await generateLeadSite(sb, leadId);
+        } else if (action === 'build') {
+          result = await buildLeadSite(sb, leadId);
+        } else if (action === 'publish') {
+          result = await publishLeadSite(sb, leadId);
+        } else {
+          const previewUrl = typeof body.previewUrl === 'string' ? body.previewUrl.trim() : '';
+          if (previewUrl && !/^https?:\/\//.test(previewUrl)) {
+            return sendJson(res, 400, { error: 'previewUrl must be an http(s) URL' });
+          }
+          result = await renderLeadSite(sb, leadId, previewUrl ? { previewUrl } : {});
+        }
         return sendJson(res, result.status, result.body);
       } catch (err) {
         return sendJson(res, 500, { error: messageOf(err) });
@@ -129,34 +149,5 @@ export function createLeadsMiddleware() {
       }
     },
 
-    // POST /api/build-site
-    build: async (req, res, next) => {
-      if (req.method !== 'POST') return next();
-      try {
-        const leadId = await readLeadId(req, res);
-        if (!leadId) return;
-        const sb = await clientOr503(res);
-        if (!sb) return;
-        const result = await buildLeadSite(sb, leadId);
-        return sendJson(res, result.status, result.body);
-      } catch (err) {
-        return sendJson(res, 500, { error: messageOf(err) });
-      }
-    },
-
-    // POST /api/publish-site
-    publish: async (req, res, next) => {
-      if (req.method !== 'POST') return next();
-      try {
-        const leadId = await readLeadId(req, res);
-        if (!leadId) return;
-        const sb = await clientOr503(res);
-        if (!sb) return;
-        const result = await publishLeadSite(sb, leadId);
-        return sendJson(res, result.status, result.body);
-      } catch (err) {
-        return sendJson(res, 500, { error: messageOf(err) });
-      }
-    },
   };
 }

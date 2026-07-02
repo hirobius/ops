@@ -204,6 +204,7 @@
     "tokens:index": "node scripts/build-token-index.mjs",
     "tokens:verify": "node scripts/build-tokens.mjs && node scripts/verify-tokens.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+    "typecheck:api": "tsc --noEmit -p tsconfig.api-check.json",
     "ui:fix": "node scripts/generate-to-figma.mjs --fix",
     "ui:gen": "node scripts/generate-to-figma.mjs",
     "ui:lint": "node scripts/ui-lint.mjs",

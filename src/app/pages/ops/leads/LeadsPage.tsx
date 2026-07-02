@@ -7,7 +7,10 @@
  * hirobius/clients (see docs OPS-INTEGRATION brief, Part 2):
  *
  *   1. "Pull leads" (niche + metro)  → POST /api/pull-leads  → rows status='sourced'
- *   2. per-lead "Generate site"      → POST /api/generate-site → row status='scored'
+ *   2. per-lead lifecycle actions    → POST /api/lead-action { leadId, action }
+ *        action 'generate' → row status='scored'; 'build'/'publish'/'render'
+ *        drive the site state machine. (One route dispatches all four to stay
+ *        under the Vercel Hobby-plan 12-function cap.)
  *   3. the board polls GET /api/leads (useLeads) and renders live status
  *
  * Data persists in the Supabase `leads` table. In prod the /api/* routes are
@@ -68,7 +71,7 @@ export default function LeadsPage() {
     async (leadId: string) => {
       setGeneratingIds((prev) => new Set(prev).add(leadId));
       try {
-        await opsApi.post('/api/generate-site', { leadId });
+        await opsApi.post('/api/lead-action', { leadId, action: 'generate' });
       } catch {
         /* surfaced via row status on next poll */
       } finally {
@@ -85,10 +88,10 @@ export default function LeadsPage() {
 
   // Build (unpublished) or publish a lead's Duda site. One in-flight action per lead.
   const handleSiteAction = useCallback(
-    async (leadId: string, endpoint: string) => {
+    async (leadId: string, action: 'build' | 'publish') => {
       setSiteBusyIds((prev) => new Set(prev).add(leadId));
       try {
-        await opsApi.post(endpoint, { leadId });
+        await opsApi.post('/api/lead-action', { leadId, action });
       } catch {
         /* surfaced via row site_status on next poll */
       } finally {
@@ -128,7 +131,7 @@ export default function LeadsPage() {
           )}
           <button
             type="button"
-            onClick={() => handleSiteAction(lead.id, '/api/publish-site')}
+            onClick={() => handleSiteAction(lead.id, 'publish')}
             style={s.genButton}
           >
             {st === 'publish_failed' ? 'Retry publish' : 'Publish'}
@@ -141,7 +144,7 @@ export default function LeadsPage() {
       return (
         <button
           type="button"
-          onClick={() => handleSiteAction(lead.id, '/api/build-site')}
+          onClick={() => handleSiteAction(lead.id, 'build')}
           style={s.genButton}
         >
           {st === 'build_failed' ? 'Retry build' : 'Build site'}
