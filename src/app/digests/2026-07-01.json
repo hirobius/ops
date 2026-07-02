@@ -1,0 +1,66 @@
+{
+  "date": "2026-07-01",
+  "source": "The Code (Superhuman)",
+  "subject": "US Govt lifts the ban on Fable 5",
+  "items": [
+    {
+      "title": "Dashboard Trap — stop building dashboards to check data",
+      "summary": "A veteran dev's 3-step agent workflow replaces metric dashboards: the agent does the looking and reports only what needs action.",
+      "opsAngle": "The digest→review→task flow follows this pattern. Apply the same to /ops metrics: agents surface exceptions instead of new dashboard panels.",
+      "links": [{ "label": "ryancarson thread", "url": "https://x.com/ryancarson/status/2071535177126277239" }],
+      "tag": "workflow",
+      "status": "new"
+    },
+    {
+      "title": "Blast Radius — grep hook that traces call chains before edits",
+      "summary": "One dev's agent got sharper after a hook that traces any function's call chain + blast radius before editing. Token usage dropped 50%.",
+      "opsAngle": "Would slot into the existing guardrail/hook system as a pre-edit Claude Code hook.",
+      "links": [{ "label": "jasonzhou thread", "url": "https://x.com/jasonzhou1993/status/2071919652922638843" }],
+      "tag": "guardrails",
+      "status": "new"
+    },
+    {
+      "title": "Animation Vocabulary — a skill that teaches AI motion terms",
+      "summary": "A Linear design engineer built a skill teaching the exact terms pros use, so AI builds the animation you pictured (2.4K bookmarks).",
+      "opsAngle": "Relevant to HDS motion work (check-motion / reduced-motion gates already exist; vocabulary could improve motion specs).",
+      "links": [{ "label": "emilkowalski skill", "url": "https://x.com/emilkowalski/status/2071572437062324440" }],
+      "tag": "design-system",
+      "status": "new"
+    },
+    {
+      "title": "Loop Engineering — Andrew Ng's 3-loop framework",
+      "summary": "Ng's take on loop engineering and why devs are turning into product managers (5.4K likes).",
+      "opsAngle": "The vendored site agent literally runs this pattern (refineLoop: produce → evaluate → retry-with-feedback). Useful for tuning iteration budgets.",
+      "links": [{ "label": "AndrewYNg post", "url": "https://x.com/AndrewYNg/status/2071988145667928442" }],
+      "tag": "agent-pipeline",
+      "status": "new"
+    },
+    {
+      "title": "Claude Sonnet 5 released — agentic, cheaper than Opus",
+      "summary": "Anthropic shipped Sonnet 5: plans, browses, runs terminals on its own; closing the gap with Opus 4.8 on reasoning/tool use/coding at lower cost.",
+      "opsAngle": "Candidate for the agent's model tiering (lib/agent/llm.mjs MODELS) — could take generation duty from Opus if quality holds; check pricing first.",
+      "links": [
+        { "label": "Anthropic announcement", "url": "https://www.anthropic.com/news/claude-sonnet-5" },
+        { "label": "model overview", "url": "https://platform.claude.com/docs/en/about-claude/models/overview" }
+      ],
+      "tag": "agent-pipeline",
+      "status": "new"
+    },
+    {
+      "title": "gh-address-comments — clear a pile of PR review comments in one pass",
+      "summary": "OpenAI skill that analyzes unresolved PR threads, applies fixes, and resolves comments; checks in before disagreeing.",
+      "opsAngle": "Concept already covered by Claude Code PR babysitting here, but the batch-resolve UX is worth stealing for review workflows.",
+      "links": [{ "label": "repo", "url": "https://github.com/openai/skills/tree/main/skills/.curated/gh-address-comments" }],
+      "tag": "workflow",
+      "status": "new"
+    },
+    {
+      "title": "Top 30 prompt techniques that actually work (2026)",
+      "summary": "Newer models interpret instructions literally — structured techniques (XML tags, explicit success criteria) beat legacy prompt tricks.",
+      "opsAngle": "Quick pass over lib/agent prompts (enrich/generate/judge SYSTEM strings) against this list.",
+      "links": [{ "label": "cookbook", "url": "https://agent-cookbook.com/tutorial/top-30-prompt-techniques-that-actually-work-in-2026" }],
+      "tag": "agent-pipeline",
+      "status": "new"
+    }
+  ]
+}

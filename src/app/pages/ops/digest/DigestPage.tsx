@@ -4,9 +4,10 @@
  * DigestPage — /ops/digest.
  *
  * Review surface for newsletter/intel digests. Each digest is a checked-in JSON
- * under src/app/data/digest/*.json (produced on demand by a Claude session that
- * reads the inbox — no cron, no server keys). Items carry an ops-specific angle
- * so triage is "read → open link → decide", not re-reading the newsletter.
+ * under src/app/digests/*.json (produced on demand by a Claude session that
+ * reads the inbox — no cron, no server keys; NOT src/app/data, which is
+ * gitignored generated output). Items carry an ops-specific angle so triage is
+ * "read → open link → decide", not re-reading the newsletter.
  *
  * v1 is read-only by design: approve→task promotion comes once the digest flow
  * proves out (items would post to the existing tasks surface — not a new
@@ -39,7 +40,7 @@ interface DigestFile {
 }
 
 // Eagerly glob all checked-in digests; newest date first.
-const digestModules = import.meta.glob('../../../data/digest/*.json', { eager: true }) as Record<
+const digestModules = import.meta.glob('../../../digests/*.json', { eager: true }) as Record<
   string,
   { default: DigestFile }
 >;
@@ -61,7 +62,7 @@ export default function DigestPage() {
       {DIGESTS.length === 0 ? (
         <p style={s.empty}>
           No digests yet. Ask a Claude session to scrub the inbox — it commits a JSON under
-          src/app/data/digest/ and this page picks it up.
+          src/app/digests/ and this page picks it up.
         </p>
       ) : (
         DIGESTS.map((d) => (
