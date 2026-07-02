@@ -65,7 +65,6 @@
     "build": "vite build --configLoader native",
     "build:ssr": "vite build --ssr src/entry-server.tsx --outDir .ssr-cache --configLoader native",
     "build:prerender": "pnpm build && pnpm build:ssr && node scripts/prerender.mjs",
-    "build:lib": "vite build -c vite.config.lib.ts",
     "catalog": "node scripts/generate-visual-catalog.mjs",
     "changelog:generate": "node scripts/generate-changelog.mjs",
     "changeset:add": "echo 'Install @changesets/cli (pnpm add -D @changesets/cli) to run: changeset add'",
@@ -111,13 +110,12 @@
     "check:page-shell": "node scripts/check-page-shell.mjs",
     "check:refs": "node scripts/check-ref-forwarding.mjs",
     "check:registry": "node scripts/check-registry.mjs",
-    "check:release": "pnpm check:full && node scripts/check-style-discipline.mjs && pnpm build && node scripts/check-route-smoke.mjs && pnpm perf:budget && pnpm test:a11y && pnpm test:visual && pnpm test:responsive && pnpm test:collision && pnpm check:size",
+    "check:release": "pnpm check:full && node scripts/check-style-discipline.mjs && pnpm build && node scripts/check-route-smoke.mjs && pnpm perf:budget && pnpm test:a11y && pnpm test:visual && pnpm test:responsive && pnpm test:collision",
     "check:route-smoke": "node scripts/check-route-smoke.mjs",
     "check:routes": "node scripts/check-link-integrity.mjs --route-links-only",
     "check:secrets": "node scripts/check-secrets.mjs",
     "check:security": "node scripts/check-security-baseline.mjs",
     "check:semantic-report": "node scripts/audit-tokens.mjs --report-only && node scripts/record-health.mjs",
-    "check:size": "pnpm build:lib && size-limit",
     "check:spacing": "node scripts/check-hardcoded-spacing.mjs",
     "check:style-props": "node scripts/check-style-discipline.mjs --style-props-only",
     "check:tailwind": "pnpm lint --rule '{\"tailwindcss/no-custom-classname\":\"error\"}'",
@@ -177,7 +175,6 @@
     "scan": "node scripts/batch-scan.mjs",
     "scan:local": "node scripts/batch-scan.mjs --local",
     "sitemap:generate": "node scripts/generate-sitemap.mjs",
-    "size-limit": "size-limit --config .size-limit.cjs",
     "strength": "node scripts/generate-strength-report.mjs",
     "strength:snapshot": "node scripts/generate-strength-report.mjs --history-snapshot",
     "sync": "node scripts/build-tokens.mjs && node scripts/audit-tokens.mjs --forbidden && node scripts/build-handoff.mjs && node scripts/build-design-md.mjs && node scripts/build-figma-variables.mjs",
@@ -292,33 +289,6 @@
     "vitest": "^4.1.0",
     "youtube-transcript": "^1.3.1"
   },
-  "size-limit": [
-    {
-      "name": "library esm (main barrel)",
-      "path": "dist/hirobius-ui.js",
-      "limit": "220 kB"
-    },
-    {
-      "name": "library css (tokens + base)",
-      "path": "dist/tokens.css",
-      "limit": "24 kB"
-    },
-    {
-      "name": "subpath: cn helper",
-      "path": "dist/cn.js",
-      "limit": "1 kB"
-    },
-    {
-      "name": "subpath: token bridge",
-      "path": "dist/tokens.js",
-      "limit": "8 kB"
-    },
-    {
-      "name": "subpath: manifest (json-as-esm)",
-      "path": "dist/manifest.js",
-      "limit": "60 kB"
-    }
-  ],
   "lint-staged": {
     "*.{ts,tsx,js,jsx,mjs,cjs,json,md,mdx,css,scss,html,yaml,yml}": "prettier --write"
   },
