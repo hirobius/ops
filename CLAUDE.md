@@ -90,6 +90,11 @@ carry homophone/word-salad artifacts ("stray" → "strategy", "Sound of the" →
 "some of the"). Read past transcription errors and act on the evident intent;
 ask only when genuinely ambiguous.
 
+**North-star drift guard:** `docs/ai/NORTH_STAR.md` is Adrian's focus contract.
+If a request materially expands scope beyond it (new infrastructure that
+doesn't ship a paying client site sooner), flag the drift in one sentence
+before proceeding — then do what Adrian decides. Sessions never edit that file.
+
 ## 🛠️ Core Commands
 
 - Start Bridge: `node scripts/hds-bridge.mjs`

@@ -75,6 +75,14 @@ _Last updated: 2026-07-02 · branch `claude/relaxed-ramanujan-vvhqf8` (all work 
 
 ## Decisions (dated, newest first)
 
+- 2026-07-02 (delegation interview): filed #8–#14 — approvals inbox + run log
+  (#8, top time-eater), outreach v1 (#9, sequenced after first live generate),
+  visual self-QA (#10), deploy/blocked alerts (#11), manual triggers NO cron
+  (#12), tier-labeled model dispatch (#13), collision safety: claims +
+  worktrees + branch-per-session (#14). North star recorded at
+  docs/ai/NORTH_STAR.md; CLAUDE.md drift-guard added (flag scope creep in one
+  sentence, Adrian decides). Y6 stays manual-trigger until per-item cron yes.
+
 - 2026-07-02: Autonomy dial — `auto-ok` label = agent self-dispatch for menial
   work; strategy stays human; budgets + auto-halt + mandatory recaps on all
   autonomous runs. Cheap-model routing (GLM et al) DECLINED at current volume
