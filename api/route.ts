@@ -36,7 +36,7 @@
 
 import { createHmac } from 'crypto';
 import type { VercelRequest } from '@vercel/node';
-import { withOpsHandler, messageOf, type HandlerResult } from '../lib/api/handler';
+import { withOpsHandler, messageOf, type HandlerResult } from '../lib/api/handler.js';
 
 /** Maximum body size accepted (bytes). */
 const MAX_BODY_BYTES = 64 * 1024; // 64 KB

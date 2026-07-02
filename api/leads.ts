@@ -18,7 +18,7 @@
 
 import type { VercelRequest } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler';
+import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler.js';
 import { listLeads } from '../lib/supabase/leads.mjs';
 
 const DEFAULT_LIMIT = 200;

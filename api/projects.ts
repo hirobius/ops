@@ -15,7 +15,7 @@
  */
 
 import type { VercelRequest } from '@vercel/node';
-import { withOpsHandler, type HandlerResult } from '../lib/api/handler';
+import { withOpsHandler, type HandlerResult } from '../lib/api/handler.js';
 import { listProjects } from '../lib/projects/index.mjs';
 
 export async function projectsHandler(_req: VercelRequest): Promise<HandlerResult> {

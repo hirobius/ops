@@ -24,7 +24,7 @@
 
 import type { VercelRequest } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler';
+import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler.js';
 import { applyTaskAction } from '../lib/tasks/actions.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
 

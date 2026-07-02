@@ -88,7 +88,13 @@ _Last updated: 2026-07-02 · branch `claude/relaxed-ramanujan-vvhqf8` (all work 
   (EXIT 0 required)** — it uses `tsconfig.api-check.json` (the real compiler
   options over `api/**`), the correct deploy-parity gate. (Do NOT use the old
   `tsc --types node api/*.ts` form — dropping the project config yields false
-  `noImplicitAny`/TS7016 noise on the `.mjs` imports.)
+  `noImplicitAny`/TS7016 noise on the `.mjs` imports.) **But `typecheck:api`
+  does NOT catch extensionless-relative-import runtime crashes:** the deploy is
+  ESM (`"type":"module"`), so every relative import in `api/*.ts` MUST carry an
+  explicit extension (`.mjs` for lib JS, `.js` for the compiled `.ts` handler) —
+  Node's ESM loader won't guess. An extensionless `'../lib/api/handler'`
+  type-checks green but 500s at runtime with `ERR_MODULE_NOT_FOUND` (the whole
+  /ops board hung on this until 2026-07-02). Explicit extensions only.
 - **Vercel Hobby plan caps at 12 serverless functions/deployment.** We sit at
   **10** (`ls api/*.ts`). The 4 lead-lifecycle routes were consolidated into one
   `api/lead-action.ts` dispatcher (POST `{leadId, action}`) to buy headroom.
