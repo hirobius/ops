@@ -197,8 +197,44 @@ files, secrets, or deploy config. Do not refactor code — this is inventory +
 wiring only.
 ```
 
+## New client-work repo procedure (copy-paste — spin up a fresh client repo)
+
+Sibling to the universal prompt above, but for a **new, private, Hirobius-owned
+client-work repo** (one per engagement). The universal prompt onboards an
+*existing* fleet repo; this one *stands up* a client repo from a project + its
+`tasks.json`. Core rule (learned on Lilac): **the work repo is private and stays
+Hirobius-owned — you never hand the client the repo, you hand them a curated
+deliverable.** Client PII + internal business (pricing, legal, pro-bono,
+competitor, brand-audit) live here safely *because it's private*; the handoff
+excludes them via the `internal` label. Run in a session that has the client
+project files (reads `tasks.json`). Replace `<Client Name>` / `<contact>`.
+
+```
+Onboard this repo into the Hirobius fleet. It's a NEW, private client-work repo — client: <Client Name>, contact: <contact>. Match the fleet convention (status.json + CLAUDE.md pointer + GitHub Issues). Five jobs:
+
+1. STATUS FILE. Create `status.json` at the repo root (the ops fleet dashboard reads it from the default branch). Shape, all fields short:
+   { "updatedAt": "<ISO now>", "phase": "active | prelaunch | live | maintenance | paused",
+     "headline": "one line: where this engagement truly stands",
+     "next": ["up to 3 near-term items"], "blocked": ["only real blockers"] }
+   Derive the content from tasks.json (current phase/status; the live blockers).
+
+2. FLEET POINTER. Create `CLAUDE.md` at the repo root with:
+   (a) the standard fleet-hub pointer — part of the Hirobius fleet; hub = hirobius/ops (fleet state at /api/projects, cross-project state in its docs/ai/HANDOFF.md); every session tracks work as GitHub Issues + refreshes root status.json before ending;
+   (b) CLIENT-DATA rule: this is a PRIVATE Hirobius work repo; internal business content (pricing/retainer/legal/invoicing/pro-bono/competitor/brand-audit) NEVER goes to the client — the handoff is a curated deliverable (working code + INSTALL/OPERATOR/access-review docs), never this repo wholesale, never `internal`-labeled issues;
+   (c) PII rule: client PII (emails, vendor account/app IDs) never ships in a public bundle; the repo stays private.
+
+3. TASKS -> GITHUB ISSUES. From tasks.json, one issue per task; body = notes + owner + dependsOn/automationRef; STRIP orchestration metadata (assignee/model/costCeiling/routingRationale/dispatchState). Labels: phase (`phase-N`); `done` -> create + close, `blocked` -> `blocked`, open stays open; `owner:<name>`; and an `internal` label on every Hirobius-only task (business/compliance, pro-bono, competitor, brand-audit) so the handoff can filter them out. Dedupe against existing issues.
+
+4. README. Short: what the engagement is, the phase structure, a one-line "handoff = curated deliverable, not this repo."
+
+5. REPORT. status.json written · issues by phase · which got `internal` · anything needing a human decision (don't decide it).
+
+Guardrails: branch + push; merge to the default branch (status.json must land there for the dashboard). Do NOT commit raw internal planning files (tasks.json, retainer.json, notes.md, brand-audit.json, stack.json) — gitignore them; the issues are the tracker. Never touch .env* or secrets.
+```
+
 ## Done log (one line each, newest first)
 
+- 2026-07-02 (client repos): added the "New client-work repo procedure" above — reusable prompt for standing up a private, Hirobius-owned client-work repo from a project + `tasks.json` (status.json + fleet pointer + tasks→issues with an `internal` label; handoff = curated deliverable, never the repo). First use: hirobius/lilac-insure (Lilac Insure / Conrad). Client-data model settled: PII + internal data live in the private work repo or Supabase — never git-committed anywhere client-facing. The ops-history PII scrub (clients/{lilac-insure,prospect-001,the-ranch-foundation}, docs/ai/routing-log.jsonl) is scoped + dry-run-verified; filter-repo runbook handed to Adrian to force-push (ops is private, so hygiene not exposure).
 - 2026-07-02 (architecture scrub + cleanup): 5-agent scrub (findings in `docs/ai/ARCHITECTURE_SCRUB_2026-07-02.md`), then shipped Tier 1 + Tier 2 in 8 verified batches — T1a dead post-commit step + 3 ENOENT /ops skill buttons · T1b failing CI build:lib/size-limit · T1c decoupled /ops dashboard from the 52-day frozen archive (also dropped a 1 MB bundle chunk) · T1d strength-report lies · T2a 6 dead deps + three · T2b 8 dead scripts · T2c 6 dead src files + 4 orphan tests · T2d api/ops-logout (→9 fns) + ALL_ROUTES ~60→23. ~30 dead files/deps gone, CI unbroken, no regressions, all 8 deploys READY. **Deferred (still open):** Tier 3 (duplicate/orchestration-era scripts), Tier 4 (doc identity: CLAUDE.md routes to retired docs; README/AGENTS "HDS product" vs NORTH_STAR agency-platform), the T1b package.json exports/check-public-api untangle, and the 2 `.ps1` files (held — possible personal tooling; Adrian to confirm). Discord always-on/fleet-aware filed as #15. **Next real work: HDS cutover** on the survivor list (PageHeader first — used by 16/17 pages).
 - 2026-07-02 (fleet hub LIVE — end of the deploy saga): after the function-cap fix, three more blockers fell in sequence — (a) `/ops` login gate needed `OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` (never in the keys list); (b) env vars only bind on a NEW feature-branch build (dashboard "Redeploy" re-runs stale `main`, which fails `invalid_engines_value`); (c) every guarded route imported `'../lib/api/handler'` extensionless → `ERR_MODULE_NOT_FOUND` at ESM runtime (typecheck-green, 500 live). All fixed. `/ops/projects` now renders all 10 repos + their status.json; `VERCEL_TOKEN` + `GITHUB_TOKEN` verified active. Login works. Preview is the live hub.
 - 2026-07-02 (deploy fix 2): the 38de046 deploy cleared the typecheck but then hit `exceeded_serverless_functions_per_deployment` (Hobby cap 12, we had 13). Consolidated the 4 lead-lifecycle routes (generate/build/publish/render-site) into one `api/lead-action.ts` POST dispatcher → 10 functions. Repointed LeadsPage callers + the dev middleware (scripts/leads-middleware.mjs, one `action` handler) + vite.config wiring. Added `pnpm typecheck:api` (tsconfig.api-check.json) as the real deploy-parity gate + fixed 7 pre-existing TS4111 so it's fully green. 41 api tests green, app build green.
