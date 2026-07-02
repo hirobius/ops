@@ -68,11 +68,12 @@ const LEAD = {
   description: null,
 };
 
+// Shape of the vendored clients pipeline: judge.overall is 1–5; no enrichment
+// (contact fields arrive at sourcing from Outscraper).
 const PIPELINE_RESULT = {
   config: { theme: 'x' },
-  judge: { overall: 0.91, pass: true, notes: 'good' },
+  judge: { overall: 4.5, pass: true, notes: 'good' },
   loop: { iterations: 2 },
-  enrichment: { email: 'a@b.co', logo_url: null, social: null, description: 'desc' },
 };
 
 beforeEach(() => {
@@ -91,9 +92,10 @@ describe('generateLeadSite', () => {
     vi.mocked(runPipeline).mockResolvedValueOnce(PIPELINE_RESULT);
     const { sb, updates } = makeSb({ lead: LEAD });
     const result = await generateLeadSite(sb, 'lead-1');
-    expect(result).toEqual({ status: 200, body: { ok: true, score: 0.91, pass: true } });
+    expect(result).toEqual({ status: 200, body: { ok: true, score: 4.5, pass: true } });
     expect(updates[0]).toEqual({ status: 'generating' });
-    expect(updates[1]).toMatchObject({ status: 'scored', eval_score: 0.91 });
+    // judge 1–5 is persisted on the board's 0–100 scale (×20).
+    expect(updates[1]).toMatchObject({ status: 'scored', eval_score: 90 });
   });
 
   it('rolls back to sourced when the pipeline throws', async () => {
