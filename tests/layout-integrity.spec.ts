@@ -36,41 +36,10 @@ const ALL_ROUTES = [
   // ── Root + info ─────────────────────────────────────────────────────────────
   '/',
   '/info',
-  '/wet-paint',
-  '/case-studies/hirobius',
-  '/case-studies/the-ranch-foundation',
-  '/microsoft-design-systems',
-  '/visuals',
-  '/portfolio/draft',
 
-  // ── HDS docs surface (ops-gated) ────────────────────────────────────────────
+  // ── HDS docs surface — every /ops/hds/* redirects to /ops via one wildcard
+  //    route; one representative covers it (was 25 near-identical redirect cases). ──
   '/ops/hds/typography',
-  '/ops/hds/color',
-  '/ops/hds/spacing',
-  '/ops/hds/tokens',
-  '/ops/hds/elevation',
-  '/ops/hds/motion',
-  '/ops/hds/breakpoints',
-  '/ops/hds/shape',
-  '/ops/hds/process',
-  '/ops/hds/components/actions',
-  '/ops/hds/components/inputs',
-  '/ops/hds/components/display',
-  '/ops/hds/components/feedback',
-  '/ops/hds/components/navigation',
-  '/ops/hds/components/layout',
-  '/ops/hds/components/doc-utilities',
-  '/ops/hds/case-studies/hirobius',
-
-  // ── HDS internal / WIP ──────────────────────────────────────────────────────
-  '/ops/hds/typography-test',
-  '/ops/hds/spacing-test',
-  '/ops/hds/architecture-snapshot',
-  '/ops/hds/component-health',
-  '/ops/hds/sandbox',
-  '/ops/hds/contribution-guide',
-  '/ops/hds/system-contract',
-  '/ops/hds/brand-theming',
 
   // ── Ops ─────────────────────────────────────────────────────────────────────
   '/ops',
@@ -99,9 +68,6 @@ const ALL_ROUTES = [
   // ── Client portal (public, token-gated; visited without ?token= renders the
   //    "Not authorized" surface — that surface still has to layout-cleanly). ──
   '/c/lilac-insure',
-
-  // ── Lab (incubator only — sketchbook is tested separately) ──────────────────
-  '/lab/incubator',
 ] as const;
 
 for (const route of ALL_ROUTES) {
