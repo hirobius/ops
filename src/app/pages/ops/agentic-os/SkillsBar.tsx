@@ -4,7 +4,7 @@
  * SkillsBar — eight buttons that fire whitelisted scripts via the
  * `/api/skills/:id` dev endpoint. Each button cycles through
  * idle → running → success/error states with a result panel. JSON
- * skills (`list-eligible`, `audit-claims`) expand inline below the
+ * skills (`research-list`, `audit-claims`) expand inline below the
  * button to show the parsed structure.
  */
 
