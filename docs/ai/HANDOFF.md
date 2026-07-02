@@ -52,8 +52,11 @@ _Last updated: 2026-07-02 · branch `claude/relaxed-ramanujan-vvhqf8` (all work 
 5. **Cutover Part B remainder** (gated on the clients Astro factory being live +
    preview-gate verified): human-triggered deploy worker → status migration →
    remove Duda (`lib/duda`, `api/build-site`, `api/publish-site`).
-6. **clients repo cleanup PR** (separate session scoped to hirobius/clients):
-   delete `packages/agent` + `scripts/lead-gen`, keep `packages/schema`.
+6. **clients repo cleanup** — tracked canonically as **hirobius/clients#10**
+   (delete `packages/agent` + `scripts/lead-gen`, keep `packages/schema`); do
+   not re-spec here. Unblock condition: first live generate in ops passes
+   (item 4). Until then the clients engine is FROZEN (no edits) so copies
+   can't diverge.
 
 ## Parked / known warts
 
@@ -135,5 +138,6 @@ wiring only.
 
 ## Done log (one line each, newest first)
 
+- 2026-07-02 (newsletter sweep): mined all 10 "The Code" editions (Jun 18–Jul 1) → filed ops issues #3–#7 (Playwright MCP self-verify · HTML plans/PR artifacts convention · blast-radius pre-edit hook · CLAUDE.md diet per Anthropic steering guide · lib/agent Sonnet-5 tiering + prompt audit). Judgment calls (cheap-model routing, observability, importer autonomy dial) parked pending Adrian.
 - 2026-07-02 (later): fleet-status layer — per-repo root status.json rendered on /ops/projects (token-gated, TTL-cached) · combined one-shot onboarding prompt (tasks + status + pointer) · HANDOFF.md system + CLAUDE.md routing repointed off the retired night-shift loop.
 - 2026-07-02: /ops/projects + /api/projects (fleet hub v1) · /ops/digest + first digest · Outscraper lead-gen · vendored agent+schema · render seam + /api/render-site · Astro decision recorded + cutover plan · script INDEX (#13-15) · architecture review #1-12 shipped.
