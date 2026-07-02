@@ -354,17 +354,6 @@ export default defineConfig(({ mode }) => {
             if (id.includes('node_modules/@radix-ui/')) {
               return 'vendor-radix';
             }
-            // three.js stack — pulled eagerly by HdsMobiusLogo via @react-three/fiber.
-            // Kept in a dedicated chunk so it doesn't block the main entry parse.
-            if (
-              id.includes('node_modules/three/') ||
-              id.includes('node_modules/@react-three/') ||
-              id.includes('node_modules/postprocessing/') ||
-              id.includes('node_modules/troika-') ||
-              id.includes('node_modules/meshline/')
-            ) {
-              return 'vendor-three';
-            }
             // Lucide icons — many routes import individual icons; isolating avoids
             // repeated tree-shake work and makes the chunk cacheable.
             if (id.includes('node_modules/lucide-react/')) {
