@@ -28,10 +28,22 @@ _Last updated: 2026-07-02 · branch `claude/relaxed-ramanujan-vvhqf8` (all work 
 
 ## Next (ordered queue)
 
-1. **Adrian: drop keys into Vercel env** (hirobius-ops → Settings → Env Vars,
-   Production + Preview): `ANTHROPIC_API_KEY`, `OUTSCRAPER_API_KEY`,
-   `VERCEL_TOKEN`, `VERCEL_TEAM_ID=team_niSKMbO08RycEwm9EXhN1PnE`,
-   `GITHUB_TOKEN` (fine-grained, read-only Issues+Metadata). Vault = Bitwarden.
+1. **Adrian: drop keys into Vercel env** (hirobius-ops → Settings → Env Vars).
+   **Set every var for BOTH Production AND Preview scopes** — the branch preview
+   reads Preview-scoped vars; a Production-only var is invisible to it. **Env
+   changes only take effect on a NEW build** — after adding/editing, redeploy
+   the *feature branch* (a fresh push), NOT the dashboard "Redeploy" button
+   (that re-runs `main`, which is stale + fails `invalid_engines_value`). Vault
+   = Bitwarden. Full list, grouped by what each unlocks:
+   - **Login gate (without these `/ops` login is dead — "Ops auth isn't
+     configured"):** `OPS_GATE_PASSWORD` (the password you type on the gate),
+     `OPS_SESSION_SECRET` (any long random string; signs the session cookie).
+   - **Data boards (leads / tasks / projects rows):** `SUPABASE_URL`,
+     `SUPABASE_SERVICE_ROLE_KEY`.
+   - **Features:** `ANTHROPIC_API_KEY` (agent generate), `OUTSCRAPER_API_KEY`
+     (real lead pull), `VERCEL_TOKEN` + `VERCEL_TEAM_ID=team_niSKMbO08RycEwm9EXhN1PnE`
+     (/ops/projects fleet), `GITHUB_TOKEN` (fine-grained, read-only
+     Issues+Metadata — per-repo status.json on /ops/projects).
 2. **Task importer unit** (needs `GITHUB_TOKEN`): pull open GitHub issues from
    every repo into the `tasks` table (`source: 'github:<repo>'`, `native_key` =
    issue#), project filter chips on `/ops/tasks`, Projects→Tasks link, and

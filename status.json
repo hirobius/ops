@@ -1,11 +1,14 @@
 {
-  "updatedAt": "2026-07-02T10:15:00Z",
+  "updatedAt": "2026-07-02T13:00:00Z",
   "phase": "active",
-  "headline": "Deploy unblocked: consolidated leads routes (13\u219210 fns) under Hobby cap; awaiting keys",
+  "headline": "Preview deploy green (10 fns, ffffa757); /ops login needs OPS_GATE_PASSWORD + OPS_SESSION_SECRET set (Preview scope) then a feature-branch rebuild",
   "next": [
-    "Confirm deploy READY + keys active \u2014 /ops/projects should light up",
+    "Set the login-gate + remaining env vars (Preview scope) \u2014 see HANDOFF Next #1",
     "Task importer + approvals inbox/run log + tier dispatch (#8, #13)",
     "First live lead\u2192generate run, then outreach v1 (#9)"
   ],
-  "blocked": []
+  "blocked": [
+    "/ops login gated until OPS_GATE_PASSWORD + OPS_SESSION_SECRET exist in Vercel Preview env",
+    "main branch is stale + fails invalid_engines_value; production waits on feature\u2192main merge (PR #1)"
+  ]
 }
