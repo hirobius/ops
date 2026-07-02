@@ -7,34 +7,40 @@
 > finished things to the log line at the bottom). Adrian never copy-pastes
 > context again — he types one word.
 
-_Last updated: 2026-07-02 · branch `claude/relaxed-ramanujan-vvhqf8` (all work committed + pushed)_
+_Last updated: 2026-07-02 (fleet hub went live) · branch `claude/relaxed-ramanujan-vvhqf8` (all work committed + pushed)_
 
 ## Now (what is true today)
 
 - **Preview**: https://hirobius-ops-git-claude-relaxed-ra-858b32-adrian-6234s-projects.vercel.app
-  (auto-updates per push · `/ops` asks the gate password · Vercel login required
-  unless using a fresh `_vercel_share` link).
-- **Engine is real, awaiting keys**: lead-gen = Outscraper wrapper (mock rows
-  until key). Agent = vendored clients pipeline (enrich→generate→judge loop,
-  `ClientConfig` contract in `lib/schema`). Render seam emits `client.config.ts`
-  + deploy commands (`/api/render-site`).
-- **New surfaces**: `/ops/digest` (newsletter intel, JSONs in `src/app/digests/`),
-  `/ops/projects` (live Vercel fleet — needs `VERCEL_TOKEN`; also renders each
-  repo's root `status.json` — phase · headline · blocked — once `GITHUB_TOKEN`
-  is set). Fleet-status convention: every repo keeps `status.json` at root
-  (ops's own is the reference).
+  (auto-updates per push · **`/ops` login gate is LIVE** — `OPS_GATE_PASSWORD` +
+  `OPS_SESSION_SECRET` are set · Vercel login also required unless using a fresh
+  `_vercel_share` link).
+- **Fleet hub is LIVE (2026-07-02)**: `/ops/projects` renders all 10 Vercel
+  projects + each repo's root `status.json` (phase · headline · ⚠blocked).
+  Verified active: **`VERCEL_TOKEN`** (fleet rows) + **`GITHUB_TOKEN`** (status
+  layer). Fleet-status convention: every repo keeps `status.json` at root (ops's
+  own is the reference).
+- **Engine wired, lead keys not yet exercised**: lead-gen = Outscraper wrapper,
+  Agent = vendored clients pipeline (enrich→generate→judge, `ClientConfig` in
+  `lib/schema`), render seam emits `client.config.ts` (`/api/render-site`, now
+  folded into `/api/lead-action`). `OUTSCRAPER_API_KEY` / `ANTHROPIC_API_KEY` /
+  Supabase are set but UNVERIFIED until the first lead run proves them.
+- **Other surfaces**: `/ops/digest` (newsletter intel, JSONs in `src/app/digests/`),
+  `/ops/leads` (the lead board), `/ops/tasks`.
 - **Decision record**: `docs/ARCHITECTURE.md` (2026-06-30 reversal — Astro is
   production, Duda retired). Execution plan: `docs/operations/ops-astro-cutover-plan.md`.
 
 ## Next (ordered queue)
 
-1. **Adrian: drop keys into Vercel env** (hirobius-ops → Settings → Env Vars).
-   **Set every var for BOTH Production AND Preview scopes** — the branch preview
-   reads Preview-scoped vars; a Production-only var is invisible to it. **Env
-   changes only take effect on a NEW build** — after adding/editing, redeploy
-   the *feature branch* (a fresh push), NOT the dashboard "Redeploy" button
-   (that re-runs `main`, which is stale + fails `invalid_engines_value`). Vault
-   = Bitwarden. Full list, grouped by what each unlocks:
+1. **Env vars — login gate + VERCEL_TOKEN + GITHUB_TOKEN verified live; the
+   rest set-but-unexercised.** (Runbook kept below as the reference.) Two rules
+   that cost real time and MUST be remembered: **(a) set every var for BOTH
+   Production AND Preview scopes** — the branch preview reads Preview-scoped
+   vars; a Production-only var is invisible to it. **(b) Env changes only take
+   effect on a NEW build** — after adding/editing, redeploy the *feature branch*
+   (a fresh push), NOT the dashboard "Redeploy" button (that re-runs `main`,
+   which is stale + fails `invalid_engines_value`). Vault = Bitwarden. Full list,
+   grouped by what each unlocks:
    - **Login gate (without these `/ops` login is dead — "Ops auth isn't
      configured"):** `OPS_GATE_PASSWORD` (the password you type on the gate),
      `OPS_SESSION_SECRET` (any long random string; signs the session cookie).
@@ -193,6 +199,7 @@ wiring only.
 
 ## Done log (one line each, newest first)
 
+- 2026-07-02 (fleet hub LIVE — end of the deploy saga): after the function-cap fix, three more blockers fell in sequence — (a) `/ops` login gate needed `OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` (never in the keys list); (b) env vars only bind on a NEW feature-branch build (dashboard "Redeploy" re-runs stale `main`, which fails `invalid_engines_value`); (c) every guarded route imported `'../lib/api/handler'` extensionless → `ERR_MODULE_NOT_FOUND` at ESM runtime (typecheck-green, 500 live). All fixed. `/ops/projects` now renders all 10 repos + their status.json; `VERCEL_TOKEN` + `GITHUB_TOKEN` verified active. Login works. Preview is the live hub.
 - 2026-07-02 (deploy fix 2): the 38de046 deploy cleared the typecheck but then hit `exceeded_serverless_functions_per_deployment` (Hobby cap 12, we had 13). Consolidated the 4 lead-lifecycle routes (generate/build/publish/render-site) into one `api/lead-action.ts` POST dispatcher → 10 functions. Repointed LeadsPage callers + the dev middleware (scripts/leads-middleware.mjs, one `action` handler) + vite.config wiring. Added `pnpm typecheck:api` (tsconfig.api-check.json) as the real deploy-parity gate + fixed 7 pre-existing TS4111 so it's fully green. 41 api tests green, app build green.
 - 2026-07-02 (deploy fix): branch had been ERROR-deploying for 7 commits (since d454856 /ops/projects) — Vercel type-checks api/*.ts functions and `@vercel/node`/`@types/node` were missing. Installed both; function typecheck now 0 blocking errors, app build green. This is why the preview looked stale + env vars weren't taking effect.
 - 2026-07-02 (newsletter sweep): mined all 10 "The Code" editions (Jun 18–Jul 1) → filed ops issues #3–#7 (Playwright MCP self-verify · HTML plans/PR artifacts convention · blast-radius pre-edit hook · CLAUDE.md diet per Anthropic steering guide · lib/agent Sonnet-5 tiering + prompt audit). Judgment calls (cheap-model routing, observability, importer autonomy dial) parked pending Adrian.

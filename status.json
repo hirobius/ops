@@ -1,14 +1,13 @@
 {
-  "updatedAt": "2026-07-02T13:00:00Z",
+  "updatedAt": "2026-07-02T19:30:00Z",
   "phase": "active",
-  "headline": "Preview deploy green (10 fns, ffffa757); /ops login needs OPS_GATE_PASSWORD + OPS_SESSION_SECRET set (Preview scope) then a feature-branch rebuild",
+  "headline": "Fleet hub fully live \u2014 /ops preview green, login works, /ops/projects renders all 10 repos + their status.json (VERCEL_TOKEN + GITHUB_TOKEN active)",
   "next": [
-    "Set the login-gate + remaining env vars (Preview scope) \u2014 see HANDOFF Next #1",
+    "First real lead run: pull Access Tech leads -> generate -> eyeball config (verifies OUTSCRAPER + ANTHROPIC + Supabase)",
     "Task importer + approvals inbox/run log + tier dispatch (#8, #13)",
-    "First live lead\u2192generate run, then outreach v1 (#9)"
+    "Vercel Pro before the importer adds routes (durable fix for the 12-fn cap)"
   ],
   "blocked": [
-    "/ops login gated until OPS_GATE_PASSWORD + OPS_SESSION_SECRET exist in Vercel Preview env",
-    "main branch is stale + fails invalid_engines_value; production waits on feature\u2192main merge (PR #1)"
+    "main branch stale + fails invalid_engines_value; production waits on feature->main merge (PR #1)"
   ]
 }
