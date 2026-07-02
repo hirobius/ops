@@ -83,6 +83,7 @@ const ALL_ROUTES = [
   '/ops/leads',
   '/ops/tasks',
   '/ops/digest',
+  '/ops/projects',
   '/ops/clients',
   '/ops/clients/lilac-insure',
   '/ops/clients/lilac-insure/report',
