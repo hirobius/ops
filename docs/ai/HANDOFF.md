@@ -70,6 +70,11 @@ _Last updated: 2026-07-02 · branch `claude/relaxed-ramanujan-vvhqf8` (all work 
   sight; do NOT commit regens. Real fix waits on the HDS import rework.
 - `pnpm typecheck` is DS-baseline-red → commits/pushes use `--no-verify`;
   validate touched files by filtering typecheck output.
+- **Vercel build ≠ local `vite build`.** Vercel type-checks every `api/*.ts`
+  serverless function; `vite build` does not. So a green local build can still
+  fail on Vercel. `@vercel/node` + `@types/node` are now installed (fixes the
+  function typecheck); if you touch api/ types, verify with
+  `pnpm exec tsc --skipLibCheck --types node api/*.ts`, not just vite build.
 - `docs/ai/OPERATOR_BRIEF.md` + night-shift loop + `orchestration.json` are
   RETIRED — do not execute them.
 
@@ -162,6 +167,7 @@ wiring only.
 
 ## Done log (one line each, newest first)
 
+- 2026-07-02 (deploy fix): branch had been ERROR-deploying for 7 commits (since d454856 /ops/projects) — Vercel type-checks api/*.ts functions and `@vercel/node`/`@types/node` were missing. Installed both; function typecheck now 0 blocking errors, app build green. This is why the preview looked stale + env vars weren't taking effect.
 - 2026-07-02 (newsletter sweep): mined all 10 "The Code" editions (Jun 18–Jul 1) → filed ops issues #3–#7 (Playwright MCP self-verify · HTML plans/PR artifacts convention · blast-radius pre-edit hook · CLAUDE.md diet per Anthropic steering guide · lib/agent Sonnet-5 tiering + prompt audit). Judgment calls (cheap-model routing, observability, importer autonomy dial) parked pending Adrian.
 - 2026-07-02 (later): fleet-status layer — per-repo root status.json rendered on /ops/projects (token-gated, TTL-cached) · combined one-shot onboarding prompt (tasks + status + pointer) · HANDOFF.md system + CLAUDE.md routing repointed off the retired night-shift loop.
 - 2026-07-02: /ops/projects + /api/projects (fleet hub v1) · /ops/digest + first digest · Outscraper lead-gen · vendored agent+schema · render seam + /api/render-site · Astro decision recorded + cutover plan · script INDEX (#13-15) · architecture review #1-12 shipped.
