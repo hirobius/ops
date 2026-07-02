@@ -40,7 +40,12 @@ _Last updated: 2026-07-02 · branch `claude/relaxed-ramanujan-vvhqf8` (all work 
    a task with target `all repos` fans out one GitHub Issue per repo via the
    existing issue port; adoption tracked by per-repo close state. Decisions
    made: **no nested boards** (one flat table, filtered views); cross-repo
-   assignment routes through the hub, never repo→repo.
+   assignment routes through the hub, never repo→repo; **autonomy dial
+   (Adrian 2026-07-02)** — menial tasks may carry an `auto-ok` label letting
+   agents self-dispatch; strategy tasks always human-dispatched; every
+   autonomous run gets a per-task iteration/time budget with auto-halt
+   (runaway protection) and posts a one-line recap to a run log surfaced on
+   /ops (recaps mandatory — nothing silent).
 3. **First-time repo onboarding ("the ping")**: for each client repo, run the
    universal prompt at the bottom of this file in a session scoped to that repo.
    It normalizes the repo's ad-hoc tasks into GitHub Issues (what the importer
@@ -67,6 +72,16 @@ _Last updated: 2026-07-02 · branch `claude/relaxed-ramanujan-vvhqf8` (all work 
   validate touched files by filtering typecheck output.
 - `docs/ai/OPERATOR_BRIEF.md` + night-shift loop + `orchestration.json` are
   RETIRED — do not execute them.
+
+## Decisions (dated, newest first)
+
+- 2026-07-02: Autonomy dial — `auto-ok` label = agent self-dispatch for menial
+  work; strategy stays human; budgets + auto-halt + mandatory recaps on all
+  autonomous runs. Cheap-model routing (GLM et al) DECLINED at current volume
+  — quality > pennies; revisit only if lead volume makes enrich-tier costs
+  real. Voice-dictation resilience line added fleet-wide. Delegation-interview
+  skill created (`claude-config/skills/delegation-interview/`) — run with
+  "run the delegation interview".
 
 ## Fleet directives (broadcast board — write here to reach every repo)
 
@@ -123,7 +138,8 @@ Onboard this repo into the Hirobius fleet hub (hirobius/ops). Four jobs:
    file; (b) before ending any session that changed project state, update
    root status.json (updatedAt, phase, headline, next, blocked) — the ops
    dashboard renders it; (c) read the ops HANDOFF before cross-project
-   decisions.
+   decisions; (d) Adrian often dictates — read past voice-transcription
+   errors and act on evident intent.
 
 4. REPORT. Reply with: issues created (numbers + titles), issues skipped as
    duplicates, the status.json you wrote, and anything found that needs a

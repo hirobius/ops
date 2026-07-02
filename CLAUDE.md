@@ -85,6 +85,11 @@ in place (Now / Next / Parked / one Done-log line) AND refresh root
 dashboard renders it), and include both in the final commit. If these are
 stale, the next session starts blind.
 
+**Voice-dictation resilience:** Adrian often dictates prompts; transcripts can
+carry homophone/word-salad artifacts ("stray" → "strategy", "Sound of the" →
+"some of the"). Read past transcription errors and act on the evident intent;
+ask only when genuinely ambiguous.
+
 ## 🛠️ Core Commands
 
 - Start Bridge: `node scripts/hds-bridge.mjs`
