@@ -22,6 +22,7 @@ const BuildPage = lazy(() => import('./pages/ops/BuildPage'));
 const KnowledgePage = lazy(() => import('./pages/ops/KnowledgePage'));
 const LeadsPage = lazy(() => import('./pages/ops/leads/LeadsPage'));
 const TasksPage = lazy(() => import('./pages/ops/tasks/TasksPage'));
+const DigestPage = lazy(() => import('./pages/ops/digest/DigestPage'));
 
 // ── Admin (approval inbox) — lazy loaded ─────────────────────────────────────
 const ApprovalsPage = lazy(() => import('./pages/admin/Approvals'));
@@ -85,6 +86,7 @@ export const router = createBrowserRouter([
           { path: 'kanban', element: <LazyHDS Page={KanbanPage} /> },
           { path: 'leads', element: <LazyHDS Page={LeadsPage} /> },
           { path: 'tasks', element: <LazyHDS Page={TasksPage} /> },
+          { path: 'digest', element: <LazyHDS Page={DigestPage} /> },
           { path: 'clients', element: <LazyHDS Page={ClientsIndexPage} /> },
           { path: 'clients/:slug', element: <LazyHDS Page={ClientDashboardPage} /> },
           { path: 'clients/:slug/report', element: <LazyHDS Page={ClientReportPage} /> },

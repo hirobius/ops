@@ -34,6 +34,11 @@ const TILES: readonly SurfaceTile[] = [
     label: 'Tasks',
     description: 'Consolidated task board — tracker + backlog + clients',
   },
+  {
+    to: '/ops/digest',
+    label: 'Digest',
+    description: 'Newsletter intel, pre-triaged with an ops angle',
+  },
   { to: '/ops/build', label: 'Build', description: 'Pipeline stats · cost burn · agent audit' },
   { to: '/ops/knowledge', label: 'Knowledge', description: 'Build · Grow · Run — ops pillar hub' },
   {
