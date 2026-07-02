@@ -386,12 +386,12 @@ function FeedbackSection({ slug }: FeedbackSectionProps) {
               style={{ ...hds.typeStyles.body, ...clientPortalStyles.feedbackTextareaBase }}
             />
             {state === 'sent' && (
-              <Alert variant="success" title="Thanks">
+              <Alert tone="success" title="Thanks">
                 We received your note. Adrian will follow up by email.
               </Alert>
             )}
             {state === 'error' && (
-              <Alert variant="error" title="Could not send">
+              <Alert tone="danger" title="Could not send">
                 Try again, or email us directly.
               </Alert>
             )}
