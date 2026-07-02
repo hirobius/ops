@@ -36,8 +36,11 @@ _Last updated: 2026-07-02 · branch `claude/relaxed-ramanujan-vvhqf8` (all work 
    every repo into the `tasks` table (`source: 'github:<repo>'`, `native_key` =
    issue#), project filter chips on `/ops/tasks`, Projects→Tasks link, and
    **`OPS_AGENT_KEY` machine auth** (Bearer alternative to the cookie on read
-   endpoints) so headless agents can use the hub. Decision made: **no nested
-   boards** — one flat table, filtered views.
+   endpoints) so headless agents can use the hub. Also: **broadcast tasks** —
+   a task with target `all repos` fans out one GitHub Issue per repo via the
+   existing issue port; adoption tracked by per-repo close state. Decisions
+   made: **no nested boards** (one flat table, filtered views); cross-repo
+   assignment routes through the hub, never repo→repo.
 3. **First-time repo onboarding ("the ping")**: for each client repo, run the
    universal prompt at the bottom of this file in a session scoped to that repo.
    It normalizes the repo's ad-hoc tasks into GitHub Issues (what the importer
@@ -61,6 +64,15 @@ _Last updated: 2026-07-02 · branch `claude/relaxed-ramanujan-vvhqf8` (all work 
   validate touched files by filtering typecheck output.
 - `docs/ai/OPERATOR_BRIEF.md` + night-shift loop + `orchestration.json` are
   RETIRED — do not execute them.
+
+## Fleet directives (broadcast board — write here to reach every repo)
+
+Every fleet repo's CLAUDE.md pointer instructs its sessions to read this file
+before cross-project decisions — so a dated line here IS a fleet-wide
+broadcast. Keep each directive one line; prune when obsolete.
+
+- 2026-07-02: Track work as GitHub Issues; keep root `status.json` fresh at
+  session end; cross-repo asks route through the ops hub, never repo→repo.
 
 ## Standing rules (never violate)
 
