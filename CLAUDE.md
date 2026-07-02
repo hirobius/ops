@@ -65,19 +65,24 @@ Do NOT guess architectural decisions. Always consult the routing documents below
 
 When asked to perform a task, read the corresponding file BEFORE writing code:
 
+- **CURRENT STATE + NEXT QUEUE + HANDOFF (start here):** Read `docs/ai/HANDOFF.md`
 - **Autonomous-build pipeline architecture (how the system drives itself):** Read `docs/ai/AUTONOMOUS_BUILD.md`
-- **Build state, active threads, autonomous-continuation protocol:** Read `docs/ai/OPERATOR_BRIEF.md`
+- **Legacy operator brief (RETIRED — do not execute its loop):** `docs/ai/OPERATOR_BRIEF.md`
 - **Unit spec database (every build unit):** `docs/ai/orchestration.json` <!-- doc-ref-ok: replaced by Hermes Kanban; routing pending update -->
 - **Global State & Current Sprints (legacy phase log):** Read `docs/ai/AI_ORCHESTRATION.md`
 - **Design Token & Manifest Rules:** Read `docs/ai/rules/MANIFEST_SYNC.md`
 - **React Component Rules:** Read `docs/ai/rules/REACT_COMPONENTS.md`
 - **Figma Plugin / Bridge Rules:** Read `docs/ai/rules/FIGMA_BRIDGE.md`
 
-**If the user's prompt is short or open-ended ("continue", "go", "next
-unit", "follow this doc"):** Default to the autonomous-continuation
-protocol at the top of `docs/ai/OPERATOR_BRIEF.md`. The protocol
-self-drives — pick the next eligible unit from `orchestration.json`
-and execute.
+**If the user's prompt is short or open-ended ("continue", "go", "status",
+"pick up where we left off"):** Read `docs/ai/HANDOFF.md` and act from its
+"Next" queue — no confirmation needed for the top item. Do NOT follow the
+retired night-shift protocol in OPERATOR_BRIEF.md or `orchestration.json`.
+
+**Before ending any session that did real work:** update `docs/ai/HANDOFF.md`
+in place (Now / Next / Parked / one Done-log line) and include it in the final
+commit. This file is the handoff — if it is stale, the next session starts
+blind.
 
 ## 🛠️ Core Commands
 
