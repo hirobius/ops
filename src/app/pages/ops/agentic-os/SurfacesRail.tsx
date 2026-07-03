@@ -23,7 +23,6 @@ export interface SurfaceTile {
 
 const TILES: readonly SurfaceTile[] = [
   { to: '/ops/atlas', label: 'Atlas', description: 'Components · tokens · pipeline · strength' },
-  { to: '/ops/kanban', label: 'Kanban', description: 'Live unit board — claim, track, ship' },
   {
     to: '/ops/leads',
     label: 'Leads',
@@ -44,7 +43,6 @@ const TILES: readonly SurfaceTile[] = [
     label: 'Projects',
     description: 'Live fleet — deploy state across every Vercel project',
   },
-  { to: '/ops/build', label: 'Build', description: 'Pipeline stats · cost burn · agent audit' },
   { to: '/ops/knowledge', label: 'Knowledge', description: 'Build · Grow · Run — ops pillar hub' },
   {
     to: '/ops/staging',

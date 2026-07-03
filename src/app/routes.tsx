@@ -16,9 +16,7 @@ const ClientDashboardPage = lazy(() => import('./pages/ops/ClientDashboardPage')
 const ClientReportPage = lazy(() => import('./pages/ops/ClientReportPage'));
 const ClientBrandAuditPage = lazy(() => import('./pages/ops/ClientBrandAuditPage'));
 const SessionsPage = lazy(() => import('./pages/ops/SessionsPage'));
-const KanbanPage = lazy(() => import('./pages/ops/kanban/KanbanPage'));
 const OpsShell = lazy(() => import('./pages/ops/OpsShell').then((m) => ({ default: m.OpsShell })));
-const BuildPage = lazy(() => import('./pages/ops/BuildPage'));
 const KnowledgePage = lazy(() => import('./pages/ops/KnowledgePage'));
 const LeadsPage = lazy(() => import('./pages/ops/leads/LeadsPage'));
 const TasksPage = lazy(() => import('./pages/ops/tasks/TasksPage'));
@@ -81,10 +79,8 @@ export const router = createBrowserRouter([
           { path: 'staging', element: <LazyHDS Page={StagingPage} /> },
           { path: 'briefing', element: <LazyHDS Page={BriefingPage} /> },
           { path: 'atlas', element: <LazyHDS Page={AtlasPage} /> },
-          { path: 'build', element: <LazyHDS Page={BuildPage} /> },
           { path: 'knowledge', element: <LazyHDS Page={KnowledgePage} /> },
           { path: 'sessions', element: <LazyHDS Page={SessionsPage} /> },
-          { path: 'kanban', element: <LazyHDS Page={KanbanPage} /> },
           { path: 'leads', element: <LazyHDS Page={LeadsPage} /> },
           { path: 'tasks', element: <LazyHDS Page={TasksPage} /> },
           { path: 'digest', element: <LazyHDS Page={DigestPage} /> },

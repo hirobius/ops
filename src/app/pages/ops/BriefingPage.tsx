@@ -355,9 +355,6 @@ export default function BriefingPage() {
           <a href="/ops/sessions" className="hds-focus" style={s.outboundLink}>
             Sessions →
           </a>
-          <a href="/ops/build" className="hds-focus" style={s.outboundLink}>
-            Build pipeline →
-          </a>
           <a href="/ops/atlas" className="hds-focus" style={s.outboundLink}>
             Atlas →
           </a>

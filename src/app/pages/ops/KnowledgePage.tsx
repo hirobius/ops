@@ -9,11 +9,6 @@ import { PageHeader } from './PageHeader';
 
 const PILLARS = [
   {
-    to: '/ops/build',
-    label: 'Build',
-    description: 'Autonomous-build pipeline · cost burn · agent audit',
-  },
-  {
     to: '/ops/clients',
     label: 'Grow',
     description: 'Client pipeline · retainers · prospects',

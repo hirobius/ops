@@ -135,8 +135,8 @@ const VIEWPORTS = [
 // FontProvider→Atkinson→system-ui body-font degradation to ship unnoticed.
 //
 // Skipped routes:
-//  - /ops + /ops/build — current visual state is the "dashboards look bad"
-//    issue Adrian flagged on 2026-05-03; baselining now would lock that in.
+//  - /ops — current visual state is the "dashboards look bad" issue Adrian
+//    flagged on 2026-05-03; baselining now would lock that in.
 //  - / (homepage) — the Mobius shader has frame-to-frame variation that
 //    headless chromium can't deterministically pin even with reducedMotion.
 //    Re-enable once MobiusScene exposes a deterministic-frame mode (e.g.
