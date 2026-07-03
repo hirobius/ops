@@ -112,6 +112,10 @@ data/
 # (queries.json itself IS tracked; only the per-run findings are local-only)
 docs/research/findings/
 
+# Outscraper prospect pulls — scraped business data (names/phones/addresses).
+# Local-only, regenerated per run. Treated like clients/* (PII stays out of git).
+prospects/
+
 # One-shot artifacts (never track)
 *.log
 *.bak
