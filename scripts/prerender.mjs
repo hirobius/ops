@@ -79,7 +79,6 @@ const ROUTES = [
     title: 'Info — Adrian Milsap',
     description:
       'About Adrian Milsap — design engineer, builder of design systems, and creative technologist.',
-    ogImage: '/assets/adrian.webp',
     ogType: 'website',
   },
 ];
@@ -89,7 +88,7 @@ const ROUTES = [
 function injectIntoShell(shell, routeMeta, bodyHtml) {
   const { url, title, description, ogImage, ogType, noindex } = routeMeta;
   const canonical = `${SITE_ORIGIN}${url === '/' ? '' : url}`;
-  const absOgImage = `${SITE_ORIGIN}${ogImage}`;
+  const absOgImage = ogImage ? `${SITE_ORIGIN}${ogImage}` : null;
 
   let html = shell;
 
@@ -114,15 +113,15 @@ function injectIntoShell(shell, routeMeta, bodyHtml) {
     `    <meta property="og:type" content="${ogType}" />`,
     `    <meta property="og:title" content="${title}" />`,
     `    <meta property="og:description" content="${description}" />`,
-    `    <meta property="og:image" content="${absOgImage}" />`,
-    `    <meta property="og:image:width" content="1200" />`,
-    `    <meta property="og:image:height" content="630" />`,
+    absOgImage ? `    <meta property="og:image" content="${absOgImage}" />` : null,
+    absOgImage ? `    <meta property="og:image:width" content="1200" />` : null,
+    absOgImage ? `    <meta property="og:image:height" content="630" />` : null,
     `    <meta property="og:url" content="${canonical}" />`,
     `    <meta property="og:site_name" content="Adrian Milsap" />`,
-    `    <meta name="twitter:card" content="summary_large_image" />`,
+    `    <meta name="twitter:card" content="${absOgImage ? 'summary_large_image' : 'summary'}" />`,
     `    <meta name="twitter:title" content="${title}" />`,
     `    <meta name="twitter:description" content="${description}" />`,
-    `    <meta name="twitter:image" content="${absOgImage}" />`,
+    absOgImage ? `    <meta name="twitter:image" content="${absOgImage}" />` : null,
   ]
     .filter(Boolean)
     .join('\n');
