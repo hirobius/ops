@@ -106,8 +106,6 @@ function sortKeys(obj) {
 
 const registry = readJSON('docs/guardrails/registry.json');
 const orchestration = readJSON('docs/ai/orchestration.json');
-// swarm-watchdog-decisions.jsonl: used for regression detection in the report comparison block
-const _watchdogDecisions = readLines('docs/ai/swarm-watchdog-decisions.jsonl');
 const componentApi = readJSON('src/app/data/component-api.json');
 const tsconfigMain = readJSON('tsconfig.json');
 

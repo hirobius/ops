@@ -22,7 +22,7 @@ export interface SurfaceTile {
 }
 
 const TILES: readonly SurfaceTile[] = [
-  { to: '/ops/atlas', label: 'Atlas', description: 'Components · tokens · pipeline · strength' },
+  { to: '/ops/atlas', label: 'Atlas', description: 'Foundations · components · tokens' },
   {
     to: '/ops/leads',
     label: 'Leads',
