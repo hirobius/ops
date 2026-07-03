@@ -55,8 +55,6 @@ Every commit on a feature branch must reference an open Hermes Kanban task via a
 - Auto-skip on `main` / `release/*` / `hotfix/*` branches
 - Auto-skip on merge / revert commits
 
-**Helper:** `pnpm kanban:start "<title>"` creates a triage task + worktree + branch + writes `HERMES_TASK_ID` for reverse lookup, and echoes the `Refs:` line for paste. See `scripts/kanban-start.mjs`.
-
 **Audit existing branches:** `pnpm audit:wip` scans every branch ahead of main and reports orphan commits / archived-target refs / partial-coverage branches. Output: `docs/guardrails/orphan-wip-report.json`.
 
 **Why it exists:** the Kimi-removal commit `c30eba6f` was a 27-file, real-work cleanup that landed without any kanban link. Sessions resuming from `git log` had no resume handle. The convention closes that gap — every distinct work intent gets a kanban task before commits land, and the audit catches the existing backlog.

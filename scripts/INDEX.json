@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 179,
+  "totalScripts": 168,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,11 +41,11 @@
     }
   },
   "categoryCounts": {
-    "other": 70,
+    "other": 60,
     "audit": 18,
     "build": 9,
     "gate": 47,
-    "figma": 4,
+    "figma": 3,
     "generate": 15,
     "sync": 5,
     "test": 5,
@@ -1103,14 +1103,6 @@
       }
     },
     {
-      "name": "classify-pillars.mjs",
-      "category": "other",
-      "prefix": "classify",
-      "purpose": "BUILD / GROW / RUN pillar field on orchestration units + kanban tasks.",
-      "pnpm": [],
-      "gate": null
-    },
-    {
       "name": "client-digest.mjs",
       "category": "other",
       "prefix": "client",
@@ -1141,14 +1133,6 @@
       "category": "other",
       "prefix": null,
       "purpose": "Request/response correlation Map used by `scripts/hds-bridge.mjs`. Build unit p5-2.",
-      "pnpm": [],
-      "gate": null
-    },
-    {
-      "name": "cost-ceiling-gate.mjs",
-      "category": "other",
-      "prefix": "cost",
-      "purpose": "Hard cost ceiling enforcement. Refuses dispatch when `task.costSpent + projected > task.costCeiling` (USD).",
       "pnpm": [],
       "gate": null
     },
@@ -1219,14 +1203,6 @@
       "pnpm": [
         "figma:diff"
       ],
-      "gate": null
-    },
-    {
-      "name": "figma-library-generate.mjs",
-      "category": "figma",
-      "prefix": "figma",
-      "purpose": "Authoritative write-path: hirobius.tokens.json → Figma Variables REST API payload.",
-      "pnpm": [],
       "gate": null
     },
     {
@@ -1406,14 +1382,6 @@
       "gate": null
     },
     {
-      "name": "haiku-agent.mjs",
-      "category": "other",
-      "prefix": "haiku",
-      "purpose": "Autonomous unit executor powered by Claude Haiku 4.5 via Anthropic API. Same orchestration protocol as hermes-unit — claim/done state machine, scoping-discipline system prompt — but uses the Anthropic Messages API",
-      "pnpm": [],
-      "gate": null
-    },
-    {
       "name": "hds-bridge.mjs",
       "category": "other",
       "prefix": "hds",
@@ -1434,34 +1402,10 @@
       "gate": null
     },
     {
-      "name": "hds-lint.js",
-      "category": "other",
-      "prefix": "hds",
-      "purpose": "Hirobius Design System - Automated System Linter",
-      "pnpm": [],
-      "gate": null
-    },
-    {
       "name": "headless-scan.browser.js",
       "category": "other",
       "prefix": "headless",
       "purpose": "(no header description)",
-      "pnpm": [],
-      "gate": null
-    },
-    {
-      "name": "import-tasks.mjs",
-      "category": "other",
-      "prefix": "import",
-      "purpose": "Targets the FINALIZED schema in supabase/migrations/0003_tasks.sql (from the ops-archive consolidation-handoff). Three sources, collision-free namespaced keys:",
-      "pnpm": [],
-      "gate": null
-    },
-    {
-      "name": "kanban-start.mjs",
-      "category": "other",
-      "prefix": "kanban",
-      "purpose": "Single-command \"I'm starting work\" helper. Combines: hermes kanban create <title> --triage --workspace worktree git worktree add .worktrees/<short-id> -b feat/<short-id>-<slug>",
       "pnpm": [],
       "gate": null
     },
@@ -1488,22 +1432,6 @@
       "category": "other",
       "prefix": "meeting",
       "purpose": "meeting transcript, append them to docs/ai/proposed-units.jsonl.",
-      "pnpm": [],
-      "gate": null
-    },
-    {
-      "name": "merge-squash.mjs",
-      "category": "other",
-      "prefix": "merge",
-      "purpose": "Automates the squash-merge-with-baseline-tag protocol for fix/* → main. Full protocol: docs/operations/squash-merge-protocol.md",
-      "pnpm": [],
-      "gate": null
-    },
-    {
-      "name": "migrate-orchestration-to-hermes.mjs",
-      "category": "other",
-      "prefix": "migrate",
-      "purpose": "Pushes outstanding orchestration.json units into the Hermes Kanban board.",
       "pnpm": [],
       "gate": null
     },
@@ -1747,14 +1675,6 @@
       "gate": null
     },
     {
-      "name": "swiss-canon-check.mjs",
-      "category": "other",
-      "prefix": "swiss",
-      "purpose": "Swiss design canon gap report for the Hirobius Design System.",
-      "pnpm": [],
-      "gate": null
-    },
-    {
       "name": "sync-asset-manifest.mjs",
       "category": "sync",
       "prefix": "sync",
@@ -1888,14 +1808,6 @@
       "category": "other",
       "prefix": "threads",
       "purpose": "Dev-only HTTP middleware that surfaces \"open work threads\" to the /ops/kanban page so it can correlate Hermes tasks with Adrian's git worktrees and active Claude Code sessions.",
-      "pnpm": [],
-      "gate": null
-    },
-    {
-      "name": "triage-approved.mjs",
-      "category": "other",
-      "prefix": "triage",
-      "purpose": "Triage actions for orchestration's `approved` bucket. Complements `_retired-2026-05-06/list-eligible.mjs` (which just lists eligible units) and `audit-claims.mjs` (which finds stale `claimed` units). This script",
       "pnpm": [],
       "gate": null
     },

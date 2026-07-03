@@ -4,7 +4,7 @@
 > Regenerate with `pnpm scripts:index`. Deterministic (no timestamps), so it
 > only changes when scripts do.
 
-**179 scripts** across 10 categories.
+**168 scripts** across 10 categories.
 
 ## Prefix taxonomy
 
@@ -168,16 +168,15 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `test-prompt-regression.mjs` | Regression suite for LLM prompt outputs. Walks fixtures/llm-prompts/<slug>/ directories. Each must contain: | `test:prompts` | — |
 | `test-retry-loop.mjs` | Tests the retry loop with a mocked LLM. No network calls. | — | — |
 
-## figma (4)
+## figma (3)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
 | `figma-bridge-smoke.mjs` | End-to-end smoke test for the HDS Figma bridge pipeline (kanban t_d068769e). | `figma:bridge:smoke` | — |
 | `figma-diff.mjs` | Structure-agnostic: recursively computes added/removed/changed keyed by JSON pointer. | `figma:diff` | — |
-| `figma-library-generate.mjs` | Authoritative write-path: hirobius.tokens.json → Figma Variables REST API payload. | — | — |
 | `figma-parity-check.mjs` | Compares Figma component metadata (names, variants) with the manifest componentSpecs (and utilities), reporting three classes of mismatch: | — | — |
 
-## other (70)
+## other (60)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
@@ -188,30 +187,22 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `batch-scan.mjs` | Visits every route on the target deployment, injects the headless scanner into the live DOM, deduplicates findings, and writes one fix-prompt file per route to scans/. | `scan`, `scan:local` | — |
 | `case-study-draft.mjs` | Context/Problem/Approach/Outcome/Artefacts case-study record. | — | — |
 | `cc-plugins-middleware.mjs` | Dev-only middleware: GET /api/cc-plugins Enumerates installed Claude Code skills from: ~/.claude/skills/ (global user skills) {cwd}/.claude/skills/ (project-scoped skills) | — | — |
-| `classify-pillars.mjs` | BUILD / GROW / RUN pillar field on orchestration units + kanban tasks. | — | — |
 | `client-digest.mjs` | Walks the last N days of git log restricted to clients/<slug>/, buckets commits into shipped / next / blocker / other, and emits a markdown email draft ready to paste. Solo agencies live on perceived momentum; this | — | — |
 | `component-discovery.mjs` | (no header description) | — | — |
 | `convert-incoming-assets.mjs` | (no header description) | `assets:convert` | — |
 | `correlation.mjs` | Request/response correlation Map used by `scripts/hds-bridge.mjs`. Build unit p5-2. | — | — |
-| `cost-ceiling-gate.mjs` | Hard cost ceiling enforcement. Refuses dispatch when `task.costSpent + projected > task.costCeiling` (USD). | — | — |
 | `derive-routes.mjs` | Auto-derive the route list from: 1. src/app/routes.tsx (the React Router config) 2. src/app/data/component-api.json (component doc pages) | — | — |
 | `discord-bot.mjs` | Hirobius HQ — Discord bot with Claude API integration. | `bot` | — |
 | `dispatch-pod.mjs` | Worktree-isolation verification for sub-agent dispatch. | — | — |
 | `enrich-manifest.mjs` | (no header description) | `manifest:generate`, `sync:health` | — |
 | `ensure-ops-data.mjs` | Makes a clean checkout of @hirobius/ops buildable. | `prebuild`, `predev`, `pretypecheck` | — |
 | `google-auth.mjs` | One-time OAuth setup: generates a Google refresh token with Gmail + Drive scope. | — | — |
-| `haiku-agent.mjs` | Autonomous unit executor powered by Claude Haiku 4.5 via Anthropic API. Same orchestration protocol as hermes-unit — claim/done state machine, scoping-discipline system prompt — but uses the Anthropic Messages API | — | — |
 | `hds-bridge.mjs` | (no header description) | `bridge` | — |
 | `hds-jsx-compiler.mjs` | (no header description) | `test:compiler` | — |
-| `hds-lint.js` | Hirobius Design System - Automated System Linter | — | — |
 | `headless-scan.browser.js` | (no header description) | — | — |
-| `import-tasks.mjs` | Targets the FINALIZED schema in supabase/migrations/0003_tasks.sql (from the ops-archive consolidation-handoff). Three sources, collision-free namespaced keys: | — | — |
-| `kanban-start.mjs` | Single-command "I'm starting work" helper. Combines: hermes kanban create <title> --triage --workspace worktree git worktree add .worktrees/<short-id> -b feat/<short-id>-<slug> | — | — |
 | `leads-middleware.mjs` | Backs the /ops Leads board under `pnpm dev` (Vite). It reuses the EXACT same logic modules as the production Vercel functions — lib/supabase/leads (the | — | — |
 | `llm-stream-bridge.mjs` | (no header description) | `figma:stream` | — |
 | `meeting-to-tasks.mjs` | meeting transcript, append them to docs/ai/proposed-units.jsonl. | — | — |
-| `merge-squash.mjs` | Automates the squash-merge-with-baseline-tag protocol for fix/* → main. Full protocol: docs/operations/squash-merge-protocol.md | — | — |
-| `migrate-orchestration-to-hermes.mjs` | Pushes outstanding orchestration.json units into the Hermes Kanban board. | — | — |
 | `normalize-figma-snapshot.mjs` | Convert transport-specific Figma export JSON into the stable snapshot shape used by `scripts/audit-figma-system.mjs`. | `figma:snapshot` | — |
 | `page-clone.mjs` | (no header description) | `clone:page` | — |
 | `parse-bookmarks.mjs` | Parses Chrome/Edge bookmark HTML exports into structured markdown files organized by BUILD / GROW / RUN pillar. | `knowledge:bookmarks` | — |
@@ -238,12 +229,10 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `setup-hooks.mjs` | Activates Husky as the repo's hook path. | `prepare` | — |
 | `skill-runner-middleware.mjs` | Dev-only HTTP middleware that runs a whitelisted set of repo scripts in response to POST /api/skills/:id from the /ops dashboard. | — | — |
 | `snapshot-token-paths.mjs` | Reads hirobius.tokens.json, walks the DTCG token tree, and emits a sorted flat list of all leaf token paths (e.g. "semantic.color.surface.raised"). | — | — |
-| `swiss-canon-check.mjs` | Swiss design canon gap report for the Hirobius Design System. | — | — |
 | `tasks-middleware.mjs` | Reuses lib/tasks/actions.mjs (same logic as the prod functions). Wired in vite.config.mjs with apply:'serve' so it never ships to prod. | — | — |
 | `telegram-bot.mjs` | Telegram adapter for the Hirobius HQ auto-assigner. Mirrors scripts/discord-bot.mjs message routing — same backend, different transport. Both can run side-by-side; both write to the same | `telegram` | — |
 | `telemetry-report.mjs` | Reads telemetry/events.jsonl and prints a generation-health summary: total generations, success / exhausted breakdown, success rate retry-exhaustion rate (over rolling 24 h, production-tagged) | `telemetry:report` | — |
 | `threads-middleware.mjs` | Dev-only HTTP middleware that surfaces "open work threads" to the /ops/kanban page so it can correlate Hermes tasks with Adrian's git worktrees and active Claude Code sessions. | — | — |
-| `triage-approved.mjs` | Triage actions for orchestration's `approved` bucket. Complements `_retired-2026-05-06/list-eligible.mjs` (which just lists eligible units) and `audit-claims.mjs` (which finds stale `claimed` units). This script | — | — |
 | `ui-lint.mjs` | p6-2: thin CLI wrapper around GET http://localhost:3005/lint. Asks the bridge to run the validator suite over its current in-memory selection and prints findings. Exits non-zero when findings are non-empty so it | `ui:lint` | — |
 | `update-journal.mjs` | Appends a systems-ledger entry to docs/SYSTEMS-LOG.md using the latest token audit report and health history snapshot. | `health-log` | — |
 | `update-precommit-hash.mjs` | Recompute the canonical SHA-256 of .husky/pre-commit and write it to docs/guardrails/registry.json as `precommitStructureHash`. | — | — |
