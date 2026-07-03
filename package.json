@@ -32,17 +32,11 @@
       "import": "./dist/cn.js",
       "default": "./dist/cn.js"
     },
-    "./manifest": {
-      "types": "./public/hds-manifest.json",
-      "import": "./dist/manifest.js",
-      "default": "./dist/manifest.js"
-    },
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "src",
-    "public/hds-manifest.json"
+    "src"
   ],
   "scripts": {
     "_comment:a11y-high-value": "The following check:* validators are high-value accessibility checks that catch real violations (check:focus found 1 missing focus class). Kept dormant/manual-only to avoid pre-commit performance regression. Candidates to wire into pretest after CI stability review.",

@@ -16,8 +16,6 @@ import { createLeadsMiddleware } from './scripts/leads-middleware.mjs';
 import { createTasksMiddleware } from './scripts/tasks-middleware.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const hdsManifestModuleId = 'virtual:hds-manifest';
-const resolvedHdsManifestModuleId = `\0${hdsManifestModuleId}`;
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -43,20 +41,6 @@ export default defineConfig(({ mode }) => {
       __FIGMA_FILE_ID__: JSON.stringify(env.FIGMA_FILE_ID ?? ''),
     },
     plugins: [
-      {
-        name: 'hds-manifest-virtual-module',
-        resolveId(id) {
-          return id === hdsManifestModuleId ? resolvedHdsManifestModuleId : null;
-        },
-        load(id) {
-          if (id !== resolvedHdsManifestModuleId) return null;
-          const manifest = readFileSync(
-            path.resolve(__dirname, 'public/hds-manifest.json'),
-            'utf8',
-          );
-          return `export default ${manifest};`;
-        },
-      },
       react(),
       tailwindcss(),
       // Dev-only: POST /api/route — accepts { text, client } body, spawns
@@ -358,12 +342,6 @@ export default defineConfig(({ mode }) => {
             // repeated tree-shake work and makes the chunk cacheable.
             if (id.includes('node_modules/lucide-react/')) {
               return 'vendor-icons';
-            }
-            // Virtual hds-manifest — inline JSON export; split so the main entry
-            // stays under budget and the manifest chunk is independently cacheable.
-            // resolvedHdsManifestModuleId starts with \0 so we match the raw string.
-            if (id === resolvedHdsManifestModuleId || id.includes('virtual:hds-manifest')) {
-              return '_virtual_hds-manifest';
             }
           },
         },
