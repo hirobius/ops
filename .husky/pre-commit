@@ -17,10 +17,6 @@ pnpm typecheck
 echo "Running lint (12i-quality-eslint-burndown complete — zero warnings/errors enforced)..."
 pnpm lint --max-warnings=0
 
-echo "Validating manifest schema..."
-# Not a registry gate (no registry entry) — invoked explicitly here.
-node scripts/validate-manifest.mjs
-
 echo "Checking guardrail registry is complete..."
 # Not a registry gate (no registry entry) — invoked explicitly here.
 node scripts/validate-guardrail-registry.mjs

@@ -72,15 +72,7 @@ if (!existsSync(r('src/app/data/security-posture.json'))) {
   generated.push('src/app/data/security-posture.json');
 }
 
-// 4. component-api.json — prop/type-parity data read by the audit-component-
-//    integrity gate and the strength report; generator writes only this
-//    gitignored file.
-if (!existsSync(r('src/app/data/component-api.json'))) {
-  runScript('generate-component-api.mjs');
-  generated.push('src/app/data/component-api.json');
-}
-
-// 5. strength-report.json — its generator ALSO rewrites two tracked reports;
+// 4. strength-report.json — its generator ALSO rewrites two tracked reports;
 //    snapshot + restore them so the working tree stays clean.
 if (!existsSync(r('docs/guardrails/strength-report.json'))) {
   const tracked = ['docs/guardrails/strength-report.md', 'docs/guardrails/SYSTEM_OVERVIEW.md'];

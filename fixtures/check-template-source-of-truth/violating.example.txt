@@ -1,2 +1,0 @@
-// TODO: replace with real-violating-example for check-template-source-of-truth
-// STUB — this file needs real violating content

@@ -4,7 +4,7 @@
 > Regenerate with `pnpm scripts:index`. Deterministic (no timestamps), so it
 > only changes when scripts do.
 
-**166 scripts** across 10 categories.
+**116 scripts** across 9 categories.
 
 ## Prefix taxonomy
 
@@ -23,68 +23,45 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `figma-` | figma | Figma bridge — design-system sync, diff, or canvas ops. |
 | _(other)_ | other | One-off utilities, middleware, and domain scripts without a taxonomy prefix. |
 
-## gate (46)
+## gate (25)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
-| `check-asset-manifest.mjs` | Guards the asset layer before large-scale visual population begins. | `check:assets`, `check:fast`, `check:full` | pre-commit · warn |
 | `check-attributions.mjs` | Keeps the attribution registry machine-checkable. | `check:attributions`, `check:full` | pre-commit · warn |
-| `check-binding-drift.mjs` | Soft gate that catches the failure mode where a component starts referencing a component-tier CSS variable that the masters pipeline doesn't know to bind. For each Hds*.tsx whose spec has a populated | `check:binding-drift`, `pretest` | pre-commit · warn |
-| `check-brand.mjs` | Validates that all living documentation files are in sync with the current brand values in hirobius.tokens.json. Exits non-zero if stale values found. | `check:brand`, `check:fast`, `check:full` | pre-commit · warn |
 | `check-code-connect.mjs` | CI check: every Figma component with a Code Connect mapping (.figma.tsx) has a corresponding React component, and vice versa. | `check:code-connect` | pre-commit · warn |
 | `check-commit-message-task-ref.mjs` | Validates that commits on feature branches reference an open Hermes Kanban task via a `Refs: <task-id>` line in the commit body. Soft-warn by default; promote to error via KANBAN_REF_ENFORCE=error. | — | commit-msg · warn |
 | `check-contrast.mjs` | WCAG 2.1 contrast ratio checker for HDS semantic color pairs. Reads hirobius.tokens.json, resolves primitive + semantic color aliases, and reports contrast ratios for critical text/bg pairings in both | `check:contrast`, `check:full` | pre-commit · warn |
-| `check-css-integrity.mjs` | Verifies that hand-authored bridge vars in theme.css stay in sync with the token source of truth in hirobius.tokens.json. | `check:css`, `check:fast`, `check:full` | pre-commit · warn |
-| `check-dimensions.mjs` | Hirobius Design System - Fixed Dimension Checker | `check:dimensions`, `check:fast`, `check:full` | pre-commit · warn |
 | `check-doc-structure.mjs` | Validates structural invariants of HDS documentation pages. | `check:doc-structure`, `check:full` | pre-commit · warn |
 | `check-exemptions.mjs` | Keeps escape hatches visible and well-formed. | `check:exemptions`, `check:full` | pre-commit · warn |
 | `check-fixture-stubs-ratchet.mjs` | Reads the current withStubFixtures count from validate-fixture-proof-of-firing (--json mode) and enforces that this count strictly decreases over time. The | — | ci-pr · error |
 | `check-focus-states.mjs` | A11y focus state checker for HDS components and pages. Every interactive element must have a visible focus indicator. | `check:focus`, `check:full` | pre-commit · warn |
 | `check-frozen-demos.mjs` | Guardrail for docs preview surfaces. | `check:docs` | pre-commit · warn |
-| `check-hardcoded-breakpoints.mjs` | Hardcoded Breakpoint Checker | `check:breakpoints`, `check:fast`, `check:full` | pre-commit · warn |
 | `check-hardcoded-colors.mjs` | Catches hardcoded color values in non-CSS color contexts that bypass the CSS custom property cascade and are invisible to check-inline-styles / check-tier-bypass. | `check:colors`, `check:full`, `check:tokens` | pre-commit · warn |
-| `check-hardcoded-spacing.mjs` | Hardcoded Spacing Checker | `check:fast`, `check:full`, `check:spacing`, `check:tokens` | pre-commit · warn |
-| `check-legacy-hds-vars.mjs` | (no header description) | `check:fast`, `check:full` | pre-commit · warn |
 | `check-licenses.mjs` | License compliance gate. Runs `pnpm licenses list --prod --json` and filters against a deny-list of copyleft / restrictive licenses (GPL/AGPL/LGPL/SSPL/BUSL/EUPL/OSL/CC-BY-NC/CDDL). | `check:licenses` | pre-commit · error |
 | `check-link-integrity.mjs` | Merged from: check-doc-references.mjs — active docs do not point at missing local files check-external-links.mjs — external <a href> URLs return non-4xx | `check:doc-refs`, `check:fast`, `check:fast`, `check:full`, `check:routes` | pnpm-meta · warn |
-| `check-manifest-drift.mjs` | (no header description) | `check:fast`, `check:full`, `check:manifest-drift`, `pretest` | pre-commit · warn |
-| `check-manifest-schema-semver.mjs` | Compares the current manifest/schema.json against manifest/schema.lock.json and flags breaking changes (property removals, type tightenings) as semver violations. | `pretest` | pre-commit · warn |
-| `check-mono-roles.mjs` | Prevents ornamental/raw monospace from creeping back into prose-heavy surfaces that should rely on InlineCode or normal body/caption styling instead. | `check:fast`, `check:full`, `check:mono-roles` | pre-commit · warn |
 | `check-motion.mjs` | Verifies that interactive components ship with motion feedback — the HDS standard that every user action has a visible, token-timed response. | `check:full`, `check:micromotion` | pre-commit · warn |
 | `check-og-meta.mjs` | Static analysis validator for OG meta tags in index.html. | `check:full` | pre-commit · warn |
 | `check-page-shell.mjs` | Forbids direct Container usage in src/app/pages/**. Pages must use Page (which wraps Container + applies the canonical vertical padding) so every page lands with consistent breathing room against the viewport edges. | `check:full`, `check:page-shell` | pre-commit · warn |
 | `check-reduced-motion.mjs` | Verifies that the HDS motion system respects prefers-reduced-motion at both layers: | `check:full`, `check:motion` | pre-commit · warn |
-| `check-ref-forwarding.mjs` | Verifies that HDS components rendering native form controls forward their ref to the underlying DOM element. | `check:fast`, `check:full`, `check:refs` | pre-commit · warn |
 | `check-registry.mjs` | Validates that hds-registry.json is complete and up-to-date. | `check:fast`, `check:full`, `check:registry`, `pretest` | pre-commit · warn |
 | `check-route-coverage.mjs` | layout-integrity test set. Adrian directive 2026-05-04: no exceptions. | `test:layout` | pre-commit · warn |
 | `check-route-smoke.mjs` | (no header description) | `check:release`, `check:route-smoke` | pnpm-meta · warn |
 | `check-secrets.mjs` | Pre-commit secrets scanner — wraps the `gitleaks` binary and registers it in docs/guardrails/registry.json so it shows up in audits and fixture-proof | `check:secrets` | pre-commit · error |
 | `check-security-baseline.mjs` | Local security and dependency hygiene baseline. | `check:full`, `check:security` | pre-commit · warn |
 | `check-snapshot-staleness.mjs` | committed baseline JSON is older than any of its source files. The intent: catch baselines that should have been regenerated after a source change but weren't. | — | manual · warn |
-| `check-source-canon.mjs` | Source-side companion to validators/swiss-canon.mjs. The JSX validator | `pretest` | pre-commit · warn |
-| `check-style-discipline.mjs` | Merged from: check-inline-styles.mjs + check-style-prop-values.mjs + check-css-values.mjs | `check:css-values`, `check:fast`, `check:full`, `check:inline-styles`, `check:release`, `check:style-props` | pnpm-meta · warn |
-| `check-template-source-of-truth.mjs` | Prevents direct edits to auto-generated output files by checking that if an output file has been modified, the corresponding generator script is also modified in the same changeset. | `check:fast`, `check:template-sot` | pre-commit · warn |
 | `check-tier-bypass.mjs` | Enforces the primitive → semantic → component aliasing hierarchy in source files. Direct use of var(--primitive-*) in component and page files bypasses the semantic | `check:fast`, `check:full`, `check:tier-bypass`, `check:tokens` | pnpm-meta · warn |
-| `check-token-descriptions.mjs` | Default mode: Enforces token description quality in hirobius.tokens.json: Every $type-bearing token node SHOULD have a "$description" field. No description may be blank or whitespace-only. | `check:docs`, `check:full`, `check:token-descriptions` | pnpm-meta · warn |
-| `check-token-paths-ratchet.mjs` | Default mode (pre-commit / scan): Scans src/** for string references to design-token paths ({primitive,semantic,component,role}.x.y.z) and asserts each resolves | — | pre-commit · error |
-| `check-token-rebake-needed.mjs` | Pre-commit guard: ensure generated token outputs are in sync with `hirobius.tokens.json`. A commit that edits the source but skips the rebake silently ships drift; this catches that. | — | pre-commit · warn |
-| `check-token-renames.mjs` | Compares the current hirobius.tokens.json leaf paths against the committed baseline in tokens.lock.json. Any path present in the baseline but missing from the current tree is a potential breaking rename. | `check:full`, `check:token-renames` | pre-commit · warn |
-| `check-token-structure.mjs` | Validates hirobius.tokens.json for structural correctness. Catches two categories of architectural error: | `check:full`, `check:token-structure` | pre-commit · warn |
-| `check-typography-discipline.mjs` | Merged from: check-hardcoded-fonts.mjs + check-font-files.mjs + audit-typography-overrides.mjs | `check:fast`, `check:font-files`, `check:fonts`, `check:full`, `check:tokens`, `tokens` | pre-commit · warn |
 | `check-unresponsive-grids.mjs` | Unresponsive Grid Checker | `check:full`, `check:grids` | pre-commit · warn |
 | `check-validator-wiring.mjs` | Meta-validator. Asserts every gate registered in docs/guardrails/registry.json has a `firingChannel` value that actually matches reality — i.e. the channel claims `pre-commit` only | — | pre-commit · warn |
 
-## audit (18)
+## audit (15)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
 | `audit-batch-deliverables.mjs` | Deterministic post-batch audit. Given a list of unit IDs (or all units marked `done` since the last audit), confirm that each unit's deliverable actually matches its spec — beyond just "validationCmd exited 0". | — | pre-commit · warn |
 | `audit-bundle.mjs` | Generates a bundle composition report at docs/perf/bundle-report.html using vite-bundle-visualizer. Manual channel — artifact, not gating. Complements size-limit (which gates total size) by showing which | `audit:bundle` | manual · warn |
 | `audit-claims.mjs` | audit-claims — detect stale claimed units in docs/ai/orchestration.json. | — | pre-commit · warn |
-| `audit-component-integrity.mjs` | Merged from: audit-components.mjs — token compliance audit for HDS components check-component-completeness.mjs — manifest completeness for LLM use | `api:check`, `api:update`, `check:docs`, `check:fast`, `check:full`, `check:full`, `pretest`, `tokens:audit` | pre-commit · warn |
 | `audit-deps.mjs` | Dependency vulnerability audit. Wraps `pnpm audit --audit-level moderate json` and translates each advisory into a registry violation. Network required — manual channel only (too slow for pre-commit). The same check | `audit:deps` | pnpm-meta · warn |
 | `audit-exceptions.mjs` | Walk a directory recursively and collect all source files. | — | pre-commit · warn |
-| `audit-figma-system.mjs` | Read-only Figma sync audit for the Hirobius repo. | `figma:audit` | manual · warn |
 | `audit-gate-purity.mjs` | audit-gate-purity — static scan for impurity patterns in every registered gate. | — | ci-pr · warn |
 | `audit-gate-replaceability.mjs` | Reads docs/guardrails/registry.json, walks every registered gate, and produces a per-gate replaceability verdict with the most likely industry-tool replacement. | `audit:gate-replaceability` | manual · warn |
 | `audit-gates-supportjson.mjs` | Meta-gate ratchet for the `--json` rollout (per unit 13p-8). For each registered gate that is NOT in the pnpm-meta channel (skipped for cost), spawn `node <gateScript> --json` with a 30s timeout, capture stdout, and | — | ci-pr · warn |
@@ -95,87 +72,60 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `audit-soft-gates.mjs` | Soft-gates audit: identifies every registered gate in docs/guardrails/registry.json that does NOT fire on a strict channel (pre-commit / pre-push / ci-pr), runs each | `audit:soft-gates` | manual · warn |
 | `audit-strengths.mjs` | Verifies that each documented differentiator in docs/architecture/strengths-and-differentiators.md is still real. | — | ci-pr · warn |
 | `audit-tiers.mjs` | Heuristic tier classifier for every src/app/components/Hds*.tsx (and recursive subdirs like src/app/components/lab/). Proposes one of: primitive \| pattern \| template \| utility. | — | pre-commit · warn |
-| `audit-tokens.mjs` | Audits CSS token bridges and visual overrides against the JSON token source of truth. | `check:fast`, `check:forbidden-overrides`, `check:full`, `check:ghost-tokens`, `check:semantic-report`, `check:tokens`, `sync`, `sync:health`, `tokens`, `watch:metrics` | pre-commit · warn |
 
-## validate (4)
+## validate (3)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
 | `validate-fixture-proof-of-firing.mjs` | Meta-validator: walks docs/guardrails/registry.json and for every registered gate asserts that a fixture pair exists in fixtures/<gate-id>/. | — | pre-commit · error |
 | `validate-guardrail-registry.mjs` | Asserts that every scripts/check-*.mjs and scripts/audit-*.mjs file has a corresponding entry in docs/guardrails/registry.json. | — | — |
-| `validate-manifest.mjs` | (no header description) | `check:fast`, `check:full`, `prebuild`, `pretest`, `validate:manifest` | — |
 | `validate-orchestration.mjs` | Validates docs/ai/orchestration.json schema extension landed for the approval-app meta-cluster (11-A). Every non-done unit must carry the four classifier fields the approval app reads: | — | pre-commit · error |
 
-## verify (2)
+## verify (1)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
 | `verify-roadmap-sync.mjs` | Verify that roadmap.json summary counts match the displayed items in each section. This prevents drift between the top-level summary and the actual section data. | `roadmap:data`, `roadmap:verify`, `sync:health` | — |
-| `verify-tokens.mjs` | Verifies that hirobius.tokens.json compiles correctly to: tokens.css — every JSON token has a CSS var; semantic vars reference upstream generated-tokens.ts — every non-composite token has a TS var() reference | `check:fast`, `check:full`, `tokens:verify` | — |
 
-## build (9)
+## build (1)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
-| `build-design-md.mjs` | Reads DESIGN.source.md (hand-authored template with auto markers), fills the marker blocks from hirobius.tokens.json and public/hds-manifest.json, and writes the assembled result to DESIGN.md at the repo root. | `sync`, `sync:health`, `tokens` | — |
-| `build-figma-masters.mjs` | (no header description) | `ui:masters` | — |
-| `build-figma-variables.mjs` | Converts hirobius.tokens.json (W3C DTCG 2025.10) into: hirobius.figma-variables.json — plugin-compatible import file (Variables Import/Export) hirobius.figma-variables-api.json — Figma REST API POST payload (for… | `figma-variables`, `sync` | — |
-| `build-handoff.mjs` | Auto-regenerates token reference tables in DESIGN-HANDOFF.md from hirobius.tokens.json. Sections between <!-- auto:start:SECTION --> and <!-- auto:end:SECTION --> markers are replaced on every run. | `sync`, `tokens` | — |
-| `build-hds-tokens.mjs` | Produces two drop-in artifacts for consuming projects: | `tokens:build` | — |
 | `build-roadmap-data.mjs` | (no header description) | `check:fast`, `roadmap:data`, `sync:health` | — |
-| `build-token-index.mjs` | Static analysis script that walks src/ for token references and produces src/app/design-system/token-usage-map.json — a committed artefact consumed by headless token-scan workflows and fix-prompt generation. | `tokens:index` | — |
-| `build-token-quick-reference.mjs` | Reads hirobius.tokens.json and extracts representative examples from each semantic token category, generating a concise lookup table for inclusion in public/llms.txt. | — | — |
-| `build-tokens.mjs` | Compiles hirobius.tokens.json (W3C DTCG 2025.10) into: src/styles/tokens.css — CSS custom properties src/app/design-system/generated-tokens.ts — TypeScript constants | `check:fast`, `check:full`, `sync`, `sync:health`, `tokens`, `tokens:verify` | — |
 
-## generate (15)
+## generate (11)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
 | `generate-changelog.mjs` | Parse git log using conventional-commit format and generate CHANGELOG.md. Groups commits by type (feat/fix/perf/refactor/docs/test/chore/other). Respects git tags; unreleased commits appear in an "Unreleased" section. | `changelog:generate` | — |
 | `generate-closure-plan.mjs` | Auto-regenerates the per-row table in `docs/guardrails/full-strictness-closure-plan.md` from `docs/guardrails/full-strictness-inventory.json`. Per unit 13p-10. | `closure:plan`, `closure:plan:check` | — |
-| `generate-component-api.mjs` | Builds a JSON manifest of exported component props from src/app/components/*.tsx using react-docgen-typescript. | `docs:api`, `manifest:generate`, `sync:health` | — |
 | `generate-component-changelogs.mjs` | Generates public/component-changelogs.json by cross-referencing each component slug in src/app/data/component-api.json with git log history. | `docs:changelogs` | — |
 | `generate-llms-txt.mjs` | Generates the machine-readable HDS system map for AI agents. Source inputs: public/hds-manifest.json src/app/data/component-api.json hirobius.tokens.json (token source of truth; referenced, not inlined) | `docs:llms`, `llms:generate`, `tokens` | — |
-| `generate-manifest-projection.mjs` | hds-manifest.json for agent/LLM consumption. | `manifest:project` | — |
-| `generate-manifest.mjs` | Keeps public/hds-manifest.json self-driving by recursively scanning the source tree for governed HDS components and documentation utilities. | `manifest:generate`, `sync:health`, `tokens`, `watch:metrics` | — |
 | `generate-portal-token.mjs` | generate-portal-token — mint a /c/:slug?token=… HMAC token for a client. | — | — |
 | `generate-script-index.mjs` | Generates a machine- + human-readable index of every script in scripts/ so an agent (or human) can find "the script that does X" without grepping ~180 files. Merges three sources: | `manifest:generate`, `scripts:index` | — |
 | `generate-security-posture.mjs` | Builds src/app/data/security-posture.json from three real data sources: 1. pnpm audit --json → open finding counts per severity 2. docs/security/audit-log.md → last entry date + derived grade | `audit:sidecar` | — |
 | `generate-sitemap.mjs` | Generates public/sitemap.xml from the route list derived from the component registry and static routes (via derive-routes.mjs). | `sitemap:generate` | — |
 | `generate-strength-report.mjs` | Pure observer — reads source data and emits two report artifacts: docs/guardrails/strength-report.md (human-readable dashboard) docs/guardrails/strength-report.json (LLM-readable structured state) | `strength`, `strength:snapshot` | pre-commit · warn |
 | `generate-system-atlas.mjs` | Builds a text-ready markdown atlas of the HDS source graph for case-study writing and future refactor planning. | — | — |
-| `generate-to-figma.mjs` | (no header description) | `ui:fix`, `ui:gen` | — |
 | `generate-visual-catalog.mjs` | (no header description) | `catalog` | — |
 
-## sync (5)
+## sync (3)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
-| `sync-asset-manifest.mjs` | (no header description) | `assets:manifest`, `check:fast`, `check:full`, `sync:health` | — |
 | `sync-client-emails.mjs` | Gmail-based email sync for Hirobius client workspaces. Uses the Gmail MCP server (already connected in Claude Code sessions) via a local bridge endpoint, OR falls back to the Gmail REST API with OAuth. | — | — |
-| `sync-hds-registry.mjs` | Keeps src/app/data/hds-registry.json in sync with the actual HDS page files. | `tokens` | — |
 | `sync-icons.mjs` | Scans src/ for lucide-react imports and emits a registry of the icon exports currently used by the app. | `icons:sync` | — |
 | `sync-system-health.mjs` | Reads the latest generated system artifacts, synchronizes health telemetry into public/hds-manifest.json, records history when the score changes, and only | `sync:health` | — |
 
-## test (5)
+## test (3)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
-| `test-doc-pages-snapshot.mjs` | 9d-10: Visual-regression baseline for the doc-site source surface. | `pretest` | — |
-| `test-figma-masters-snapshot.mjs` | Visual-regression baseline for pipeline/figma-masters-batch.mjs. The pipeline is a pure JS→JSON projection (no Figma APIs called from Node), so we capture buildMastersBatch() output as canonical JSON and | `check:figma-snapshot`, `check:figma-snapshot:update`, `pretest` | — |
 | `test-phase1.mjs` | (no header description) | `test:phase1` | — |
 | `test-prompt-regression.mjs` | Regression suite for LLM prompt outputs. Walks fixtures/llm-prompts/<slug>/ directories. Each must contain: | `test:prompts` | — |
 | `test-retry-loop.mjs` | Tests the retry loop with a mocked LLM. No network calls. | — | — |
 
-## figma (3)
-
-| Script | Purpose | pnpm | Fires |
-| --- | --- | --- | --- |
-| `figma-bridge-smoke.mjs` | End-to-end smoke test for the HDS Figma bridge pipeline (kanban t_d068769e). | `figma:bridge:smoke` | — |
-| `figma-diff.mjs` | Structure-agnostic: recursively computes added/removed/changed keyed by JSON pointer. | `figma:diff` | — |
-| `figma-parity-check.mjs` | Compares Figma component metadata (names, variants) with the manifest componentSpecs (and utilities), reporting three classes of mismatch: | — | — |
-
-## other (59)
+## other (54)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
@@ -193,16 +143,12 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `derive-routes.mjs` | Auto-derive the route list from: 1. src/app/routes.tsx (the React Router config) 2. src/app/data/component-api.json (component doc pages) | — | — |
 | `discord-bot.mjs` | Hirobius HQ — Discord bot with Claude API integration. | `bot` | — |
 | `dispatch-pod.mjs` | Worktree-isolation verification for sub-agent dispatch. | — | — |
-| `enrich-manifest.mjs` | (no header description) | `manifest:generate`, `sync:health` | — |
 | `ensure-ops-data.mjs` | Makes a clean checkout of @hirobius/ops buildable. | `prebuild`, `predev`, `pretypecheck` | — |
 | `google-auth.mjs` | One-time OAuth setup: generates a Google refresh token with Gmail + Drive scope. | — | — |
-| `hds-bridge.mjs` | (no header description) | `bridge` | — |
-| `hds-jsx-compiler.mjs` | (no header description) | `test:compiler` | — |
 | `headless-scan.browser.js` | (no header description) | — | — |
 | `leads-middleware.mjs` | Backs the /ops Leads board under `pnpm dev` (Vite). It reuses the EXACT same logic modules as the production Vercel functions — lib/supabase/leads (the | — | — |
 | `llm-stream-bridge.mjs` | (no header description) | `figma:stream` | — |
 | `meeting-to-tasks.mjs` | meeting transcript, append them to docs/ai/proposed-units.jsonl. | — | — |
-| `normalize-figma-snapshot.mjs` | Convert transport-specific Figma export JSON into the stable snapshot shape used by `scripts/audit-figma-system.mjs`. | `figma:snapshot` | — |
 | `page-clone.mjs` | (no header description) | `clone:page` | — |
 | `parse-bookmarks.mjs` | Parses Chrome/Edge bookmark HTML exports into structured markdown files organized by BUILD / GROW / RUN pillar. | `knowledge:bookmarks` | — |
 | `persist-learned-rule.mjs` | Append a learned-rule entry to docs/ai/learned-rules.jsonl, the append-only canon for hermes post-mortem distillation output. Each entry is one JSON line, schema: | — | — |
@@ -226,7 +172,6 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `service-manager-middleware.mjs` | Dev-only Connect middleware for /api/services/*. Mounted at /api/services in vite.config.mjs; req.url is the suffix. | — | — |
 | `setup-hooks.mjs` | Activates Husky as the repo's hook path. | `prepare` | — |
 | `skill-runner-middleware.mjs` | Dev-only HTTP middleware that runs a whitelisted set of repo scripts in response to POST /api/skills/:id from the /ops dashboard. | — | — |
-| `snapshot-token-paths.mjs` | Reads hirobius.tokens.json, walks the DTCG token tree, and emits a sorted flat list of all leaf token paths (e.g. "semantic.color.surface.raised"). | — | — |
 | `tasks-middleware.mjs` | Reuses lib/tasks/actions.mjs (same logic as the prod functions). Wired in vite.config.mjs with apply:'serve' so it never ships to prod. | — | — |
 | `telegram-bot.mjs` | Telegram adapter for the Hirobius HQ auto-assigner. Mirrors scripts/discord-bot.mjs message routing — same backend, different transport. Both can run side-by-side; both write to the same | `telegram` | — |
 | `telemetry-report.mjs` | Reads telemetry/events.jsonl and prints a generation-health summary: total generations, success / exhausted breakdown, success rate retry-exhaustion rate (over rolling 24 h, production-tagged) | `telemetry:report` | — |

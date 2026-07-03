@@ -1,2 +1,0 @@
-// TODO: replace with real-passing-example for audit-figma-system
-// STUB — this file needs real passing content
