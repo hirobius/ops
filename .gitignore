@@ -94,6 +94,10 @@ clients/*/inbox-discovery-results/
 # (backed up out-of-band; only the _template scaffold is tracked).
 clients/*
 !clients/_template/
+
+# Outscraper prospecting output — scraped business records are unverified PII;
+# stay local, same policy as clients/*. See docs/prospecting/outscraper-pipeline.md.
+prospects/
 # Generated client task-routing log (client names + task content)
 docs/ai/routing-log.jsonl
 
