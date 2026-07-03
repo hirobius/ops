@@ -4,7 +4,7 @@
 > Regenerate with `pnpm scripts:index`. Deterministic (no timestamps), so it
 > only changes when scripts do.
 
-**168 scripts** across 10 categories.
+**166 scripts** across 10 categories.
 
 ## Prefix taxonomy
 
@@ -23,7 +23,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `figma-` | figma | Figma bridge — design-system sync, diff, or canvas ops. |
 | _(other)_ | other | One-off utilities, middleware, and domain scripts without a taxonomy prefix. |
 
-## gate (47)
+## gate (46)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
@@ -64,7 +64,6 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `check-source-canon.mjs` | Source-side companion to validators/swiss-canon.mjs. The JSX validator | `pretest` | pre-commit · warn |
 | `check-style-discipline.mjs` | Merged from: check-inline-styles.mjs + check-style-prop-values.mjs + check-css-values.mjs | `check:css-values`, `check:fast`, `check:full`, `check:inline-styles`, `check:release`, `check:style-props` | pnpm-meta · warn |
 | `check-template-source-of-truth.mjs` | Prevents direct edits to auto-generated output files by checking that if an output file has been modified, the corresponding generator script is also modified in the same changeset. | `check:fast`, `check:template-sot` | pre-commit · warn |
-| `check-tenant-tokens.mjs` | Validates every tenants/<slug>/tokens.json against HDS structural rules. | `pretest` | pre-commit · warn |
 | `check-tier-bypass.mjs` | Enforces the primitive → semantic → component aliasing hierarchy in source files. Direct use of var(--primitive-*) in component and page files bypasses the semantic | `check:fast`, `check:full`, `check:tier-bypass`, `check:tokens` | pnpm-meta · warn |
 | `check-token-descriptions.mjs` | Default mode: Enforces token description quality in hirobius.tokens.json: Every $type-bearing token node SHOULD have a "$description" field. No description may be blank or whitespace-only. | `check:docs`, `check:full`, `check:token-descriptions` | pnpm-meta · warn |
 | `check-token-paths-ratchet.mjs` | Default mode (pre-commit / scan): Scans src/** for string references to design-token paths ({primitive,semantic,component,role}.x.y.z) and asserts each resolves | — | pre-commit · error |
@@ -176,7 +175,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `figma-diff.mjs` | Structure-agnostic: recursively computes added/removed/changed keyed by JSON pointer. | `figma:diff` | — |
 | `figma-parity-check.mjs` | Compares Figma component metadata (names, variants) with the manifest componentSpecs (and utilities), reporting three classes of mismatch: | — | — |
 
-## other (60)
+## other (59)
 
 | Script | Purpose | pnpm | Fires |
 | --- | --- | --- | --- |
@@ -223,7 +222,6 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `sales-pipeline.mjs` | with the recommended next touch. | — | — |
 | `sales-proposal.mjs` | Deterministic v1: keyword-routes the scope to Tier 1/2/3 and emits a markdown quote table. Designed for the SkillTile input-shell (kind: 'text') — receives the scope as a single argv string via the skill-runner | — | — |
 | `scaffold-component.mjs` | Creates a Swiss-canonical component skeleton from templates/component-template.tsx, plus a manifest stub and a fixture stub under fixtures/swiss-canon/<name>-clean/. The scaffolder makes | `scaffold:component` | — |
-| `scaffold-tenant.mjs` | Bootstraps a new HDS tenant directory from tenants/_template. Emits tenants/<slug>/tokens.json + tenants/<slug>/metadata.json + tenants/<slug>/README.md pre-filled with the supplied brand args. | `scaffold:tenant` | — |
 | `self-heal.mjs` | (no header description) | `heal`, `heal:smoke` | — |
 | `service-manager-middleware.mjs` | Dev-only Connect middleware for /api/services/*. Mounted at /api/services in vite.config.mjs; req.url is the suffix. | — | — |
 | `setup-hooks.mjs` | Activates Husky as the repo's hook path. | `prepare` | — |

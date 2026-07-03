@@ -658,18 +658,6 @@
       "scope": "full-tree"
     },
     {
-      "id": "check-tenant-tokens",
-      "description": "Validates every tenants/<slug>/tokens.json against HDS structural rules. Runs as a standalone CLI tool and as a pre-commit gate.",
-      "severity": "warn",
-      "gateScript": "scripts/check-tenant-tokens.mjs",
-      "fixturePath": "fixtures/check-tenant-tokens",
-      "lastFiringAt": "2026-05-10T16:58:31.550Z",
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "pre-commit"
-    },
-    {
       "id": "check-tier-bypass",
       "description": "Enforces the primitive -> semantic -> component aliasing hierarchy in source files. Direct use of var(--primitive-*) in component and page files bypasses the semantic tier.",
       "severity": "warn",

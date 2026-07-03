@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 168,
+  "totalScripts": 166,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,10 +41,10 @@
     }
   },
   "categoryCounts": {
-    "other": 60,
+    "other": 59,
     "audit": 18,
     "build": 9,
-    "gate": 47,
+    "gate": 46,
     "figma": 3,
     "generate": 15,
     "sync": 5,
@@ -966,19 +966,6 @@
       }
     },
     {
-      "name": "check-tenant-tokens.mjs",
-      "category": "gate",
-      "prefix": "check",
-      "purpose": "Validates every tenants/<slug>/tokens.json against HDS structural rules.",
-      "pnpm": [
-        "pretest"
-      ],
-      "gate": {
-        "channel": "pre-commit",
-        "severity": "warn"
-      }
-    },
-    {
       "name": "check-tier-bypass.mjs",
       "category": "gate",
       "prefix": "check",
@@ -1616,16 +1603,6 @@
       "purpose": "Creates a Swiss-canonical component skeleton from templates/component-template.tsx, plus a manifest stub and a fixture stub under fixtures/swiss-canon/<name>-clean/. The scaffolder makes",
       "pnpm": [
         "scaffold:component"
-      ],
-      "gate": null
-    },
-    {
-      "name": "scaffold-tenant.mjs",
-      "category": "other",
-      "prefix": "scaffold",
-      "purpose": "Bootstraps a new HDS tenant directory from tenants/_template. Emits tenants/<slug>/tokens.json + tenants/<slug>/metadata.json + tenants/<slug>/README.md pre-filled with the supplied brand args.",
-      "pnpm": [
-        "scaffold:tenant"
       ],
       "gate": null
     },
