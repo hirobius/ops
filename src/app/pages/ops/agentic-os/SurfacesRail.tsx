@@ -22,7 +22,6 @@ export interface SurfaceTile {
 }
 
 const TILES: readonly SurfaceTile[] = [
-  { to: '/ops/atlas', label: 'Atlas', description: 'Foundations · components · tokens' },
   {
     to: '/ops/leads',
     label: 'Leads',
@@ -42,11 +41,6 @@ const TILES: readonly SurfaceTile[] = [
     to: '/ops/projects',
     label: 'Projects',
     description: 'Live fleet — deploy state across every Vercel project',
-  },
-  {
-    to: '/ops/staging',
-    label: 'Staging',
-    description: 'Specimen catalog — filter, promote to HDS',
   },
 ] as const;
 

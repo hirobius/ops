@@ -6,9 +6,7 @@ import InfoPageWrapper from './pages/InfoPageWrapper';
 import OpsGate from './components/OpsGate';
 
 // ── Ops / internal tooling — lazy loaded ─────────────────────────────────────
-const AtlasPage = lazy(() => import('./pages/ops/AtlasPage'));
 const AgenticOSPage = lazy(() => import('./pages/ops/agentic-os/AgenticOSPage'));
-const StagingPage = lazy(() => import('./pages/ops/StagingPage'));
 const ClientsIndexPage = lazy(() => import('./pages/ops/ClientsIndexPage'));
 const ClientDashboardPage = lazy(() => import('./pages/ops/ClientDashboardPage'));
 const ClientReportPage = lazy(() => import('./pages/ops/ClientReportPage'));
@@ -71,8 +69,6 @@ export const router = createBrowserRouter([
         ),
         children: [
           { index: true, element: <LazyHDS Page={AgenticOSPage} /> },
-          { path: 'staging', element: <LazyHDS Page={StagingPage} /> },
-          { path: 'atlas', element: <LazyHDS Page={AtlasPage} /> },
           { path: 'leads', element: <LazyHDS Page={LeadsPage} /> },
           { path: 'tasks', element: <LazyHDS Page={TasksPage} /> },
           { path: 'digest', element: <LazyHDS Page={DigestPage} /> },
