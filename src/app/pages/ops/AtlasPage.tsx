@@ -24,7 +24,6 @@ import {
   TabsTrigger,
   TabsContent,
 } from '@hirobius/design-system';
-import PipelineDag from './atlas/pipeline-dag';
 import ComponentGraph from './atlas/component-graph';
 import TokensTab from './atlas/tokens-tab';
 import FoundationsTab from './atlas/foundations-tab';
@@ -38,13 +37,12 @@ import { PageHeader } from './PageHeader';
 // duplicated here, only linked through. See OPERATING_MAP.md for the rule.
 // (Closes kanban t_ada3aa9f, 2026-05-10.)
 
-type TabValue = 'foundations' | 'components' | 'tokens' | 'pipeline';
+type TabValue = 'foundations' | 'components' | 'tokens';
 
 const TABS: { value: TabValue; label: string }[] = [
   { value: 'foundations', label: 'Foundations' },
   { value: 'components', label: 'Components' },
   { value: 'tokens', label: 'Tokens' },
-  { value: 'pipeline', label: 'Pipeline' },
 ];
 
 const VALID_TABS = new Set<string>(TABS.map((t) => t.value));
@@ -76,7 +74,7 @@ export default function AtlasPage() {
         <PageHeader
           breadcrumbs={[{ label: 'Ops', href: '/ops' }, { label: 'Atlas' }]}
           title="Atlas"
-          lede="Design system command center — foundations, components, tokens, pipeline. Operator surface; public docs live at /hds."
+          lede="Design system command center — foundations, components, tokens. Operator surface; public docs live at /hds."
         />
 
         <Tabs value={tab} onValueChange={handleChange}>
@@ -103,12 +101,6 @@ export default function AtlasPage() {
           <TabsContent value="tokens">
             <Surface padding="component">
               <TokensTab />
-            </Surface>
-          </TabsContent>
-
-          <TabsContent value="pipeline">
-            <Surface padding="component">
-              <PipelineDag />
             </Surface>
           </TabsContent>
         </Tabs>

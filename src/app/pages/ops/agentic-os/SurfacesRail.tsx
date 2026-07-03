@@ -43,7 +43,6 @@ const TILES: readonly SurfaceTile[] = [
     label: 'Projects',
     description: 'Live fleet — deploy state across every Vercel project',
   },
-  { to: '/ops/knowledge', label: 'Knowledge', description: 'Build · Grow · Run — ops pillar hub' },
   {
     to: '/ops/staging',
     label: 'Staging',

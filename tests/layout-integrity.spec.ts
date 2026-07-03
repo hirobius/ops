@@ -43,10 +43,7 @@ const ALL_ROUTES = [
 
   // ── Ops ─────────────────────────────────────────────────────────────────────
   '/ops',
-  '/ops/briefing',
   '/ops/atlas',
-  '/ops/knowledge',
-  '/ops/sessions',
   '/ops/leads',
   '/ops/tasks',
   '/ops/digest',
@@ -57,7 +54,6 @@ const ALL_ROUTES = [
   '/ops/clients/lilac-insure/brand-audit',
   '/ops/staging',
   // ── Ops · temporary (deleted with OpsDashboardPage once harvest is finalized) ──
-  '/ops/_legacy',
 
   // ── Admin ───────────────────────────────────────────────────────────────────
   '/admin/approvals',
