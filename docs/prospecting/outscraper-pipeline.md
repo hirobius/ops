@@ -25,6 +25,7 @@ Outscraper /maps/search-v3
 |---|---|
 | `scripts/outscraper-fetch.mjs` | API client + CLI (network + filesystem shell) |
 | `scripts/lib/outscraper-normalize.mjs` | Pure normalizer + lead scoring (`place → Prospect`) |
+| `scripts/lib/query-presets.mjs` | Named query matrices (`--preset`), ported from clients `lead-gen/config.ts` |
 | `src/app/pages/ops/prospectTypes.ts` | Types: `OutscraperPlace`, `Prospect`, `ProspectSignals`, `ProspectBatch` |
 | `fixtures/outscraper-maps-search/response.json` | Synthetic sample response (no real PII) covering all 4 buckets |
 | `scripts/__tests__/outscraper-normalize.test.mjs` | Vitest unit tests for the normalizer + scoring invariants |
@@ -32,8 +33,11 @@ Outscraper /maps/search-v3
 ## How to run
 
 ```bash
-# No key, no network — see the exact request that would be sent:
+# No key, no network — see the exact request + a size/cost estimate:
 node scripts/outscraper-fetch.mjs --query "dentists, Austin TX" --limit 20 --dry-run
+
+# Size the full beachhead matrix (259 queries) before spending anything:
+node scripts/outscraper-fetch.mjs --preset exterior-cleaning --limit 20 --dry-run
 
 # Offline end-to-end against the fixture (normalize → score → rank):
 node scripts/outscraper-fetch.mjs --fixture fixtures/outscraper-maps-search/response.json --json
@@ -52,6 +56,7 @@ node --env-file=.env.local scripts/outscraper-fetch.mjs --query "..." --out
 | Flag | Meaning |
 |---|---|
 | `--query "<q>"` | Search query; **repeatable** for multiple queries |
+| `--preset <name>` | Expand a built-in query matrix (e.g. `exterior-cleaning` = 259 queries) |
 | `--limit <n>` | Results per query (default 20) |
 | `--language <l>` / `--region <r>` | Outscraper locale params (default `en` / `us`) |
 | `--async` | Use the async submit + poll flow instead of the blocking sync call |
@@ -111,6 +116,16 @@ Fixture ranking (proves the thesis):
 [46] Clearout Junk Haulers   builder (squarespace), 12 reviews
 [12] Old Town Hauling        no-site, 41 reviews, CLOSED_PERMANENTLY ← gated to the bottom
 ```
+
+## Cost
+
+Outscraper's Google Maps search bills pay-as-you-go: **500 records/month free
+per service**, then **~$3 / 1,000** (volume discount past 100k/mo). `--dry-run`
+prints a worst-case ceiling (`queries × limit`) so you can size a run before
+spending. A `--limit 5` smoke test or a sub-500-record pass is **free**; the full
+`exterior-cleaning` matrix (259 queries × limit 20) is ~$14 worst case. Only the
+Maps service is called — email/socials enrichment is a separate service (its own
+500-record tier + cost) and is **not** wired here. *Verify current pricing.*
 
 ## Data handling
 

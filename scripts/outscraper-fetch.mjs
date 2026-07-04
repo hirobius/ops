@@ -48,6 +48,12 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeResponse } from './lib/outscraper-normalize.mjs';
+import { buildQueries, PRESET_NAMES } from './lib/query-presets.mjs';
+
+// Outscraper Google Maps search: 500 records/month free per service, then
+// ~$3/1,000. Used only for the dry-run estimate; verify current pricing.
+const FREE_RECORDS = 500;
+const COST_PER_1K = 3;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const API_BASE = process.env.OUTSCRAPER_API_BASE || 'https://api.app.outscraper.com';
@@ -57,6 +63,7 @@ const API_BASE = process.env.OUTSCRAPER_API_BASE || 'https://api.app.outscraper.
 function parseArgs(argv) {
   const opts = {
     queries: [],
+    preset: null,
     limit: 20,
     language: 'en',
     region: 'us',
@@ -75,6 +82,7 @@ function parseArgs(argv) {
     const next = () => argv[++i];
     switch (a) {
       case '--query': opts.queries.push(next()); break;
+      case '--preset': opts.preset = next(); break;
       case '--limit': opts.limit = Number(next()); break;
       case '--language': opts.language = next(); break;
       case '--region': opts.region = next(); break;
@@ -100,6 +108,7 @@ function printHelp() {
   console.log(
     `Usage: node scripts/outscraper-fetch.mjs [--query "<q>" ...] [flags]\n\n` +
       `  --query "<q>"       search query; repeatable\n` +
+      `  --preset <name>     expand a built-in query matrix (${PRESET_NAMES.join(', ')})\n` +
       `  --limit <n>         results per query (default 20)\n` +
       `  --language <l>      default en\n` +
       `  --region <r>        default us\n` +
@@ -296,6 +305,16 @@ async function main() {
   const opts = parseArgs(process.argv.slice(2));
   if (opts.help) { printHelp(); process.exit(0); }
 
+  // Expand a preset matrix into individual queries (in addition to any --query).
+  if (opts.preset) {
+    try {
+      opts.queries.push(...buildQueries(opts.preset));
+    } catch (err) {
+      console.error(String(err.message || err));
+      process.exit(1);
+    }
+  }
+
   // ── resolve the raw response `data` (fixture, dry-run, or live) ──
   let data;
   if (opts.fixture) {
@@ -310,12 +329,29 @@ async function main() {
       process.exit(1);
     }
     if (opts.dryRun) {
+      const preview = opts.queries.slice(0, 8);
       console.log('DRY RUN — no key used, no network call. Requests that WOULD be sent:\n');
-      for (const q of opts.queries) {
+      for (const q of preview) {
         console.log(`  GET ${buildRequestUrl(q, opts)}`);
         console.log(`      header: X-API-KEY: <OUTSCRAPER_API_KEY>\n`);
       }
-      console.log(`Sync mode returns { status:"Success", data:[[...places]] } per query.`);
+      if (opts.queries.length > preview.length) {
+        console.log(`  … and ${opts.queries.length - preview.length} more queries\n`);
+      }
+      // Size + cost estimate. `limit` is an upper bound per query; real record
+      // counts are usually lower, so this is a worst-case ceiling.
+      const maxRecords = opts.queries.length * opts.limit;
+      const billable = Math.max(0, maxRecords - FREE_RECORDS);
+      const estCost = (billable / 1000) * COST_PER_1K;
+      console.log(
+        `Queries: ${opts.queries.length}  ·  limit ${opts.limit}/query  ·  ` +
+          `up to ${maxRecords} records (worst case)`,
+      );
+      console.log(
+        `Est. cost ceiling: ${billable === 0 ? 'FREE (within the 500-record/mo tier)' : `~$${estCost.toFixed(2)}`}` +
+          ` (500 free/mo, then ~$${COST_PER_1K}/1k — verify current Outscraper pricing).`,
+      );
+      console.log(`\nSync mode returns { status:"Success", data:[[...places]] } per query.`);
       console.log(`Add --out and/or --scaffold-clients to persist results on a live run.`);
       process.exit(0);
     }
