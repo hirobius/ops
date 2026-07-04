@@ -16,7 +16,7 @@ import { Bot } from 'lucide-react';
 import { Page } from '@hirobius/design-system';
 import { Stack } from '@hirobius/design-system';
 import { Icon } from '@hirobius/design-system';
-import { AgentTag } from '@hirobius/design-system';
+import { AgentTag } from '../../components/ds-compat/AgentTag';
 import { PageHeader } from './PageHeader';
 import { CLIENT_REGISTRY, CLIENT_SLUGS } from './clientRegistry';
 import { SessionsSection, type SessionEvent } from './SessionsSection';

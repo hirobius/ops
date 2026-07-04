@@ -12,6 +12,7 @@ import { createProposedSkillsMiddleware } from './scripts/proposed-skills-middle
 import { createServiceManagerMiddleware } from './scripts/service-manager-middleware.mjs';
 import { createCcPluginsMiddleware } from './scripts/cc-plugins-middleware.mjs';
 import { createResearchFeedMiddleware } from './scripts/research-feed-middleware.mjs';
+import { leadsMiddleware } from './scripts/leads-middleware.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const hdsManifestModuleId = 'virtual:hds-manifest';
@@ -41,6 +42,9 @@ export default defineConfig(({ mode }) => {
       },
       react(),
       tailwindcss(),
+      // Dev-only: GET /api/leads — reads the Supabase `leads` table so the
+      // /ops/leads board works in `pnpm dev` (prod uses api/leads.ts). Read-only.
+      leadsMiddleware(),
       // Dev-only: POST /api/route — accepts { text, client } body, spawns
       // scripts/auto-assigner.mjs, returns its JSON. Lets /ops/sessions
       // submit messages from the browser (incl. mobile on the LAN) without

@@ -7,7 +7,7 @@ import { Card } from '@hirobius/design-system';
 import { Button } from '@hirobius/design-system';
 import { Field } from '@hirobius/design-system';
 import { Tag } from '@hirobius/design-system';
-import type { ApprovalState } from '@hirobius/design-system';
+import type { ApprovalState } from '../../components/ds-compat/types';
 
 // 11a-4 — approval app detail view.
 //
