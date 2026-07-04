@@ -49,6 +49,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeResponse } from './lib/outscraper-normalize.mjs';
 import { buildQueries, PRESET_NAMES } from './lib/query-presets.mjs';
+import { prospectsToLeadRows } from './lib/prospect-to-lead.mjs';
 
 // Outscraper Google Maps search: 500 records/month free per service, then
 // ~$3/1,000. Used only for the dry-run estimate; verify current pricing.
@@ -72,6 +73,8 @@ function parseArgs(argv) {
     dryRun: false,
     out: false,
     scaffold: false,
+    supabase: false,
+    ingestBatch: null,
     top: 5,
     outDir: ROOT,
     json: false,
@@ -91,6 +94,8 @@ function parseArgs(argv) {
       case '--dry-run': opts.dryRun = true; break;
       case '--out': opts.out = true; break;
       case '--scaffold-clients': opts.scaffold = true; break;
+      case '--supabase': opts.supabase = true; break;
+      case '--ingest-batch': opts.ingestBatch = next(); break;
       case '--top': opts.top = Number(next()); break;
       case '--out-dir': opts.outDir = path.resolve(next()); break;
       case '--json': opts.json = true; break;
@@ -117,9 +122,15 @@ function printHelp() {
       `  --dry-run           print the request(s) and exit (no key, no network)\n` +
       `  --out               write prospects/<runId>/{batch.json,prospects.csv}\n` +
       `  --scaffold-clients  scaffold clients/<slug>/ for the top prospects\n` +
+      `  --supabase          upsert scored leads to Supabase (onConflict place_id)\n` +
+      `  --ingest-batch <p>  backfill a saved batch/summary JSON (no scrape); pair with --supabase\n` +
       `  --top <n>           how many to scaffold (default 5)\n` +
       `  --out-dir <dir>     base dir for output (default: repo root)\n` +
-      `  --json              machine-readable summary\n`,
+      `  --json              machine-readable summary\n` +
+      `\nSupabase needs SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (human-set, never in\n` +
+      `.env by an agent) and @supabase/supabase-js installed. In this proxied env run\n` +
+      `with NODE_USE_ENV_PROXY=1 (Node >=22.21) so writes traverse the egress proxy.\n` +
+      `Preview the exact rows with --supabase --dry-run (needs --fixture/--ingest-batch).\n`,
   );
 }
 
@@ -211,12 +222,12 @@ function csvCell(v) {
 
 function toCsv(prospects) {
   const cols = [
-    'leadScore', 'name', 'category', 'city', 'region', 'phone', 'website',
+    'leadScore', 'buildScore', 'name', 'category', 'city', 'region', 'phone', 'website',
     'sitePresence', 'reviews', 'rating', 'ownerVerified', 'operational',
     'placeId', 'mapsUrl', 'sourceQuery', 'slug',
   ];
   const rows = prospects.map((p) => [
-    p.signals.leadScore, p.name, p.category, p.city, p.region, p.phone, p.website,
+    p.signals.leadScore, p.signals.buildScore, p.name, p.category, p.city, p.region, p.phone, p.website,
     p.signals.sitePresence, p.reviews, p.rating, p.signals.ownerVerified,
     p.signals.operational, p.placeId, p.mapsUrl, p.sourceQuery, p.slug,
   ].map(csvCell).join(','));
@@ -275,15 +286,65 @@ function writeOutput(batch, opts) {
   return written;
 }
 
+// ── Supabase upsert ──────────────────────────────────────────────────────────
+
+/**
+ * Map the batch's prospects to `leads` rows and upsert them (onConflict place_id).
+ * With opts.dryRun this prints the rows that WOULD be written and returns without
+ * importing @supabase/supabase-js or touching the DB — a no-key, no-package smoke
+ * test of the exact payload. Otherwise it dynamically imports the server client
+ * (kept out of the offline/fixture/dry paths on purpose) and writes.
+ * @returns {Promise<{upserted:number, dryRun?:boolean, rows:number, error?:string}>}
+ */
+async function upsertBatchToSupabase(batch, opts) {
+  const rows = prospectsToLeadRows(batch.prospects, batch.runId);
+
+  if (opts.dryRun) {
+    if (!opts.json) {
+      console.log(
+        `\n--supabase --dry-run — ${rows.length} row(s) that WOULD upsert to \`leads\` ` +
+          `(no DB, no @supabase import):\n`,
+      );
+    }
+    console.log(JSON.stringify(rows, null, 2));
+    return { upserted: 0, dryRun: true, rows: rows.length };
+  }
+
+  if (rows.length === 0) return { upserted: 0, rows: 0 };
+
+  // Guarded imports — only here, so fixture/dry/offline runs never need the package.
+  const { getServiceClient } = await import('../lib/supabase/server.mjs');
+  const { upsertLeads } = await import('../lib/supabase/leads.mjs');
+  const sb = await getServiceClient();
+  const { error } = await upsertLeads(sb, rows);
+  if (error) return { upserted: 0, rows: rows.length, error: error.message || String(error) };
+  return { upserted: rows.length, rows: rows.length };
+}
+
+/** Load a previously saved batch/summary JSON (has a `prospects` array) for
+ *  --ingest-batch backfill — no scrape, no API spend. */
+function loadBatch(filePath) {
+  const raw = JSON.parse(fs.readFileSync(path.resolve(filePath), 'utf8'));
+  const prospects = Array.isArray(raw?.prospects) ? raw.prospects : [];
+  return {
+    runId: raw?.runId || makeRunId(),
+    queries: Array.isArray(raw?.queries) ? raw.queries : [],
+    rawCount: raw?.rawCount ?? prospects.length,
+    prospects,
+  };
+}
+
 // ── reporting ────────────────────────────────────────────────────────────────
 
 function printRanking(batch) {
-  console.log(`\nRun ${batch.runId} — ${batch.prospects.length} prospects (from ${batch.rawCount} raw):\n`);
+  console.log(`\nRun ${batch.runId} — ${batch.prospects.length} prospects (from ${batch.rawCount} raw):`);
+  console.log(`  [need/build] name  ·  presence, reviews  ·  location\n`);
   for (const p of batch.prospects.slice(0, 20)) {
     const s = p.signals;
     const loc = [p.city, p.region].filter(Boolean).join(', ');
+    const build = s.buildScore === undefined ? '  -' : String(s.buildScore).padStart(3);
     console.log(
-      `  [${String(s.leadScore).padStart(3)}] ${p.name}` +
+      `  [${String(s.leadScore).padStart(3)}/${build}] ${p.name}` +
         `  ·  ${s.sitePresence}, ${p.reviews} reviews` +
         `${s.ownerVerified ? ', verified' : ''}${s.operational ? '' : ', CLOSED'}` +
         `${loc ? `  ·  ${loc}` : ''}`,
@@ -313,6 +374,21 @@ async function main() {
       console.error(String(err.message || err));
       process.exit(1);
     }
+  }
+
+  // ── --ingest-batch: backfill a previously saved batch, no scrape ──
+  let batch;
+  if (opts.ingestBatch) {
+    batch = loadBatch(opts.ingestBatch);
+    if (batch.prospects.length === 0) {
+      console.error(`No prospects found in ${opts.ingestBatch} (expected a { prospects: [...] } summary).`);
+      process.exit(1);
+    }
+    if (!opts.supabase && !opts.out) {
+      console.error('--ingest-batch loads a saved batch to persist it. Add --supabase (backfill DB) or --out.');
+    }
+    await persistAndReport(batch, opts);
+    return;
   }
 
   // ── resolve the raw response `data` (fixture, dry-run, or live) ──
@@ -373,9 +449,21 @@ async function main() {
     ? data.reduce((n, e) => n + (Array.isArray(e) ? e.length : 1), 0)
     : 0;
   const prospects = normalizeResponse(data);
-  const batch = { runId: makeRunId(), queries: opts.queries, rawCount, prospects };
+  batch = { runId: makeRunId(), queries: opts.queries, rawCount, prospects };
 
-  // ── persist + report ──
+  await persistAndReport(batch, opts);
+}
+
+/** Shared tail: upsert to Supabase (if asked), write files (if asked), report. */
+async function persistAndReport(batch, opts) {
+  // Supabase first so a --supabase --dry-run can print the payload and exit before
+  // any file I/O or ranking noise.
+  let supabase = null;
+  if (opts.supabase) {
+    supabase = await upsertBatchToSupabase(batch, opts);
+    if (supabase.dryRun) process.exit(0);
+  }
+
   const written = opts.out || opts.scaffold ? writeOutput(batch, opts) : [];
 
   if (opts.json) {
@@ -385,6 +473,7 @@ async function main() {
       rawCount: batch.rawCount,
       prospectCount: batch.prospects.length,
       written,
+      supabase,
       prospects: batch.prospects,
     }, null, 2));
   } else {
@@ -392,8 +481,16 @@ async function main() {
     if (written.length) {
       console.log(`\nWrote ${written.length} file(s):`);
       for (const f of written) console.log(`  ${path.relative(opts.outDir, f)}`);
-    } else {
-      console.log(`\n(no files written — add --out and/or --scaffold-clients to persist)`);
+    }
+    if (supabase) {
+      console.log(
+        supabase.error
+          ? `\nSupabase upsert FAILED: ${supabase.error}`
+          : `\nSupabase: upserted ${supabase.upserted} lead(s) (onConflict place_id).`,
+      );
+    }
+    if (!written.length && !supabase) {
+      console.log(`\n(nothing persisted — add --out, --scaffold-clients, and/or --supabase)`);
     }
   }
 }

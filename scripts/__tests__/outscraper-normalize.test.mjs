@@ -14,6 +14,8 @@ import {
   socialProofPoints,
   isOperational,
   scoreProspect,
+  scoreBuildability,
+  photoRichnessPoints,
   slugify,
   normalizePlace,
   normalizeResponse,
@@ -118,7 +120,43 @@ describe('slugify', () => {
   });
 });
 
+describe('scoreBuildability', () => {
+  it('is 0 with no material and bounded at 100', () => {
+    expect(scoreBuildability({ photosCount: 0, reviews: 0 })).toBe(0);
+    const max = scoreBuildability({
+      photosCount: 100, reviews: 10_000, hasDescription: true, hasHours: true,
+      hasServices: true, hasLocation: true, hasLogo: true, hasCta: true,
+    });
+    expect(max).toBeLessThanOrEqual(100);
+    expect(max).toBeGreaterThan(90);
+  });
+  it('rewards each material lever additively', () => {
+    const base = scoreBuildability({ photosCount: 0, reviews: 0 });
+    const withDesc = scoreBuildability({ photosCount: 0, reviews: 0, hasDescription: true });
+    expect(withDesc).toBeGreaterThan(base);
+  });
+  it('photo richness is log-scaled and capped', () => {
+    expect(photoRichnessPoints(0)).toBe(0);
+    expect(photoRichnessPoints(1000)).toBeLessThanOrEqual(25);
+    expect(photoRichnessPoints(40)).toBeGreaterThan(photoRichnessPoints(4));
+  });
+});
+
 describe('normalizePlace', () => {
+  it('derives buildScore and richer content from a live-shaped place', () => {
+    const p = normalizePlace({
+      name: 'Cascade Fence', place_id: 'B1', city: 'Olympia', state_code: 'WA',
+      type: 'Fence contractor', reviews: 87, rating: 4.8, photos_count: 32,
+      photo: 'https://img/x.jpg', description: 'Family-owned since 2009.',
+      working_hours: { Monday: ['8AM-5PM'] }, logo: 'https://img/logo.png',
+      booking_appointment_link: 'https://x/quote', business_status: 'OPERATIONAL',
+    });
+    expect(p.signals.buildScore).toBeGreaterThan(70);
+    expect(p.content.description).toBe('Family-owned since 2009.');
+    expect(p.content.photos).toEqual(['https://img/x.jpg']);
+    expect(p.content.logoUrl).toBe('https://img/logo.png');
+    expect(p.content.cta).toBe('https://x/quote');
+  });
   it('derives signals and tolerates field aliases (us_state / category / reviews_count)', () => {
     const p = normalizePlace({
       name: 'Alias Co',

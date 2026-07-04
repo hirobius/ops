@@ -66,8 +66,35 @@ export interface ProspectSignals {
   ownerVerified: boolean;
   /** Not permanently closed. */
   operational: boolean;
-  /** 0–100. Higher = better mock-site candidate. See the normalizer for weights. */
+  /** 0–100. Higher = they NEED a site more (weak web presence). Ranks the list. */
   leadScore: number;
+  /**
+   * 0–100. Higher = more real material (photos, copy, reviews, hours, services,
+   * location, logo, CTA) to build a believable spec site from. The dream prospect
+   * scores high on BOTH leadScore and buildScore.
+   */
+  buildScore: number;
+}
+
+/**
+ * Richer business material captured for the site build + the `leads` content
+ * columns. Not part of scoring (buildScore already summarised it); carried so the
+ * eventual spec-site build never has to re-scrape.
+ */
+export interface ProspectContent {
+  description: string;
+  hours: Record<string, unknown> | null;
+  photos: string[];
+  logoUrl: string;
+  social: Record<string, string> | null;
+  types: string[];
+  cta: string;
+  email: string;
+  postalCode: string;
+  country: string;
+  latitude: number | null;
+  longitude: number | null;
+  businessStatus: string;
 }
 
 /** A normalized, scored prospect ready to rank, export, or scaffold. */
@@ -88,6 +115,8 @@ export interface Prospect {
   /** The query that surfaced this prospect — provenance for the run. */
   sourceQuery: string;
   signals: ProspectSignals;
+  /** Richer material for the site build + leads content columns. */
+  content: ProspectContent;
 }
 
 /** One pipeline run: the ranked prospects plus reproducibility metadata. */

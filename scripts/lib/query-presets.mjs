@@ -13,8 +13,54 @@
 
 /** @typedef {{ label: string, keywords: string[], metros: { region: string, areas: string[] }[] }} Preset */
 
+// WA-only metro set (the WA slice of the exterior-cleaning matrix, no OR) —
+// shared by the niche presets below so "WA for now" is one edit, not five.
+/** @type {{ region: string, areas: string[] }[]} */
+const WA_METROS = [
+  {
+    region: 'Seattle, WA',
+    areas: [
+      'Seattle, WA', 'Bellevue, WA', 'Redmond, WA', 'Kirkland, WA', 'Renton, WA',
+      'Everett, WA', 'Kent, WA', 'Federal Way, WA', 'Shoreline, WA', 'Bothell, WA',
+    ],
+  },
+  { region: 'Tacoma, WA', areas: ['Tacoma, WA', 'Lakewood, WA', 'Puyallup, WA', 'University Place, WA'] },
+  { region: 'Spokane, WA', areas: ['Spokane, WA', 'Spokane Valley, WA'] },
+  { region: 'Vancouver, WA', areas: ['Vancouver, WA', 'Camas, WA'] },
+  { region: 'Olympia, WA', areas: ['Olympia, WA', 'Lacey, WA'] },
+  { region: 'Bellingham, WA', areas: ['Bellingham, WA'] },
+];
+
 /** @type {Record<string, Preset>} */
 export const PRESETS = {
+  // ── WA niche beachheads — trades with low website-penetration + high job
+  //    ticket + reachable by cold outreach (see docs/prospecting/niche-targeting.md).
+  'fencing-wa': {
+    label: 'Fencing & deck builders — WA metros',
+    keywords: ['fence company', 'fence installation', 'fence contractor', 'deck builder', 'deck contractor'],
+    metros: WA_METROS,
+  },
+  'tree-service-wa': {
+    label: 'Tree services / arborists — WA metros',
+    keywords: ['tree service', 'tree removal', 'arborist', 'stump grinding', 'tree trimming'],
+    metros: WA_METROS,
+  },
+  'septic-wa': {
+    label: 'Septic & excavation — WA metros',
+    keywords: ['septic service', 'septic pumping', 'septic installation', 'excavation contractor', 'land clearing'],
+    metros: WA_METROS,
+  },
+  'pressure-washing-wa': {
+    label: 'Pressure / soft washing — WA metros',
+    keywords: ['pressure washing', 'soft washing', 'house washing', 'roof cleaning'],
+    metros: WA_METROS,
+  },
+  'concrete-coating-wa': {
+    label: 'Concrete / epoxy floor coating — WA metros',
+    keywords: ['epoxy flooring', 'garage floor coating', 'concrete coating', 'concrete resurfacing'],
+    metros: WA_METROS,
+  },
+
   // Beachhead: exterior cleaning across the WA+OR core metros + suburbs.
   'exterior-cleaning': {
     label: 'Exterior cleaning — WA+OR core metros (beachhead)',

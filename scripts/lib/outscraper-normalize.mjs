@@ -126,6 +126,68 @@ export function scoreProspect({ sitePresence, reviews, operational, ownerVerifie
   return base + OPERATIONAL_POINTS; // 0..100
 }
 
+// ── buildability scoring ─────────────────────────────────────────────────────
+//
+// `leadScore` answers "how much do they NEED a site?" (weak web presence).
+// `buildScore` answers "how COMPELLING a spec site can we build from what they
+// already have online?" — more real material (photos, copy, reviews, hours,
+// services, location, branding, a booking link) means we can show them a
+// believable one-page site of their OWN business before they pay, which is the
+// strongest move in the outreach playbook. The best target scores high on BOTH.
+//
+// Weights sum to a 100 ceiling; photos and reviews are the richest raw material
+// (imagery + testimonials), so they carry the most weight.
+const BUILD_WEIGHTS = {
+  photos: 25, // hero + gallery imagery
+  reviews: 20, // testimonials / star ratings
+  description: 15, // real "about" copy
+  hours: 10, // hours block
+  services: 10, // a service list (category / subtypes)
+  location: 10, // map + service area
+  logo: 5, // branding
+  cta: 5, // a booking / order link
+};
+
+/** Photos -> 0..photos-ceiling, log-scaled so a full gallery ≈ the ceiling. */
+export function photoRichnessPoints(photosCount) {
+  const n = Number(photosCount) || 0;
+  if (n <= 0) return 0;
+  return Math.min(BUILD_WEIGHTS.photos, Math.round(Math.log10(n + 1) * 15));
+}
+
+/** Reviews -> 0..reviews-ceiling for buildability (testimonial material). */
+function reviewRichnessPoints(reviews) {
+  const n = Number(reviews) || 0;
+  if (n <= 0) return 0;
+  return Math.min(BUILD_WEIGHTS.reviews, Math.round(Math.log10(n + 1) * 10));
+}
+
+/**
+ * Compute the 0–100 buildability score from richness signals. Pure arithmetic
+ * over presence/volume of the material a spec site is built from.
+ */
+export function scoreBuildability({
+  photosCount,
+  reviews,
+  hasDescription,
+  hasHours,
+  hasServices,
+  hasLocation,
+  hasLogo,
+  hasCta,
+}) {
+  return (
+    photoRichnessPoints(photosCount) +
+    reviewRichnessPoints(reviews) +
+    (hasDescription ? BUILD_WEIGHTS.description : 0) +
+    (hasHours ? BUILD_WEIGHTS.hours : 0) +
+    (hasServices ? BUILD_WEIGHTS.services : 0) +
+    (hasLocation ? BUILD_WEIGHTS.location : 0) +
+    (hasLogo ? BUILD_WEIGHTS.logo : 0) +
+    (hasCta ? BUILD_WEIGHTS.cta : 0)
+  );
+}
+
 /** URL/filesystem-safe slug from a business name + city, deduped-friendly. */
 export function slugify(name, city) {
   const base = [name, city]
@@ -168,10 +230,42 @@ export function normalizePlace(place = {}) {
   const photosCount = Number(pick(place, 'photos_count')) || 0;
   const placeId = String(pick(place, 'place_id', 'google_id') ?? '').trim();
 
+  // Live Outscraper returns `address`; `full_address` is the alt name.
+  const address = String(pick(place, 'full_address', 'address') ?? '').trim();
+
   const sitePresence = classifySitePresence(website);
   const operational = isOperational(place.business_status);
   const ownerVerified = Boolean(place.verified);
   const hasSocialProof = reviews >= SOCIAL_PROOF_MIN_REVIEWS;
+
+  // ── richer content — the raw material a spec site is built from. Feeds
+  //    buildScore AND the `leads` content columns (0002) for the eventual build.
+  const description = String(pick(place, 'description') ?? '').trim();
+  const workingHours =
+    place.working_hours && typeof place.working_hours === 'object' ? place.working_hours : null;
+  const logoUrl = String(pick(place, 'logo') ?? '').trim();
+  const mainPhoto = String(pick(place, 'photo') ?? '').trim();
+  const photos = mainPhoto ? [mainPhoto] : []; // search-v3 gives one photo + a count
+  const subtypesRaw = pick(place, 'subtypes', 'type', 'category');
+  const types = subtypesRaw
+    ? String(subtypesRaw).split(',').map((s) => s.trim()).filter(Boolean)
+    : [];
+  const orderLinks = Array.isArray(place.order_links) ? place.order_links.filter(Boolean) : [];
+  const cta = String(pick(place, 'booking_appointment_link') ?? '').trim() || (orderLinks[0] ?? '');
+  const latRaw = pick(place, 'latitude');
+  const lngRaw = pick(place, 'longitude');
+  const latitude = Number.isFinite(Number(latRaw)) ? Number(latRaw) : null;
+  const longitude = Number.isFinite(Number(lngRaw)) ? Number(lngRaw) : null;
+  // Social-only presence means the "website" IS their social page — surface it as
+  // a { host: url } social link so the build step has it.
+  const social = sitePresence === 'social-only' && website ? { [hostOf(website)]: website } : null;
+
+  const hasDescription = description.length > 0;
+  const hasHours = !!workingHours && Object.keys(workingHours).length > 0;
+  const hasServices = types.length > 0 || category.length > 0;
+  const hasLocation = address.length > 0 || (latitude !== null && longitude !== null);
+  const hasLogo = logoUrl.length > 0;
+  const hasCta = cta.length > 0;
 
   const signals = {
     hasWebsite: sitePresence !== 'none',
@@ -180,14 +274,23 @@ export function normalizePlace(place = {}) {
     ownerVerified,
     operational,
     leadScore: scoreProspect({ sitePresence, reviews, operational, ownerVerified }),
+    buildScore: scoreBuildability({
+      photosCount,
+      reviews,
+      hasDescription,
+      hasHours,
+      hasServices,
+      hasLocation,
+      hasLogo,
+      hasCta,
+    }),
   };
 
   return {
     slug: slugify(name, city),
     name,
     category,
-    // Live Outscraper returns `address`; `full_address` is the alt name.
-    address: String(pick(place, 'full_address', 'address') ?? '').trim(),
+    address,
     city,
     region,
     phone: String(pick(place, 'phone') ?? '').trim(),
@@ -199,6 +302,23 @@ export function normalizePlace(place = {}) {
     mapsUrl: String(pick(place, 'location_link') ?? '').trim(),
     sourceQuery: String(pick(place, 'query') ?? '').trim(),
     signals,
+    // Richer material for the site build + the leads content columns. Not part of
+    // scoring — buildScore already summarised it into signals.
+    content: {
+      description,
+      hours: workingHours,
+      photos,
+      logoUrl,
+      social,
+      types,
+      cta,
+      email: String(pick(place, 'email', 'email_1') ?? '').trim(),
+      postalCode: String(pick(place, 'postal_code') ?? '').trim(),
+      country: String(pick(place, 'country') ?? '').trim(),
+      latitude,
+      longitude,
+      businessStatus: String(pick(place, 'business_status') ?? '').trim(),
+    },
   };
 }
 
@@ -249,4 +369,5 @@ export const _internal = {
   BUILDER_HOSTS,
   WEB_WEAKNESS,
   SOCIAL_PROOF_MIN_REVIEWS,
+  BUILD_WEIGHTS,
 };
