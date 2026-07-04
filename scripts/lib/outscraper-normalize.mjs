@@ -156,8 +156,11 @@ function pick(place, ...keys) {
 export function normalizePlace(place = {}) {
   const name = String(pick(place, 'name') ?? '').trim();
   const city = String(pick(place, 'city') ?? '').trim();
-  const region = String(pick(place, 'us_state', 'state') ?? '').trim();
-  const website = String(pick(place, 'site') ?? '').trim();
+  // Live Outscraper returns `state` (full name, e.g. "Oregon") + `state_code`
+  // ("OR"); prefer the 2-letter code. `us_state` is the older/alt field name.
+  const region = String(pick(place, 'us_state', 'state_code', 'state') ?? '').trim();
+  // Live Outscraper returns the site URL as `website`; `site` is the alt name.
+  const website = String(pick(place, 'site', 'website') ?? '').trim();
   const category = String(pick(place, 'type', 'category') ?? '').trim();
   const reviews = Number(pick(place, 'reviews', 'reviews_count')) || 0;
   const ratingRaw = pick(place, 'rating');
@@ -183,7 +186,8 @@ export function normalizePlace(place = {}) {
     slug: slugify(name, city),
     name,
     category,
-    address: String(pick(place, 'full_address') ?? '').trim(),
+    // Live Outscraper returns `address`; `full_address` is the alt name.
+    address: String(pick(place, 'full_address', 'address') ?? '').trim(),
     city,
     region,
     phone: String(pick(place, 'phone') ?? '').trim(),

@@ -145,6 +145,32 @@ describe('normalizePlace', () => {
     expect(p.rating).toBeNull();
     expect(p.signals.sitePresence).toBe('none');
   });
+  // Contract regression: the LIVE /maps/search-v3 response names these fields
+  // `website`, `address`, and `state`/`state_code` — NOT `site`, `full_address`,
+  // `us_state`. Verified against a live probe 2026-07-04. If the mapping ever
+  // reverts to only the old names, a real business with a custom site would read
+  // as `sitePresence: 'none'` and rank as a top no-website target — inverting the
+  // scoring thesis. This locks the live shape.
+  it('reads live Outscraper field names (website / address / state_code)', () => {
+    const p = normalizePlace({
+      name: "Pressure Wash Pro's",
+      place_id: 'LIVE1',
+      city: 'Bend',
+      state: 'Oregon', // live full name
+      state_code: 'OR', // live 2-letter — preferred for region
+      type: 'Pressure washing service',
+      reviews: 15,
+      rating: 5,
+      website: 'https://www.pressurewashproshop.com/', // live: `website`, not `site`
+      address: '61819 Avonlea Cir, Bend, OR 97702', // live: `address`, not `full_address`
+      business_status: 'OPERATIONAL',
+      verified: true,
+    });
+    expect(p.website).toBe('https://www.pressurewashproshop.com/');
+    expect(p.signals.sitePresence).toBe('custom'); // a real site is correctly detected
+    expect(p.region).toBe('OR'); // state_code beats the full-name `state`
+    expect(p.address).toBe('61819 Avonlea Cir, Bend, OR 97702');
+  });
 });
 
 describe('flattenPlaces / dedupeProspects', () => {

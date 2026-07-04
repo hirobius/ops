@@ -79,10 +79,24 @@ node --env-file=.env.local scripts/outscraper-fetch.mjs --query "..." --out
   the script polls `GET /requests/{id}` until `status:"Success"`.
 - `data` is **one array of places per submitted query**.
 
-> ⚠️ **Verify the live contract before trusting at scale.** The base URL,
-> endpoint, and async flow are wired from prior knowledge of Outscraper's API,
-> not re-verified against a live key in this environment. Make one real keyed
-> call and confirm the endpoint/params/field names before a large run.
+> ✅ **Live-verified 2026-07-04.** One free keyed probe (`--query "pressure
+> washing in Bend, OR" --limit 5`, HTTP 200, within the 500-records/mo free
+> tier) confirmed the base URL, endpoint, sync params, and `{ status:"Success",
+> data:[[...places]] }` shape. The probe also surfaced **three field-name
+> mismatches** vs. the original synthetic fixture, now fixed in the normalizer:
+>
+> | Signal | Original (fixture) key | **Live** key | Notes |
+> |---|---|---|---|
+> | website | `site` | **`website`** | critical — unread ⇒ every business scored `sitePresence:none` |
+> | address | `full_address` | **`address`** | |
+> | region | `us_state` | **`state_code`** (2-letter) | live also returns full-name `state` (e.g. "Oregon") |
+>
+> `normalizePlace()` now accepts both spellings (old fixture keys kept as
+> aliases), so the fixture tests and live data both pass. Other wired fields
+> (`name`, `city`, `type`, `reviews`, `rating`, `photos_count`, `place_id`,
+> `business_status`, `verified`, `phone`, `location_link`, `query`) matched the
+> live response as-is. The async flow was **not** re-verified live (sync path
+> only); confirm `results_location`/`GET /requests/{id}` before relying on `--async`.
 
 ## Lead scoring
 
