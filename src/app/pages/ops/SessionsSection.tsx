@@ -21,7 +21,7 @@ import { Bot, AlertCircle, CheckCircle2, MessageSquare, HelpCircle, ShieldCheck 
 import hds from '@hirobius/design-system/tokens';
 import { Stack } from '@hirobius/design-system';
 import { ActivityFeed, type ActivityEvent, type ActivityStatus } from '@hirobius/design-system';
-import { AgentTag, type AgentTier } from '@hirobius/design-system';
+import { AgentTag, type AgentTier } from '@/app/design-system-ext';
 import { Icon } from '@hirobius/design-system';
 import type { ClientFiles, ClientTask } from './clientTypes';
 import { PodTail } from './PodTail';

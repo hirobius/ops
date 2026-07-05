@@ -63,8 +63,9 @@
     "bot": "node scripts/discord-bot.mjs",
     "bridge": "node --env-file=.env.local scripts/hds-bridge.mjs",
     "build": "vite build --configLoader native",
+    "build:data": "node scripts/ensure-build-data-files.mjs && node scripts/build-roadmap-data.mjs && node scripts/generate-strength-report.mjs && node scripts/generate-security-posture.mjs",
     "build:ssr": "vite build --ssr src/entry-server.tsx --outDir .ssr-cache --configLoader native",
-    "build:prerender": "pnpm build && pnpm build:ssr && node scripts/prerender.mjs",
+    "build:prerender": "pnpm build:data && pnpm build && pnpm build:ssr && node scripts/prerender.mjs",
     "build:lib": "vite build -c vite.config.lib.ts",
     "catalog": "node scripts/generate-visual-catalog.mjs",
     "changelog:generate": "node scripts/generate-changelog.mjs",
@@ -211,7 +212,7 @@
     "watch:metrics": "nodemon --watch src/app/components --watch src/app/pages --watch src/app/design-system --watch src/app/styles -e tsx,ts,css --exec \"node scripts/audit-tokens.mjs --full && node scripts/generate-manifest.mjs\""
   },
   "dependencies": {
-    "@hirobius/design-system": "file:../hirobius-design-system",
+    "@hirobius/design-system": "^0.11.0",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",

@@ -9,7 +9,7 @@ import { Badge } from '@hirobius/design-system';
 import { Callout } from '@hirobius/design-system';
 import { StatusTile, type StatusTileTone } from '@hirobius/design-system';
 import { TileGrid } from '@hirobius/design-system';
-import { PhaseHeader, type PhaseHeaderTone } from '@hirobius/design-system';
+import { PhaseHeader, type PhaseHeaderTone } from '@/app/design-system-ext';
 import { EmptyState } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from './PageHeader';
