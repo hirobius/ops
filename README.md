@@ -72,6 +72,7 @@ pnpm build        # prebuild (ensure-ops-data) → vite build
 ## Where to read
 
 - `CLAUDE.md` — agent rules, working-with-Adrian conventions, dispatch rules (start here).
+- `standards/secrets-management.md` — **org-wide Secrets Management Standard** (canonical home; every Hirobius repo links here). Fleet adoption tracked in `standards/secrets-adoption.md`.
 - `docs/ai/HANDOFF.md` — current state / what's next.
 - `docs/ai/NORTH_STAR.md` — the focus contract (scope guard).
 - `docs/ARCHITECTURE.md` — the lead → site delivery pipeline + decisions.
