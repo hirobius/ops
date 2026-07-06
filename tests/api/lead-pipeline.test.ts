@@ -118,16 +118,16 @@ describe('generateLeadSite', () => {
 
 describe('buildLeadSite', () => {
   it('builds on the happy path', async () => {
-    vi.mocked(buildSite).mockResolvedValueOnce({ duda_site_name: 's1', preview_url: 'http://p', editor_url: 'http://e' });
+    vi.mocked(buildSite).mockResolvedValueOnce({ external_site_id: 's1', preview_url: 'http://p', editor_url: 'http://e' });
     const { sb, updates } = makeSb({ lead: LEAD });
     const result = await buildLeadSite(sb, 'lead-1');
     expect(result).toEqual({ status: 200, body: { ok: true, preview_url: 'http://p' } });
     expect(updates[0]).toEqual({ site_status: 'building' });
-    expect(updates[1]).toMatchObject({ site_status: 'built', duda_site_name: 's1' });
+    expect(updates[1]).toMatchObject({ site_status: 'built', external_site_id: 's1' });
   });
 
   it('BUGFIX: rolls to build_failed when the built-update errors', async () => {
-    vi.mocked(buildSite).mockResolvedValueOnce({ duda_site_name: 's1', preview_url: 'http://p', editor_url: 'http://e' });
+    vi.mocked(buildSite).mockResolvedValueOnce({ external_site_id: 's1', preview_url: 'http://p', editor_url: 'http://e' });
     const { sb, updates } = makeSb({ lead: LEAD, updateErrors: [null, { message: 'write failed' }] });
     const result = await buildLeadSite(sb, 'lead-1');
     expect(result.status).toBe(500);
@@ -137,14 +137,14 @@ describe('buildLeadSite', () => {
 
 describe('publishLeadSite', () => {
   it('409s when there is no built site', async () => {
-    const { sb } = makeSb({ lead: { ...LEAD, duda_site_name: null } });
+    const { sb } = makeSb({ lead: { ...LEAD, external_site_id: null } });
     const result = await publishLeadSite(sb, 'lead-1');
     expect(result).toMatchObject({ status: 409, body: { code: 'NO_SITE' } });
   });
 
   it('publishes on the happy path', async () => {
     vi.mocked(publishSite).mockResolvedValueOnce({ live_url: 'http://live' });
-    const { sb, updates } = makeSb({ lead: { ...LEAD, duda_site_name: 's1' } });
+    const { sb, updates } = makeSb({ lead: { ...LEAD, external_site_id: 's1' } });
     const result = await publishLeadSite(sb, 'lead-1');
     expect(result).toEqual({ status: 200, body: { ok: true, live_url: 'http://live' } });
     expect(updates[0]).toEqual({ site_status: 'publishing' });
@@ -152,7 +152,7 @@ describe('publishLeadSite', () => {
 
   it('BUGFIX: rolls to publish_failed when the published-update errors', async () => {
     vi.mocked(publishSite).mockResolvedValueOnce({ live_url: 'http://live' });
-    const { sb, updates } = makeSb({ lead: { ...LEAD, duda_site_name: 's1' }, updateErrors: [null, { message: 'write failed' }] });
+    const { sb, updates } = makeSb({ lead: { ...LEAD, external_site_id: 's1' }, updateErrors: [null, { message: 'write failed' }] });
     const result = await publishLeadSite(sb, 'lead-1');
     expect(result.status).toBe(500);
     expect(updates.at(-1)).toEqual({ site_status: 'publish_failed' });

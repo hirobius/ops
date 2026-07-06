@@ -57,8 +57,9 @@ export interface Lead {
   // outreach
   preview_url: string | null;
   sent_at: string | null;
-  // Duda site tracking (build → preview → publish)
-  duda_site_name: string | null;
+  // Site tracking (build → preview → publish) — platform-neutral
+  external_site_id: string | null;
+  site_platform: string | null;
   editor_url: string | null;
   live_url: string | null;
   site_status: SiteStatus | null;

@@ -28,16 +28,20 @@ alter table leads
   add column if not exists description text,         -- editorial summary / about
   add column if not exists types jsonb,             -- full Places category list
   add column if not exists service_area text,        -- Duda "area served"
-  -- Duda site tracking (build → preview → publish) ---------------------------
-  add column if not exists duda_site_name text,
+  -- Site tracking (build → preview → publish) — platform-neutral -------------
+  -- external_site_id: the builder's own site identifier (idempotency key).
+  -- site_platform: which builder produced it (e.g. 'duda'); lets us swap or
+  -- run multiple builders without reshaping the data model.
+  add column if not exists external_site_id text,
+  add column if not exists site_platform text default 'duda',
   add column if not exists editor_url text,
   add column if not exists live_url text,
   -- none → building → built → publishing → published  (+ build_failed / publish_failed)
   add column if not exists site_status text default 'none',
   add column if not exists published_at timestamptz;
 
--- Idempotency for the Duda build: one site per lead, keyed by Duda's site name.
--- Partial so the many leads without a site (null) don't collide.
-create unique index if not exists leads_duda_site_name_key
-  on leads (duda_site_name)
-  where duda_site_name is not null;
+-- Idempotency for the site build: one site per lead, keyed by the builder's
+-- site id. Partial so the many leads without a site (null) don't collide.
+create unique index if not exists leads_external_site_id_key
+  on leads (external_site_id)
+  where external_site_id is not null;
