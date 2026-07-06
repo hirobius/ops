@@ -7,7 +7,6 @@
  * The app statically imports gitignored, generated artifacts:
  *
  *   docs/guardrails/strength-report.json ← scripts/generate-strength-report.mjs
- *   lib/tasks/backlog.tasks.json         ← scripts/gen-backlog-tasks.mjs (BACKLOG.md)
  *
  * (strength-history.jsonl is committed; roadmap/security-posture/component-api
  * generators were retired along with their consumers, so they are not run here.)
@@ -36,6 +35,3 @@ if (existsSync(r(STRENGTH_REPORT))) {
   });
   console.log(`[ensure-ops-data] generated ${STRENGTH_REPORT}`);
 }
-
-// backlog.tasks.json — always regenerate so it tracks BACKLOG.md edits.
-execFileSync(process.execPath, [r('scripts/gen-backlog-tasks.mjs')], { stdio: 'inherit', cwd: ROOT });

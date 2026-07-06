@@ -67,19 +67,6 @@ export default function TasksPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
   const [busyKeys, setBusyKeys] = useState<ReadonlySet<string>>(new Set());
-  const [importing, setImporting] = useState(false);
-
-  const importBacklog = useCallback(async () => {
-    setImporting(true);
-    try {
-      await opsApi.post('/api/tasks-import');
-    } catch {
-      /* surfaced on next poll */
-    } finally {
-      setImporting(false);
-      refetch();
-    }
-  }, [refetch]);
 
   const act = useCallback(
     async (key: string, action: TaskAction) => {
@@ -162,15 +149,6 @@ export default function TasksPage() {
               ? 'loading…'
               : `${summary} · updated ${formatLastUpdated(lastUpdatedAt)}`}
         </span>
-        <Button
-          size="sm"
-          variant="secondary"
-          disabled={importing}
-          onClick={importBacklog}
-          title="Seed/refresh the board from BACKLOG.md"
-        >
-          {importing ? 'importing…' : 'import backlog'}
-        </Button>
         <Button size="sm" variant="secondary" onClick={refetch}>
           refresh
         </Button>
