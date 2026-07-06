@@ -3,9 +3,9 @@
   "phase": "live",
   "headline": "Production is LIVE (hirobius-ops, main). Command center running: leads/tasks/digest/projects boards + new /ops/issues cross-repo GitHub board. GitHub Issues are the task source of truth.",
   "next": [
-    "Per-card polish on /ops/issues (… menu, acceptance-criteria field, per-card GitHub deep-links)",
-    "Work the newly-filed ops issues #25-#29 (discord-bot bugs, dispatchState dead-end, PII history rewrite, portal server-auth, agentic review-loop Slice 1)",
-    "First real lead run: pull Access Tech leads -> generate -> eyeball config"
+    "Revenue path: Adrian sets Supabase env + applies migrations 0001/0002/0005, then first live Outscraper prospecting run (#21 landed on main, blocked on env only)",
+    "Backfill the 60 scored WA realtors via --ingest-batch once Supabase exists (#21 follow-on, zero API cost)",
+    "Remaining ops issues: #27 PII history rewrite, #28 portal server-auth, #29 agentic review-loop Slice 1, #9 outreach v1"
   ],
   "blocked": []
 }
