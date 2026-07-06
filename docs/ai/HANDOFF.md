@@ -7,14 +7,24 @@
 > finished things to the log line at the bottom). Adrian never copy-pastes
 > context again — he types one word.
 
-_Last updated: 2026-07-02 (fleet hub went live) · branch `claude/relaxed-ramanujan-vvhqf8` (all work committed + pushed)_
+_Last updated: 2026-07-06 (PRODUCTION live · /ops/issues board shipped · backlog triaged to Issues) · branch `claude/ops-dashboard-launch-7cons7` (pushed to `main`)_
 
 ## Now (what is true today)
 
-- **Preview**: https://hirobius-ops-git-claude-relaxed-ra-858b32-adrian-6234s-projects.vercel.app
-  (auto-updates per push · **`/ops` login gate is LIVE** — `OPS_GATE_PASSWORD` +
-  `OPS_SESSION_SECRET` are set · Vercel login also required unless using a fresh
-  `_vercel_share` link).
+- **PRODUCTION is LIVE** (project `hirobius-ops`, deploys from `main`). `/ops`
+  login gate active (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` set). DS consumed
+  from **public npm `@hirobius/design-system@0.11`** (GitHub Packages + `.npmrc`
+  gone). Supabase wired (`SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`); tasks/leads
+  boards online. `GITHUB_TOKEN` set (dispatch + issues board verified).
+- **NEW: `/ops/issues`** — cross-repo GitHub Issues board (every open issue the
+  `GITHUB_TOKEN` can see, grouped by repo, multi-select → copy refs to paste into
+  a Claude chat). GitHub is the task source of truth; `api/issues.ts` keeps the
+  token server-side. Route + SurfacesRail tile + layout-integrity coverage landed.
+- **GitHub Issues supersede BACKLOG.md.** `hirobius/ops` now carries issues
+  #3–#29; the 2026-07-06 triage confirmed the issues are current and BACKLOG.md is
+  the stale artifact (see Done-log). New ops work → file a GitHub Issue directly,
+  not a markdown line. The `/ops/tasks` board + BACKLOG import path can be retired
+  once the migration is confirmed (Adrian's call — it touches the build pipeline).
 - **Fleet hub is LIVE (2026-07-02)**: `/ops/projects` renders all 10 Vercel
   projects + each repo's root `status.json` (phase · headline · ⚠blocked).
   Verified active: **`VERCEL_TOKEN`** (fleet rows) + **`GITHUB_TOKEN`** (status
@@ -252,6 +262,7 @@ Guardrails: branch + push; merge to the default branch (status.json must land th
 
 ## Done log (one line each, newest first)
 
+- 2026-07-06 (production live + issues board + backlog triage): got the ops dashboard onto **PRODUCTION** (`main`) — fixed the SPA/prerender 404, moved DS to public npm `@0.11`, sanitized `SUPABASE_URL`, added `dispatch_url` migration 0004, actionable `GITHUB_TOKEN` failure messaging, one-click backlog import. Shipped **`/ops/issues`** (cross-repo GitHub Issues board; `api/issues.ts` server-side token; typecheck + build + 16/16 layout tests green). **Triaged all 76 BACKLOG.md items** against the 19 existing issues (#3–#22) + repo state: most are already-an-issue, done (ops-production-go-live, client-facing-portal-route, 13z-7-scripts-prune), stale/removed-surface (atlas/kanban/build/staging/knowledge/hermes-era), or belong in other repos (portfolio ×7, concrete ×8 → anchored by #19, HDS/DS ×10 → #20 anchors gates). Filed the 5 surviving ops-repo items as issues **#25** (discord-bot getOrchSummary/bridge bugs), **#26** (dispatchState dead-end), **#27** (PII git-history rewrite), **#28** (portal server-auth), **#29** (agentic review-loop Slice 1). Other-repo items handed to Adrian as paste-ready blocks (session scope is `hirobius/ops` only — can't write cross-repo). BACKLOG.md recommended for retirement now that Issues are the source of truth.
 - 2026-07-02 (client repos): added the "New client-work repo procedure" above — reusable prompt for standing up a private, Hirobius-owned client-work repo from a project + `tasks.json` (status.json + fleet pointer + tasks→issues with an `internal` label; handoff = curated deliverable, never the repo). First use: hirobius/lilac-insure (Lilac Insure / Conrad). Client-data model settled: PII + internal data live in the private work repo or Supabase — never git-committed anywhere client-facing. The ops-history PII scrub (clients/{lilac-insure,prospect-001,the-ranch-foundation}, docs/ai/routing-log.jsonl) is scoped + dry-run-verified; filter-repo runbook handed to Adrian to force-push (ops is private, so hygiene not exposure).
 - 2026-07-02 (architecture scrub + cleanup): 5-agent scrub (findings in `docs/ai/ARCHITECTURE_SCRUB_2026-07-02.md`), then shipped Tier 1 + Tier 2 in 8 verified batches — T1a dead post-commit step + 3 ENOENT /ops skill buttons · T1b failing CI build:lib/size-limit · T1c decoupled /ops dashboard from the 52-day frozen archive (also dropped a 1 MB bundle chunk) · T1d strength-report lies · T2a 6 dead deps + three · T2b 8 dead scripts · T2c 6 dead src files + 4 orphan tests · T2d api/ops-logout (→9 fns) + ALL_ROUTES ~60→23. ~30 dead files/deps gone, CI unbroken, no regressions, all 8 deploys READY. **Deferred (still open):** Tier 3 (duplicate/orchestration-era scripts), Tier 4 (doc identity: CLAUDE.md routes to retired docs; README/AGENTS "HDS product" vs NORTH_STAR agency-platform), the T1b package.json exports/check-public-api untangle, and the 2 `.ps1` files (held — possible personal tooling; Adrian to confirm). Discord always-on/fleet-aware filed as #15. **Next real work: HDS cutover** on the survivor list (PageHeader first — used by 16/17 pages).
 - 2026-07-02 (fleet hub LIVE — end of the deploy saga): after the function-cap fix, three more blockers fell in sequence — (a) `/ops` login gate needed `OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` (never in the keys list); (b) env vars only bind on a NEW feature-branch build (dashboard "Redeploy" re-runs stale `main`, which fails `invalid_engines_value`); (c) every guarded route imported `'../lib/api/handler'` extensionless → `ERR_MODULE_NOT_FOUND` at ESM runtime (typecheck-green, 500 live). All fixed. `/ops/projects` now renders all 10 repos + their status.json; `VERCEL_TOKEN` + `GITHUB_TOKEN` verified active. Login works. Preview is the live hub.

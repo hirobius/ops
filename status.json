@@ -1,13 +1,11 @@
 {
-  "updatedAt": "2026-07-02T22:00:00Z",
-  "phase": "active",
-  "headline": "Fleet hub live + architecture scrub Tier 1/2 shipped (8 batches: ~30 dead files/deps gone, CI unbroken on main, -1MB bundle, 9 serverless fns)",
+  "updatedAt": "2026-07-06T20:00:00Z",
+  "phase": "live",
+  "headline": "Production is LIVE (hirobius-ops, main). Command center running: leads/tasks/digest/projects boards + new /ops/issues cross-repo GitHub board. GitHub Issues are the task source of truth.",
   "next": [
-    "HDS cutover on the /ops survivor list (shared chrome first: PageHeader = 16/17 pages)",
-    "First real lead run: pull Access Tech leads -> generate -> eyeball config",
-    "Discord always-on + fleet-aware (#15); task importer + alerts (#8/#11); Tier 3/4 scrub follow-ups"
+    "Per-card polish on /ops/issues (… menu, acceptance-criteria field) + retire the BACKLOG.md import path once issues fully supersede it",
+    "Work the newly-filed ops issues #25-#29 (discord-bot bugs, dispatchState dead-end, PII history rewrite, portal server-auth, agentic review-loop Slice 1)",
+    "First real lead run: pull Access Tech leads -> generate -> eyeball config"
   ],
-  "blocked": [
-    "main branch stale + fails invalid_engines_value; production waits on feature->main merge (PR #1)"
-  ]
+  "blocked": []
 }
