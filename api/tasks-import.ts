@@ -6,8 +6,9 @@
  * human doesn't hand-run SQL or expose the key. Replaces the retired importer.
  *
  * The rows are precomputed at build time from BACKLOG.md into
- * lib/tasks/backlog.tasks.json (scripts/gen-backlog-tasks.mjs via ensure-ops-data),
- * so the function bundles the data — no runtime filesystem read.
+ * lib/tasks/backlog.tasks.mjs (scripts/gen-backlog-tasks.mjs via ensure-ops-data)
+ * — a native ESM module (not JSON), so Vercel imports it with no runtime
+ * filesystem read and no `type: json` import attribute.
  *
  * Idempotent: upsert on the natural `key` ('backlog:<slug>'), so re-running just
  * refreshes existing rows.
@@ -20,7 +21,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler.js';
 import { upsertTasks } from '../lib/supabase/tasks.mjs';
-import backlogTasks from '../lib/tasks/backlog.tasks.json';
+import { backlogTasks } from '../lib/tasks/backlog.tasks.mjs';
 
 export async function tasksImportHandler(sb: SupabaseClient): Promise<HandlerResult> {
   const rows = backlogTasks as Array<Record<string, unknown>>;
