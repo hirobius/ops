@@ -33,6 +33,11 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 3. **SELF-HEAL:** If tests fail, read the output, fix the error, and re-run until green — don't ask for help.
 4. **FINALIZATION:** Only report a task complete when tests are 100% green.
 
+### Working-with-Adrian conventions (standing prefs, 2026-07-06)
+
+- **Give paste-ready text for every human-filled field.** When a setup step needs Adrian to type into a description/name/value field (Vercel env var, GitHub token name, Supabase key, etc.), supply the exact copy-paste text — never leave him to guess what to write.
+- **Token/secret-backed features must fail loud and actionable.** Any feature that depends on an env token or secret must catch the failure and return a message that names the variable AND the fix (e.g., "GITHUB_TOKEN is expired/revoked — rotate it in Vercel → Settings → Environment Variables (Production), then redeploy"), never a generic/cryptic error. Build this in when you build the feature, not after it breaks.
+
 ## 3. SUB-AGENT DISPATCH RULES
 
 - **Pick the cheapest model that can do the job.** `sonnet` is the default for source-code work and is **required for any task involving deletions** (file removals, dead-code pruning, dependency removal). `opus` only for cross-cutting architectural reasoning, ambiguous scope, or subtle validator logic — use sparingly.
