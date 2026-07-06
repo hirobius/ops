@@ -37,6 +37,12 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 
 - **Give paste-ready text for every human-filled field.** When a setup step needs Adrian to type into a description/name/value field (Vercel env var, GitHub token name, Supabase key, etc.), supply the exact copy-paste text — never leave him to guess what to write.
 - **Token/secret-backed features must fail loud and actionable.** Any feature that depends on an env token or secret must catch the failure and return a message that names the variable AND the fix (e.g., "GITHUB_TOKEN is expired/revoked — rotate it in Vercel → Settings → Environment Variables (Production), then redeploy"), never a generic/cryptic error. Build this in when you build the feature, not after it breaks.
+- **Hand Adrian clickable deep-links, not directions.** Whenever a step means "go create a key" or "run this SQL" or "set this env var", give the actual clickable URL to the exact place — not a breadcrumb trail. Known destinations for this account:
+  - Supabase SQL editor (project `ops`, ref `vvyccwxtcwvlusweenje`): `https://supabase.com/dashboard/project/vvyccwxtcwvlusweenje/sql/new`
+  - Supabase API keys: `https://supabase.com/dashboard/project/vvyccwxtcwvlusweenje/settings/api-keys`
+  - Vercel env vars (`hirobius-ops`): `https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables`
+  - GitHub fine-grained tokens: `https://github.com/settings/personal-access-tokens`
+  Pair every "paste this" with the link to where it goes.
 
 ## 3. SUB-AGENT DISPATCH RULES
 
