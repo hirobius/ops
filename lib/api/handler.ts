@@ -74,11 +74,17 @@ export function withOpsHandler(
     }
     try {
       const result = await fn(req);
+      // Surface server-side failures in the runtime logs — the message otherwise
+      // only reaches the client response body, which the UI collapses to "offline".
+      if (result.status >= 500) {
+        console.error(`[ops-api] ${req.method} ${req.url} → ${result.status}:`, JSON.stringify(result.body));
+      }
       res.status(result.status).json(result.body);
     } catch (err) {
       // Backstop: any uncaught throw becomes a uniform JSON 500. Handlers that
       // need cleanup-on-error (e.g. a lead-status rollback) keep their own
       // try/catch and return { status: 500, … } explicitly.
+      console.error(`[ops-api] ${req.method} ${req.url} → 500 (uncaught):`, messageOf(err));
       res.status(500).json({ error: messageOf(err) });
     }
   };
