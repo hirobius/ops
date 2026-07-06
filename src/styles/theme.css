@@ -1,0 +1,17 @@
+/**
+ * Tailwind v4 entry — tooling source of truth (not bundled at runtime).
+ *
+ * ops renders with the design-system's pre-compiled stylesheet
+ * (`import "@hirobius/design-system/tokens.css"` in src/main.tsx), so it has no
+ * compiled Tailwind of its own. This file exists so tools that need a Tailwind
+ * v4 entry can resolve valid utility class names — notably
+ * eslint-plugin-tailwindcss, wired via `settings.tailwindcss.config` in
+ * eslint.config.mjs. Without it, every `pnpm lint` run crashes with
+ * `ENOENT: src/styles/theme.css`.
+ *
+ * `@config` pulls in the v3-style `theme.extend` (the generated token bridge in
+ * tailwind.config.tokens.cjs) so token-mapped classes such as `bg-background`
+ * and `text-foreground` are recognised and not flagged as unknown.
+ */
+@import "tailwindcss";
+@config "../../tailwind.config.ts";

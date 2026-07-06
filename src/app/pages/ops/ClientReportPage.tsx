@@ -17,11 +17,7 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
 import { useParams } from 'react-router';
-import { Page } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
-import { Badge } from '@hirobius/design-system';
-import { Callout } from '@hirobius/design-system';
-import { EmptyState } from '@hirobius/design-system';
+import { Page, Stack, Badge, Callout, EmptyState } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from './PageHeader';
 
@@ -36,10 +32,11 @@ import type {
   ClientWorkflowConfig,
   ClientWorkflow,
 } from './clientTypes';
+import { buildClientRegistry } from './clientRegistry';
 
 // ── Manifest-driven registry (same shape as ClientDashboardPage) ──────────────
-// Duplicated rather than refactored shared because the Vite glob has to live
-// in the consuming module to be statically resolved at build time.
+// The glob() calls stay here (Vite statically analyses them at build time); the
+// assembly loop is shared via buildClientRegistry.
 
 const _metas = import.meta.glob<{ default: ClientMeta }>('../../../../clients/*/meta.json', {
   eager: true,
@@ -67,98 +64,23 @@ const _workflows = import.meta.glob<{ default: ClientWorkflowConfig }>(
   { eager: true },
 );
 
-function slugOf(p: string) {
-  return p.match(/clients\/([^/]+)\//)?.[1] ?? '';
-}
-function workflowOf(p: string) {
-  const m = p.match(/clients\/([^/]+)\/automations\/([^/]+)\/config\.json/);
-  return m ? { slug: m[1], workflowId: m[2] } : null;
-}
-function shouldRegister(slug: string) {
-  return Boolean(slug) && !slug.startsWith('_');
-}
-
-const REGISTRY: Record<string, ClientFiles> = {};
-for (const [p, m] of Object.entries(_metas)) {
-  const s = slugOf(p);
-  if (shouldRegister(s)) REGISTRY[s] = { meta: m.default };
-}
-for (const [p, m] of Object.entries(_tasks)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && REGISTRY[s]) REGISTRY[s].tasks = m.default;
-}
-for (const [p, m] of Object.entries(_checks)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && REGISTRY[s]) REGISTRY[s].checklist = m.default;
-}
-for (const [p, m] of Object.entries(_retains)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && REGISTRY[s]) REGISTRY[s].retainer = m.default;
-}
-for (const [p, m] of Object.entries(_goals)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && REGISTRY[s]) REGISTRY[s].goals = m.default;
-}
-for (const [p, m] of Object.entries(_autoCfgs)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && REGISTRY[s]) REGISTRY[s].automationConfig = m.default;
-}
-for (const [p, m] of Object.entries(_workflows)) {
-  const r = workflowOf(p);
-  if (!r || !shouldRegister(r.slug) || !REGISTRY[r.slug]) continue;
-  REGISTRY[r.slug].workflows = [
-    ...(REGISTRY[r.slug].workflows ?? []),
-    { id: r.workflowId, config: m.default },
-  ];
-}
-for (const slug of Object.keys(REGISTRY)) {
-  if (REGISTRY[slug].workflows) REGISTRY[slug].workflows!.sort((a, b) => a.id.localeCompare(b.id));
-}
+const REGISTRY = buildClientRegistry({
+  metas: _metas,
+  tasks: _tasks,
+  checks: _checks,
+  retains: _retains,
+  goals: _goals,
+  autoCfgs: _autoCfgs,
+  workflows: _workflows,
+});
 
 // ── Plain-language translation ────────────────────────────────────────────────
-// Keys are operator-side status strings; values are what the client reads.
+// Status tone + client-facing labels live in the shared statusPresentation module.
+import { statusTone, statusLabel, type BadgeTone } from '../../lib/statusPresentation';
 
-const STATUS_LABEL: Record<string, string> = {
-  done: 'Done',
-  complete: 'Done',
-  'in-progress': 'In progress',
-  blocked: 'Waiting on you',
-  'not-started': 'Not started',
-  todo: 'Not started',
-  planned: 'Planned',
-  evaluating: 'Evaluating',
-  scaffolded: 'Built, awaiting access',
-  'pending-access': 'Awaiting access',
-  'pending-activation': 'Awaiting activation',
-  deferred: 'Deferred',
-  unknown: 'Unknown',
-  'phase-2-candidate': 'Planned for Phase 2',
-};
-
-type Tone = 'neutral' | 'info' | 'success' | 'danger' | 'warning';
-const STATUS_TONE: Record<string, Tone> = {
-  done: 'success',
-  complete: 'success',
-  'in-progress': 'warning',
-  blocked: 'danger',
-  'not-started': 'neutral',
-  todo: 'neutral',
-  planned: 'info',
-  evaluating: 'info',
-  scaffolded: 'info',
-  'pending-access': 'warning',
-  'pending-activation': 'warning',
-  deferred: 'neutral',
-  unknown: 'neutral',
-  'phase-2-candidate': 'info',
-};
-
-function label(status: string | undefined): string {
-  return STATUS_LABEL[status ?? ''] ?? status ?? '—';
-}
-function tone(status: string | undefined): Tone {
-  return STATUS_TONE[status ?? ''] ?? 'neutral';
-}
+type Tone = BadgeTone;
+const tone = (status: string | undefined): Tone => statusTone(status);
+const label = (status: string | undefined): string => statusLabel(status, 'client');
 
 // Workflow promotion state — one of three the client-readable strings.
 type WorkflowState = { label: string; tone: Tone };

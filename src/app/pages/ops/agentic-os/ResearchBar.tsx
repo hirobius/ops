@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
+import { opsApi } from '../../../lib/opsApi';
 
 interface QuerySpec {
   id: string;
@@ -93,7 +94,7 @@ export function ResearchBar() {
     setRunState({ kind: 'running' });
     const start = Date.now();
     try {
-      const res = await fetch('/api/skills/research-run', { method: 'POST' });
+      const res = await opsApi.post('/api/skills/research-run');
       const body = (await res.json()) as {
         ok?: boolean;
         durationMs?: number;

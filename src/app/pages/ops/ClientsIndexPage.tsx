@@ -15,11 +15,7 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
 
-import { Page } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
-import { Card } from '@hirobius/design-system';
-import { Badge } from '@hirobius/design-system';
-import { Stat } from '@hirobius/design-system';
+import { Page, Stack, Card, Badge, Stat } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from './PageHeader';
 

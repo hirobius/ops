@@ -202,7 +202,7 @@ Current state:
 - the retired prototype files and stale inspector specs have been pruned; the remaining scanner surface is the headless path plus token-index metadata
 - `scripts/batch-scan.mjs` is now the canonical route/render scan entrypoint
 - `scripts/headless-scan.browser.js` owns the browser-only DOM scan runtime
-- `scripts/build-token-index.mjs` and `src/app/design-system/token-usage-map.json` provide the static metadata used to enrich scan output
+- token-index static metadata that used to enrich scan output was design-system authoring; it moved to the design-system repo when ops became a pure consumer
 
 Target state:
 
@@ -226,7 +226,7 @@ Current contract:
 - `pnpm scan` scans the default deployed site or any explicit `--url=...`
 - `pnpm scan:local` probes common localhost preview/dev ports instead of assuming a single fixed port
 - the scanner injects `scripts/headless-scan.browser.js` into each route at runtime
-- static metadata comes from local `src/app/design-system/token-usage-map.json`, so route-level findings still include handoff drift, dead tokens, and audit-ok context
+- token-index static-metadata enrichment (handoff drift, dead tokens) is no longer local — that authoring layer moved to the design-system repo
 
 ## Known Gaps And Drift
 

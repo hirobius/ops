@@ -21,12 +21,11 @@
  */
 
 import React from 'react';
-import { Badge } from '@hirobius/design-system';
-import { Card } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
+import { Badge, Card, Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import strengthRaw from '../../../../../docs/guardrails/strength-report.json';
 import historyRaw from '../../../../../docs/guardrails/strength-history.jsonl?raw';
+import { parseJsonlLines } from '../../../lib/jsonl';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -65,12 +64,7 @@ interface HistoryEntry {
 // ── Parse history JSONL ──────────────────────────────────────────────────────
 
 function parseHistory(raw: string): HistoryEntry[] {
-  return raw
-    .trim()
-    .split('\n')
-    .filter(Boolean)
-    .map((line) => JSON.parse(line) as HistoryEntry)
-    .sort((a, b) => a.date.localeCompare(b.date));
+  return parseJsonlLines<HistoryEntry>(raw).sort((a, b) => a.date.localeCompare(b.date));
 }
 
 // ── Sparkline ────────────────────────────────────────────────────────────────

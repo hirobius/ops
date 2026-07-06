@@ -12,12 +12,14 @@
  * in the ops extraction; only /info remains pre-renderable here.
  */
 import { renderToString } from 'react-dom/server';
-import { createMemoryRouter, RouterProvider } from 'react-router';
+import { createMemoryRouter, matchRoutes, RouterProvider } from 'react-router';
 import { MotionConfig } from 'motion/react';
-import { TenantProvider } from '@hirobius/design-system/contexts';
-import { LanguageProvider } from '@hirobius/design-system/contexts';
-import { ThemeProvider } from '@hirobius/design-system/contexts';
-import { FontProvider } from '@hirobius/design-system/contexts';
+import {
+  TenantProvider,
+  LanguageProvider,
+  ThemeProvider,
+  FontProvider,
+} from '@hirobius/design-system/contexts';
 
 // Direct (non-lazy) imports so renderToString resolves them synchronously
 import InfoPageWrapper from './app/pages/InfoPageWrapper';
@@ -25,6 +27,11 @@ import InfoPageWrapper from './app/pages/InfoPageWrapper';
 const SSR_ROUTES = [{ path: '/info', element: <InfoPageWrapper /> }];
 
 export function render(url: string): string {
+  // Routes not in SSR_ROUTES (the gated /ops app, or stale prerender entries) have
+  // no server render — return an empty body so prerender writes the clean SPA shell
+  // instead of React Router's default 404 error-boundary HTML (which otherwise gets
+  // baked into index.html and shows on every SPA-fallback route, e.g. /ops).
+  if (!matchRoutes(SSR_ROUTES, url)) return '';
   const router = createMemoryRouter(SSR_ROUTES, {
     initialEntries: [url],
     initialIndex: 0,

@@ -374,18 +374,23 @@ function totalSymbolCount(surface) {
 }
 
 function main() {
+  if (!existsSync(ENTRY)) {
+    console.log('check-public-api: src/index.ts absent (ops is an app, not a library) — skip');
+    process.exit(0);
+  }
+
   const current = collectPublicApi();
 
   if (UPDATE_BASELINE) {
     writeBaseline(current);
     if (JSON_OUTPUT) {
-      console.log(JSON.stringify({ updated: true, baseline: BASELINE_PATH, surface: current }, null, 2));
+      console.log(
+        JSON.stringify({ updated: true, baseline: BASELINE_PATH, surface: current }, null, 2),
+      );
     } else {
       const moduleCount = Object.keys(current.modules).length;
       const symbolCount = totalSymbolCount(current);
-      console.log(
-        `[check-public-api] baseline updated → ${relative(ROOT, BASELINE_PATH)}`,
-      );
+      console.log(`[check-public-api] baseline updated → ${relative(ROOT, BASELINE_PATH)}`);
       console.log(`[check-public-api] ${moduleCount} modules, ${symbolCount} exported symbols`);
     }
     process.exit(0);

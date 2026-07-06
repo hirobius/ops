@@ -52,17 +52,6 @@ const SKILLS = {
     ],
     timeoutMs: 90_000,
   },
-  'snapshot-orch': { argv: ['node', 'scripts/snapshot-orchestration.mjs'], timeoutMs: 5_000 },
-  'list-eligible': {
-    argv: ['node', 'scripts/list-eligible.mjs', '--json'],
-    timeoutMs: 5_000,
-    supportsJson: true,
-  },
-  'triage-approved': {
-    argv: ['node', 'scripts/triage-approved.mjs', '--json'],
-    timeoutMs: 10_000,
-    supportsJson: true,
-  },
   'audit-sidecar': { argv: ['pnpm', 'audit:sidecar'], timeoutMs: 30_000 },
   // Build (creator-facing artefact regen)
   'tokens-index': { argv: ['node', 'scripts/build-token-index.mjs'], timeoutMs: 30_000 },

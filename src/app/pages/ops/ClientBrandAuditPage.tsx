@@ -23,10 +23,7 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
 import { useParams } from 'react-router';
-import { Page } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
-import { Badge } from '@hirobius/design-system';
-import { EmptyState } from '@hirobius/design-system';
+import { Page, Stack, Badge, EmptyState } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from './PageHeader';
 

@@ -8,18 +8,14 @@
  *
  * Surface flow (top → bottom):
  *   1. PageHeader        locked-down chrome (Clash anchor + divider)
- *   2. SurfacesRail      Atlas + Kanban inline jump-tiles
- *   3. StatusBanner      one-line triage (errors > stale > healthy)
- *   4. KpiCards          live metrics — active · cost · errors
+ *   2. SurfacesRail      inline jump-tiles to sibling /ops surfaces
+ *   3. StrengthTab       Score A/B + --json compliance
+ *   4. KpiCards          live metrics — active · cost
  *   5. PillarRail        BUILD / GROW / RUN distribution + filter chips
- *   6. LanesGrid         workstreams (outline-light list)
- *   7. Routes            (atlas import) — interactive route tree
- *   8. Clients           (atlas import) — registry card grid
- *   9. Gates             (atlas import) — guardrail validators table
- *  10. Knowledge         (atlas import) — BUILD/GROW/RUN pillar summaries
- *  11. Skills            (collapsed) — whitelisted scripts grouped Build/Ops/Knowledge
- *  12. New skill         (collapsed) — capture-only seam; appends to proposed-skills.jsonl
- *  13. StrengthFooter    Score A/B + --json compliance bar
+ *   6. Routes            (atlas import) — interactive route tree
+ *   7. Clients           (atlas import) — registry card grid
+ *   8. Gates             (atlas import) — guardrail validators table
+ *   9. Skills / New skill / Plugins / Research (collapsed disclosures)
  *
  * @category Internal
  * @tier utility
@@ -27,8 +23,7 @@
 
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 
-import { Page } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
+import { Page, Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 
 import { PageHeader } from '../PageHeader';
@@ -38,7 +33,6 @@ import RoutesTree from '../atlas/routes-tree';
 import ClientsTab from '../atlas/clients-tab';
 import ValidatorsTab from '../atlas/validators-tab';
 import StrengthTab from '../atlas/strength-tab';
-import { StatusBanner } from './StatusBanner';
 import { KpiCards } from './KpiCards';
 import { PillarRail, type PillarFilter } from './PillarRail';
 import { SurfacesRail } from './SurfacesRail';
@@ -47,11 +41,10 @@ import { SkillCreatorForm } from './SkillCreatorForm';
 import { PluginsBar } from './PluginsBar';
 import { ResearchBar } from './ResearchBar';
 import { ServicesBar } from './ServicesBar';
-import { computeTriage, UNITS } from './data';
+import { UNITS } from './data';
 
 /** @public */
 export default function AgenticOSPage() {
-  const triage = useMemo(() => computeTriage(), []);
   const [pillarFilter, setPillarFilter] = useState<PillarFilter>(null);
 
   const filteredUnits = useMemo(() => {
@@ -69,9 +62,7 @@ export default function AgenticOSPage() {
 
         <StrengthTab />
 
-        <StatusBanner triage={triage} />
-
-        <KpiCards triage={triage} units={filteredUnits} />
+        <KpiCards units={filteredUnits} />
 
         <PillarRail units={UNITS} filter={pillarFilter} onFilterChange={setPillarFilter} />
 

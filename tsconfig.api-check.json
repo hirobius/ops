@@ -1,0 +1,15 @@
+{
+  // Deploy-parity typecheck for the Vercel serverless functions in api/.
+  // The default `pnpm typecheck` (tsconfig.typecheck.json) only covers src/**,
+  // so api/*.ts type errors sail past local builds and only surface on Vercel —
+  // which is exactly what caused a 7-commit ERROR-deploy streak (missing
+  // @vercel/node types). Run `pnpm typecheck:api` (EXIT 0 required) before
+  // pushing any api/ change. Inherits the real compiler options (strict:false,
+  // skipLibCheck) so it mirrors how Vercel type-checks each function.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["api"],
+  "exclude": ["dist", "node_modules"]
+}

@@ -106,8 +106,6 @@ function sortKeys(obj) {
 
 const registry = readJSON('docs/guardrails/registry.json');
 const orchestration = readJSON('docs/ai/orchestration.json');
-// swarm-watchdog-decisions.jsonl: used for regression detection in the report comparison block
-const _watchdogDecisions = readLines('docs/ai/swarm-watchdog-decisions.jsonl');
 const componentApi = readJSON('src/app/data/component-api.json');
 const tsconfigMain = readJSON('tsconfig.json');
 
@@ -1355,10 +1353,10 @@ function renderSystemOverview(report, generated) {
   md += `## 1. What is this repo?\n\n`;
   md += `Adrian Milsap's solo-founder agency platform. Three pillars:\n\n`;
   md += `- **HDS (Hirobius Design System)** — token-first, multi-tenant, AI-driven component library (src/).\n`;
-  md += `- **Ops Command Center** — internal dashboard at \`/ops\` for client management, build orchestration, cost tracking.\n`;
-  md += `- **Autonomous build pipeline** — swarm-watchdog dispatches parallel agent pods; all units tracked in \`docs/ai/orchestration.json\`.\n\n`;
+  md += `- **Ops Command Center** — internal dashboard at \`/ops\` for client management, lead pipeline, build + cost tracking.\n`;
+  md += `- **Fleet hub** — \`/ops/projects\` tracks every repo's deploy state + \`status.json\`; work lives as Hermes Kanban tasks + GitHub Issues.\n\n`;
 
-  md += `Stack: React + Vite + TypeScript + Tailwind (token-mapped). 435+ orchestration units across phases 12–13.\n\n`;
+  md += `Stack: React + Vite + TypeScript + Tailwind (token-mapped), deployed on Vercel with serverless \`api/*\` functions.\n\n`;
 
   md += `---\n\n`;
   md += `## 2. Current state\n\n`;
@@ -1381,7 +1379,7 @@ function renderSystemOverview(report, generated) {
   md += `## 3. Active sprint\n\n`;
   md += `Hottest cluster (most pending units): ${sprintLine}\n\n`;
   md += sprintTable + `\n`;
-  md += `_Full unit database: \`docs/ai/orchestration.json\` — 435 units, status field: approved | claimed | done | parked._\n\n`;
+  md += `_Task tracking: Hermes Kanban + GitHub Issues, surfaced at \`/ops/tasks\`; session state in \`docs/ai/HANDOFF.md\`._\n\n`;
 
   md += `---\n\n`;
   md += `## 4. Blockers\n\n`;
@@ -1395,9 +1393,8 @@ function renderSystemOverview(report, generated) {
   md += `| Score methodology ADR | \`docs/guardrails/strength-score-spec.md\` |\n`;
   md += `| Hardening roadmap + principles | \`docs/guardrails/HARDENING_ROADMAP.md\` |\n`;
   md += `| Gate registry (all validators) | \`docs/guardrails/registry.json\` |\n`;
-  md += `| Unit spec database | \`docs/ai/orchestration.json\` |\n`;
-  md += `| Autonomous build protocol | \`docs/ai/AUTONOMOUS_BUILD.md\` |\n`;
-  md += `| Operator brief (active threads) | \`docs/ai/OPERATOR_BRIEF.md\` |\n`;
+  md += `| Living session state | \`docs/ai/HANDOFF.md\` |\n`;
+  md += `| North star (focus contract) | \`docs/ai/NORTH_STAR.md\` |\n`;
   md += `| Design token spec | \`hirobius.tokens.json\` |\n`;
   md += `| Component API (prop tables) | \`src/app/data/component-api.json\` |\n`;
   md += `\n`;

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /** @internal — not part of @hirobius/design-system public API surface. */
 import { createHash } from 'crypto';
-import { readFileSync, writeFileSync } from 'fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
@@ -98,6 +98,7 @@ const roadmap = {
   } : null,
 };
 
+mkdirSync(dirname(OUT), { recursive: true }); // dir is gitignored; absent on clean clones (e.g. Vercel)
 writeFileSync(OUT, `${JSON.stringify(roadmap, null, 2)}\n`);
 console.log(`OK ${OUT}`);
 console.log(`Roadmap: ${roadmap.summary.active} active, ${roadmap.summary.committed} committed, ${roadmap.summary.backlog} backlog, ${roadmap.summary.discovery} discovery`);

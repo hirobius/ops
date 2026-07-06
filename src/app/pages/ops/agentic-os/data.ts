@@ -8,21 +8,20 @@
  * picks up file edits because the imports declare them as dependencies.
  *
  * Source files (read once at build time):
- *   - docs/ai/orchestration.json              units + claims
- *   - docs/ai/swarm-watchdog-decisions.jsonl  watchdog dispatch trace
- *   - docs/security/agent-audit-log.jsonl     HITL audit trail
- *   - docs/ai/routing-log.jsonl               cost + verdict
- *   - docs/guardrails/firing-log.jsonl        gate firings
- *   - telemetry/events.jsonl                  retry events
+ *   - docs/ai/routing-log.jsonl               cost + verdict (gitignored, PII)
  *   - docs/guardrails/strength-report.json    composite scores
  *   - docs/guardrails/strength-history.jsonl  sparkline points
  *   - docs/guardrails/registry.json           --json compliance
+ *
+ * The retired orchestration/watchdog/agent-audit/firing/telemetry feeds were
+ * dropped 2026-07-03 (#17) — their widgets (triage banner, errors/stale KPI,
+ * trace stream) were orchestration-era dead weight.
  */
 
-import legacyTaskArchive from '../../../../../docs/ai/_archive/legacy-task-systems-2026-05-11.json';
-const orchestration = legacyTaskArchive.sources.orchestration;
-import watchdogDecisionsRaw from '../../../../../docs/ai/swarm-watchdog-decisions.jsonl?raw';
-import agentAuditRaw from '../../../../../docs/security/agent-audit-log.jsonl?raw';
+// Legacy orchestration archive retired 2026-07-02 — units now live in Hermes Kanban.
+// Empty stub keeps the derived dashboard values rendering (empty state) for the HDS
+// cutover to redesign, and drops the ~1 MB archive JSON from the app bundle.
+const orchestration = { units: [] };
 // routing-log.jsonl holds per-client task PII and is gitignored; this glob tolerates
 // its absence (yields '' in clean/prod builds) instead of a hard import failure.
 const _routingLogGlob = import.meta.glob<string>('../../../../../docs/ai/routing-log.jsonl', {
@@ -31,8 +30,6 @@ const _routingLogGlob = import.meta.glob<string>('../../../../../docs/ai/routing
   import: 'default',
 });
 const routingLogRaw = (Object.values(_routingLogGlob)[0] as string | undefined) ?? '';
-import firingLogRaw from '../../../../../docs/guardrails/firing-log.jsonl?raw';
-import telemetryEventsRaw from '../../../../../telemetry/events.jsonl?raw';
 import strengthReport from '../../../../../docs/guardrails/strength-report.json';
 import strengthHistoryRaw from '../../../../../docs/guardrails/strength-history.jsonl?raw';
 import registry from '../../../../../docs/guardrails/registry.json';
@@ -79,23 +76,6 @@ export interface Unit {
   hitl?: boolean;
 }
 
-export interface WatchdogDecision {
-  ts: string;
-  candidateUnitId?: string;
-  decision: string;
-  reason?: string;
-  factors?: Record<string, unknown>;
-}
-
-export interface AgentAuditEntry {
-  timestamp: string;
-  unit_id?: string;
-  agent_id?: string;
-  outcome?: string;
-  files_written?: string[];
-  commit_hash?: string | null;
-}
-
 export interface RoutingEntry {
   at?: string;
   assigner?: string;
@@ -107,21 +87,6 @@ export interface RoutingEntry {
   model?: string;
   projectedUsd?: number;
   costCeiling?: number;
-}
-
-export interface FiringEntry {
-  ts: string;
-  channel?: string | null;
-  gate?: string;
-  exitCode?: number;
-  durationMs?: number;
-  commitSha?: string;
-}
-
-export interface RetryEvent {
-  ts: string;
-  event: string;
-  data?: Record<string, unknown>;
 }
 
 export interface ProposedUnit {
@@ -146,27 +111,10 @@ export interface StrengthHistoryPoint {
   scoreB: { composite: number };
 }
 
-export type TraceSource = 'agent' | 'gate' | 'watchdog' | 'audit' | 'retry';
-
-export interface TraceEvent {
-  ts: string;
-  source: TraceSource;
-  kind: 'info' | 'success' | 'warning' | 'error';
-  unitId?: string;
-  message: string;
-  costUsd?: number;
-  durationMs?: number;
-  exitCode?: number;
-  raw: unknown;
-}
-
 // ── Constants ────────────────────────────────────────────────────────────────
 
 /** Stale threshold for claims. Watchdog uses 4h; we mirror it. */
 export const STALE_CLAIM_HOURS = 4;
-
-/** Trace-table window. */
-export const TRACE_LIMIT = 50;
 
 // ── Generic helpers ──────────────────────────────────────────────────────────
 
@@ -250,18 +198,6 @@ export function computePillarBuckets(units: Unit[] = UNITS): PillarBucket[] {
   return order.map((k) => buckets.get(k)!);
 }
 
-// ── Source: watchdog decisions ───────────────────────────────────────────────
-
-export const WATCHDOG_DECISIONS = parseJsonl<WatchdogDecision>(watchdogDecisionsRaw);
-
-export function recentReverts(
-  decisions: WatchdogDecision[] = WATCHDOG_DECISIONS,
-  withinHours = 24,
-): WatchdogDecision[] {
-  const cutoff = Date.now() - withinHours * 36e5;
-  return decisions.filter((d) => d.decision === 'reverted' && new Date(d.ts).getTime() >= cutoff);
-}
-
 // ── Source: routing log (cost burn) ──────────────────────────────────────────
 
 export const ROUTING_ENTRIES = parseJsonl<RoutingEntry>(routingLogRaw);
@@ -279,30 +215,6 @@ export function computeTodayCost(
     .filter((r) => !r.gate && r.at && new Date(r.at).getTime() >= since)
     .reduce((sum, r) => sum + (r.projectedUsd ?? 0), 0);
 }
-
-// ── Source: firing log ───────────────────────────────────────────────────────
-
-export const FIRING_ENTRIES = parseJsonl<FiringEntry>(firingLogRaw);
-
-export function gateFiresLastCommit(entries: FiringEntry[] = FIRING_ENTRIES): {
-  commitSha: string | null;
-  failures: number;
-} {
-  if (entries.length === 0) return { commitSha: null, failures: 0 };
-  // Walk newest → oldest, find first entry with a commitSha, then count failures for that sha.
-  const sorted = [...entries].sort((a, b) => (b.ts ?? '').localeCompare(a.ts ?? ''));
-  const latest = sorted.find((e) => e.commitSha);
-  if (!latest?.commitSha) return { commitSha: null, failures: 0 };
-  const failures = sorted.filter(
-    (e) => e.commitSha === latest.commitSha && (e.exitCode ?? 0) !== 0,
-  ).length;
-  return { commitSha: latest.commitSha, failures };
-}
-
-// ── Source: agent audit + telemetry retries ─────────────────────────────────
-
-export const AGENT_AUDIT_ENTRIES = parseJsonl<AgentAuditEntry>(agentAuditRaw);
-export const RETRY_EVENTS = parseJsonl<RetryEvent>(telemetryEventsRaw);
 
 // ── Source: proposed-units (gitignored inbox seam — defensive load) ──────────
 
@@ -329,46 +241,6 @@ export function dedupedProposals(entries: ProposedUnit[] = PROPOSED_UNITS): Prop
     out.push(e);
   }
   return out;
-}
-
-// ── Triage status (banner) ───────────────────────────────────────────────────
-
-export type Triage = 'healthy' | 'stale' | 'errors';
-
-export interface TriageState {
-  status: Triage;
-  staleCount: number;
-  recentRevertCount: number;
-  activeCount: number;
-  todayCostUsd: number;
-  message: string;
-}
-
-export function computeTriage(): TriageState {
-  const stale = computeStaleClaims();
-  const reverts = recentReverts();
-  const active = activeClaims();
-  const cost = computeTodayCost();
-
-  let status: Triage = 'healthy';
-  let message = `Healthy · ${active.length} active · $${cost.toFixed(2)} today`;
-
-  if (reverts.length > 0) {
-    status = 'errors';
-    message = `Watchdog reverted ${reverts.length} unit${reverts.length === 1 ? '' : 's'} in the last 24h`;
-  } else if (stale.length > 0) {
-    status = 'stale';
-    message = `${stale.length} stale claim${stale.length === 1 ? '' : 's'} — review or revert`;
-  }
-
-  return {
-    status,
-    staleCount: stale.length,
-    recentRevertCount: reverts.length,
-    activeCount: active.length,
-    todayCostUsd: cost,
-    message,
-  };
 }
 
 // ── Strength + compliance (footer) ───────────────────────────────────────────
@@ -419,86 +291,6 @@ export function loadStrength(): StrengthSnapshot {
     sparkB,
     jsonStrict: { compliant, total: strict.length },
   };
-}
-
-// ── Trace stream (5 sources unified) ─────────────────────────────────────────
-
-function pushAgentAudit(entry: AgentAuditEntry, into: TraceEvent[]) {
-  if (!entry.timestamp) return;
-  into.push({
-    ts: entry.timestamp,
-    source: 'audit',
-    kind: entry.outcome === 'failure' ? 'error' : 'info',
-    unitId: entry.unit_id,
-    message: `${entry.agent_id ?? 'agent'} · ${entry.outcome ?? '—'}${entry.commit_hash ? ' · ' + entry.commit_hash.slice(0, 7) : ''}`,
-    raw: entry,
-  });
-}
-
-function pushRouting(entry: RoutingEntry, into: TraceEvent[]) {
-  if (!entry.at) return;
-  const isGate = !!entry.gate;
-  const failed = entry.verdict === 'rejected';
-  into.push({
-    ts: entry.at,
-    source: isGate ? 'gate' : 'agent',
-    kind: failed ? 'error' : isGate ? 'info' : 'success',
-    unitId: entry.taskId,
-    message: isGate
-      ? `${entry.gate} · ${entry.verdict ?? '—'}${entry.client ? ' · ' + entry.client : ''}`
-      : `${entry.assigner ?? 'router'} → ${entry.tier ?? '—'}/${entry.model ?? '—'}${entry.client ? ' · ' + entry.client : ''}`,
-    costUsd: entry.projectedUsd,
-    raw: entry,
-  });
-}
-
-function pushWatchdog(entry: WatchdogDecision, into: TraceEvent[]) {
-  if (!entry.ts) return;
-  const reverted = entry.decision === 'reverted';
-  into.push({
-    ts: entry.ts,
-    source: 'watchdog',
-    kind: reverted ? 'error' : 'info',
-    unitId: entry.candidateUnitId,
-    message: `${entry.decision}${entry.reason ? ' · ' + entry.reason : ''}`,
-    raw: entry,
-  });
-}
-
-function pushFiring(entry: FiringEntry, into: TraceEvent[]) {
-  if (!entry.ts) return;
-  const failed = (entry.exitCode ?? 0) !== 0;
-  into.push({
-    ts: entry.ts,
-    source: 'gate',
-    kind: failed ? 'error' : 'success',
-    message: `${entry.gate ?? 'gate'} · exit ${entry.exitCode ?? 0}${entry.channel ? ' · ' + entry.channel : ''}`,
-    durationMs: entry.durationMs,
-    exitCode: entry.exitCode,
-    raw: entry,
-  });
-}
-
-function pushRetry(entry: RetryEvent, into: TraceEvent[]) {
-  if (!entry.ts) return;
-  into.push({
-    ts: entry.ts,
-    source: 'retry',
-    kind: entry.event.includes('error') ? 'error' : 'info',
-    message: entry.event,
-    raw: entry,
-  });
-}
-
-export function unionTraceEvents(limit = TRACE_LIMIT): TraceEvent[] {
-  const events: TraceEvent[] = [];
-  for (const e of AGENT_AUDIT_ENTRIES) pushAgentAudit(e, events);
-  for (const e of ROUTING_ENTRIES) pushRouting(e, events);
-  for (const e of WATCHDOG_DECISIONS) pushWatchdog(e, events);
-  for (const e of FIRING_ENTRIES) pushFiring(e, events);
-  for (const e of RETRY_EVENTS) pushRetry(e, events);
-  events.sort((a, b) => b.ts.localeCompare(a.ts));
-  return events.slice(0, limit);
 }
 
 // ── Format helpers ───────────────────────────────────────────────────────────

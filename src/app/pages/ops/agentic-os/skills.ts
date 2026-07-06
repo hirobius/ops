@@ -13,9 +13,6 @@ export type SkillId =
   | 'firing-stats'
   | 'audit-claims'
   | 'verify-head'
-  | 'snapshot-orch'
-  | 'list-eligible'
-  | 'triage-approved'
   | 'audit-sidecar'
   | 'tokens-index'
   | 'llms-generate'
@@ -116,20 +113,6 @@ export const SKILLS: SkillSpec[] = [
   },
   // Ops — repo + agent ops
   {
-    id: 'list-eligible',
-    label: 'List eligible',
-    hint: 'queue ready to dispatch',
-    group: 'Ops',
-    showJsonResult: true,
-  },
-  {
-    id: 'triage-approved',
-    label: 'Triage approved',
-    hint: 'sift the approved bucket',
-    group: 'Ops',
-    showJsonResult: true,
-  },
-  {
     id: 'audit-claims',
     label: 'Audit claims',
     hint: 'detect stale claims',
@@ -161,13 +144,6 @@ export const SKILLS: SkillSpec[] = [
     id: 'firing-stats',
     label: 'Firing stats',
     hint: 'gate firing summary',
-    group: 'Ops',
-    showJsonResult: false,
-  },
-  {
-    id: 'snapshot-orch',
-    label: 'Snapshot orch',
-    hint: 'archive orchestration.json',
     group: 'Ops',
     showJsonResult: false,
   },
@@ -292,18 +268,13 @@ export interface SkillResponse {
   error?: string;
 }
 
+import { opsApi } from '../../../lib/opsApi';
+
 export async function runSkill(id: SkillId, input?: string): Promise<SkillResponse> {
   const start = Date.now();
   const hasInput = typeof input === 'string' && input.length > 0;
-  const init: RequestInit = hasInput
-    ? {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input }),
-      }
-    : { method: 'POST' };
   try {
-    const res = await fetch(`/api/skills/${id}`, init);
+    const res = await opsApi.post(`/api/skills/${id}`, hasInput ? { input } : undefined);
     const body = (await res.json()) as SkillResponse;
     return body;
   } catch (err) {

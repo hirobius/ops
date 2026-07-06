@@ -11,47 +11,11 @@
  * Exits 0 if all pairs pass WCAG AA. Exits 1 if any pair fails.
  */
 
-import { readFileSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const tokenPath = resolve(__dirname, '../hirobius.tokens.json');
+import { loadTokens, getByPath, resolveAlias } from './lib/token-resolver.mjs';
 
 // ── Token loading ─────────────────────────────────────────────
 
-const tokens = JSON.parse(readFileSync(tokenPath, 'utf8'));
-
-// ── Path resolver ─────────────────────────────────────────────
-
-/**
- * Traverse a dot-notation path through the token object.
- * Returns the node at that path, or undefined if not found.
- */
-function getByPath(obj, path) {
-  return path.split('.').reduce((node, key) => {
-    if (node == null) return undefined;
-    return node[key];
-  }, obj);
-}
-
-/**
- * Resolve an alias string like "{primitive.color.neutral.white}"
- * to its hex $value, following chains up to 10 levels deep.
- */
-function resolveAlias(ref, maxDepth = 10) {
-  let current = ref;
-  for (let i = 0; i < maxDepth; i++) {
-    const match = typeof current === 'string' && current.match(/^\{(.+)\}$/);
-    if (!match) break;
-    const node = getByPath(tokens, match[1]);
-    if (node == null) {
-      throw new Error(`Token path not found: ${match[1]}`);
-    }
-    current = node.$value ?? node;
-  }
-  return current;
-}
+const tokens = loadTokens();
 
 /**
  * Resolve a semantic color token to a concrete hex string for a given mode.
@@ -72,7 +36,7 @@ function resolveSemanticHex(dotPath, mode) {
     rawValue = node.$value;
   }
 
-  const hex = resolveAlias(rawValue);
+  const hex = resolveAlias(rawValue, tokens);
   if (typeof hex !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(hex)) {
     throw new Error(
       `Could not resolve ${dotPath} (${mode}) to a 6-digit hex. Got: ${JSON.stringify(hex)}`

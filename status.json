@@ -1,0 +1,13 @@
+{
+  "updatedAt": "2026-07-02T22:00:00Z",
+  "phase": "active",
+  "headline": "Fleet hub live + architecture scrub Tier 1/2 shipped (8 batches: ~30 dead files/deps gone, CI unbroken on main, -1MB bundle, 9 serverless fns)",
+  "next": [
+    "HDS cutover on the /ops survivor list (shared chrome first: PageHeader = 16/17 pages)",
+    "First real lead run: pull Access Tech leads -> generate -> eyeball config",
+    "Discord always-on + fleet-aware (#15); task importer + alerts (#8/#11); Tier 3/4 scrub follow-ups"
+  ],
+  "blocked": [
+    "main branch stale + fails invalid_engines_value; production waits on feature->main merge (PR #1)"
+  ]
+}

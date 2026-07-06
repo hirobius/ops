@@ -1,9 +1,0 @@
-{
-  "color": {
-    "brand": {
-      "$type": "color",
-      "$value": "#1e2fff",
-      "$description": "Primary brand blue used for interactive elements and focus indicators"
-    }
-  }
-}

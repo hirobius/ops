@@ -11,10 +11,16 @@
  * should live in matrices / frozen specimens, not one-off preview panes.
  */
 
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 const ROOT = process.cwd();
+
+if (!existsSync(join(ROOT, 'src/app/pages/hds/components'))) {
+  console.log('check-frozen-demos: src/app/pages/hds/components absent — skip');
+  process.exit(0);
+}
+
 const TARGET_FILES = [
   join(ROOT, 'src/app/pages/hds/components/ActionsPage.tsx'),
   join(ROOT, 'src/app/pages/hds/components/InputsPage.tsx'),
@@ -46,11 +52,15 @@ for (const file of TARGET_FILES) {
 }
 
 if (offenders.length === 0) {
-  console.log('Frozen demo check passed: consumer preview pages only use default-state specimens and matrices.');
+  console.log(
+    'Frozen demo check passed: consumer preview pages only use default-state specimens and matrices.',
+  );
   process.exit(0);
 }
 
-console.error('Frozen demo check failed: bespoke preview demos still exist in consumer component docs.\n');
+console.error(
+  'Frozen demo check failed: bespoke preview demos still exist in consumer component docs.\n',
+);
 for (const offender of offenders) {
   console.error(`  ${offender.file}`);
   for (const line of offender.lines) {

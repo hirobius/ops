@@ -10,11 +10,9 @@
  */
 
 import React from 'react';
-import { Card } from '@hirobius/design-system';
-import { Badge } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
-import { CLIENT_REGISTRY } from '../clientRegistry';
+import { Card, Badge, Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
+import { CLIENT_REGISTRY } from '../clientRegistry';
 
 export default function ClientsTab() {
   const clients = Object.entries(CLIENT_REGISTRY).sort(([a], [b]) => a.localeCompare(b));

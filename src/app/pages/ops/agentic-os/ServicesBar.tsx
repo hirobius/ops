@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef, type CSSProperties } from 'react';
 import hds from '@hirobius/design-system/tokens';
 import { useServicesStatus, type ServiceName, type ServiceState } from '../useServicesStatus';
+import { opsApi } from '../../../lib/opsApi';
 
 const SERVICE_SPECS: { id: ServiceName; label: string; hint: string }[] = [
   { id: 'hds-bridge',  label: 'HDS Bridge',  hint: 'Figma plugin · port 3005' },
@@ -10,7 +11,7 @@ const SERVICE_SPECS: { id: ServiceName; label: string; hint: string }[] = [
 ];
 
 async function callService(name: ServiceName, action: 'start' | 'stop'): Promise<void> {
-  await fetch(`/api/services/${name}/${action}`, { method: 'POST' });
+  await opsApi.post(`/api/services/${name}/${action}`);
 }
 
 function formatUptime(startedAt: string): string {

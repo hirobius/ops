@@ -57,7 +57,7 @@ Consolidated 2026-05-11 from `docs/ai/orchestration.json`,
 - `idea` **figma-plugin-planning-docs-save** — Save Figma DesignOps planning dumps to docs/figma-plugin/
 - `idea` **atlas-absorb-hds-docs** — Absorb HDS documentation into /ops/atlas
 
-## Ops / Agents _(14)_
+## Ops / Agents _(19)_
 
 - `ready` **t_be5c5b75** — AI-powered Build skills bundle (6 sub-skills)
 - `ready` **t_bc7081a8** — Daily task picker view — pick from 474 units, queue for today
@@ -73,9 +73,16 @@ Consolidated 2026-05-11 from `docs/ai/orchestration.json`,
 - `idea` **dashbd-visual-ingest-drag-drop** — Drag-drop image + video inputs for visual-ingest / page-clone buttons
 - `idea` **dashbd-auto-research** — Auto-research — scheduled research jobs that surface findings to /ops
 - `idea` **dashbd-task-pillar-classification** — Adaptive pillar/category field on orchestration units
+- `parked` **ops-agentic-review-loop** — Daily cron → analyze app (`audit-*`/`check-*` + optional LLM) → post refactor/improve findings to Discord with Proceed/Punt/Backlog CTAs → Proceed opens a GitHub issue that @mentions Claude → Claude Code session on a branch (no Claude API). Scrapped from active build 2026-06-18; design + 4 slices + decided dispatch in [docs/operations/agentic-ops-loop.md](./docs/operations/agentic-ops-loop.md). Safe start = Slice 1 (`scripts/daily-review.mjs` → `findings.jsonl` + Discord digest, no auto-dispatch). Related: `dashbd-auto-research`.
+- `ready` **ops-production-go-live** — Preview is LIVE on `claude/relaxed-ramanujan-vvhqf8` (hirobius-ops project) as of 2026-06-23. To cut PRODUCTION over: merge PR #1 → `main` (brings published-DS `^0.5.0` + the client-PII scrub + the roadmap-data mkdir fix), set prod env (`VITE_OPS_GATE_HASH`, `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `DUDA_*`), and run migrations `0001`/`0002`/`0003`. `NODE_AUTH_TOKEN` already set in Vercel. DS `0.5.1` (delete the dangling `token.tsx`) clears the typecheck-red so PR #1 CI goes green — not a deploy blocker (the Vercel build skips typecheck). Replaces the shipped `ops-dashboard-deploy-unblock`.
+- `ready` **ops-lead-pipeline-go-live** — Lead-gen → agent → Duda pipeline is scaffolded (stubs) and now merged onto `relaxed-ramanujan`; deploy is unblocked. To ship: port real Places (`lib/lead-gen`), agent + enrich (`lib/agent`), Duda (`lib/duda`); set Supabase/Places/Anthropic/Duda env + run migrations. Docs: [lead-gen-integration.md](./docs/operations/lead-gen-integration.md), [lead-pipeline-platform-integrations.md](./docs/operations/lead-pipeline-platform-integrations.md), [lead-gen-test-plan.md](./docs/operations/lead-gen-test-plan.md).
+- `ready` **discord-bot-runtime-bugs** — `scripts/discord-bot.mjs`: `getOrchSummary()` called (~L406) but never defined → ReferenceError on the `get_orchestration` tool; dead reference to non-existent `scripts/hermes-discord-bridge.mjs` (~L40). Fix or remove (relevant to the agentic-ops-loop Discord path).
+- `ready` **dispatchstate-queued-deadend** — `auto-assigner.mjs` writes `dispatchState:"queued"` to `clients/*/tasks.json` but nothing consumes it to start a build. Wire a consumer (folds into the agentic-ops-loop dispatch) or drop the field.
 
-## Security / Compliance _(3)_
+## Security / Compliance _(5)_
 
+- `ready` **security-history-rewrite** — Purge client PII (lilac-insure / prospect-001 / the-ranch-foundation workspaces + contact names) from git history. The tip-scrub (PR #2, merged) removed it going forward but left it in history on a **public** repo. Tested `git filter-repo` runbook delivered — recommended: rewrite → recreate repo (only certain GitHub erasure); alt: filter-repo + force-push all refs + GitHub Support. Also notify the two client contacts (was public). Runbook + replacements file handed off out-of-band.
+- `ready` **security-portal-server-auth** — Harden the `/c/:slug` portal token: today it's a client-bundled HMAC ("casual unguessable-link" privacy — forgeable, by design). Move verification server-side: new `api/portal-verify` + server-only `PORTAL_HMAC_SECRET` (no `VITE_` prefix) + httpOnly session cookie; delete `DEV_PORTAL_SECRET` + client-side `getPortalSecret`. ~half-day.
 - `ready` **13s-10-grc-career-planning** — GRC career positioning — research + planning (HITL)
 - `blocked` **t_52a4852d** — Investigate B2 OWASP SAMM 88→75 regression
 - `blocked` **t_5f36efeb** — Investigate B6 OSV/audit 100→95 drift mid-session
@@ -99,7 +106,7 @@ Consolidated 2026-05-11 from `docs/ai/orchestration.json`,
 
 ---
 
-**Total: 69 open items.**
+**Total: 76 open items.**
 
 ## Conventions
 

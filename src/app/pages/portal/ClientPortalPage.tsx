@@ -28,16 +28,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
-import { Page } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
-import { Card } from '@hirobius/design-system';
-import { Input } from '@hirobius/design-system';
-import { Button } from '@hirobius/design-system';
-import { EmptyState } from '@hirobius/design-system';
-import { Alert } from '@hirobius/design-system';
+import { Page, Stack, Card, Input, Button, EmptyState, Alert } from '@hirobius/design-system';
+import hds from '@hirobius/design-system/tokens';
 import { CLIENT_REGISTRY } from '../ops/clientRegistry';
 import { verifyPortalToken } from '../../../lib/portal-token';
-import hds from '@hirobius/design-system/tokens';
 
 const clientPortalStyles = {
   iframeFrameBase: {

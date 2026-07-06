@@ -1,5 +1,11 @@
 # 🛰️ HDS DesignOps Engine — Operator's Brief
 
+> **⛔ RETIRED (2026-07-02).** This brief and its continuation loop reference
+> retired machinery (`orchestration.json`, orchestration-watcher, night-shift
+> mode, ready-queue). **Do not execute anything below.** The living handoff is
+> **`docs/ai/HANDOFF.md`** — read that and act from its "Next" queue. This file
+> is kept for historical context only.
+
 ## ⚡ Autonomous Continuation Protocol — agent: start here
 
 If Adrian's prompt is short and open ("continue", "go", "next unit",

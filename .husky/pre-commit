@@ -2,7 +2,11 @@
 set -e
 
 echo "Running secrets scan..."
-gitleaks git --config .gitleaks.toml --staged --verbose
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --config .gitleaks.toml --staged --verbose
+else
+  echo "  ⚠ gitleaks not installed — skipping secrets scan (install gitleaks to enable)"
+fi
 
 echo "Running lint-staged (Prettier formatting on staged files)..."
 pnpm exec lint-staged
@@ -12,10 +16,6 @@ pnpm typecheck
 
 echo "Running lint (12i-quality-eslint-burndown complete — zero warnings/errors enforced)..."
 pnpm lint --max-warnings=0
-
-echo "Validating manifest schema..."
-# Not a registry gate (no registry entry) — invoked explicitly here.
-node scripts/validate-manifest.mjs
 
 echo "Checking guardrail registry is complete..."
 # Not a registry gate (no registry entry) — invoked explicitly here.

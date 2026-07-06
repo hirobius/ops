@@ -12,33 +12,35 @@ import { createProposedSkillsMiddleware } from './scripts/proposed-skills-middle
 import { createServiceManagerMiddleware } from './scripts/service-manager-middleware.mjs';
 import { createCcPluginsMiddleware } from './scripts/cc-plugins-middleware.mjs';
 import { createResearchFeedMiddleware } from './scripts/research-feed-middleware.mjs';
+import { createLeadsMiddleware } from './scripts/leads-middleware.mjs';
+import { createTasksMiddleware } from './scripts/tasks-middleware.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const hdsManifestModuleId = 'virtual:hds-manifest';
-const resolvedHdsManifestModuleId = `\0${hdsManifestModuleId}`;
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+
+  // Surface server-only secrets to the dev middleware (scripts/leads-middleware.mjs).
+  // loadEnv reads them from .env.local but does not inject them into process.env.
+  // Dev-only; production functions read Vercel env directly. Values are never logged.
+  for (const key of [
+    'SUPABASE_URL',
+    'SUPABASE_SERVICE_ROLE_KEY',
+    'GOOGLE_PLACES_API_KEY',
+    'ANTHROPIC_API_KEY',
+    'DUDA_API_USER',
+    'DUDA_API_PASSWORD',
+    'GITHUB_TOKEN',
+    'GITHUB_REPO',
+  ]) {
+    if (!process.env[key] && env[key]) process.env[key] = env[key];
+  }
 
   return {
     define: {
       __FIGMA_FILE_ID__: JSON.stringify(env.FIGMA_FILE_ID ?? ''),
     },
     plugins: [
-      {
-        name: 'hds-manifest-virtual-module',
-        resolveId(id) {
-          return id === hdsManifestModuleId ? resolvedHdsManifestModuleId : null;
-        },
-        load(id) {
-          if (id !== resolvedHdsManifestModuleId) return null;
-          const manifest = readFileSync(
-            path.resolve(__dirname, 'public/hds-manifest.json'),
-            'utf8',
-          );
-          return `export default ${manifest};`;
-        },
-      },
       react(),
       tailwindcss(),
       // Dev-only: POST /api/route — accepts { text, client } body, spawns
@@ -99,6 +101,32 @@ export default defineConfig(({ mode }) => {
               res.end(JSON.stringify({ error: String(error?.message || error) }));
             }
           });
+        },
+      },
+      // Dev-only: leads pipeline — POST /api/pull-leads, POST /api/lead-action,
+      // GET /api/leads. Mirrors the production Vercel functions in api/* using the
+      // same lib/* logic (single source of truth). See scripts/leads-middleware.mjs.
+      // apply: 'serve' so prod builds never expose these — Vercel serves the
+      // api/* functions in production.
+      {
+        name: 'ops-leads-api',
+        apply: 'serve',
+        configureServer(server) {
+          const leads = createLeadsMiddleware();
+          server.middlewares.use('/api/pull-leads', leads.pull);
+          server.middlewares.use('/api/lead-action', leads.action);
+          server.middlewares.use('/api/leads', leads.list);
+        },
+      },
+      // Dev-only: consolidated tasks board — GET /api/tasks, POST /api/task-action.
+      // Mirrors the prod Vercel functions via the same lib/tasks logic.
+      {
+        name: 'ops-tasks-api',
+        apply: 'serve',
+        configureServer(server) {
+          const tasks = createTasksMiddleware();
+          server.middlewares.use('/api/task-action', tasks.action);
+          server.middlewares.use('/api/tasks', tasks.list);
         },
       },
       // Dev-only: POST /api/skills/:id — whitelisted skill runner that backs the
@@ -310,27 +338,10 @@ export default defineConfig(({ mode }) => {
             if (id.includes('node_modules/@radix-ui/')) {
               return 'vendor-radix';
             }
-            // three.js stack — pulled eagerly by HdsMobiusLogo via @react-three/fiber.
-            // Kept in a dedicated chunk so it doesn't block the main entry parse.
-            if (
-              id.includes('node_modules/three/') ||
-              id.includes('node_modules/@react-three/') ||
-              id.includes('node_modules/postprocessing/') ||
-              id.includes('node_modules/troika-') ||
-              id.includes('node_modules/meshline/')
-            ) {
-              return 'vendor-three';
-            }
             // Lucide icons — many routes import individual icons; isolating avoids
             // repeated tree-shake work and makes the chunk cacheable.
             if (id.includes('node_modules/lucide-react/')) {
               return 'vendor-icons';
-            }
-            // Virtual hds-manifest — inline JSON export; split so the main entry
-            // stays under budget and the manifest chunk is independently cacheable.
-            // resolvedHdsManifestModuleId starts with \0 so we match the raw string.
-            if (id === resolvedHdsManifestModuleId || id.includes('virtual:hds-manifest')) {
-              return '_virtual_hds-manifest';
             }
           },
         },

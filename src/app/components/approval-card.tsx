@@ -1,0 +1,171 @@
+// motion-ok: card surface — hover/focus styling via tokens, no per-card motion
+/**
+ * ApprovalCard — review surface for proposed work units.
+ * @category Display
+ * @tier utility
+ * @internal — ops infrastructure, absorbed from @hirobius/design-system (the DS
+ *   repo stripped its ops-flavored components). Consumes only DS primitives
+ *   (Card, Button, Tag) + the ops-local `cn`.
+ */
+/* hds-bypass: ops-domain component — composes DS primitives with Tailwind utility classes, not a consumer HDS surface */
+
+import * as React from 'react';
+import { cn } from '../../lib/utils';
+import { Card, Button, Tag } from '@hirobius/design-system';
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+export type ApprovalState = 'proposed' | 'approved' | 'denied' | 'needs-grilling';
+
+export interface ApprovalUnitSummary {
+  /** Unit id (matches docs/ai/orchestration.json). */
+  id: string;
+  /** Human-readable unit name. */
+  name: string;
+  /** Sprint bucket (0..6). */
+  sprint?: number;
+  /** Priority (1..5, 1 = highest). */
+  priority?: number;
+  /** Cluster tag grouping units in the approval inbox. */
+  cluster?: string;
+  /** Where the unit was proposed from (free-text source attribution). */
+  source?: string;
+  /** Full description; the card renders a truncated form. */
+  description?: string;
+  /** Current approval state. */
+  approval?: ApprovalState;
+}
+
+export interface ApprovalCardProps {
+  /** Unit metadata to render. */
+  unit: ApprovalUnitSummary;
+  /** Approve action — flips approval to `approved` (status proposed→pending on server). */
+  onApprove?: (unit: ApprovalUnitSummary) => void;
+  /** Deny action — flips approval to `denied`. */
+  onDeny?: (unit: ApprovalUnitSummary) => void;
+  /** Grill action — flips approval to `needs-grilling`. */
+  onGrill?: (unit: ApprovalUnitSummary) => void;
+  /** Disable buttons while a mutation is in flight. */
+  pending?: boolean;
+  /** Optional click handler for the title — typically a link to the detail view. */
+  onOpenDetail?: (unit: ApprovalUnitSummary) => void;
+  /** Optional className passthrough. */
+  className?: string;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+const DESCRIPTION_TRUNCATE_CHARS = 240;
+
+function truncate(text: string, max: number): string {
+  if (!text) return '';
+  if (text.length <= max) return text;
+  return `${text.slice(0, max).trimEnd()}…`;
+}
+
+// ── Component ──────────────────────────────────────────────────────────────────
+
+/**
+ * ApprovalCard — proposed-unit summary card for the autonomous build's
+ * approval inbox.
+ * @category Display
+ * @tier utility
+ *
+ * Composes Card + Button + Tag into a compact decision surface for
+ * a single orchestration.json unit awaiting human ratification. Renders the
+ * unit's id, name, sprint / priority / cluster metadata as tag pills, the
+ * source attribution, a truncated description, and three action buttons
+ * (Approve / Deny / Grill) that fire callbacks the page wires to the
+ * bridge endpoint.
+ *
+ * Purely presentational — no fetch logic lives here. The page
+ * (src/app/pages/admin/Approvals.tsx) owns the optimistic-update / reconcile
+ * flow and supplies the disabled flag while a mutation is in flight.
+ */
+export const ApprovalCard = React.forwardRef<HTMLDivElement, ApprovalCardProps>(
+  function ApprovalCard(
+    { unit, onApprove, onDeny, onGrill, onOpenDetail, pending = false, className },
+    ref,
+  ) {
+    const sprintLabel = typeof unit.sprint === 'number' ? `Sprint ${unit.sprint}` : null;
+    const priorityLabel = typeof unit.priority === 'number' ? `Priority ${unit.priority}` : null;
+    const clusterLabel = unit.cluster ? unit.cluster : null;
+
+    return (
+      <Card ref={ref} padding="none" className={cn('flex flex-col', className)}>
+        <Card.Header>
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-xs font-mono text-muted-foreground" data-role="unit-id">
+              {unit.id}
+            </p>
+            {unit.source ? (
+              <p className="text-xs text-muted-foreground" data-role="unit-source">
+                {unit.source}
+              </p>
+            ) : null}
+          </div>
+          <Card.Title>
+            {onOpenDetail ? (
+              <button
+                type="button"
+                onClick={() => onOpenDetail(unit)}
+                className="text-left hover:underline focus-visible:underline focus-visible:outline-none"
+                data-role="unit-title-button"
+              >
+                {unit.name}
+              </button>
+            ) : (
+              unit.name
+            )}
+          </Card.Title>
+          <div className="flex flex-wrap gap-2 pt-1" data-role="unit-meta-tags">
+            {sprintLabel ? <Tag>{sprintLabel}</Tag> : null}
+            {priorityLabel ? <Tag>{priorityLabel}</Tag> : null}
+            {clusterLabel ? <Tag>{clusterLabel}</Tag> : null}
+          </div>
+        </Card.Header>
+        {unit.description ? (
+          <Card.Body>
+            <Card.Description data-role="unit-description">
+              {truncate(unit.description, DESCRIPTION_TRUNCATE_CHARS)}
+            </Card.Description>
+          </Card.Body>
+        ) : null}
+        <Card.Footer className="gap-2">
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={pending}
+            onClick={() => onApprove?.(unit)}
+            aria-label={`Approve ${unit.id}`}
+            data-role="approve-button"
+          >
+            Approve
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={pending}
+            onClick={() => onDeny?.(unit)}
+            aria-label={`Deny ${unit.id}`}
+            data-role="deny-button"
+          >
+            Deny
+          </Button>
+          <Button
+            variant="tertiary"
+            size="sm"
+            disabled={pending}
+            onClick={() => onGrill?.(unit)}
+            aria-label={`Grill ${unit.id}`}
+            data-role="grill-button"
+          >
+            Grill
+          </Button>
+        </Card.Footer>
+      </Card>
+    );
+  },
+);
+
+export default ApprovalCard;

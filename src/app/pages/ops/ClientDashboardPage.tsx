@@ -9,41 +9,15 @@ import { Badge } from '@hirobius/design-system';
 import { Callout } from '@hirobius/design-system';
 import { StatusTile, type StatusTileTone } from '@hirobius/design-system';
 import { TileGrid } from '@hirobius/design-system';
-import { PhaseHeader, type PhaseHeaderTone } from '@/app/design-system-ext';
+import { PhaseHeader, type PhaseHeaderTone } from '../../components/phase-header';
 import { EmptyState } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from './PageHeader';
 
-// Domain-status → Badge tone. Owns the mapping; renderer is the canonical
-// primitive so status badges always have consistent padding, type, and a11y
-// regardless of which page they appear on (12d-card-anatomy slot rule).
-type BadgeTone = 'neutral' | 'info' | 'success' | 'danger' | 'warning';
-const STATUS_TONE: Record<string, BadgeTone> = {
-  done: 'success',
-  complete: 'success',
-  'in-progress': 'warning',
-  blocked: 'danger',
-  'not-started': 'neutral',
-  planned: 'info',
-  evaluating: 'info',
-  todo: 'neutral',
-  'agreed-verbal': 'info',
-  prospect: 'info',
-  'pro-bono': 'neutral',
-  'phase-2-candidate': 'info',
-  'pending-activation': 'warning',
-  'pending-access': 'warning',
-  unknown: 'neutral',
-  deferred: 'neutral',
-  'api-unknown': 'neutral',
-  scaffolded: 'info',
-};
-function statusTone(status: string): BadgeTone {
-  return STATUS_TONE[status] ?? 'neutral';
-}
-function statusLabel(status: string): string {
-  return STATUS_LABEL[status] ?? status;
-}
+// Domain-status → Badge tone + label now live in the shared statusPresentation
+// module (consolidated with ClientReportPage; that module documents the
+// per-surface tone conflicts deliberately left untouched).
+import { statusTone, statusLabel, type BadgeTone } from '../../lib/statusPresentation';
 
 // ── Manifest-driven client registry ───────────────────────────────────────────
 
@@ -59,6 +33,7 @@ import type {
   ClientWorkflowConfig,
   ClientWorkflow,
 } from './clientTypes';
+import { buildClientRegistry } from './clientRegistry';
 
 const _metas = import.meta.glob<{ default: ClientMeta }>('../../../../clients/*/meta.json', {
   eager: true,
@@ -86,57 +61,15 @@ const _workflows = import.meta.glob<{ default: ClientWorkflowConfig }>(
   { eager: true },
 );
 
-function slugOf(p: string) {
-  return p.match(/clients\/([^/]+)\//)?.[1] ?? '';
-}
-function workflowOf(p: string) {
-  const m = p.match(/clients\/([^/]+)\/automations\/([^/]+)\/config\.json/);
-  return m ? { slug: m[1], workflowId: m[2] } : null;
-}
-
-const CLIENT_REGISTRY: Record<string, ClientFiles> = {};
-// Skip slugs starting with `_` (e.g. `_template/`) — those are scaffolding,
-// not real clients, and shouldn't appear in the dashboard.
-function shouldRegister(slug: string) {
-  return Boolean(slug) && !slug.startsWith('_');
-}
-
-for (const [p, m] of Object.entries(_metas)) {
-  const s = slugOf(p);
-  if (shouldRegister(s)) CLIENT_REGISTRY[s] = { meta: m.default };
-}
-for (const [p, m] of Object.entries(_tasks)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].tasks = m.default;
-}
-for (const [p, m] of Object.entries(_checks)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].checklist = m.default;
-}
-for (const [p, m] of Object.entries(_retains)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].retainer = m.default;
-}
-for (const [p, m] of Object.entries(_goals)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].goals = m.default;
-}
-for (const [p, m] of Object.entries(_autoCfgs)) {
-  const s = slugOf(p);
-  if (shouldRegister(s) && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].automationConfig = m.default;
-}
-for (const [p, m] of Object.entries(_workflows)) {
-  const r = workflowOf(p);
-  if (!r || !shouldRegister(r.slug) || !CLIENT_REGISTRY[r.slug]) continue;
-  const wf = { id: r.workflowId, config: m.default };
-  CLIENT_REGISTRY[r.slug].workflows = [...(CLIENT_REGISTRY[r.slug].workflows ?? []), wf];
-}
-// Sort workflows by id for stable rendering
-for (const slug of Object.keys(CLIENT_REGISTRY)) {
-  if (CLIENT_REGISTRY[slug].workflows) {
-    CLIENT_REGISTRY[slug].workflows!.sort((a, b) => a.id.localeCompare(b.id));
-  }
-}
+const CLIENT_REGISTRY = buildClientRegistry({
+  metas: _metas,
+  tasks: _tasks,
+  checks: _checks,
+  retains: _retains,
+  goals: _goals,
+  autoCfgs: _autoCfgs,
+  workflows: _workflows,
+});
 
 // ── Status colours ─────────────────────────────────────────────────────────────
 
@@ -159,26 +92,7 @@ const STATUS_TONE_MAP: Record<string, StatusTileTone> = {
 function tileTone(status: string): StatusTileTone {
   return STATUS_TONE_MAP[status] ?? 'neutral';
 }
-const STATUS_LABEL: Record<string, string> = {
-  done: 'Done',
-  complete: 'Done',
-  'in-progress': 'In Progress',
-  blocked: 'Blocked',
-  'not-started': 'Not Started',
-  planned: 'Planned',
-  todo: 'To Do',
-  evaluating: 'Evaluating',
-  'agreed-verbal': 'Verbal Agreed',
-  prospect: 'Prospect',
-  'pro-bono': 'Pro Bono',
-  'phase-2-candidate': 'Phase 2 Candidate',
-  'pending-activation': 'Pending Activation',
-  'pending-access': 'Pending Access',
-  scaffolded: 'Scaffolded',
-  deferred: 'Deferred',
-  unknown: 'Unknown',
-  'api-unknown': 'API Unknown',
-};
+// Status labels moved to ../../lib/statusPresentation (statusLabel, operator audience).
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 

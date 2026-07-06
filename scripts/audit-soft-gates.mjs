@@ -45,11 +45,10 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { loadRegistry, runGateCaptured, REGISTRY_PATH } from './lib/guardrail-core.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const REGISTRY_PATH = path.join(ROOT, 'docs/guardrails/registry.json');
 const OUT_JSON = '/tmp/soft-gates-audit.json';
 const OUT_PLAN = '/tmp/soft-gates-promotion-plan.md';
 const OUT_PLAN_CANONICAL = path.join(ROOT, 'docs/guardrails/soft-gate-promotion-plan.md');
@@ -67,18 +66,16 @@ const GATE_TIMEOUT_MS = 60_000;
 
 // ── Load registry ─────────────────────────────────────────────────────────────
 
-if (!fs.existsSync(REGISTRY_PATH)) {
-  process.stderr.write(`audit-soft-gates: registry not found at ${REGISTRY_PATH}\n`);
+const loaded = loadRegistry(REGISTRY_PATH);
+if (!loaded.ok) {
+  if (loaded.error.kind === 'not-found') {
+    process.stderr.write(`audit-soft-gates: registry not found at ${REGISTRY_PATH}\n`);
+  } else {
+    process.stderr.write(`audit-soft-gates: registry parse failed: ${loaded.error.message}\n`);
+  }
   process.exit(2);
 }
-
-let registry;
-try {
-  registry = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf8'));
-} catch (e) {
-  process.stderr.write(`audit-soft-gates: registry parse failed: ${e.message}\n`);
-  process.exit(2);
-}
+const registry = loaded.registry;
 
 // Filter to soft gates (exclude strict channels and skip self)
 const softGates = (registry.gates || []).filter(
@@ -145,25 +142,21 @@ function runGate(gate) {
     };
   }
 
-  // Run with --json first to capture violations
-  const startJson = process.hrtime.bigint();
-  const jsonProc = spawnSync(process.execPath, [scriptPath, '--json'], {
-    cwd: ROOT,
-    encoding: 'utf8',
-    timeout: GATE_TIMEOUT_MS,
-    maxBuffer: 32 * 1024 * 1024,
-    env: process.env,
+  // Run with --json first to capture violations. The spawn + timing + timeout
+  // detection live in guardrail-core.runGateCaptured; the violation parsing,
+  // timeout/spawn-error → investigate-broken mapping, and recommendation stay
+  // here. timedOut covers both the timeout kill (ETIMEDOUT) and a maxBuffer
+  // overflow (ENOBUFS), as before.
+  const proc = runGateCaptured(scriptPath, {
+    extraArgs: ['--json'],
+    timeoutMs: GATE_TIMEOUT_MS,
   });
-  const durationJsonMs = Number(process.hrtime.bigint() - startJson) / 1_000_000;
-
-  // If --json timed out or errored badly, fall back to plain run
-  const jsonTimedOut = jsonProc.error?.code === 'ETIMEDOUT' || jsonProc.error?.code === 'ENOBUFS';
 
   let exitCode;
   let durationMs;
   let violationCount = null;
 
-  if (jsonTimedOut) {
+  if (proc.timedOut) {
     // Gate hung — record as investigate-broken
     return {
       id: gate.id,
@@ -177,25 +170,25 @@ function runGate(gate) {
     };
   }
 
-  if (jsonProc.error) {
+  if (proc.spawnError) {
     return {
       id: gate.id,
       currentChannel: gate.firingChannel,
       exitCode: null,
-      durationMs: Math.round(durationJsonMs),
+      durationMs: proc.durationMs,
       violationCount: null,
       severity: gate.severity || 'warn',
-      error: `spawn error: ${jsonProc.error.message}`,
+      error: `spawn error: ${proc.spawnError.message}`,
       recommendation: 'investigate-broken',
     };
   }
 
-  exitCode = typeof jsonProc.status === 'number' ? jsonProc.status : null;
-  durationMs = Math.round(durationJsonMs);
+  exitCode = proc.exitCode;
+  durationMs = proc.durationMs;
 
   // Try to parse violations from --json stdout
   if (gate.supportsJson !== false) {
-    const stdout = (jsonProc.stdout || '').trim();
+    const stdout = (proc.stdout || '').trim();
     // Strip any leading non-JSON lines (some gates emit warnings before JSON)
     const jsonStart = stdout.indexOf('{');
     if (jsonStart >= 0) {

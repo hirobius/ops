@@ -160,7 +160,7 @@ function finishMissingRef() {
   warn('commit body has no `Refs:` line — work intent is not linked to a kanban task.');
   info('Add a line like:   Refs: t_38b7574e   (or:   Refs: 13y-9   for legacy unit IDs)');
   info('Skip with [skip-kanban] in the message, or work on main/release/*/hotfix/* branches.');
-  info(`See docs: claude-config/skills/dispatch-unit/SKILL.md (commit-msg convention)`);
+  info('Skip with [skip-kanban] if the commit is not tied to a tracked task.');
   if (ENFORCE === 'error') {
     info('Mode: error (KANBAN_REF_ENFORCE=error). Commit blocked.');
     process.exit(1);

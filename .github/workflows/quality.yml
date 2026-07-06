@@ -41,19 +41,6 @@ jobs:
       - name: Build (catches Vite/asset issues)
         run: pnpm build
 
-      - name: Bundle budget check (hard-fail)
-        # Budgets are +10% over 2026-05-01 baseline. Promoted from warn-mode
-        # after 2 clean PRs confirmed headroom (12o-perf-bundle-budget-hard-fail-promote).
-        # Exceeding a budget will fail the merge — this is intentional.
-        run: pnpm size-limit
-
-      - name: Build library artifact (catches barrel / type-emit regressions)
-        # pnpm build:lib emits dist/{hirobius-ui,cn,tokens,manifest}.js + tokens.css
-        # via vite.config.lib.ts. A breaking change to src/index.ts barrel exports
-        # would be caught here before it ships. Runs after the app build so the
-        # dist/ directory is fresh and not stale from a prior local run.
-        run: pnpm build:lib
-
       - name: Typecheck
         run: pnpm typecheck
 

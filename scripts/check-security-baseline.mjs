@@ -29,7 +29,6 @@ const BLOCKED_FILES = [
   '.env.production',
   '.env.development',
   '.env.test',
-  '.npmrc',
 ];
 
 const TEXT_EXTENSIONS = new Set([
@@ -128,6 +127,19 @@ for (const blocked of BLOCKED_FILES) {
   const full = join(ROOT, blocked);
   if (existsSync(full) && isGitTracked(blocked)) {
     violations.push(`blocked file committed: ${blocked}`);
+  }
+}
+
+// .npmrc is intentionally committed in ops (it pins the @hirobius scope to
+// GitHub Packages). That is safe only while the auth token is injected from the
+// environment — a hardcoded token must never be committed. Block the latter.
+const npmrc = join(ROOT, '.npmrc');
+if (existsSync(npmrc) && isGitTracked('.npmrc')) {
+  const hardcoded = readFileSync(npmrc, 'utf8')
+    .split('\n')
+    .some((l) => /_authToken\s*=/.test(l) && !/\$\{[^}]+\}/.test(l));
+  if (hardcoded) {
+    violations.push('.npmrc contains a hardcoded auth token (use ${ENV_VAR} interpolation)');
   }
 }
 

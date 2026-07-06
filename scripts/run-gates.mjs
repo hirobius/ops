@@ -63,10 +63,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync, spawn } from 'node:child_process';
 import { performance } from 'node:perf_hooks';
-import { matchesScope } from './lib/gate-scope.mjs';
+import { loadRegistry, selectGates, REGISTRY_PATH } from './lib/guardrail-core.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const REGISTRY_PATH = path.join(ROOT, 'docs/guardrails/registry.json');
 
 // ── Arg parsing ───────────────────────────────────────────────────────────────
 
@@ -229,57 +228,53 @@ if (isPreCommit && concurrency > 1) {
 
 // ── Load registry ─────────────────────────────────────────────────────────────
 
-if (!fs.existsSync(REGISTRY_PATH)) {
-  console.error(`✗ run-gates: registry not found at ${REGISTRY_PATH}`);
+const loaded = loadRegistry(REGISTRY_PATH);
+if (!loaded.ok) {
+  if (loaded.error.kind === 'not-found') {
+    console.error(`✗ run-gates: registry not found at ${REGISTRY_PATH}`);
+  } else {
+    console.error(`✗ run-gates: could not parse registry: ${loaded.error.message}`);
+  }
   process.exit(2);
 }
-
-let registry;
-try {
-  registry = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf8'));
-} catch (e) {
-  console.error(`✗ run-gates: could not parse registry: ${e.message}`);
-  process.exit(2);
-}
+const registry = loaded.registry;
 
 // ── Select gates ──────────────────────────────────────────────────────────────
+//
+// loadRegistry + selectGates (scripts/lib/guardrail-core.mjs) own the mechanics:
+// gate-by-id lookup, channel filter (declaration order preserved), and --scope
+// glob matching per unit 13g-2-validator-self-register. The exact console text,
+// exit codes, and message ordering stay here so the CLI contract is unchanged.
 
-let selectedGates;
+const selection = selectGates({
+  registry,
+  channel: channelArg,
+  gate: gateArg,
+  changedFiles: scopeFiles,
+});
 
-if (gateArg) {
-  const found = registry.gates.find((g) => g.id === gateArg);
-  if (!found) {
-    console.error(`✗ run-gates: gate '${gateArg}' not found in registry`);
-    process.exit(2);
-  }
-  selectedGates = [found];
-} else {
-  // Declaration order is preserved because JSON.parse preserves array order.
-  selectedGates = registry.gates.filter((g) => g.firingChannel === channelArg);
-  if (selectedGates.length === 0) {
+if (!selection.ok) {
+  // gate-not-found
+  console.error(`✗ run-gates: gate '${selection.gate}' not found in registry`);
+  process.exit(2);
+}
+
+// --scope skip log prints before any "nothing to do", matching prior order.
+// (Empty channels never reach scope filtering, so skippedByScope is [] there.)
+if (selection.skippedByScope.length > 0) {
+  console.log(`run-gates: --scope skipped ${selection.skippedByScope.length} gate(s) (no glob match): ${selection.skippedByScope.join(', ')}`);
+}
+
+if (selection.gates.length === 0) {
+  if (selection.emptyReason === 'no-gates-for-channel') {
     console.log(`run-gates: no gates registered for channel '${channelArg}' — nothing to do`);
-    process.exit(0);
+  } else if (selection.emptyReason === 'scope-filtered-all') {
+    console.log(`run-gates: --scope filtered out every gate — nothing to do`);
   }
+  process.exit(0);
 }
 
-// Apply per-file scoping (--scope). Gates whose registry entry has
-// scope:'full-tree' OR no glob always run. Gates with a glob run only when
-// at least one changed file matches. Per unit 13g-2-validator-self-register.
-const skippedByScope = [];
-if (scopeFiles) {
-  selectedGates = selectedGates.filter((g) => {
-    const keep = matchesScope(g, scopeFiles);
-    if (!keep) skippedByScope.push(g.id);
-    return keep;
-  });
-  if (skippedByScope.length > 0) {
-    console.log(`run-gates: --scope skipped ${skippedByScope.length} gate(s) (no glob match): ${skippedByScope.join(', ')}`);
-  }
-  if (selectedGates.length === 0) {
-    console.log(`run-gates: --scope filtered out every gate — nothing to do`);
-    process.exit(0);
-  }
-}
+const selectedGates = selection.gates;
 
 // ── Dry-run ───────────────────────────────────────────────────────────────────
 
