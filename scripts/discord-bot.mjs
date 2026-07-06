@@ -37,7 +37,7 @@
  *   OLLAMA_BASE_URL=http://localhost:11434  ← default; change if Ollama is remote
  *   OLLAMA_MODEL=hermes3              ← default local model
  *
- * Hermes → Discord bridge (used by scripts/hermes-discord-bridge.mjs):
+ * Hermes → Discord bridge:
  *   DISCORD_HERMES_CHANNEL_ID=<channel id>          ← default thread parent
  *   DISCORD_CHANNEL_<TENANT-OR-SLUG>=<channel id>   ← per-client/tenant override
  *
@@ -349,11 +349,6 @@ const TOOL_DEFS = [
     },
   },
   {
-    name: 'get_orchestration',
-    description: 'Get a summary of the orchestration queue: done/claimed/approved counts, active workers, next eligible units.',
-    parameters: { type: 'object', properties: {} },
-  },
-  {
     name: 'client_status',
     description: 'Get a status summary for a Hirobius client workspace: tasks by phase/swimlane, checklist blockers, retainer/payment status. Use when asked about a client like "lilac", "lilac insure", "Conrad", etc.',
     parameters: {
@@ -401,9 +396,6 @@ function executeTool(name, input) {
       if (!fs.existsSync(full)) return `File not found: ${input.path}`;
       const lines = fs.readFileSync(full, 'utf8').split('\n');
       return lines.slice(0, input.lines || 50).join('\n');
-    }
-    if (name === 'get_orchestration') {
-      return JSON.stringify(getOrchSummary(), null, 2);
     }
     if (name === 'client_status') {
       return getClientStatus(input.slug || 'lilac-insure');

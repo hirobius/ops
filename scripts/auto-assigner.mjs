@@ -256,7 +256,6 @@ function applyRouting(task, routing) {
   task.routedBy          = ASSIGNER_VERSION;
   task.routedAt          = routing.routedAt;
   task.routingRationale  = routing.routingRationale;
-  task.dispatchState     = 'queued';
 }
 
 // ---------- audit log -------------------------------------------------------
