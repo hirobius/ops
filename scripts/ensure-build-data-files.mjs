@@ -15,6 +15,19 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
+// Directories that hold only gitignored generated output, so they do not exist
+// in a clean checkout (local CI or Vercel). The generators run right after this
+// script and writeFileSync into them — which fails with ENOENT if the parent
+// directory is missing. Create them up front.
+const REQUIRED_DIRS = ['src/app/data', 'docs/guardrails', 'telemetry'];
+
+for (const rel of REQUIRED_DIRS) {
+  const abs = resolve(ROOT, rel);
+  if (existsSync(abs)) continue;
+  mkdirSync(abs, { recursive: true });
+  console.log(`[ensure-build-data-files] created directory ${rel}`);
+}
+
 const REQUIRED_LOG_FILES = ['docs/guardrails/firing-log.jsonl', 'telemetry/events.jsonl'];
 
 for (const rel of REQUIRED_LOG_FILES) {
