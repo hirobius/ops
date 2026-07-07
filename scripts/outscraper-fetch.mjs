@@ -31,6 +31,7 @@
  * FLAGS:
  *   --query "<q>"        search query; repeatable for multiple queries
  *   --limit <n>          max results per query (default 20)
+ *   --max-records <n>    stop firing queries once ~n records collected (budget cap)
  *   --language <l>       Outscraper `language` (default en)
  *   --region <r>         Outscraper `region` (default us)
  *   --async              use Outscraper's async submit+poll flow (default sync)
@@ -66,6 +67,7 @@ function parseArgs(argv) {
     queries: [],
     preset: null,
     limit: 20,
+    maxRecords: null,
     language: 'en',
     region: 'us',
     async: false,
@@ -87,6 +89,7 @@ function parseArgs(argv) {
       case '--query': opts.queries.push(next()); break;
       case '--preset': opts.preset = next(); break;
       case '--limit': opts.limit = Number(next()); break;
+      case '--max-records': opts.maxRecords = Number(next()); break;
       case '--language': opts.language = next(); break;
       case '--region': opts.region = next(); break;
       case '--async': opts.async = true; break;
@@ -115,6 +118,7 @@ function printHelp() {
       `  --query "<q>"       search query; repeatable\n` +
       `  --preset <name>     expand a built-in query matrix (${PRESET_NAMES.join(', ')})\n` +
       `  --limit <n>         results per query (default 20)\n` +
+      `  --max-records <n>   stop once ~n records collected (budget cap; may overshoot by one --limit)\n` +
       `  --language <l>      default en\n` +
       `  --region <r>        default us\n` +
       `  --async             async submit+poll flow\n` +
@@ -199,7 +203,10 @@ async function fetchQueryAsync(query, opts, apiKey) {
 /** Run every query, concatenating each query's data (array-of-place-arrays). */
 async function fetchAll(opts, apiKey) {
   const data = [];
-  for (const q of opts.queries) {
+  const cap = Number.isFinite(opts.maxRecords) && opts.maxRecords > 0 ? opts.maxRecords : null;
+  let records = 0;
+  for (let qi = 0; qi < opts.queries.length; qi++) {
+    const q = opts.queries[qi];
     const one = opts.async
       ? await fetchQueryAsync(q, opts, apiKey)
       : await fetchQuerySync(q, opts, apiKey);
@@ -209,6 +216,21 @@ async function fetchAll(opts, apiKey) {
       if (Array.isArray(arr)) arr.forEach((p) => { if (p && !p.query) p.query = q; });
     }
     data.push(...one);
+    // Budget cap: stop after any query that pushes us to/over --max-records so a
+    // large --query list or preset can't quietly blow the monthly free tier. The
+    // check is post-query, so the final query may overshoot by up to --limit.
+    records += one.reduce((n, e) => n + (Array.isArray(e) ? e.length : 1), 0);
+    if (cap && records >= cap) {
+      const skipped = opts.queries.length - qi - 1;
+      if (skipped > 0) {
+        console.error(
+          `⚠ --max-records ${cap} reached (${records} records after ${qi + 1} ` +
+            `quer${qi === 0 ? 'y' : 'ies'}) — stopping; skipped ${skipped} remaining ` +
+            `quer${skipped === 1 ? 'y' : 'ies'} to protect your Outscraper budget.`,
+        );
+      }
+      break;
+    }
   }
   return data;
 }
@@ -415,13 +437,16 @@ async function main() {
         console.log(`  … and ${opts.queries.length - preview.length} more queries\n`);
       }
       // Size + cost estimate. `limit` is an upper bound per query; real record
-      // counts are usually lower, so this is a worst-case ceiling.
-      const maxRecords = opts.queries.length * opts.limit;
-      const billable = Math.max(0, maxRecords - FREE_RECORDS);
+      // counts are usually lower, so this is a worst-case ceiling. A --max-records
+      // cap lowers the ceiling (may overshoot by one query's --limit).
+      const cap = Number.isFinite(opts.maxRecords) && opts.maxRecords > 0 ? opts.maxRecords : null;
+      const worstCase = opts.queries.length * opts.limit;
+      const ceiling = cap ? Math.min(worstCase, cap + opts.limit) : worstCase;
+      const billable = Math.max(0, ceiling - FREE_RECORDS);
       const estCost = (billable / 1000) * COST_PER_1K;
       console.log(
         `Queries: ${opts.queries.length}  ·  limit ${opts.limit}/query  ·  ` +
-          `up to ${maxRecords} records (worst case)`,
+          `up to ${ceiling} records (worst case)${cap ? ` — capped at ~${cap} via --max-records` : ''}`,
       );
       console.log(
         `Est. cost ceiling: ${billable === 0 ? 'FREE (within the 500-record/mo tier)' : `~$${estCost.toFixed(2)}`}` +
