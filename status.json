@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-07-07T20:10:00Z",
+  "updatedAt": "2026-07-07T20:20:00Z",
   "phase": "live",
-  "headline": "Production LIVE. #12 (lead-sweep half) shipped: /ops/leads saved-sweep selector — preset preview → reviewable pair checklist + record estimate → capped, explicit-confirm, sequential /api/pull-leads run. #17 closed: swept orchestration-era dead code out of agentic-os/data.ts. #28 done: /c/:slug portal auth moved server-side (secret no longer bundled). Guardrail hygiene: separated ops gates from inherited DS-authoring gates (pre-commit 26→16, all green; DS gates → manual) — #39 tracks residual lint debt. Prospecting pipeline (#21) live: Run 01 scored 249 leads (25 qualified) + site-quality scorer + compliance shipped.",
+  "headline": "Production LIVE. #11 shipped: scripts/deploy-alert.mjs — manual (no cron) fleet-wide deploy-ERROR / newly-blocked alert check, diffs against committed docs/ops/deploy-snapshot.json, logs to docs/ops/alert-log.jsonl, stdout + optional Discord delivery. First run's real baseline already caught hirobius-design-system mid-ERROR (branch claude/storybook-publishable-9tdovm) — worth a look. #12 (lead-sweep half) shipped: /ops/leads saved-sweep selector. #17 closed: swept orchestration-era dead code out of agentic-os/data.ts. #28 done: /c/:slug portal auth moved server-side (secret no longer bundled). Guardrail hygiene: separated ops gates from inherited DS-authoring gates (pre-commit 26→16, all green; DS gates → manual) — #39 tracks residual lint debt. Prospecting pipeline (#21) live: Run 01 scored 249 leads (25 qualified) + site-quality scorer + compliance shipped.",
   "next": [
     "Adrian: explicit go before any lead-sweep 'Confirm run' — Outscraper spend still on hold pending bad-site thesis validation",
     "Adrian: PORTAL_HMAC_SECRET set in env+Vercel (verified e2e); redeploy main to ship #28, then remove old VITE_PORTAL_HMAC_SECRET",
