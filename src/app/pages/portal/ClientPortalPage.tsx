@@ -12,13 +12,15 @@
  * "show live site only (not Figma WIP), simple password-gate per client,
  * lightweight feedback form."
  *
- * Token = HMAC-SHA256(slug, secret), verified via `src/lib/portal-token.ts`.
+ * Token = HMAC-SHA256(slug, secret), verified SERVER-side by
+ * `/api/portal-verify` (secret `PORTAL_HMAC_SECRET` never ships to the browser).
  * Mint tokens with `node scripts/generate-portal-token.mjs <slug>`.
  *
- * Frontend-only validation — acceptable per kanban agent notes for
- * low-stakes private URLs. The secret is bundled into the static build, so
- * rotate `VITE_PORTAL_HMAC_SECRET` per engagement and treat the URL as the
- * credential. NOT a hardened authn boundary.
+ * Auth flow (mirrors OpsGate): on mount, ask the server whether an existing
+ * httpOnly `portal_session` cookie already authorizes this slug; if not and the
+ * URL carries `?token=…`, POST it to `/api/portal-verify`, which sets the cookie
+ * on success. Treat the URL as the credential; rotate `PORTAL_HMAC_SECRET` per
+ * engagement.
  *
  * Feedback form is client-side only: submission is logged to the console
  * (dev) and the user gets a confirmation surface. No server-side
@@ -31,7 +33,6 @@ import { useParams, useSearchParams } from 'react-router';
 import { Page, Stack, Card, Input, Button, EmptyState, Alert } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { CLIENT_REGISTRY } from '../ops/clientRegistry';
-import { verifyPortalToken } from '../../../lib/portal-token';
 
 const clientPortalStyles = {
   iframeFrameBase: {
@@ -91,10 +92,23 @@ for (const [path, mod] of Object.entries(STATUS_FILES)) {
 
 type AuthStatus = 'pending' | 'authorized' | 'unauthorized';
 
+// Dev has no deployed api/ functions (the Vite middleware serves the data
+// routes locally, unguarded), so bypass the server check in `pnpm dev` — same
+// pattern as OpsGate. Production always round-trips to /api/portal-verify.
+const DEV_BYPASS = import.meta.env.DEV;
+
+/**
+ * Server-side token gate. On mount:
+ *  1. GET /api/portal-verify?slug — is there already a valid session cookie?
+ *  2. If not and the URL carries ?token=…, POST it — the server verifies the
+ *     HMAC with the server-only secret and, on success, sets the httpOnly cookie.
+ * The secret never ships to the browser (unlike the old client verifier).
+ */
 function useTokenAuth(slug: string | undefined, token: string | null) {
-  const [status, setStatus] = useState<AuthStatus>('pending');
+  const [status, setStatus] = useState<AuthStatus>(DEV_BYPASS ? 'authorized' : 'pending');
 
   useEffect(() => {
+    if (DEV_BYPASS) return;
     let cancelled = false;
     if (!slug) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -103,9 +117,30 @@ function useTokenAuth(slug: string | undefined, token: string | null) {
     }
     setStatus('pending');
     (async () => {
-      const ok = await verifyPortalToken(slug, token);
-      if (cancelled) return;
-      setStatus(ok ? 'authorized' : 'unauthorized');
+      try {
+        const q = new URLSearchParams({ slug }).toString();
+        const me = await fetch(`/api/portal-verify?${q}`, { credentials: 'same-origin' });
+        const meData = (await me.json()) as { authorized?: boolean };
+        if (cancelled) return;
+        if (meData?.authorized) {
+          setStatus('authorized');
+          return;
+        }
+        if (!token) {
+          setStatus('unauthorized');
+          return;
+        }
+        const res = await fetch('/api/portal-verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ slug, token }),
+        });
+        if (cancelled) return;
+        setStatus(res.ok ? 'authorized' : 'unauthorized');
+      } catch {
+        if (!cancelled) setStatus('unauthorized');
+      }
     })();
     return () => {
       cancelled = true;

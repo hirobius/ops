@@ -2,20 +2,21 @@
 /**
  * generate-portal-token — mint a /c/:slug?token=… HMAC token for a client.
  *
- * Mirrors `src/lib/portal-token.ts` exactly so tokens generated here verify
- * in the browser. Algorithm:
+ * Mirrors the server verifier `lib/portal-auth.mjs` exactly so tokens generated
+ * here verify at `/api/portal-verify`. Algorithm:
  *
  *   token = lowercase-hex( HMAC-SHA256( secret, utf8(slug) ) )
  *
  * Secret resolution (in priority order):
  *   1. --secret <value> CLI flag.
- *   2. PORTAL_HMAC_SECRET environment variable.
- *   3. VITE_PORTAL_HMAC_SECRET environment variable (matches build-time
- *      Vite var, so Adrian can `export VITE_PORTAL_HMAC_SECRET=…` once
- *      and use both the CLI and the dev server with identical secrets).
- *   4. Dev fallback `hirobius-portal-dev-fallback-secret` — must match the
- *      DEV_PORTAL_SECRET constant in src/lib/portal-token.ts. Production
- *      deployments MUST set VITE_PORTAL_HMAC_SECRET.
+ *   2. PORTAL_HMAC_SECRET environment variable — the canonical server-only
+ *      secret (same var the Vercel function reads). Set it in Vercel + export
+ *      it locally to mint links that verify in production.
+ *   3. VITE_PORTAL_HMAC_SECRET environment variable — legacy fallback from the
+ *      old client-side gate; kept so pre-migration exports still resolve.
+ *   4. Dev fallback `hirobius-portal-dev-fallback-secret` — dev-only; the dev
+ *      portal bypasses server verification entirely (DEV_BYPASS). Production
+ *      deployments MUST set PORTAL_HMAC_SECRET.
  *
  * Usage:
  *   node scripts/generate-portal-token.mjs <slug>
@@ -27,15 +28,16 @@
  *   node scripts/generate-portal-token.mjs lilac-insure
  *   node scripts/generate-portal-token.mjs the-ranch-foundation --base https://hirobius.com
  *
- * NOTE: this is NOT a hardened authentication boundary. The frontend secret
- * is bundled into the static build, so a sufficiently motivated reader can
- * mint tokens themselves. Treat the URL as the credential, rotate
- * VITE_PORTAL_HMAC_SECRET per engagement, and use this CLI to issue fresh
- * links to clients.
+ * Token verification is server-side (`/api/portal-verify`, secret
+ * `PORTAL_HMAC_SECRET` never bundled), so a valid link is a real gate. Treat
+ * the URL as the credential, rotate `PORTAL_HMAC_SECRET` per engagement, and
+ * use this CLI to issue fresh links to clients.
  */
 
 import { createHmac } from 'node:crypto';
 
+// Dev-only fallback. The dev portal bypasses server verification (DEV_BYPASS),
+// so this only exists to produce a non-empty token for local link previews.
 const DEV_PORTAL_SECRET = 'hirobius-portal-dev-fallback-secret';
 
 function parseArgs(argv) {
@@ -79,7 +81,7 @@ function help() {
       '  node scripts/generate-portal-token.mjs <slug> [--secret <value>] [--base <url>] [--json]',
       '',
       'Secret resolution: --secret > $PORTAL_HMAC_SECRET > $VITE_PORTAL_HMAC_SECRET > dev fallback.',
-      'See `src/lib/portal-token.ts` for the matching browser-side verifier.',
+      'See `lib/portal-auth.mjs` (server verifier behind /api/portal-verify) for the matching check.',
     ].join('\n'),
   );
 }
@@ -117,7 +119,7 @@ function main() {
   if (source === 'dev-fallback') {
     console.log('');
     console.log(
-      'WARN: using dev-fallback secret. Production must set VITE_PORTAL_HMAC_SECRET.',
+      'WARN: using dev-fallback secret. Production must set PORTAL_HMAC_SECRET.',
     );
   }
 }

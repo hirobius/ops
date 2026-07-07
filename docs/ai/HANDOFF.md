@@ -7,7 +7,7 @@
 > finished things to the log line at the bottom). Adrian never copy-pastes
 > context again — he types one word.
 
-_Last updated: 2026-07-06 (PRODUCTION live · /ops/issues board shipped · backlog triaged to Issues) · branch `claude/ops-dashboard-launch-7cons7` (pushed to `main`)_
+_Last updated: 2026-07-07 (#28 portal auth moved server-side · prospecting Run 01 + 3rd scorer landed) · branch `claude/ops-dashboard-launch-7cons7` (pushed to `main`)_
 
 ## Now (what is true today)
 
@@ -54,6 +54,12 @@ _Last updated: 2026-07-06 (PRODUCTION live · /ops/issues board shipped · backl
   self-gates via `OPS_GATE_PASSWORD`) + evaluate Pro before more `api/` routes land.
 - **Set `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in Vercel** — `/ops/leads` +
   `/ops/tasks` are offline without it (#16); apply `supabase/migrations`.
+- **Set `PORTAL_HMAC_SECRET` in Vercel (#28)** — server-only (NOT `VITE_`-prefixed),
+  Production + Preview scopes. **Paste the SAME value the current
+  `VITE_PORTAL_HMAC_SECRET` holds** so existing `/c/:slug?token=…` links keep
+  verifying. Link: https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables
+  Then redeploy the branch; once verified, the old `VITE_PORTAL_HMAC_SECRET` can be
+  deleted (nothing reads it — its only effect was leaking the secret into the bundle).
 - **Delete the 2 Error deployments** (`dpl_En1J6…`, `dpl_7D3tk…`) — dashboard tidy.
 - **Confirm the 2 `.ps1` scripts** (bridge-wsl2-port, setup-cron-windows) are safe
   to delete — the Tier-2 scrub held them (possible personal tooling).
@@ -262,6 +268,7 @@ Guardrails: branch + push; merge to the default branch (status.json must land th
 
 ## Done log (one line each, newest first)
 
+- 2026-07-07 (#28 portal server-auth): moved the `/c/:slug?token=…` client-portal gate **server-side**, closing the same class of hole `/ops` had — the old `src/lib/portal-token.ts` verified tokens **in the browser** using `VITE_PORTAL_HMAC_SECRET`, which Vite inlines into the static bundle (anyone could read it and mint a token for any slug). New `lib/portal-auth.mjs` (mirrors `lib/ops-auth.mjs`) + raw handler `api/portal-verify.ts` (GET ?slug checks the httpOnly `portal_session` cookie, POST {slug,token} verifies with server-only `PORTAL_HMAC_SECRET` and sets a slug-scoped cookie); `ClientPortalPage.tsx` `useTokenAuth` rewritten to round-trip the server (DEV_BYPASS in dev, same as OpsGate); deleted `portal-token.ts` (client secret/verifier gone from the bundle — grep of `dist/` confirms). **Token scheme byte-identical**, so every link already handed to a client keeps working. api fns 10→11 (≤12). 288 tests green (10 new in `portal-auth.test.mjs`) + typecheck + 16/16 layout (incl `/c/lilac-insure`) + `dist/` clean of the secret. **Human-gated (Adrian):** set `PORTAL_HMAC_SECRET` in Vercel (Prod+Preview) to the SAME value as the current `VITE_PORTAL_HMAC_SECRET`, redeploy, then the old `VITE_PORTAL_HMAC_SECRET` can be removed.
 - 2026-07-07 (prospecting Run 01 + 3rd scorer + compliance + prompts): first live Outscraper runs — **Run 01: 249 WA-trade leads, 25 qualified** (all no-site; 90% of scraped businesses already on custom sites). **Key learnings** (`docs/prospecting/run-log.md`): Spokane+Olympia yield ~4× Seattle; excavation/tree/pressure-washing beat fencing (which ranked #1 in theory, worst in practice). Built the **site-quality/redesign-need 3rd scorer** (`scripts/lib/site-audit.mjs` + `audit-sites.mjs` via PageSpeed — arbitrary-domain fetch is blocked by the egress allowlist, so Google fetches server-side; migration 0006) to mine the 223 custom-site leads for bad-site redesign targets at **zero Outscraper cost**. Added `--max-records` budget cap, underserved-trade presets (excavation/welding/well-drilling/masonry), `prospect-stats.mjs` analytics. **Compliance pass** filed #35–#38 + `docs/prospecting/compliance.md` + migration 0007 (lifecycle + `do_not_contact`) + `purge-stale-leads.mjs` (12-mo retention). **Fable prompt library** in `docs/prompts/`. Realtors dropped (avoid niche + data lost). **Human-gated next:** create `PAGESPEED_API_KEY`, apply migrations 0006/0007 → then I run the 223-lead site-audit. **Outscraper spend on hold** (Adrian) until bad-site thesis validated. 268 tests green.
 - 2026-07-06 (prospecting pipeline landed + bug cleanups): closed #25 (discord-bot `getOrchSummary`/bridge dead refs) and #26 (orphaned `dispatchState` write) in `e8843a6`; filed #30 (Discord→ops workflow, low-pri). Landed the **Outscraper→Supabase prospecting pipeline (#21)** onto `main` (`0f7daba`) off the ephemeral `claude/prospect-to-site` branch (canonical superset of `nwrktj`) — 5 scripts + `prospectTypes.ts` + 4 vitest specs + `docs/prospecting/*`; migration renumbered `0004_lead_score`→**`0005`** (0004 taken by tasks_dispatch_url), 2 specs converted node:test→vitest. Verified 262/262 vitest + typecheck + build + a live fixture dry-run (5 scored rows to `0005` columns, no DB/API). **#21 still blocked on Adrian:** Supabase env (`SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`) + apply migrations `0001`/`0002`/`0005`, then a first live run. Stale branches to prune later: `claude/prospect-to-site`, `claude/outscraper-prospecting-pipeline-nwrktj` (both now landed).
 - 2026-07-06 (cross-repo backlog handoff finished): DS accessibility idea (`12v-token-system-modes`) recorded on DS #80; Concrete repo `hirobius/concrete` exists + was already bootstrapped (issues #1–#4: brand hexes, catalog data, tenant tooling, launch prereqs) — its catalog model + Stripe checkout are already built, so only the two genuine gaps were filed: **concrete#5** (WA legal pages) + **concrete#6** (AI content-repurpose, post-launch). BACKLOG.md is now fully drained into per-repo Issues across ops/DS/portfolio/concrete.
