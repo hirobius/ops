@@ -97,6 +97,9 @@ clients/*/inbox-discovery-results/
 # (backed up out-of-band; only the _template scaffold is tracked).
 clients/*
 !clients/_template/
+# Outscraper prospecting output — scraped business PII (names/phones/addresses),
+# same never-commit policy as clients/*. Written by scripts/outscraper-fetch.mjs --out.
+prospects/
 # Generated client task-routing log (client names + task content)
 docs/ai/routing-log.jsonl
 
