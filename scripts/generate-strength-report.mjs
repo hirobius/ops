@@ -48,25 +48,13 @@ function readJSON(relPath) {
   return JSON.parse(readFileSync(abs, 'utf-8'));
 }
 
-function readLines(relPath) {
-  const abs = resolve(ROOT, relPath);
-  if (!existsSync(abs)) return [];
-  return readFileSync(abs, 'utf-8')
-    .split('\n')
-    .filter(Boolean)
-    .map(l => {
-      try { return JSON.parse(l); } catch { return null; }
-    })
-    .filter(Boolean);
-}
-
 /** Count files matching a glob pattern in the scripts/ directory only. */
 function countFiles(pattern) {
   try {
     const scriptsDir = resolve(ROOT, 'scripts');
     const result = execSync(
       `find "${scriptsDir}" -maxdepth 1 -type f -name "${pattern}" 2>/dev/null | wc -l`,
-      { encoding: 'utf-8', timeout: 5000 }
+      { encoding: 'utf-8', timeout: 5000 },
     ).trim();
     return parseInt(result, 10) || 0;
   } catch {
@@ -79,7 +67,7 @@ function countGrep(pattern, dir = 'src') {
   try {
     const result = execSync(
       `grep -rn --include='*.ts' --include='*.tsx' -E "${pattern}" ${resolve(ROOT, dir)} 2>/dev/null | wc -l`,
-      { encoding: 'utf-8', timeout: 5000 }
+      { encoding: 'utf-8', timeout: 5000 },
     ).trim();
     return parseInt(result, 10) || 0;
   } catch {
@@ -124,9 +112,16 @@ const units = orchestration?.units ?? [];
 function computeA1() {
   const scriptsOnDisk = countFiles('check-*.mjs') + countFiles('audit-*.mjs');
   // Only count check-* and audit-* gates (the scope validate-guardrail-registry enforces)
-  const registered = gates.filter(g => g.id.startsWith('check-') || g.id.startsWith('audit-')).length;
+  const registered = gates.filter(
+    (g) => g.id.startsWith('check-') || g.id.startsWith('audit-'),
+  ).length;
   if (scriptsOnDisk === 0) {
-    return { score: null, status: 'needs-wiring', reason: 'no-scripts-found', raw: { registered, scriptsOnDisk } };
+    return {
+      score: null,
+      status: 'needs-wiring',
+      reason: 'no-scripts-found',
+      raw: { registered, scriptsOnDisk },
+    };
   }
   // Cap at 100 — having more registered than on-disk is fine (may include validators)
   const score = Math.min(100, Math.round((registered / scriptsOnDisk) * 100));
@@ -141,9 +136,14 @@ function computeA1() {
 function computeA2() {
   const total = gates.length;
   if (total === 0) {
-    return { score: null, status: 'needs-wiring', reason: 'no-registered-gates', raw: { honest: 0, total: 0 } };
+    return {
+      score: null,
+      status: 'needs-wiring',
+      reason: 'no-registered-gates',
+      raw: { honest: 0, total: 0 },
+    };
   }
-  const honest = gates.filter(g => !g.wiringTodo).length;
+  const honest = gates.filter((g) => !g.wiringTodo).length;
   const score = Math.round((honest / total) * 100);
   return { score, status: 'wired', raw: { honest, total } };
 }
@@ -167,7 +167,12 @@ function computeA2() {
 function computeA3() {
   const total = gates.length;
   if (total === 0) {
-    return { score: null, status: 'needs-wiring', reason: 'no-registered-gates', raw: { withRealFixtures: 0, withStubFixtures: 0, withMissingFixtures: 0, total: 0 } };
+    return {
+      score: null,
+      status: 'needs-wiring',
+      reason: 'no-registered-gates',
+      raw: { withRealFixtures: 0, withStubFixtures: 0, withMissingFixtures: 0, total: 0 },
+    };
   }
 
   // Stub marker prefixes — must match validate-fixture-proof-of-firing.mjs
@@ -183,7 +188,7 @@ function computeA3() {
     try {
       const buf = readFileSync(filePath, 'utf-8');
       const head = buf.slice(0, 256);
-      return STUB_MARKERS.some(m => head.includes(m));
+      return STUB_MARKERS.some((m) => head.includes(m));
     } catch {
       return false;
     }
@@ -243,10 +248,15 @@ function computeA3() {
 function computeA4() {
   const total = gates.length;
   if (total === 0) {
-    return { score: null, status: 'needs-wiring', reason: 'no-registered-gates', raw: { strict: 0, total: 0 } };
+    return {
+      score: null,
+      status: 'needs-wiring',
+      reason: 'no-registered-gates',
+      raw: { strict: 0, total: 0 },
+    };
   }
   const strictChannels = new Set(['pre-commit', 'pre-push', 'ci-pr']);
-  const strict = gates.filter(g => strictChannels.has(g.firingChannel)).length;
+  const strict = gates.filter((g) => strictChannels.has(g.firingChannel)).length;
   const score = Math.round((strict / total) * 100);
   return { score, status: 'wired', raw: { strict, total } };
 }
@@ -256,12 +266,17 @@ function computeA4() {
  * = count(13g-* units with status=done) / count(13g-* units)
  */
 function computeA5() {
-  const cluster = units.filter(u => u.id?.startsWith('13g-'));
+  const cluster = units.filter((u) => u.id?.startsWith('13g-'));
   const total = cluster.length;
   if (total === 0) {
-    return { score: null, status: 'needs-wiring', reason: 'no-13g-units', raw: { done: 0, total: 0 } };
+    return {
+      score: null,
+      status: 'needs-wiring',
+      reason: 'no-13g-units',
+      raw: { done: 0, total: 0 },
+    };
   }
-  const done = cluster.filter(u => u.status === 'done').length;
+  const done = cluster.filter((u) => u.status === 'done').length;
   const score = Math.round((done / total) * 100);
   return { score, status: 'wired', raw: { done, total } };
 }
@@ -289,7 +304,8 @@ function computeA6() {
     return {
       score: null,
       status: 'needs-wiring',
-      reason: 'docs/guardrails/full-strictness-inventory.json not yet generated — run `node scripts/run-gates.mjs --channel ci-pr --emit-inventory docs/guardrails/full-strictness-inventory.json` (per unit 13p-2)',
+      reason:
+        'docs/guardrails/full-strictness-inventory.json not yet generated — run `node scripts/run-gates.mjs --channel ci-pr --emit-inventory docs/guardrails/full-strictness-inventory.json` (per unit 13p-2)',
       raw: {},
     };
   }
@@ -304,7 +320,7 @@ function computeA6() {
       raw: { totalGates: 0, gatesWithViolations: 0 },
     };
   }
-  const gatesWithViolations = gates.filter(g => {
+  const gatesWithViolations = gates.filter((g) => {
     if (g?.exitCode !== 0) return true;
     if (Array.isArray(g?.violations) && g.violations.length > 0) return true;
     return false;
@@ -347,36 +363,38 @@ function computeB1() {
  * Categories: secrets, types, lint, deps, license, accessibility, perf, WCAG
  */
 function computeB2() {
-  const allChannels = gates.map(g => g.firingChannel);
+  const allChannels = gates.map((g) => g.firingChannel);
 
   // Category coverage assessment (derived purely from registry contents)
   const categories = {
-    secrets: gates.some(g => g.id.includes('security') || g.id.includes('secrets')),
-    types: gates.some(g => g.id === 'validate-orchestration') ||
-           allChannels.includes('pre-commit'), // pnpm typecheck is in pre-commit hook
-    lint: gates.some(g =>
-      g.id.includes('source-canon') ||
-      g.id.includes('hardcoded-colors') ||
-      g.id.includes('hardcoded-fonts') ||
-      g.id.includes('hardcoded-spacing')
+    secrets: gates.some((g) => g.id.includes('security') || g.id.includes('secrets')),
+    types:
+      gates.some((g) => g.id === 'validate-orchestration') || allChannels.includes('pre-commit'), // pnpm typecheck is in pre-commit hook
+    lint: gates.some(
+      (g) =>
+        g.id.includes('source-canon') ||
+        g.id.includes('hardcoded-colors') ||
+        g.id.includes('hardcoded-fonts') ||
+        g.id.includes('hardcoded-spacing'),
     ),
-    deps: gates.some(g =>
-      g.id.includes('token-rebake') ||
-      g.id.includes('token-renames') ||
-      g.id.includes('manifest-drift')
+    deps: gates.some(
+      (g) =>
+        g.id.includes('token-rebake') ||
+        g.id.includes('token-renames') ||
+        g.id.includes('manifest-drift'),
     ),
     license: false, // no license-check gate registered
-    accessibility: gates.some(g =>
-      g.id.includes('aria-labels') ||
-      g.id.includes('focus-states') ||
-      g.id.includes('contrast')
+    accessibility: gates.some(
+      (g) =>
+        g.id.includes('aria-labels') || g.id.includes('focus-states') || g.id.includes('contrast'),
     ),
-    perf: gates.some(g => g.id.includes('perf-budget')),
-    wcag: gates.some(g =>
-      g.id.includes('contrast') ||
-      g.id.includes('wcag') ||
-      g.id.includes('a11y') ||
-      g.id.includes('aria')
+    perf: gates.some((g) => g.id.includes('perf-budget')),
+    wcag: gates.some(
+      (g) =>
+        g.id.includes('contrast') ||
+        g.id.includes('wcag') ||
+        g.id.includes('a11y') ||
+        g.id.includes('aria'),
     ),
   };
 
@@ -391,7 +409,7 @@ function computeB2() {
       coveredCount,
       totalCategories,
       categories: Object.fromEntries(
-        Object.entries(categories).sort(([a], [b]) => a.localeCompare(b))
+        Object.entries(categories).sort(([a], [b]) => a.localeCompare(b)),
       ),
     },
   };
@@ -441,7 +459,7 @@ function computeB3() {
   // status === 'failed': count a11y route tests in failedTests[]
   const failedTests = Array.isArray(lastRun?.failedTests) ? lastRun.failedTests : [];
   // a11y spec test titles: "a11y [/hds/...]" — count distinct route violations
-  const a11yFailures = failedTests.filter(t => typeof t === 'string' && /^a11y \[/.test(t));
+  const a11yFailures = failedTests.filter((t) => typeof t === 'string' && /^a11y \[/.test(t));
   const violatingRoutes = a11yFailures.length;
   // Each failing route = at least 1 blocking violation group. Score: 100 - (count * 5), clamped.
   const violationsPerRouteMean = violatingRoutes;
@@ -503,21 +521,32 @@ function computeB4() {
     if (existsSync(playwrightBase)) {
       try {
         const dirs = execSync(`ls -1 "${playwrightBase}" 2>/dev/null | grep chromium | sort -r`, {
-          encoding: 'utf-8', timeout: 5000,
-        }).trim().split('\n').filter(Boolean);
+          encoding: 'utf-8',
+          timeout: 5000,
+        })
+          .trim()
+          .split('\n')
+          .filter(Boolean);
         for (const dir of dirs) {
           const candidate = resolve(playwrightBase, dir, 'chrome-linux64', 'chrome');
           if (existsSync(candidate)) return candidate;
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
 
     // 3. System chromium/chrome
     for (const name of ['chromium', 'chromium-browser', 'google-chrome', 'google-chrome-stable']) {
       try {
-        const p = execSync(`which ${name} 2>/dev/null`, { encoding: 'utf-8', timeout: 3000 }).trim();
+        const p = execSync(`which ${name} 2>/dev/null`, {
+          encoding: 'utf-8',
+          timeout: 3000,
+        }).trim();
         if (p) return p;
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
 
     return null; // let lhci use its own detection
@@ -543,7 +572,7 @@ function computeB4() {
       '--staticDistDir=./dist',
       '--isSinglePageApplication=true',
       '--numberOfRuns=1',
-      ...ROUTES.map(r => `--url=http://localhost${r}`),
+      ...ROUTES.map((r) => `--url=http://localhost${r}`),
       '--settings={"preset":"desktop","chromeFlags":"--no-sandbox --disable-dev-shm-usage --headless=new"}',
     ];
     if (chromePath) collectArgs.push(`--chromePath=${chromePath}`);
@@ -575,8 +604,12 @@ function computeB4() {
     let lhrFiles;
     try {
       lhrFiles = execSync(`ls -1t "${lhciDir}/lhr-"*.json 2>/dev/null`, {
-        encoding: 'utf-8', timeout: 5000,
-      }).trim().split('\n').filter(Boolean);
+        encoding: 'utf-8',
+        timeout: 5000,
+      })
+        .trim()
+        .split('\n')
+        .filter(Boolean);
     } catch {
       return [];
     }
@@ -589,21 +622,25 @@ function computeB4() {
         const url = lhr?.requestedUrl ?? lhr?.finalUrl ?? 'unknown';
         // Normalise URL by stripping port/host (keep path only)
         let path;
-        try { path = new URL(url).pathname; } catch { path = url; }
+        try {
+          path = new URL(url).pathname;
+        } catch {
+          path = url;
+        }
         if (seen.has(path)) continue;
         seen.add(path);
 
         const cats = lhr?.categories ?? {};
         const audits = lhr?.audits ?? {};
-        const perfScore = typeof cats?.performance?.score === 'number'
-          ? cats.performance.score * 100
-          : null;
+        const perfScore =
+          typeof cats?.performance?.score === 'number' ? cats.performance.score * 100 : null;
         const lcpMs = audits['largest-contentful-paint']?.numericValue ?? null;
         const clsVal = audits['cumulative-layout-shift']?.numericValue ?? null;
         // INP if present; fallback to FID (older Lighthouse)
-        const inpMs = audits['interaction-to-next-paint']?.numericValue
-          ?? audits['max-potential-fid']?.numericValue
-          ?? null;
+        const inpMs =
+          audits['interaction-to-next-paint']?.numericValue ??
+          audits['max-potential-fid']?.numericValue ??
+          null;
 
         results.push({
           url: path,
@@ -612,7 +649,9 @@ function computeB4() {
           cls: clsVal !== null ? Math.round(clsVal * 1000) / 1000 : null,
           inp: inpMs !== null ? Math.round(inpMs) : null,
         });
-      } catch { /* skip malformed */ }
+      } catch {
+        /* skip malformed */
+      }
     }
     return results;
   }
@@ -625,7 +664,7 @@ function computeB4() {
   if (routeData.length === 0) {
     const cached = readJSON('docs/security/lighthouse-report.json');
     if (cached?.routes && Array.isArray(cached.routes) && cached.routes.length > 0) {
-      const scores = cached.routes.map(r => r.perfScore).filter(s => typeof s === 'number');
+      const scores = cached.routes.map((r) => r.perfScore).filter((s) => typeof s === 'number');
       const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
       const score = avg !== null ? Math.max(0, Math.min(100, Math.round(avg))) : null;
       return {
@@ -634,7 +673,9 @@ function computeB4() {
         notes: [
           'Using stale cached lighthouse-report.json (fresh run failed).',
           freshRunNotes ?? 'lhci collect produced no LHR files.',
-        ].filter(Boolean).join(' '),
+        ]
+          .filter(Boolean)
+          .join(' '),
         raw: { routes: cached.routes, source: 'cached', cachedAt: cached.generatedAt ?? null },
       };
     }
@@ -654,7 +695,7 @@ function computeB4() {
   // ---------------------------------------------------------------------------
   // Compute composite score and write cache
   // ---------------------------------------------------------------------------
-  const scores = routeData.map(r => r.perfScore).filter(s => typeof s === 'number');
+  const scores = routeData.map((r) => r.perfScore).filter((s) => typeof s === 'number');
   const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
   const score = avg !== null ? Math.max(0, Math.min(100, Math.round(avg))) : null;
 
@@ -666,7 +707,9 @@ function computeB4() {
   };
   try {
     writeFileSync(lhrCachePath, JSON.stringify(cachePayload, null, 2) + '\n', 'utf-8');
-  } catch { /* non-fatal */ }
+  } catch {
+    /* non-fatal */
+  }
 
   const result = {
     score,
@@ -720,7 +763,7 @@ function computeB5() {
       flagsPresent,
       totalFlags,
       strictFlags: Object.fromEntries(
-        Object.entries(strictFlags).sort(([a], [b]) => a.localeCompare(b))
+        Object.entries(strictFlags).sort(([a], [b]) => a.localeCompare(b)),
       ),
     },
   };
@@ -749,10 +792,11 @@ function computeB6() {
   // Attempt a fresh pnpm audit run and cache to disk
   let freshRunNotes = null;
   try {
-    const auditOutput = execSync(
-      'pnpm audit --json 2>/dev/null',
-      { encoding: 'utf-8', timeout: 60000, cwd: ROOT }
-    );
+    const auditOutput = execSync('pnpm audit --json 2>/dev/null', {
+      encoding: 'utf-8',
+      timeout: 60000,
+      cwd: ROOT,
+    });
     writeFileSync(osvReportPath, auditOutput, 'utf-8');
   } catch (err) {
     // pnpm audit exits 1 when vulnerabilities found — that's fine, stdout still has JSON
@@ -767,7 +811,8 @@ function computeB6() {
         raw: {},
       };
     } else {
-      freshRunNotes = 'pnpm audit failed — using stale cached report from docs/security/osv-report.json';
+      freshRunNotes =
+        'pnpm audit failed — using stale cached report from docs/security/osv-report.json';
     }
   }
 
@@ -785,10 +830,10 @@ function computeB6() {
   // pnpm audit --json shape: { metadata: { vulnerabilities: { info, low, moderate, high, critical } } }
   const vulns = report?.metadata?.vulnerabilities ?? {};
   const critical = typeof vulns.critical === 'number' ? vulns.critical : 0;
-  const high     = typeof vulns.high     === 'number' ? vulns.high     : 0;
+  const high = typeof vulns.high === 'number' ? vulns.high : 0;
   const moderate = typeof vulns.moderate === 'number' ? vulns.moderate : 0;
-  const low      = typeof vulns.low      === 'number' ? vulns.low      : 0;
-  const info     = typeof vulns.info     === 'number' ? vulns.info     : 0;
+  const low = typeof vulns.low === 'number' ? vulns.low : 0;
+  const info = typeof vulns.info === 'number' ? vulns.info : 0;
 
   // Score: 100 - 20*critical - 5*high, clamped [0, 100]
   const score = Math.max(0, Math.min(100, 100 - 20 * critical - 5 * high));
@@ -821,7 +866,12 @@ function computeB7() {
   const entries = Object.entries(components);
   const total = entries.length;
   if (total === 0) {
-    return { score: null, status: 'needs-wiring', reason: 'component-api.json has no components', raw: {} };
+    return {
+      score: null,
+      status: 'needs-wiring',
+      reason: 'component-api.json has no components',
+      raw: {},
+    };
   }
 
   const withRealDesc = entries.filter(([, c]) => {
@@ -918,7 +968,7 @@ function buildDimension(id, name, weight, methodology, result) {
 }
 
 function computeComposite(dimensions) {
-  const wired = dimensions.filter(d => d.status === 'wired' && typeof d.score === 'number');
+  const wired = dimensions.filter((d) => d.status === 'wired' && typeof d.score === 'number');
   const total = dimensions.length;
   const wiredCount = wired.length;
   const wiredCoverage = `${wiredCount}/${total}`;
@@ -927,9 +977,7 @@ function computeComposite(dimensions) {
     return { composite: null, reason: 'all-dims-need-wiring', wiredCoverage };
   }
 
-  const composite = Math.round(
-    wired.reduce((sum, d) => sum + d.score, 0) / wiredCount
-  );
+  const composite = Math.round(wired.reduce((sum, d) => sum + d.score, 0) / wiredCount);
 
   return { composite, wiredCoverage };
 }
@@ -941,24 +989,108 @@ function computeComposite(dimensions) {
 function buildReport() {
   // Score A dimensions
   const aDims = [
-    buildDimension('A1', 'Registration Coverage',   '1/6', 'count(registered) / count(scripts/check-*.mjs ∪ audit-*.mjs)', computeA1()),
-    buildDimension('A2', 'Wiring Honesty',           '1/6', 'count(gates without wiringTodo) / count(registered)', computeA2()),
-    buildDimension('A3', 'Fixture Proof-of-Firing',  '1/6', 'count(gates with REAL non-stub fixture pair verified firing) / count(registered). Stubs exist but are unproven; missing is an error.', computeA3()),
-    buildDimension('A4', 'Strict Gating',            '1/6', 'count(firingChannel ∈ {pre-commit, pre-push, ci-pr}) / count(registered)', computeA4()),
-    buildDimension('A5', 'Hardening Cluster Completeness', '1/6', 'count(13g-* status=done) / count(13g-*)', computeA5()),
-    buildDimension('A6', 'Debt Closure Ratio',       '1/6', '(totalGates - gatesWithViolations) / totalGates over docs/guardrails/full-strictness-inventory.json', computeA6()),
+    buildDimension(
+      'A1',
+      'Registration Coverage',
+      '1/6',
+      'count(registered) / count(scripts/check-*.mjs ∪ audit-*.mjs)',
+      computeA1(),
+    ),
+    buildDimension(
+      'A2',
+      'Wiring Honesty',
+      '1/6',
+      'count(gates without wiringTodo) / count(registered)',
+      computeA2(),
+    ),
+    buildDimension(
+      'A3',
+      'Fixture Proof-of-Firing',
+      '1/6',
+      'count(gates with REAL non-stub fixture pair verified firing) / count(registered). Stubs exist but are unproven; missing is an error.',
+      computeA3(),
+    ),
+    buildDimension(
+      'A4',
+      'Strict Gating',
+      '1/6',
+      'count(firingChannel ∈ {pre-commit, pre-push, ci-pr}) / count(registered)',
+      computeA4(),
+    ),
+    buildDimension(
+      'A5',
+      'Hardening Cluster Completeness',
+      '1/6',
+      'count(13g-* status=done) / count(13g-*)',
+      computeA5(),
+    ),
+    buildDimension(
+      'A6',
+      'Debt Closure Ratio',
+      '1/6',
+      '(totalGates - gatesWithViolations) / totalGates over docs/guardrails/full-strictness-inventory.json',
+      computeA6(),
+    ),
   ];
 
   // Score B dimensions
   const bDims = [
-    buildDimension('B1', 'DORA Metrics',          '1/8', 'deploy frequency + change failure rate vs Elite threshold', computeB1()),
-    buildDimension('B2', 'OWASP SAMM / NIST SSDF','1/8', 'count(security categories covered by registry gates) / 8', computeB2()),
-    buildDimension('B3', 'WCAG 2.1 AA',           '1/8', 'axe-playwright violations per route on critical pages (0 = 100)', computeB3()),
-    buildDimension('B4', 'Web Vitals',            '1/8', 'Web Vitals (LCP, INP, CLS) via lighthouse-ci across critical routes — averaged perf score (0–100)', computeB4()),
-    buildDimension('B5', 'TS Strict Mode',        '1/8', 'tsconfig strict flags present + zero any in src/**/*.ts(x)', computeB5()),
-    buildDimension('B6', 'OSV / npm Audit',       '1/8', '0 critical + 0 high CVEs = 100; each critical -20, each high -5', computeB6()),
-    buildDimension('B7', 'CHAOSS Docs Coverage',  '1/8', '% components in component-api.json with real description', computeB7()),
-    buildDimension('B8', 'Test Coverage',         '1/8', 'line + branch coverage ≥80% from vitest+playwright', computeB8()),
+    buildDimension(
+      'B1',
+      'DORA Metrics',
+      '1/8',
+      'deploy frequency + change failure rate vs Elite threshold',
+      computeB1(),
+    ),
+    buildDimension(
+      'B2',
+      'OWASP SAMM / NIST SSDF',
+      '1/8',
+      'count(security categories covered by registry gates) / 8',
+      computeB2(),
+    ),
+    buildDimension(
+      'B3',
+      'WCAG 2.1 AA',
+      '1/8',
+      'axe-playwright violations per route on critical pages (0 = 100)',
+      computeB3(),
+    ),
+    buildDimension(
+      'B4',
+      'Web Vitals',
+      '1/8',
+      'Web Vitals (LCP, INP, CLS) via lighthouse-ci across critical routes — averaged perf score (0–100)',
+      computeB4(),
+    ),
+    buildDimension(
+      'B5',
+      'TS Strict Mode',
+      '1/8',
+      'tsconfig strict flags present + zero any in src/**/*.ts(x)',
+      computeB5(),
+    ),
+    buildDimension(
+      'B6',
+      'OSV / npm Audit',
+      '1/8',
+      '0 critical + 0 high CVEs = 100; each critical -20, each high -5',
+      computeB6(),
+    ),
+    buildDimension(
+      'B7',
+      'CHAOSS Docs Coverage',
+      '1/8',
+      '% components in component-api.json with real description',
+      computeB7(),
+    ),
+    buildDimension(
+      'B8',
+      'Test Coverage',
+      '1/8',
+      'line + branch coverage ≥80% from vitest+playwright',
+      computeB8(),
+    ),
   ];
 
   const aResult = computeComposite(aDims);
@@ -1012,8 +1144,10 @@ function bar(score, width = 20) {
 function renderMarkdown(report, generated) {
   const { aDims, aResult, bDims, bResult, regressionWarning } = report;
 
-  const aComp = aResult.composite !== null ? `**${aResult.composite}**/100` : '**—** (no wired dims)';
-  const bComp = bResult.composite !== null ? `**${bResult.composite}**/100` : '**—** (no wired dims)';
+  const aComp =
+    aResult.composite !== null ? `**${aResult.composite}**/100` : '**—** (no wired dims)';
+  const bComp =
+    bResult.composite !== null ? `**${bResult.composite}**/100` : '**—** (no wired dims)';
 
   let md = `# System Strength Report\n\n`;
   md += `> Generated: ${generated}\n`;
@@ -1092,7 +1226,7 @@ function renderMarkdown(report, generated) {
   md += `## Wiring Obligations\n\n`;
   md += `Dimensions that are \`needs-wiring\` require follow-up units before they contribute to the composite:\n\n`;
 
-  const needsWiring = [...aDims, ...bDims].filter(d => d.status === 'needs-wiring');
+  const needsWiring = [...aDims, ...bDims].filter((d) => d.status === 'needs-wiring');
   for (const d of needsWiring) {
     md += `- **${d.id} (${d.name}):** ${d.reason}\n`;
   }
@@ -1187,8 +1321,12 @@ function appendHistorySnapshot(report, ts) {
     existing = raw
       .split('\n')
       .filter(Boolean)
-      .map(line => {
-        try { return JSON.parse(line); } catch { return null; }
+      .map((line) => {
+        try {
+          return JSON.parse(line);
+        } catch {
+          return null;
+        }
       })
       .filter(Boolean);
   }
@@ -1197,20 +1335,18 @@ function appendHistorySnapshot(report, ts) {
   const cutoff = new Date(ts);
   cutoff.setDate(cutoff.getDate() - 365);
   const cutoffDate = cutoff.toISOString().slice(0, 10); // YYYY-MM-DD string comparison is safe
-  const pruned = existing.filter(e => (e.date ?? '') >= cutoffDate);
+  const pruned = existing.filter((e) => (e.date ?? '') >= cutoffDate);
 
   // Drop any entry for today (same-day idempotency), then append new entry
-  const withoutToday = pruned.filter(e => e.date !== date);
+  const withoutToday = pruned.filter((e) => e.date !== date);
   withoutToday.push(entry);
 
   // Write back (each line is one JSON object, no trailing newline after last line)
-  writeFileSync(
-    historyPath,
-    withoutToday.map(e => JSON.stringify(e)).join('\n') + '\n',
-    'utf-8',
-  );
+  writeFileSync(historyPath, withoutToday.map((e) => JSON.stringify(e)).join('\n') + '\n', 'utf-8');
 
-  console.log(`[strength:snapshot] Appended entry for ${date} → docs/guardrails/strength-history.jsonl (${withoutToday.length} total entries)`);
+  console.log(
+    `[strength:snapshot] Appended entry for ${date} → docs/guardrails/strength-history.jsonl (${withoutToday.length} total entries)`,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -1240,7 +1376,7 @@ function deriveSprintState() {
 
   // Sort clusters by (approved + claimed) descending; break ties by done desc
   const sorted = [...clusterMap.entries()].sort(([, a], [, b]) => {
-    const pendingDiff = (b.approved + b.claimed) - (a.approved + a.claimed);
+    const pendingDiff = b.approved + b.claimed - (a.approved + a.claimed);
     return pendingDiff !== 0 ? pendingDiff : b.done - a.done;
   });
 
@@ -1255,7 +1391,7 @@ function deriveSprintState() {
  */
 function deriveBlockers() {
   const blockers = units
-    .filter(u => u.status === 'parked' || (u.lastAbort && typeof u.lastAbort === 'string'))
+    .filter((u) => u.status === 'parked' || (u.lastAbort && typeof u.lastAbort === 'string'))
     .sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99))
     .slice(0, 3);
   return blockers;
@@ -1269,9 +1405,9 @@ function deriveBlockers() {
 function deriveWeakestDims(report) {
   const { aDims, bDims } = report;
   const allDims = [...aDims, ...bDims];
-  const wired = allDims.filter(d => d.status === 'wired' && typeof d.score === 'number');
+  const wired = allDims.filter((d) => d.status === 'wired' && typeof d.score === 'number');
   wired.sort((a, b) => a.score - b.score);
-  return wired.slice(0, 3).map(d => ({
+  return wired.slice(0, 3).map((d) => ({
     id: d.id,
     name: d.name,
     score: d.score,
@@ -1304,7 +1440,7 @@ function renderSystemOverview(report, generated) {
   // Top clusters with pending work (up to 4, skip 'unknown' / zero-pending)
   const pendingClusters = [...clusterMap.entries()]
     .filter(([, v]) => v.approved + v.claimed > 0)
-    .sort(([, a], [, b]) => (b.approved + b.claimed) - (a.approved + a.claimed))
+    .sort(([, a], [, b]) => b.approved + b.claimed - (a.approved + a.claimed))
     .slice(0, 4);
 
   let sprintTable = '';
@@ -1339,9 +1475,7 @@ function renderSystemOverview(report, generated) {
     }
   }
 
-  const regressionBlock = regressionWarning
-    ? `\n> ⚠️  **REGRESSION:** ${regressionWarning}\n`
-    : '';
+  const regressionBlock = regressionWarning ? `\n> ⚠️  **REGRESSION:** ${regressionWarning}\n` : '';
 
   let md = `# SYSTEM_OVERVIEW\n\n`;
   md += `> **Hirobius DesignOps Engine** — multi-tenant AI-native design system + agency platform.\n`;
@@ -1444,7 +1578,9 @@ function main() {
   if (report.regressionWarning) {
     console.warn(`[strength] REGRESSION: ${report.regressionWarning}`);
   }
-  console.log(`[strength] Reports written to docs/guardrails/strength-report.{md,json} + SYSTEM_OVERVIEW.md`);
+  console.log(
+    `[strength] Reports written to docs/guardrails/strength-report.{md,json} + SYSTEM_OVERVIEW.md`,
+  );
 }
 
 main();

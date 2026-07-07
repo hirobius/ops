@@ -35,19 +35,46 @@ const SCRIPTS = join(ROOT, 'scripts');
 // registry reality: check-* are strict deterministic gates (mostly pre-commit/
 // CI), audit-* are broader health/compliance scans (mostly soft/manual).
 const TAXONOMY = [
-  ['check',    'gate',     'Strict deterministic gate — fast pass/fail, fires on a channel (pre-commit / CI).'],
-  ['audit',    'audit',    'Health / compliance scan — broader, often slower or advisory (soft / manual channel).'],
-  ['validate', 'validate', 'Schema / structure validation — asserts a file or JSON matches its contract.'],
-  ['verify',   'verify',   'Post-build verification — confirms a build step produced correct output.'],
-  ['build',    'build',    'Artifact builder — compiles source into a committed or served artifact.'],
-  ['generate', 'generate', 'Content generator — derives a file (manifest, docs, index) from source.'],
-  ['sync',     'sync',     'Synchronizer — reconciles one source of truth into another.'],
-  ['test',     'test',     'Test runner — integration / smoke / unit checks.'],
-  ['figma',    'figma',    'Figma bridge — design-system sync, diff, or canvas ops.'],
+  [
+    'check',
+    'gate',
+    'Strict deterministic gate — fast pass/fail, fires on a channel (pre-commit / CI).',
+  ],
+  [
+    'audit',
+    'audit',
+    'Health / compliance scan — broader, often slower or advisory (soft / manual channel).',
+  ],
+  [
+    'validate',
+    'validate',
+    'Schema / structure validation — asserts a file or JSON matches its contract.',
+  ],
+  ['verify', 'verify', 'Post-build verification — confirms a build step produced correct output.'],
+  ['build', 'build', 'Artifact builder — compiles source into a committed or served artifact.'],
+  [
+    'generate',
+    'generate',
+    'Content generator — derives a file (manifest, docs, index) from source.',
+  ],
+  ['sync', 'sync', 'Synchronizer — reconciles one source of truth into another.'],
+  ['test', 'test', 'Test runner — integration / smoke / unit checks.'],
+  ['figma', 'figma', 'Figma bridge — design-system sync, diff, or canvas ops.'],
 ];
 const PREFIX_CATEGORY = Object.fromEntries(TAXONOMY.map(([p, cat]) => [p, cat]));
 // Display order for INDEX.md sections (categories not listed fall under 'other').
-const CATEGORY_ORDER = ['gate', 'audit', 'validate', 'verify', 'build', 'generate', 'sync', 'test', 'figma', 'other'];
+const CATEGORY_ORDER = [
+  'gate',
+  'audit',
+  'validate',
+  'verify',
+  'build',
+  'generate',
+  'sync',
+  'test',
+  'figma',
+  'other',
+];
 
 // ── Purpose extraction ───────────────────────────────────────────────────────
 const SECTION_RE =
@@ -60,7 +87,6 @@ const SECTION_RE =
  */
 function extractPurpose(src, base) {
   const lines = src.split('\n');
-  const stem = base.replace(/\.[^.]+$/, '');
 
   // Collect the first descriptive comment block.
   let block = [];
@@ -172,7 +198,9 @@ const indexJson = {
   generatedBy: 'scripts/generate-script-index.mjs',
   note: 'Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.',
   totalScripts: entries.length,
-  taxonomy: Object.fromEntries(TAXONOMY.map(([prefix, category, meaning]) => [prefix, { category, meaning }])),
+  taxonomy: Object.fromEntries(
+    TAXONOMY.map(([prefix, category, meaning]) => [prefix, { category, meaning }]),
+  ),
   categoryCounts,
   scripts: entries,
 };
@@ -197,7 +225,9 @@ md.push('| --- | --- | --- |');
 for (const [prefix, category, meaning] of TAXONOMY) {
   md.push(`| \`${prefix}-\` | ${category} | ${meaning} |`);
 }
-md.push('| _(other)_ | other | One-off utilities, middleware, and domain scripts without a taxonomy prefix. |');
+md.push(
+  '| _(other)_ | other | One-off utilities, middleware, and domain scripts without a taxonomy prefix. |',
+);
 md.push('');
 
 const present = CATEGORY_ORDER.filter((c) => entries.some((e) => e.category === c));
@@ -209,7 +239,9 @@ for (const category of present) {
   md.push('| --- | --- | --- | --- |');
   for (const e of rows) {
     const aliases = e.pnpm.length ? e.pnpm.map((a) => `\`${a}\``).join(', ') : '—';
-    const fires = e.gate ? `${e.gate.channel}${e.gate.severity ? ` · ${e.gate.severity}` : ''}` : '—';
+    const fires = e.gate
+      ? `${e.gate.channel}${e.gate.severity ? ` · ${e.gate.severity}` : ''}`
+      : '—';
     const purpose = e.purpose.replace(/\|/g, '\\|');
     md.push(`| \`${e.name}\` | ${purpose} | ${aliases} | ${fires} |`);
   }

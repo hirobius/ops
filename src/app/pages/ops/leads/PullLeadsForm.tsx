@@ -10,8 +10,7 @@
  */
 
 import { useState, type CSSProperties, type FormEvent } from 'react';
-import { Stack } from '@hirobius/design-system';
-import { Badge } from '@hirobius/design-system';
+import { Stack, Badge } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { opsApi } from '../../../lib/opsApi';
 

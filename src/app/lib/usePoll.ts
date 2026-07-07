@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect -- polling primitive intentionally hydrates state from the fetcher in an effect */
 /* eslint-disable react-hooks/immutability -- scheduleNext ref pattern + latest-fetcher ref are intentional for timer management */
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -51,9 +50,14 @@ export function usePoll<T>(
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
 
-  // Latest fetcher without re-subscribing the effect every render.
+  // Latest fetcher without re-subscribing the effect every render. Written
+  // in an effect (not render body) — refs must only be read/written outside
+  // render; this still runs after every commit, before any timer/handler
+  // that reads fetcherRef.current, so behavior is unchanged.
   const fetcherRef = useRef(fetcher);
-  fetcherRef.current = fetcher;
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+  });
 
   const fetchOnce = useCallback(async () => {
     if (inFlightRef.current) return;

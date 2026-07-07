@@ -19,6 +19,7 @@ import type { CSSProperties } from 'react';
 import { useParams } from 'react-router';
 import { Page, Stack, Badge, Callout, EmptyState } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
+import { statusTone, statusLabel, type BadgeTone } from '../../lib/statusPresentation';
 import { PageHeader } from './PageHeader';
 
 import type {
@@ -76,7 +77,6 @@ const REGISTRY = buildClientRegistry({
 
 // ── Plain-language translation ────────────────────────────────────────────────
 // Status tone + client-facing labels live in the shared statusPresentation module.
-import { statusTone, statusLabel, type BadgeTone } from '../../lib/statusPresentation';
 
 type Tone = BadgeTone;
 const tone = (status: string | undefined): Tone => statusTone(status);

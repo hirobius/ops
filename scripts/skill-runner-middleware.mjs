@@ -55,7 +55,6 @@ const SKILLS = {
   'audit-sidecar': { argv: ['pnpm', 'audit:sidecar'], timeoutMs: 30_000 },
   // Build (creator-facing artefact regen)
   'tokens-index': { argv: ['node', 'scripts/build-token-index.mjs'], timeoutMs: 30_000 },
-  'llms-generate': { argv: ['node', 'scripts/generate-llms-txt.mjs'], timeoutMs: 30_000 },
   'figma-audit': { argv: ['node', 'scripts/audit-figma-system.mjs'], timeoutMs: 20_000 },
   'figma-vars': { argv: ['node', 'scripts/build-figma-variables.mjs'], timeoutMs: 30_000 },
   'convert-assets': { argv: ['node', 'scripts/convert-incoming-assets.mjs'], timeoutMs: 90_000 },

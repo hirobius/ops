@@ -10,8 +10,8 @@
 /* hds-bypass: ops-domain component — composes DS primitives with Tailwind utility classes, not a consumer HDS surface */
 
 import * as React from 'react';
-import { cn } from '../../lib/utils';
 import { Card, Button, Tag } from '@hirobius/design-system';
+import { cn } from '../../lib/utils';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

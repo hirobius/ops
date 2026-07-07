@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 116,
+  "totalScripts": 117,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,13 +41,13 @@
     }
   },
   "categoryCounts": {
-    "other": 54,
-    "audit": 15,
+    "other": 57,
+    "audit": 16,
     "build": 1,
     "gate": 25,
-    "generate": 11,
-    "sync": 3,
-    "test": 3,
+    "generate": 10,
+    "sync": 2,
+    "test": 2,
     "validate": 3,
     "verify": 1
   },
@@ -76,9 +76,7 @@
       "category": "audit",
       "prefix": "audit",
       "purpose": "Generates a bundle composition report at docs/perf/bundle-report.html using vite-bundle-visualizer. Manual channel — artifact, not gating. Complements size-limit (which gates total size) by showing which",
-      "pnpm": [
-        "audit:bundle"
-      ],
+      "pnpm": ["audit:bundle"],
       "gate": {
         "channel": "manual",
         "severity": "warn"
@@ -100,9 +98,7 @@
       "category": "audit",
       "prefix": "audit",
       "purpose": "Dependency vulnerability audit. Wraps `pnpm audit --audit-level moderate json` and translates each advisory into a registry violation. Network required — manual channel only (too slow for pre-commit). The same check",
-      "pnpm": [
-        "audit:deps"
-      ],
+      "pnpm": ["audit:deps"],
       "gate": {
         "channel": "pnpm-meta",
         "severity": "warn"
@@ -135,9 +131,7 @@
       "category": "audit",
       "prefix": "audit",
       "purpose": "Reads docs/guardrails/registry.json, walks every registered gate, and produces a per-gate replaceability verdict with the most likely industry-tool replacement.",
-      "pnpm": [
-        "audit:gate-replaceability"
-      ],
+      "pnpm": ["audit:gate-replaceability"],
       "gate": {
         "channel": "manual",
         "severity": "warn"
@@ -159,9 +153,7 @@
       "category": "audit",
       "prefix": "audit",
       "purpose": "Scans the repository for the four pillars of a self-healing system: 1. AI Guardrails (CLAUDE.md, .cursorrules) 2. Linter Rules (ESLint, stylelint) 3. Gatekeepers (pre-commit hooks, lint-staged)",
-      "pnpm": [
-        "watch:guardrails"
-      ],
+      "pnpm": ["watch:guardrails"],
       "gate": null
     },
     {
@@ -180,10 +172,7 @@
       "category": "audit",
       "prefix": "audit",
       "purpose": "Token compliance auditor for page surfaces. This is intentionally looser than audit-components.mjs:",
-      "pnpm": [
-        "check:full",
-        "tokens:audit:pages"
-      ],
+      "pnpm": ["check:full", "tokens:audit:pages"],
       "gate": {
         "channel": "pnpm-meta",
         "severity": "warn"
@@ -194,9 +183,18 @@
       "category": "audit",
       "prefix": "audit",
       "purpose": "Generates a CycloneDX Software Bill of Materials at docs/security/sbom.json. Manual channel — produces an artifact, not a gate. Useful for the GRC narrative and supply-chain review.",
-      "pnpm": [
-        "audit:sbom"
-      ],
+      "pnpm": ["audit:sbom"],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "audit-sites.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "(no header description)",
+      "pnpm": [],
       "gate": {
         "channel": "manual",
         "severity": "warn"
@@ -207,9 +205,7 @@
       "category": "audit",
       "prefix": "audit",
       "purpose": "Soft-gates audit: identifies every registered gate in docs/guardrails/registry.json that does NOT fire on a strict channel (pre-commit / pre-push / ci-pr), runs each",
-      "pnpm": [
-        "audit:soft-gates"
-      ],
+      "pnpm": ["audit:soft-gates"],
       "gate": {
         "channel": "manual",
         "severity": "warn"
@@ -233,17 +229,9 @@
       "purpose": "Heuristic tier classifier for every src/app/components/Hds*.tsx (and recursive subdirs like src/app/components/lab/). Proposes one of: primitive | pattern | template | utility.",
       "pnpm": [],
       "gate": {
-        "channel": "pre-commit",
+        "channel": "manual",
         "severity": "warn"
       }
-    },
-    {
-      "name": "auth-middleware.mjs",
-      "category": "other",
-      "prefix": "auth",
-      "purpose": "HMAC authentication middleware for the bridge (build unit p5-3). Layered on top of the p5-1 envelope and p5-2 correlation work.",
-      "pnpm": [],
-      "gate": null
     },
     {
       "name": "auto-assigner.mjs",
@@ -266,10 +254,7 @@
       "category": "other",
       "prefix": "batch",
       "purpose": "Visits every route on the target deployment, injects the headless scanner into the live DOM, deduplicates findings, and writes one fix-prompt file per route to scans/.",
-      "pnpm": [
-        "scan",
-        "scan:local"
-      ],
+      "pnpm": ["scan", "scan:local"],
       "gate": null
     },
     {
@@ -277,11 +262,7 @@
       "category": "build",
       "prefix": "build",
       "purpose": "(no header description)",
-      "pnpm": [
-        "check:fast",
-        "roadmap:data",
-        "sync:health"
-      ],
+      "pnpm": ["check:fast", "roadmap:data"],
       "gate": null
     },
     {
@@ -305,12 +286,9 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Keeps the attribution registry machine-checkable.",
-      "pnpm": [
-        "check:attributions",
-        "check:full"
-      ],
+      "pnpm": ["check:attributions", "check:full"],
       "gate": {
-        "channel": "pre-commit",
+        "channel": "manual",
         "severity": "warn"
       }
     },
@@ -319,11 +297,9 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "CI check: every Figma component with a Code Connect mapping (.figma.tsx) has a corresponding React component, and vice versa.",
-      "pnpm": [
-        "check:code-connect"
-      ],
+      "pnpm": ["check:code-connect"],
       "gate": {
-        "channel": "pre-commit",
+        "channel": "manual",
         "severity": "warn"
       }
     },
@@ -343,12 +319,9 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "WCAG 2.1 contrast ratio checker for HDS semantic color pairs. Reads hirobius.tokens.json, resolves primitive + semantic color aliases, and reports contrast ratios for critical text/bg pairings in both",
-      "pnpm": [
-        "check:contrast",
-        "check:full"
-      ],
+      "pnpm": ["check:contrast", "check:full"],
       "gate": {
-        "channel": "pre-commit",
+        "channel": "manual",
         "severity": "warn"
       }
     },
@@ -357,12 +330,9 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Validates structural invariants of HDS documentation pages.",
-      "pnpm": [
-        "check:doc-structure",
-        "check:full"
-      ],
+      "pnpm": ["check:doc-structure", "check:full"],
       "gate": {
-        "channel": "pre-commit",
+        "channel": "manual",
         "severity": "warn"
       }
     },
@@ -371,10 +341,7 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Keeps escape hatches visible and well-formed.",
-      "pnpm": [
-        "check:exemptions",
-        "check:full"
-      ],
+      "pnpm": ["check:exemptions", "check:full"],
       "gate": {
         "channel": "pre-commit",
         "severity": "warn"
@@ -396,12 +363,9 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "A11y focus state checker for HDS components and pages. Every interactive element must have a visible focus indicator.",
-      "pnpm": [
-        "check:focus",
-        "check:full"
-      ],
+      "pnpm": ["check:focus", "check:full"],
       "gate": {
-        "channel": "pre-commit",
+        "channel": "manual",
         "severity": "warn"
       }
     },
@@ -410,11 +374,9 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Guardrail for docs preview surfaces.",
-      "pnpm": [
-        "check:docs"
-      ],
+      "pnpm": ["check:docs"],
       "gate": {
-        "channel": "pre-commit",
+        "channel": "manual",
         "severity": "warn"
       }
     },
@@ -423,11 +385,7 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Catches hardcoded color values in non-CSS color contexts that bypass the CSS custom property cascade and are invisible to check-inline-styles / check-tier-bypass.",
-      "pnpm": [
-        "check:colors",
-        "check:full",
-        "check:tokens"
-      ],
+      "pnpm": ["check:colors", "check:full", "check:tokens"],
       "gate": {
         "channel": "pre-commit",
         "severity": "warn"
@@ -438,9 +396,7 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "License compliance gate. Runs `pnpm licenses list --prod --json` and filters against a deny-list of copyleft / restrictive licenses (GPL/AGPL/LGPL/SSPL/BUSL/EUPL/OSL/CC-BY-NC/CDDL).",
-      "pnpm": [
-        "check:licenses"
-      ],
+      "pnpm": ["check:licenses"],
       "gate": {
         "channel": "pre-commit",
         "severity": "error"
@@ -451,13 +407,7 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Merged from: check-doc-references.mjs — active docs do not point at missing local files check-external-links.mjs — external <a href> URLs return non-4xx",
-      "pnpm": [
-        "check:doc-refs",
-        "check:fast",
-        "check:fast",
-        "check:full",
-        "check:routes"
-      ],
+      "pnpm": ["check:doc-refs", "check:fast", "check:fast", "check:full", "check:routes"],
       "gate": {
         "channel": "pnpm-meta",
         "severity": "warn"
@@ -468,12 +418,9 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Verifies that interactive components ship with motion feedback — the HDS standard that every user action has a visible, token-timed response.",
-      "pnpm": [
-        "check:full",
-        "check:micromotion"
-      ],
+      "pnpm": ["check:full", "check:micromotion"],
       "gate": {
-        "channel": "pre-commit",
+        "channel": "manual",
         "severity": "warn"
       }
     },
@@ -482,9 +429,7 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Static analysis validator for OG meta tags in index.html.",
-      "pnpm": [
-        "check:full"
-      ],
+      "pnpm": ["check:full"],
       "gate": {
         "channel": "pre-commit",
         "severity": "warn"
@@ -495,10 +440,7 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Forbids direct Container usage in src/app/pages/**. Pages must use Page (which wraps Container + applies the canonical vertical padding) so every page lands with consistent breathing room against the viewport edges.",
-      "pnpm": [
-        "check:full",
-        "check:page-shell"
-      ],
+      "pnpm": ["check:full", "check:page-shell"],
       "gate": {
         "channel": "pre-commit",
         "severity": "warn"
@@ -509,12 +451,9 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Verifies that the HDS motion system respects prefers-reduced-motion at both layers:",
-      "pnpm": [
-        "check:full",
-        "check:motion"
-      ],
+      "pnpm": ["check:full", "check:motion"],
       "gate": {
-        "channel": "pre-commit",
+        "channel": "manual",
         "severity": "warn"
       }
     },
@@ -523,14 +462,9 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Validates that hds-registry.json is complete and up-to-date.",
-      "pnpm": [
-        "check:fast",
-        "check:full",
-        "check:registry",
-        "pretest"
-      ],
+      "pnpm": ["check:fast", "check:full", "check:registry", "pretest"],
       "gate": {
-        "channel": "pre-commit",
+        "channel": "manual",
         "severity": "warn"
       }
     },
@@ -539,9 +473,7 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "layout-integrity test set. Adrian directive 2026-05-04: no exceptions.",
-      "pnpm": [
-        "test:layout"
-      ],
+      "pnpm": ["test:layout"],
       "gate": {
         "channel": "pre-commit",
         "severity": "warn"
@@ -552,10 +484,7 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "(no header description)",
-      "pnpm": [
-        "check:release",
-        "check:route-smoke"
-      ],
+      "pnpm": ["check:release", "check:route-smoke"],
       "gate": {
         "channel": "pnpm-meta",
         "severity": "warn"
@@ -566,9 +495,7 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Pre-commit secrets scanner — wraps the `gitleaks` binary and registers it in docs/guardrails/registry.json so it shows up in audits and fixture-proof",
-      "pnpm": [
-        "check:secrets"
-      ],
+      "pnpm": ["check:secrets"],
       "gate": {
         "channel": "pre-commit",
         "severity": "error"
@@ -579,10 +506,7 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Local security and dependency hygiene baseline.",
-      "pnpm": [
-        "check:full",
-        "check:security"
-      ],
+      "pnpm": ["check:full", "check:security"],
       "gate": {
         "channel": "pre-commit",
         "severity": "warn"
@@ -604,12 +528,7 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Enforces the primitive → semantic → component aliasing hierarchy in source files. Direct use of var(--primitive-*) in component and page files bypasses the semantic",
-      "pnpm": [
-        "check:fast",
-        "check:full",
-        "check:tier-bypass",
-        "check:tokens"
-      ],
+      "pnpm": ["check:fast", "check:full", "check:tier-bypass", "check:tokens"],
       "gate": {
         "channel": "pnpm-meta",
         "severity": "warn"
@@ -620,10 +539,7 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "Unresponsive Grid Checker",
-      "pnpm": [
-        "check:full",
-        "check:grids"
-      ],
+      "pnpm": ["check:full", "check:grids"],
       "gate": {
         "channel": "pre-commit",
         "severity": "warn"
@@ -661,9 +577,7 @@
       "category": "other",
       "prefix": "convert",
       "purpose": "(no header description)",
-      "pnpm": [
-        "assets:convert"
-      ],
+      "pnpm": ["assets:convert"],
       "gate": null
     },
     {
@@ -687,9 +601,7 @@
       "category": "other",
       "prefix": "discord",
       "purpose": "Hirobius HQ — Discord bot with Claude API integration.",
-      "pnpm": [
-        "bot"
-      ],
+      "pnpm": ["bot"],
       "gate": null
     },
     {
@@ -705,11 +617,15 @@
       "category": "other",
       "prefix": "ensure",
       "purpose": "Makes a clean checkout of @hirobius/ops buildable.",
-      "pnpm": [
-        "prebuild",
-        "predev",
-        "pretypecheck"
-      ],
+      "pnpm": ["prebuild", "predev", "pretypecheck"],
+      "gate": null
+    },
+    {
+      "name": "export-agent-lead.mjs",
+      "category": "other",
+      "prefix": "export",
+      "purpose": "The ops → clients handoff for the \"prospect → Astro site\" bridge (Phase 3). Reads a saved prospecting batch (the `--json` output of outscraper-fetch.mjs, or",
+      "pnpm": [],
       "gate": null
     },
     {
@@ -717,9 +633,7 @@
       "category": "generate",
       "prefix": "generate",
       "purpose": "Parse git log using conventional-commit format and generate CHANGELOG.md. Groups commits by type (feat/fix/perf/refactor/docs/test/chore/other). Respects git tags; unreleased commits appear in an \"Unreleased\" section.",
-      "pnpm": [
-        "changelog:generate"
-      ],
+      "pnpm": ["changelog:generate"],
       "gate": null
     },
     {
@@ -727,10 +641,7 @@
       "category": "generate",
       "prefix": "generate",
       "purpose": "Auto-regenerates the per-row table in `docs/guardrails/full-strictness-closure-plan.md` from `docs/guardrails/full-strictness-inventory.json`. Per unit 13p-10.",
-      "pnpm": [
-        "closure:plan",
-        "closure:plan:check"
-      ],
+      "pnpm": ["closure:plan", "closure:plan:check"],
       "gate": null
     },
     {
@@ -738,21 +649,7 @@
       "category": "generate",
       "prefix": "generate",
       "purpose": "Generates public/component-changelogs.json by cross-referencing each component slug in src/app/data/component-api.json with git log history.",
-      "pnpm": [
-        "docs:changelogs"
-      ],
-      "gate": null
-    },
-    {
-      "name": "generate-llms-txt.mjs",
-      "category": "generate",
-      "prefix": "generate",
-      "purpose": "Generates the machine-readable HDS system map for AI agents. Source inputs: public/hds-manifest.json src/app/data/component-api.json hirobius.tokens.json (token source of truth; referenced, not inlined)",
-      "pnpm": [
-        "docs:llms",
-        "llms:generate",
-        "tokens"
-      ],
+      "pnpm": ["docs:changelogs"],
       "gate": null
     },
     {
@@ -768,10 +665,7 @@
       "category": "generate",
       "prefix": "generate",
       "purpose": "Generates a machine- + human-readable index of every script in scripts/ so an agent (or human) can find \"the script that does X\" without grepping ~180 files. Merges three sources:",
-      "pnpm": [
-        "manifest:generate",
-        "scripts:index"
-      ],
+      "pnpm": ["manifest:generate", "scripts:index"],
       "gate": null
     },
     {
@@ -779,9 +673,7 @@
       "category": "generate",
       "prefix": "generate",
       "purpose": "Builds src/app/data/security-posture.json from three real data sources: 1. pnpm audit --json → open finding counts per severity 2. docs/security/audit-log.md → last entry date + derived grade",
-      "pnpm": [
-        "audit:sidecar"
-      ],
+      "pnpm": ["audit:sidecar"],
       "gate": null
     },
     {
@@ -789,9 +681,7 @@
       "category": "generate",
       "prefix": "generate",
       "purpose": "Generates public/sitemap.xml from the route list derived from the component registry and static routes (via derive-routes.mjs).",
-      "pnpm": [
-        "sitemap:generate"
-      ],
+      "pnpm": ["sitemap:generate"],
       "gate": null
     },
     {
@@ -799,10 +689,7 @@
       "category": "generate",
       "prefix": "generate",
       "purpose": "Pure observer — reads source data and emits two report artifacts: docs/guardrails/strength-report.md (human-readable dashboard) docs/guardrails/strength-report.json (LLM-readable structured state)",
-      "pnpm": [
-        "strength",
-        "strength:snapshot"
-      ],
+      "pnpm": ["strength", "strength:snapshot"],
       "gate": {
         "channel": "pre-commit",
         "severity": "warn"
@@ -821,9 +708,7 @@
       "category": "generate",
       "prefix": "generate",
       "purpose": "(no header description)",
-      "pnpm": [
-        "catalog"
-      ],
+      "pnpm": ["catalog"],
       "gate": null
     },
     {
@@ -855,9 +740,7 @@
       "category": "other",
       "prefix": "llm",
       "purpose": "(no header description)",
-      "pnpm": [
-        "figma:stream"
-      ],
+      "pnpm": ["figma:stream"],
       "gate": null
     },
     {
@@ -869,13 +752,19 @@
       "gate": null
     },
     {
+      "name": "outscraper-fetch.mjs",
+      "category": "other",
+      "prefix": "outscraper",
+      "purpose": "Intake stage for the rapid-proposal consulting model: scrape local businesses from Google Maps via Outscraper, score each as a \"mock-site candidate,\" and",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "page-clone.mjs",
       "category": "other",
       "prefix": "page",
       "purpose": "(no header description)",
-      "pnpm": [
-        "clone:page"
-      ],
+      "pnpm": ["clone:page"],
       "gate": null
     },
     {
@@ -883,9 +772,7 @@
       "category": "other",
       "prefix": "parse",
       "purpose": "Parses Chrome/Edge bookmark HTML exports into structured markdown files organized by BUILD / GROW / RUN pillar.",
-      "pnpm": [
-        "knowledge:bookmarks"
-      ],
+      "pnpm": ["knowledge:bookmarks"],
       "gate": null
     },
     {
@@ -901,9 +788,7 @@
       "category": "other",
       "prefix": null,
       "purpose": "Static pre-render script.",
-      "pnpm": [
-        "build:prerender"
-      ],
+      "pnpm": ["build:prerender"],
       "gate": null
     },
     {
@@ -911,9 +796,7 @@
       "category": "other",
       "prefix": "print",
       "purpose": "Prints a copyable commit message that includes the current system integrity grade from the latest token audit.",
-      "pnpm": [
-        "health-commit"
-      ],
+      "pnpm": ["health-commit"],
       "gate": null
     },
     {
@@ -929,10 +812,7 @@
       "category": "other",
       "prefix": "promote",
       "purpose": "Interactive walker over docs/ai/learned-rules.jsonl. For each unprommoted entry (no `promotedAt` field), prompts Adrian to promote it to a real registry entry in docs/guardrails/registry.json. The actual flip from",
-      "pnpm": [
-        "guardrail:learned-rules",
-        "guardrail:promote-rule"
-      ],
+      "pnpm": ["guardrail:learned-rules", "guardrail:promote-rule"],
       "gate": null
     },
     {
@@ -948,9 +828,7 @@
       "category": "other",
       "prefix": null,
       "purpose": "(no header description)",
-      "pnpm": [
-        "promote"
-      ],
+      "pnpm": ["promote"],
       "gate": null
     },
     {
@@ -970,14 +848,27 @@
       "gate": null
     },
     {
+      "name": "prospect-stats.mjs",
+      "category": "other",
+      "prefix": "prospect",
+      "purpose": "table. Auto-computes what Run 01 had to be hand-SQL'd: per source_query (= niche × metro) how many leads, the qualified rate, %no-site, and avg need/build/site-quality. Read-only, zero Outscraper cost.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "purge-stale-leads.mjs",
+      "category": "other",
+      "prefix": "purge",
+      "purpose": "(compliance #37, Adrian 2026-07-07). Deletes leads that are stale AND unworked AND not suppressed. KEEPS forever: `won` leads, do_not_contact / unsubscribed tombstones (so opt-outs are never re-scraped), and anything",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "record-health.mjs",
       "category": "other",
       "prefix": "record",
       "purpose": "Appends the current token audit snapshot to the health history log so the Overview rail can track trend over time.",
-      "pnpm": [
-        "check:semantic-report",
-        "health:record"
-      ],
+      "pnpm": ["check:semantic-report", "health:record"],
       "gate": null
     },
     {
@@ -985,9 +876,7 @@
       "category": "other",
       "prefix": "refresh",
       "purpose": "Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and updates per-gate `lastFiringAt` and `lastViolationAt` fields in",
-      "pnpm": [
-        "guardrail:firing-stats"
-      ],
+      "pnpm": ["guardrail:firing-stats"],
       "gate": null
     },
     {
@@ -1003,9 +892,7 @@
       "category": "other",
       "prefix": "run",
       "purpose": "Single source of truth for \"which gates run on which channel.\"",
-      "pnpm": [
-        "closure:plan"
-      ],
+      "pnpm": ["closure:plan"],
       "gate": null
     },
     {
@@ -1037,9 +924,7 @@
       "category": "other",
       "prefix": "scaffold",
       "purpose": "Creates a Swiss-canonical component skeleton from templates/component-template.tsx, plus a manifest stub and a fixture stub under fixtures/swiss-canon/<name>-clean/. The scaffolder makes",
-      "pnpm": [
-        "scaffold:component"
-      ],
+      "pnpm": ["scaffold:component"],
       "gate": null
     },
     {
@@ -1047,10 +932,7 @@
       "category": "other",
       "prefix": "self",
       "purpose": "(no header description)",
-      "pnpm": [
-        "heal",
-        "heal:smoke"
-      ],
+      "pnpm": ["heal", "heal:smoke"],
       "gate": null
     },
     {
@@ -1066,9 +948,7 @@
       "category": "other",
       "prefix": "setup",
       "purpose": "Activates Husky as the repo's hook path.",
-      "pnpm": [
-        "prepare"
-      ],
+      "pnpm": ["prepare"],
       "gate": null
     },
     {
@@ -1092,19 +972,7 @@
       "category": "sync",
       "prefix": "sync",
       "purpose": "Scans src/ for lucide-react imports and emits a registry of the icon exports currently used by the app.",
-      "pnpm": [
-        "icons:sync"
-      ],
-      "gate": null
-    },
-    {
-      "name": "sync-system-health.mjs",
-      "category": "sync",
-      "prefix": "sync",
-      "purpose": "Reads the latest generated system artifacts, synchronizes health telemetry into public/hds-manifest.json, records history when the score changes, and only",
-      "pnpm": [
-        "sync:health"
-      ],
+      "pnpm": ["icons:sync"],
       "gate": null
     },
     {
@@ -1120,9 +988,7 @@
       "category": "other",
       "prefix": "telegram",
       "purpose": "Telegram adapter for the Hirobius HQ auto-assigner. Mirrors scripts/discord-bot.mjs message routing — same backend, different transport. Both can run side-by-side; both write to the same",
-      "pnpm": [
-        "telegram"
-      ],
+      "pnpm": ["telegram"],
       "gate": null
     },
     {
@@ -1130,9 +996,7 @@
       "category": "other",
       "prefix": "telemetry",
       "purpose": "Reads telemetry/events.jsonl and prints a generation-health summary: total generations, success / exhausted breakdown, success rate retry-exhaustion rate (over rolling 24 h, production-tagged)",
-      "pnpm": [
-        "telemetry:report"
-      ],
+      "pnpm": ["telemetry:report"],
       "gate": null
     },
     {
@@ -1140,9 +1004,7 @@
       "category": "test",
       "prefix": "test",
       "purpose": "(no header description)",
-      "pnpm": [
-        "test:phase1"
-      ],
+      "pnpm": ["test:phase1"],
       "gate": null
     },
     {
@@ -1150,17 +1012,7 @@
       "category": "test",
       "prefix": "test",
       "purpose": "Regression suite for LLM prompt outputs. Walks fixtures/llm-prompts/<slug>/ directories. Each must contain:",
-      "pnpm": [
-        "test:prompts"
-      ],
-      "gate": null
-    },
-    {
-      "name": "test-retry-loop.mjs",
-      "category": "test",
-      "prefix": "test",
-      "purpose": "Tests the retry loop with a mocked LLM. No network calls.",
-      "pnpm": [],
+      "pnpm": ["test:prompts"],
       "gate": null
     },
     {
@@ -1176,9 +1028,7 @@
       "category": "other",
       "prefix": "ui",
       "purpose": "p6-2: thin CLI wrapper around GET http://localhost:3005/lint. Asks the bridge to run the validator suite over its current in-memory selection and prints findings. Exits non-zero when findings are non-empty so it",
-      "pnpm": [
-        "ui:lint"
-      ],
+      "pnpm": ["ui:lint"],
       "gate": null
     },
     {
@@ -1186,9 +1036,7 @@
       "category": "other",
       "prefix": "update",
       "purpose": "Appends a systems-ledger entry to docs/SYSTEMS-LOG.md using the latest token audit report and health history snapshot.",
-      "pnpm": [
-        "health-log"
-      ],
+      "pnpm": ["health-log"],
       "gate": null
     },
     {
@@ -1234,11 +1082,7 @@
       "category": "verify",
       "prefix": "verify",
       "purpose": "Verify that roadmap.json summary counts match the displayed items in each section. This prevents drift between the top-level summary and the actual section data.",
-      "pnpm": [
-        "roadmap:data",
-        "roadmap:verify",
-        "sync:health"
-      ],
+      "pnpm": ["roadmap:data", "roadmap:verify"],
       "gate": null
     },
     {
@@ -1254,9 +1098,7 @@
       "category": "other",
       "prefix": "visual",
       "purpose": "(no header description)",
-      "pnpm": [
-        "visual-ingest"
-      ],
+      "pnpm": ["visual-ingest"],
       "gate": null
     },
     {
@@ -1264,9 +1106,7 @@
       "category": "other",
       "prefix": "watch",
       "purpose": "(no header description)",
-      "pnpm": [
-        "roadmap:watch"
-      ],
+      "pnpm": ["roadmap:watch"],
       "gate": null
     },
     {
@@ -1274,11 +1114,7 @@
       "category": "other",
       "prefix": "youtube",
       "purpose": "Fetches liked + Watch Later videos from multiple Google accounts, gets transcripts, summarizes via local Hermes, writes structured markdown to data/knowledge/grow/youtube/.",
-      "pnpm": [
-        "knowledge:youtube",
-        "knowledge:youtube:auth",
-        "knowledge:youtube:digest"
-      ],
+      "pnpm": ["knowledge:youtube", "knowledge:youtube:auth", "knowledge:youtube:digest"],
       "gate": null
     }
   ]

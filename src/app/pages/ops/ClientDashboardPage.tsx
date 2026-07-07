@@ -3,21 +3,16 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
 import { useParams } from 'react-router';
-import { Page } from '@hirobius/design-system';
-import { Stack } from '@hirobius/design-system';
-import { Badge } from '@hirobius/design-system';
-import { Callout } from '@hirobius/design-system';
+import { Page, Stack, Badge, Callout, TileGrid, EmptyState } from '@hirobius/design-system';
 import { StatusTile, type StatusTileTone } from '@hirobius/design-system';
-import { TileGrid } from '@hirobius/design-system';
-import { PhaseHeader, type PhaseHeaderTone } from '../../components/phase-header';
-import { EmptyState } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
-import { PageHeader } from './PageHeader';
+import { PhaseHeader, type PhaseHeaderTone } from '../../components/phase-header';
 
 // Domain-status → Badge tone + label now live in the shared statusPresentation
 // module (consolidated with ClientReportPage; that module documents the
 // per-surface tone conflicts deliberately left untouched).
-import { statusTone, statusLabel, type BadgeTone } from '../../lib/statusPresentation';
+import { statusTone, statusLabel } from '../../lib/statusPresentation';
+import { PageHeader } from './PageHeader';
 
 // ── Manifest-driven client registry ───────────────────────────────────────────
 
