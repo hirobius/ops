@@ -1,11 +1,12 @@
 {
-  "updatedAt": "2026-07-06T20:00:00Z",
+  "updatedAt": "2026-07-07T06:15:00Z",
   "phase": "live",
-  "headline": "Production is LIVE (hirobius-ops, main). Command center running: leads/tasks/digest/projects boards + new /ops/issues cross-repo GitHub board. GitHub Issues are the task source of truth.",
+  "headline": "Production LIVE. Prospecting pipeline (#21) running end-to-end: Run 01 scored 249 WA-trade leads (25 qualified). 3rd 'site-quality' scorer + compliance pass + Fable prompt library shipped. Outscraper spend on hold pending validation.",
   "next": [
-    "Revenue path: Adrian sets Supabase env + applies migrations 0001/0002/0005, then first live Outscraper prospecting run (#21 landed on main, blocked on env only)",
-    "Backfill the 60 scored WA realtors via --ingest-batch once Supabase exists (#21 follow-on, zero API cost)",
-    "Remaining ops issues: #27 PII history rewrite, #28 portal server-auth, #29 agentic review-loop Slice 1, #9 outreach v1"
+    "Adrian: create free PAGESPEED_API_KEY + apply migrations 0006/0007 → then I audit the 223 custom-site leads (bad-site thesis) at zero Outscraper cost",
+    "Prospecting learnings: Spokane+Olympia yield 4x Seattle; excavation/tree/pressure-washing > fencing; next paid run targets winners (spend on hold)",
+    "Compliance before outreach scales: #35-#38 (suppression, retention purge, privacy policy). Outreach engine #9 still unbuilt.",
+    "Other open ops issues: #27 PII history rewrite, #28 portal server-auth, #29 review-loop Slice 1"
   ],
   "blocked": []
 }
