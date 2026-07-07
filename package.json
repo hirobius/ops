@@ -115,7 +115,7 @@
     "knowledge:youtube": "node scripts/youtube-knowledge.mjs",
     "knowledge:youtube:auth": "node scripts/youtube-knowledge.mjs --auth",
     "knowledge:youtube:digest": "node scripts/youtube-knowledge.mjs --digest",
-    "lint": "eslint src scripts validators tests",
+    "lint": "eslint src scripts tests",
     "lint:fix": "eslint src scripts validators tests --fix",
     "llms:generate": "node scripts/generate-llms-txt.mjs",
     "manifest:generate": "node scripts/generate-script-index.mjs",

@@ -1,14 +1,16 @@
 #!/usr/bin/env sh
 set -e
 
-echo "Running full HDS checks..."
-pnpm check:full
+# Ops pre-push gate. Ops CONSUMES @hirobius/design-system; it does not author
+# it — so the old DS-authoring suite here (check:full, test:a11y, HDS self-heal,
+# foundation visual-parity) either crashed on missing DS artifacts
+# (hirobius.tokens.json) or checked things that live in the DS repo, forcing
+# every push through --no-verify. Replaced with the checks that actually apply
+# to this app. DS-authoring gates now live in the `manual` channel
+# (docs/guardrails/registry.json) and can be run on demand.
 
-echo "Running a11y tests..."
-pnpm test:a11y
+echo "Running typecheck..."
+pnpm typecheck
 
-echo "Running HDS self-heal..."
-pnpm run heal
-
-echo "Running foundation visual parity..."
-node scripts/visual-ingest.mjs --foundation-parity
+echo "Running tests..."
+pnpm test

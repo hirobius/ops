@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "generated": "2026-05-05T00:00:00.000Z",
-  "precommitStructureHash": "b8605f283af7a0543921bd353bab5fff829d9d058719a4b8b267cc7c24c0e5a8",
-  "precommitStructureHashUpdatedAt": "2026-06-19T04:36:57.045Z",
+  "precommitStructureHash": "79c0ba29fc869e2883956bf87a19fd4ea8bc967547eaf27aa3dacb6ea2469a2a",
+  "precommitStructureHashUpdatedAt": "2026-07-07T18:01:41.652Z",
   "gates": [
     {
       "id": "audit-soft-gates",
@@ -152,7 +152,8 @@
       "lastViolationAt": null,
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pre-commit"
+      "firingChannel": "manual",
+      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-attributions",
@@ -164,7 +165,8 @@
       "lastViolationAt": null,
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pre-commit"
+      "firingChannel": "manual",
+      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-code-connect",
@@ -176,7 +178,8 @@
       "lastViolationAt": null,
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pre-commit"
+      "firingChannel": "manual",
+      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-contrast",
@@ -188,7 +191,8 @@
       "lastViolationAt": null,
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pre-commit"
+      "firingChannel": "manual",
+      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-doc-structure",
@@ -200,7 +204,8 @@
       "lastViolationAt": null,
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pre-commit"
+      "firingChannel": "manual",
+      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-link-integrity",
@@ -263,7 +268,8 @@
       "lastViolationAt": "2026-05-08T02:21:53.642Z",
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pre-commit"
+      "firingChannel": "manual",
+      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-frozen-demos",
@@ -275,7 +281,8 @@
       "lastViolationAt": null,
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pre-commit"
+      "firingChannel": "manual",
+      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-hardcoded-colors",
@@ -315,7 +322,8 @@
       "lastViolationAt": null,
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pre-commit"
+      "firingChannel": "manual",
+      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-og-meta",
@@ -352,7 +360,8 @@
       "lastViolationAt": null,
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pre-commit"
+      "firingChannel": "manual",
+      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-registry",
@@ -364,7 +373,8 @@
       "lastViolationAt": "2026-05-06T20:50:02.717Z",
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pre-commit"
+      "firingChannel": "manual",
+      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-route-coverage",
@@ -428,18 +438,6 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "pnpm-meta"
-    },
-    {
-      "id": "check-unit-overlap",
-      "description": "Pre-dispatch unit-overlap detector. Given a unit ID about to be claimed, reads its agentNotes and description for likely file paths and refuses to claim if another in-flight (status: claimed) unit is also touching those paths. Hooked into hermes-unit.mjs claim flow. Mitigates the parallel-pod anti-pattern where two agents race to edit the same file.",
-      "severity": "error",
-      "gateScript": "scripts/check-unit-overlap.mjs",
-      "fixturePath": "fixtures/check-unit-overlap",
-      "lastFiringAt": null,
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "generated",
-      "firingChannel": "manual"
     },
     {
       "id": "check-unresponsive-grids",
@@ -558,6 +556,18 @@
       "source": "human",
       "firingChannel": "manual",
       "supportsJson": true
+    },
+    {
+      "id": "audit-sites",
+      "description": "Site-quality / redesign-need auditor (#21). Reads custom-site leads from Supabase, calls Google PageSpeed Insights, and scores each site (0-100 inverse). Operator CLI + data tool, not a guardrail — manual channel, needs PAGESPEED_API_KEY + migration 0006.",
+      "severity": "warn",
+      "gateScript": "scripts/audit-sites.mjs",
+      "fixturePath": null,
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual"
     }
   ]
 }
