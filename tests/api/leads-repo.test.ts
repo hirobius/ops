@@ -29,6 +29,10 @@ function recordingSb(result: { data?: unknown; error?: unknown } = { data: [], e
       calls.eq = { col, val };
       return builder;
     },
+    in(col: string, vals: unknown) {
+      calls.in = { col, vals };
+      return builder;
+    },
     single() {
       calls.single = true;
       return builder;
@@ -84,5 +88,61 @@ describe('leads repository', () => {
     const { sb, calls } = recordingSb({ error: null });
     await upsertLeads(sb, [{ place_id: 'p1' }]);
     expect(calls.upsert).toEqual({ rows: [{ place_id: 'p1' }], opts: { onConflict: 'place_id' } });
+  });
+
+  // A mode-aware stub: the suppression SELECT (…eq('do_not_contact', true))
+  // resolves `suppressed`; the upsert resolves success and captures its rows.
+  function suppressionSb(suppressed: { place_id: string }[], supErr: unknown = null) {
+    let mode = '';
+    let upsertRows: unknown = null;
+    const b: Record<string, unknown> = {
+      select: () => b,
+      in: () => b,
+      eq: (col: string) => {
+        if (col === 'do_not_contact') mode = 'suppress';
+        return b;
+      },
+      upsert: (rows: unknown) => {
+        mode = 'upsert';
+        upsertRows = rows;
+        return b;
+      },
+      then: (resolve: (r: unknown) => unknown) =>
+        mode === 'suppress'
+          ? resolve({ data: suppressed, error: supErr })
+          : resolve({ data: upsertRows, error: null }),
+    };
+    const sb = { from: () => b } as never;
+    return { sb, getUpsertRows: () => upsertRows };
+  }
+
+  it('upsertLeads: drops do_not_contact tombstones before upsert (#36)', async () => {
+    const { sb, getUpsertRows } = suppressionSb([{ place_id: 'p2' }]);
+    const { error } = await upsertLeads(sb, [{ place_id: 'p1' }, { place_id: 'p2' }]);
+    expect(error).toBeNull();
+    expect(getUpsertRows()).toEqual([{ place_id: 'p1' }]); // p2 suppressed, never re-surfaced
+  });
+
+  it('upsertLeads: when every incoming row is suppressed, no upsert runs', async () => {
+    const { sb, getUpsertRows } = suppressionSb([{ place_id: 'p1' }]);
+    const { data, error } = await upsertLeads(sb, [{ place_id: 'p1' }]);
+    expect(error).toBeNull();
+    expect(data).toEqual([]);
+    expect(getUpsertRows()).toBeNull(); // upsert skipped entirely
+  });
+
+  it('upsertLeads: suppression-lookup error (e.g. pre-0007 column) falls back to plain upsert', async () => {
+    const { sb, getUpsertRows } = suppressionSb([], { message: 'column do_not_contact does not exist' });
+    const { error } = await upsertLeads(sb, [{ place_id: 'p1' }]);
+    expect(error).toBeNull();
+    expect(getUpsertRows()).toEqual([{ place_id: 'p1' }]); // ingest not blocked
+  });
+
+  it('upsertLeads: empty input returns without touching the db', async () => {
+    const { sb, getUpsertRows } = suppressionSb([]);
+    const { data, error } = await upsertLeads(sb, []);
+    expect(data).toEqual([]);
+    expect(error).toBeNull();
+    expect(getUpsertRows()).toBeNull();
   });
 });
