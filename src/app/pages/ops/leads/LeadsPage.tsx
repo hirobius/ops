@@ -27,6 +27,7 @@ import { PageHeader } from '../PageHeader';
 import { opsApi } from '../../../lib/opsApi';
 import { useLeads } from './useLeads';
 import { PullLeadsForm } from './PullLeadsForm';
+import { LeadSweepPanel } from './LeadSweepPanel';
 import type { Lead, LeadStatus, SiteStatus } from './types';
 
 type BadgeTone = 'success' | 'neutral' | 'warning' | 'danger';
@@ -169,6 +170,10 @@ export default function LeadsPage() {
 
       <section style={s.formSlot} aria-label="Pull leads">
         <PullLeadsForm onInserted={() => refetch()} />
+      </section>
+
+      <section style={s.formSlot} aria-label="Saved lead sweeps">
+        <LeadSweepPanel onInserted={() => refetch()} />
       </section>
 
       <div style={s.statusRow}>

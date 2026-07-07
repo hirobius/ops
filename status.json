@@ -1,12 +1,12 @@
 {
-  "updatedAt": "2026-07-07T19:40:00Z",
+  "updatedAt": "2026-07-07T20:10:00Z",
   "phase": "live",
-  "headline": "Production LIVE. #17 closed: swept orchestration-era dead code out of agentic-os/data.ts (the routed Build/Briefing/Dispatcher pages were already gone pre-#17; ~110 lines of orphaned aggregates removed, knip unused-exports 10→1). #28 done: /c/:slug portal auth moved server-side (secret no longer bundled). Guardrail hygiene: separated ops gates from inherited DS-authoring gates (pre-commit 26→16, all green; DS gates → manual) — #39 tracks residual lint debt. Prospecting pipeline (#21) live: Run 01 scored 249 leads (25 qualified) + site-quality scorer + compliance shipped.",
+  "headline": "Production LIVE. #12 (lead-sweep half) shipped: /ops/leads saved-sweep selector — preset preview → reviewable pair checklist + record estimate → capped, explicit-confirm, sequential /api/pull-leads run. #17 closed: swept orchestration-era dead code out of agentic-os/data.ts. #28 done: /c/:slug portal auth moved server-side (secret no longer bundled). Guardrail hygiene: separated ops gates from inherited DS-authoring gates (pre-commit 26→16, all green; DS gates → manual) — #39 tracks residual lint debt. Prospecting pipeline (#21) live: Run 01 scored 249 leads (25 qualified) + site-quality scorer + compliance shipped.",
   "next": [
+    "Adrian: explicit go before any lead-sweep 'Confirm run' — Outscraper spend still on hold pending bad-site thesis validation",
     "Adrian: PORTAL_HMAC_SECRET set in env+Vercel (verified e2e); redeploy main to ship #28, then remove old VITE_PORTAL_HMAC_SECRET",
     "#39 lint debt CLEARED (0 errors/0 warnings); commit+push clean locally. Web-session caveat: editorconfig-checker 403s downloading its binary in-sandbox — vendor it or move to CI to drop --no-verify in web sessions too",
     "Adrian: create free PAGESPEED_API_KEY + apply migrations 0006/0007 → then I audit the 223 custom-site leads (bad-site thesis) at zero Outscraper cost",
-    "Prospecting learnings: Spokane+Olympia yield 4x Seattle; excavation/tree/pressure-washing > fencing; next paid run targets winners (spend on hold)",
     "Compliance before outreach scales: #35-#38 (suppression, retention purge, privacy policy). Outreach engine #9 still unbuilt. Other open: #27 PII history rewrite, #29 review-loop Slice 1"
   ],
   "blocked": []
