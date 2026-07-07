@@ -87,6 +87,12 @@ docs/ai/proposed-skills.jsonl
 docs/guardrails/firing-log.jsonl
 docs/guardrails/firing-log.stderr
 
+# Agentic-ops review loop, Slice 1 (#29) — scripts/daily-review.mjs output.
+# findings.jsonl accumulates append-only across runs; the digest is a
+# rewrite-per-run snapshot. Both are local review artifacts, not history.
+findings.jsonl
+daily-review-digest.json
+
 # Per-client automation runtime logs — appended by automations/<id>/run.mjs
 clients/*/automations/_log.jsonl
 
