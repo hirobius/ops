@@ -21,6 +21,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 - **Delivery architecture (lead → site pipeline):** `docs/ARCHITECTURE.md`.
 - **Guardrail registry:** `docs/guardrails/registry.json` — every `scripts/check-*.mjs` / `audit-*.mjs` gate with its `firingChannel`; `validate-guardrail-registry` keeps registry ↔ scripts consistent.
 - **Context awareness:** look for local `CLAUDE.md` files in subdirectories for overriding rules before editing.
+- **Plan & PR artifacts (convention, #4):** for a substantial implementation plan, write it as a self-contained **HTML file** (real tables, mockups, data-flow, key code snippets) reviewable in a browser — not a markdown wall (template gallery: `anthropics/html-effectiveness`). For a large diff, produce an **artifact walkthrough** (the diff, reasoning per change, what was tested). Small changes stay inline.
 
 **Before ending a session that did real work:** update `docs/ai/HANDOFF.md` (Now / Next / Parked / one Done-log line) and refresh root `status.json` (the fleet dashboard renders it); include both in the final commit.
 
