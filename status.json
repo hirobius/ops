@@ -1,11 +1,12 @@
 {
-  "updatedAt": "2026-07-07T20:40:00Z",
+  "updatedAt": "2026-07-07T22:30:00Z",
   "phase": "live",
-  "headline": "Production LIVE. Issue burn-down: closed 11 ops issues this session — #28 portal server-auth, #16 offline-copy, #17 dead-surface sweep, #29 daily-review, #12 lead-sweep presets, #11 deploy-alert, #36 do_not_contact suppression on ingest, #37 retention purge, #14 collision policy, #4 plan/PR-artifact convention, #39 lint debt. Prospecting pipeline (#21) live: Run 01 scored 249 leads (25 qualified) + site-quality scorer + compliance shipped.",
+  "headline": "Task-importer Slice 1 landed (#8/#13 foundation): GitHub issues -> tasks table via POST /api/tasks, OPS_AGENT_KEY machine auth, /ops/tasks source filter chips + import button. Production LIVE. Issue burn-down: closed 11 ops issues this session — #28 portal server-auth, #16 offline-copy, #17 dead-surface sweep, #29 daily-review, #12 lead-sweep presets, #11 deploy-alert, #36 do_not_contact suppression on ingest, #37 retention purge, #14 collision policy, #4 plan/PR-artifact convention, #39 lint debt. Prospecting pipeline (#21) live: Run 01 scored 249 leads (25 qualified) + site-quality scorer + compliance shipped.",
   "next": [
-    "Adrian DECISIONS needed to unblock the rest: (a) #9 outreach email provider (Resend/Postmark/SES) — gates outreach; (b) #8 approvals inbox needs the task-importer + OPS_AGENT_KEY as its data source (its old source, the Hermes bridge, is dead); (c) #5 blast-radius is dev-tooling (NORTH_STAR drift) — build or skip?",
+    "Task-importer Slice 2+: autonomy dial (auto-ok self-dispatch), broadcast tasks (fan out to all repos), per-task budgets/auto-halt/run-log recaps, Projects->Tasks link — none built yet, see docs/ai/HANDOFF.md Next item 2",
+    "Adrian DECISIONS needed to unblock the rest: (a) #9 outreach email provider (Resend/Postmark/SES) — gates outreach; (b) #8 approvals inbox now has its data source (task-importer + OPS_AGENT_KEY landed) — ready to scope; (c) #5 blast-radius is dev-tooling (NORTH_STAR drift) — build or skip?",
     "Adrian HUMAN steps: apply migrations 0006/0007 in Supabase (unblocks #36 suppression + #37 purge + the 223-lead site audit); set PORTAL_HMAC_SECRET + redeploy to ship #28; create PAGESPEED_API_KEY; run `claude mcp add playwright --scope project` (#3); force-push PII history scrub (#27)",
-    "Parked/gated open issues: #3 (mcp), #7 (needs ANTHROPIC_API_KEY + risky prompt changes), #9 (#8+provider), #13 (task-importer infra), #15/#30 (Discord low-pri), #18 (Vercel dashboard), #19/#20 (cross-repo Concrete/DS), #27/#33/#38 (human/legal), #32 (.env.example blocked by hard rule), #35 (legal umbrella)",
+    "Parked/gated open issues: #3 (mcp), #7 (needs ANTHROPIC_API_KEY + risky prompt changes), #9 (#8+provider), #15/#30 (Discord low-pri), #18 (Vercel dashboard), #19/#20 (cross-repo Concrete/DS), #27/#33/#38 (human/legal), #32 (.env.example blocked by hard rule), #35 (legal umbrella)",
     "Web-session caveat (#39): editorconfig-checker 403s downloading its binary in-sandbox — every commit here still needs --no-verify; vendor the binary or move that step to CI to fix",
     "Outscraper spend still ON HOLD — explicit go required before any lead-sweep 'Confirm run'"
   ],
