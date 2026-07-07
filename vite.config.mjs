@@ -105,6 +105,40 @@ export default defineConfig(({ mode }) => {
           });
         },
       },
+      // Dev-only: GET /api/projects — aggregates each fleet repo's root
+      // status.json live from GitHub so /ops reflects fleet status without an
+      // ops redeploy. Prod is served by api/projects.ts. apply: 'serve' only.
+      {
+        name: 'ops-projects-api',
+        apply: 'serve',
+        configureServer(server) {
+          server.middlewares.use('/api/projects', async (req, res, next) => {
+            if (req.method !== 'GET') return next();
+            res.setHeader('Content-Type', 'application/json');
+            const token = env.GITHUB_TOKEN || process.env.GITHUB_TOKEN;
+            if (!token) {
+              res.statusCode = 503;
+              res.end(
+                JSON.stringify({
+                  error: 'GITHUB_TOKEN is not set (dev: add it to .env.local).',
+                  code: 'ENV_MISSING_GITHUB_TOKEN',
+                }),
+              );
+              return;
+            }
+            try {
+              const ref = new URL(req.url, 'http://localhost').searchParams.get('ref') || undefined;
+              const { fetchFleetStatus } = await import('./lib/fleet-status.mjs');
+              const data = await fetchFleetStatus({ token, ref });
+              res.statusCode = 200;
+              res.end(JSON.stringify(data));
+            } catch (error) {
+              res.statusCode = 502;
+              res.end(JSON.stringify({ error: String(error?.message || error) }));
+            }
+          });
+        },
+      },
       // Dev-only: POST /api/skills/:id — whitelisted skill runner that backs the
       // /ops dashboard's skills bar. See scripts/skill-runner-middleware.mjs for
       // the whitelist; anything outside it returns 403. apply: 'serve' so prod

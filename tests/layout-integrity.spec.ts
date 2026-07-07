@@ -81,6 +81,7 @@ const ALL_ROUTES = [
   '/ops/sessions',
   '/ops/kanban',
   '/ops/leads',
+  '/ops/fleet',
   '/ops/clients',
   '/ops/clients/lilac-insure',
   '/ops/clients/lilac-insure/report',
