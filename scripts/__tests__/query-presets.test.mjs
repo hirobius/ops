@@ -31,4 +31,20 @@ describe('query-presets', () => {
   it('throws a helpful error on an unknown preset', () => {
     expect(() => buildQueries('nope')).toThrow(/Unknown preset "nope"/);
   });
+
+  it('includes the underserved-trade presets (added after Run 01)', () => {
+    for (const name of ['excavation-wa', 'welding-wa', 'well-drilling-wa', 'masonry-wa']) {
+      expect(PRESET_NAMES).toContain(name);
+    }
+  });
+
+  it('underserved presets expand over the 21 WA_METROS areas × 5 keywords = 105', () => {
+    for (const name of ['excavation-wa', 'welding-wa', 'well-drilling-wa', 'masonry-wa']) {
+      const preset = PRESETS[name];
+      const areaCount = preset.metros.reduce((n, m) => n + m.areas.length, 0);
+      expect(areaCount).toBe(21);
+      expect(preset.keywords).toHaveLength(5);
+      expect(buildQueries(name)).toHaveLength(105);
+    }
+  });
 });

@@ -61,6 +61,29 @@ export const PRESETS = {
     metros: WA_METROS,
   },
 
+  // ── Underserved trades (added 2026-07-07 after Run 01) — higher-ticket,
+  //    less-digitized, nobody pitching them; excavation clustered in Run 01. ──
+  'excavation-wa': {
+    label: 'Excavation / land clearing / grading — WA metros',
+    keywords: ['excavation contractor', 'land clearing', 'grading contractor', 'site prep', 'demolition contractor'],
+    metros: WA_METROS,
+  },
+  'welding-wa': {
+    label: 'Welding / metal fabrication — WA metros',
+    keywords: ['welding', 'metal fabrication', 'welder', 'custom fabrication', 'mobile welding'],
+    metros: WA_METROS,
+  },
+  'well-drilling-wa': {
+    label: 'Well drilling / water systems — WA metros',
+    keywords: ['well drilling', 'water well drilling', 'well pump service', 'water well', 'water systems'],
+    metros: WA_METROS,
+  },
+  'masonry-wa': {
+    label: 'Masonry / hardscaping — WA metros',
+    keywords: ['masonry', 'hardscaping', 'retaining walls', 'paver patio', 'stone mason'],
+    metros: WA_METROS,
+  },
+
   // Beachhead: exterior cleaning across the WA+OR core metros + suburbs.
   'exterior-cleaning': {
     label: 'Exterior cleaning — WA+OR core metros (beachhead)',
