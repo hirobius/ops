@@ -44,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
   // GET — does the caller's existing cookie already authorize this slug?
   if (req.method === 'GET') {
-    const slug = slugOf(req.query?.slug);
+    const slug = slugOf(req.query?.['slug']);
     res.status(200).json({ authorized: Boolean(slug) && requirePortalAuth(req, slug), configured: true });
     return;
   }
