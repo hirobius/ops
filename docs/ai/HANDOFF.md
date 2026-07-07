@@ -7,7 +7,7 @@
 > finished things to the log line at the bottom). Adrian never copy-pastes
 > context again — he types one word.
 
-_Last updated: 2026-07-07 (#11 deploy/blocked alert check landed · #12 lead-sweep manual-trigger landed · #17 orchestration-era dead-code sweep · #28 portal auth moved server-side · prospecting Run 01 + 3rd scorer landed) · branch `claude/outscraper-max-records`_
+_Last updated: 2026-07-07 (task-importer Slice 1 landed — GitHub issues → tasks + OPS_AGENT_KEY machine auth · #11 deploy/blocked alert check landed · #12 lead-sweep manual-trigger landed · #17 orchestration-era dead-code sweep · #28 portal auth moved server-side · prospecting Run 01 + 3rd scorer landed) · branch `claude/outscraper-max-records`_
 
 ## Now (what is true today)
 
@@ -111,20 +111,29 @@ requires an explicit per-item yes from Adrian (standing rule).
      (real lead pull), `VERCEL_TOKEN` + `VERCEL_TEAM_ID=team_niSKMbO08RycEwm9EXhN1PnE`
      (/ops/projects fleet), `GITHUB_TOKEN` (fine-grained, read-only
      Issues+Metadata — per-repo status.json on /ops/projects).
-2. **Task importer unit** (needs `GITHUB_TOKEN`): pull open GitHub issues from
-   every repo into the `tasks` table (`source: 'github:<repo>'`, `native_key` =
-   issue#), project filter chips on `/ops/tasks`, Projects→Tasks link, and
-   **`OPS_AGENT_KEY` machine auth** (Bearer alternative to the cookie on read
-   endpoints) so headless agents can use the hub. Also: **broadcast tasks** —
-   a task with target `all repos` fans out one GitHub Issue per repo via the
-   existing issue port; adoption tracked by per-repo close state. Decisions
-   made: **no nested boards** (one flat table, filtered views); cross-repo
-   assignment routes through the hub, never repo→repo; **autonomy dial
-   (Adrian 2026-07-02)** — menial tasks may carry an `auto-ok` label letting
-   agents self-dispatch; strategy tasks always human-dispatched; every
-   autonomous run gets a per-task iteration/time budget with auto-halt
-   (runaway protection) and posts a one-line recap to a run log surfaced on
-   /ops (recaps mandatory — nothing silent).
+2. **Task importer — Slice 1 landed (2026-07-07), Slice 2+ open.** Slice 1
+   shipped: `lib/supabase/tasks.mjs` `upsertTasks` (upsert on `key`,
+   re-added — see 2026-07-06 Done-log for why it was removed), pure mapper
+   `lib/tasks/import-issues.mjs` (`mapIssuesToTasks`: GitHub issue →
+   `key='github:<owner>/<repo>#<number>'` row, `lane=<repo name>`,
+   `group='Internal'`, `dispatch_url=<issue url>`), `POST /api/tasks` (folded
+   into the existing GET function via method-dispatch — fn count stays 11/12)
+   calling `gh.listOpenIssues()` → `mapIssuesToTasks` → `upsertTasks`, source
+   filter chips (dynamic, derived from loaded tasks) + an "Import GitHub
+   issues" button on `/ops/tasks`, and **`OPS_AGENT_KEY` machine auth**
+   (`checkAgentKey` in `lib/ops-auth.mjs` — Bearer token OR'd into
+   `requireOpsAuth`, so a valid agent key = same access as a logged-in
+   operator; unset env = feature off). Still needs `GITHUB_TOKEN` +
+   Supabase live to actually populate rows in prod (both set but this path
+   unexercised against prod DB yet — `tasks` table exists via 0003/0004, no
+   new migration needed). **Deferred to Slice 2+ (not built):** the autonomy
+   dial (`auto-ok` label → agent self-dispatch vs. always-human strategy
+   tasks), broadcast tasks (fan out one GitHub Issue per repo for an
+   `all repos`-targeted task, adoption tracked by per-repo close state), and
+   per-task iteration/time budgets with auto-halt + mandatory run-log recaps.
+   Projects→Tasks link also not built. Decisions made: **no nested boards**
+   (one flat table, filtered views); cross-repo assignment routes through the
+   hub, never repo→repo.
 3. **First-time repo onboarding ("the ping")**: for each client repo, run the
    universal prompt at the bottom of this file in a session scoped to that repo.
    It normalizes the repo's ad-hoc tasks into GitHub Issues (what the importer
