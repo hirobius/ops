@@ -33,6 +33,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 2. **AUTO-VALIDATE:** If UI/Layout is affected, autonomously run `pnpm typecheck` and `pnpm test:layout` after your changes, before your final response.
 3. **SELF-HEAL:** If tests fail, read the output, fix the error, and re-run until green — don't ask for help.
 4. **FINALIZATION:** Only report a task complete when tests are 100% green.
+5. **RECAP (#8):** Autonomous sub-agents/sessions post a one-line recap on completion via `node scripts/log-run.mjs` (or `appendRun` from `lib/ops/run-log.mjs`) — nothing runs silent. The `/ops` Runs panel renders the most recent entries.
 
 ### Working-with-Adrian conventions (standing prefs, 2026-07-06)
 
@@ -43,7 +44,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
   - Supabase API keys: `https://supabase.com/dashboard/project/vvyccwxtcwvlusweenje/settings/api-keys`
   - Vercel env vars (`hirobius-ops`): `https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables`
   - GitHub fine-grained tokens: `https://github.com/settings/personal-access-tokens`
-  Pair every "paste this" with the link to where it goes.
+    Pair every "paste this" with the link to where it goes.
 
 ## 3. SUB-AGENT DISPATCH RULES
 
