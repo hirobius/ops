@@ -186,9 +186,16 @@ export default function LeadsPage() {
 
       {isOffline && (
         <p style={s.notice}>
-          Can&apos;t reach the leads API. In dev, ensure <code style={s.code}>SUPABASE_URL</code>{' '}
-          and <code style={s.code}>SUPABASE_SERVICE_ROLE_KEY</code> are set in{' '}
-          <code style={s.code}>.env.local</code>.
+          {import.meta.env.DEV ? (
+            <>
+              Can&apos;t reach the leads API. In dev, ensure{' '}
+              <code style={s.code}>SUPABASE_URL</code> and{' '}
+              <code style={s.code}>SUPABASE_SERVICE_ROLE_KEY</code> are set in{' '}
+              <code style={s.code}>.env.local</code>.
+            </>
+          ) : (
+            'Leads are temporarily unavailable — the data service isn’t responding. Try refresh in a moment.'
+          )}
         </p>
       )}
 

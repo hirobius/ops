@@ -155,9 +155,16 @@ export default function TasksPage() {
 
       {isOffline && (
         <p style={s.notice}>
-          Can&apos;t reach the tasks API. In dev, ensure <code style={s.code}>SUPABASE_URL</code> +{' '}
-          <code style={s.code}>SUPABASE_SERVICE_ROLE_KEY</code> are set and the table exists
-          (migration <code style={s.code}>0003_tasks.sql</code>).
+          {import.meta.env.DEV ? (
+            <>
+              Can&apos;t reach the tasks API. In dev, ensure{' '}
+              <code style={s.code}>SUPABASE_URL</code> +{' '}
+              <code style={s.code}>SUPABASE_SERVICE_ROLE_KEY</code> are set and the table exists
+              (migration <code style={s.code}>0003_tasks.sql</code>).
+            </>
+          ) : (
+            'Tasks are temporarily unavailable — the data service isn’t responding. Try refresh in a moment.'
+          )}
         </p>
       )}
 
