@@ -5,7 +5,7 @@
  * key-based lookups are locked against drift.
  */
 import { describe, it, expect } from 'vitest';
-import { listTasks, getTask, updateTask } from '../../lib/supabase/tasks.mjs';
+import { listTasks, getTask, updateTask, upsertTasks } from '../../lib/supabase/tasks.mjs';
 
 function recordingSb(result: { data?: unknown; error?: unknown } = { data: [], error: null }) {
   const calls: { orders: Array<{ col: string; opts: unknown }> } & Record<string, unknown> = { orders: [] };
@@ -36,6 +36,11 @@ function recordingSb(result: { data?: unknown; error?: unknown } = { data: [], e
     },
     update(patch: unknown) {
       calls.update = patch;
+      return builder;
+    },
+    upsert(rows: unknown, opts: unknown) {
+      calls.upsert = rows;
+      calls.upsertOpts = opts;
       return builder;
     },
     then(resolve: (r: unknown) => unknown) {
@@ -83,5 +88,21 @@ describe('tasks repository', () => {
     await updateTask(sb, 'k1', { status: 'done' });
     expect(calls.update).toEqual({ status: 'done' });
     expect(calls.eq).toEqual({ col: 'key', val: 'k1' });
+  });
+
+  it('upsertTasks: upserts rows with onConflict: key', async () => {
+    const { sb, calls } = recordingSb({ data: [{ key: 'github:hirobius/ops#1' }], error: null });
+    const rows = [{ key: 'github:hirobius/ops#1', source: 'github:hirobius/ops', title: 'Do it', lane: 'ops', status: 'open' }];
+    const result = await upsertTasks(sb, rows);
+    expect(calls.table).toBe('tasks');
+    expect(calls.upsert).toEqual(rows);
+    expect(calls.upsertOpts).toEqual({ onConflict: 'key' });
+    expect(result.error).toBeNull();
+  });
+
+  it('upsertTasks: no-ops on an empty/non-array input without touching the client', async () => {
+    const { sb, calls } = recordingSb();
+    expect(await upsertTasks(sb, [])).toEqual({ data: [], error: null });
+    expect(calls.table).toBeUndefined();
   });
 });

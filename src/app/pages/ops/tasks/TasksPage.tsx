@@ -26,7 +26,6 @@ import type { Task, TaskStatus, TaskAction } from './types';
 
 type BadgeTone = 'success' | 'neutral' | 'warning' | 'danger';
 type StatusFilter = TaskStatus | 'all';
-type SourceFilter = 'all' | 'tracker' | 'backlog' | 'client';
 
 const STATUS_TONE: Record<TaskStatus, BadgeTone> = {
   open: 'neutral',
@@ -35,7 +34,6 @@ const STATUS_TONE: Record<TaskStatus, BadgeTone> = {
 };
 
 const STATUS_FILTERS: StatusFilter[] = ['open', 'blocked', 'done', 'all'];
-const SOURCE_FILTERS: SourceFilter[] = ['all', 'tracker', 'backlog', 'client'];
 
 function asStrings(v: unknown): string[] {
   return Array.isArray(v) ? (v as string[]) : [];
@@ -64,8 +62,28 @@ function formatLastUpdated(epochMs: number | null): string {
 export default function TasksPage() {
   const { tasks, isOffline, isInitialLoading, lastUpdatedAt, refetch } = useTasks();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
-  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [busyKeys, setBusyKeys] = useState<ReadonlySet<string>>(new Set());
+  const [importing, setImporting] = useState(false);
+
+  const sourceFilters = useMemo(() => {
+    if (!tasks) return ['all'];
+    const seen = new Set<string>();
+    for (const t of tasks) if (t.source) seen.add(t.source);
+    return ['all', ...[...seen].sort()];
+  }, [tasks]);
+
+  const importIssues = useCallback(async () => {
+    setImporting(true);
+    try {
+      await opsApi.post('/api/tasks');
+    } catch {
+      /* surfaced on next poll */
+    } finally {
+      setImporting(false);
+      refetch();
+    }
+  }, [refetch]);
 
   const act = useCallback(
     async (key: string, action: TaskAction) => {
@@ -129,7 +147,7 @@ export default function TasksPage() {
           ))}
         </div>
         <div style={s.filterGroup}>
-          {SOURCE_FILTERS.map((f) => (
+          {sourceFilters.map((f) => (
             <button
               key={f}
               type="button"
@@ -148,6 +166,9 @@ export default function TasksPage() {
               ? 'loading…'
               : `${summary} · updated ${formatLastUpdated(lastUpdatedAt)}`}
         </span>
+        <Button size="sm" variant="secondary" disabled={importing} onClick={importIssues}>
+          {importing ? 'importing…' : 'Import GitHub issues'}
+        </Button>
         <Button size="sm" variant="secondary" onClick={refetch}>
           refresh
         </Button>
