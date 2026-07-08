@@ -1,0 +1,3 @@
+{"ts":"2026-07-07T19:05:00Z","kind":"completed","title":"Run-log Slice 2 (#8) shipped","detail":"docs/ops/run-log.jsonl + lib/ops/run-log.mjs + scripts/log-run.mjs + /ops Runs panel.","task":"#8"}
+{"ts":"2026-07-07T20:11:12.315Z","kind":"deploy_error","title":"Deploy ERROR: hirobius-design-system","detail":"claude/storybook-publishable-9tdovm@49a9867 — flagged by scripts/deploy-alert.mjs.","url":"hirobius-design-system-nzpjstzww-adrian-6234s-projects.vercel.app"}
+{"ts":"2026-07-08T05:43:48.803Z","kind":"completed","title":"Fleet #41 Slice 1 shipped","detail":"Migration 0008 dispatch fields + pure tier.mjs router + /ops/tasks auto toggle.","task":"#41"}

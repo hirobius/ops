@@ -50,6 +50,8 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync } fr
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
+import { postToDiscord as sharedPostToDiscord } from '../lib/ops/notify.mjs';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const SNAPSHOT_PATH = join(ROOT, 'docs', 'ops', 'deploy-snapshot.json');
@@ -253,6 +255,11 @@ export function computeDiff(projects, previousSnapshot, now = new Date().toISOSt
 }
 
 // ── Delivery ──────────────────────────────────────────────────────────────────
+//
+// The actual fetch/timeout/error-handling is shared with lib/ops/notify.mjs
+// (extracted from this function's original inlined copy, #41 Slice 4) — this
+// wrapper keeps deploy-alert's own decision logic (message formatting, the
+// "no alerts to send" short-circuit) local so its behavior is unchanged.
 
 async function postToDiscord(alerts, info) {
   const url = process.env.DISCORD_WEBHOOK_URL;
@@ -262,23 +269,9 @@ async function postToDiscord(alerts, info) {
   const lines = alerts.map((a) => `⚠️ ${a.message}`);
   if (info.length) lines.push('', ...info.map((i) => `ℹ️ ${i.message}`));
 
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content: `**Deploy/blocked alert** (${alerts.length} new)\n${lines.join('\n')}`,
-      }),
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!res.ok) {
-      const detail = await res.text().catch(() => res.statusText);
-      return { sent: false, reason: `Discord ${res.status}: ${detail.slice(0, 200)}` };
-    }
-    return { sent: true };
-  } catch (e) {
-    return { sent: false, reason: `Discord POST failed: ${e.message}` };
-  }
+  return sharedPostToDiscord(`**Deploy/blocked alert** (${alerts.length} new)\n${lines.join('\n')}`, {
+    webhookUrl: url,
+  });
 }
 
 // ── Output ────────────────────────────────────────────────────────────────────

@@ -7,7 +7,7 @@
 > finished things to the log line at the bottom). Adrian never copy-pastes
 > context again — he types one word.
 
-_Last updated: 2026-07-08 (Fleet auto-dispatch epic #41, Slice 1: board dispatch fields + deterministic tier→model routing — data + routing foundation for Slice 2's dispatcher) · previously 2026-07-08 (#9 outreach engine: Smartlead adapter scaffolded — provider-agnostic `lib/outreach/*` + compliance-gated `scripts/push-outreach.mjs`, dry-run default, webhook route deferred) · 2026-07-07 (autonomous run-log shipped — #8 run-log half, Slice 2 · task-importer Slice 1 landed — GitHub issues → tasks + OPS_AGENT_KEY machine auth · #11 deploy/blocked alert check landed · #12 lead-sweep manual-trigger landed · #17 orchestration-era dead-code sweep · #28 portal auth moved server-side · prospecting Run 01 + 3rd scorer landed) · branch `claude/outscraper-max-records`_
+_Last updated: 2026-07-08 (Fleet auto-dispatch epic #41, Slice 4: observability — shared `lib/ops/notify.mjs` notify seam + Discord fan-out, `docs/ops/events.jsonl`, unified `/ops` Fleet timeline merging run-log + events + alert-log; `scripts/deploy-alert.mjs`'s inlined Discord POST deduped into the shared helper) · previously 2026-07-08 (Fleet #41 Slice 1: board dispatch fields + deterministic tier→model routing — data + routing foundation for Slice 2's dispatcher) · 2026-07-08 (#9 outreach engine: Smartlead adapter scaffolded — provider-agnostic `lib/outreach/*` + compliance-gated `scripts/push-outreach.mjs`, dry-run default, webhook route deferred) · 2026-07-07 (autonomous run-log shipped — #8 run-log half, Slice 2 · task-importer Slice 1 landed — GitHub issues → tasks + OPS_AGENT_KEY machine auth · #11 deploy/blocked alert check landed · #12 lead-sweep manual-trigger landed · #17 orchestration-era dead-code sweep · #28 portal auth moved server-side · prospecting Run 01 + 3rd scorer landed) · branch `claude/outscraper-max-records`_
 
 ## Now (what is true today)
 
@@ -20,7 +20,24 @@ _Last updated: 2026-07-08 (Fleet auto-dispatch epic #41, Slice 1: board dispatch
   `GITHUB_TOKEN` can see, grouped by repo, multi-select → copy refs to paste into
   a Claude chat). GitHub is the task source of truth; `api/issues.ts` keeps the
   token server-side. Route + SurfacesRail tile + layout-integrity coverage landed.
-- **NEW: Fleet auto-dispatch epic #41, Slice 1 landed (2026-07-08)** — data +
+- **NEW: Fleet auto-dispatch epic #41, Slice 4 landed (2026-07-08)** — the
+  observability layer (built ahead of Slice 2/3, scoped as its own unit).
+  `lib/ops/notify.mjs` (`notifyEvent`/`readEvents`/`postToDiscord`) is the
+  shared seam any future dispatcher posts through: validates
+  `{ts,kind,title}` (`kind` ∈ dispatched|completed|approval_waiting|
+  deploy_error|blocked), appends to committed `docs/ops/events.jsonl`, fans
+  out to `DISCORD_WEBHOOK_URL` fail-soft (never throws). `scripts/notify.mjs`
+  is the manual-trigger CLI. `scripts/deploy-alert.mjs`'s inlined Discord POST
+  is now deduped — it delegates the fetch/timeout/error-handling to the
+  shared `postToDiscord`, decision logic (message formatting, "no alerts to
+  send" short-circuit) stays local, behavior unchanged. New `/ops` **Fleet**
+  section (`FleetTimeline.tsx`, mounted above Runs) merges `run-log.jsonl` +
+  `events.jsonl` + `alert-log.jsonl` into one newest-first, kind-toned-badge
+  timeline (same build-time `import.meta.glob` idiom as RunsPanel — no
+  Supabase migration, no new `api/*.ts` route, still 11/12 fn slots). Still
+  not built: Slice 2 (the dispatcher worker) and Slice 3 (whatever's between
+  — check issue #41 sub-tasks).
+- **Fleet auto-dispatch epic #41, Slice 1 landed (2026-07-08)** — data +
   routing foundation only, no dispatcher runs yet. Migration
   `0008_task_dispatch.sql` (not yet applied — Adrian applies it in Supabase)
   adds `auto_ok`/`tier`/`model`/`dispatch_status`/`dispatch_count`/

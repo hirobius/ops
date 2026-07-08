@@ -36,6 +36,7 @@ import StrengthTab from '../atlas/strength-tab';
 import { KpiCards } from './KpiCards';
 import { PillarRail, type PillarFilter } from './PillarRail';
 import { RunsPanel } from './RunsPanel';
+import { FleetTimeline } from './FleetTimeline';
 import { SurfacesRail } from './SurfacesRail';
 import { SkillsBar } from './SkillsBar';
 import { SkillCreatorForm } from './SkillCreatorForm';
@@ -66,6 +67,10 @@ export default function AgenticOSPage() {
         <KpiCards units={filteredUnits} />
 
         <PillarRail units={UNITS} filter={pillarFilter} onFilterChange={setPillarFilter} />
+
+        <Section label="Fleet" hint="run-log + events + alerts, merged — newest 20">
+          <FleetTimeline />
+        </Section>
 
         <Section label="Runs" hint="autonomous run recap — newest 15">
           <RunsPanel />
