@@ -35,6 +35,14 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Widen tool permissions so the UNATTENDED agent can actually do its
+          # work — query Supabase (node) and use gh to comment/label/file issues.
+          # Last run was blocked because default perms deny Bash without a human
+          # to approve. Broad Bash is acceptable here: ephemeral CI sandbox,
+          # manual-only (workflow_dispatch) job, scoped creds → blast radius is
+          # the tasks board + issues, which is exactly this job's purpose.
+          claude_args: |
+            --allowedTools "Bash,Read,Write,Edit,Glob,Grep"
           prompt: |
             Execute the tasks-board combing job specified in issue #57 of this repo
             (hirobius/ops) — read that issue first for the full spec and constraints.
