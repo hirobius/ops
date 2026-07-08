@@ -6,6 +6,11 @@
  *
  * Request:  { key: string, action: Action, actor?: string }
  *   Action = 'done' | 'reopen' | 'claim' | 'unclaim' | 'trash' | 'restore' | 'dispatch'
+ *          | 'auto_on' | 'auto_off'
+ *
+ * 'auto_on' / 'auto_off' flip `auto_ok` (migration 0008) — the Fleet
+ * auto-dispatch opt-in (epic #41). Slice 2's dispatcher only picks up rows
+ * with auto_ok=true; this action alone does not dispatch anything.
  *
  * 'dispatch' is the agentic-loop hand-off (decided design: no Claude API). It opens
  * a GitHub issue that @mentions Claude — GitHub turns that into a Claude Code

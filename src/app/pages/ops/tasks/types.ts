@@ -37,9 +37,28 @@ export interface Task {
   deleted_at: string | null;
   created_at: string;
   updated_at: string;
+  // Fleet auto-dispatch fields (supabase/migrations/0008_task_dispatch.sql,
+  // epic #41). tier/model are computed by lib/tasks/tier.mjs::routeTask —
+  // Slice 1 only stores + renders them; Slice 2 adds the dispatcher that
+  // writes them and drives dispatch_status through its lifecycle.
+  auto_ok: boolean | null;
+  tier: 'mechanical' | 'standard' | 'judgment' | null;
+  model: 'sonnet' | 'opus' | null;
+  dispatch_status: 'queued' | 'dispatched' | 'running' | 'done' | 'failed' | null;
+  dispatch_count: number | null;
+  last_dispatched_at: string | null;
 }
 
-export type TaskAction = 'done' | 'reopen' | 'claim' | 'unclaim' | 'trash' | 'restore' | 'dispatch';
+export type TaskAction =
+  | 'done'
+  | 'reopen'
+  | 'claim'
+  | 'unclaim'
+  | 'trash'
+  | 'restore'
+  | 'dispatch'
+  | 'auto_on'
+  | 'auto_off';
 
 export interface TasksResponse {
   tasks: Task[];

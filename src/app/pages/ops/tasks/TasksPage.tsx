@@ -33,6 +33,15 @@ const STATUS_TONE: Record<TaskStatus, BadgeTone> = {
   done: 'success',
 };
 
+// Fleet auto-dispatch tier (migration 0008, epic #41) — computed by
+// lib/tasks/tier.mjs::routeTask; rendered here whenever a row has one, empty
+// otherwise (Slice 2's dispatcher owns writing these).
+const TIER_TONE: Record<NonNullable<Task['tier']>, BadgeTone> = {
+  mechanical: 'neutral',
+  standard: 'neutral',
+  judgment: 'warning',
+};
+
 const STATUS_FILTERS: StatusFilter[] = ['open', 'blocked', 'done', 'all'];
 
 function asStrings(v: unknown): string[] {
@@ -231,7 +240,18 @@ export default function TasksPage() {
                           issue ↗
                         </a>
                       )}
+                      {t.tier && <Badge tone={TIER_TONE[t.tier] ?? 'neutral'}>{t.tier}</Badge>}
+                      {t.model && <Badge tone="neutral">{t.model}</Badge>}
                       <Badge tone={STATUS_TONE[t.status] ?? 'neutral'}>{t.status}</Badge>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => act(t.key, t.auto_ok ? 'auto_off' : 'auto_on')}
+                        style={busy ? s.btnDisabled : t.auto_ok ? s.btnPrimary : s.btn}
+                        aria-pressed={!!t.auto_ok}
+                      >
+                        {busy ? '…' : t.auto_ok ? 'Auto: on' : 'Auto: off'}
+                      </button>
                       {t.status === 'done' ? (
                         <button
                           type="button"
