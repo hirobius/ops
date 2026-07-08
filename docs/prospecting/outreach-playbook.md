@@ -158,6 +158,70 @@ sends spec links, sets the meeting); the technical owner runs the demo & close**
 the partner never fields build/pricing questions. Raise their % as they take on more
 of the close.
 
+## 8. v1 implementation spec (decided 2026-07-07) — the build target for #9
+
+Turns this playbook into a buildable v1. **Channels: email + phone.** SMS stays out (§1);
+DM / direct-mail are later.
+
+**Decisions locked**
+- **Volume:** ~**20 personalized emails/day** (+ manual dials). Deliberately low + personalized —
+  best deliverability, lowest legal surface. One warmed inbox covers it.
+- **Sender = a purpose-built cold platform (Smartlead recommended; Instantly equivalent),
+  NOT a transactional API.** Resend/Postmark/SES are built for opted-in/transactional mail —
+  they penalize or ban cold outreach and give none of the warm-up / inbox-rotation / suppression
+  tooling. **Resend keeps only the *transactional* half**: once a prospect replies/opts in, the
+  1:1 "here's your preview link," notifications, and later invoices go through Resend — never
+  the cold campaign.
+- **Integration:** cold platform ⇄ **Supabase** (`leads` stays the source of truth).
+
+**Prerequisite setup (human, one-time — agents never touch DNS or `.env*`)**
+- [ ] Buy a **secondary sending domain** (a hirobius lookalike, e.g. `gethirobius.com`) — *never
+      send cold from the primary domain*, so a reputation dip never touches real mail. **(Not
+      owned yet — this gates go-live.)**
+- [ ] Create **1 Google Workspace inbox** on it (a 2nd as backup). At ~20/day one warmed inbox
+      is plenty (safe ceiling ~30–50/day/inbox once warmed).
+- [ ] Set **SPF + DKIM + DMARC** on the sending domain.
+- [ ] **Warm up 2–3 weeks** (platform auto-warmup) before the first real send — do not skip.
+- [ ] Connect the inbox to the platform; set the footer (physical mailing address +
+      one-click unsubscribe).
+
+**Architecture (fits the Vercel + Supabase stack)**
+- **Supabase `leads` = source of truth.** A Vercel function (approval-button or cron) selects
+  qualified leads (`lead_score ≥ threshold`, has email, not suppressed, WA + target niche) with
+  their `preview_url`, and pushes them into a platform campaign via its API.
+- **Platform = deliverability layer:** sequencing, warm-up, inbox rotation, open/reply tracking,
+  unsubscribe + suppression.
+- **Webhooks → Supabase:** the platform posts opens/replies/bounces/unsubscribes to a Vercel
+  webhook that writes them back onto the lead.
+- **Approval-gated:** nothing enters a campaign without a click on the board (kill-switch);
+  hard daily cap = 20 regardless.
+- **Phone:** manual dial off the board (OpenPhone / Google Voice, hand-dial only per §1); a
+  "log call" action writes outcome + next follow-up to the lead — no send integration to build.
+
+**Data model** — extend `leads` (or add an `outreach` table): `channel` (email|call|dm),
+`sequence_step`, `message_variant`, `sent_at`, `opened_at`, `replied_at`, `bounced`,
+`unsubscribed`, `suppressed`, `outcome`, `next_follow_up`. `message_variant` + niche feed the
+weekly what-converts review (§6).
+
+**Compliance send-gate** — enforce in code before any lead is queued; one failing check blocks it:
+- Subject line rendered and checked **literally true** (no `Re:`/`Fwd:`, no "as discussed") — WA
+  CEMA, **$500/email**.
+- Footer has a **valid physical mailing address** + **working one-click unsubscribe** — CAN-SPAM;
+  opt-outs auto-suppressed and honored within 10 business days.
+- Lead is **B2B** and **not on the suppression list**.
+- Sending domain ≠ primary; **DKIM/DMARC verified**.
+- Daily volume ≤ cap (20).
+
+**Cadence at ~20/day:** ≈400 emails/mo + ~30–50 hand-dials/day → the §4 funnel math implies
+≈**2–4 closed sites/mo** once follow-ups run (touches 2–4 win most; the platform automates them).
+
+**Build order for #9**
+1. `leads`/`outreach` schema migration + suppression list.
+2. Platform API client + the push-qualified-leads function (approval-gated).
+3. Webhook receiver → status writeback.
+4. Board: send-gate checks + "queue" / "log call" actions + status column.
+5. Warm-up, then first 20/day live once the domain + inbox are ready.
+
 ## Honest caveats
 - The big "video lifted replies 4%→22%" figures are practitioner anecdotes — treat
   the **direction** (tangible artifact beats plain pitch) as reliable, the exact
