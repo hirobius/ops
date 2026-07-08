@@ -11,6 +11,7 @@ _Last updated: 2026-07-08 (Issue #44: auto-record `preview_url` on leads — `sc
 
 ## Now (what is true today)
 
+- **🔒 FEATURE FREEZE (2026-07-08, Adrian).** No net-new features. Only ship: (1) **revenue** (first paying client — Monroe preview → outreach), (2) **bug/hygiene + CI honesty** (e.g. #54), (3) finishing genuinely well-scoped in-flight work. Everything else is **captured & parked** as issues — do not build it, no matter how tempting. Lifts when Adrian says so. This exists because feature churn was outrunning revenue; the fleet/tooling is "good enough" — go earn a client.
 - **PRODUCTION is LIVE** (project `hirobius-ops`, deploys from `main`). `/ops`
   login gate active (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` set). DS consumed
   from **public npm `@hirobius/design-system@0.11`** (GitHub Packages + `.npmrc`
