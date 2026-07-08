@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { selectAndRoute, isMissingColumnError, DEFAULT_MAX } from '../fleet-dispatch.mjs';
+import { selectAndRoute, applySafetyGates, isMissingColumnError, DEFAULT_MAX } from '../fleet-dispatch.mjs';
 
 function task(overrides = {}) {
   return {
@@ -133,5 +133,72 @@ describe('isMissingColumnError', () => {
 
   it('is false for an unrelated error', () => {
     expect(isMissingColumnError({ code: '23505', message: 'duplicate key value' })).toBe(false);
+  });
+});
+
+describe('applySafetyGates (issue #47 safety layer)', () => {
+  const NOW = new Date('2026-07-08T12:00:00.000Z').getTime();
+
+  function selected(overrides = {}) {
+    return { task: task({ ...overrides }), tier: 'standard', model: 'sonnet' };
+  }
+
+  it('passes everything through when nothing is leased, overlapping, or over budget', () => {
+    const gates = applySafetyGates([selected({ key: 'a' }), selected({ key: 'b' })], {
+      now: NOW,
+      inFlightTasks: [],
+    });
+    expect(gates.dispatchable.map((c) => c.task.key)).toEqual(['a', 'b']);
+    expect(gates.blockedByLease).toEqual([]);
+    expect(gates.blockedByOverlap).toEqual([]);
+    expect(gates.blockedByBudget).toEqual([]);
+  });
+
+  it('blocks a candidate whose task currently holds an unexpired lease', () => {
+    const leased = selected({
+      key: 'leased',
+      lease_expires_at: new Date(NOW + 60_000).toISOString(),
+    });
+    const gates = applySafetyGates([leased, selected({ key: 'free' })], {
+      now: NOW,
+      inFlightTasks: [],
+    });
+    expect(gates.blockedByLease.map((c) => c.task.key)).toEqual(['leased']);
+    expect(gates.dispatchable.map((c) => c.task.key)).toEqual(['free']);
+  });
+
+  it('blocks a candidate whose declared touches overlap an in-flight task', () => {
+    const candidate = selected({ key: 'a', touches: ['lib/tasks/tier.mjs'] });
+    const gates = applySafetyGates([candidate], {
+      now: NOW,
+      inFlightTasks: [{ key: 'github:hirobius/ops#9', touches: ['lib/tasks/'] }],
+    });
+    expect(gates.dispatchable).toEqual([]);
+    expect(gates.blockedByOverlap).toHaveLength(1);
+    expect(gates.blockedByOverlap[0].conflictsWith).toBe('github:hirobius/ops#9');
+  });
+
+  it('blocks a candidate once the spend ceiling is exceeded', () => {
+    const candidate = { task: task({ key: 'a' }), tier: 'judgment', model: 'opus' };
+    const gates = applySafetyGates([candidate], {
+      now: NOW,
+      inFlightTasks: [],
+      perRunCeilingUsd: 0.1,
+    });
+    expect(gates.dispatchable).toEqual([]);
+    expect(gates.blockedByBudget.map((c) => c.task.key)).toEqual(['a']);
+  });
+
+  it('runs lease -> overlap -> budget in order, each narrowing what the next sees', () => {
+    const leased = selected({ key: 'leased', lease_expires_at: new Date(NOW + 60_000).toISOString() });
+    const overlapping = selected({ key: 'overlapping', touches: ['lib/x.mjs'] });
+    const affordable = selected({ key: 'ok' });
+    const gates = applySafetyGates([leased, overlapping, affordable], {
+      now: NOW,
+      inFlightTasks: [{ key: 'in-flight', touches: ['lib/x.mjs'] }],
+    });
+    expect(gates.blockedByLease.map((c) => c.task.key)).toEqual(['leased']);
+    expect(gates.blockedByOverlap.map((c) => c.task.key)).toEqual(['overlapping']);
+    expect(gates.dispatchable.map((c) => c.task.key)).toEqual(['ok']);
   });
 });

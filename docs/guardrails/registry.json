@@ -440,6 +440,19 @@
       "firingChannel": "pnpm-meta"
     },
     {
+      "id": "check-unit-overlap",
+      "description": "File-overlap gate for the fleet dispatcher (issue #47, B.3) — revived from the deleted check-unit-overlap.mjs (662d94c). Reports every pair of in-flight (dispatched, not done/blocked) tasks whose declared `touches` (migration 0009) overlap. scripts/fleet-dispatch.mjs's applySafetyGates runs the same check automatically pre-dispatch; this CLI audits current state on demand. Manual channel — Supabase-backed (same shape as audit-sites.mjs), not a static source-code gate, so no fixture pair applies.",
+      "severity": "warn",
+      "gateScript": "scripts/check-unit-overlap.mjs",
+      "fixturePath": null,
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual",
+      "supportsJson": true
+    },
+    {
       "id": "check-unresponsive-grids",
       "description": "Catches static multi-column gridTemplateColumns values with no nearby isMobile guard. Every multi-column grid must be responsive.",
       "severity": "warn",
