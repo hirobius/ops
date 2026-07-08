@@ -303,16 +303,19 @@ export default function TasksPage() {
                           >
                             {busy ? '…' : 'Done'}
                           </button>
-                          {!dispatched && (
-                            <button
-                              type="button"
-                              disabled={busy}
-                              onClick={() => act(t.key, 'dispatch')}
-                              style={busy ? s.btnDisabled : s.btnPrimary}
-                            >
-                              Dispatch
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => act(t.key, 'dispatch')}
+                            style={busy ? s.btnDisabled : s.btnPrimary}
+                            title={
+                              dispatched
+                                ? 'Re-ping @claude on the linked issue'
+                                : 'Open an @claude issue for this task'
+                            }
+                          >
+                            {busy ? '…' : dispatched ? 'Re-dispatch' : 'Dispatch'}
+                          </button>
                         </>
                       )}
                       <button
