@@ -80,3 +80,65 @@ Pick the platform (recommend **Smartlead**). Then the build is: outreach adapter
 Supabase push → webhook-back → approval-gated send, respecting the compliance
 already in place. The domain/inbox warmup is a parallel human track that should
 start early (it's the 2–4 week long pole).
+
+## Adapter (scaffolded, 2026-07-08)
+
+The provider-agnostic adapter from "How it wires into our stack" above is built,
+with Smartlead as the implementation. **Sending stays gated — no live API calls
+happen without `--apply` + a human-set `SMARTLEAD_API_KEY`.**
+
+**Files:**
+- `lib/outreach/types.mjs` — the `OutreachProvider` interface + normalized
+  `OutreachEvent` shape (JSDoc typedefs). Nothing else in the codebase talks to
+  a vendor SDK directly — swapping providers later means one new file.
+- `lib/outreach/map.mjs` — pure, fully unit-tested: `leadToOutreachLead(lead)` /
+  `leadsToOutreachLeads(leads)` map a Supabase `leads` row → Smartlead's lead
+  shape (skips no-email rows); `webhookEventToPatch(event)` maps a normalized
+  event → the #36 lifecycle patch (`sent`/`replied`/`bounced`/`unsubscribed`).
+- `lib/outreach/smartlead.mjs` — `makeSmartleadProvider({ apiKey, fetch })`
+  (the real client, contract verified against Smartlead's docs — see file
+  header) and `normalizeWebhook(body)` (Smartlead webhook payload → our
+  `OutreachEvent`, coded defensively with `// VERIFY` notes where the sources
+  disagreed on field/event names).
+- `scripts/push-outreach.mjs` — the CLI. `--dry-run` is the **default**
+  (prints who WOULD be pushed, sends nothing); `--apply` performs the real
+  push. Enforces the compliance eligibility filter (below) in the Supabase
+  query. `--help` for usage.
+- `scripts/__tests__/outreach-map.test.mjs` — full coverage of the mapping
+  functions + the Smartlead client against a **stub fetch** (no live network).
+
+**Env vars (server-only, Adrian-set — never touched by an agent):**
+- `SMARTLEAD_API_KEY` — from `app.smartlead.ai` → Settings → API Keys.
+- `SMARTLEAD_CAMPAIGN_ID` — the target campaign id (or pass `--campaign <id>`
+  on each run instead).
+
+Set both in Vercel (Production + Preview scopes):
+https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables
+
+**Compliance eligibility (enforced in `push-outreach.mjs`, ALL must hold):**
+`lead_score >= 60` (qualified) AND `email` present AND `do_not_contact` is not
+true (#36 suppression) AND `outreach_status` is `null` (never contacted — this
+script never re-sends).
+
+**Dry-run → apply flow:**
+```
+NODE_USE_ENV_PROXY=1 node scripts/push-outreach.mjs --campaign <id>            # dry-run (default)
+NODE_USE_ENV_PROXY=1 node scripts/push-outreach.mjs --campaign <id> --apply    # real push
+```
+
+**CAN-SPAM footer + unsubscribe link:** authored in the **Smartlead email
+template** (not in this code) — the physical mailing address + working
+unsubscribe link required by CAN-SPAM live in the campaign's sequence steps,
+configured in the Smartlead UI. `webhookEventToPatch`'s `unsubscribed` case is
+already wired to flip `do_not_contact` the moment Smartlead reports an
+unsubscribe click, once the webhook route below exists.
+
+**Deferred — next step:** the inbound webhook route (`api/outreach-webhook.ts`)
+that Smartlead POSTs events to. Not built yet because (a) it must be
+**ungated** (external caller, no `/ops` session cookie — needs a
+`SMARTLEAD_WEBHOOK_SECRET` shared-secret check instead) and (b) it would push
+us to **12/12 Vercel serverless functions** (the Hobby-plan cap), which needs
+either the free 12th slot or a route-consolidation decision first. The pure
+`normalizeWebhook` + `webhookEventToPatch` are already built and tested, so
+wiring the route later is: add the file, verify the secret, call
+`updateLead(sb, leadId, webhookEventToPatch(normalizeWebhook(req.body)))`.
