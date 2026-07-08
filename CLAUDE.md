@@ -54,6 +54,21 @@ Applies to any agent working a dispatched `@claude` task — and to any session 
 - **Never false-close.** An agent that cannot make real, mergeable progress — blocked on a human decision, a missing key/paid account, out-of-scope, or genuinely not agent-actionable — must NOT mark the task `done`. Set it `blocked` (or `on-hold`) with a one-line reason on the issue, so the thought is recycled, never lost to a false "completed". **"I analyzed it" is not "done".**
 - **Ask, don't guess.** When input is genuinely needed, drain every non-blocked part first (open a draft PR), then post the specific question, apply `needs-adrian`, and set the task blocked (see ops#51) — rather than guessing or closing.
 
+### Skill protocol — the engineering skills are MANDATORY, not optional (2026-07-08)
+
+`.claude/skills/` vendors Matt Pocock's engineering skills. They only earn their keep if invoked **deterministically** — so this is a routing mandate, not a suggestion the model may skip:
+
+- **Building anything (feature or fix) → `/implement` + `/tdd`** (test-first, red-green-refactor). No "just write it."
+- **Epic / multi-part / fuzzy task → `/to-tickets`** (split into dependency-ordered tickets); `/grill-me` first if the *plan* itself is unclear. Pairs with the Dispatched-task discipline above.
+- **Before opening ANY PR → `/code-review`** (dual-axis: standards + spec).
+- **A bug → `/diagnosing-bugs`** (reproduce → minimize → hypothesize → fix), then `/tdd`.
+- **Design-touching / new module → `/codebase-design`**; periodic design-debt sweep → `/improve-codebase-architecture`.
+- **Board / issue-lifecycle work → `/triage`.**
+
+**Tracker config for `/to-tickets` + `/triage`** (they ask for it): our tracker is **GitHub Issues in the current repo**; label vocabulary is `backlog` · `bug` · `blocked` · `needs-adrian`. Dependencies: **sub-issues** for epic→child, **"Depends on #N"** in the body for cross-task prerequisites.
+
+Dispatched `@claude` issues carry these invocations in their body (`lib/tasks/actions.mjs`), so fleet work runs them by default; interactive sessions follow this table.
+
 ## 3. SUB-AGENT DISPATCH RULES
 
 - **Pick the cheapest model that can do the job.** `sonnet` is the default for source-code work and is **required for any task involving deletions** (file removals, dead-code pruning, dependency removal). `opus` only for cross-cutting architectural reasoning, ambiguous scope, or subtle validator logic — use sparingly.
