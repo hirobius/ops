@@ -1,0 +1,52 @@
+name: Comb tasks board
+
+# Dedicated, MANUALLY-triggered combing job (approach 2-B, ops#57).
+#
+# Kept deliberately SEPARATE from the general claude.yml executor so the
+# full-access SUPABASE_SERVICE_ROLE_KEY is exposed ONLY in this one job you
+# choose to run — never to every `@claude` mention (that would hand a DB key to
+# any commenter; bad for the compliance posture, see ops#49/#54).
+#
+# Run it: Actions tab → "Comb tasks board" → Run workflow (main).
+# One-time setup (Adrian): repo secrets SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
+# (already set) + CLAUDE_CODE_OAUTH_TOKEN (already set).
+
+on:
+  workflow_dispatch:
+
+jobs:
+  comb:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Claude Code — comb the tasks board
+        uses: anthropics/claude-code-action@v1
+        env:
+          # Scoped to THIS job only. The runner has open egress to Supabase
+          # (unlike the dev sandbox), so the agent can read the board here.
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Execute the tasks-board combing job specified in issue #57 of this repo
+            (hirobius/ops) — read that issue first for the full spec and constraints.
+
+            Summary: the Supabase `tasks` table is reachable via the env vars
+            SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (reuse lib/supabase/server.mjs +
+            lib/supabase/tasks.mjs). Read all non-deleted rows, inventory them, dedup
+            against tasks that already map to a GitHub issue, and identify epics.
+
+            CRITICAL: do NOT create any issues yet. Post a PLAN (bucket counts, dedup
+            skip-list, proposed new issues with title/repo/one-line-scope/DoD, and epic
+            decompositions) as a comment on issue #57, apply the `needs-adrian` label,
+            and STOP. Adrian approves before anything is filed. Respect the feature
+            freeze (HANDOFF) and the "Dispatched-task discipline" in CLAUDE.md — never
+            false-close; if blocked (e.g. creds missing), say so on #57 and stop.
