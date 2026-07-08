@@ -18,7 +18,7 @@ import { cn } from '../../lib/utils';
 export type ApprovalState = 'proposed' | 'approved' | 'denied' | 'needs-grilling';
 
 export interface ApprovalUnitSummary {
-  /** Unit id (matches docs/ai/orchestration.json). */
+  /** Unit id (matches docs/ai/orchestration.json, or a tasks-store `task.key`). */
   id: string;
   /** Human-readable unit name. */
   name: string;
@@ -34,6 +34,14 @@ export interface ApprovalUnitSummary {
   description?: string;
   /** Current approval state. */
   approval?: ApprovalState;
+  /**
+   * Fleet auto-dispatch routing tier (migration 0008, epic #41) — set when the
+   * unit is backed by a `tasks` row that's been through `lib/tasks/tier.mjs`.
+   * Rendered as a tag so the operator sees the routing before approving.
+   */
+  tier?: 'mechanical' | 'standard' | 'judgment' | null;
+  /** Fleet auto-dispatch routing model (migration 0008, epic #41). */
+  model?: 'sonnet' | 'opus' | null;
 }
 
 export interface ApprovalCardProps {
@@ -45,6 +53,12 @@ export interface ApprovalCardProps {
   onDeny?: (unit: ApprovalUnitSummary) => void;
   /** Grill action — flips approval to `needs-grilling`. */
   onGrill?: (unit: ApprovalUnitSummary) => void;
+  /**
+   * Render the "Grill" action. Default true. The tasks-store approvals inbox
+   * (epic #41 Slice 3, v1) has no `needs-grilling` equivalent state — pass
+   * false there rather than wiring a dead button.
+   */
+  showGrill?: boolean;
   /** Disable buttons while a mutation is in flight. */
   pending?: boolean;
   /** Optional click handler for the title — typically a link to the detail view. */
@@ -84,12 +98,23 @@ function truncate(text: string, max: number): string {
  */
 export const ApprovalCard = React.forwardRef<HTMLDivElement, ApprovalCardProps>(
   function ApprovalCard(
-    { unit, onApprove, onDeny, onGrill, onOpenDetail, pending = false, className },
+    {
+      unit,
+      onApprove,
+      onDeny,
+      onGrill,
+      showGrill = true,
+      onOpenDetail,
+      pending = false,
+      className,
+    },
     ref,
   ) {
     const sprintLabel = typeof unit.sprint === 'number' ? `Sprint ${unit.sprint}` : null;
     const priorityLabel = typeof unit.priority === 'number' ? `Priority ${unit.priority}` : null;
     const clusterLabel = unit.cluster ? unit.cluster : null;
+    const tierLabel = unit.tier ? unit.tier : null;
+    const modelLabel = unit.model ? unit.model : null;
 
     return (
       <Card ref={ref} padding="none" className={cn('flex flex-col', className)}>
@@ -122,6 +147,8 @@ export const ApprovalCard = React.forwardRef<HTMLDivElement, ApprovalCardProps>(
             {sprintLabel ? <Tag>{sprintLabel}</Tag> : null}
             {priorityLabel ? <Tag>{priorityLabel}</Tag> : null}
             {clusterLabel ? <Tag>{clusterLabel}</Tag> : null}
+            {tierLabel ? <Tag>{tierLabel}</Tag> : null}
+            {modelLabel ? <Tag>{modelLabel}</Tag> : null}
           </div>
         </Card.Header>
         {unit.description ? (
@@ -152,16 +179,18 @@ export const ApprovalCard = React.forwardRef<HTMLDivElement, ApprovalCardProps>(
           >
             Deny
           </Button>
-          <Button
-            variant="tertiary"
-            size="sm"
-            disabled={pending}
-            onClick={() => onGrill?.(unit)}
-            aria-label={`Grill ${unit.id}`}
-            data-role="grill-button"
-          >
-            Grill
-          </Button>
+          {showGrill ? (
+            <Button
+              variant="tertiary"
+              size="sm"
+              disabled={pending}
+              onClick={() => onGrill?.(unit)}
+              aria-label={`Grill ${unit.id}`}
+              data-role="grill-button"
+            >
+              Grill
+            </Button>
+          ) : null}
         </Card.Footer>
       </Card>
     );

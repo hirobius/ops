@@ -6,16 +6,22 @@
  *
  * Request:  { key: string, action: Action, actor?: string }
  *   Action = 'done' | 'reopen' | 'claim' | 'unclaim' | 'trash' | 'restore' | 'dispatch'
- *          | 'auto_on' | 'auto_off'
+ *          | 'auto_on' | 'auto_off' | 'queue' | 'unqueue'
  *
  * 'auto_on' / 'auto_off' flip `auto_ok` (migration 0008) — the Fleet
  * auto-dispatch opt-in (epic #41). Slice 2's dispatcher only picks up rows
  * with auto_ok=true; this action alone does not dispatch anything.
  *
+ * 'queue' / 'unqueue' flip `dispatch_status` to/from 'queued' (epic #41 Slice
+ * 3) — the /admin/approvals inbox flag. A queued task is proposed for
+ * dispatch but awaiting a human's Approve/Deny click; distinct from auto_ok
+ * (which skips approval entirely).
+ *
  * 'dispatch' is the agentic-loop hand-off (decided design: no Claude API). It opens
  * a GitHub issue that @mentions Claude — GitHub turns that into a Claude Code
- * session on a branch — and stamps dispatch_url + claimed_by='claude'. Requires
- * GITHUB_TOKEN (repo Issues: write); 503 if unset.
+ * session on a branch — and stamps dispatch_url + claimed_by='claude' +
+ * dispatch_status='dispatched' (clears 'queued' so an approved task leaves the
+ * inbox). Requires GITHUB_TOKEN (repo Issues: write); 503 if unset.
  *
  * In dev, the same contract is served by scripts/tasks-middleware.mjs.
  * Success:  { ok: true, ...extra } · Error: { error, code? } 400/401/404/405/500/503

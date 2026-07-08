@@ -1,168 +1,29 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router';
 import { Page, Stack, TextLockup } from '@hirobius/design-system';
-import {
-  ApprovalCard,
-  type ApprovalUnitSummary,
-  type ApprovalState,
-} from '../../components/approval-card';
+import { ApprovalCard } from '../../components/approval-card';
+import { useApprovalsInbox, taskToApprovalUnit } from './useApprovalsInbox';
 
-// 11a-3 — approval app list view.
+// Fleet approvals inbox — list view (epic #41, Slice 3).
 //
-// Reads docs/ai/orchestration.json (served as a static asset under /docs/ai
-// in dev / from the bridge /orchestration/list endpoint when available).
-// Filters to units with approval ∈ {proposed, needs-grilling} and renders
-// one ApprovalCard per unit. Buttons POST to /orchestration/approve
-// (bridge endpoint shipped in 11a-2). Optimistic UI: the card disappears
-// from the inbox immediately, then reconciles on response. On error the
-// optimistic mutation is rolled back.
+// Reads the live `tasks` store (GET /api/tasks via useApprovalsInbox →
+// useTasks) and filters to `dispatch_status === 'queued'` — tasks proposed
+// for dispatch but awaiting a human click. Auto-dispatch (`auto_ok=true`)
+// tasks self-run WITHOUT hitting this inbox; that's a separate lever
+// (/ops/tasks' "Auto: on/off" toggle, Slice 1).
 //
-// Per Q1=(a) ratification 2026-05-01 there is no live trigger — approval
-// flips status proposed→pending and the next autonomous session picks the
-// unit up via the existing pretest dry-run loop. This page does NOT call
-// /run, /generate, or any execution surface.
-
-const INBOX_FILTERS: ApprovalState[] = ['proposed', 'needs-grilling'];
-const BRIDGE_BASE = 'http://localhost:3005';
-
-interface OrchestrationUnitRaw extends ApprovalUnitSummary {
-  status?: string;
-  phase?: string | number;
-  proposedBy?: string;
-  source?: string;
-}
-
-interface ListResponse {
-  status: string;
-  total: number;
-  filter: string | null;
-  count: number;
-  units: OrchestrationUnitRaw[];
-}
-
-type ApproveResponse = {
-  status: string;
-  id?: string;
-  approval?: ApprovalState;
-  previousApproval?: ApprovalState;
-  previousStatus?: string;
-  currentStatus?: string;
-  statusFlipped?: boolean;
-  error?: string;
-};
-
-async function fetchInbox(): Promise<OrchestrationUnitRaw[]> {
-  // Try the bridge first; fall back to the static JSON in /docs (served by
-  // Vite's public-dir mirror) so the page renders without the bridge running.
-  try {
-    const r = await fetch(`${BRIDGE_BASE}/orchestration/list`);
-    if (r.ok) {
-      const body = (await r.json()) as ListResponse;
-      return body.units.filter((u) => INBOX_FILTERS.includes(u.approval as ApprovalState));
-    }
-  } catch (_) {
-    // bridge offline — fall through to static read
-  }
-  try {
-    const r = await fetch('/docs/ai/orchestration.json');
-    if (!r.ok) return [];
-    const data = (await r.json()) as { units?: OrchestrationUnitRaw[] };
-    if (!Array.isArray(data.units)) return [];
-    return data.units.filter((u) => INBOX_FILTERS.includes(u.approval as ApprovalState));
-  } catch (_) {
-    return [];
-  }
-}
-
-async function postApproval(id: string, approval: ApprovalState): Promise<ApproveResponse> {
-  const r = await fetch(`${BRIDGE_BASE}/orchestration/approve`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, approval }),
-  });
-  return (await r.json()) as ApproveResponse;
-}
-
-interface InboxState {
-  units: OrchestrationUnitRaw[];
-  pending: Set<string>;
-  loaded: boolean;
-  bridgeOk: boolean;
-  errorMessage: string | null;
-}
-
-const INITIAL_STATE: InboxState = {
-  units: [],
-  pending: new Set(),
-  loaded: false,
-  bridgeOk: true,
-  errorMessage: null,
-};
+// Approve → POST /api/task-action { action: 'dispatch' } — opens the
+//   `@claude` GitHub issue and clears dispatch_status off 'queued'.
+// Deny    → POST /api/task-action { action: 'unqueue' } — back to the backlog.
+//
+// Replaces the retired Figma-bridge dev-server fetch entirely (that dev
+// port was swept 2026-07-02 — see docs/ai/HANDOFF.md). No edit form here —
+// v1 tasks have no editable spec-doc fields; operators edit a task from
+// /ops/tasks directly.
 
 export default function ApprovalsPage() {
   const navigate = useNavigate();
-  const [state, setState] = React.useState<InboxState>(INITIAL_STATE);
-
-  React.useEffect(() => {
-    let cancelled = false;
-    fetchInbox().then((units) => {
-      if (cancelled) return;
-      setState((prev) => ({ ...prev, units, loaded: true }));
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const reconcile = React.useCallback(
-    async (id: string, approval: ApprovalState) => {
-      // Optimistic remove.
-      const previous = state.units.find((u) => u.id === id);
-      setState((prev) => ({
-        ...prev,
-        units: prev.units.filter((u) => u.id !== id),
-        pending: new Set([...prev.pending, id]),
-      }));
-
-      try {
-        const result = await postApproval(id, approval);
-        if (result.status !== 'ok') {
-          // Rollback on server error.
-          setState((prev) => {
-            const nextPending = new Set(prev.pending);
-            nextPending.delete(id);
-            return {
-              ...prev,
-              units: previous ? [...prev.units, previous] : prev.units,
-              pending: nextPending,
-              errorMessage: result.error ?? 'unknown server error',
-            };
-          });
-          return;
-        }
-        setState((prev) => {
-          const nextPending = new Set(prev.pending);
-          nextPending.delete(id);
-          return { ...prev, pending: nextPending, errorMessage: null };
-        });
-      } catch (err) {
-        setState((prev) => {
-          const nextPending = new Set(prev.pending);
-          nextPending.delete(id);
-          return {
-            ...prev,
-            units: previous ? [...prev.units, previous] : prev.units,
-            pending: nextPending,
-            bridgeOk: false,
-            errorMessage: err instanceof Error ? err.message : 'bridge unreachable',
-          };
-        });
-      }
-    },
-    [state.units],
-  );
-
-  const inbox = state.units;
+  const { queued, loaded, busyKeys, errorMessage, approve, deny } = useApprovalsInbox();
 
   return (
     <div className="hds-page-enter">
@@ -170,34 +31,34 @@ export default function ApprovalsPage() {
         <Stack gap="spacious">
           <TextLockup
             eyebrow="Admin · Approval Inbox"
-            title="Pending unit approvals"
-            description={`${inbox.length} unit${inbox.length === 1 ? '' : 's'} awaiting ratification. Approve flips the unit to pending; the next autonomous session executes it.`}
+            title="Tasks awaiting approval"
+            description={`${queued.length} task${queued.length === 1 ? '' : 's'} queued for dispatch. Approve opens the @claude GitHub issue; deny sends the task back to the backlog.`}
             size="section"
           />
-          {state.errorMessage ? (
+          {errorMessage ? (
             <p className="text-sm text-destructive" data-role="approvals-error">
-              Bridge error: {state.errorMessage}
+              {errorMessage}
             </p>
           ) : null}
-          {!state.loaded ? (
+          {!loaded ? (
             <p className="text-sm text-muted-foreground" data-role="approvals-loading">
               Loading inbox…
             </p>
-          ) : inbox.length === 0 ? (
+          ) : queued.length === 0 ? (
             <p className="text-sm text-muted-foreground" data-role="approvals-empty">
-              Inbox is empty — no units in proposed or needs-grilling state.
+              {EMPTY_STATE_MESSAGE}
             </p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" data-role="approvals-grid">
-              {inbox.map((unit) => (
+              {queued.map((t) => (
                 <ApprovalCard
-                  key={unit.id}
-                  unit={unit}
-                  pending={state.pending.has(unit.id)}
-                  onApprove={() => reconcile(unit.id, 'approved')}
-                  onDeny={() => reconcile(unit.id, 'denied')}
-                  onGrill={() => reconcile(unit.id, 'needs-grilling')}
-                  onOpenDetail={(u) => navigate(`/admin/approvals/${u.id}`)}
+                  key={t.key}
+                  unit={taskToApprovalUnit(t)}
+                  pending={busyKeys.has(t.key)}
+                  showGrill={false}
+                  onApprove={() => approve(t.key)}
+                  onDeny={() => deny(t.key)}
+                  onOpenDetail={(u) => navigate(`/admin/approvals/${encodeURIComponent(u.id)}`)}
                 />
               ))}
             </div>
@@ -207,3 +68,6 @@ export default function ApprovalsPage() {
     </div>
   );
 }
+
+const EMPTY_STATE_MESSAGE =
+  "No tasks awaiting approval — mark a task 'queue' on the board or turn on auto-dispatch.";

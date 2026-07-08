@@ -33,6 +33,7 @@ import RoutesTree from '../atlas/routes-tree';
 import ClientsTab from '../atlas/clients-tab';
 import ValidatorsTab from '../atlas/validators-tab';
 import StrengthTab from '../atlas/strength-tab';
+import { useTasks } from '../tasks/useTasks';
 import { KpiCards } from './KpiCards';
 import { PillarRail, type PillarFilter } from './PillarRail';
 import { RunsPanel } from './RunsPanel';
@@ -48,6 +49,8 @@ import { UNITS } from './data';
 /** @public */
 export default function AgenticOSPage() {
   const [pillarFilter, setPillarFilter] = useState<PillarFilter>(null);
+  const { tasks } = useTasks();
+  const approvalsCount = tasks ? tasks.filter((t) => t.dispatch_status === 'queued').length : null;
 
   const filteredUnits = useMemo(() => {
     if (pillarFilter === null) return UNITS;
@@ -60,7 +63,7 @@ export default function AgenticOSPage() {
       <Stack direction="column" gap="px40">
         <PageHeader breadcrumbs={[{ label: 'Ops' }]} title="Ops" />
 
-        <SurfacesRail />
+        <SurfacesRail approvalsCount={approvalsCount} />
 
         <StrengthTab />
 

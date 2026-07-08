@@ -58,7 +58,9 @@ export type TaskAction =
   | 'restore'
   | 'dispatch'
   | 'auto_on'
-  | 'auto_off';
+  | 'auto_off'
+  | 'queue'
+  | 'unqueue';
 
 export interface TasksResponse {
   tasks: Task[];

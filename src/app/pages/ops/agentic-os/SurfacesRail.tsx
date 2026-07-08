@@ -3,7 +3,8 @@
 /**
  * SurfacesRail — sibling-surface jump-tiles surfaced under the page header.
  * Each tile points at a /ops/* peer page (Atlas, Kanban, etc.) so the index
- * can act as a real launchpad rather than a dead end.
+ * can act as a real launchpad rather than a dead end. The trailing Approvals
+ * tile points at /admin/approvals (epic #41 Slice 3) with a live queued-count.
  *
  * Outline-light: raised surface, no border. ArrowRight on the right edge.
  * Modeled on the staging "Resource link card" pattern.
@@ -49,7 +50,19 @@ const TILES: readonly SurfaceTile[] = [
   },
 ] as const;
 
-export function SurfacesRail() {
+export interface SurfacesRailProps {
+  /**
+   * Queued-for-approval task count (epic #41 Slice 3, dispatch_status ===
+   * 'queued'). Rendered on the Approvals tile so mission control surfaces the
+   * inbox without a trip to /ops/tasks. null/undefined while still loading.
+   */
+  approvalsCount?: number | null;
+}
+
+export function SurfacesRail({ approvalsCount }: SurfacesRailProps = {}) {
+  const approvalsLabel =
+    typeof approvalsCount === 'number' ? `Approvals (${approvalsCount})` : 'Approvals';
+
   return (
     <nav aria-label="Sibling surfaces" style={s.row}>
       {TILES.map((t) => (
@@ -65,6 +78,13 @@ export function SurfacesRail() {
           />
         </Link>
       ))}
+      <Link to="/admin/approvals" className="hds-focus" style={s.tile} data-role="approvals-tile">
+        <Stack direction="column" gap="px2" style={{ minWidth: 0 }}>
+          <span style={s.tileLabel}>{approvalsLabel}</span>
+          <span style={s.tileDesc}>Tasks queued for dispatch — approve or deny</span>
+        </Stack>
+        <ArrowRight size={14} color="var(--semantic-color-content-secondary)" aria-hidden="true" />
+      </Link>
     </nav>
   );
 }

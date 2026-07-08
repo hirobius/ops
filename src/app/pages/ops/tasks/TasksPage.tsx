@@ -13,10 +13,14 @@
  *   - Dispatch → opens a GitHub issue that @mentions Claude (the agentic-loop
  *     hand-off; GitHub spins up a Claude Code session — no Claude API). Needs
  *     GITHUB_TOKEN; the row gets a dispatch_url + claimed_by='claude'.
+ *   - Queue → flips dispatch_status to 'queued' (epic #41 Slice 3) — pushes the
+ *     task into the /admin/approvals inbox for a human Approve/Deny click,
+ *     distinct from Auto (auto_ok, which self-dispatches with no approval).
  *   - Trash → soft-delete (deleted_at).
  */
 
 import { useCallback, useMemo, useState, type CSSProperties } from 'react';
+import { Link } from 'react-router';
 import { Button, Badge } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from '../PageHeader';
@@ -133,6 +137,10 @@ export default function TasksPage() {
   }, [filtered]);
 
   const summary = tasks ? `${filtered.length} shown · ${tasks.length} total` : '';
+  const queuedCount = useMemo(
+    () => (tasks ? tasks.filter((t) => t.dispatch_status === 'queued').length : 0),
+    [tasks],
+  );
 
   return (
     <div style={s.page}>
@@ -175,6 +183,11 @@ export default function TasksPage() {
               ? 'loading…'
               : `${summary} · updated ${formatLastUpdated(lastUpdatedAt)}`}
         </span>
+        {queuedCount > 0 && (
+          <Link to="/admin/approvals" style={s.approvalsLink} data-role="approvals-indicator">
+            {queuedCount} awaiting approval
+          </Link>
+        )}
         <Button size="sm" variant="secondary" disabled={importing} onClick={importIssues}>
           {importing ? 'importing…' : 'Import GitHub issues'}
         </Button>
@@ -252,6 +265,25 @@ export default function TasksPage() {
                       >
                         {busy ? '…' : t.auto_ok ? 'Auto: on' : 'Auto: off'}
                       </button>
+                      {!dispatched && (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() =>
+                            act(t.key, t.dispatch_status === 'queued' ? 'unqueue' : 'queue')
+                          }
+                          style={
+                            busy
+                              ? s.btnDisabled
+                              : t.dispatch_status === 'queued'
+                                ? s.btnPrimary
+                                : s.btn
+                          }
+                          aria-pressed={t.dispatch_status === 'queued'}
+                        >
+                          {busy ? '…' : t.dispatch_status === 'queued' ? 'Queued' : 'Queue'}
+                        </button>
+                      )}
                       {t.status === 'done' ? (
                         <button
                           type="button"
@@ -348,6 +380,15 @@ const s = {
     fontFamily: hds.monoFamily,
     fontSize: hds.fontSize.xs,
     color: 'var(--semantic-color-content-secondary)',
+  },
+  approvalsLink: {
+    ...hds.typeStyles.ui,
+    fontSize: hds.fontSize.xs,
+    padding: '4px 10px',
+    border: '1px solid var(--semantic-color-content-accent)',
+    borderRadius: hds.borderRadius[8],
+    color: 'var(--semantic-color-content-accent)',
+    textDecoration: 'none',
   },
   notice: { margin: 0, ...hds.typeStyles.body, color: 'var(--semantic-color-content-secondary)' },
   code: {
