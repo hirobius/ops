@@ -46,6 +46,14 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
   - GitHub fine-grained tokens: `https://github.com/settings/personal-access-tokens`
     Pair every "paste this" with the link to where it goes.
 
+### Dispatched-task discipline (2026-07-08)
+
+Applies to any agent working a dispatched `@claude` task — and to any session dispatching them.
+
+- **Decompose epics; never build one wholesale.** If a dispatched task is actually an epic — multiple deliverables, or a design/spec/roadmap doc (e.g. a "fleet mayor", "compliance", "consolidation", "live status feed" issue) — do NOT attempt the whole thing in one PR. File concrete sub-issues, implement the smallest well-scoped slice, and link the rest. A dispatching session splits an epic into tasks *before* dispatch; an agent that receives one decomposes rather than flailing at all of it.
+- **Never false-close.** An agent that cannot make real, mergeable progress — blocked on a human decision, a missing key/paid account, out-of-scope, or genuinely not agent-actionable — must NOT mark the task `done`. Set it `blocked` (or `on-hold`) with a one-line reason on the issue, so the thought is recycled, never lost to a false "completed". **"I analyzed it" is not "done".**
+- **Ask, don't guess.** When input is genuinely needed, drain every non-blocked part first (open a draft PR), then post the specific question, apply `needs-adrian`, and set the task blocked (see ops#51) — rather than guessing or closing.
+
 ## 3. SUB-AGENT DISPATCH RULES
 
 - **Pick the cheapest model that can do the job.** `sonnet` is the default for source-code work and is **required for any task involving deletions** (file removals, dead-code pruning, dependency removal). `opus` only for cross-cutting architectural reasoning, ambiguous scope, or subtle validator logic — use sparingly.
