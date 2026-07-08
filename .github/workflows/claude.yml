@@ -1,0 +1,41 @@
+name: Claude
+
+# Fleet executor (epic #41). When a task is dispatched, the ops board opens a
+# GitHub issue whose body @-mentions Claude; this workflow picks it up and runs
+# a Claude Code session on Adrian's Max subscription (via CLAUDE_CODE_OAUTH_TOKEN,
+# NOT a metered API key) to work the task on a branch and open a PR.
+#
+# Setup (one-time, Adrian): install github.com/apps/claude on the hirobius org,
+# run `claude setup-token` locally, add the output as the repo/org secret
+# CLAUDE_CODE_OAUTH_TOKEN. See docs/operations/agentic-ops-loop.md / epic #41.
+
+on:
+  issues:
+    types: [opened, assigned]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  claude:
+    # Only run when @claude is actually mentioned (in a new issue body or a comment).
+    if: |
+      contains(github.event.issue.body, '@claude') ||
+      contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Claude Code
+        uses: anthropics/claude-code-action@v1
+        with:
+          # Auth via the Max subscription (no ANTHROPIC_API_KEY). Generate with
+          # `claude setup-token`; store as the CLAUDE_CODE_OAUTH_TOKEN secret.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
