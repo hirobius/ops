@@ -18,7 +18,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 
 - **Current state / what's next:** `docs/ai/HANDOFF.md` — start here on any short or open-ended prompt ("continue", "go", "status") and act from its Next queue.
 - **Focus contract:** `docs/ai/NORTH_STAR.md` — if a request materially expands scope beyond it (infrastructure that doesn't ship a paying client site sooner), flag the drift in one sentence, then do what Adrian decides. Sessions never edit that file.
-- **Delivery architecture (lead → site pipeline):** `docs/ARCHITECTURE.md`.
+- **Delivery architecture + pipeline gap-map (lead → site → outreach → invoice):** `docs/ARCHITECTURE.md` (canonical) ⇄ `docs/pipeline-walkthrough.html` (visual, published as an Artifact). **Keep the two in lockstep** — any change to pipeline state updates BOTH in the same commit.
 - **Guardrail registry:** `docs/guardrails/registry.json` — every `scripts/check-*.mjs` / `audit-*.mjs` gate with its `firingChannel`; `validate-guardrail-registry` keeps registry ↔ scripts consistent.
 - **Context awareness:** look for local `CLAUDE.md` files in subdirectories for overriding rules before editing.
 - **Plan & PR artifacts (convention, #4):** for a substantial implementation plan, write it as a self-contained **HTML file** (real tables, mockups, data-flow, key code snippets) reviewable in a browser — not a markdown wall (template gallery: `anthropics/html-effectiveness`). For a large diff, produce an **artifact walkthrough** (the diff, reasoning per change, what was tested). Small changes stay inline.

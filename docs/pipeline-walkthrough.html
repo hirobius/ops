@@ -1,0 +1,396 @@
+<title>Hirobius Pipeline — end-to-end gap-map</title>
+<style>
+  :root {
+    --bg: #f5f7f8;
+    --surface: #ffffff;
+    --surface-2: #fafbfc;
+    --ink: #161b22;
+    --muted: #59626f;
+    --faint: #838d9b;
+    --hairline: #e3e8ee;
+    --hairline-strong: #cfd6df;
+    --accent: #0e7c86;
+    --accent-soft: #d7ecee;
+    --chip-bg: #f0f2f5;
+    --chip-ink: #37414f;
+
+    --live: #17924a;      --live-bg: #e6f5ec;      --live-line: #46b877;
+    --gated: #b26a06;     --gated-bg: #fbefd9;     --gated-line: #e0982f;
+    --scaffold: #2560d4;  --scaffold-bg: #e6edfb;  --scaffold-line: #5f92ea;
+    --gap: #cf2f2f;       --gap-bg: #fbe6e6;       --gap-line: #e56a6a;
+    --future: #667180;    --future-bg: #eceff2;    --future-line: #9aa4b1;
+
+    --radius: 12px;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e131a;
+      --surface: #161d26;
+      --surface-2: #1a222c;
+      --ink: #e7ecf2;
+      --muted: #97a1af;
+      --faint: #6e7987;
+      --hairline: #232d38;
+      --hairline-strong: #313d4a;
+      --accent: #38c7be;
+      --accent-soft: #123539;
+      --chip-bg: #1f2833;
+      --chip-ink: #b9c2ce;
+
+      --live: #46c07d;      --live-bg: #12291d;      --live-line: #2f6f49;
+      --gated: #e2a13f;     --gated-bg: #2c2213;     --gated-line: #7a5c25;
+      --scaffold: #6fa0ef;  --scaffold-bg: #16223a;  --scaffold-line: #315089;
+      --gap: #ef6f6f;       --gap-bg: #2e1717;       --gap-line: #7c3535;
+      --future: #8b95a3;    --future-bg: #1c242e;    --future-line: #3b4552;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e131a;
+    --surface: #161d26;
+    --surface-2: #1a222c;
+    --ink: #e7ecf2;
+    --muted: #97a1af;
+    --faint: #6e7987;
+    --hairline: #232d38;
+    --hairline-strong: #313d4a;
+    --accent: #38c7be;
+    --accent-soft: #123539;
+    --chip-bg: #1f2833;
+    --chip-ink: #b9c2ce;
+
+    --live: #46c07d;      --live-bg: #12291d;      --live-line: #2f6f49;
+    --gated: #e2a13f;     --gated-bg: #2c2213;     --gated-line: #7a5c25;
+    --scaffold: #6fa0ef;  --scaffold-bg: #16223a;  --scaffold-line: #315089;
+    --gap: #ef6f6f;       --gap-bg: #2e1717;       --gap-line: #7c3535;
+    --future: #8b95a3;    --future-bg: #1c242e;    --future-line: #3b4552;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 40px 24px 72px; }
+
+  .lockstep {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 28px;
+  }
+  .lockstep b { color: var(--accent); font-weight: 600; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 12px;
+    font-weight: 680;
+  }
+  .lede { font-size: 17px; color: var(--muted); margin: 0 0 4px; max-width: 62ch; }
+  .lede code { font-family: var(--mono); font-size: 14px; color: var(--ink); }
+
+  /* summary */
+  .summary {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 16px;
+    margin: 32px 0 40px;
+  }
+  @media (max-width: 720px) { .summary { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .thesis { border-left: 3px solid var(--gap); }
+  .thesis h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gap); margin: 0 0 8px; font-family: var(--mono); }
+  .thesis p { margin: 0; font-size: 15px; color: var(--ink); }
+  .thesis .mid { color: var(--gap); font-weight: 600; }
+
+  .tally { display: flex; flex-wrap: wrap; gap: 8px 10px; align-content: start; }
+  .tally .count { font-variant-numeric: tabular-nums; font-weight: 680; }
+  .stat {
+    display: flex; align-items: baseline; gap: 7px;
+    font-size: 13px; color: var(--muted);
+    border: 1px solid var(--hairline);
+    border-radius: 999px; padding: 5px 12px 5px 10px;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; align-self: center; }
+  .d-live { background: var(--live-line); }
+  .d-gated { background: var(--gated-line); }
+  .d-scaffold { background: var(--scaffold-line); }
+  .d-gap { background: var(--gap-line); }
+  .d-future { background: var(--future-line); }
+
+  /* legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 8px; font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+  h2.section { font-size: 13px; font-family: var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin: 40px 0 16px; font-weight: 600; }
+
+  /* pipeline spine */
+  .stage {
+    position: relative;
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 16px;
+    padding-bottom: 14px;
+  }
+  .rail { display: flex; flex-direction: column; align-items: center; }
+  .num {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    width: 30px; height: 30px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1.5px solid var(--hairline-strong);
+    color: var(--muted);
+    z-index: 1;
+  }
+  .spine { width: 2px; flex: 1; background: var(--hairline); margin-top: 4px; }
+  .stage:last-of-type .spine { display: none; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-left-width: 3px;
+    border-radius: var(--radius);
+    padding: 15px 18px;
+    margin-bottom: 4px;
+  }
+  .card.s-live { border-left-color: var(--live-line); }
+  .card.s-gated { border-left-color: var(--gated-line); }
+  .card.s-scaffold { border-left-color: var(--scaffold-line); }
+  .card.s-gap { border-left-color: var(--gap-line); }
+  .card.s-future { border-left-color: var(--future-line); }
+
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .card-head h3 { margin: 0; font-size: 17px; font-weight: 620; letter-spacing: -0.01em; }
+  .pill {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .p-live { color: var(--live); background: var(--live-bg); }
+  .p-gated { color: var(--gated); background: var(--gated-bg); }
+  .p-scaffold { color: var(--scaffold); background: var(--scaffold-bg); }
+  .p-gap { color: var(--gap); background: var(--gap-bg); }
+  .p-future { color: var(--future); background: var(--future-bg); }
+
+  .desc { margin: 8px 0 12px; font-size: 14.5px; color: var(--muted); max-width: 68ch; }
+  .desc b { color: var(--ink); font-weight: 620; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--chip-ink);
+    background: var(--chip-bg);
+    border-radius: 6px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+  .chip.env { color: var(--accent); background: var(--accent-soft); }
+
+  /* the broken-middle bracket */
+  .bracket {
+    grid-column: 2;
+    display: flex; align-items: center; gap: 10px;
+    margin: -6px 0 12px;
+    font-family: var(--mono); font-size: 12px; color: var(--gap);
+  }
+  .bracket .ln { flex: 1; height: 1px; background: var(--gap-line); opacity: 0.5; }
+
+  .foot { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--hairline); font-size: 13px; color: var(--faint); font-family: var(--mono); }
+  .foot code { color: var(--muted); }
+  a { color: var(--accent); }
+</style>
+
+<div class="wrap">
+  <div class="lockstep">⇄ synced with <b>docs/ARCHITECTURE.md</b> — the in-repo canonical readme. Both update together; this is the visual view.</div>
+
+  <p class="eyebrow">Hirobius · delivery pipeline</p>
+  <h1>Lead to invoice, end&#8209;to&#8209;end — and where it breaks</h1>
+  <p class="lede">Every stage of <code>lead → score → site → preview → outreach → reply → deal → invoice</code>, its moving parts, and an honest status. Built for the operator, not the archive.</p>
+
+  <div class="summary">
+    <div class="panel thesis">
+      <h2>The headline</h2>
+      <p>Both ends are built — sourcing and scoring are live, outreach is scaffolded. But the <span class="mid">middle is the broken link</span>: the site actually gets <b>generated</b> (③) and <b>published</b> (④) has never run end-to-end. Until it does, there is <span class="mid">no preview link to send</span>. That middle — not the outreach engine — is the #1 build target.</p>
+    </div>
+    <div class="panel">
+      <div class="legend" style="margin-bottom:14px">
+        <span><i class="dot d-live"></i>live / proven</span>
+        <span><i class="dot d-gated"></i>gated on a human step</span>
+        <span><i class="dot d-scaffold"></i>scaffolded, unrun</span>
+        <span><i class="dot d-gap"></i>gap / broken</span>
+      </div>
+      <div class="tally">
+        <span class="stat"><i class="dot d-live"></i><span class="count">3</span> live</span>
+        <span class="stat"><i class="dot d-gated"></i><span class="count">2</span> gated</span>
+        <span class="stat"><i class="dot d-scaffold"></i><span class="count">2</span> scaffolded</span>
+        <span class="stat"><i class="dot d-gap"></i><span class="count">2</span> gaps</span>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section">The funnel</h2>
+
+  <div class="stage">
+    <div class="rail"><div class="num">1</div><div class="spine"></div></div>
+    <div class="card s-live">
+      <div class="card-head"><h3>Source leads</h3><span class="pill p-live">live · spend on hold</span></div>
+      <p class="desc">Scrape local businesses via Outscraper, normalize + score, upsert to Supabase. <b>Proven: Run 01 = 249 leads, 25 qualified.</b> Opt-out suppression is enforced on ingest.</p>
+      <div class="chips">
+        <span class="chip">scripts/outscraper-fetch.mjs</span>
+        <span class="chip">lib/lead-gen/</span>
+        <span class="chip">lib/supabase/leads.mjs</span>
+        <span class="chip">/ops/leads + sweep presets</span>
+        <span class="chip env">OUTSCRAPER_API_KEY</span>
+        <span class="chip env">SUPABASE_*</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="rail"><div class="num">2</div><div class="spine"></div></div>
+    <div class="card s-live">
+      <div class="card-head"><h3>Score &amp; qualify</h3><span class="pill p-live">live</span> <span class="pill p-gated">3rd scorer gated</span></div>
+      <p class="desc"><code>lead_score</code> (need) + <code>build_score</code> (demo material); qualified at ≥ 60. The <b>site-quality / redesign scorer</b> (PageSpeed) is built but waits on a key + migration.</p>
+      <div class="chips">
+        <span class="chip">scripts/lib/outscraper-normalize.mjs</span>
+        <span class="chip">scripts/prospect-stats.mjs</span>
+        <span class="chip">scripts/audit-sites.mjs</span>
+        <span class="chip env">PAGESPEED_API_KEY</span>
+        <span class="chip">migration 0006</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="rail"><div class="num">3</div><div class="spine"></div></div>
+    <div class="card s-scaffold">
+      <div class="card-head"><h3>Generate the site</h3><span class="pill p-scaffold">wired · never run</span></div>
+      <p class="desc">The agent (enrich → generate → judge) emits a <code>ClientConfig</code>. Triggered from the board, but <b>never actually run on a real lead</b> — and it produces a config, not a live site.</p>
+      <div class="chips">
+        <span class="chip">lib/agent/</span>
+        <span class="chip">lib/schema (ClientConfig)</span>
+        <span class="chip">/api/lead-action → generate</span>
+        <span class="chip env">ANTHROPIC_API_KEY</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bracket"><span>the broken middle</span><span class="ln"></span></div>
+
+  <div class="stage">
+    <div class="rail"><div class="num">4</div><div class="spine"></div></div>
+    <div class="card s-gap">
+      <div class="card-head"><h3>Build &amp; publish</h3><span class="pill p-gap">gap · mid-cutover</span></div>
+      <p class="desc">Duda is <b>retired</b>; the Astro clients factory is the replacement but <b>isn't live yet</b> (Cutover Part B). <b>There is no working path from config → a published preview site today</b> — this is the hole.</p>
+      <div class="chips">
+        <span class="chip">lib/render/</span>
+        <span class="chip">lib/duda/ (retired)</span>
+        <span class="chip">hirobius/clients (Astro)</span>
+        <span class="chip">ops-astro-cutover-plan.md</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="rail"><div class="num">5</div><div class="spine"></div></div>
+    <div class="card s-live">
+      <div class="card-head"><h3>Preview / client portal</h3><span class="pill p-live">live · needs a site</span></div>
+      <p class="desc">The <code>/c/:slug?token=</code> portal (server-side auth) shows the live preview + milestones + a feedback form. The lead's <code>preview_url</code> is the hook the outreach email points at.</p>
+      <div class="chips">
+        <span class="chip">lib/portal-auth.mjs</span>
+        <span class="chip">api/portal-verify.ts</span>
+        <span class="chip">ClientPortalPage</span>
+        <span class="chip env">PORTAL_HMAC_SECRET</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="rail"><div class="num">6</div><div class="spine"></div></div>
+    <div class="card s-scaffold">
+      <div class="card-head"><h3>Outreach</h3><span class="pill p-scaffold">scaffolded</span> <span class="pill p-gated">gated</span></div>
+      <p class="desc">Smartlead adapter + push script (dry-run by default, compliance-filtered). Sending is gated on the key + a <b>warmed sending domain</b> (2–4 wk). The reply/bounce webhook is deferred (function cap + secret).</p>
+      <div class="chips">
+        <span class="chip">lib/outreach/</span>
+        <span class="chip">scripts/push-outreach.mjs</span>
+        <span class="chip env">SMARTLEAD_API_KEY</span>
+        <span class="chip env">SMARTLEAD_CAMPAIGN_ID</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="rail"><div class="num">7</div><div class="spine"></div></div>
+    <div class="card s-gated">
+      <div class="card-head"><h3>CRM lifecycle &amp; compliance</h3><span class="pill p-gated">built · migration not applied</span></div>
+      <p class="desc">Lifecycle columns + opt-out suppression + retention purge are built; they activate once migration 0007 is applied. B2B cold email is CAN-SPAM-legal; the privacy page is the open item.</p>
+      <div class="chips">
+        <span class="chip">migration 0007</span>
+        <span class="chip">scripts/purge-stale-leads.mjs</span>
+        <span class="chip">docs/prospecting/compliance.md</span>
+        <span class="chip">do_not_contact (#36)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="rail"><div class="num">8</div><div class="spine"></div></div>
+    <div class="card s-future">
+      <div class="card-head"><h3>Deal → invoice</h3><span class="pill p-future">not built</span></div>
+      <p class="desc">The funnel's end. No won-deal → billing path exists yet — a future stage once the middle is closed and outreach is converting.</p>
+      <div class="chips"><span class="chip">— future —</span></div>
+    </div>
+  </div>
+
+  <h2 class="section">Cross-cutting · the command center (/ops)</h2>
+  <div class="panel s-live" style="border-left:3px solid var(--live-line)">
+    <div class="card-head" style="margin-bottom:10px"><h3 style="font-size:16px;margin:0">The dashboard everything runs from</h3><span class="pill p-live">live</span></div>
+    <p class="desc" style="max-width:72ch">Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home (with the new Runs panel). Password-gated, with a machine-auth key for headless agents. The fleet view watches every Vercel deploy + repo status; the task board imports GitHub issues and dispatches them by @-mentioning Claude; every autonomous run posts a recap to the run-log.</p>
+    <div class="chips">
+      <span class="chip">/ops/* surfaces</span>
+      <span class="chip">scripts/deploy-alert.mjs</span>
+      <span class="chip">tasks importer (#25)</span>
+      <span class="chip">docs/ops/run-log.jsonl</span>
+      <span class="chip env">OPS_GATE_PASSWORD</span>
+      <span class="chip env">OPS_AGENT_KEY</span>
+    </div>
+    <p class="desc" style="margin-bottom:0"><b>Open here:</b> the approvals inbox, the autonomy dial, and tier→model dispatch (#13).</p>
+  </div>
+
+  <p class="foot">Canonical source: <code>docs/ARCHITECTURE.md</code> · updated 2026-07-08 · legend: green live · amber gated · blue scaffolded · red gap</p>
+</div>
