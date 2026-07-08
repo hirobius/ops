@@ -157,7 +157,7 @@ create trigger tasks_audit_upd after update on tasks
 -- =============================================================================
 -- A task is blocked if ANY dep key is not done. Recomputed LIVE — do not trust
 -- the imported blocked_by snapshot.
-create or replace view tasks_blocked as
+create or replace view tasks_blocked with (security_invoker = on) as
 select t.id, t.key,
        array_remove(array_agg(d.key) filter (where d.status <> 'done'), null) as unmet_deps,
        (count(d.*) filter (where d.status <> 'done')) > 0                     as is_blocked
@@ -167,7 +167,7 @@ where t.deleted_at is null
 group by t.id, t.key;
 
 -- "What's next": open, not deleted, every dep done — the deps-aware daily driver.
-create or replace view tasks_next as
+create or replace view tasks_next with (security_invoker = on) as
 select t.*
 from tasks t
 join tasks_blocked b on b.key = t.key
