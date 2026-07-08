@@ -11,7 +11,7 @@
  *
  * Usage:
  *   node scripts/log-run.mjs --actor <a> --outcome <o> --summary "<s>" \
- *     [--task <t>] [--model <m>] [--tier <t>] [--url <u>]
+ *     [--task <t>] [--model <m>] [--tier <t>] [--url <u>] [--tokens <n>]
  *
  * Required:
  *   --actor     who ran it, e.g. claude-subagent | claude
@@ -23,6 +23,7 @@
  *   --model     model id/tier label
  *   --tier      dispatch tier label
  *   --url       session_url — link back to the originating session
+ *   --tokens    total token count for the run, if known
  *   --help      print this usage and exit 0
  *
  * Examples:
@@ -58,6 +59,9 @@ function parseArgs(argv) {
       case '--url':
         o.session_url = argv[++i];
         break;
+      case '--tokens':
+        o.tokens = Number(argv[++i]);
+        break;
       case '--help':
       case '-h':
         o.help = true;
@@ -75,9 +79,9 @@ function printHelp() {
     `scripts/log-run.mjs — post a one-line autonomous-run recap (#8 Slice 2)\n\n` +
       `Usage:\n` +
       `  node scripts/log-run.mjs --actor <a> --outcome <o> --summary "<s>" \\\n` +
-      `    [--task <t>] [--model <m>] [--tier <t>] [--url <u>]\n\n` +
+      `    [--task <t>] [--model <m>] [--tier <t>] [--url <u>] [--tokens <n>]\n\n` +
       `Required: --actor --outcome --summary\n` +
-      `Optional: --task --model --tier --url --help\n\n` +
+      `Optional: --task --model --tier --url --tokens --help\n\n` +
       `Appends one line to docs/ops/run-log.jsonl; the /ops Runs panel picks it\n` +
       `up on next build.\n`,
   );
@@ -106,9 +110,13 @@ function main() {
     model: args.model,
     tier: args.tier,
     session_url: args.session_url,
+    tokens: args.tokens,
   });
 
-  console.log(`Logged run: ${row.ts} · ${row.actor} · ${row.outcome} — ${row.summary}`);
+  const tokensSuffix = typeof row.tokens === 'number' ? ` · ${row.tokens} tok` : '';
+  console.log(
+    `Logged run: ${row.ts} · ${row.actor} · ${row.outcome}${tokensSuffix} — ${row.summary}`,
+  );
 }
 
 main();

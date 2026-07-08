@@ -37,15 +37,24 @@ outreach engine.
 ### Cross-cutting: the command center (`/ops`) — 🟢 live
 
 Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home
-(+ Runs panel) · admin/approvals (live — tasks-store approvals inbox, epic #41
-Slice 3: `dispatch_status='queued'` tasks await an Approve/Deny click, reusing
-`ApprovalCard` + `/api/task-action`'s `dispatch`/`unqueue` actions; the dead
-`localhost:3005/orchestration/*` bridge is fully retired). Auth:
-`OPS_GATE_PASSWORD`+`OPS_SESSION_SECRET` (gate), `OPS_AGENT_KEY` (machine auth,
-#25). Fleet: `/ops/projects` + `scripts/deploy-alert.mjs` (#11). Task machinery:
-`tasks` table + GitHub-issue importer (#25) + dispatch (opens an issue @-mentioning
-Claude). Run-log: `docs/ops/run-log.jsonl` + Runs panel (#8 half). Gaps: autonomy
-dial, tier→model dispatch UI polish (#13).
+(+ Runs panel, Fleet timeline, and an inline **Approvals panel** — the queue
+itself renders on `/ops`, not just a link) · admin/approvals (live — tasks-store
+approvals inbox, epic #41 Slice 3: `dispatch_status='queued'` tasks await an
+Approve/Deny click, reusing `ApprovalCard` + `/api/task-action`'s
+`dispatch`/`unqueue` actions; the dead `localhost:3005/orchestration/*` bridge
+is fully retired). **Slice 6 (2026-07-08, closes #8's autonomy dial):**
+`scripts/fleet-dispatch.mjs` now also auto-queues — every run proposes up to
+`--queue-max` open, non-`auto_ok` tasks into the approvals inbox
+(`dispatch_status='queued'`), so `auto_ok=true` tasks self-dispatch-and-recap
+while everything else lands in front of Adrian for one click, with no
+operator having to notice and toggle "Queue" by hand first. A task he denies
+is never re-proposed (tracked via `docs/ops/events.jsonl`'s `approval_waiting`
+events). Auth: `OPS_GATE_PASSWORD`+`OPS_SESSION_SECRET` (gate), `OPS_AGENT_KEY`
+(machine auth, #25). Fleet: `/ops/projects` + `scripts/deploy-alert.mjs` (#11).
+Task machinery: `tasks` table + GitHub-issue importer (#25) + dispatch (opens
+an issue @-mentioning Claude). Run-log: `docs/ops/run-log.jsonl` + Runs panel
+(#8), recap rows now also carry an optional `tokens` count. Gap: tier→model
+dispatch UI polish (#13).
 
 ### Active env vars (pipeline) vs. dead weight
 

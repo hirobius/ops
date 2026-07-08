@@ -77,6 +77,48 @@ describe('appendRun', () => {
     expect(JSON.parse(raw.trim())).toEqual(row);
   });
 
+  it('includes a valid numeric tokens field', () => {
+    path = tmpPath();
+    const row = appendRun(
+      {
+        ts: '2026-07-07T10:00:00Z',
+        actor: 'claude',
+        outcome: 'shipped',
+        summary: 'did a thing',
+        tokens: 45200,
+      },
+      { path },
+    );
+    expect(row.tokens).toBe(45200);
+  });
+
+  it('drops a non-finite or negative tokens value rather than throwing', () => {
+    path = tmpPath();
+    const row = appendRun(
+      {
+        ts: '2026-07-07T10:00:00Z',
+        actor: 'claude',
+        outcome: 'shipped',
+        summary: 'x',
+        tokens: NaN,
+      },
+      { path },
+    );
+    expect(row.tokens).toBeUndefined();
+
+    const row2 = appendRun(
+      {
+        ts: '2026-07-07T10:00:01Z',
+        actor: 'claude',
+        outcome: 'shipped',
+        summary: 'y',
+        tokens: -5,
+      },
+      { path },
+    );
+    expect(row2.tokens).toBeUndefined();
+  });
+
   it('creates the parent directory if missing', () => {
     const dir = mkdtempSync(join(tmpdir(), 'run-log-test-'));
     path = join(dir, 'nested', 'deeper', 'run-log.jsonl');

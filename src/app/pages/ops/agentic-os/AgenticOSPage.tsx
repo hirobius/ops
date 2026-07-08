@@ -12,10 +12,12 @@
  *   3. StrengthTab       Score A/B + --json compliance
  *   4. KpiCards          live metrics — active · cost
  *   5. PillarRail        BUILD / GROW / RUN distribution + filter chips
- *   6. Routes            (atlas import) — interactive route tree
- *   7. Clients           (atlas import) — registry card grid
- *   8. Gates             (atlas import) — guardrail validators table
- *   9. Skills / New skill / Plugins / Research (collapsed disclosures)
+ *   6. Approvals         tasks queued for dispatch — approve/deny inline (#8)
+ *   7. Fleet / Runs      run-log + events + alerts, autonomous recaps
+ *   8. Routes            (atlas import) — interactive route tree
+ *   9. Clients           (atlas import) — registry card grid
+ *  10. Gates             (atlas import) — guardrail validators table
+ *  11. Skills / New skill / Plugins / Research (collapsed disclosures)
  *
  * @category Internal
  * @tier utility
@@ -33,12 +35,13 @@ import RoutesTree from '../atlas/routes-tree';
 import ClientsTab from '../atlas/clients-tab';
 import ValidatorsTab from '../atlas/validators-tab';
 import StrengthTab from '../atlas/strength-tab';
-import { useTasks } from '../tasks/useTasks';
+import { useApprovalsInbox } from '../../admin/useApprovalsInbox';
 import { KpiCards } from './KpiCards';
 import { PillarRail, type PillarFilter } from './PillarRail';
 import { RunsPanel } from './RunsPanel';
 import { FleetTimeline } from './FleetTimeline';
 import { SurfacesRail } from './SurfacesRail';
+import { ApprovalsPanel } from './ApprovalsPanel';
 import { SkillsBar } from './SkillsBar';
 import { SkillCreatorForm } from './SkillCreatorForm';
 import { PluginsBar } from './PluginsBar';
@@ -49,8 +52,8 @@ import { UNITS } from './data';
 /** @public */
 export default function AgenticOSPage() {
   const [pillarFilter, setPillarFilter] = useState<PillarFilter>(null);
-  const { tasks } = useTasks();
-  const approvalsCount = tasks ? tasks.filter((t) => t.dispatch_status === 'queued').length : null;
+  const approvalsInbox = useApprovalsInbox();
+  const approvalsCount = approvalsInbox.loaded ? approvalsInbox.queued.length : null;
 
   const filteredUnits = useMemo(() => {
     if (pillarFilter === null) return UNITS;
@@ -70,6 +73,10 @@ export default function AgenticOSPage() {
         <KpiCards units={filteredUnits} />
 
         <PillarRail units={UNITS} filter={pillarFilter} onFilterChange={setPillarFilter} />
+
+        <Section label="Approvals" hint="tasks queued for dispatch — approve or deny">
+          <ApprovalsPanel inbox={approvalsInbox} />
+        </Section>
 
         <Section label="Fleet" hint="run-log + events + alerts, merged — newest 20">
           <FleetTimeline />

@@ -676,16 +676,22 @@
       <span class="pill p-live">live</span>
     </div>
     <p class="desc" style="max-width: 72ch">
-      Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home (with the new
-      Runs panel) · admin/approvals (live — tasks-store approvals inbox, epic #41 Slice 3).
+      Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home (with an
+      inline Approvals panel + Runs panel + Fleet timeline, all rendered on the page itself) ·
+      admin/approvals (live — tasks-store approvals inbox, epic #41 Slice 3).
       Password-gated, with a machine-auth key for headless agents. The fleet view watches every
       Vercel deploy + repo status; the task board imports GitHub issues and dispatches them by
-      @-mentioning Claude; a task marked "queue" awaits a human Approve/Deny in the approvals inbox
-      before dispatch; every autonomous run posts a recap to the run-log.
+      @-mentioning Claude. Since Slice 6 (2026-07-08), <code>fleet-dispatch.mjs</code> auto-queues
+      every non-<code>auto_ok</code> open task into the approvals inbox each run — closing #8's
+      autonomy dial ("auto-ok self-dispatches and recaps; everything else queues for a click", no
+      manual toggle needed first). Approve/Deny happens inline on <code>/ops</code> or at
+      <code>/admin/approvals</code>; every autonomous run posts a recap (task, tier, model,
+      optional token count, outcome) to the run-log.
     </p>
     <div class="chips">
       <span class="chip">/ops/* surfaces</span>
       <span class="chip">/admin/approvals (#41 Slice 3)</span>
+      <span class="chip">fleet-dispatch.mjs auto-queue (#41 Slice 6)</span>
       <span class="chip">scripts/deploy-alert.mjs</span>
       <span class="chip">tasks importer (#25)</span>
       <span class="chip">docs/ops/run-log.jsonl</span>
@@ -693,7 +699,7 @@
       <span class="chip env">OPS_AGENT_KEY</span>
     </div>
     <p class="desc" style="margin-bottom: 0">
-      <b>Open here:</b> the autonomy dial and tier→model dispatch UI polish (#13).
+      <b>Open here:</b> tier→model dispatch UI polish (#13).
     </p>
   </div>
 

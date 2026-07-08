@@ -30,6 +30,7 @@ export interface RunLogEntry {
   model?: string;
   tier?: string;
   session_url?: string;
+  tokens?: number;
 }
 
 // ── Source: docs/ops/run-log.jsonl (build-time, eager, raw) ───────────────────
@@ -106,6 +107,9 @@ export function RunsPanel({ limit = 15 }: { limit?: number }) {
                   {r.summary}
                   {r.task ? <span style={s.meta}> · {r.task}</span> : null}
                   {r.model ? <span style={s.meta}> · {r.model}</span> : null}
+                  {typeof r.tokens === 'number' ? (
+                    <span style={s.meta}> · {r.tokens.toLocaleString()} tok</span>
+                  ) : null}
                 </td>
               </tr>
             ))}

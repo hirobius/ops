@@ -10,7 +10,13 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { selectAndRoute, isMissingColumnError, DEFAULT_MAX } from '../fleet-dispatch.mjs';
+import {
+  selectAndRoute,
+  selectToQueue,
+  isMissingColumnError,
+  DEFAULT_MAX,
+  DEFAULT_QUEUE_MAX,
+} from '../fleet-dispatch.mjs';
 
 function task(overrides = {}) {
   return {
@@ -19,6 +25,7 @@ function task(overrides = {}) {
     status: 'open',
     auto_ok: true,
     dispatch_url: null,
+    dispatch_status: null,
     dispatch_count: 0,
     priority: null,
     effort: null,
@@ -133,5 +140,107 @@ describe('isMissingColumnError', () => {
 
   it('is false for an unrelated error', () => {
     expect(isMissingColumnError({ code: '23505', message: 'duplicate key value' })).toBe(false);
+  });
+});
+
+describe('selectToQueue', () => {
+  function nonAuto(overrides = {}) {
+    return task({ auto_ok: false, ...overrides });
+  }
+
+  it('returns an empty array for an empty task list', () => {
+    expect(selectToQueue([], new Set())).toEqual([]);
+  });
+
+  it('returns an empty array when given a non-array', () => {
+    expect(selectToQueue(undefined, new Set())).toEqual([]);
+    expect(selectToQueue(null, new Set())).toEqual([]);
+  });
+
+  it('filters out tasks with auto_ok === true (those self-dispatch instead)', () => {
+    const tasks = [nonAuto({ key: 'a', auto_ok: true }), nonAuto({ key: 'b', auto_ok: false })];
+    const out = selectToQueue(tasks, new Set());
+    expect(out.map((t) => t.key)).toEqual(['b']);
+  });
+
+  it('filters out tasks that already have a dispatch_url', () => {
+    const tasks = [
+      nonAuto({ key: 'a', dispatch_url: 'https://github.com/hirobius/ops/issues/1' }),
+      nonAuto({ key: 'b', dispatch_url: null }),
+    ];
+    const out = selectToQueue(tasks, new Set());
+    expect(out.map((t) => t.key)).toEqual(['b']);
+  });
+
+  it('filters out tasks whose status is not open', () => {
+    const tasks = [
+      nonAuto({ key: 'a', status: 'done' }),
+      nonAuto({ key: 'b', status: 'blocked' }),
+      nonAuto({ key: 'c', status: 'open' }),
+    ];
+    const out = selectToQueue(tasks, new Set());
+    expect(out.map((t) => t.key)).toEqual(['c']);
+  });
+
+  it('filters out tasks that already have a dispatch_status (queued/dispatched/failed/…)', () => {
+    const tasks = [
+      nonAuto({ key: 'a', dispatch_status: 'queued' }),
+      nonAuto({ key: 'b', dispatch_status: 'failed' }),
+      nonAuto({ key: 'c', dispatch_status: null }),
+    ];
+    const out = selectToQueue(tasks, new Set());
+    expect(out.map((t) => t.key)).toEqual(['c']);
+  });
+
+  it('filters out tasks already seen (previously proposed/denied) — no re-queue spam', () => {
+    const tasks = [nonAuto({ key: 'a' }), nonAuto({ key: 'b' })];
+    const out = selectToQueue(tasks, new Set(['a']));
+    expect(out.map((t) => t.key)).toEqual(['b']);
+  });
+
+  it('accepts a plain iterable (array) in place of a Set for seenTaskKeys', () => {
+    const tasks = [nonAuto({ key: 'a' }), nonAuto({ key: 'b' })];
+    const out = selectToQueue(tasks, ['a']);
+    expect(out.map((t) => t.key)).toEqual(['b']);
+  });
+
+  it('treats an omitted seenTaskKeys as "nothing seen yet"', () => {
+    const tasks = [nonAuto({ key: 'a' })];
+    expect(selectToQueue(tasks, undefined).map((t) => t.key)).toEqual(['a']);
+  });
+
+  it('defaults the cap to DEFAULT_QUEUE_MAX when no max is given', () => {
+    const tasks = Array.from({ length: DEFAULT_QUEUE_MAX + 5 }, (_, i) =>
+      nonAuto({ key: `t${i}` }),
+    );
+    const out = selectToQueue(tasks, new Set());
+    expect(out).toHaveLength(DEFAULT_QUEUE_MAX);
+  });
+
+  it('respects an explicit --queue-max cap smaller than the eligible count', () => {
+    const tasks = [nonAuto({ key: 'a' }), nonAuto({ key: 'b' }), nonAuto({ key: 'c' })];
+    const out = selectToQueue(tasks, new Set(), { max: 2 });
+    expect(out.map((t) => t.key)).toEqual(['a', 'b']);
+  });
+
+  it('max: 0 selects nothing', () => {
+    const tasks = [nonAuto({ key: 'a' }), nonAuto({ key: 'b' })];
+    expect(selectToQueue(tasks, new Set(), { max: 0 })).toEqual([]);
+  });
+
+  it('falls back to DEFAULT_QUEUE_MAX for a non-finite max', () => {
+    const tasks = Array.from({ length: DEFAULT_QUEUE_MAX + 2 }, (_, i) =>
+      nonAuto({ key: `t${i}` }),
+    );
+    const out = selectToQueue(tasks, new Set(), { max: NaN });
+    expect(out).toHaveLength(DEFAULT_QUEUE_MAX);
+  });
+
+  it('never selects a task that would also be eligible for auto-dispatch', () => {
+    // A task that IS auto_ok should self-dispatch (selectAndRoute), never
+    // land in the approvals queue too — the two passes are mutually exclusive.
+    const tasks = [nonAuto({ key: 'a', auto_ok: true })];
+    expect(selectToQueue(tasks, new Set())).toEqual([]);
+    expect(selectAndRoute(tasks).map((s) => s.task.key)).toEqual(['a']);
   });
 });
