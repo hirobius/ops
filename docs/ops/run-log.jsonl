@@ -13,3 +13,4 @@
 {"ts":"2026-07-07T19:05:00Z","actor":"claude","task":"run-log Slice 2 (#8)","outcome":"shipped","summary":"Autonomous run-log shipped: docs/ops/run-log.jsonl + lib/ops/run-log.mjs + scripts/log-run.mjs + /ops Runs panel."}
 {"ts":"2026-07-08T05:43:48.803Z","actor":"claude-subagent","outcome":"shipped","summary":"Fleet #41 Slice 1: migration 0008 dispatch fields + pure tier.mjs router + /ops/tasks auto toggle","task":"#41","model":"opus","tier":"judgment"}
 {"ts":"2026-07-08T05:58:17.080Z","actor":"claude-subagent","outcome":"shipped","summary":"Fleet #41 Slice 4: notify.mjs seam + events.jsonl + deploy-alert dedupe + /ops Fleet timeline (run-log+events+alert-log merged).","task":"#41","model":"opus","tier":"judgment"}
+{"ts":"2026-07-08T06:10:09.565Z","actor":"claude-subagent","outcome":"shipped","summary":"Fleet #41 Slice 2: headless fleet-dispatch.mjs — auto_ok tasks routed + @claude-dispatched","task":"#41"}
