@@ -11,3 +11,4 @@
 {"ts":"2026-07-07T13:45:00Z","actor":"claude-subagent","task":"#39","model":"sonnet","outcome":"shipped","summary":"Guardrail hygiene: pre-commit 26→16 gates, lint debt cleared to 0/0, 5 dead DS-carryover scripts removed."}
 {"ts":"2026-07-07T16:10:00Z","actor":"claude","task":"task-importer Slice 1","outcome":"shipped","summary":"GitHub issues → tasks board: upsertTasks, mapIssuesToTasks, POST /api/tasks import, OPS_AGENT_KEY machine auth."}
 {"ts":"2026-07-07T19:05:00Z","actor":"claude","task":"run-log Slice 2 (#8)","outcome":"shipped","summary":"Autonomous run-log shipped: docs/ops/run-log.jsonl + lib/ops/run-log.mjs + scripts/log-run.mjs + /ops Runs panel."}
+{"ts":"2026-07-08T05:43:48.803Z","actor":"claude-subagent","outcome":"shipped","summary":"Fleet #41 Slice 1: migration 0008 dispatch fields + pure tier.mjs router + /ops/tasks auto toggle","task":"#41","model":"opus","tier":"judgment"}
