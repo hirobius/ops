@@ -30,9 +30,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { withOpsHandler, withServiceClient, messageOf, type HandlerResult } from '../lib/api/handler.js';
-import { listTasks, upsertTasks } from '../lib/supabase/tasks.mjs';
+import { listTasks, upsertTasks, updateTask } from '../lib/supabase/tasks.mjs';
 import { mapIssuesToTasks } from '../lib/tasks/import-issues.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
+import { resolveLiveDispatchStatuses } from '../lib/tasks/dispatch-status.mjs';
 
 const DEFAULT_LIMIT = 1000;
 const MAX_LIMIT = 2000;
@@ -43,7 +44,12 @@ export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Prom
 
   const { data, error } = await listTasks(sb, { limit, includeDeleted });
   if (error) return { status: 500, body: { error: error.message } };
-  return { status: 200, body: { tasks: data ?? [] } };
+  const tasks = data ?? [];
+  // Issue #50: reflect live dispatch progress (dispatched → running → done/
+  // failed) read back from the linked GitHub issue's PR. Fail-soft — no
+  // GITHUB_TOKEN, or a GitHub hiccup, just leaves tasks at their stored status.
+  await resolveLiveDispatchStatuses(tasks, { github: makeGitHubPort(), updateTask, sb });
+  return { status: 200, body: { tasks } };
 }
 
 export async function importIssuesHandler(sb: SupabaseClient, _req: VercelRequest): Promise<HandlerResult> {

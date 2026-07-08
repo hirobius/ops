@@ -34,6 +34,10 @@ export interface Task {
   claimed_at: string | null;
   completed_at: string | null;
   dispatch_url: string | null;
+  // The PR resolved from dispatch_url once the agent opens one (migration
+  // 0009_task_pr_url.sql, issue #50) — lib/tasks/dispatch-status.mjs writes
+  // this alongside dispatch_status as the dispatch progresses.
+  pr_url: string | null;
   deleted_at: string | null;
   created_at: string;
   updated_at: string;

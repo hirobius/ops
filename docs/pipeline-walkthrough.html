@@ -681,7 +681,9 @@
       Password-gated, with a machine-auth key for headless agents. The fleet view watches every
       Vercel deploy + repo status; the task board imports GitHub issues and dispatches them by
       @-mentioning Claude; a task marked "queue" awaits a human Approve/Deny in the approvals inbox
-      before dispatch; every autonomous run posts a recap to the run-log.
+      before dispatch; every autonomous run posts a recap to the run-log. <b>New (#50):</b> a
+      dispatched task's status now flips live — dispatched → running → done/failed — read back from
+      the PR linked to its dispatch issue, plus a "Recently completed" section on the board.
     </p>
     <div class="chips">
       <span class="chip">/ops/* surfaces</span>
@@ -689,6 +691,7 @@
       <span class="chip">scripts/deploy-alert.mjs</span>
       <span class="chip">tasks importer (#25)</span>
       <span class="chip">docs/ops/run-log.jsonl</span>
+      <span class="chip">dispatch-status feed (#50)</span>
       <span class="chip env">OPS_GATE_PASSWORD</span>
       <span class="chip env">OPS_AGENT_KEY</span>
     </div>

@@ -46,6 +46,31 @@ const TIER_TONE: Record<NonNullable<Task['tier']>, BadgeTone> = {
   judgment: 'warning',
 };
 
+// Live dispatch-status feed (issue #50) — lib/tasks/dispatch-status.mjs
+// resolves this from the PR linked to dispatch_url on every /api/tasks poll.
+const DISPATCH_TONE: Record<NonNullable<Task['dispatch_status']>, BadgeTone> = {
+  queued: 'neutral',
+  dispatched: 'neutral',
+  running: 'warning',
+  done: 'success',
+  failed: 'danger',
+};
+
+const ACTION_LABEL: Partial<Record<TaskAction, string>> = {
+  done: 'Marked done',
+  reopen: 'Reopened',
+  dispatch: 'Dispatched — opened/pinged the @claude issue',
+  auto_on: 'Auto-dispatch turned on',
+  auto_off: 'Auto-dispatch turned off',
+  queue: 'Queued for approval',
+  unqueue: 'Removed from the approvals queue',
+  trash: 'Trashed',
+  restore: 'Restored',
+};
+
+const RECENTLY_COMPLETED_WINDOW_MS = 48 * 60 * 60 * 1000;
+const RECENTLY_COMPLETED_LIMIT = 5;
+
 const STATUS_FILTERS: StatusFilter[] = ['open', 'blocked', 'done', 'all'];
 
 function asStrings(v: unknown): string[] {
@@ -78,6 +103,8 @@ export default function TasksPage() {
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [busyKeys, setBusyKeys] = useState<ReadonlySet<string>>(new Set());
   const [importing, setImporting] = useState(false);
+  const [feedback, setFeedback] = useState<Record<string, { message: string; ok: boolean }>>({});
+  const [announcement, setAnnouncement] = useState('');
 
   const sourceFilters = useMemo(() => {
     if (!tasks) return ['all'];
@@ -99,20 +126,37 @@ export default function TasksPage() {
   }, [refetch]);
 
   const act = useCallback(
-    async (key: string, action: TaskAction) => {
+    async (key: string, action: TaskAction, title?: string) => {
       setBusyKeys((prev) => new Set(prev).add(key));
+      let result: { message: string; ok: boolean };
       try {
-        await opsApi.post('/api/task-action', { key, action });
+        const res = await opsApi.post('/api/task-action', { key, action });
+        if (res.ok) {
+          result = { message: ACTION_LABEL[action] ?? `${action} done`, ok: true };
+        } else {
+          const body = (await res.json().catch(() => null)) as { error?: unknown } | null;
+          const detail = typeof body?.error === 'string' ? body.error : `HTTP ${res.status}`;
+          result = { message: detail, ok: false };
+        }
       } catch {
-        /* surfaced on next poll */
-      } finally {
-        setBusyKeys((prev) => {
-          const next = new Set(prev);
-          next.delete(key);
+        result = { message: `${action} failed — network error, will retry on next refresh`, ok: false };
+      }
+      setBusyKeys((prev) => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
+      setFeedback((prev) => ({ ...prev, [key]: result }));
+      setAnnouncement(`${title ?? key}: ${result.message}`);
+      refetch();
+      setTimeout(() => {
+        setFeedback((prev) => {
+          if (prev[key] !== result) return prev; // superseded by a newer action on this row
+          const next = { ...prev };
+          delete next[key];
           return next;
         });
-        refetch();
-      }
+      }, 5000);
     },
     [refetch],
   );
@@ -142,8 +186,25 @@ export default function TasksPage() {
     [tasks],
   );
 
+  // Issue #50: "what got done" visible without leaving /ops — a small window
+  // of recently-merged dispatches, independent of the status/source filters
+  // above (a done task drops out of the default 'open' filter immediately).
+  const recentlyCompleted = useMemo(() => {
+    if (!tasks) return [];
+    const cutoff = Date.now() - RECENTLY_COMPLETED_WINDOW_MS;
+    return tasks
+      .filter((t) => t.dispatch_status === 'done' && t.completed_at && Date.parse(t.completed_at) >= cutoff)
+      .sort((a, b) => Date.parse(b.completed_at as string) - Date.parse(a.completed_at as string))
+      .slice(0, RECENTLY_COMPLETED_LIMIT);
+  }, [tasks]);
+
   return (
     <div style={s.page}>
+      <style>{MOBILE_CSS}</style>
+      {/* Screen-reader announcements for dispatch/action results (board-UX polish, issue #50). */}
+      <div aria-live="polite" role="status" style={s.srOnly}>
+        {announcement}
+      </div>
       <PageHeader
         breadcrumbs={[{ label: 'Ops', href: '/ops' }, { label: 'Tasks' }]}
         title="Tasks"
@@ -217,6 +278,40 @@ export default function TasksPage() {
         <p style={s.notice}>No tasks match this filter.</p>
       )}
 
+      {/* "What got done" without leaving /ops (issue #50) — independent of the
+          filters above so a task that just finished doesn't vanish immediately. */}
+      {!isOffline && recentlyCompleted.length > 0 && (
+        <section style={s.lane} aria-labelledby="lane-completed">
+          <header style={s.laneHeader}>
+            <span id="lane-completed" style={s.laneLabel}>
+              Recently completed
+            </span>
+            <span style={s.laneCount}>{recentlyCompleted.length}</span>
+          </header>
+          <ul style={s.list}>
+            {recentlyCompleted.map((t) => (
+              <li key={t.key} style={s.row}>
+                <div style={s.rowMain}>
+                  <span style={s.title}>{t.title}</span>
+                  <span style={s.meta}>{metaLine(t)}</span>
+                </div>
+                <div style={s.rowAside}>
+                  <Badge tone="success">done</Badge>
+                  {t.pr_url && (
+                    <a href={t.pr_url} target="_blank" rel="noreferrer" style={s.linkAction}>
+                      PR ↗
+                    </a>
+                  )}
+                  <span style={s.meta}>
+                    {formatLastUpdated(t.completed_at ? Date.parse(t.completed_at) : null)}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {!isOffline &&
         byLane.map(([lane, laneTasks]) => (
           <section key={lane} style={s.lane} aria-labelledby={`lane-${lane}`}>
@@ -230,13 +325,21 @@ export default function TasksPage() {
               {laneTasks.map((t) => {
                 const busy = busyKeys.has(t.key);
                 const dispatched = !!t.dispatch_url;
+                const rowFeedback = feedback[t.key];
                 return (
-                  <li key={t.key} style={s.row}>
+                  <li key={t.key} style={s.row} data-role="task-row">
                     <div style={s.rowMain}>
                       <span style={s.title}>{t.title}</span>
                       <span style={s.meta}>{metaLine(t)}</span>
+                      {rowFeedback && (
+                        <span role="alert">
+                          <Badge tone={rowFeedback.ok ? 'success' : 'danger'}>
+                            {rowFeedback.message}
+                          </Badge>
+                        </span>
+                      )}
                     </div>
-                    <div style={s.rowAside}>
+                    <div style={s.rowAside} data-role="task-row-aside">
                       {asStrings(t.import_flags).map((f) => (
                         <Badge key={f} tone="neutral">
                           {f}
@@ -253,77 +356,100 @@ export default function TasksPage() {
                           issue ↗
                         </a>
                       )}
+                      {t.pr_url && (
+                        <a href={t.pr_url} target="_blank" rel="noreferrer" style={s.linkAction}>
+                          PR ↗
+                        </a>
+                      )}
                       {t.tier && <Badge tone={TIER_TONE[t.tier] ?? 'neutral'}>{t.tier}</Badge>}
                       {t.model && <Badge tone="neutral">{t.model}</Badge>}
+                      {t.dispatch_status && (
+                        <Badge tone={DISPATCH_TONE[t.dispatch_status] ?? 'neutral'}>
+                          {t.dispatch_status}
+                        </Badge>
+                      )}
                       <Badge tone={STATUS_TONE[t.status] ?? 'neutral'}>{t.status}</Badge>
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => act(t.key, t.auto_ok ? 'auto_off' : 'auto_on')}
-                        style={busy ? s.btnDisabled : t.auto_ok ? s.btnPrimary : s.btn}
-                        aria-pressed={!!t.auto_ok}
-                      >
-                        {busy ? '…' : t.auto_ok ? 'Auto: on' : 'Auto: off'}
-                      </button>
-                      {!dispatched && (
+                      {/* Auto/Queue/Dispatch grouped + titled — three similar-looking
+                          toggles that share a row are easy to confuse (issue #50 UX polish). */}
+                      <div style={s.dispatchGroup} role="group" aria-label="Dispatch controls">
                         <button
                           type="button"
                           disabled={busy}
-                          onClick={() =>
-                            act(t.key, t.dispatch_status === 'queued' ? 'unqueue' : 'queue')
-                          }
-                          style={
-                            busy
-                              ? s.btnDisabled
-                              : t.dispatch_status === 'queued'
-                                ? s.btnPrimary
-                                : s.btn
-                          }
-                          aria-pressed={t.dispatch_status === 'queued'}
+                          onClick={() => act(t.key, t.auto_ok ? 'auto_off' : 'auto_on', t.title)}
+                          style={busy ? s.btnDisabled : t.auto_ok ? s.btnPrimary : s.btn}
+                          aria-pressed={!!t.auto_ok}
+                          title="Auto-dispatch: pick this task up unattended, no approval click needed"
                         >
-                          {busy ? '…' : t.dispatch_status === 'queued' ? 'Queued' : 'Queue'}
+                          {busy ? '…' : t.auto_ok ? 'Auto: on' : 'Auto: off'}
                         </button>
-                      )}
+                        {!dispatched && (
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() =>
+                              act(
+                                t.key,
+                                t.dispatch_status === 'queued' ? 'unqueue' : 'queue',
+                                t.title,
+                              )
+                            }
+                            style={
+                              busy
+                                ? s.btnDisabled
+                                : t.dispatch_status === 'queued'
+                                  ? s.btnPrimary
+                                  : s.btn
+                            }
+                            aria-pressed={t.dispatch_status === 'queued'}
+                            title="Queue: propose for dispatch, waits for a human Approve/Deny click in /admin/approvals"
+                          >
+                            {busy ? '…' : t.dispatch_status === 'queued' ? 'Queued' : 'Queue'}
+                          </button>
+                        )}
+                        {t.status !== 'done' && (
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => act(t.key, 'dispatch', t.title)}
+                            style={busy ? s.btnDisabled : s.btnPrimary}
+                            title={
+                              dispatched
+                                ? 'Re-ping @claude on the linked issue'
+                                : 'Dispatch now: open an @claude issue for this task immediately'
+                            }
+                          >
+                            {busy ? '…' : dispatched ? 'Re-dispatch' : 'Dispatch'}
+                          </button>
+                        )}
+                      </div>
                       {t.status === 'done' ? (
                         <button
                           type="button"
                           disabled={busy}
-                          onClick={() => act(t.key, 'reopen')}
+                          onClick={() => act(t.key, 'reopen', t.title)}
                           style={busy ? s.btnDisabled : s.btn}
                         >
                           {busy ? '…' : 'Reopen'}
                         </button>
                       ) : (
-                        <>
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => act(t.key, 'done')}
-                            style={busy ? s.btnDisabled : s.btn}
-                          >
-                            {busy ? '…' : 'Done'}
-                          </button>
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => act(t.key, 'dispatch')}
-                            style={busy ? s.btnDisabled : s.btnPrimary}
-                            title={
-                              dispatched
-                                ? 'Re-ping @claude on the linked issue'
-                                : 'Open an @claude issue for this task'
-                            }
-                          >
-                            {busy ? '…' : dispatched ? 'Re-dispatch' : 'Dispatch'}
-                          </button>
-                        </>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => act(t.key, 'done', t.title)}
+                          style={busy ? s.btnDisabled : s.btn}
+                        >
+                          {busy ? '…' : 'Done'}
+                        </button>
                       )}
                       <button
                         type="button"
                         disabled={busy}
-                        onClick={() => act(t.key, 'trash')}
+                        onClick={() => {
+                          if (window.confirm(`Trash "${t.title}"?`)) act(t.key, 'trash', t.title);
+                        }}
                         style={busy ? s.btnDisabled : s.btnGhost}
                         aria-label="Trash task"
+                        title="Trash task"
                       >
                         ✕
                       </button>
@@ -337,6 +463,17 @@ export default function TasksPage() {
     </div>
   );
 }
+
+// Dense action row → stacked, full-bleed on narrow screens (issue #50 UX
+// polish: "the dense action row doesn't collapse gracefully"). Inline styles
+// can't express a media query, so this mirrors ClientReportPage's PRINT_CSS
+// pattern — a plain <style> tag scoped by data-role selectors.
+const MOBILE_CSS = `
+@media (max-width: 640px) {
+  [data-role="task-row"] { flex-direction: column; align-items: stretch; }
+  [data-role="task-row-aside"] { justify-content: flex-start; }
+}
+`;
 
 const s = {
   page: {
@@ -359,6 +496,24 @@ const s = {
     flexWrap: 'wrap' as const,
   },
   spacer: { flex: 1 },
+  srOnly: {
+    position: 'absolute' as const,
+    width: '1px',
+    height: '1px',
+    padding: 0,
+    margin: '-1px',
+    overflow: 'hidden',
+    clip: 'rect(0,0,0,0)',
+    whiteSpace: 'nowrap' as const,
+    border: 0,
+  },
+  dispatchGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: hds.space.px8,
+    paddingLeft: hds.space.px8,
+    borderLeft: '1px solid var(--semantic-color-border-subdued)',
+  },
   pill: {
     ...hds.typeStyles.ui,
     fontSize: hds.fontSize.xs,

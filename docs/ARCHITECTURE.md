@@ -44,7 +44,11 @@ Slice 3: `dispatch_status='queued'` tasks await an Approve/Deny click, reusing
 `OPS_GATE_PASSWORD`+`OPS_SESSION_SECRET` (gate), `OPS_AGENT_KEY` (machine auth,
 #25). Fleet: `/ops/projects` + `scripts/deploy-alert.mjs` (#11). Task machinery:
 `tasks` table + GitHub-issue importer (#25) + dispatch (opens an issue @-mentioning
-Claude). Run-log: `docs/ops/run-log.jsonl` + Runs panel (#8 half). Gaps: autonomy
+Claude). **NEW (#50, 2026-07-08):** `/ops/tasks` now reflects live dispatch
+progress — `dispatched → running → done/failed`, resolved from the PR linked
+to the dispatch issue (`lib/tasks/dispatch-status.mjs`), plus a "Recently
+completed" board section; needs migration `0009_task_pr_url.sql` applied.
+Run-log: `docs/ops/run-log.jsonl` + Runs panel (#8 half). Gaps: autonomy
 dial, tier→model dispatch UI polish (#13).
 
 ### Active env vars (pipeline) vs. dead weight

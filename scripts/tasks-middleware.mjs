@@ -11,9 +11,10 @@
  */
 
 import { getServiceClient } from '../lib/supabase/server.mjs';
-import { listTasks } from '../lib/supabase/tasks.mjs';
+import { listTasks, updateTask } from '../lib/supabase/tasks.mjs';
 import { applyTaskAction } from '../lib/tasks/actions.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
+import { resolveLiveDispatchStatuses } from '../lib/tasks/dispatch-status.mjs';
 
 const MAX_LIMIT = 2000;
 
@@ -57,7 +58,9 @@ export function createTasksMiddleware() {
 
         const { data, error } = await listTasks(sb, { limit, includeDeleted });
         if (error) return sendJson(res, 500, { error: error.message });
-        return sendJson(res, 200, { tasks: data ?? [] });
+        const tasks = data ?? [];
+        await resolveLiveDispatchStatuses(tasks, { github: makeGitHubPort(), updateTask, sb });
+        return sendJson(res, 200, { tasks });
       } catch (err) {
         return sendJson(res, 500, { error: messageOf(err) });
       }
