@@ -36,16 +36,29 @@ outreach engine.
 
 ### Cross-cutting: the command center (`/ops`) — 🟢 live
 
-Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home
-(+ Runs panel) · admin/approvals (live — tasks-store approvals inbox, epic #41
-Slice 3: `dispatch_status='queued'` tasks await an Approve/Deny click, reusing
-`ApprovalCard` + `/api/task-action`'s `dispatch`/`unqueue` actions; the dead
-`localhost:3005/orchestration/*` bridge is fully retired). Auth:
+Surfaces: leads · tasks · digest · projects · issues (retiring, see #52) · clients
+· agentic-os home (+ Runs panel) · admin/approvals (live — tasks-store approvals
+inbox, epic #41 Slice 3: `dispatch_status='queued'` tasks await an Approve/Deny
+click, reusing `ApprovalCard` + `/api/task-action`'s `dispatch`/`unqueue` actions;
+the dead `localhost:3005/orchestration/*` bridge is fully retired). Auth:
 `OPS_GATE_PASSWORD`+`OPS_SESSION_SECRET` (gate), `OPS_AGENT_KEY` (machine auth,
 #25). Fleet: `/ops/projects` + `scripts/deploy-alert.mjs` (#11). Task machinery:
 `tasks` table + GitHub-issue importer (#25) + dispatch (opens an issue @-mentioning
 Claude). Run-log: `docs/ops/run-log.jsonl` + Runs panel (#8 half). Gaps: autonomy
 dial, tier→model dispatch UI polish (#13).
+
+**Decision (2026-07-08, #52 — direction locked, build deferred):** GitHub issues
+are the canonical unit for anything an agent touches; the `tasks` table is the
+index/control-plane over them (fleet fields: tier/model/dispatch_status/auto_ok/
+lane), not a second source of truth. `/ops/tasks` stays the one surface (name
+stays "tasks"); `/ops/issues` retires once the importer's cross-repo pull —
+already working today, `listOpenIssues()` hits GitHub's all-repos feed, not just
+`hirobius/ops` — is confirmed to cover clients + hirobius-design-system. Known
+conflation to fix first: `dispatch_url` currently means both "where this task
+came from" (GitHub import) and "the @claude hand-off issue" (manual/fleet
+dispatch) on the same column, which makes an imported task look pre-dispatched to
+`fleet-dispatch.mjs`'s `dispatch_url IS NULL` eligibility check. Full slice plan:
+`docs/operations/tasks-issues-consolidation-plan.html`.
 
 ### Active env vars (pipeline) vs. dead weight
 

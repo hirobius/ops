@@ -1,0 +1,243 @@
+<title>Tasks/Issues consolidation — decision + slice plan (#52)</title>
+<style>
+  :root {
+    --bg: #f5f7f8;
+    --surface: #ffffff;
+    --surface-2: #fafbfc;
+    --ink: #161b22;
+    --muted: #59626f;
+    --faint: #838d9b;
+    --hairline: #e3e8ee;
+    --hairline-strong: #cfd6df;
+    --accent: #0e7c86;
+    --accent-soft: #d7ecee;
+    --chip-bg: #f0f2f5;
+    --chip-ink: #37414f;
+    --live: #17924a; --live-bg: #e6f5ec; --live-line: #46b877;
+    --gated: #b26a06; --gated-bg: #fbefd9; --gated-line: #e0982f;
+    --gap: #cf2f2f; --gap-bg: #fbe6e6; --gap-line: #e56a6a;
+    --future: #667180; --future-bg: #eceff2; --future-line: #9aa4b1;
+    --radius: 12px;
+    --sans: ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #0e131a; --surface: #161d26; --surface-2: #1a222c; --ink: #e7ecf2;
+      --muted: #97a1af; --faint: #6e7987; --hairline: #232d38; --hairline-strong: #313d4a;
+      --accent: #38c7be; --accent-soft: #123539; --chip-bg: #1f2833; --chip-ink: #b9c2ce;
+      --live: #46c07d; --live-bg: #12291d; --live-line: #2f6f49;
+      --gated: #e2a13f; --gated-bg: #2c2213; --gated-line: #7a5c25;
+      --gap: #ef6f6f; --gap-bg: #2e1717; --gap-line: #7c3535;
+      --future: #8b95a3; --future-bg: #1c242e; --future-line: #3b4552;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 24px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+  h2.section { font-size: 15px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted);
+    margin: 36px 0 12px; border-bottom: 1px solid var(--hairline); padding-bottom: 6px; }
+  .panel { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius);
+    padding: 16px 18px; margin-bottom: 14px; }
+  .panel.locked { border-left: 3px solid var(--live-line); }
+  .panel.gap { border-left: 3px solid var(--gap-line); }
+  .panel.gated { border-left: 3px solid var(--gated-line); }
+  code { font-family: var(--mono); font-size: 0.92em; background: var(--chip-bg); color: var(--chip-ink);
+    padding: 1px 5px; border-radius: 5px; }
+  .desc { color: var(--ink); font-size: 14.5px; margin: 0 0 8px; }
+  .muted { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 8px 0 4px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:last-child td { border-bottom: none; }
+  .pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .p-live { background: var(--live-bg); color: var(--live); }
+  .p-gap { background: var(--gap-bg); color: var(--gap); }
+  .p-gated { background: var(--gated-bg); color: var(--gated); }
+  .p-future { background: var(--future-bg); color: var(--future); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { font-family: var(--mono); font-size: 11.5px; background: var(--chip-bg); color: var(--chip-ink);
+    padding: 3px 8px; border-radius: 6px; }
+  ol.dod li, ul.notes li { font-size: 14px; margin-bottom: 6px; }
+  .foot { color: var(--faint); font-size: 12px; margin-top: 40px; border-top: 1px solid var(--hairline); padding-top: 12px; }
+</style>
+<div class="wrap">
+  <h1>Tasks/Issues consolidation — decision + slice plan</h1>
+  <p class="sub">
+    Source: GitHub issue <a href="https://github.com/hirobius/ops/issues/52">#52</a> · direction locked
+    2026-07-08 · <b>build deferred</b> — this document is the plan to execute against when a session
+    picks it up, not a record of anything shipped. Canonical decision summary lives in
+    <code>docs/ARCHITECTURE.md</code> — keep both in lockstep.
+  </p>
+
+  <h2 class="section">1 · Decision (locked)</h2>
+  <div class="panel locked">
+    <p class="desc">
+      <b>GitHub issues are the canonical unit</b> for anything an agent touches. The Supabase
+      <code>tasks</code> table is the <b>index / control-plane</b> over them — fleet-only fields
+      (<code>tier</code>, <code>model</code>, <code>dispatch_status</code>, <code>auto_ok</code>,
+      <code>lane</code>, status-mirror) — not a second source of truth. Rule: agent-workable → it
+      becomes an issue. Trivial personal reminders may stay board-only.
+    </p>
+    <p class="desc" style="margin-bottom:0">
+      <b>One surface:</b> <code>/ops/tasks</code> stays the actionable board (name stays "tasks" —
+      Adrian's preference). <code>/ops/issues</code> retires once cross-repo coverage is confirmed
+      equivalent (see §3 — it already mostly is).
+    </p>
+  </div>
+
+  <h2 class="section">2 · Current state (verified against code, 2026-07-08)</h2>
+  <table>
+    <tr><th>Area</th><th>Finding</th></tr>
+    <tr>
+      <td><code>/ops/issues</code></td>
+      <td>Read-only GitHub mirror. <code>api/issues.ts</code> → <code>listOpenIssues()</code> → grouped
+        by repo, multi-select "copy refs". No Supabase write. Only feature tasks doesn't have:
+        cross-repo grouping in one glance + copy-refs.</td>
+    </tr>
+    <tr>
+      <td><code>/ops/tasks</code></td>
+      <td>Lane-grouped board over Supabase <code>tasks</code>. "Import GitHub issues" button →
+        <code>POST /api/tasks</code> → same <code>listOpenIssues()</code> → <code>mapIssuesToTasks</code>
+        → <code>upsertTasks</code> (upsert on <code>key</code>). Per-row Dispatch/Auto/Queue/Trash.</td>
+    </tr>
+    <tr>
+      <td>Importer repo scope</td>
+      <td><b>Already cross-repo.</b> <code>lib/github/issues.mjs#listOpenIssues()</code> calls GitHub's
+        authenticated-user <code>/issues?filter=all</code> feed — every repo the <code>GITHUB_TOKEN</code>
+        identity can see, not just <code>hirobius/ops</code>. <code>mapIssuesToTasks</code> derives
+        <code>lane</code> per-issue from <code>issue.repo</code> and is tested against issues from two
+        different repos. <b>The "fold in cross-repo visibility" DoD item is ~already true</b> —
+        confirm the token's repo access (ops + clients + hirobius-design-system) rather than build new
+        scanning logic.</td>
+    </tr>
+    <tr>
+      <td><code>dispatch()</code> issue body</td>
+      <td><code>lib/tasks/actions.mjs</code> builds: <code>@claude please pick up this task</code> +
+        key/title + lane/phase + deps + free-text <code>notes</code> bullets. No dedicated
+        description/acceptance-criteria field exists on the table today — <code>tier</code>/<code>model</code>
+        are computed and shown as board chips but are <b>not</b> included in the issue body itself.</td>
+    </tr>
+  </table>
+
+  <h2 class="section">3 · The <code>source_url</code> / <code>dispatch_url</code> conflation</h2>
+  <div class="panel gap">
+    <p class="desc">
+      <b>Confirmed conflated.</b> <code>source_url</code> does not exist as a column or anywhere in code.
+      <code>dispatch_url</code> is written from two different meanings onto the same column:
+    </p>
+    <table>
+      <tr><th>Writer</th><th>What it stores</th></tr>
+      <tr><td><code>import-issues.mjs</code> (importer)</td>
+        <td><code>dispatch_url = issue.url</code> — the imported issue's own URL (provenance).</td></tr>
+      <tr><td><code>actions.mjs#dispatch()</code> (manual/fleet dispatch)</td>
+        <td><code>dispatch_url = issue.html_url</code> of a <b>newly created</b> <code>@claude</code>-mention
+          issue (the hand-off).</td></tr>
+    </table>
+    <p class="desc" style="margin-bottom:0">
+      <b>Hazard:</b> <code>scripts/fleet-dispatch.mjs</code> and <code>fleet-watchdog.mjs</code> both treat
+      <code>dispatch_url IS NULL</code> as "not yet dispatched." A GitHub-imported task has
+      <code>dispatch_url</code> set from the moment it's imported — it never becomes eligible for
+      auto-dispatch, and the board can't tell "this task came from an issue" apart from "this task was
+      already handed to Claude."
+    </p>
+  </div>
+
+  <h2 class="section">4 · Fix — pick one, then build (recommended: split fields)</h2>
+  <table>
+    <tr><th>Option</th><th>Shape</th><th>Trade-off</th></tr>
+    <tr>
+      <td><b>A — split fields (recommended)</b></td>
+      <td><code>source_url</code> (provenance — set once by the importer, never overwritten) +
+        <code>dispatch_url</code> (only ever set by an actual <code>@claude</code> hand-off — manual
+        dispatch or fleet auto-dispatch). Importer stops writing <code>dispatch_url</code>.</td>
+      <td>One migration (add <code>source_url</code>, backfill from existing <code>dispatch_url</code> on
+        imported rows, then null out <code>dispatch_url</code> for rows that were never actually
+        dispatched). Every read site (<code>fleet-dispatch.mjs</code> eligibility, <code>TasksPage.tsx</code>
+        "dispatched" badge, watchdog re-ping) starts working correctly with zero logic changes — the
+        column already means the right thing once the data is split.</td>
+    </tr>
+    <tr>
+      <td>B — collapse to one identity</td>
+      <td>Single <code>issue_url</code> + a separate <code>dispatch_status</code> enum value
+        (<code>'imported'</code> vs <code>'dispatched'</code>) to distinguish state instead of a second
+        column.</td>
+      <td><code>dispatch_status</code> already exists (migration 0008) and is closer to "did the fleet
+        hand this off" semantics already — cheaper migration (no new column), but every eligibility
+        check has to switch from a null-check to a status-check, touching more call sites.</td>
+    </tr>
+  </table>
+  <p class="desc">Either is workable; Option A is lower-risk because it's additive and doesn't change the
+    meaning any existing code currently depends on — it only stops writing garbage into
+    <code>dispatch_url</code> going forward. Adrian's call before a session builds this.</p>
+
+  <h2 class="section">5 · Agent-ready task shape (the leverage item)</h2>
+  <div class="panel gated">
+    <p class="desc">Today's <code>tasks</code> table has no <code>description</code> /
+      <code>acceptance_criteria</code> / <code>constraints</code> columns — the dispatch body is built
+      from <code>title</code> + <code>lane</code>/<code>phase</code> + <code>deps</code> + free-text
+      <code>notes</code> (jsonb string array). To carry outcome/DoD/pointers/constraints into the
+      <code>@claude</code> issue body, either:</p>
+    <ul class="notes">
+      <li>add structured columns (<code>description</code>, <code>acceptance_criteria</code>,
+        <code>constraints</code> — text or jsonb) and extend <code>dispatch()</code>'s body template to
+        render them, or</li>
+      <li>reuse the existing <code>notes</code> jsonb with a light convention (first bullet = outcome,
+        a <code>DoD:</code>-prefixed bullet = acceptance criteria) — zero migration, but unenforced
+        shape, easy to drift.</li>
+    </ul>
+    <p class="desc" style="margin-bottom:0"><b>Readiness lint (optional, cheap):</b> before Dispatch is
+      clickable, require title + at least one of description/acceptance-criteria to be non-empty;
+      otherwise show "too vague to dispatch" inline instead of opening the issue. Pure function,
+      testable like <code>lib/tasks/tier.mjs</code>.</p>
+  </div>
+
+  <h2 class="section">6 · Slice plan (build order, each independently shippable)</h2>
+  <table>
+    <tr><th>Slice</th><th>Scope</th><th>Risk</th></tr>
+    <tr><td><b>1 — schema split</b></td>
+      <td>Migration: add <code>source_url</code>; backfill; importer writes
+        <code>source_url</code> instead of <code>dispatch_url</code>; one-time data fix for existing
+        imported rows (null their <code>dispatch_url</code> unless a real dispatch happened).</td>
+      <td>Touches live <code>tasks</code> rows — needs a dry-run + backup, same discipline as migration
+        0008.</td></tr>
+    <tr><td><b>2 — confirm cross-repo token scope</b></td>
+      <td>Verify <code>GITHUB_TOKEN</code> can see <code>hirobius/clients</code> +
+        <code>hirobius/hirobius-design-system</code> issues (it should already, per §2); if not, that's
+        a token-scope fix, not a code fix.</td>
+      <td>Low — read-only check.</td></tr>
+    <tr><td><b>3 — agent-ready shape</b></td>
+      <td>Add description/acceptance-criteria columns (or the <code>notes</code> convention) +
+        extend <code>dispatch()</code>'s body template + the optional readiness lint.</td>
+      <td>Low — additive, board-only.</td></tr>
+    <tr><td><b>4 — retire <code>/ops/issues</code></b></td>
+      <td>Only after Slices 1–3 land and cross-repo tasks render correctly on
+        <code>/ops/tasks</code>. Remove the route, nav entry, <code>IssuesPage.tsx</code>,
+        <code>useIssues.ts</code>; keep <code>api/issues.ts</code> only if something else still reads it
+        (check before deleting), else remove.</td>
+      <td>Reversible (delete-only) but do it last, once Adrian has used the merged board for real.</td></tr>
+  </table>
+
+  <h2 class="section">7 · DoD (from the issue, unchanged)</h2>
+  <ol class="dod">
+    <li>One board (<code>/ops/tasks</code>) shows every task/issue across all fleet repos.</li>
+    <li>Each task dispatches in one click.</li>
+    <li><code>/ops/issues</code> retired.</li>
+    <li>Provenance vs. dispatch cleanly separated (Slice 1).</li>
+    <li>A documented agent-ready task template the dispatch body carries (Slice 3).</li>
+  </ol>
+
+  <h2 class="section">8 · Open questions for Adrian</h2>
+  <ul class="notes">
+    <li>Option A vs. B in §4 — split fields or collapse to a status enum?</li>
+    <li>Structured columns vs. <code>notes</code> convention for §5 — worth a migration now, or defer
+      until the readiness lint proves the shape is right?</li>
+  </ul>
+
+  <p class="foot">
+    Canonical decision: <code>docs/ARCHITECTURE.md</code> · this file: implementation detail, update
+    freely as slices land · originating issue: hirobius/ops#52
+  </p>
+</div>

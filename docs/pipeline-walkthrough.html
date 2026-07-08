@@ -676,10 +676,10 @@
       <span class="pill p-live">live</span>
     </div>
     <p class="desc" style="max-width: 72ch">
-      Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home (with the new
-      Runs panel) · admin/approvals (live — tasks-store approvals inbox, epic #41 Slice 3).
-      Password-gated, with a machine-auth key for headless agents. The fleet view watches every
-      Vercel deploy + repo status; the task board imports GitHub issues and dispatches them by
+      Surfaces: leads · tasks · digest · projects · issues (retiring, see #52) · clients · agentic-os
+      home (with the new Runs panel) · admin/approvals (live — tasks-store approvals inbox, epic #41
+      Slice 3). Password-gated, with a machine-auth key for headless agents. The fleet view watches
+      every Vercel deploy + repo status; the task board imports GitHub issues and dispatches them by
       @-mentioning Claude; a task marked "queue" awaits a human Approve/Deny in the approvals inbox
       before dispatch; every autonomous run posts a recap to the run-log.
     </p>
@@ -693,7 +693,9 @@
       <span class="chip env">OPS_AGENT_KEY</span>
     </div>
     <p class="desc" style="margin-bottom: 0">
-      <b>Open here:</b> the autonomy dial and tier→model dispatch UI polish (#13).
+      <b>Open here:</b> the autonomy dial, tier→model dispatch UI polish (#13), and the tasks/issues
+      consolidation (direction locked, build deferred — #52, plan:
+      <code>docs/operations/tasks-issues-consolidation-plan.html</code>).
     </p>
   </div>
 
