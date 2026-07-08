@@ -109,4 +109,35 @@ describe('applyTaskAction — dispatch (injected GitHub port)', () => {
     const github = { createIssue: async () => ({ html_url: 'https://gh/issues/1' }) };
     expect(await applyTaskAction(sb, { key: 't1', action: 'dispatch' }, { github })).toMatchObject({ status: 500 });
   });
+
+  it('comments on the existing issue (no new issue) when the task already has a dispatch_url', async () => {
+    const issued = { ...task, dispatch_url: 'https://github.com/hirobius/ops/issues/9' };
+    const { sb, updates } = makeSb({ task: issued });
+    const comments: Array<{ issueUrl: string; body: string }> = [];
+    let created = false;
+    const github = {
+      createIssue: async () => {
+        created = true;
+        return { html_url: 'https://gh/should-not-happen' };
+      },
+      commentOnIssue: async (i: { issueUrl: string; body: string }) => {
+        comments.push(i);
+        return {};
+      },
+    };
+    const result = await applyTaskAction(sb, { key: 't1', action: 'dispatch' }, { github });
+    // Uniform one-click dispatch: reuse the existing issue, don't open a duplicate.
+    expect(created).toBe(false);
+    expect(comments[0].issueUrl).toBe('https://github.com/hirobius/ops/issues/9');
+    expect(comments[0].body).toContain('@claude');
+    expect(result).toEqual({
+      status: 200,
+      body: { ok: true, dispatch_url: 'https://github.com/hirobius/ops/issues/9' },
+    });
+    expect(updates.at(-1)).toMatchObject({
+      dispatch_url: 'https://github.com/hirobius/ops/issues/9',
+      claimed_by: 'claude',
+      dispatch_status: 'dispatched',
+    });
+  });
 });
