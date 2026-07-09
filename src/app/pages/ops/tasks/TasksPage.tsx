@@ -188,6 +188,9 @@ export default function TasksPage() {
             {queuedCount} awaiting approval
           </Link>
         )}
+        <Link to="/ops/issues" style={s.approvalsLink} data-role="cross-repo-issues">
+          GitHub issues ↗
+        </Link>
         <Button size="sm" variant="secondary" disabled={importing} onClick={importIssues}>
           {importing ? 'importing…' : 'Import GitHub issues'}
         </Button>

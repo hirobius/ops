@@ -31,7 +31,7 @@ const TILES: readonly SurfaceTile[] = [
   {
     to: '/ops/tasks',
     label: 'Tasks',
-    description: 'Consolidated task board — tracker + backlog + clients',
+    description: 'One board — tracker, backlog, clients + GitHub issues',
   },
   {
     to: '/ops/digest',
@@ -42,11 +42,6 @@ const TILES: readonly SurfaceTile[] = [
     to: '/ops/projects',
     label: 'Projects',
     description: 'Live fleet — deploy state across every Vercel project',
-  },
-  {
-    to: '/ops/issues',
-    label: 'Issues',
-    description: 'Every open GitHub issue across your repos, at a glance',
   },
 ] as const;
 
