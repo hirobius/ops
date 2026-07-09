@@ -72,12 +72,54 @@ function formatLastUpdated(epochMs: number | null): string {
   return new Date(epochMs).toLocaleTimeString();
 }
 
+/**
+ * The `owner/repo#N` GitHub ref for a task, or null if it isn't issue-backed.
+ * Imported issues carry it in their key (`github:<owner>/<repo>#<n>`); dispatched
+ * tasks carry an issue URL in `dispatch_url`. Powers the multi-select "Copy refs"
+ * batch action (folded in from the retired /ops/issues surface).
+ */
+function taskRef(t: Task): string | null {
+  if (t.key.startsWith('github:')) return t.key.slice('github:'.length);
+  const m = /github\.com\/([^/]+)\/([^/]+)\/issues\/(\d+)/.exec(t.dispatch_url ?? '');
+  return m ? `${m[1]}/${m[2]}#${m[3]}` : null;
+}
+
+async function copyText(text: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    /* clipboard unavailable — no-op */
+  }
+}
+
 export default function TasksPage() {
   const { tasks, isOffline, isInitialLoading, lastUpdatedAt, refetch } = useTasks();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [busyKeys, setBusyKeys] = useState<ReadonlySet<string>>(new Set());
   const [importing, setImporting] = useState(false);
+  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+
+  const toggleSelect = useCallback((key: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+
+  const selectedRefs = useMemo(
+    () =>
+      (tasks ?? [])
+        .filter((t) => selected.has(t.key))
+        .map(taskRef)
+        .filter((r): r is string => !!r),
+    [tasks, selected],
+  );
+  const copySelectedRefs = useCallback(() => {
+    void copyText(selectedRefs.join('\n'));
+  }, [selectedRefs]);
 
   const sourceFilters = useMemo(() => {
     if (!tasks) return ['all'];
@@ -147,7 +189,7 @@ export default function TasksPage() {
       <PageHeader
         breadcrumbs={[{ label: 'Ops', href: '/ops' }, { label: 'Tasks' }]}
         title="Tasks"
-        lede="One board over every task — the markdown tracker, the dashboard backlog, and client tasks, consolidated in Supabase."
+        lede="The single board over every task and GitHub issue across all fleet repos. Import syncs open issues in; select any rows to copy their owner/repo#N refs into a chat."
       />
 
       <div style={s.controls}>
@@ -188,9 +230,6 @@ export default function TasksPage() {
             {queuedCount} awaiting approval
           </Link>
         )}
-        <Link to="/ops/issues" style={s.approvalsLink} data-role="cross-repo-issues">
-          GitHub issues ↗
-        </Link>
         <Button size="sm" variant="secondary" disabled={importing} onClick={importIssues}>
           {importing ? 'importing…' : 'Import GitHub issues'}
         </Button>
@@ -198,6 +237,18 @@ export default function TasksPage() {
           refresh
         </Button>
       </div>
+
+      {selected.size > 0 && (
+        <div style={s.batchBar}>
+          <span style={s.batchCount}>{selected.size} selected</span>
+          <Button size="sm" variant="primary" onClick={copySelectedRefs}>
+            Copy refs
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => setSelected(new Set())}>
+            Clear
+          </Button>
+        </div>
+      )}
 
       {isOffline && (
         <p style={s.notice}>
@@ -233,8 +284,21 @@ export default function TasksPage() {
               {laneTasks.map((t) => {
                 const busy = busyKeys.has(t.key);
                 const dispatched = !!t.dispatch_url;
+                const ref = taskRef(t);
+                const isSelected = selected.has(t.key);
                 return (
                   <li key={t.key} style={s.row}>
+                    {ref && (
+                      <button
+                        type="button"
+                        aria-pressed={isSelected}
+                        onClick={() => toggleSelect(t.key)}
+                        style={isSelected ? s.checkOn : s.check}
+                        title={isSelected ? 'Deselect' : `Select ${ref}`}
+                      >
+                        {isSelected ? '✓' : ''}
+                      </button>
+                    )}
                     <div style={s.rowMain}>
                       <span style={s.title}>{t.title}</span>
                       <span style={s.meta}>{metaLine(t)}</span>
@@ -395,6 +459,39 @@ const s = {
     borderRadius: hds.borderRadius[8],
     color: 'var(--semantic-color-content-accent)',
     textDecoration: 'none',
+  },
+  batchBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: hds.space.px8,
+    padding: hds.space.px8,
+    borderRadius: hds.borderRadius[8],
+    background: 'var(--semantic-color-surface-raised)',
+  },
+  batchCount: {
+    ...hds.typeStyles.ui,
+    fontWeight: hds.fontWeight.semibold,
+    color: 'var(--semantic-color-content-primary)',
+  },
+  check: {
+    width: hds.space.px20,
+    height: hds.space.px20,
+    flexShrink: 0,
+    borderRadius: hds.borderRadius[4],
+    border: '1px solid var(--semantic-color-border-default)',
+    background: 'transparent',
+    color: 'var(--semantic-color-content-onAccent)',
+    cursor: 'pointer',
+  },
+  checkOn: {
+    width: hds.space.px20,
+    height: hds.space.px20,
+    flexShrink: 0,
+    borderRadius: hds.borderRadius[4],
+    border: '1px solid var(--semantic-color-content-accent)',
+    background: 'var(--semantic-color-content-accent)',
+    color: 'var(--semantic-color-content-onAccent)',
+    cursor: 'pointer',
   },
   notice: { margin: 0, ...hds.typeStyles.body, color: 'var(--semantic-color-content-secondary)' },
   code: {
