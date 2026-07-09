@@ -18,3 +18,4 @@
 {"ts":"2026-07-08T06:59:09.025Z","actor":"claude-subagent","outcome":"shipped","summary":"Fleet #41 Slice 5: stale-dispatch watchdog (fleet-watchdog.mjs) — re-dispatch or flag stalled dispatches","task":"#41"}
 {"ts":"2026-07-08T15:15:54.689Z","actor":"claude","outcome":"shipped","summary":"auto-record preview_url: sync-preview-urls.mjs (Vercel->lead by config.slug), 13 tests, dry-run default","task":"#44"}
 {"ts":"2026-07-09T00:44:48.502Z","actor":"claude","outcome":"shipped","summary":"board-comb ops#57 file-now wave: 0 new issues (all dedups of #25/#26/#27/#28), closed 7 board rows","task":"ops#57"}
+{"ts":"2026-07-09T05:01:13.122Z","actor":"claude","outcome":"shipped","summary":"Board-comb closeout: 24 new issues filed across ops/concrete/portfolio; all 59 text-only rows -> issues. 0 naked text left.","task":"ops#57"}
