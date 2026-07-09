@@ -7,9 +7,11 @@
  *        Success: { tasks: Task[] }
  *
  * POST — the task importer (Slice 1, #8/#13): pulls every open GitHub issue
- *        the server's GITHUB_TOKEN can see (lib/github/issues.mjs, already
- *        powers /ops/issues) and upserts each as a task row, keyed
- *        `github:<owner>/<repo>#<number>` so re-running is idempotent.
+ *        the server's GITHUB_TOKEN can see across ALL fleet repos
+ *        (lib/github/issues.mjs) and upserts each as a task row, keyed
+ *        `github:<owner>/<repo>#<number>` so re-running is idempotent. This is
+ *        the single issues+tasks board — the standalone /ops/issues surface was
+ *        retired into /ops/tasks (#52, 2026-07-09).
  *        Success: { imported: n }
  *
  * Both methods are service-role + ops-gated, so no Supabase/GitHub credential

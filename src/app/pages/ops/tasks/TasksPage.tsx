@@ -72,12 +72,67 @@ function formatLastUpdated(epochMs: number | null): string {
   return new Date(epochMs).toLocaleTimeString();
 }
 
+/**
+ * The `owner/repo#N` GitHub ref for a task, or null if it isn't issue-backed.
+ * Imported issues carry it in their key (`github:<owner>/<repo>#<n>`); dispatched
+ * tasks carry an issue URL in `dispatch_url`. Powers the multi-select "Copy refs"
+ * batch action (folded in from the retired /ops/issues surface).
+ */
+function taskRef(t: Task): string | null {
+  if (t.key.startsWith('github:')) return t.key.slice('github:'.length);
+  const m = /github\.com\/([^/]+)\/([^/]+)\/issues\/(\d+)/.exec(t.dispatch_url ?? '');
+  return m ? `${m[1]}/${m[2]}#${m[3]}` : null;
+}
+
+async function copyText(text: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    /* clipboard unavailable — no-op */
+  }
+}
+
+function relTime(iso: string | null): string {
+  if (!iso) return '';
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (!Number.isFinite(s) || s < 0) return '';
+  if (s < 60) return 'just now';
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
 export default function TasksPage() {
   const { tasks, isOffline, isInitialLoading, lastUpdatedAt, refetch } = useTasks();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [busyKeys, setBusyKeys] = useState<ReadonlySet<string>>(new Set());
   const [importing, setImporting] = useState(false);
+  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+
+  const toggleSelect = useCallback((key: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+
+  const selectedRefs = useMemo(
+    () =>
+      (tasks ?? [])
+        .filter((t) => selected.has(t.key))
+        .map(taskRef)
+        .filter((r): r is string => !!r),
+    [tasks, selected],
+  );
+  const copySelectedRefs = useCallback(() => {
+    void copyText(selectedRefs.join('\n'));
+  }, [selectedRefs]);
+  const [openMenuKey, setOpenMenuKey] = useState<string | null>(null);
 
   const sourceFilters = useMemo(() => {
     if (!tasks) return ['all'];
@@ -147,7 +202,7 @@ export default function TasksPage() {
       <PageHeader
         breadcrumbs={[{ label: 'Ops', href: '/ops' }, { label: 'Tasks' }]}
         title="Tasks"
-        lede="One board over every task — the markdown tracker, the dashboard backlog, and client tasks, consolidated in Supabase."
+        lede="The single board over every task and GitHub issue across all fleet repos. Import syncs open issues in; select any rows to copy their owner/repo#N refs into a chat."
       />
 
       <div style={s.controls}>
@@ -196,6 +251,18 @@ export default function TasksPage() {
         </Button>
       </div>
 
+      {selected.size > 0 && (
+        <div style={s.batchBar}>
+          <span style={s.batchCount}>{selected.size} selected</span>
+          <Button size="sm" variant="primary" onClick={copySelectedRefs}>
+            Copy refs
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => setSelected(new Set())}>
+            Clear
+          </Button>
+        </div>
+      )}
+
       {isOffline && (
         <p style={s.notice}>
           {import.meta.env.DEV ? (
@@ -230,58 +297,67 @@ export default function TasksPage() {
               {laneTasks.map((t) => {
                 const busy = busyKeys.has(t.key);
                 const dispatched = !!t.dispatch_url;
+                const ref = taskRef(t);
+                const isSelected = selected.has(t.key);
                 return (
                   <li key={t.key} style={s.row}>
-                    <div style={s.rowMain}>
-                      <span style={s.title}>{t.title}</span>
-                      <span style={s.meta}>{metaLine(t)}</span>
-                    </div>
-                    <div style={s.rowAside}>
-                      {asStrings(t.import_flags).map((f) => (
-                        <Badge key={f} tone="neutral">
-                          {f}
-                        </Badge>
-                      ))}
-                      {t.claimed_by && <span style={s.claim}>{t.claimed_by}</span>}
-                      {dispatched && (
-                        <a
-                          href={t.dispatch_url ?? '#'}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={s.linkAction}
-                        >
-                          issue ↗
-                        </a>
-                      )}
-                      {t.tier && <Badge tone={TIER_TONE[t.tier] ?? 'neutral'}>{t.tier}</Badge>}
-                      {t.model && <Badge tone="neutral">{t.model}</Badge>}
-                      <Badge tone={STATUS_TONE[t.status] ?? 'neutral'}>{t.status}</Badge>
+                    {ref && (
                       <button
                         type="button"
-                        disabled={busy}
-                        onClick={() => act(t.key, t.auto_ok ? 'auto_off' : 'auto_on')}
-                        style={busy ? s.btnDisabled : t.auto_ok ? s.btnPrimary : s.btn}
-                        aria-pressed={!!t.auto_ok}
+                        aria-pressed={isSelected}
+                        onClick={() => toggleSelect(t.key)}
+                        style={isSelected ? s.checkOn : s.check}
+                        title={isSelected ? 'Deselect' : `Select ${ref}`}
                       >
-                        {busy ? '…' : t.auto_ok ? 'Auto: on' : 'Auto: off'}
+                        {isSelected ? '✓' : ''}
                       </button>
-                      {!dispatched && (
+                    )}
+                    <div style={s.rowMain}>
+                      <div style={s.titleLine}>
+                        {ref && <span style={s.num}>#{ref.slice(ref.indexOf('#') + 1)}</span>}
+                        {dispatched ? (
+                          <a
+                            href={t.dispatch_url ?? '#'}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={s.titleLink}
+                          >
+                            {t.title} ↗
+                          </a>
+                        ) : (
+                          <span style={s.title}>{t.title}</span>
+                        )}
+                      </div>
+                      <div style={s.badgeLine}>
+                        <Badge tone={STATUS_TONE[t.status] ?? 'neutral'}>{t.status}</Badge>
+                        {t.tier && <Badge tone={TIER_TONE[t.tier] ?? 'neutral'}>{t.tier}</Badge>}
+                        {t.model && <Badge tone="neutral">{t.model}</Badge>}
+                        {asStrings(t.tags).map((tag) => (
+                          <Badge key={tag} tone="neutral">
+                            {tag}
+                          </Badge>
+                        ))}
+                        {asStrings(t.import_flags).map((f) => (
+                          <Badge key={f} tone="neutral">
+                            {f}
+                          </Badge>
+                        ))}
+                        {t.claimed_by && <span style={s.claim}>{t.claimed_by}</span>}
+                      </div>
+                      <span style={s.meta}>
+                        {metaLine(t)}
+                        {t.updated_at ? `  ·  updated ${relTime(t.updated_at)}` : ''}
+                      </span>
+                    </div>
+                    <div style={s.rowAside}>
+                      {ref && (
                         <button
                           type="button"
-                          disabled={busy}
-                          onClick={() =>
-                            act(t.key, t.dispatch_status === 'queued' ? 'unqueue' : 'queue')
-                          }
-                          style={
-                            busy
-                              ? s.btnDisabled
-                              : t.dispatch_status === 'queued'
-                                ? s.btnPrimary
-                                : s.btn
-                          }
-                          aria-pressed={t.dispatch_status === 'queued'}
+                          onClick={() => void copyText(ref)}
+                          style={s.ghostBtn}
+                          title={`Copy ${ref}`}
                         >
-                          {busy ? '…' : t.dispatch_status === 'queued' ? 'Queued' : 'Queue'}
+                          copy #
                         </button>
                       )}
                       {t.status === 'done' ? (
@@ -300,6 +376,7 @@ export default function TasksPage() {
                             disabled={busy}
                             onClick={() => act(t.key, 'done')}
                             style={busy ? s.btnDisabled : s.btn}
+                            title="Mark this task done"
                           >
                             {busy ? '…' : 'Done'}
                           </button>
@@ -311,22 +388,69 @@ export default function TasksPage() {
                             title={
                               dispatched
                                 ? 'Re-ping @claude on the linked issue'
-                                : 'Open an @claude issue for this task'
+                                : 'Open an @claude issue that hands this to a Claude Code session'
                             }
                           >
                             {busy ? '…' : dispatched ? 'Re-dispatch' : 'Dispatch'}
                           </button>
                         </>
                       )}
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => act(t.key, 'trash')}
-                        style={busy ? s.btnDisabled : s.btnGhost}
-                        aria-label="Trash task"
-                      >
-                        ✕
-                      </button>
+                      <div style={s.menuWrap}>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => setOpenMenuKey((k) => (k === t.key ? null : t.key))}
+                          style={s.ghostBtn}
+                          aria-haspopup="menu"
+                          aria-expanded={openMenuKey === t.key}
+                          aria-label="More actions"
+                        >
+                          ⋯
+                        </button>
+                        {openMenuKey === t.key && (
+                          <div style={s.menu} role="menu">
+                            <button
+                              type="button"
+                              role="menuitem"
+                              style={s.menuItem}
+                              onClick={() => {
+                                act(t.key, t.auto_ok ? 'auto_off' : 'auto_on');
+                                setOpenMenuKey(null);
+                              }}
+                            >
+                              {t.auto_ok
+                                ? 'Auto-dispatch: on → turn off'
+                                : 'Auto-dispatch: off → turn on'}
+                            </button>
+                            {!dispatched && (
+                              <button
+                                type="button"
+                                role="menuitem"
+                                style={s.menuItem}
+                                onClick={() => {
+                                  act(t.key, t.dispatch_status === 'queued' ? 'unqueue' : 'queue');
+                                  setOpenMenuKey(null);
+                                }}
+                              >
+                                {t.dispatch_status === 'queued'
+                                  ? 'Remove from approvals queue'
+                                  : 'Queue for approval'}
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              role="menuitem"
+                              style={s.menuItem}
+                              onClick={() => {
+                                act(t.key, 'trash');
+                                setOpenMenuKey(null);
+                              }}
+                            >
+                              Trash task (soft-delete)
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </li>
                 );
@@ -392,6 +516,39 @@ const s = {
     borderRadius: hds.borderRadius[8],
     color: 'var(--semantic-color-content-accent)',
     textDecoration: 'none',
+  },
+  batchBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: hds.space.px8,
+    padding: hds.space.px8,
+    borderRadius: hds.borderRadius[8],
+    background: 'var(--semantic-color-surface-raised)',
+  },
+  batchCount: {
+    ...hds.typeStyles.ui,
+    fontWeight: hds.fontWeight.semibold,
+    color: 'var(--semantic-color-content-primary)',
+  },
+  check: {
+    width: hds.space.px20,
+    height: hds.space.px20,
+    flexShrink: 0,
+    borderRadius: hds.borderRadius[4],
+    border: '1px solid var(--semantic-color-border-default)',
+    background: 'transparent',
+    color: 'var(--semantic-color-content-onAccent)',
+    cursor: 'pointer',
+  },
+  checkOn: {
+    width: hds.space.px20,
+    height: hds.space.px20,
+    flexShrink: 0,
+    borderRadius: hds.borderRadius[4],
+    border: '1px solid var(--semantic-color-content-accent)',
+    background: 'var(--semantic-color-content-accent)',
+    color: 'var(--semantic-color-content-onAccent)',
+    cursor: 'pointer',
   },
   notice: { margin: 0, ...hds.typeStyles.body, color: 'var(--semantic-color-content-secondary)' },
   code: {
@@ -465,6 +622,67 @@ const s = {
     fontFamily: hds.monoFamily,
     fontSize: hds.fontSize.xs,
     color: 'var(--semantic-color-content-secondary)',
+  },
+  titleLine: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: hds.space.px8,
+    minWidth: 0,
+    flexWrap: 'wrap' as const,
+  },
+  num: {
+    fontFamily: hds.monoFamily,
+    fontSize: hds.fontSize.xs,
+    color: 'var(--semantic-color-content-secondary)',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  titleLink: {
+    ...hds.typeStyles.ui,
+    color: 'var(--semantic-color-content-primary)',
+    textDecoration: 'none',
+  },
+  badgeLine: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: hds.space.px4,
+    flexWrap: 'wrap' as const,
+  },
+  ghostBtn: {
+    ...hds.typeStyles.ui,
+    fontSize: hds.fontSize.xs,
+    padding: '4px 8px',
+    minHeight: '32px',
+    border: '1px solid var(--semantic-color-border-subdued)',
+    borderRadius: hds.borderRadius[8],
+    background: 'transparent',
+    color: 'var(--semantic-color-content-secondary)',
+    cursor: 'pointer',
+  },
+  menuWrap: { position: 'relative' as const, display: 'inline-flex' },
+  menu: {
+    position: 'absolute' as const,
+    top: 'calc(100% + 4px)',
+    right: 0,
+    zIndex: 20,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    minWidth: '15rem',
+    padding: hds.space.px4,
+    background: 'var(--semantic-color-surface-raised)',
+    border: '1px solid var(--semantic-color-border-default)',
+    borderRadius: hds.borderRadius[8],
+    boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+  },
+  menuItem: {
+    ...hds.typeStyles.ui,
+    fontSize: hds.fontSize.xs,
+    textAlign: 'left' as const,
+    padding: '8px 10px',
+    border: 'none',
+    borderRadius: hds.borderRadius[4],
+    background: 'transparent',
+    color: 'var(--semantic-color-content-primary)',
+    cursor: 'pointer',
   },
   linkAction: {
     ...hds.typeStyles.ui,

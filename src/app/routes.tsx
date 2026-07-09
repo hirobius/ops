@@ -16,7 +16,6 @@ const LeadsPage = lazy(() => import('./pages/ops/leads/LeadsPage'));
 const TasksPage = lazy(() => import('./pages/ops/tasks/TasksPage'));
 const DigestPage = lazy(() => import('./pages/ops/digest/DigestPage'));
 const ProjectsPage = lazy(() => import('./pages/ops/projects/ProjectsPage'));
-const IssuesPage = lazy(() => import('./pages/ops/issues/IssuesPage'));
 
 // ── Admin (approval inbox) — lazy loaded ─────────────────────────────────────
 const ApprovalsPage = lazy(() => import('./pages/admin/Approvals'));
@@ -74,7 +73,10 @@ export const router = createBrowserRouter([
           { path: 'tasks', element: <LazyHDS Page={TasksPage} /> },
           { path: 'digest', element: <LazyHDS Page={DigestPage} /> },
           { path: 'projects', element: <LazyHDS Page={ProjectsPage} /> },
-          { path: 'issues', element: <LazyHDS Page={IssuesPage} /> },
+          // /ops/issues retired 2026-07-09 (#52): consolidated into /ops/tasks —
+          // the importer already pulls the same cross-repo issue feed, and the
+          // multi-select "Copy refs" action moved onto the tasks board.
+          { path: 'issues', element: <Navigate to="/ops/tasks" replace /> },
           { path: 'clients', element: <LazyHDS Page={ClientsIndexPage} /> },
           { path: 'clients/:slug', element: <LazyHDS Page={ClientDashboardPage} /> },
           { path: 'clients/:slug/report', element: <LazyHDS Page={ClientReportPage} /> },
