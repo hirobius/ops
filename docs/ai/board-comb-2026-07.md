@@ -88,10 +88,31 @@ Under the freeze the combing yields a **2-issue file-now wave** (both ops bugs),
 57 issues would fight both the freeze and the parked-repo decision. Adrian to
 confirm whether to also file `security-history-rewrite` (`needs-adrian`) now.
 
-## Next actions (once GitHub access is restored)
+## EXECUTED — 2026-07-09 (the file-now wave, reconciled)
 
-1. Reconcile with any plan the `comb-tasks.yml` CI run posted on ops#57.
-2. File the 2 ops bugs (`discord-bot-runtime-bugs`, `dispatchstate-queued-deadend`) as `bug`.
-3. Close/supersede the 4 dedups on the board.
-4. If approved: open `security-history-rewrite` with `needs-adrian`.
-5. Leave epics / parked-repo / idea-backlog untouched until the freeze lifts.
+**Net result: 0 new issues filed; 7 board rows closed as `done`.** Reconciling
+against GitHub (which the plan above couldn't reach) collapsed the "2-issue
+file-now wave" to zero — both proposed bugs were **already filed AND fixed**. The
+plan (and the `comb-tasks.yml` CI plan on ops#57) missed this because both rows
+key `backlog:*`, not `github:*`, so the dedup pass skipped them.
+
+Reconciliation (each row → what already tracks it):
+
+| Board row | Already tracked by | Board action |
+| --- | --- | --- |
+| `discord-bot-runtime-bugs` | **#25 — CLOSED/completed** (fixed in `e8843a6`; `bug`) | closed as dedup; `dispatch_url`→#25 |
+| `dispatchstate-queued-deadend` | **#26 — CLOSED/completed** (fixed in `e8843a6`; `bug`) | closed as dedup; `dispatch_url`→#26 |
+| `security-portal-server-auth` | #28 — CLOSED/completed | closed as dedup; `dispatch_url`→#28 |
+| `client-facing-portal-route` | done — `ClientPortalPage` + route ship | closed as already-delivered |
+| `ops-production-go-live` | done — ops is in PRODUCTION (deploys from `main`) | closed as superseded |
+| `ops-lead-pipeline-go-live` | superseded — lead-gen has since progressed | closed as superseded |
+| `security-history-rewrite` | **#27 — OPEN** (verbatim PII git-history purge) | closed on board (dedup); work stays live on #27 |
+
+Code confirms #25/#26 are genuinely resolved: no `getOrchSummary` /
+`get_orchestration` tool in `scripts/discord-bot.mjs`, no `dispatchState:"queued"`
+write in `scripts/auto-assigner.mjs`. Each closed row carries a `notes` entry
+recording the supersede + the mapping issue so it will not be re-combed.
+
+**Adrian's decisions (this session):** close the 2 "bugs" as dedup of #25/#26
+(don't re-file); don't file `security-history-rewrite` — close its row as a dedup
+of open #27. Epics / parked-repo / idea-backlog left untouched; freeze holds.
