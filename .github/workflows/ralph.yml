@@ -73,3 +73,24 @@ jobs:
             - NEVER merge. NEVER push to main. A human reviews. Respect the feature freeze.
             - Append what you did to progress.txt.
             - If blocked or ambiguous, comment on the issue and STOP — do not force.
+
+      - name: Notify Discord (run summary)
+        if: always()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "No DISCORD_WEBHOOK_URL secret set — skipping Discord notify."
+            exit 0
+          fi
+          case "$STATUS" in
+            success) EMOJI="✅" ;;
+            failure) EMOJI="❌" ;;
+            *)       EMOJI="⚪" ;;
+          esac
+          curl -sS -H "Content-Type: application/json" \
+            -d "$(printf '{"content":"%s Ralph run **%s** on `%s` — run log: %s"}' "$EMOJI" "$STATUS" "$REPO" "$RUN_URL")" \
+            "$DISCORD_WEBHOOK_URL" || echo "Discord notify failed (non-fatal)."

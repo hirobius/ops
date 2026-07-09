@@ -10,7 +10,7 @@ Choose the HIGHEST-PRIORITY issue, not the first. Order:
 3. Unknowns / spikes
 4. Standard features
 5. Polish, cleanup, quick wins
-If none exist, stop and say so.
+If none exist, output `<promise>COMPLETE</promise>` and stop.
 
 ## 2. Implement it — small
 - One logical change. If the issue is big, ship the smallest complete
