@@ -28,3 +28,15 @@ Quality gates are registered in `docs/guardrails/registry.json`
 - Update this file and [CLAUDE.md](./CLAUDE.md) only with stable, repo-wide rules.
 - Do not reference missing docs, folders, or workflows as if they exist.
 - When the repo structure changes, update this file to match reality rather than preserving aspirational architecture.
+
+## Ralph quality bar
+
+REPO_TYPE: production
+QUALITY BAR: Private client automation (Lilac/EZLynx). Correctness over speed. No destructive ops.
+
+Rules for any autonomous loop in this repo:
+
+- One issue per PR. Small steps. Never push to main.
+- The gate (ralph/gate.sh) must pass before any PR. No exceptions.
+- Fight entropy: leave the code better than you found it.
+- No shortcut that creates debt someone else pays for.
