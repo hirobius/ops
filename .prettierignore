@@ -28,3 +28,6 @@ node_modules/
 
 # Vendor
 src/lib/vendor/**
+
+# Ralph loop scaffolding — spec-owned, kept byte-exact as authored
+ralph/
