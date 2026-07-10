@@ -580,6 +580,18 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual"
+    },
+    {
+      "id": "check-dom-node-budgets",
+      "description": "Per-file DOM-node budget lock (ratchet) for src/app: counts JSX elements per component/page via the TypeScript AST and locks each file's count against docs/guardrails/baselines/check-dom-node-budgets.json. Files that grow past their budget fail; files that shrink tighten; new files are recorded.",
+      "severity": "error",
+      "gateScript": "scripts/check-dom-node-budgets.mjs",
+      "fixturePath": "fixtures/check-dom-node-budgets",
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual"
     }
   ]
 }

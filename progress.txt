@@ -12,3 +12,15 @@
   baselines/check-circular-deps.json}.
 - Next iteration for #69: DOM-node budgets (slice 3/3). Consider render-time counting vs static
   JSX-element budget per page.
+
+#69 — DOM-node budgets (slice 3/3; completes the guardrails epic w/ #91 orphan + #94 circular)
+- New gate scripts/check-dom-node-budgets.mjs: counts JSX elements per src/app/**.tsx via the
+  TypeScript AST (generics-proof), locks each file's count in a per-file budget baseline. Grow
+  past budget = fail; shrink = tighten; new file = recorded. Static structural proxy (a .map is 1
+  element) — runtime render-count budget noted as future tightening.
+- Baseline docs/guardrails/baselines/check-dom-node-budgets.json — 43 files locked at current.
+- Registered (severity error, manual channel, stub fixture pair). Meta-validators + gate green.
+- Decision: TS compiler API not regex — .tsx generics/comparisons would fool a regex counter.
+- Files: scripts/check-dom-node-budgets.mjs, scripts/__tests__/check-dom-node-budgets.test.mjs,
+  fixtures/check-dom-node-budgets/*, docs/guardrails/{registry.json, baselines/check-dom-node-budgets.json}.
+- #69 now fully delivered (orphan #91 + circular #94 + DOM #this) — safe to close on merge.
