@@ -12,3 +12,26 @@
   baselines/check-circular-deps.json}.
 - Next iteration for #69: DOM-node budgets (slice 3/3). Consider render-time counting vs static
   JSX-element budget per page.
+
+#99 — task importer reconcile (prune stale/renamed-repo rows)
+- Root cause: importIssuesHandler (api/tasks.ts) only ever upserted github:* rows keyed by
+  owner/repo#number — a repo rename/transfer (hirobius->adr-eng, hds<->hirobius-design-system)
+  left the OLD-slug row forever, and a closed issue (listOpenIssues() only returns open) was
+  never revisited, so the board's repo chips duplicated and closed issues never dropped off.
+- Fix (test-first): new pure helper reconcileGithubTasks(existingKeys, liveKeys) in
+  lib/tasks/import-issues.mjs — diffs stored github:* keys against the keys the latest
+  listOpenIssues() pull produced, returns the stale ones. Scoped to github: prefix internally
+  as a second guard even though the caller already filters.
+- New repo ops in lib/supabase/tasks.mjs: listGithubTaskKeys (source LIKE 'github:%', live only)
+  and retireGithubTasks (soft-delete via deleted_at, in(key) + LIKE 'github:%' double-scoped —
+  never touches tracker/backlog/client rows). Non-destructive: same deleted_at mechanism as the
+  board's existing Trash action, not a hard delete.
+- importIssuesHandler wired: fetch existing github keys -> upsert live rows (unchanged) ->
+  reconcile -> retire stale keys. Response now { imported, retired }.
+- Decision: soft-delete (deleted_at) over status:'done' — listTasks already excludes deleted_at
+  by default, which is what "closed issues drop off the board" needs; 'done' would still surface
+  under a done filter.
+- Files: lib/tasks/import-issues.mjs, lib/supabase/tasks.mjs, api/tasks.ts,
+  tests/api/import-issues.test.ts, tests/api/tasks-repo.test.ts.
+- Gate green: typecheck + 461 tests (20 new) + lint. No schema change needed (deleted_at already
+  exists, migration 0003).

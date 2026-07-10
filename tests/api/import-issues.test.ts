@@ -5,7 +5,7 @@
  * GitHubIssuePort#listOpenIssues (lib/github/issues.mjs) returns.
  */
 import { describe, it, expect } from 'vitest';
-import { mapIssuesToTasks } from '../../lib/tasks/import-issues.mjs';
+import { mapIssuesToTasks, reconcileGithubTasks } from '../../lib/tasks/import-issues.mjs';
 
 describe('mapIssuesToTasks', () => {
   it('maps one issue to the exact expected task row', () => {
@@ -71,5 +71,46 @@ describe('mapIssuesToTasks', () => {
   it('returns [] for an empty or non-array input', () => {
     expect(mapIssuesToTasks([])).toEqual([]);
     expect(mapIssuesToTasks(undefined)).toEqual([]);
+  });
+});
+
+describe('reconcileGithubTasks', () => {
+  it('retires a renamed-repo row (stored under the old slug, absent from the live set)', () => {
+    const existingKeys = [
+      'github:hirobius/hds#1',
+      'github:hirobius/hirobius-design-system#1',
+      'github:hirobius/hds#2',
+    ];
+    const liveKeys = ['github:hirobius/hds#1', 'github:hirobius/hds#2'];
+
+    expect(reconcileGithubTasks(existingKeys, liveKeys)).toEqual([
+      'github:hirobius/hirobius-design-system#1',
+    ]);
+  });
+
+  it('retires a closed-issue key (stored but no longer in the live-open set)', () => {
+    const existingKeys = ['github:hirobius/ops#42'];
+    const liveKeys: string[] = [];
+    expect(reconcileGithubTasks(existingKeys, liveKeys)).toEqual(['github:hirobius/ops#42']);
+  });
+
+  it('keeps keys present in both sets', () => {
+    const existingKeys = ['github:hirobius/ops#1'];
+    const liveKeys = ['github:hirobius/ops#1'];
+    expect(reconcileGithubTasks(existingKeys, liveKeys)).toEqual([]);
+  });
+
+  it('never touches a non-github: key even if absent from the live set', () => {
+    const existingKeys = ['tracker:OPS-1', 'backlog:foo'];
+    const liveKeys: string[] = [];
+    expect(reconcileGithubTasks(existingKeys, liveKeys)).toEqual([]);
+  });
+
+  it('returns [] for an empty existing set', () => {
+    expect(reconcileGithubTasks([], ['github:hirobius/ops#1'])).toEqual([]);
+  });
+
+  it('returns [] for non-array input', () => {
+    expect(reconcileGithubTasks(undefined, ['github:hirobius/ops#1'])).toEqual([]);
   });
 });

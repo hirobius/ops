@@ -12,7 +12,11 @@
  *        `github:<owner>/<repo>#<number>` so re-running is idempotent. This is
  *        the single issues+tasks board — the standalone /ops/issues surface was
  *        retired into /ops/tasks (#52, 2026-07-09).
- *        Success: { imported: n }
+ *        Reconcile (#99): a stored `github:*` row with no matching key in this
+ *        pull — closed since the last import, or stranded under an old
+ *        owner/repo slug after a rename/transfer — is soft-deleted so the
+ *        board's repo chips and counts reflect only live, open issues.
+ *        Success: { imported: n, retired: n }
  *
  * Both methods are service-role + ops-gated, so no Supabase/GitHub credential
  * reaches the browser. In dev, GET is also served by scripts/tasks-middleware.mjs.
@@ -31,9 +35,19 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { withOpsHandler, withServiceClient, messageOf, type HandlerResult } from '../lib/api/handler.js';
-import { listTasks, upsertTasks } from '../lib/supabase/tasks.mjs';
-import { mapIssuesToTasks } from '../lib/tasks/import-issues.mjs';
+import {
+  withOpsHandler,
+  withServiceClient,
+  messageOf,
+  type HandlerResult,
+} from '../lib/api/handler.js';
+import {
+  listTasks,
+  upsertTasks,
+  listGithubTaskKeys,
+  retireGithubTasks,
+} from '../lib/supabase/tasks.mjs';
+import { mapIssuesToTasks, reconcileGithubTasks } from '../lib/tasks/import-issues.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
 
 const DEFAULT_LIMIT = 1000;
@@ -48,7 +62,10 @@ export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Prom
   return { status: 200, body: { tasks: data ?? [] } };
 }
 
-export async function importIssuesHandler(sb: SupabaseClient, _req: VercelRequest): Promise<HandlerResult> {
+export async function importIssuesHandler(
+  sb: SupabaseClient,
+  _req: VercelRequest,
+): Promise<HandlerResult> {
   const gh = makeGitHubPort();
   if (!gh) {
     return {
@@ -69,10 +86,23 @@ export async function importIssuesHandler(sb: SupabaseClient, _req: VercelReques
     return { status: 502, body: { error: messageOf(err), code: 'GITHUB_LIST_FAILED' } };
   }
 
+  const { data: existingRows, error: existingError } = await listGithubTaskKeys(sb);
+  if (existingError) return { status: 500, body: { error: existingError.message } };
+
   const rows = mapIssuesToTasks(issues);
   const { error } = await upsertTasks(sb, rows);
   if (error) return { status: 500, body: { error: error.message } };
-  return { status: 200, body: { imported: rows.length } };
+
+  const existingKeys = (existingRows ?? []).map((r: { key: string }) => r.key);
+  const liveKeys = rows.map((r) => r.key);
+  const keysToRetire = reconcileGithubTasks(existingKeys, liveKeys);
+
+  if (keysToRetire.length > 0) {
+    const { error: retireError } = await retireGithubTasks(sb, keysToRetire);
+    if (retireError) return { status: 500, body: { error: retireError.message } };
+  }
+
+  return { status: 200, body: { imported: rows.length, retired: keysToRetire.length } };
 }
 
 const getHandler = withOpsHandler('GET', withServiceClient(tasksHandler));
