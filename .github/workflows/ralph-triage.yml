@@ -1,0 +1,117 @@
+name: Ralph Triage
+
+# INTAKE agent (propose-then-approve). Combs THIS repo for work, scopes it into
+# TDD-shaped issues, and proposes a RANKED ralph-ready shortlist — but it NEVER
+# tags ralph-ready and NEVER touches code. You keep the governor: you approve the
+# tag. Auth: CLAUDE_CODE_OAUTH_TOKEN (Max subscription) — no ANTHROPIC_API_KEY.
+
+on:
+  workflow_dispatch:
+    inputs:
+      goal:
+        description: "North-star to bias the comb (blank = general repo-health)"
+        required: false
+        type: string
+      mode:
+        description: "report = one triage-report issue (safe default) | file = create top-N triage-labelled drafts"
+        required: false
+        default: report
+        type: choice
+        options: [report, file]
+      max:
+        description: "Max proposals"
+        required: false
+        default: "6"
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+  id-token: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "10"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+      - name: Install dependencies (so the comb can run cheap checks)
+        run: pnpm install --frozen-lockfile
+
+      - name: Comb + propose
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --allowedTools "Bash,Read,Grep,Glob"
+          prompt: |
+            You are an INTAKE/TRIAGE agent for ${{ github.repository }}. Comb this
+            repo for the highest-value work and PROPOSE issues. You do NOT write
+            code, open PRs, or run the loop.
+
+            HARD RULES:
+            - NEVER apply the `ralph-ready` label — that approval is the human's.
+            - NEVER exceed ${{ inputs.max || '6' }} proposals.
+            - DEDUPE first: `gh issue list --state open --limit 100`. Do not
+              re-propose anything already tracked.
+            - Read AGENTS.md, CLAUDE.md, and any freeze/status notes; respect them.
+
+            GOAL for this run: "${{ inputs.goal }}"  (blank = general repo-health)
+
+            Look for (cheap signals first): TODO/FIXME/HACK, failing or missing
+            tests, thin coverage, lint warnings, dead/unused exports, dependency
+            drift, doc-vs-code drift, and gaps toward the GOAL. Prefer small,
+            self-contained, TDD-shaped work.
+
+            For EACH proposal:
+              - Title (conventional, scoped)
+              - Problem (2-4 sentences WITH file paths / evidence)
+              - DoD (test-first where possible)
+              - effort (S/M/L), risk (low/med/high)
+              - autonomous-fit: `ralph` (safe for the loop) or `human`
+                (design/decision/deletion/secret/architecture) — be honest;
+                only `ralph` items may appear in the shortlist.
+              - suggested labels (NEVER ralph-ready)
+
+            Then RANK by impact and output a "Recommended ralph-ready shortlist"
+            (the `ralph`-fit items, best first) with a one-line why for each.
+
+            OUTPUT MODE = "${{ inputs.mode || 'report' }}":
+            - report: create ONE issue titled "Triage: <goal-or-health>"
+              labelled `triage`, body = the full ranked proposals (each with a
+              ready-to-file body) + the shortlist. Create nothing else. STOP.
+            - file: create the top proposals as individual issues, EACH labelled
+              `triage` and nothing else (never ralph-ready); then post one
+              "Triage summary" issue with the ranked shortlist linking them. STOP.
+
+            Finish by printing the shortlist to the log (so it also hits Discord).
+
+      - name: Notify Discord (triage summary)
+        if: always()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "No DISCORD_WEBHOOK_URL secret set — skipping Discord notify."
+            exit 0
+          fi
+          case "$STATUS" in
+            success) EMOJI="🔎" ;;
+            failure) EMOJI="❌" ;;
+            *)       EMOJI="⚪" ;;
+          esac
+          curl -sS -H "Content-Type: application/json" \
+            -d "$(printf '{"content":"%s Triage comb **%s** on `%s` — review the proposed issues, then tag the good ones ralph-ready. %s"}' "$EMOJI" "$STATUS" "$REPO" "$RUN_URL")" \
+            "$DISCORD_WEBHOOK_URL" || echo "Discord notify failed (non-fatal)."
