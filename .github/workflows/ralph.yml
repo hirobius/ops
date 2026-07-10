@@ -1,17 +1,13 @@
 name: Ralph
 
-# Manually-triggered autonomous "Ralph" loop — ONE iteration per run.
-# Actions tab -> "Ralph" -> Run workflow (main). Picks the highest-priority open
-# `ralph-ready` issue (or the one you name), makes one small change, must pass
-# ralph/gate.sh, and opens a PR. NEVER merges, NEVER pushes to main — a human reviews.
+# Autonomous "Ralph" loop — ONE iteration per run. Manual (workflow_dispatch) OR
+# scheduled (cron). Picks the highest-priority open `ralph-ready` issue (or the one
+# you name), makes one small change, must pass ralph/gate.sh, opens a PR. Auto-merge
+# is handled by ralph-gate.yml + branch protection.
 #
-# Sibling to comb-tasks.yml: deliberately manual-only (workflow_dispatch), no
-# label/schedule auto-fire, so a human decides each run. Runs Claude Code on
-# Adrian's Max subscription via CLAUDE_CODE_OAUTH_TOKEN (already set for this repo),
-# the same auth the fleet executor (claude.yml) uses.
-#
-# NOTE: tag an issue `ralph-ready` (or pass its number) to greenlight it; a blank
-# run with an empty queue just stops. Contract: ralph/prompt.md + AGENTS.md.
+# ops is private client automation — correctness over speed, no destructive ops.
+# Scheduled runs use CLAUDE_CODE_OAUTH_TOKEN (Max) — NO ANTHROPIC_API_KEY.
+# Safety: concurrency (one Ralph/repo) + single-flight guard (skip if a Ralph PR is open).
 
 on:
   workflow_dispatch:
@@ -20,6 +16,12 @@ on:
         description: "Issue number to work (blank = pick highest-priority ralph-ready)"
         required: false
         type: string
+  schedule:
+    - cron: "40 */4 * * *" # staggered vs hds/site-engine; dry queue -> no PR; stops itself.
+
+concurrency:
+  group: ralph-${{ github.repository }}
+  cancel-in-progress: false
 
 jobs:
   ralph:
@@ -33,23 +35,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Single-flight guard — skip if a Ralph PR is already open
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          open=$(gh pr list --repo "${{ github.repository }}" --state open \
+            --json headRefName --jq '[.[] | select(.headRefName | startswith("ralph/"))] | length')
+          if [ "${open:-0}" -gt 0 ]; then
+            echo "A Ralph PR is already open ($open) — skipping this run to avoid pile-up."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: pnpm/action-setup@v4
+        if: steps.guard.outputs.skip != 'true'
         with:
           version: "10"
       - uses: actions/setup-node@v4
+        if: steps.guard.outputs.skip != 'true'
         with:
           node-version: "22"
           cache: "pnpm"
       - name: Install dependencies (so ralph/gate.sh can run)
+        if: steps.guard.outputs.skip != 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Run Claude Code — one Ralph iteration
+        if: steps.guard.outputs.skip != 'true'
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # Broad Bash is acceptable here: ephemeral CI sandbox, manual-only job,
-          # scoped token -> blast radius is a branch + PR + issue comments, which is
-          # exactly this job's purpose. Ralph never merges and never pushes main.
           claude_args: |
             --allowedTools "Bash,Read,Write,Edit,Glob,Grep"
           prompt: |
@@ -58,7 +73,8 @@ jobs:
 
             A target issue may have been provided via the dispatch input: "${{ inputs.issue }}"
             - If that is an issue number, work THAT issue.
-            - If it is blank, pick the HIGHEST-PRIORITY open `ralph-ready` issue:
+            - If it is blank (e.g. a scheduled run), pick the HIGHEST-PRIORITY open
+              `ralph-ready` issue:
               gh issue list --label "ralph-ready" --state open
               (highest priority per ralph/prompt.md's order — NOT the first). If none
               exist, say so and stop.
@@ -69,12 +85,14 @@ jobs:
               types to pass it. Red gate = no PR.
             - Branch ralph/issue-<n>-<slug>. Open a PR with "Closes #<n>" in the body.
               Comment a 2-line summary on the issue.
-            - NEVER merge. NEVER push to main. A human reviews. Respect the feature freeze.
+            - NEVER merge or push to main yourself — the ralph-gate workflow handles
+              merging after an independent review. Respect the feature freeze and
+              NEVER perform destructive ops (DB migrations, deletes) without care.
             - Append what you did to progress.txt.
             - If blocked or ambiguous, comment on the issue and STOP — do not force.
 
       - name: Notify Discord (run summary)
-        if: always()
+        if: always() && steps.guard.outputs.skip != 'true'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           STATUS: ${{ job.status }}
