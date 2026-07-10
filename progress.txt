@@ -12,3 +12,28 @@
   baselines/check-circular-deps.json}.
 - Next iteration for #69: DOM-node budgets (slice 3/3). Consider render-time counting vs static
   JSX-element budget per page.
+
+#99 — task importer: reconcile (prune stale/renamed-repo rows)
+- Red-first: tests/api/reconcile-github-tasks.test.ts against a not-yet-existing
+  lib/tasks/reconcile-github-tasks.mjs, confirmed failing before implementing.
+- New pure helper reconcileGithubTasks(existingKeys, liveKeys) → keysToRetire: plain
+  set-diff, data-in/data-out like mapIssuesToTasks. Unit-tested per the issue's DoD case
+  (renamed-repo dup + closed-issue key both retired, matching keys untouched).
+- New repo ops in lib/supabase/tasks.mjs: listGithubTaskKeys (source LIKE 'github:%' AND
+  deleted_at IS NULL — the "existing" side) and retireTasks (soft-delete via deleted_at,
+  batched .in('key', keys)).
+- Wired into importIssuesHandler (api/tasks.ts): after upsertTasks, diff stored github:*
+  keys against the just-imported live keys, retire the stale ones. Scoped to github:* only
+  via the LIKE filter — never touches client/lead-pipeline tasks. Response now
+  { imported, retired }.
+- Decision: soft-delete (deleted_at) over status:'done'. Marking done would fire the
+  tasks_touch/tasks_audit completion-ping trigger (0003_tasks.sql) — false "completed"
+  Discord pings for issues that just closed or moved repos, not real completions.
+  Soft-delete drops them from the board (listTasks default) without a false ping, and
+  listTasks({ includeDeleted: true }) can still surface them — non-destructive per DoD.
+- Files: lib/tasks/reconcile-github-tasks.mjs (new), lib/supabase/tasks.mjs, api/tasks.ts,
+  tests/api/reconcile-github-tasks.test.ts (new), tests/api/tasks-repo.test.ts.
+- Gate green: typecheck + 459 tests (was 455) + lint.
+- Next iteration: no handler-level integration test for importIssuesHandler's full flow
+  exists yet (matches pre-existing convention — the handler is thin, each part is unit
+  tested). If that gap ever bites, add one alongside ops-handler.test.ts's pattern.

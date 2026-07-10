@@ -5,10 +5,19 @@
  * key-based lookups are locked against drift.
  */
 import { describe, it, expect } from 'vitest';
-import { listTasks, getTask, updateTask, upsertTasks } from '../../lib/supabase/tasks.mjs';
+import {
+  listTasks,
+  getTask,
+  updateTask,
+  upsertTasks,
+  listGithubTaskKeys,
+  retireTasks,
+} from '../../lib/supabase/tasks.mjs';
 
 function recordingSb(result: { data?: unknown; error?: unknown } = { data: [], error: null }) {
-  const calls: { orders: Array<{ col: string; opts: unknown }> } & Record<string, unknown> = { orders: [] };
+  const calls: { orders: Array<{ col: string; opts: unknown }> } & Record<string, unknown> = {
+    orders: [],
+  };
   const builder: Record<string, unknown> = {
     select(cols: string) {
       calls.select = cols;
@@ -16,6 +25,14 @@ function recordingSb(result: { data?: unknown; error?: unknown } = { data: [], e
     },
     is(col: string, val: unknown) {
       calls.is = { col, val };
+      return builder;
+    },
+    like(col: string, val: unknown) {
+      calls.like = { col, val };
+      return builder;
+    },
+    in(col: string, val: unknown) {
+      calls.in = { col, val };
       return builder;
     },
     order(col: string, opts: unknown) {
@@ -92,7 +109,15 @@ describe('tasks repository', () => {
 
   it('upsertTasks: upserts rows with onConflict: key', async () => {
     const { sb, calls } = recordingSb({ data: [{ key: 'github:hirobius/ops#1' }], error: null });
-    const rows = [{ key: 'github:hirobius/ops#1', source: 'github:hirobius/ops', title: 'Do it', lane: 'ops', status: 'open' }];
+    const rows = [
+      {
+        key: 'github:hirobius/ops#1',
+        source: 'github:hirobius/ops',
+        title: 'Do it',
+        lane: 'ops',
+        status: 'open',
+      },
+    ];
     const result = await upsertTasks(sb, rows);
     expect(calls.table).toBe('tasks');
     expect(calls.upsert).toEqual(rows);
@@ -103,6 +128,30 @@ describe('tasks repository', () => {
   it('upsertTasks: no-ops on an empty/non-array input without touching the client', async () => {
     const { sb, calls } = recordingSb();
     expect(await upsertTasks(sb, [])).toEqual({ data: [], error: null });
+    expect(calls.table).toBeUndefined();
+  });
+
+  it('listGithubTaskKeys: scopes to live github:* sources only', async () => {
+    const { sb, calls } = recordingSb({ data: [{ key: 'github:hirobius/ops#1' }], error: null });
+    await listGithubTaskKeys(sb);
+    expect(calls.table).toBe('tasks');
+    expect(calls.select).toBe('key');
+    expect(calls.like).toEqual({ col: 'source', val: 'github:%' });
+    expect(calls.is).toEqual({ col: 'deleted_at', val: null });
+  });
+
+  it('retireTasks: soft-deletes the given keys', async () => {
+    const { sb, calls } = recordingSb({ data: [], error: null });
+    await retireTasks(sb, ['github:hirobius/hirobius-design-system#1']);
+    expect(calls.table).toBe('tasks');
+    expect(calls.in).toEqual({ col: 'key', val: ['github:hirobius/hirobius-design-system#1'] });
+    const update = calls.update as { deleted_at?: unknown };
+    expect(typeof update.deleted_at).toBe('string');
+  });
+
+  it('retireTasks: no-ops on an empty/non-array input without touching the client', async () => {
+    const { sb, calls } = recordingSb();
+    expect(await retireTasks(sb, [])).toEqual({ data: [], error: null });
     expect(calls.table).toBeUndefined();
   });
 });
