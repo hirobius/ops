@@ -1,14 +1,15 @@
 name: Ralph
 
 # Autonomous "Ralph" loop — ONE iteration per run. Manual (workflow_dispatch),
-# scheduled (cron), OR chained (push to main). Picks the highest-priority open
+# triggered by `issues: labeled` (fires when an issue is tagged `ralph-ready`),
+# OR chained (push to main). Picks the highest-priority open
 # `ralph-ready` issue (or the one you name), makes one small change, must pass
 # ralph/gate.sh, opens a PR. Auto-merge is handled by ralph-gate.yml + branch protection.
 #
 # The `push: [main]` trigger is the chain: when a Ralph PR auto-merges it pushes
 # main, which fires the next iteration -> grab next issue -> PR -> auto-merge ->
 # fire again, until the queue is dry (Ralph emits COMPLETE, no PR, chain stops).
-# Cron is the backstop heartbeat.
+# Labeling an issue `ralph-ready` fires a run directly.
 #
 # ops is private client automation — correctness over speed, no destructive ops.
 # Scheduled/chained runs use CLAUDE_CODE_OAUTH_TOKEN (Max) — NO ANTHROPIC_API_KEY.
@@ -24,8 +25,8 @@ on:
         description: "Issue number to work (blank = pick highest-priority ralph-ready)"
         required: false
         type: string
-  schedule:
-    - cron: "40 */4 * * *" # backstop heartbeat, staggered vs hds/site-engine
+  issues:
+    types: [labeled]
   push:
     branches: [main] # chain: an auto-merged Ralph PR grabs the next ralph-ready issue
 
@@ -54,6 +55,12 @@ jobs:
           # An explicit manual dispatch of a specific issue always runs (human override).
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${ISSUE}" ]; then
             echo "Explicit dispatch of #${ISSUE} — running."
+            exit 0
+          fi
+          # issues:labeled — only proceed when the label added is `ralph-ready`.
+          if [ "${{ github.event_name }}" = "issues" ] && [ "${{ github.event.label.name }}" != "ralph-ready" ]; then
+            echo "Labeled with something other than ralph-ready — skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           # Single-flight: never stack a second Ralph PR.
