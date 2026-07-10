@@ -1,0 +1,56 @@
+## Issue #69 — guardrails: orphan sweeper + circular-dep locks + DOM node budgets
+
+Slice shipped: orphan-module sweeper only (audit-orphan-modules.mjs).
+Circular-dependency locks and DOM-node budgets NOT done — left for
+follow-up issues per Ralph "smallest complete slice" rule (issue is an
+epic covering three separate guardrails).
+
+Decisions + why:
+- Wrapped `knip --reporter json`'s "unused files" category instead of
+  hand-rolling a dependency-graph walker: knip is already a devDep and
+  already runs (non-gating) in `pretest`. Reusing it avoids duplicating
+  graph-traversal logic the repo already has.
+- severity: warn, always exits 0 (matches audit-claims/audit-exceptions
+  pattern) — informational sweep, not a hard block, since a knip
+  "unused file" hit can be a false positive (SSR entry point, etc.)
+  that needs human triage rather than auto-deletion.
+- firingChannel: pnpm-meta (matches audit-deps, the closest analog:
+  external-tool wrapper, full-tree scan, not fast enough/appropriate
+  for pre-commit).
+- Fixtures are stubs (__stub marker), same as audit-deps — knip runs
+  against the whole repo, not a single targeted file, so there's no
+  clean way to give it a FIXTURE_FILE to scan in isolation.
+
+Files changed:
+- scripts/audit-orphan-modules.mjs (new)
+- fixtures/audit-orphan-modules/{violating,passing}.example.json (new, stubs)
+- docs/guardrails/registry.json (registered the gate)
+- package.json (added `audit:orphan-modules` script)
+- scripts/INDEX.json / scripts/INDEX.md (regenerated)
+- .editorconfig-checker.json (unrelated but required fix — see below)
+
+Unrelated fix bundled in because it blocked every commit:
+- .editorconfig-checker.json pinned Version v3.7.0 but the installed
+  editorconfig-checker npm package (^6.1.1) resolves to a v3.8.0
+  binary. The pre-commit hook's `pnpm exec editorconfig-checker` step
+  failed on that mismatch for ANY commit, not just this one. Bumped
+  the pin to v3.8.0 to match; re-ran editorconfig-checker afterward,
+  zero new violations (pure version-string drift, not a real lint
+  failure).
+
+Notes for next iteration:
+- Found (and worked around, did not fix) a real bug in
+  scripts/validate-fixture-proof-of-firing.mjs: its cache-hit branch
+  (~line 278) treats any cached lastResult that isn't exactly 'pass'
+  as a failure — including legitimate cached 'skip' results (e.g.
+  check-secrets, which always skips because gitleaks isn't installed
+  in this environment). Once a gate's fixture mtimes are stable and a
+  'skip' gets cached, every subsequent run reports a false "cached
+  failure" until .fixture-proof-cache.json (gitignored, machine-local)
+  is deleted. Didn't fix it here to keep this PR to one logical
+  change — worth its own issue.
+- Remaining #69 scope: circular-dependency locks (no madge/
+  dependency-cruiser installed yet — would need a new dep, flagged in
+  case that changes the approval bar) and DOM-node budgets (needs a
+  decision on where the budget threshold/config lives and whether it
+  runs against built HTML or a runtime check). Left on the issue.
