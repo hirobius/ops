@@ -7,6 +7,7 @@
  * Request:  { key: string, action: Action, actor?: string }
  *   Action = 'done' | 'reopen' | 'claim' | 'unclaim' | 'trash' | 'restore' | 'dispatch'
  *          | 'auto_on' | 'auto_off' | 'queue' | 'unqueue'
+ *          | 'ralph_ready_on' | 'ralph_ready_off'
  *
  * 'auto_on' / 'auto_off' flip `auto_ok` (migration 0008) — the Fleet
  * auto-dispatch opt-in (epic #41). Slice 2's dispatcher only picks up rows
@@ -22,6 +23,12 @@
  * session on a branch — and stamps dispatch_url + claimed_by='claude' +
  * dispatch_status='dispatched' (clears 'queued' so an approved task leaves the
  * inbox). Requires GITHUB_TOKEN (repo Issues: write); 503 if unset.
+ *
+ * 'ralph_ready_on' / 'ralph_ready_off' (ops#88) add/remove the `ralph-ready`
+ * label on the task's linked GitHub issue — the one human-approval tap the
+ * Ralph loop polls for (`gh issue list --label ralph-ready`). Only issue-backed
+ * tasks (a real dispatch_url) qualify; 400 otherwise. Mirrors the label into
+ * the row's `tags` on success so the board badge updates immediately.
  *
  * In dev, the same contract is served by scripts/tasks-middleware.mjs.
  * Success:  { ok: true, ...extra } · Error: { error, code? } 400/401/404/405/500/503

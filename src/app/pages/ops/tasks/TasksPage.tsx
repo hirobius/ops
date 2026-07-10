@@ -16,6 +16,9 @@
  *   - Queue → flips dispatch_status to 'queued' (epic #41 Slice 3) — pushes the
  *     task into the /admin/approvals inbox for a human Approve/Deny click,
  *     distinct from Auto (auto_ok, which self-dispatches with no approval).
+ *   - Ralph-ready (ops#88) → adds/removes the `ralph-ready` label on the linked
+ *     GitHub issue — the one human-approval tap the Ralph loop polls for. Only
+ *     offered once a task is issue-backed (has a dispatch_url).
  *   - Trash → soft-delete (deleted_at).
  */
 
@@ -299,6 +302,7 @@ export default function TasksPage() {
                 const dispatched = !!t.dispatch_url;
                 const ref = taskRef(t);
                 const isSelected = selected.has(t.key);
+                const ralphReady = asStrings(t.tags).includes('ralph-ready');
                 return (
                   <li key={t.key} style={s.row}>
                     {ref && (
@@ -435,6 +439,22 @@ export default function TasksPage() {
                                 {t.dispatch_status === 'queued'
                                   ? 'Remove from approvals queue'
                                   : 'Queue for approval'}
+                              </button>
+                            )}
+                            {dispatched && (
+                              <button
+                                type="button"
+                                role="menuitem"
+                                style={s.menuItem}
+                                onClick={() => {
+                                  act(t.key, ralphReady ? 'ralph_ready_off' : 'ralph_ready_on');
+                                  setOpenMenuKey(null);
+                                }}
+                                title="Adds/removes the ralph-ready label on the linked GitHub issue — the Ralph loop picks up ralph-ready issues automatically."
+                              >
+                                {ralphReady
+                                  ? 'Ralph-ready: on → turn off'
+                                  : 'Ralph-ready: off → turn on'}
                               </button>
                             )}
                             <button
