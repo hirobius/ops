@@ -1,0 +1,14 @@
+#69 — circular-dependency locks (slice 2/3 of guardrails epic; orphan sweeper was #91)
+- New gate scripts/check-circular-deps.mjs: Tarjan-SCC cycle detector over the intra-src import
+  graph (relative + @/* alias), locked against a baseline ratchet (monotonic-decrement, mirrors
+  check-fixture-stubs-ratchet). New cycles fail; removed cycles tighten the lock.
+- Baseline docs/guardrails/baselines/check-circular-deps.json — current src/ is clean (count 0).
+- Registered in registry.json (severity error, firingChannel manual, fixture stub pair). All 3
+  meta-validators green (registry / wiring / fixture-proof). Gate green (typecheck+test+lint, 443 tests).
+- Decision: self-contained detector, no new dep (madge/dpdm) — 69-file graph, regex import parse is
+  enough and keeps the gate fast + dep-free per #39's "no DS-inherited weight" caution.
+- Files: scripts/check-circular-deps.mjs, scripts/__tests__/check-circular-deps.test.mjs,
+  fixtures/check-circular-deps/{passing,violating}.example.json, docs/guardrails/{registry.json,
+  baselines/check-circular-deps.json}.
+- Next iteration for #69: DOM-node budgets (slice 3/3). Consider render-time counting vs static
+  JSX-element budget per page.

@@ -18,7 +18,7 @@
     },
     {
       "id": "audit-batch-deliverables",
-      "description": "TODO: add description — audit-batch-deliverables.mjs JSDoc block is empty.",
+      "description": "TODO: add description \u2014 audit-batch-deliverables.mjs JSDoc block is empty.",
       "severity": "warn",
       "gateScript": "scripts/audit-batch-deliverables.mjs",
       "fixturePath": "fixtures/audit-batch-deliverables",
@@ -30,7 +30,7 @@
     },
     {
       "id": "audit-bundle",
-      "description": "Generates a bundle composition report at docs/perf/bundle-report.html using vite-bundle-visualizer. Manual channel only — artifact, not gating.",
+      "description": "Generates a bundle composition report at docs/perf/bundle-report.html using vite-bundle-visualizer. Manual channel only \u2014 artifact, not gating.",
       "severity": "warn",
       "gateScript": "scripts/audit-bundle.mjs",
       "fixturePath": null,
@@ -68,7 +68,7 @@
     },
     {
       "id": "audit-exceptions",
-      "description": "TODO: add description — audit-exceptions.mjs has no leading JSDoc block.",
+      "description": "TODO: add description \u2014 audit-exceptions.mjs has no leading JSDoc block.",
       "severity": "warn",
       "gateScript": "scripts/audit-exceptions.mjs",
       "fixturePath": "fixtures/audit-exceptions",
@@ -107,7 +107,7 @@
     },
     {
       "id": "audit-pages",
-      "description": "Token compliance auditor for page surfaces. This is intentionally looser than audit-components.mjs — reusable components must be strict, pages must still avoid raw design values but can keep justified editorial layout.",
+      "description": "Token compliance auditor for page surfaces. This is intentionally looser than audit-components.mjs \u2014 reusable components must be strict, pages must still avoid raw design values but can keep justified editorial layout.",
       "severity": "warn",
       "gateScript": "scripts/audit-pages.mjs",
       "fixturePath": "fixtures/audit-pages",
@@ -119,7 +119,7 @@
     },
     {
       "id": "audit-sbom",
-      "description": "Generates a CycloneDX Software Bill of Materials at docs/security/sbom.json. Manual channel — produces an artifact, not a gate. Useful for the GRC narrative and supply-chain review.",
+      "description": "Generates a CycloneDX Software Bill of Materials at docs/security/sbom.json. Manual channel \u2014 produces an artifact, not a gate. Useful for the GRC narrative and supply-chain review.",
       "severity": "warn",
       "gateScript": "scripts/audit-sbom.mjs",
       "fixturePath": null,
@@ -153,7 +153,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-attributions",
@@ -166,7 +166,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-code-connect",
@@ -179,7 +179,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-contrast",
@@ -192,7 +192,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-doc-structure",
@@ -205,7 +205,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-link-integrity",
@@ -269,7 +269,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-frozen-demos",
@@ -282,7 +282,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-hardcoded-colors",
@@ -314,7 +314,7 @@
     },
     {
       "id": "check-motion",
-      "description": "Verifies that interactive components ship with motion feedback — the HDS standard that every user action has a visible, token-timed response.",
+      "description": "Verifies that interactive components ship with motion feedback \u2014 the HDS standard that every user action has a visible, token-timed response.",
       "severity": "warn",
       "gateScript": "scripts/check-motion.mjs",
       "fixturePath": "fixtures/check-motion",
@@ -323,7 +323,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-og-meta",
@@ -336,7 +336,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "pre-commit",
-      "wiringTodo": "should be ci-pr or ci-scheduled — not yet wired into a workflow that actually triggers it"
+      "wiringTodo": "should be ci-pr or ci-scheduled \u2014 not yet wired into a workflow that actually triggers it"
     },
     {
       "id": "check-page-shell",
@@ -361,7 +361,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-registry",
@@ -374,11 +374,11 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-route-coverage",
-      "description": "Route coverage gate — every routable page must appear in the layout-integrity test set.",
+      "description": "Route coverage gate \u2014 every routable page must appear in the layout-integrity test set.",
       "severity": "warn",
       "gateScript": "scripts/check-route-coverage.mjs",
       "fixturePath": "fixtures/check-route-coverage",
@@ -399,7 +399,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "pnpm-meta",
-      "wiringTodo": "should be ci-pr or ci-scheduled — not yet wired into a workflow that actually triggers it"
+      "wiringTodo": "should be ci-pr or ci-scheduled \u2014 not yet wired into a workflow that actually triggers it"
     },
     {
       "id": "check-secrets",
@@ -453,7 +453,7 @@
     },
     {
       "id": "check-validator-wiring",
-      "description": "Meta-validator: every gate registered in docs/guardrails/registry.json has a firingChannel that matches actual invocation. Catches aspirational guardrails — gates registered but never really firing.",
+      "description": "Meta-validator: every gate registered in docs/guardrails/registry.json has a firingChannel that matches actual invocation. Catches aspirational guardrails \u2014 gates registered but never really firing.",
       "severity": "warn",
       "gateScript": "scripts/check-validator-wiring.mjs",
       "fixturePath": "fixtures/check-validator-wiring",
@@ -479,7 +479,7 @@
     },
     {
       "id": "audit-orphan-wip",
-      "description": "Scans every branch ahead of main and classifies each commit as tracked/orphan based on whether it has a 'Refs: <task-id>' line that points to an open Hermes Kanban task. Companion to check-commit-message-task-ref (which catches new orphans pre-commit); this catches the existing backlog. Always exits 0 — purely informational. Run via 'pnpm audit:wip'. Writes docs/guardrails/orphan-wip-report.json.",
+      "description": "Scans every branch ahead of main and classifies each commit as tracked/orphan based on whether it has a 'Refs: <task-id>' line that points to an open Hermes Kanban task. Companion to check-commit-message-task-ref (which catches new orphans pre-commit); this catches the existing backlog. Always exits 0 \u2014 purely informational. Run via 'pnpm audit:wip'. Writes docs/guardrails/orphan-wip-report.json.",
       "severity": "info",
       "gateScript": "scripts/audit-orphan-wip.mjs",
       "fixturePath": "fixtures/audit-orphan-wip",
@@ -492,7 +492,7 @@
     },
     {
       "id": "generate-strength-report",
-      "description": "Pure observer that reads registry.json, orchestration.json, swarm-watchdog-decisions.jsonl, tsconfig.json, and component-api.json. Computes Score A (Internal Integrity, 6 dims) + Score B (Industry Benchmark, 8 dims) per the 13s-strength-1 ADR. Emits docs/guardrails/strength-report.md and strength-report.json. Idempotent (same input → byte-identical output modulo timestamp). Fast (<2s). No mutations to source files.",
+      "description": "Pure observer that reads registry.json, orchestration.json, swarm-watchdog-decisions.jsonl, tsconfig.json, and component-api.json. Computes Score A (Internal Integrity, 6 dims) + Score B (Industry Benchmark, 8 dims) per the 13s-strength-1 ADR. Emits docs/guardrails/strength-report.md and strength-report.json. Idempotent (same input \u2192 byte-identical output modulo timestamp). Fast (<2s). No mutations to source files.",
       "severity": "warn",
       "gateScript": "scripts/generate-strength-report.mjs",
       "fixturePath": "fixtures/generate-strength-report",
@@ -533,7 +533,7 @@
     },
     {
       "id": "audit-gate-replaceability",
-      "description": "Planning artifact: reads registry.json and produces a per-gate replaceability verdict (fully-replaceable / partially-replaceable / genuinely-custom) with industry-tool replacements and migration cost estimates. Output: /tmp/gate-replaceability-audit.json + docs/guardrails/gate-replaceability-plan.md. Manual channel only — run on demand when evaluating gate rationalization.",
+      "description": "Planning artifact: reads registry.json and produces a per-gate replaceability verdict (fully-replaceable / partially-replaceable / genuinely-custom) with industry-tool replacements and migration cost estimates. Output: /tmp/gate-replaceability-audit.json + docs/guardrails/gate-replaceability-plan.md. Manual channel only \u2014 run on demand when evaluating gate rationalization.",
       "severity": "warn",
       "gateScript": "scripts/audit-gate-replaceability.mjs",
       "fixturePath": "fixtures/audit-gate-replaceability",
@@ -546,7 +546,7 @@
     },
     {
       "id": "check-snapshot-staleness",
-      "description": "Warns when a committed snapshot baseline JSON is older than any of its source files — catching baselines that should have been regenerated after a source change but weren't. Covers fixtures/figma-masters/snapshot-pre-8v3.json (sources: pipeline/figma-masters-batch.mjs + public/hds-manifest.json) and fixtures/doc-pages/snapshot.json (sources: src/app/pages/docs/**/*.tsx). Warn-only by default; set STALENESS_ENFORCE=error to make blocking.",
+      "description": "Warns when a committed snapshot baseline JSON is older than any of its source files \u2014 catching baselines that should have been regenerated after a source change but weren't. Covers fixtures/figma-masters/snapshot-pre-8v3.json (sources: pipeline/figma-masters-batch.mjs + public/hds-manifest.json) and fixtures/doc-pages/snapshot.json (sources: src/app/pages/docs/**/*.tsx). Warn-only by default; set STALENESS_ENFORCE=error to make blocking.",
       "severity": "warn",
       "gateScript": "scripts/check-snapshot-staleness.mjs",
       "fixturePath": null,
@@ -559,10 +559,22 @@
     },
     {
       "id": "audit-sites",
-      "description": "Site-quality / redesign-need auditor (#21). Reads custom-site leads from Supabase, calls Google PageSpeed Insights, and scores each site (0-100 inverse). Operator CLI + data tool, not a guardrail — manual channel, needs PAGESPEED_API_KEY + migration 0006.",
+      "description": "Site-quality / redesign-need auditor (#21). Reads custom-site leads from Supabase, calls Google PageSpeed Insights, and scores each site (0-100 inverse). Operator CLI + data tool, not a guardrail \u2014 manual channel, needs PAGESPEED_API_KEY + migration 0006.",
       "severity": "warn",
       "gateScript": "scripts/audit-sites.mjs",
       "fixturePath": null,
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual"
+    },
+    {
+      "id": "check-circular-deps",
+      "description": "Circular-dependency lock (ratchet) for src/: builds the intra-src static import graph, finds every import cycle via Tarjan SCC, and locks the count against docs/guardrails/baselines/check-circular-deps.json. New cycles fail; removed cycles tighten the lock.",
+      "severity": "error",
+      "gateScript": "scripts/check-circular-deps.mjs",
+      "fixturePath": "fixtures/check-circular-deps",
       "lastFiringAt": null,
       "lastViolationAt": null,
       "owner": "Adrian",
