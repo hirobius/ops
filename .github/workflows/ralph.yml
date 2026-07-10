@@ -63,12 +63,42 @@ jobs:
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          # Single-flight: never stack a second Ralph PR.
-          open=$(gh pr list --repo "${{ github.repository }}" --state open \
-            --json headRefName --jq '[.[] | select(.headRefName | startswith("ralph/"))] | length')
-          if [ "${open:-0}" -gt 0 ]; then
-            echo "A Ralph PR is already open ($open) — skipping this run to avoid pile-up."
+          # Single-flight: never stack a second Ralph PR. But distinguish a healthy
+          # in-flight PR (skip quietly) from one WEDGED on a failed/absent ralph-gate.
+          # A wedged PR blocks the whole chain indefinitely, and the plain skip below
+          # used to no-op in SILENCE (the Discord step only fires on non-skip runs) —
+          # so the loop could sit dead for hours with nobody the wiser. Now we detect
+          # the wedge and alert (see the "Alert Discord" step). Single-flight still
+          # holds: we do not open a second PR either way.
+          REPO="${{ github.repository }}"
+          open_prs=$(gh pr list --repo "$REPO" --state open \
+            --json number,headRefName,headRefOid,updatedAt \
+            --jq '[.[] | select(.headRefName | startswith("ralph/"))]')
+          open_count=$(echo "$open_prs" | jq 'length')
+          if [ "${open_count:-0}" -gt 0 ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
+            now=$(date -u +%s)
+            wedged=""
+            while read -r n sha updated; do
+              [ -z "$n" ] && continue
+              gate=$(gh api "repos/$REPO/commits/$sha/status" \
+                --jq '[.statuses[] | select(.context=="ralph-gate")] | sort_by(.created_at) | (last.state // "none")' \
+                2>/dev/null || echo none)
+              age_h=$(( (now - $(date -u -d "$updated" +%s)) / 3600 ))
+              echo "Open Ralph PR #$n — ralph-gate=$gate, age=${age_h}h"
+              if [ "$gate" = "failure" ]; then
+                wedged="${wedged}"$'\n'"- #$n — ralph-gate FAILED (changes requested / red gate); needs a human."
+              elif { [ "$gate" = "none" ] || [ "$gate" = "pending" ]; } && [ "$age_h" -ge 3 ]; then
+                wedged="${wedged}"$'\n'"- #$n — open ${age_h}h with no passing ralph-gate (stale / never gated)."
+              fi
+            done < <(echo "$open_prs" | jq -r '.[] | "\(.number) \(.headRefOid) \(.updatedAt)"')
+            if [ -n "$wedged" ]; then
+              echo "Ralph loop is WEDGED behind stuck PR(s):$wedged"
+              echo "wedged=true" >> "$GITHUB_OUTPUT"
+              { echo "reason<<WEDGE_EOF"; printf '%s\n' "$wedged"; echo "WEDGE_EOF"; } >> "$GITHUB_OUTPUT"
+            else
+              echo "A healthy Ralph PR is in flight ($open_count) — skipping quietly to avoid pile-up."
+            fi
             exit 0
           fi
           # Dry queue: nothing to do — keep push/schedule runs cheap (metered minutes).
@@ -78,6 +108,26 @@ jobs:
             echo "No open ralph-ready issues — skipping."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Alert Discord — Ralph loop wedged behind a stuck PR
+        if: steps.guard.outputs.wedged == 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REASON: ${{ steps.guard.outputs.reason }}
+          REPO: ${{ github.repository }}
+          ACTIONS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/workflows/ralph.yml
+        run: |
+          echo "Ralph loop wedged. Blocking PR(s):"
+          printf '%s\n' "$REASON"
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "No DISCORD_WEBHOOK_URL secret — logged above; cannot ping Discord."
+            exit 0
+          fi
+          msg=$(printf '🟠 **Ralph loop WEDGED** on `%s` — the ralph-ready queue is NOT advancing because open Ralph PR(s) will not auto-merge:\n%s\n\nClear them (address the review, rebase, or close the branch) to resume the chain: %s' \
+            "$REPO" "$REASON" "$ACTIONS_URL")
+          curl -sS -H "Content-Type: application/json" \
+            -d "$(jq -n --arg c "$msg" '{content:$c}')" \
+            "$DISCORD_WEBHOOK_URL" || echo "Discord alert failed (non-fatal)."
 
       - uses: pnpm/action-setup@v4
         if: steps.guard.outputs.skip != 'true'
