@@ -1,13 +1,21 @@
 name: Ralph
 
-# Autonomous "Ralph" loop — ONE iteration per run. Manual (workflow_dispatch) OR
-# scheduled (cron). Picks the highest-priority open `ralph-ready` issue (or the one
-# you name), makes one small change, must pass ralph/gate.sh, opens a PR. Auto-merge
-# is handled by ralph-gate.yml + branch protection.
+# Autonomous "Ralph" loop — ONE iteration per run. Manual (workflow_dispatch),
+# scheduled (cron), OR chained (push to main). Picks the highest-priority open
+# `ralph-ready` issue (or the one you name), makes one small change, must pass
+# ralph/gate.sh, opens a PR. Auto-merge is handled by ralph-gate.yml + branch protection.
+#
+# The `push: [main]` trigger is the chain: when a Ralph PR auto-merges it pushes
+# main, which fires the next iteration -> grab next issue -> PR -> auto-merge ->
+# fire again, until the queue is dry (Ralph emits COMPLETE, no PR, chain stops).
+# Cron is the backstop heartbeat.
 #
 # ops is private client automation — correctness over speed, no destructive ops.
-# Scheduled runs use CLAUDE_CODE_OAUTH_TOKEN (Max) — NO ANTHROPIC_API_KEY.
-# Safety: concurrency (one Ralph/repo) + single-flight guard (skip if a Ralph PR is open).
+# Scheduled/chained runs use CLAUDE_CODE_OAUTH_TOKEN (Max) — NO ANTHROPIC_API_KEY.
+# Safety: concurrency (one Ralph/repo) + a guard that skips when a Ralph PR is open
+# OR the ralph-ready queue is dry (so push/schedule runs are cheap no-ops when there
+# is nothing to do — matters on metered private minutes). An explicit manual dispatch
+# of a specific issue always runs (human override).
 
 on:
   workflow_dispatch:
@@ -17,7 +25,9 @@ on:
         required: false
         type: string
   schedule:
-    - cron: "40 */4 * * *" # staggered vs hds/site-engine; dry queue -> no PR; stops itself.
+    - cron: "40 */4 * * *" # backstop heartbeat, staggered vs hds/site-engine
+  push:
+    branches: [main] # chain: an auto-merged Ralph PR grabs the next ralph-ready issue
 
 concurrency:
   group: ralph-${{ github.repository }}
@@ -35,15 +45,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Single-flight guard — skip if a Ralph PR is already open
+      - name: Guard — honor explicit dispatch; else skip if a Ralph PR is open or the queue is dry
         id: guard
         env:
           GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ inputs.issue }}
         run: |
+          # An explicit manual dispatch of a specific issue always runs (human override).
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${ISSUE}" ]; then
+            echo "Explicit dispatch of #${ISSUE} — running."
+            exit 0
+          fi
+          # Single-flight: never stack a second Ralph PR.
           open=$(gh pr list --repo "${{ github.repository }}" --state open \
             --json headRefName --jq '[.[] | select(.headRefName | startswith("ralph/"))] | length')
           if [ "${open:-0}" -gt 0 ]; then
             echo "A Ralph PR is already open ($open) — skipping this run to avoid pile-up."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Dry queue: nothing to do — keep push/schedule runs cheap (metered minutes).
+          ready=$(gh issue list --repo "${{ github.repository }}" --label ralph-ready --state open \
+            --json number --jq 'length')
+          if [ "${ready:-0}" -eq 0 ]; then
+            echo "No open ralph-ready issues — skipping."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
 
@@ -73,8 +98,8 @@ jobs:
 
             A target issue may have been provided via the dispatch input: "${{ inputs.issue }}"
             - If that is an issue number, work THAT issue.
-            - If it is blank (e.g. a scheduled run), pick the HIGHEST-PRIORITY open
-              `ralph-ready` issue:
+            - If it is blank (e.g. a scheduled or chained run), pick the HIGHEST-PRIORITY
+              open `ralph-ready` issue:
               gh issue list --label "ralph-ready" --state open
               (highest priority per ralph/prompt.md's order — NOT the first). If none
               exist, say so and stop.
