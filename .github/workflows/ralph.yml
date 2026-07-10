@@ -10,9 +10,8 @@ name: Ralph
 # Adrian's Max subscription via CLAUDE_CODE_OAUTH_TOKEN (already set for this repo),
 # the same auth the fleet executor (claude.yml) uses.
 #
-# NOTE: ops is under a feature freeze and currently has NO `ralph-ready` issue, so a
-# blank-input run will find nothing and stop. Tag an issue `ralph-ready` (or pass its
-# number) to greenlight it. Contract: ralph/prompt.md + AGENTS.md ("Ralph quality bar").
+# NOTE: tag an issue `ralph-ready` (or pass its number) to greenlight it; a blank
+# run with an empty queue just stops. Contract: ralph/prompt.md + AGENTS.md.
 
 on:
   workflow_dispatch:
@@ -36,10 +35,10 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: "10"
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "pnpm"
       - name: Install dependencies (so ralph/gate.sh can run)
         run: pnpm install --frozen-lockfile
