@@ -31,8 +31,27 @@ describe('mapIssuesToTasks', () => {
         lane: 'ops',
         group: 'Internal',
         dispatch_url: 'https://github.com/hirobius/ops/issues/42',
+        tags: [],
       },
     ]);
+  });
+
+  it('carries GitHub labels through as tags (ralph-ready, triage, …)', () => {
+    const issues = [
+      {
+        repo: 'hirobius/ops',
+        number: 88,
+        title: 'one-tap ralph-ready',
+        url: 'https://github.com/hirobius/ops/issues/88',
+        labels: ['ralph-ready', 'triage'],
+      },
+    ];
+    expect(mapIssuesToTasks(issues)[0]).toMatchObject({ tags: ['ralph-ready', 'triage'] });
+  });
+
+  it('defaults tags to [] when the issue carries no labels field', () => {
+    const issues = [{ repo: 'hirobius/ops', number: 1, title: 'A', url: 'https://gh/1' }];
+    expect(mapIssuesToTasks(issues)[0]).toMatchObject({ tags: [] });
   });
 
   it('maps multiple issues across different repos independently', () => {

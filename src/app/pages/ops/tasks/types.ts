@@ -60,7 +60,9 @@ export type TaskAction =
   | 'auto_on'
   | 'auto_off'
   | 'queue'
-  | 'unqueue';
+  | 'unqueue'
+  | 'ralph_ready_on'
+  | 'ralph_ready_off';
 
 export interface TasksResponse {
   tasks: Task[];
