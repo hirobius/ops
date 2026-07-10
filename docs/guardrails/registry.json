@@ -491,6 +491,19 @@
       "scope": "full-tree"
     },
     {
+      "id": "audit-orphan-modules",
+      "description": "Orphan-module sweeper. Wraps `knip --reporter json` and surfaces its unused-files category (source files nothing imports) as registry violations. Companion to the existing pretest knip run, which covers unused exports/deps too but never gates. Severity:warn, always exits 0 — informational, triage each hit rather than deleting on sight.",
+      "severity": "warn",
+      "gateScript": "scripts/audit-orphan-modules.mjs",
+      "fixturePath": "fixtures/audit-orphan-modules",
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "pnpm-meta",
+      "supportsJson": true
+    },
+    {
       "id": "generate-strength-report",
       "description": "Pure observer that reads registry.json, orchestration.json, swarm-watchdog-decisions.jsonl, tsconfig.json, and component-api.json. Computes Score A (Internal Integrity, 6 dims) + Score B (Industry Benchmark, 8 dims) per the 13s-strength-1 ADR. Emits docs/guardrails/strength-report.md and strength-report.json. Idempotent (same input → byte-identical output modulo timestamp). Fast (<2s). No mutations to source files.",
       "severity": "warn",

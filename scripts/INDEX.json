@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 117,
+  "totalScripts": 126,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,12 +41,12 @@
     }
   },
   "categoryCounts": {
-    "other": 57,
-    "audit": 16,
+    "other": 64,
+    "audit": 17,
     "build": 1,
     "gate": 25,
     "generate": 10,
-    "sync": 2,
+    "sync": 3,
     "test": 2,
     "validate": 3,
     "verify": 1
@@ -155,6 +155,17 @@
       "purpose": "Scans the repository for the four pillars of a self-healing system: 1. AI Guardrails (CLAUDE.md, .cursorrules) 2. Linter Rules (ESLint, stylelint) 3. Gatekeepers (pre-commit hooks, lint-staged)",
       "pnpm": ["watch:guardrails"],
       "gate": null
+    },
+    {
+      "name": "audit-orphan-modules.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Sweeps the repo for orphan modules — source files nothing imports. Wraps `knip --reporter json` and surfaces its \"unused files\" category as registry violations. Companion to the existing `pnpm knip` /",
+      "pnpm": ["audit:orphan-modules"],
+      "gate": {
+        "channel": "pnpm-meta",
+        "severity": "warn"
+      }
     },
     {
       "name": "audit-orphan-wip.mjs",
@@ -589,6 +600,22 @@
       "gate": null
     },
     {
+      "name": "daily-review.mjs",
+      "category": "other",
+      "prefix": "daily",
+      "purpose": "Agentic-ops review loop — Slice 1 (issue #29). A read-only review pass:",
+      "pnpm": ["review:daily"],
+      "gate": null
+    },
+    {
+      "name": "deploy-alert.mjs",
+      "category": "other",
+      "prefix": "deploy",
+      "purpose": "Watches the SAME sources /ops/projects reads — Vercel deploy states via lib/projects/index.mjs::listProjects() (VERCEL_TOKEN) and each repo's root status.json `blocked[]` via GITHUB_TOKEN (attachRepoStatuses, called…",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "derive-routes.mjs",
       "category": "other",
       "prefix": "derive",
@@ -625,6 +652,22 @@
       "category": "other",
       "prefix": "export",
       "purpose": "The ops → clients handoff for the \"prospect → Astro site\" bridge (Phase 3). Reads a saved prospecting batch (the `--json` output of outscraper-fetch.mjs, or",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "fleet-dispatch.mjs",
+      "category": "other",
+      "prefix": "fleet",
+      "purpose": "The mayor's fleet-mode worker: scans the `tasks` board for rows Adrian has opted into auto-dispatch (`auto_ok=true`, via the /ops/tasks toggle from Slice 1), routes each through the deterministic `lib/tasks/tier.mjs`",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "fleet-watchdog.mjs",
+      "category": "other",
+      "prefix": "fleet",
+      "purpose": "Closes the loop Slice 2 opened: `fleet-dispatch.mjs` opens `@claude` issues and stamps `dispatch_status='dispatched'`, but nothing previously noticed when a dispatched session died / never opened a PR. This script…",
       "pnpm": [],
       "gate": null
     },
@@ -744,10 +787,26 @@
       "gate": null
     },
     {
+      "name": "log-run.mjs",
+      "category": "other",
+      "prefix": "log",
+      "purpose": "(no header description)",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "meeting-to-tasks.mjs",
       "category": "other",
       "prefix": "meeting",
       "purpose": "meeting transcript, append them to docs/ai/proposed-units.jsonl.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "notify.mjs",
+      "category": "other",
+      "prefix": null,
+      "purpose": "dispatcher/other scripts call `notifyEvent` directly rather than shelling out to this. The timestamp is stamped here at post-time (`new Date()` is fine in a normal one-shot CLI; only workflow scripts that must stay",
       "pnpm": [],
       "gate": null
     },
@@ -864,6 +923,14 @@
       "gate": null
     },
     {
+      "name": "push-outreach.mjs",
+      "category": "other",
+      "prefix": "push",
+      "purpose": "into a Smartlead cold-outreach campaign (#9 outreach engine, scaffolding).",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "record-health.mjs",
       "category": "other",
       "prefix": "record",
@@ -973,6 +1040,14 @@
       "prefix": "sync",
       "purpose": "Scans src/ for lucide-react imports and emits a registry of the icon exports currently used by the app.",
       "pnpm": ["icons:sync"],
+      "gate": null
+    },
+    {
+      "name": "sync-preview-urls.mjs",
+      "category": "sync",
+      "prefix": "sync",
+      "purpose": "Closes the manual-paste nav gap: today, after a client site deploys to Vercel, someone has to hand-paste the preview URL onto the lead's `preview_url` so it",
+      "pnpm": [],
       "gate": null
     },
     {
