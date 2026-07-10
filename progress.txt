@@ -12,3 +12,24 @@
   baselines/check-circular-deps.json}.
 - Next iteration for #69: DOM-node budgets (slice 3/3). Consider render-time counting vs static
   JSX-element budget per page.
+
+#88 — one-tap "Ralph-ready" toggle on /ops/tasks (part of #87, the governor)
+- New GitHub port methods addLabel/removeLabel (lib/github/issues.mjs), reusing a shared
+  parseIssueRef helper (also folded commentOnIssue onto it). removeLabel treats a 404 (label
+  already absent) as success — idempotent toggle-off.
+- New task action pair ralph_ready_on/ralph_ready_off (lib/tasks/actions.mjs): flips the
+  ralph-ready label on the task's linked issue via the injected port, then mirrors the change
+  into the row's tags column so the board badge updates without a re-import. Only issue-backed
+  tasks (real dispatch_url) qualify — 400 otherwise. Renamed githubDispatchError ->
+  githubPortError(err, {action, code}) so dispatch + the new action share one error mapper.
+- lib/tasks/import-issues.mjs now carries issue.labels through into tags on every import —
+  this is what makes ralph-ready/triage state (and any other label) show up as board badges;
+  previously labels were fetched by listOpenIssues but silently dropped on the floor.
+- Folded into the existing POST /api/task-action handler — no new Vercel function (10/12 budget
+  respected). UI: toggle added to the row "..." menu in TasksPage.tsx, gated on dispatched rows.
+- Gate green (typecheck+test+lint, 452 tests — +9 new). PR #97, Closes #88.
+- Note for next iteration: manual click-through against a live GITHUB_TOKEN + real issue wasn't
+  exercised in this sandbox — worth a smoke check once merged. Also: labels only sync into tags
+  on (re-)import; a ralph-ready toggle flip is mirrored locally by the action itself, but if the
+  label changes directly on GitHub (not via the toggle), the badge won't reflect it until the
+  next "Import GitHub issues" click.
