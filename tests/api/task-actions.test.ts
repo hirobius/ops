@@ -109,6 +109,35 @@ describe('applyTaskAction — dispatch (injected GitHub port)', () => {
     });
   });
 
+  it('includes Tier/Model lines in the dispatch body when the task row has them set', async () => {
+    const tiered = { ...task, tier: 'judgment', model: 'opus' };
+    const { sb } = makeSb({ task: tiered });
+    const calls: Array<{ title: string; body: string }> = [];
+    const github = {
+      createIssue: async (i: { title: string; body: string }) => {
+        calls.push(i);
+        return { html_url: 'https://gh/issues/1' };
+      },
+    };
+    await applyTaskAction(sb, { key: 't1', action: 'dispatch' }, { github });
+    expect(calls[0].body).toContain('**Tier:** judgment');
+    expect(calls[0].body).toContain('**Model:** opus');
+  });
+
+  it('omits the Tier/Model line cleanly when tier/model are absent', async () => {
+    const { sb } = makeSb({ task });
+    const calls: Array<{ title: string; body: string }> = [];
+    const github = {
+      createIssue: async (i: { title: string; body: string }) => {
+        calls.push(i);
+        return { html_url: 'https://gh/issues/1' };
+      },
+    };
+    await applyTaskAction(sb, { key: 't1', action: 'dispatch' }, { github });
+    expect(calls[0].body).not.toContain('**Tier:**');
+    expect(calls[0].body).not.toContain('**Model:**');
+  });
+
   it('502s when the port throws', async () => {
     const { sb } = makeSb({ task });
     const github = {
