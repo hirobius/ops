@@ -10,8 +10,12 @@
 /* hds-bypass: ops-domain component — composes DS primitives with Tailwind utility classes, not a consumer HDS surface */
 
 import * as React from 'react';
-import { Card, Button, Tag } from '@hirobius/design-system';
+import { Card, Button, Tag, Badge } from '@hirobius/design-system';
+import type { ComponentProps } from 'react';
 import { cn } from '../../lib/utils';
+import { WORK_STATE_TONE } from '../../../lib/tasks/work-state.mjs';
+
+type BadgeTone = NonNullable<ComponentProps<typeof Badge>['tone']>;
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -42,6 +46,12 @@ export interface ApprovalUnitSummary {
   tier?: 'mechanical' | 'standard' | 'judgment' | null;
   /** Fleet auto-dispatch routing model (migration 0008, epic #41). */
   model?: 'sonnet' | 'opus' | null;
+  /**
+   * Derived work-state phase (ops#135, `lib/tasks/work-state.mjs::deriveWorkState`)
+   * — the same single-phase badge the /ops/tasks board renders, so an operator
+   * sees the true state even if a row is stale in the queued filter.
+   */
+  workState?: string | null;
 }
 
 export interface ApprovalCardProps {
@@ -144,6 +154,14 @@ export const ApprovalCard = React.forwardRef<HTMLDivElement, ApprovalCardProps>(
             )}
           </Card.Title>
           <div className="flex flex-wrap gap-2 pt-1" data-role="unit-meta-tags">
+            {unit.workState ? (
+              <Badge
+                tone={(WORK_STATE_TONE[unit.workState] as BadgeTone) ?? 'neutral'}
+                data-role="unit-work-state"
+              >
+                {unit.workState}
+              </Badge>
+            ) : null}
             {sprintLabel ? <Tag>{sprintLabel}</Tag> : null}
             {priorityLabel ? <Tag>{priorityLabel}</Tag> : null}
             {clusterLabel ? <Tag>{clusterLabel}</Tag> : null}

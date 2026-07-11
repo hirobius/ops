@@ -3,6 +3,7 @@ import { opsApi } from '../../lib/opsApi';
 import { useTasks } from '../ops/tasks/useTasks';
 import type { Task } from '../ops/tasks/types';
 import type { ApprovalUnitSummary } from '../../components/approval-card';
+import { deriveWorkState } from '../../../../lib/tasks/work-state.mjs';
 
 /**
  * useApprovalsInbox — the tasks-store approvals inbox (epic #41, Slice 3).
@@ -126,5 +127,6 @@ export function taskToApprovalUnit(t: Task): ApprovalUnitSummary {
     description: metaParts.join('  ·  '),
     tier: t.tier,
     model: t.model,
+    workState: deriveWorkState(t),
   };
 }
