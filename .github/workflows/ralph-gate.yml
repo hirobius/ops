@@ -23,4 +23,5 @@ jobs:
       pull-requests: write
       statuses: write
       id-token: write
+      actions: write # chain hop: gate dispatches the next run after an auto-merge
     secrets: inherit
