@@ -102,3 +102,29 @@
   and #123 (Lighthouse SEO exemption) remain ralph-ready backlog items. If a real /ops visual
   baseline is ever wanted, capture it in the pinned Playwright container per the file's header
   comment, once the "dashboards look bad" state is resolved.
+
+#127 — bump @hirobius/design-system ^0.11 → ^0.13, fix consumer breakage
+- CardTone/StatProps `tone` dropped the 'default' member (now neutral|danger|success|warning|info).
+  Mechanical rename tone="default" → tone="neutral" at all 6 call sites (ClientsIndexPage.tsx x3,
+  atlas/clients-tab.tsx, atlas/strength-tab.tsx, portal/ClientPortalPage.tsx x4).
+- InfoPage (the /info portfolio-bio component) was removed from hds's public API in 0.12 — decided
+  out-of-scope branding content for the shared package. Checked: /info is NOT dead content like the
+  old /hds/* deep-links (#54/#124 redirected those) — it's a real, tested route (adrianmilsap.com/info,
+  in sitemap.xml, covered by visual/a11y/layout-integrity/responsive suites). So InfoPageWrapper.tsx now
+  ports the exact prior JSX locally (pulled from the published 0.11.0 npm tarball's compiled output),
+  rebuilt from currently-exported primitives (Stack/Text/AssetImg/InlineLink) + hds tokens. Same
+  /assets/adrian.webp reference (already relies on AssetImg's fallback placeholder since #17 removed
+  the actual asset from this repo — pre-existing, not new), same expand/collapse lightbox behavior.
+  No new content invented, just relocated since hds stopped shipping it.
+- docs/guardrails/baselines/check-dom-node-budgets.json: InfoPageWrapper.tsx budget 1 → 13 (ratchet,
+  `--update`) since the file's authored JSX legitimately grew from a 1-line delegate to the full port.
+- Env note: this sandbox lacked `gitleaks` (pre-commit's secrets-scan step) and Playwright's chromium
+  binary — installed both locally (go install + playwright install chromium) to get pre-commit/pre-push
+  hooks green; Lighthouse inside generate-strength-report still can't launch a sandboxed Chrome here
+  (no usable zygote sandbox) but that gate already treats LH failure as non-fatal (writes a strength
+  score from whatever it has) so it doesn't block.
+- Files: package.json, pnpm-lock.yaml, src/app/pages/InfoPageWrapper.tsx, src/app/pages/ops/ClientsIndexPage.tsx,
+  src/app/pages/ops/atlas/clients-tab.tsx, src/app/pages/ops/atlas/strength-tab.tsx,
+  src/app/pages/portal/ClientPortalPage.tsx, docs/guardrails/baselines/check-dom-node-budgets.json.
+- Gate green: typecheck + typecheck:api + vite build + 458 unit tests + test:layout (16/16, incl. /info)
+  + lint. PR #133, branch ralph/issue-127-bump-hds-0-13.
