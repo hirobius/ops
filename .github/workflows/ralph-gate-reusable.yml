@@ -256,13 +256,14 @@ jobs:
           if [ "$v" = "approve" ]; then
             gh api "repos/${{ github.repository }}/statuses/$SHA" \
               -f state=success -f context=ralph-gate -f description="gate green + AI approved" >/dev/null
-            pr_ok=$(gh pr view "$PR" --json labels \
-              --jq --arg l "$RALPH_APPROVE_LABEL" '[.labels[].name] | index($l) != null')
+            # Pipe to real jq — gh's --jq has no --arg flag (see ralph/lib.sh).
+            pr_ok=$(gh pr view "$PR" --json labels |
+              jq -r --arg l "$RALPH_APPROVE_LABEL" '[.labels[].name] | index($l) != null')
             issue_ok=false
             n=$(gh pr view "$PR" --json body --jq .body | grep -oiE 'closes #[0-9]+' | head -n1 | grep -oE '[0-9]+' || true)
             if [ -n "$n" ]; then
-              issue_ok=$(gh issue view "$n" --json labels \
-                --jq --arg l "$RALPH_AUTO_MERGE_LABEL" '[.labels[].name] | index($l) != null' 2>/dev/null || echo false)
+              issue_ok=$(gh issue view "$n" --json labels 2>/dev/null |
+                jq -r --arg l "$RALPH_AUTO_MERGE_LABEL" '[.labels[].name] | index($l) != null' || echo false)
             fi
             if [ "$pr_ok" = "true" ] || [ "$issue_ok" = "true" ]; then
               why="\`$RALPH_APPROVE_LABEL\` label"
