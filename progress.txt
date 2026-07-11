@@ -171,3 +171,43 @@
 - Files: lib/github/issues.mjs, tests/api/github-issues.test.ts (new).
 - Gate green: typecheck + test (483 passed, incl. 3 new) + lint. Branch
   ralph/issue-143-listopenissues-pagination.
+
+## Issue #135 — one derived work-state (2026-07-11)
+- feat(tasks): new pure module lib/tasks/work-state.mjs exporting
+  deriveWorkState(task) and WORK_STATE_TONE. Folds ~10 status-ish fields
+  (status, completed_at, dispatch_status, claimed_by/dispatch_url, ralph-*
+  tags) into one phase per the issue's exact precedence table (done >
+  needs-adrian > parked > blocked > wip > dispatched > queued > ready >
+  backlog). Pure, no I/O, no Date.
+- Wired into both panes the issue named: TaskRow (board) renders ONE toned
+  phase badge in place of the raw status badge + ralph-ready/ralph-wip/
+  ralph-parked/needs-adrian tag chips (other labels — p0/p1/bug/ralph-auto/
+  ralph-approved — still render as their own chips, unchanged); the
+  approvals inbox (ApprovalCard via useApprovalsInbox's taskToApprovalUnit)
+  shows the same phase so a stale dispatch_status='queued' row that's since
+  gone blocked/parked/done doesn't lie to the operator.
+- Decision: imported the .mjs module straight into src/ (relative path,
+  e.g. '../../../../../lib/tasks/work-state.mjs') rather than duplicating
+  logic client-side — tsc (allowJs:false) and Vite both resolve it fine, no
+  new build config needed. No existing src→lib precedent, but the module
+  is trivially pure so there's no server-only dependency risk.
+- Deliberately did NOT touch the /ops/agentic-os Fleet timeline's separate
+  JSONL vocabulary or the phase enum's future pr-open/awaiting-approval
+  states (the issue defers both — no #112 PR data yet). Smallest complete
+  slice per the issue's own DoD.
+- Tests: tests/api/work-state.test.ts (new) — one case per precedence rule
+  (9) + 6 explicit tie-break cases (e.g. ralph-parked tag + status=blocked
+  -> parked; completed_at + ralph-wip tag -> done) + a tone-coverage check.
+- Re-locked docs/guardrails/baselines/check-dom-node-budgets.json (one new
+  Badge element in approval-card.tsx pushed it from 19->20; also picked up
+  drift for TaskRow.tsx/TaskActionsMenu.tsx, which existed as separate
+  files but weren't in the baseline yet — unrelated pre-existing gap).
+- Gate green: typecheck + test (503 passed, incl. 20 new) + lint (0
+  warnings). Also ran pnpm test:layout manually (CLAUDE.md's UI
+  AUTO-VALIDATE step) — 16/16 passed, including /ops/tasks and
+  /admin/approvals.
+- Files: lib/tasks/work-state.mjs (new), tests/api/work-state.test.ts
+  (new), src/app/pages/ops/tasks/TaskRow.tsx, src/app/components/
+  approval-card.tsx, src/app/pages/admin/useApprovalsInbox.ts,
+  docs/guardrails/baselines/check-dom-node-budgets.json.
+- Branch ralph/issue-135-derive-work-state.

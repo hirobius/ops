@@ -5,9 +5,10 @@
  *
  * Information hierarchy, in order of operator value:
  *   1. title line — issue #, title (links to the issue when dispatched)
- *   2. chip line — state first (status), then the scheduling facts the operator
- *      tracks by (priority / due / effort, toned), then Ralph/label state, then
- *      routing (tier·model) and provenance ("no Ralph" for personal repos)
+ *   2. chip line — state first (the derived work-state phase, ops#135), then the
+ *      scheduling facts the operator tracks by (priority / due / effort, toned),
+ *      then remaining labels, then routing (tier·model) and provenance ("no
+ *      Ralph" for personal repos)
  *   3. meta line — provenance + freshness, deliberately quiet
  * Actions: ONE primary (Dispatch / Re-dispatch, or Reopen when done) plus the
  * governed ⋯ menu. Everything else moved into the menu.
@@ -16,6 +17,7 @@
 import { Badge, Button } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import type { ComponentProps, CSSProperties } from 'react';
+import { deriveWorkState, WORK_STATE_TONE } from '../../../../../lib/tasks/work-state.mjs';
 import type { Task, TaskAction } from './types';
 import { isNoRalphSource, taskRef, priorityTone, dueToneNow, relTimeNow } from './taskMeta';
 import { TaskActionsMenu } from './TaskActionsMenu';
@@ -23,19 +25,13 @@ import { TaskActionsMenu } from './TaskActionsMenu';
 // Stay in lockstep with the DS Badge contract instead of shadowing it.
 type BadgeTone = NonNullable<ComponentProps<typeof Badge>['tone']>;
 
-const STATUS_TONE: Record<Task['status'], BadgeTone> = {
-  open: 'neutral',
-  blocked: 'warning',
-  done: 'success',
-};
+// Tags folded into the derived work-state phase (ops#135) — no longer rendered
+// as their own chips, so "done"/"blocked"/"dispatched" aren't encoded twice.
+const STATE_TAGS = new Set(['ralph-ready', 'ralph-wip', 'ralph-parked', 'needs-adrian']);
 
-// Label-borne state (GitHub labels sync into tags on import; ralph-* are the
-// loop's own state machine — see ralph/README.md's label table).
+// Remaining label-borne chips (GitHub labels sync into tags on import) that
+// the phase badge doesn't absorb — approval/auto markers and priority/type labels.
 const TAG_TONE: Record<string, BadgeTone> = {
-  'ralph-ready': 'success',
-  'ralph-wip': 'inProgress',
-  'ralph-parked': 'warning',
-  'needs-adrian': 'danger',
   'ralph-auto': 'info',
   'ralph-approved': 'success',
   p0: 'danger',
@@ -58,6 +54,8 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
   const tags = t.tags ?? [];
   const flags = t.import_flags ?? [];
   const dTone = dueToneNow(t.due);
+  const workState = deriveWorkState(t);
+  const labelTags = tags.filter((tag) => !STATE_TAGS.has(tag));
 
   const metaParts = [t.source];
   if (t.phase) metaParts.push(t.phase);
@@ -90,11 +88,11 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
           )}
         </div>
         <div style={s.badgeLine}>
-          <Badge tone={STATUS_TONE[t.status] ?? 'neutral'}>{t.status}</Badge>
+          <Badge tone={(WORK_STATE_TONE[workState] as BadgeTone) ?? 'neutral'}>{workState}</Badge>
           {t.priority && <Badge tone={priorityTone(t.priority)}>P:{t.priority}</Badge>}
           {t.due && dTone && <Badge tone={dTone}>due {t.due}</Badge>}
           {t.effort && <Badge tone="neutral">E:{t.effort}</Badge>}
-          {tags.map((tag) => (
+          {labelTags.map((tag) => (
             <Badge key={tag} tone={TAG_TONE[tag] ?? 'neutral'}>
               {tag}
             </Badge>
@@ -102,7 +100,10 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
           {t.tier && <Badge tone="neutral">{t.tier}</Badge>}
           {t.model && <Badge tone="neutral">{t.model}</Badge>}
           {isNoRalphSource(t.source) && (
-            <Badge tone="warning" title="Personal repo — the Ralph loop only runs in hirobius repos">
+            <Badge
+              tone="warning"
+              title="Personal repo — the Ralph loop only runs in hirobius repos"
+            >
               no Ralph
             </Badge>
           )}
@@ -117,7 +118,12 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
       </div>
       <div style={s.rowAside}>
         {t.status === 'done' ? (
-          <Button size="sm" variant="secondary" disabled={busy} onClick={() => onAction(t.key, 'reopen')}>
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={busy}
+            onClick={() => onAction(t.key, 'reopen')}
+          >
             {busy ? '…' : 'Reopen'}
           </Button>
         ) : (
