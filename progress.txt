@@ -147,3 +147,27 @@
 - Files: lib/schema/index.mjs, scripts/__tests__/schema-brand-motion.test.mjs (new).
 - Gate green: typecheck + test (480 passed, incl. 3 new) + lint. Branch
   ralph/issue-129-schema-brand-motion, commit 492bb84. PR next.
+
+#143 — listOpenIssues pagination fix (ops rows vanishing from /ops/tasks)
+- Root cause: lib/github/issues.mjs::listOpenIssues fetched a single
+  GET /issues?filter=all&state=open&per_page=100&sort=updated page, no
+  Link-header pagination. Fleet has >100 open issues across repos the token
+  sees; whenever another repo (hds/site-engine/ralph) had a burst of activity,
+  ops's quieter backlog fell off the 100-item page — pure feed truncation,
+  not data loss.
+- Fix: loop following `Link: rel="next"` up to LIST_ISSUES_MAX_PAGES=5 (500
+  issues cap), keeping the existing 9s AbortSignal timeout per page. If the
+  cap is ever hit (a next link still exists after page 5), console.warn with
+  an actionable message instead of truncating silently — no response-shape
+  change needed since /api/tasks POST just returns { imported: n }.
+- Added parseNextLink() helper (regex over the comma-separated Link header,
+  matches rel="next" segment only).
+- Tests: tests/api/github-issues.test.ts (new) — stubs global fetch directly
+  against the real makeGitHubPort() adapter (no GITHUB_TOKEN needed, just
+  process.env.GITHUB_TOKEN='test-token' + vi.stubGlobal). Three cases:
+  follows next-link across 2 pages (150 issues), stops at the 5-page cap and
+  warns exactly once (500 issues, 5 fetches), and PR-filtering/normalization
+  still works on a single page.
+- Files: lib/github/issues.mjs, tests/api/github-issues.test.ts (new).
+- Gate green: typecheck + test (483 passed, incl. 3 new) + lint. Branch
+  ralph/issue-143-listopenissues-pagination.
