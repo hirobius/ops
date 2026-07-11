@@ -195,10 +195,20 @@ release_claim() {
 
 # ------------------------------------------------------- attempts + parking
 
+# A human re-adding the ready label resets the attempt budget — otherwise a
+# re-queued parked issue would instantly re-park at the cap. Only failures
+# NEWER than the latest ralph-ready labeled event count (ISO-8601 Zulu strings
+# compare correctly as text). No event found → count everything.
 count_failed_attempts() {
-  gh issue view "$1" --json comments \
-    --jq '[.comments[] | select(.body | startswith("ralph-attempt-failed"))] | length' \
-    2>/dev/null || echo 0
+  local n=$1 since
+  since=$(gh api "repos/$(repo_slug)/issues/$n/events" --paginate 2>/dev/null |
+    jq -rs --arg l "$RALPH_READY_LABEL" \
+      '[add[] | select(.event == "labeled" and .label.name == $l)] | (last.created_at // empty)' \
+      2>/dev/null || true)
+  gh issue view "$n" --json comments 2>/dev/null |
+    jq -r --arg since "${since:-1970-01-01T00:00:00Z}" \
+      '[.comments[] | select((.body | startswith("ralph-attempt-failed")) and (.createdAt > $since))] | length' \
+      2>/dev/null || echo 0
 }
 
 record_failed_attempt() { # <n> <run_id> <reason>
