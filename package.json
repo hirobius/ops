@@ -158,7 +158,7 @@
     "watch:guardrails": "nodemon --watch CLAUDE.md --watch .cursorrules --watch eslint.config.js --watch .github/workflows -e md,json,js,yml,yaml --exec \"node scripts/audit-guardrails.js\""
   },
   "dependencies": {
-    "@hirobius/design-system": "^0.11.0",
+    "@hirobius/design-system": "^0.13.0",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",

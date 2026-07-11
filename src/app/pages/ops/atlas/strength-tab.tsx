@@ -154,7 +154,7 @@ function CompositeCard({
   const subtitle = letter === 'A' ? 'Internal Integrity' : 'Industry Benchmark';
 
   return (
-    <Card tone="default" padding="component">
+    <Card tone="neutral" padding="component">
       <div style={s.compositeRoot}>
         <div style={s.compositeHeader}>
           <div>
