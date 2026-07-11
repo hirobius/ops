@@ -39,6 +39,7 @@ jobs:
       issues: write
       pull-requests: write
       id-token: write
+      actions: write # chain hop: push runs re-dispatch as workflow_dispatch
     with:
       issue: ${{ inputs.issue || '' }}
     secrets: inherit
