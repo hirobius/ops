@@ -48,3 +48,57 @@
   before this is live (per CLAUDE.md .env*/deploy hard rules — schema change, not a deploy).
 - Next: #106 (tier/model into dispatch body) and #107 (dispatch-status poller) both build on this
   and can now proceed — #107's migration numbering should pick up after 0010.
+
+#54 — DS-inherited CI gates (visual/a11y) spuriously red on every ops PR
+- Root cause confirmed by reading the app (not just re-trusting the issue's evidence):
+  src/app/routes.tsx redirects ALL /hds/* paths to /ops (DS docs moved to the standalone
+  hirobius-design-system repo — this app never renders that gallery). tests/visual.spec.ts
+  and tests/a11y.spec.ts run against `vite build && vite preview` (no /api/* functions in
+  static preview), so OpsGate's /api/ops-me fetch fails, authed stays false, and every
+  /hds/* route under test lands on the SAME password-gate screen. All ~86 visual baselines
+  and every a11y route case were diffing/auditing one identical screen under different
+  filenames — 100% dead content. The "mobile sidebar focus-trap" failure the issue flagged
+  as a possible real bug is a test artifact (gate screen has no nav), not an OpsShell bug —
+  confirmed OpsShell.tsx has no sidebar/nav-toggle at all.
+- First attempt was to flip .github/workflows/visual.yml + a11y.yml from `pull_request` to
+  `workflow_dispatch` — reverted: the bot's GitHub App token lacks the `workflows` scope,
+  so `git push` is hard-rejected for any diff touching .github/workflows/*.yml ("refusing to
+  allow a GitHub App to create or update workflow ... without `workflows` permission"). CI
+  YAML is off-limits for this loop; the fix has to live in application/test code instead.
+- Actual fix: rewrote tests/a11y.spec.ts and tests/visual.spec.ts to stop testing dead
+  /hds/* content and test what the app actually serves:
+  - a11y.spec.ts: ROUTES now ['/', '/info', '/ops'] (real, existing routes). Dropped the
+    skip-link sub-test and the mobile-sidebar focus-trap test — both assert DS-gallery-only
+    UI patterns (a skip link, a sidebar nav toggle) that don't exist anywhere in this app;
+    testing for a feature that was never built isn't a scoping fix. Kept the search-modal
+    no-op guard, repointed from /hds to /ops. Verified locally: 4/4 pass.
+  - visual.spec.ts: gutted the entire pixel-diff apparatus (viewport matrix, theme matrix,
+    component-state matrix, captureAndCompare) since there's no way to regenerate 86 correct
+    baselines against real content from here — /ops is deliberately NOT baselined per the
+    file's own prior comment ("dashboards look bad" issue, baselining now would lock it in),
+    and re-baselining needs the pinned Playwright container (build 1208) per the issue text.
+    Replaced with 2 no-baseline smoke tests (renders-without-erroring, mirroring the file's
+    pre-existing Block D pattern) against /ops and /info. Verified locally: 2/2 pass.
+  - Deleted tests/helpers/visual-diff.ts (now-orphaned, only consumer was visual.spec.ts)
+    and tests/visual.spec.ts-snapshots/ (86 dead baseline PNGs). Confirmed audit-strengths.mjs's
+    fixture-count check (threshold >=269) stays well clear (386 fixtures/ files alone) with
+    the snapshot dir gone — findCount() already no-ops gracefully on a missing dir.
+  - Touched up 2 stale comments in scripts/generate-strength-report.mjs (totalRoutes 20→3,
+    a11y test-title example) so the strength report's B3 (WCAG) computation stays honest
+    about the new route count — informational only, doesn't gate anything.
+- Left for follow-up (epic decomposition — CLAUDE.md dispatched-task discipline), since both
+  are separate mechanisms/surfaces from what fits this slice: #122 (now scoped down to just
+  self-heal.mjs/setup-hooks.mjs/SYSTEMS_REGISTRY.md still saying "test:a11y" as their
+  pre-push a11y step — true and fine now, no longer references dead content, so this is
+  lower-urgency polish, not a correctness bug) and #123 (Lighthouse SEO floor miscalibrated
+  for gated /ops — untouched, separate config mechanism, needs assertMatrix research).
+- Files: tests/a11y.spec.ts, tests/visual.spec.ts (rewritten), tests/helpers/visual-diff.ts
+  (deleted), tests/visual.spec.ts-snapshots/* (86 files deleted), scripts/generate-strength-report.mjs.
+- Gate green: typecheck + 458 unit tests + lint. Playwright a11y (4/4) and visual (2/2) smoke
+  suites run and verified green locally against a real build (not just gate.sh, which doesn't
+  invoke Playwright) — first real evidence this issue's DoD ("clean ops PR shows green CI")
+  is achievable, since I can't trigger the actual GH Actions run from here.
+- Next: #122 (lower urgency now — no longer references dead content, just naming/doc polish)
+  and #123 (Lighthouse SEO exemption) remain ralph-ready backlog items. If a real /ops visual
+  baseline is ever wanted, capture it in the pinned Playwright container per the file's header
+  comment, once the "dashboards look bad" state is resolved.

@@ -1,42 +1,23 @@
 /**
  * Accessibility audit — axe-core via @axe-core/playwright
  *
- * Tests every major route against WCAG 2.1 AA.
+ * Tests every route this app actually serves against WCAG 2.1 AA.
  * Fails on critical and serious violations; moderate/minor are logged only.
  *
  * Run:  pnpm test:a11y
  * CI:   included in check:release (post-content-lock)
+ *
+ * (#54) Previously audited a `/hds/*` route matrix inherited from when this
+ * repo hosted the design-system doc gallery. That gallery now lives in the
+ * standalone hirobius-design-system repo (with its own a11y CI); in this app
+ * `/hds/*` is a client-side redirect to /ops (src/app/routes.tsx), so the old
+ * matrix was auditing the SAME /ops page under ~20 different route names.
+ * Scoped down to the routes this router actually serves.
  */
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-const FOUNDATION_ROUTES = [
-  '/hds',
-  '/hds/getting-started',
-  '/hds/process',
-  '/hds/typography',
-  '/hds/color',
-  '/hds/spacing',
-  '/hds/tokens',
-  '/hds/motion',
-  '/hds/breakpoints',
-  '/hds/shape',
-  '/hds/elevation',
-  '/hds/icons',
-] as const;
-
-const COMPONENT_ROUTES = [
-  '/hds/components',
-  '/hds/components/actions',
-  '/hds/components/inputs',
-  '/hds/components/display',
-  '/hds/components/feedback',
-  '/hds/components/navigation',
-  '/hds/components/layout',
-  '/hds/components/doc-utilities',
-] as const;
-
-const ROUTES = [...FOUNDATION_ROUTES, ...COMPONENT_ROUTES];
+const ROUTES = ['/', '/info', '/ops'] as const;
 
 for (const route of ROUTES) {
   test(`a11y [${route}]`, async ({ page }) => {
@@ -51,15 +32,17 @@ for (const route of ROUTES) {
       .exclude('[aria-hidden="true"][data-inspector-ignore="color-swatch"]')
       .analyze();
 
-    const critical = results.violations.filter(v => v.impact === 'critical');
-    const serious  = results.violations.filter(v => v.impact === 'serious');
+    const critical = results.violations.filter((v) => v.impact === 'critical');
+    const serious = results.violations.filter((v) => v.impact === 'serious');
     const blocking = [...critical, ...serious];
 
     const summary = blocking
-      .map((violation) => [
-        `  [${violation.impact}] ${violation.id}: ${violation.description}`,
-        ...violation.nodes.slice(0, 3).map((node) => `    -> ${node.html.slice(0, 180)}`),
-      ].join('\n'))
+      .map((violation) =>
+        [
+          `  [${violation.impact}] ${violation.id}: ${violation.description}`,
+          ...violation.nodes.slice(0, 3).map((node) => `    -> ${node.html.slice(0, 180)}`),
+        ].join('\n'),
+      )
       .join('\n\n');
 
     expect(
@@ -70,28 +53,12 @@ for (const route of ROUTES) {
     ).toHaveLength(0);
 
     // Log lower-severity for visibility without failing
-    const moderate = results.violations.filter(v => v.impact === 'moderate');
+    const moderate = results.violations.filter((v) => v.impact === 'moderate');
     if (moderate.length) {
-      console.log(`  ⚠ ${moderate.length} moderate violation(s) on ${route}: ${moderate.map(v => v.id).join(', ')}`);
+      console.log(
+        `  ⚠ ${moderate.length} moderate violation(s) on ${route}: ${moderate.map((v) => v.id).join(', ')}`,
+      );
     }
-  });
-
-  // Skip-link test at mobile viewport
-  test(`skip-link [${route}] @ 375px`, async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto(route);
-    await page.waitForLoadState('networkidle');
-
-    // Check DOM order rather than simulating Tab — Tab simulation is brittle at
-    // mobile viewports because Playwright's focus model can land on position:fixed
-    // elements regardless of blur state. DOM order is the authoritative requirement
-    // for "first tab stop" and is unaffected by browser focus quirks.
-    const isFirstFocusable = await page.evaluate(() => {
-      const sel = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-      const first = document.querySelector(sel);
-      return first?.classList.contains('skip-link') ?? false;
-    });
-    expect(isFirstFocusable, 'skip-link should be first focusable element in DOM order').toBe(true);
   });
 }
 
@@ -100,7 +67,7 @@ for (const route of ROUTES) {
 // HDSLayout.tsx on 2026-05-01 (12i-bloat-hdslayout-dead-code). This test is
 // retained as a no-op guard in case search is ever re-wired.
 test('focus trap: search modal', async ({ page }) => {
-  await page.goto('/hds');
+  await page.goto('/ops');
   await page.waitForLoadState('networkidle');
   // SearchModal is not wired into the running app; skip if absent.
   const maybeSearchInput = page.locator('input[placeholder]').first();
@@ -114,14 +81,9 @@ test('focus trap: search modal', async ({ page }) => {
   }
 });
 
-// Mobile sidebar focus trap
-test('focus trap: mobile sidebar @ 375px', async ({ page }) => {
-  await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto('/hds');
-  await page.waitForLoadState('networkidle');
-  const trigger = page.getByRole('button', { name: /navigation/i }).first();
-  await trigger.click();
-  await page.waitForTimeout(300);
-  const sidebar = page.locator('nav').first();
-  await expect(sidebar).toBeVisible();
-});
+// (#54) Dropped: skip-link sub-test and "focus trap: mobile sidebar" test.
+// Both targeted DS-gallery-only patterns (HDSLayout's skip link, its mobile
+// sidebar nav toggle) that don't exist in OpsShell (src/app/pages/ops/
+// OpsShell.tsx has no sidebar or skip link). Testing for a feature the app
+// doesn't have isn't a scoping fix — whether ops should grow either is a
+// product decision, not this issue's.
