@@ -1,7 +1,8 @@
 name: Ralph Gate
 
-# Thin caller — the engine is ralph-gate-reusable.yml (org-shared; other repos
-# call it as hirobius/ops/.github/workflows/ralph-gate-reusable.yml@main).
+# Thin caller — the engine lives in the PUBLIC hirobius/ralph repo (public
+# because GitHub forbids public repos from calling private reusables; every
+# hirobius repo, private or public, calls the same engine).
 #
 # ralph/* PRs: deterministic gate + independent AI review + HUMAN-approved
 # merge (label the PR `ralph-approved`, or pre-tag the issue `ralph-auto` for
@@ -15,7 +16,7 @@ on:
 
 jobs:
   ralph-gate:
-    uses: ./.github/workflows/ralph-gate-reusable.yml
+    uses: hirobius/ralph/.github/workflows/ralph-gate-reusable.yml@main
     permissions:
       contents: write
       issues: write
