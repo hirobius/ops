@@ -162,7 +162,7 @@ function ClientRow({ client: c }: { client: ClientCard }) {
       {...({ href: `/ops/clients/${c.slug}` } as React.HTMLAttributes<HTMLDivElement>)}
       padding="none"
       style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
-      tone="default"
+      tone="neutral"
     >
       <Card.Header
         metadata={
@@ -207,7 +207,7 @@ function ClientRow({ client: c }: { client: ClientCard }) {
               <Stat
                 label="Blockers"
                 value={String(c.blockerCount)}
-                tone={c.blockerCount > 0 ? 'danger' : 'default'}
+                tone={c.blockerCount > 0 ? 'danger' : 'neutral'}
               />
             </>
           )}
@@ -244,7 +244,7 @@ function PipelineCard({
 }) {
   return (
     <Card padding="none">
-      <Card.Metric label={label} value={value} sub={note} tone={highlight ? 'danger' : 'default'} />
+      <Card.Metric label={label} value={value} sub={note} tone={highlight ? 'danger' : 'neutral'} />
     </Card>
   );
 }

@@ -33,7 +33,7 @@ export default function ClientsTab() {
 
         return (
           <a key={slug} href={`/ops/clients/${slug}`} className="hds-focus" style={s.linkReset}>
-            <Card tone="default" padding="component">
+            <Card tone="neutral" padding="component">
               <Card.Header metadata={<Badge tone={statusTone(meta.status)}>{meta.status}</Badge>}>
                 <Card.Title style={s.cardTitle}>{meta.name}</Card.Title>
                 <Card.Description style={s.cardDesc}>{slug}</Card.Description>

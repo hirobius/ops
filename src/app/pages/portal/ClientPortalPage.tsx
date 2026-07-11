@@ -208,7 +208,7 @@ interface PreviewSectionProps {
 function PreviewSection({ url, clientName }: PreviewSectionProps) {
   if (!url) {
     return (
-      <Card tone="default" bordered>
+      <Card tone="neutral" bordered>
         <Card.Header>
           <Card.Title>Live preview</Card.Title>
           <Card.Description>
@@ -223,7 +223,7 @@ function PreviewSection({ url, clientName }: PreviewSectionProps) {
   }
 
   return (
-    <Card tone="default" bordered padding="none">
+    <Card tone="neutral" bordered padding="none">
       <Card.Header>
         <Card.Title>Live preview</Card.Title>
         <Card.Description>{clientName} — published site</Card.Description>
@@ -283,7 +283,7 @@ interface MilestoneSectionProps {
 
 function MilestoneSection({ milestones }: MilestoneSectionProps) {
   return (
-    <Card tone="default" bordered>
+    <Card tone="neutral" bordered>
       <Card.Header>
         <Card.Title>Milestones</Card.Title>
         <Card.Description>Recent and upcoming engagement checkpoints.</Card.Description>
@@ -399,7 +399,7 @@ function FeedbackSection({ slug }: FeedbackSectionProps) {
   }
 
   return (
-    <Card tone="default" bordered>
+    <Card tone="neutral" bordered>
       <Card.Header>
         <Card.Title>Send feedback</Card.Title>
         <Card.Description>

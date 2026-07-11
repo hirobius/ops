@@ -6,7 +6,7 @@
     "src/app/components/approval-card.tsx": 19,
     "src/app/components/phase-header.tsx": 10,
     "src/app/pages/ErrorPage.tsx": 2,
-    "src/app/pages/InfoPageWrapper.tsx": 1,
+    "src/app/pages/InfoPageWrapper.tsx": 13,
     "src/app/pages/NotFoundPage.tsx": 1,
     "src/app/pages/admin/ApprovalDetail.tsx": 16,
     "src/app/pages/admin/Approvals.tsx": 9,
@@ -44,6 +44,6 @@
     "src/app/pages/portal/ClientPortalPage.tsx": 54,
     "src/app/routes.tsx": 28
   },
-  "updatedAt": "2026-07-10T23:07:32.404Z",
-  "sha": "96c60df"
+  "updatedAt": "2026-07-11T07:19:29.441Z",
+  "sha": "47d11b2"
 }
