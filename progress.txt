@@ -24,3 +24,27 @@
 - Files: scripts/check-dom-node-budgets.mjs, scripts/__tests__/check-dom-node-budgets.test.mjs,
   fixtures/check-dom-node-budgets/*, docs/guardrails/{registry.json, baselines/check-dom-node-budgets.json}.
 - #69 now fully delivered (orphan #91 + circular #94 + DOM #this) — safe to close on merge.
+
+#105 — split source_url from dispatch_url so GitHub-imported tasks stay auto-dispatch-eligible
+- Root cause: lib/tasks/import-issues.mjs stamped a freshly-imported issue's own URL into
+  dispatch_url at import time; scripts/fleet-dispatch.mjs's eligibility required dispatch_url
+  IS NULL, so imported tasks could never be auto-dispatched even with auto_ok=true.
+- Migration 0010_task_source_url.sql: additive `tasks.source_url text` column.
+- lib/tasks/import-issues.mjs: mapIssuesToTasks now writes source_url, and OMITS dispatch_url
+  entirely from the row (not even null) — upsertTasks does a raw Supabase upsert, so an explicit
+  null would clobber an already-dispatched task's URL on every re-import. Omitting the key keeps
+  upsert from touching that column.
+- scripts/fleet-dispatch.mjs: eligibility now `auto_ok=true AND dispatch_status IS NULL AND
+  status='open'` (was dispatch_url IS NULL) — gates on dispatch LIFECYCLE, not provenance.
+- lib/tasks/actions.mjs dispatch(): existingUrl now falls back dispatch_url → source_url, so a
+  github-imported task with no dispatch_url yet comments on its source issue (no duplicate
+  issue) and THEN stamps dispatch_url = that same URL, same as the pre-existing dispatched-task
+  path.
+- Tests: tests/api/import-issues.test.ts (source_url shape, no dispatch_url key),
+  scripts/__tests__/fleet-dispatch.test.mjs (dispatch_status-gated eligibility + imported-task
+  regression pin), tests/api/task-actions.test.ts (comment-on-source_url dispatch path). Gate
+  green (typecheck + 458 tests + lint).
+- Migration not yet applied to live Supabase — Adrian applies supabase/migrations/0010_task_source_url.sql
+  before this is live (per CLAUDE.md .env*/deploy hard rules — schema change, not a deploy).
+- Next: #106 (tier/model into dispatch body) and #107 (dispatch-status poller) both build on this
+  and can now proceed — #107's migration numbering should pick up after 0010.

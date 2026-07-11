@@ -34,6 +34,10 @@ export interface Task {
   claimed_at: string | null;
   completed_at: string | null;
   dispatch_url: string | null;
+  // Provenance — where an imported task came from (e.g. the GitHub issue URL a
+  // github:* row was imported from). Distinct from dispatch_url, which is only
+  // set once the task is actually dispatched (ops#105).
+  source_url: string | null;
   deleted_at: string | null;
   created_at: string;
   updated_at: string;

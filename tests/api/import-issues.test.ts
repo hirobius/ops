@@ -30,10 +30,11 @@ describe('mapIssuesToTasks', () => {
         status: 'open',
         lane: 'ops',
         group: 'Internal',
-        dispatch_url: 'https://github.com/hirobius/ops/issues/42',
+        source_url: 'https://github.com/hirobius/ops/issues/42',
         tags: [],
       },
     ]);
+    expect(mapIssuesToTasks(issues)[0]).not.toHaveProperty('dispatch_url');
   });
 
   it('carries GitHub labels through as tags (ralph-ready, triage, …)', () => {

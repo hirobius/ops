@@ -159,6 +159,39 @@ describe('applyTaskAction — dispatch (injected GitHub port)', () => {
       dispatch_status: 'dispatched',
     });
   });
+
+  it('comments on source_url (no new issue) for a github-imported task with no dispatch_url yet — ops#105', async () => {
+    const imported = {
+      ...task,
+      dispatch_url: null,
+      source_url: 'https://github.com/hirobius/ops/issues/105',
+    };
+    const { sb, updates } = makeSb({ task: imported });
+    const comments: Array<{ issueUrl: string; body: string }> = [];
+    let created = false;
+    const github = {
+      createIssue: async () => {
+        created = true;
+        return { html_url: 'https://gh/should-not-happen' };
+      },
+      commentOnIssue: async (i: { issueUrl: string; body: string }) => {
+        comments.push(i);
+        return {};
+      },
+    };
+    const result = await applyTaskAction(sb, { key: 't1', action: 'dispatch' }, { github });
+    expect(created).toBe(false);
+    expect(comments[0].issueUrl).toBe('https://github.com/hirobius/ops/issues/105');
+    expect(result).toEqual({
+      status: 200,
+      body: { ok: true, dispatch_url: 'https://github.com/hirobius/ops/issues/105' },
+    });
+    expect(updates.at(-1)).toMatchObject({
+      dispatch_url: 'https://github.com/hirobius/ops/issues/105',
+      claimed_by: 'claude',
+      dispatch_status: 'dispatched',
+    });
+  });
 });
 
 describe('applyTaskAction — ralph_ready_on/off (injected GitHub port)', () => {
