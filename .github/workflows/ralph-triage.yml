@@ -25,7 +25,7 @@ on:
 
 jobs:
   triage:
-    uses: hirobius/ralph/.github/workflows/ralph-triage-reusable.yml@main
+    uses: hirobius/ralph/.github/workflows/ralph-triage-reusable.yml@v1
     permissions:
       contents: read
       issues: write
