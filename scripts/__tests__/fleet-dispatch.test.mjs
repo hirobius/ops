@@ -19,6 +19,7 @@ function task(overrides = {}) {
     status: 'open',
     auto_ok: true,
     dispatch_url: null,
+    dispatch_status: null,
     dispatch_count: 0,
     priority: null,
     effort: null,
@@ -42,13 +43,31 @@ describe('selectAndRoute', () => {
     expect(out.map((s) => s.task.key)).toEqual(['b']);
   });
 
-  it('filters out tasks that already have a dispatch_url (no re-dispatch)', () => {
+  it('filters out tasks that already have a dispatch_status (no re-dispatch)', () => {
     const tasks = [
-      task({ key: 'a', dispatch_url: 'https://github.com/hirobius/ops/issues/1' }),
-      task({ key: 'b', dispatch_url: null }),
+      task({ key: 'a', dispatch_status: 'dispatched' }),
+      task({ key: 'b', dispatch_status: null }),
     ];
     const out = selectAndRoute(tasks);
     expect(out.map((s) => s.task.key)).toEqual(['b']);
+  });
+
+  it('treats a github-imported task (source_url set, dispatch_status null) as eligible — ops#105', () => {
+    // Shape produced by lib/tasks/import-issues.mjs: dispatch_url is never set at
+    // import time, only source_url. The old eligibility check (`!t.dispatch_url`)
+    // happened to work here since dispatch_url was already null pre-fix too, but
+    // this pins the importer's actual output shape so a regression back to
+    // stamping dispatch_url at import time fails loudly.
+    const tasks = [
+      task({
+        key: 'github:hirobius/ops#105',
+        source_url: 'https://github.com/hirobius/ops/issues/105',
+        dispatch_url: null,
+        dispatch_status: null,
+      }),
+    ];
+    const out = selectAndRoute(tasks);
+    expect(out.map((s) => s.task.key)).toEqual(['github:hirobius/ops#105']);
   });
 
   it('filters out tasks whose status is not open', () => {

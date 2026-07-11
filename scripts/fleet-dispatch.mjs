@@ -29,10 +29,14 @@
  * (default 3) — both listing and dispatch respect the cap. `--json` prints
  * machine-readable output instead of the human summary.
  *
- * Eligibility: `auto_ok = true AND dispatch_url IS NULL AND status = 'open'`.
- * Already-dispatched rows (dispatch_url set) are never re-picked — the
+ * Eligibility: `auto_ok = true AND dispatch_status IS NULL AND status = 'open'`.
+ * Already-dispatched rows (dispatch_status set) are never re-picked — the
  * eligibility filter is a guardrail against double-dispatch, not just an
- * optimization.
+ * optimization. This checks dispatch LIFECYCLE (dispatch_status), not
+ * PROVENANCE (dispatch_url) — a github-imported task carries its source issue
+ * in `source_url`, not `dispatch_url` (ops#105), so gating on dispatch_url
+ * would make imported tasks permanently ineligible once that field were ever
+ * (mis)stamped at import time.
  *
  * Board columns (migration 0008) may not be applied in every environment yet
  * (Adrian applies it in Supabase). If the columns are absent, the Supabase
@@ -58,7 +62,7 @@ const VERCEL_ENV_URL =
 
 /**
  * Pure: filter a task list to the auto-dispatch eligibility rule
- * (`auto_ok === true && !dispatch_url && status === 'open'`), route each
+ * (`auto_ok === true && !dispatch_status && status === 'open'`), route each
  * survivor through `routeTask`, and cap the result at `max`. No network, no
  * Date — safe to unit test with plain stub objects.
  *
@@ -69,7 +73,7 @@ const VERCEL_ENV_URL =
 export function selectAndRoute(tasks, { max = DEFAULT_MAX } = {}) {
   const cap = Number.isFinite(max) && max >= 0 ? max : DEFAULT_MAX;
   const eligible = (Array.isArray(tasks) ? tasks : []).filter(
-    (t) => t && t.auto_ok === true && !t.dispatch_url && t.status === 'open',
+    (t) => t && t.auto_ok === true && !t.dispatch_status && t.status === 'open',
   );
   return eligible.slice(0, cap).map((task) => ({ task, ...routeTask(task) }));
 }
@@ -87,7 +91,7 @@ async function fetchEligibleTasks(sb) {
     .from('tasks')
     .select('*')
     .eq('auto_ok', true)
-    .is('dispatch_url', null)
+    .is('dispatch_status', null)
     .eq('status', 'open')
     .order('sort_order', { ascending: true });
   if (error) throw error;
@@ -128,7 +132,7 @@ function printHelp() {
     `scripts/fleet-dispatch.mjs — headless fleet-mode dispatcher (#41 Slice 2)\n\n` +
       `Usage:\n` +
       `  node scripts/fleet-dispatch.mjs [--max N] [--json] [--apply]\n\n` +
-      `Eligibility: auto_ok=true AND dispatch_url IS NULL AND status='open'.\n` +
+      `Eligibility: auto_ok=true AND dispatch_status IS NULL AND status='open'.\n` +
       `--dry-run is the DEFAULT — lists eligible tasks + computed tier/model,\n` +
       `dispatches nothing. Pass --apply to actually open @claude issues.\n\n` +
       `Flags:\n` +
@@ -200,7 +204,7 @@ async function main() {
       ),
     );
   } else {
-    console.log(`Eligible tasks: ${tasks.length} (auto_ok, no dispatch_url, status=open)`);
+    console.log(`Eligible tasks: ${tasks.length} (auto_ok, no dispatch_status, status=open)`);
     if (selected.length === 0) {
       console.log('Nothing to dispatch.');
     } else {
