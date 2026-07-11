@@ -1,34 +1,31 @@
 name: Ralph
 
-# Autonomous "Ralph" loop — ONE iteration per run. Manual (workflow_dispatch),
-# triggered by `issues: labeled` (fires when an issue is tagged `ralph-ready`),
-# OR chained (push to main). Picks the highest-priority open
-# `ralph-ready` issue (or the one you name), makes one small change, must pass
-# ralph/gate.sh, opens a PR. Auto-merge is handled by ralph-gate.yml + branch protection.
+# Thin caller — the engine is ralph-run-reusable.yml (org-shared; other repos
+# call it as hirobius/ops/.github/workflows/ralph-run-reusable.yml@main).
 #
-# The `push: [main]` trigger is the chain: when a Ralph PR auto-merges it pushes
-# main, which fires the next iteration -> grab next issue -> PR -> auto-merge ->
-# fire again, until the queue is dry (Ralph emits COMPLETE, no PR, chain stops).
-# Labeling an issue `ralph-ready` fires a run directly.
+# Triggers: manual dispatch (optionally naming an issue — a human override
+# that steals any claim), `issues: labeled` (fires when something is tagged
+# ralph-ready; the guard filters every other label — load-bearing, see the
+# reusable), and push-to-main (the chain: an approved+merged Ralph PR pushes
+# main, which grabs the next issue). Selection, claiming, single-flight,
+# wedge alerts, and reconciliation all live in the reusable workflow +
+# ralph/lib.sh — one logic for CI and local runs.
 #
-# ops is private client automation — correctness over speed, no destructive ops.
-# Scheduled/chained runs use CLAUDE_CODE_OAUTH_TOKEN (Max) — NO ANTHROPIC_API_KEY.
-# Safety: concurrency (one Ralph/repo) + a guard that skips when a Ralph PR is open
-# OR the ralph-ready queue is dry (so push/schedule runs are cheap no-ops when there
-# is nothing to do — matters on metered private minutes). An explicit manual dispatch
-# of a specific issue always runs (human override).
+# ops is private client automation — correctness over speed, no destructive
+# ops, merges are human-approved (`ralph-approved` on the PR, or the issue
+# pre-tagged `ralph-auto`). Auth: CLAUDE_CODE_OAUTH_TOKEN (Max) — NO API key.
 
 on:
   workflow_dispatch:
     inputs:
       issue:
-        description: "Issue number to work (blank = pick highest-priority ralph-ready)"
+        description: "Issue number to work (blank = deterministic pick via ralph/next.sh)"
         required: false
         type: string
   issues:
     types: [labeled]
   push:
-    branches: [main] # chain: an auto-merged Ralph PR grabs the next ralph-ready issue
+    branches: [main] # chain: a merged Ralph PR grabs the next ralph-ready issue
 
 concurrency:
   group: ralph-${{ github.repository }}
@@ -36,160 +33,12 @@ concurrency:
 
 jobs:
   ralph:
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/ralph-run-reusable.yml
     permissions:
       contents: write
       issues: write
       pull-requests: write
       id-token: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Guard — honor explicit dispatch; else skip if a Ralph PR is open or the queue is dry
-        id: guard
-        env:
-          GH_TOKEN: ${{ github.token }}
-          ISSUE: ${{ inputs.issue }}
-        run: |
-          # An explicit manual dispatch of a specific issue always runs (human override).
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${ISSUE}" ]; then
-            echo "Explicit dispatch of #${ISSUE} — running."
-            exit 0
-          fi
-          # issues:labeled — only proceed when the label added is `ralph-ready`.
-          if [ "${{ github.event_name }}" = "issues" ] && [ "${{ github.event.label.name }}" != "ralph-ready" ]; then
-            echo "Labeled with something other than ralph-ready — skipping."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          # Single-flight: never stack a second Ralph PR. But distinguish a healthy
-          # in-flight PR (skip quietly) from one WEDGED on a failed/absent ralph-gate.
-          # A wedged PR blocks the whole chain indefinitely, and the plain skip below
-          # used to no-op in SILENCE (the Discord step only fires on non-skip runs) —
-          # so the loop could sit dead for hours with nobody the wiser. Now we detect
-          # the wedge and alert (see the "Alert Discord" step). Single-flight still
-          # holds: we do not open a second PR either way.
-          REPO="${{ github.repository }}"
-          open_prs=$(gh pr list --repo "$REPO" --state open \
-            --json number,headRefName,headRefOid,updatedAt \
-            --jq '[.[] | select(.headRefName | startswith("ralph/"))]')
-          open_count=$(echo "$open_prs" | jq 'length')
-          if [ "${open_count:-0}" -gt 0 ]; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            now=$(date -u +%s)
-            wedged=""
-            while read -r n sha updated; do
-              [ -z "$n" ] && continue
-              gate=$(gh api "repos/$REPO/commits/$sha/status" \
-                --jq '[.statuses[] | select(.context=="ralph-gate")] | sort_by(.created_at) | (last.state // "none")' \
-                2>/dev/null || echo none)
-              age_h=$(( (now - $(date -u -d "$updated" +%s)) / 3600 ))
-              echo "Open Ralph PR #$n — ralph-gate=$gate, age=${age_h}h"
-              if [ "$gate" = "failure" ]; then
-                wedged="${wedged}"$'\n'"- #$n — ralph-gate FAILED (changes requested / red gate); needs a human."
-              elif { [ "$gate" = "none" ] || [ "$gate" = "pending" ]; } && [ "$age_h" -ge 3 ]; then
-                wedged="${wedged}"$'\n'"- #$n — open ${age_h}h with no passing ralph-gate (stale / never gated)."
-              fi
-            done < <(echo "$open_prs" | jq -r '.[] | "\(.number) \(.headRefOid) \(.updatedAt)"')
-            if [ -n "$wedged" ]; then
-              echo "Ralph loop is WEDGED behind stuck PR(s):$wedged"
-              echo "wedged=true" >> "$GITHUB_OUTPUT"
-              { echo "reason<<WEDGE_EOF"; printf '%s\n' "$wedged"; echo "WEDGE_EOF"; } >> "$GITHUB_OUTPUT"
-            else
-              echo "A healthy Ralph PR is in flight ($open_count) — skipping quietly to avoid pile-up."
-            fi
-            exit 0
-          fi
-          # Dry queue: nothing to do — keep push/schedule runs cheap (metered minutes).
-          ready=$(gh issue list --repo "${{ github.repository }}" --label ralph-ready --state open \
-            --json number --jq 'length')
-          if [ "${ready:-0}" -eq 0 ]; then
-            echo "No open ralph-ready issues — skipping."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Alert Discord — Ralph loop wedged behind a stuck PR
-        if: steps.guard.outputs.wedged == 'true'
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          REASON: ${{ steps.guard.outputs.reason }}
-          REPO: ${{ github.repository }}
-          ACTIONS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/workflows/ralph.yml
-        run: |
-          echo "Ralph loop wedged. Blocking PR(s):"
-          printf '%s\n' "$REASON"
-          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
-            echo "No DISCORD_WEBHOOK_URL secret — logged above; cannot ping Discord."
-            exit 0
-          fi
-          msg=$(printf '🟠 **Ralph loop WEDGED** on `%s` — the ralph-ready queue is NOT advancing because open Ralph PR(s) will not auto-merge:\n%s\n\nClear them (address the review, rebase, or close the branch) to resume the chain: %s' \
-            "$REPO" "$REASON" "$ACTIONS_URL")
-          curl -sS -H "Content-Type: application/json" \
-            -d "$(jq -n --arg c "$msg" '{content:$c}')" \
-            "$DISCORD_WEBHOOK_URL" || echo "Discord alert failed (non-fatal)."
-
-      - uses: pnpm/action-setup@v4
-        if: steps.guard.outputs.skip != 'true'
-        with:
-          version: "10"
-      - uses: actions/setup-node@v4
-        if: steps.guard.outputs.skip != 'true'
-        with:
-          node-version: "22"
-          cache: "pnpm"
-      - name: Install dependencies (so ralph/gate.sh can run)
-        if: steps.guard.outputs.skip != 'true'
-        run: pnpm install --frozen-lockfile
-
-      - name: Run Claude Code — one Ralph iteration
-        if: steps.guard.outputs.skip != 'true'
-        uses: anthropics/claude-code-action@v1
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: |
-            --allowedTools "Bash,Read,Write,Edit,Glob,Grep"
-          prompt: |
-            Read ralph/prompt.md and AGENTS.md in this repo first — their rules are
-            binding. Then do EXACTLY ONE Ralph iteration and STOP.
-
-            A target issue may have been provided via the dispatch input: "${{ inputs.issue }}"
-            - If that is an issue number, work THAT issue.
-            - If it is blank (e.g. a scheduled or chained run), pick the HIGHEST-PRIORITY
-              open `ralph-ready` issue:
-              gh issue list --label "ralph-ready" --state open
-              (highest priority per ralph/prompt.md's order — NOT the first). If none
-              exist, say so and stop.
-
-            Binding rules (ralph/prompt.md + AGENTS.md "Ralph quality bar"):
-            - ONE logical change, smallest complete slice. Comment the rest back on the issue.
-            - `bash ralph/gate.sh` MUST pass green before any PR. Never weaken tests or
-              types to pass it. Red gate = no PR.
-            - Branch ralph/issue-<n>-<slug>. Open a PR with "Closes #<n>" in the body.
-              Comment a 2-line summary on the issue.
-            - NEVER merge or push to main yourself — the ralph-gate workflow handles
-              merging after an independent review. Respect the feature freeze and
-              NEVER perform destructive ops (DB migrations, deletes) without care.
-            - Append what you did to progress.txt.
-            - If blocked or ambiguous, comment on the issue and STOP — do not force.
-
-      - name: Notify Discord (run summary)
-        if: always() && steps.guard.outputs.skip != 'true'
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          STATUS: ${{ job.status }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          REPO: ${{ github.repository }}
-        run: |
-          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
-            echo "No DISCORD_WEBHOOK_URL secret set — skipping Discord notify."
-            exit 0
-          fi
-          case "$STATUS" in
-            success) EMOJI="✅" ;;
-            failure) EMOJI="❌" ;;
-            *)       EMOJI="⚪" ;;
-          esac
-          curl -sS -H "Content-Type: application/json" \
-            -d "$(printf '{"content":"%s Ralph run **%s** on `%s` — run log: %s"}' "$EMOJI" "$STATUS" "$REPO" "$RUN_URL")" \
-            "$DISCORD_WEBHOOK_URL" || echo "Discord notify failed (non-fatal)."
+    with:
+      issue: ${{ inputs.issue || '' }}
+    secrets: inherit
