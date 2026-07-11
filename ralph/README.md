@@ -44,14 +44,14 @@ error (bounded backoff, never silent).
 2. **Add the two thin callers** as `.github/workflows/ralph.yml` and
    `.github/workflows/ralph-gate.yml` — copy them from ops and change the
    `uses:` lines to the org-level form:
-   `uses: hirobius/ops/.github/workflows/ralph-run-reusable.yml@main` and
-   `uses: hirobius/ops/.github/workflows/ralph-gate-reusable.yml@main`.
-3. **One-time org setup** (already done once, listed for completeness):
-   - Org secrets `CLAUDE_CODE_OAUTH_TOKEN` + `DISCORD_WEBHOOK_URL`, shared
-     with private repos: <https://github.com/organizations/hirobius/settings/secrets/actions>
-   - Allow org repos to call ops' reusable workflows:
-     <https://github.com/hirobius/ops/settings/actions> → **Access** →
-     "Accessible from repositories in the `hirobius` organization".
+   `uses: hirobius/ralph/.github/workflows/ralph-run-reusable.yml@main` and
+   `uses: hirobius/ralph/.github/workflows/ralph-gate-reusable.yml@main`.
+3. **Secrets**: `CLAUDE_CODE_OAUTH_TOKEN` (+ optional `DISCORD_WEBHOOK_URL`)
+   must reach the repo — org secrets shared to it
+   (<https://github.com/organizations/hirobius/settings/secrets/actions>) or
+   plain repo secrets. The engine itself lives in the PUBLIC
+   <https://github.com/hirobius/ralph> repo, so no Actions access toggle is
+   needed anywhere.
 4. **Per-repo GitHub settings**: branch protection on the default branch with
    required status check `ralph-gate` + "Allow auto-merge" enabled:
    `https://github.com/hirobius/<repo>/settings/branches`

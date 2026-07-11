@@ -1,7 +1,8 @@
 name: Ralph
 
-# Thin caller — the engine is ralph-run-reusable.yml (org-shared; other repos
-# call it as hirobius/ops/.github/workflows/ralph-run-reusable.yml@main).
+# Thin caller — the engine lives in the PUBLIC hirobius/ralph repo (public
+# because GitHub forbids public repos from calling private reusables; every
+# hirobius repo, private or public, calls the same engine).
 #
 # Triggers: manual dispatch (optionally naming an issue — a human override
 # that steals any claim), `issues: labeled` (fires when something is tagged
@@ -33,7 +34,7 @@ concurrency:
 
 jobs:
   ralph:
-    uses: ./.github/workflows/ralph-run-reusable.yml
+    uses: hirobius/ralph/.github/workflows/ralph-run-reusable.yml@main
     permissions:
       contents: write
       issues: write
