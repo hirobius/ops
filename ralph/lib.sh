@@ -172,10 +172,12 @@ claim_issue() {
   gh issue comment "$n" --body "ralph-claim $run_id" >/dev/null 2>&1 || true
   # The claim only counts if the issue is still open and still queued —
   # otherwise it was closed/retracted between select and claim.
-  ok=$(gh issue view "$n" --json state,labels \
-    --jq --arg l "$RALPH_READY_LABEL" \
-    'if .state == "OPEN" and ([.labels[].name] | index($l) != null) then "yes" else "no" end' \
-    2>/dev/null || echo no)
+  # Pipe to real jq: gh's --jq takes only an expression, it has NO --arg flag
+  # (using one makes gh error and every re-verify silently fail — bit us live).
+  ok=$(gh issue view "$n" --json state,labels 2>/dev/null |
+    jq -r --arg l "$RALPH_READY_LABEL" \
+      'if .state == "OPEN" and ([.labels[].name] | index($l) != null) then "yes" else "no" end' \
+      2>/dev/null || echo no)
   if [ "$ok" != "yes" ]; then
     echo "ralph: #$n was closed or unqueued between select and claim — releasing" >&2
     release_claim "$n"
