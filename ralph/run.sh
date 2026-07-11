@@ -115,6 +115,12 @@ races=0
 while :; do
   sel=0
   ISSUE=$(bash ralph/next.sh) || sel=$? # ||-guarded: exit 10/20 must not trip the ERR trap
+  if [ "$sel" -eq 0 ] && ! [[ "$ISSUE" =~ ^[0-9]+$ ]]; then
+    # selector stdout must be exactly one issue number — anything else means
+    # a helper leaked output; fail loud rather than claim garbage
+    echo "ralph: selector emitted non-numeric output: '$ISSUE'" >&2
+    sel=20
+  fi
   case $sel in
   0) ;;
   10)

@@ -118,6 +118,10 @@ jobs:
             echo "::error::ralph/next.sh failed (code $code) — GitHub API trouble, not an empty queue."
             exit 1
           fi
+          if ! [[ "$issue" =~ ^[0-9]+$ ]]; then
+            echo "::error::selector emitted non-numeric output ('$issue') — a helper leaked stdout; refusing to claim garbage."
+            exit 1
+          fi
           # Atomic claim (ref create = test-and-set): losing means another
           # runner (local or CI) owns it — skip, never double-work.
           if ! claim_issue "$issue" "$RUN_ID"; then

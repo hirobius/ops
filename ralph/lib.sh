@@ -215,9 +215,12 @@ park_issue() {
   fi
   ensure_label ralph-parked D93F0B "Parked by the Ralph loop — see the park comment"
   ensure_label needs-adrian 5319E7 "Blocked on a human decision"
-  gh_retry issue edit "$n" --remove-label "$RALPH_READY_LABEL" --add-label "$label" || true
+  # >/dev/null matters: gh edit/comment print URLs on stdout, and park_issue
+  # runs inside next.sh's candidate walk — stray stdout would corrupt the
+  # selected-issue capture in run.sh / the CI guard (bit us on the first run).
+  gh_retry issue edit "$n" --remove-label "$RALPH_READY_LABEL" --add-label "$label" >/dev/null || true
   gh_retry issue comment "$n" --body "🅿️ **Ralph parked this issue** — $reason
-(To retry: fix the cause, then re-add \`$RALPH_READY_LABEL\`.)" || true
+(To retry: fix the cause, then re-add \`$RALPH_READY_LABEL\`.)" >/dev/null || true
 }
 
 # ---------------------------------------------------------------- reconcile

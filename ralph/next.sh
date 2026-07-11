@@ -48,14 +48,16 @@ for n in $ordered; do
   body=$(jq -r --argjson n "$n" '.[] | select(.number == $n) | .body // ""' <<<"$issues")
   if ! has_dod_marker "$body"; then
     echo "ralph: #$n has no acceptance-criteria/DoD marker — parking" >&2
-    park_issue "$n" "no acceptance criteria found in the body (looked for a \`- [ ]\` checklist or an acceptance / DoD / definition-of-done section). Add one, then re-add \`$RALPH_READY_LABEL\`." needs-adrian
+    # >&2: this script's stdout is ONLY the selected issue number; park side
+    # effects must never leak into it (callers capture it).
+    park_issue "$n" "no acceptance criteria found in the body (looked for a \`- [ ]\` checklist or an acceptance / DoD / definition-of-done section). Add one, then re-add \`$RALPH_READY_LABEL\`." needs-adrian >&2
     continue
   fi
 
   fails=$(count_failed_attempts "$n")
   if [ "${fails:-0}" -ge "$RALPH_MAX_ATTEMPTS" ]; then
     echo "ralph: #$n already failed $fails attempt(s) — parking" >&2
-    park_issue "$n" "hit the attempt cap ($fails/$RALPH_MAX_ATTEMPTS failed attempts — see the ralph-attempt-failed comments above)." ralph-parked
+    park_issue "$n" "hit the attempt cap ($fails/$RALPH_MAX_ATTEMPTS failed attempts — see the ralph-attempt-failed comments above)." ralph-parked >&2
     continue
   fi
 
