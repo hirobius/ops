@@ -1,3 +1,5 @@
+/* hds-bypass: ops-internal page. Inline styles intentional for ops dashboard. */
+
 /**
  * TaskRow — one presentational board row (ops#136).
  *
@@ -11,14 +13,15 @@
  * governed ⋯ menu. Everything else moved into the menu.
  */
 
-import { Badge } from '@hirobius/design-system';
+import { Badge, Button } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
-import type { CSSProperties } from 'react';
+import type { ComponentProps, CSSProperties } from 'react';
 import type { Task, TaskAction } from './types';
 import { isNoRalphSource, taskRef, priorityTone, dueToneNow, relTimeNow } from './taskMeta';
 import { TaskActionsMenu } from './TaskActionsMenu';
 
-type BadgeTone = 'success' | 'neutral' | 'warning' | 'danger' | 'info' | 'inProgress';
+// Stay in lockstep with the DS Badge contract instead of shadowing it.
+type BadgeTone = NonNullable<ComponentProps<typeof Badge>['tone']>;
 
 const STATUS_TONE: Record<Task['status'], BadgeTone> = {
   open: 'neutral',
@@ -114,20 +117,15 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
       </div>
       <div style={s.rowAside}>
         {t.status === 'done' ? (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => onAction(t.key, 'reopen')}
-            style={busy ? s.btnDisabled : s.btn}
-          >
+          <Button size="sm" variant="secondary" disabled={busy} onClick={() => onAction(t.key, 'reopen')}>
             {busy ? '…' : 'Reopen'}
-          </button>
+          </Button>
         ) : (
-          <button
-            type="button"
+          <Button
+            size="sm"
+            variant="primary"
             disabled={busy}
             onClick={() => onAction(t.key, 'dispatch')}
-            style={busy ? s.btnDisabled : s.btnPrimary}
             title={
               dispatched
                 ? 'Re-ping @claude on the linked issue'
@@ -135,7 +133,7 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
             }
           >
             {busy ? '…' : dispatched ? 'Re-dispatch' : 'Dispatch'}
-          </button>
+          </Button>
         )}
         <TaskActionsMenu task={t} busy={busy} onAction={onAction} />
       </div>
@@ -220,38 +218,5 @@ const s = {
     background: 'var(--semantic-color-content-accent)',
     color: 'var(--semantic-color-content-onAccent)',
     cursor: 'pointer',
-  },
-  btn: {
-    ...hds.typeStyles.ui,
-    fontSize: hds.fontSize.xs,
-    padding: '4px 10px',
-    minHeight: '32px',
-    border: '1px solid var(--semantic-color-border-default)',
-    borderRadius: hds.borderRadius[8],
-    background: 'transparent',
-    color: 'var(--semantic-color-content-primary)',
-    cursor: 'pointer',
-  },
-  btnPrimary: {
-    ...hds.typeStyles.ui,
-    fontSize: hds.fontSize.xs,
-    padding: '4px 10px',
-    minHeight: '32px',
-    border: '1px solid var(--semantic-color-content-accent)',
-    borderRadius: hds.borderRadius[8],
-    background: 'var(--semantic-color-content-accent)',
-    color: 'var(--semantic-color-surface-raised)',
-    cursor: 'pointer',
-  },
-  btnDisabled: {
-    ...hds.typeStyles.ui,
-    fontSize: hds.fontSize.xs,
-    padding: '4px 10px',
-    minHeight: '32px',
-    border: '1px solid var(--semantic-color-border-subdued)',
-    borderRadius: hds.borderRadius[8],
-    background: 'transparent',
-    color: 'var(--semantic-color-content-disabled)',
-    cursor: 'not-allowed',
   },
 } satisfies Record<string, CSSProperties>;

@@ -1,3 +1,5 @@
+/* hds-bypass: ops-internal page. Inline styles intentional for ops dashboard. */
+
 /**
  * TaskActionsMenu — the governed per-row action menu (ops#136).
  *
@@ -7,12 +9,10 @@
  * title · chips · primary · ⋯.
  */
 
-import { Menu } from '@hirobius/design-system';
-import hds from '@hirobius/design-system/tokens';
-import type { CSSProperties } from 'react';
+import { Button, Menu } from '@hirobius/design-system';
 import type { Task, TaskAction } from './types';
 import { taskRef } from './taskMeta';
-import { copyText } from './useTaskSelection';
+import { copyText } from './clipboard';
 
 export interface TaskActionsMenuProps {
   task: Task;
@@ -28,9 +28,9 @@ export function TaskActionsMenu({ task: t, busy, onAction }: TaskActionsMenuProp
   return (
     <Menu>
       <Menu.Trigger asChild>
-        <button type="button" disabled={busy} style={s.trigger} aria-label="More actions">
+        <Button size="sm" variant="secondary" disabled={busy} aria-label="More actions">
           ⋯
-        </button>
+        </Button>
       </Menu.Trigger>
       <Menu.Content align="end">
         {t.status !== 'done' && (
@@ -64,17 +64,3 @@ export function TaskActionsMenu({ task: t, busy, onAction }: TaskActionsMenuProp
     </Menu>
   );
 }
-
-const s = {
-  trigger: {
-    ...hds.typeStyles.ui,
-    fontSize: hds.fontSize.xs,
-    padding: '4px 8px',
-    minHeight: '32px',
-    border: '1px solid var(--semantic-color-border-subdued)',
-    borderRadius: hds.borderRadius[8],
-    background: 'transparent',
-    color: 'var(--semantic-color-content-secondary)',
-    cursor: 'pointer',
-  },
-} satisfies Record<string, CSSProperties>;

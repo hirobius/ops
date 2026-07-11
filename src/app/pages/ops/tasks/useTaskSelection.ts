@@ -9,14 +9,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { Task } from './types';
 import { taskRef } from './taskMeta';
-
-export async function copyText(text: string): Promise<void> {
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch {
-    /* clipboard unavailable — no-op */
-  }
-}
+import { copyText } from './clipboard';
 
 export interface UseTaskSelectionResult {
   selected: ReadonlySet<string>;

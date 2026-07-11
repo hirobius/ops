@@ -13,6 +13,11 @@
  * (TaskActionsMenu); mutations live in useTaskActions; the multi-select
  * "Copy refs" subsystem lives in useTaskSelection; the operator ordering /
  * grouping / chip-tone logic is pure and unit-tested in taskMeta.ts.
+ *
+ * DS note: everything used here (Badge, Button, Menu, SegmentedControl, Tag)
+ * exists in BOTH @hirobius/design-system 0.11 and 0.13. Adopting the
+ * 0.13-only static.css layer is deferred until the #127/#133 bump merges
+ * (blocked on the ralph-gate engine outage, ops#144).
  */
 
 import { useMemo, useState } from 'react';

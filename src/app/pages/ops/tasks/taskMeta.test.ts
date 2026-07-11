@@ -147,6 +147,11 @@ describe('groupTasks', () => {
       'no due': ['b'],
     });
   });
+  it('due grouping puts a task due TODAY in "this week", not "overdue"', () => {
+    const today = task({ key: 'today', due: '2026-07-11' });
+    const groups = groupTasks([today], 'due', NOW);
+    expect(groups).toEqual([['this week', [today]]]);
+  });
   it('status grouping orders open → blocked → done', () => {
     const groups = groupTasks(tasks, 'status', NOW);
     expect(groups.map(([l]) => l)).toEqual(['open', 'blocked', 'done']);
@@ -175,5 +180,8 @@ describe('chip tones', () => {
     expect(dueTone('2026-07-14', NOW)).toBe('warning');
     expect(dueTone('2026-09-01', NOW)).toBe('neutral');
     expect(dueTone(null, NOW)).toBeNull();
+  });
+  it('a task due TODAY is due, not overdue (dates are end-of-day, not UTC midnight)', () => {
+    expect(dueTone('2026-07-11', NOW)).toBe('warning');
   });
 });

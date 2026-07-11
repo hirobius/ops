@@ -58,13 +58,38 @@ export function compareTasks(a: Task, b: Task): number {
   return 0; // stable sort preserves API order (sort_order)
 }
 
-function dueBucket(t: Task, now: number): string {
-  if (!t.due) return 'no due';
-  const ms = dueMs(t);
-  if (!Number.isFinite(ms)) return 'no due';
-  if (ms < now) return 'overdue';
-  if (ms <= now + WEEK_MS) return 'this week';
+type DueClass = 'overdue' | 'week' | 'later';
+
+/**
+ * One classifier feeds both the due-grouping bucket and the due-chip tone so
+ * they can never disagree. A `YYYY-MM-DD` due date parses to UTC midnight, so
+ * the deadline is treated as END of that day — a task due today is "due", not
+ * overdue.
+ */
+function classifyDue(due: string | null, now: number): DueClass | null {
+  if (!due) return null;
+  const ms = new Date(due).getTime();
+  if (!Number.isFinite(ms)) return null;
+  if (ms + DAY_MS <= now) return 'overdue';
+  if (ms <= now + WEEK_MS) return 'week';
   return 'later';
+}
+
+const DUE_BUCKET: Record<DueClass, string> = {
+  overdue: 'overdue',
+  week: 'this week',
+  later: 'later',
+};
+
+const DUE_TONE: Record<DueClass, ChipTone> = {
+  overdue: 'danger',
+  week: 'warning',
+  later: 'neutral',
+};
+
+function dueBucket(t: Task, now: number): string {
+  const c = classifyDue(t.due, now);
+  return c ? DUE_BUCKET[c] : 'no due';
 }
 
 const GROUP_ORDERS: Partial<Record<GroupBy, string[]>> = {
@@ -122,12 +147,8 @@ export function priorityTone(priority: NonNullable<Task['priority']>): ChipTone 
 
 /** Tone for the due chip: overdue=danger, due within 7 days=warning, later=neutral. */
 export function dueTone(due: string | null, now: number): ChipTone | null {
-  if (!due) return null;
-  const ms = new Date(due).getTime();
-  if (!Number.isFinite(ms)) return null;
-  if (ms < now) return 'danger';
-  if (ms <= now + WEEK_MS) return 'warning';
-  return 'neutral';
+  const c = classifyDue(due, now);
+  return c ? DUE_TONE[c] : null;
 }
 
 /** Render-time wrapper over dueTone — see groupTasksNow. */
