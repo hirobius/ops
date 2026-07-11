@@ -2,15 +2,14 @@
 
 Read AGENTS.md first. Its "Ralph quality bar" section is binding.
 
-## 1. Pick ONE task
-Run: gh issue list --label "ralph-ready" --state open
-Choose the HIGHEST-PRIORITY issue, not the first. Order:
-1. Architecture / core abstractions
-2. Integration points between modules
-3. Unknowns / spikes
-4. Standard features
-5. Polish, cleanup, quick wins
-If none exist, output `<promise>COMPLETE</promise>` and stop.
+The issue to work arrives as `ISSUE=<n>` in your instructions — the harness
+(ralph/run.sh or the CI guard) selected and claimed it deterministically.
+**You never pick a task and never look for another one.**
+
+## 1. Understand the task
+Run: gh issue view <n> — read the title, body, acceptance criteria, comments.
+If it is genuinely ambiguous or needs a human decision, post the specific
+question as an issue comment and STOP — the harness reconciles the state.
 
 ## 2. Implement it — small
 - One logical change. If the issue is big, ship the smallest complete
@@ -31,8 +30,17 @@ Append to progress.txt (terse, grammar optional):
 - Notes for next iteration
 
 ## 5. Ship it
-- Branch: ralph/issue-<n>-<slug>
+- Branch: ralph/issue-<n>-<slug> — EXACTLY this shape; the harness keys
+  reconciliation on it, and it makes a racing duplicate push fail loudly.
 - Commit (match this repo's commit style)
 - Open PR with "Closes #<n>" in the body
 - Comment the issue with a 2-line summary
-- Never merge. Never push to main. A human reviews.
+- Never merge. Never push to main. A human approves merges
+  (`ralph-approved` on the PR, or the issue was pre-tagged `ralph-auto`).
+
+## Loop hygiene — hard rules
+- NEVER add/remove `ralph-*` labels and never touch `refs/heads/ralph/claim-*`,
+  ralph/.lock, ralph/runs.jsonl, or ralph/logs/ — the harness owns those.
+- If a `gh` call fails transiently (rate limit / 5xx / network), retry it up
+  to 3 times with a short sleep; if it still fails, say so and stop — the
+  harness records the attempt and will retry or park.
