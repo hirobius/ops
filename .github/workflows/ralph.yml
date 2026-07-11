@@ -34,9 +34,7 @@ concurrency:
 
 jobs:
   ralph:
-    # TEMP outage pin (ops#144): same known-good engine sha as ralph-gate.yml —
-    # the run reusable was touched by the same sweep. Restore @main once fixed.
-    uses: hirobius/ralph/.github/workflows/ralph-run-reusable.yml@03dea1df3554eb34ec5e7b7231488c6bfe9ac7bb
+    uses: hirobius/ralph/.github/workflows/ralph-run-reusable.yml@main
     permissions:
       contents: write
       issues: write

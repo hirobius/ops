@@ -16,10 +16,7 @@ on:
 
 jobs:
   ralph-gate:
-    # TEMP outage pin (ops#144): hirobius/ralph@main regressed at 7387f7c8 —
-    # every @main gate call startup-fails. Pinned to the last known-good
-    # engine sha; restore @main once the engine is fixed.
-    uses: hirobius/ralph/.github/workflows/ralph-gate-reusable.yml@03dea1df3554eb34ec5e7b7231488c6bfe9ac7bb
+    uses: hirobius/ralph/.github/workflows/ralph-gate-reusable.yml@main
     permissions:
       contents: write
       issues: write
