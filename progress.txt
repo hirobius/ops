@@ -128,3 +128,22 @@
   src/app/pages/portal/ClientPortalPage.tsx, docs/guardrails/baselines/check-dom-node-budgets.json.
 - Gate green: typecheck + typecheck:api + vite build + 458 unit tests + test:layout (16/16, incl. /info)
   + lint. PR #133, branch ralph/issue-127-bump-hds-0-13.
+
+#129 — re-sync lib/schema/index.mjs BrandSchema — brand.motion (site-engine#40)
+- site-engine PR #40 (merged) added brand.motion: "none"|"subtle"|"rich" (default
+  "rich") to canonical packages/schema/src/index.ts BrandSchema, bumped schema to 0.2.0.
+  Confirmed via `gh pr diff 40 --repo hirobius/site-engine` and fetched the post-merge
+  file from main — motion is the ONLY delta vs. the vendored copy; diffed presets.ts too
+  (no shape changes, just TS/MJS style differences as expected from the vendoring convention).
+- Ported the enum field + default into lib/schema/index.mjs BrandSchema, matching semantics
+  exactly (comment references site-engine's motion ADR instead of copying its long doc block).
+- Checked lib/agent/generate.mjs (BrandSchema consumer): assemble() builds `brand` without
+  `motion`, but it flows through defineClient → ClientConfigSchema.safeParse, so zod's
+  `.default('rich')` fills it in — no agent/render code change needed. lib/render/index.mjs
+  only reads brand.palettePreset, untouched by this field.
+- Added scripts/__tests__/schema-brand-motion.test.mjs (vitest, matches existing
+  scripts/__tests__/*.test.mjs convention that already imports from ../../lib/*): asserts
+  default "rich", accepts "none"/"subtle", rejects an unknown value.
+- Files: lib/schema/index.mjs, scripts/__tests__/schema-brand-motion.test.mjs (new).
+- Gate green: typecheck + test (480 passed, incl. 3 new) + lint. Branch
+  ralph/issue-129-schema-brand-motion, commit 492bb84. PR next.
