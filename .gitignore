@@ -147,3 +147,9 @@ src/styles/tokens.generated.css
 src/styles/tenants.css
 src/app/design-system/generated-*
 
+
+# Ralph loop runtime artifacts (audit log, transcripts, lock, CI verdict)
+ralph/runs.jsonl
+ralph/logs/
+ralph/.lock
+verdict.json
