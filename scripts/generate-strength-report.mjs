@@ -439,7 +439,7 @@ function computeB3() {
   }
 
   const lastRun = readJSON(lastRunPath);
-  const totalRoutes = 20; // FOUNDATION_ROUTES (12) + COMPONENT_ROUTES (8) in a11y.spec.ts
+  const totalRoutes = 3; // ROUTES in a11y.spec.ts (#54: scoped down from the dead /hds/* matrix)
 
   if (lastRun?.status === 'passed') {
     // All tests passed — 0 blocking violations across all routes
@@ -458,7 +458,7 @@ function computeB3() {
 
   // status === 'failed': count a11y route tests in failedTests[]
   const failedTests = Array.isArray(lastRun?.failedTests) ? lastRun.failedTests : [];
-  // a11y spec test titles: "a11y [/hds/...]" — count distinct route violations
+  // a11y spec test titles: "a11y [/route]" — count distinct route violations
   const a11yFailures = failedTests.filter((t) => typeof t === 'string' && /^a11y \[/.test(t));
   const violatingRoutes = a11yFailures.length;
   // Each failing route = at least 1 blocking violation group. Score: 100 - (count * 5), clamped.
