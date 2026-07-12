@@ -67,11 +67,20 @@ export interface TaskRowProps {
   task: Task;
   busy: boolean;
   isSelected: boolean;
+  /** Most recent failed action's message for this row, if any (ops#108). */
+  error?: string;
   onToggleSelect: (key: string) => void;
   onAction: (key: string, action: TaskAction) => void;
 }
 
-export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }: TaskRowProps) {
+export function TaskRow({
+  task: t,
+  busy,
+  isSelected,
+  error,
+  onToggleSelect,
+  onAction,
+}: TaskRowProps) {
   const dispatched = !!t.dispatch_url;
   const ref = taskRef(t);
   const issueLink = issueLinkFor(t);
@@ -141,6 +150,14 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
         </Card.Title>
       </Card.Header>
 
+      {error && (
+        <Card.Body>
+          <span role="alert" style={s.error}>
+            {error}
+          </span>
+        </Card.Body>
+      )}
+
       <Card.Footer style={s.footer}>
         <span style={s.meta}>{metaParts.join('  ·  ')}</span>
         <span style={s.spacer} />
@@ -205,6 +222,11 @@ const s = {
     minWidth: 0,
   },
   spacer: { flex: 1 },
+  error: {
+    ...hds.typeStyles.ui,
+    fontSize: hds.fontSize.xs,
+    color: 'var(--semantic-color-feedback-error)',
+  },
   check: {
     width: hds.space.px20,
     height: hds.space.px20,

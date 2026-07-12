@@ -65,8 +65,16 @@ export function TaskActionsMenu({ task: t, busy, onAction }: TaskActionsMenuProp
           </Menu.Item>
         )}
         <Menu.Separator />
-        <Menu.Item onSelect={() => onAction(t.key, 'trash')}>Trash task (soft-delete)</Menu.Item>
+        <Menu.Item onSelect={() => confirmTrash(ref) && onAction(t.key, 'trash')}>
+          Trash task (soft-delete)
+        </Menu.Item>
       </Menu.Content>
     </Menu>
   );
+}
+
+// A native confirm is enough friction for this internal tool (ops#108) — a
+// mis-tap on "Trash" no longer soft-deletes without a beat to back out.
+function confirmTrash(ref: string | null): boolean {
+  return window.confirm(`Trash ${ref ?? 'this task'}? It can be restored later, but not from here.`);
 }

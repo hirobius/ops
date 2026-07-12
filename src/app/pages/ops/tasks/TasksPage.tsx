@@ -68,7 +68,7 @@ function formatLastUpdated(epochMs: number | null): string {
 
 export default function TasksPage() {
   const { tasks, isOffline, isInitialLoading, lastUpdatedAt, refetch } = useTasks();
-  const { act, busyKeys, importing, importIssues } = useTaskActions(refetch);
+  const { act, busyKeys, errors, announcement, importing, importIssues } = useTaskActions(refetch);
   const { selected, toggleSelect, clearSelection, copySelectedRefs } = useTaskSelection(tasks);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
@@ -117,6 +117,9 @@ export default function TasksPage() {
 
   return (
     <div style={s.page}>
+      <span role="status" aria-live="polite" style={s.visuallyHidden}>
+        {announcement}
+      </span>
       <PageHeader
         breadcrumbs={[{ label: 'Ops', href: '/ops' }, { label: 'Tasks' }]}
         title="Tasks"
@@ -235,6 +238,7 @@ export default function TasksPage() {
                   task={t}
                   busy={busyKeys.has(t.key)}
                   isSelected={selected.has(t.key)}
+                  error={errors.get(t.key)}
                   onToggleSelect={toggleSelect}
                   onAction={act}
                 />
@@ -247,6 +251,19 @@ export default function TasksPage() {
 }
 
 const s = {
+  // Standard visually-hidden-but-announced technique: present in the a11y
+  // tree (so aria-live is heard) without taking up visual layout space.
+  visuallyHidden: {
+    position: 'absolute' as const,
+    width: '1px',
+    height: '1px',
+    padding: 0,
+    margin: '-1px',
+    overflow: 'hidden',
+    clip: 'rect(0, 0, 0, 0)',
+    whiteSpace: 'nowrap' as const,
+    border: 0,
+  },
   page: {
     display: 'flex',
     flexDirection: 'column' as const,
