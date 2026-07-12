@@ -32,7 +32,17 @@ fi
 : "${RALPH_DRY_RUN:=0}"
 
 repo_slug() {
-  git remote get-url origin | sed -E 's#^(git@github\.com:|https://github\.com/)##; s#\.git$##'
+  # CI first: $GITHUB_REPOSITORY is the runner's canonical slug. The checkout's
+  # origin URL is NOT trustworthy mid-job — claude-code-action rewrites it to
+  # https://x-access-token:<token>@github.com/..., which the sed below didn't
+  # strip, so every "repos/$(repo_slug)/..." API path built after the model
+  # step 404'd SILENTLY (ralph#8: claim refs never released, attempt-budget
+  # resets never seen). The local fallback also strips embedded credentials.
+  if [ -n "${GITHUB_REPOSITORY:-}" ]; then
+    echo "$GITHUB_REPOSITORY"
+    return 0
+  fi
+  git remote get-url origin | sed -E 's#^(git@github\.com:|https://([^@/]+@)?github\.com/)##; s#\.git$##'
 }
 
 default_branch() {
@@ -189,7 +199,10 @@ claim_issue() {
 release_claim() {
   local n=$1
   [ "$RALPH_DRY_RUN" = "1" ] && return 0
-  delete_claim_ref "$n" || true
+  # Fail loud (stderr, non-fatal): a leaked claim ref blocks re-queueing the
+  # issue until the stale-TTL reclaim — never let that happen silently again.
+  delete_claim_ref "$n" ||
+    echo "ralph: WARNING — could not delete claim ref for #$n; it will block re-claims until the stale-TTL reclaim." >&2
   gh issue edit "$n" --remove-label ralph-wip >/dev/null 2>&1 || true
 }
 
