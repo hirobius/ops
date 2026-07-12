@@ -17,9 +17,9 @@
 
 import { Badge, Button } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
-import { useState, type ComponentProps, type CSSProperties } from 'react';
+import type { ComponentProps, CSSProperties } from 'react';
 import { usePoll } from '../../../lib/usePoll';
-import { opsApi } from '../../../lib/opsApi';
+import { useTaskActions } from './useTaskActions';
 import { relTimeNow } from './taskMeta';
 
 type BadgeTone = NonNullable<ComponentProps<typeof Badge>['tone']>;
@@ -109,23 +109,7 @@ export function RalphPanel() {
     { intervalMs: POLL_MS, offlineIntervalMs: POLL_MS * 2, requestTimeoutMs: 15_000 },
   );
 
-  const [requeuing, setRequeuing] = useState<ReadonlySet<string>>(new Set());
-
-  async function requeue(key: string) {
-    setRequeuing((prev) => new Set(prev).add(key));
-    try {
-      await opsApi.post('/api/task-action', { key, action: 'ralph_requeue' });
-    } catch {
-      /* surfaced on next poll */
-    } finally {
-      setRequeuing((prev) => {
-        const next = new Set(prev);
-        next.delete(key);
-        return next;
-      });
-      refetch();
-    }
-  }
+  const { act, busyKeys } = useTaskActions(refetch);
 
   return (
     <section style={s.panel} aria-labelledby="ralph-panel-label" data-role="ralph-panel">
@@ -235,8 +219,8 @@ export function RalphPanel() {
                       <Button
                         size="sm"
                         variant="secondary"
-                        disabled={requeuing.has(p.key)}
-                        onClick={() => void requeue(p.key)}
+                        disabled={busyKeys.has(p.key)}
+                        onClick={() => void act(p.key, 'ralph_requeue')}
                       >
                         Re-queue
                       </Button>
