@@ -8,8 +8,18 @@ The issue to work arrives as `ISSUE=<n>` in your instructions — the harness
 
 ## 1. Understand the task
 Run: gh issue view <n> — read the title, body, acceptance criteria, comments.
-If it is genuinely ambiguous or needs a human decision, post the specific
-question as an issue comment and STOP — the harness reconciles the state.
+
+If it is genuinely ambiguous, or needs a human decision, or is blocked on
+something you cannot resolve this iteration, do a **clean blocked-stop** — this
+is a first-class outcome, NOT a failure, and it is always better than guessing:
+
+1. Post an issue comment whose **first line is exactly** `ralph-blocked: <one-line reason>`
+   (put the detail/options below it). That marker is load-bearing: the harness
+   keys on it to route the issue to a human WITHOUT counting a failed attempt or
+   re-picking it. Skip the marker and your deliberate stop looks identical to a
+   crash — it burns an attempt and the loop retries a blocker it can't clear.
+2. Do NOT open a PR. Do NOT touch labels (the harness applies `needs-adrian`).
+3. STOP. The harness reconciles the rest.
 
 ## 2. Implement it — small
 - One logical change. If the issue is big, ship the smallest complete

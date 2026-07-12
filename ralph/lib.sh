@@ -212,16 +212,38 @@ release_claim() {
 # re-queued parked issue would instantly re-park at the cap. Only failures
 # NEWER than the latest ralph-ready labeled event count (ISO-8601 Zulu strings
 # compare correctly as text). No event found → count everything.
-count_failed_attempts() {
-  local n=$1 since
-  since=$(gh api "repos/$(repo_slug)/issues/$n/events" --paginate 2>/dev/null |
+# Newest ralph-ready `labeled` event timestamp (empty if none). The budget
+# "since" line: a human re-queuing resets it, so signals from a prior cycle
+# never leak into this one.
+latest_ready_label_at() {
+  gh api "repos/$(repo_slug)/issues/$1/events" --paginate 2>/dev/null |
     jq -rs --arg l "$RALPH_READY_LABEL" \
       '[add[] | select(.event == "labeled" and .label.name == $l)] | (last.created_at // empty)' \
-      2>/dev/null || true)
+      2>/dev/null || true
+}
+
+count_failed_attempts() {
+  local n=$1 since
+  since=$(latest_ready_label_at "$n")
   gh issue view "$n" --json comments 2>/dev/null |
     jq -r --arg since "${since:-1970-01-01T00:00:00Z}" \
       '[.comments[] | select((.body | startswith("ralph-attempt-failed")) and (.createdAt > $since))] | length' \
       2>/dev/null || echo 0
+}
+
+# Did the model post a `ralph-blocked` sentinel THIS cycle? That comment is the
+# model's explicit "I followed the blocked/ambiguous → comment and STOP
+# contract; this is a clean hand-off to a human, not a crashed attempt" signal
+# (prompt.md §1). Gated by latest_ready_label_at so a stale sentinel from a
+# prior cycle can't suppress a genuine failure after a re-queue.
+model_signalled_blocked() {
+  local n=$1 since count
+  since=$(latest_ready_label_at "$n")
+  count=$(gh issue view "$n" --json comments 2>/dev/null |
+    jq -r --arg since "${since:-1970-01-01T00:00:00Z}" \
+      '[.comments[] | select((.body | ascii_downcase | startswith("ralph-blocked")) and (.createdAt > $since))] | length' \
+      2>/dev/null || echo 0)
+  [ "${count:-0}" -gt 0 ]
 }
 
 record_failed_attempt() { # <n> <run_id> <reason>
@@ -298,26 +320,44 @@ Opened by ralph reconciliation (run \`$run_id\`): the iteration pushed this bran
   else
     why="${why:-iteration ended without a pushed branch ($work_status)}"
   fi
-  # 3) Deliberate stop, not a failure: prompt.md tells the model "blocked or
-  #    ambiguous → comment on the issue and STOP", which reaches here as
-  #    "no branch pushed" — but the model (or a human, mid-run) took the issue
-  #    out of the queue: closed it, pulled the ready label, or tagged it
-  #    needs-adrian / blocked. Recording an attempt would double-count one
-  #    decision, and needs-adrian often rides ALONGSIDE a kept ready label, so
-  #    no re-label event ever resets that budget. On API failure assume
-  #    "queued" and fall through to the conservative attempt-recording path.
+  # 3) Deliberate stop vs genuine failure. "No branch pushed" is ambiguous: the
+  #    model may have crashed/timed out (a real failed attempt → retry), OR it
+  #    followed prompt.md §1 ("blocked/ambiguous → comment and STOP") and pushed
+  #    nothing ON PURPOSE because the issue needs a human. Burning an attempt on
+  #    the latter double-counts one decision and wastes the retry on an
+  #    already-known blocker (site-engine#86: a schema-drift blocker cost an
+  #    attempt and reddened the run, halting the chain). Distinguish via the
+  #    model's own signals, each gated to THIS cycle so a re-queue resets them:
+  #      (a) a `ralph-blocked` comment it posted — the PRIMARY signal, because
+  #          §1 makes it always comment when it stops (a label add is optional
+  #          and a cautious model may skip it), or
+  #      (b) the issue left the ready queue mid-run — closed, ready label
+  #          pulled, or needs-adrian/blocked added (by the model or a human).
+  #    Either routes to a human (needs-adrian) GREEN with no attempt recorded.
+  #    On a gh API failure eligibility defaults to "queued" and the sentinel to
+  #    absent → conservative fall-through to the attempt path, never a silent
+  #    swallow.
   eligible=$(gh issue view "$n" --json state,labels 2>/dev/null |
     jq -r --arg l "$RALPH_READY_LABEL" \
       'if .state != "OPEN" then "closed"
        elif ([.labels[].name] | index($l)) == null then "unqueued"
-       elif ([.labels[].name] | (index("needs-adrian") or index("blocked"))) then "handed off"
+       elif ([.labels[].name] | (index("needs-adrian") or index("blocked"))) then "handed-off"
        else "queued" end' 2>/dev/null || echo queued)
   if [ "$eligible" != "queued" ]; then
     release_claim "$n"
-    echo "parked:#$n was $eligible during the iteration ($why) — deliberate stop, no attempt recorded"
+    echo "parked:#$n left the ready queue mid-iteration ($eligible) — deliberate stop, no attempt recorded ($why)"
     return 0
   fi
-  # 4) Nothing shippable → record the attempt, release the claim, park on cap.
+  if model_signalled_blocked "$n"; then
+    # Model flagged a human blocker but left the labels alone (loop hygiene
+    # says the harness owns queue labels). Apply needs-adrian here so the issue
+    # routes to a human and next.sh skips it — without counting an attempt.
+    park_issue "$n" "the model signalled it is blocked on a human decision (\`ralph-blocked\`) and stopped without a PR — $why" needs-adrian
+    release_claim "$n"
+    echo "parked:#$n — model signalled \`ralph-blocked\` (routed to needs-adrian), no attempt recorded"
+    return 0
+  fi
+  # 4) Genuine no-ship → record the attempt, release the claim, park on cap.
   record_failed_attempt "$n" "$run_id" "$why"
   release_claim "$n"
   fails=$(count_failed_attempts "$n")
