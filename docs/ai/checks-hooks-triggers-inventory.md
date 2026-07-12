@@ -185,5 +185,49 @@ Based on this audit, the following follow-on work is unblocked:
 
 ---
 
+## 8. Claude Code Hooks (`.claude/settings.json`)
+
+`.claude/settings.json` wires hooks into the Claude Code harness itself (distinct
+from `.husky/*`, which gates `git commit`/`git push`). Existing `PostToolUse`
+entries (matcher `Write|Edit`) auto-run `eslint --fix`, `pnpm tokens:verify` on
+token-file edits, and `pnpm check:css` on `theme.css` edits.
+
+**`scripts/hooks/blast-radius.mjs`** (issue #5, prototype) is a `PreToolUse`
+hook on matcher `Edit|Write`: before an edit lands, it greps `src/`, `scripts/`,
+`api/`, `lib/` for direct callers/importers of the file about to be touched and
+surfaces them to the agent as advisory context, so edits land with knowledge of
+who depends on the code. It is read-only and advisory-only — it never sets a
+`permissionDecision`, so the edit always proceeds, and any internal error is
+swallowed (fail-soft: exit 0, no output) so a broken hook can never break a
+session. **To disable:** remove the `PreToolUse` entry from
+`.claude/settings.json`, or set `BLAST_RADIUS_DISABLE=1` in the environment.
+Self-test: `scripts/__tests__/blast-radius.test.mjs`.
+
+Editing `.claude/settings.json` is itself permission-gated in Claude Code
+sessions (hook config is a code-execution surface), so an autonomous session
+cannot self-wire a new hook — the JSON snippet below needs a human apply:
+
+```json
+"PreToolUse": [
+  {
+    "matcher": "Edit|Write",
+    "hooks": [
+      {
+        "type": "command",
+        "command": "node scripts/hooks/blast-radius.mjs",
+        "shell": "bash",
+        "timeout": 15,
+        "statusMessage": "Tracing blast radius..."
+      }
+    ]
+  }
+]
+```
+
+Out of scope for this prototype (human decision, per issue #5 DoD): measuring
+token/quality effect on real units and promoting it beyond advisory.
+
+---
+
 *Grounded against: `package.json` (scripts section), `.husky/pre-commit`, `.husky/pre-push`,
 `.github/workflows/*.yml`, `scripts/` directory listing, commit `20f351e` (prior dormant audit).*
