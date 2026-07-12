@@ -54,6 +54,10 @@ epoch_of() {
   date -u -d "$1" +%s 2>/dev/null || date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$1" +%s
 }
 
+iso_of() { # epoch seconds → ISO-8601 Zulu (GNU first, BSD fallback)
+  date -u -d "@$1" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -r "$1" +%Y-%m-%dT%H:%M:%SZ
+}
+
 # Bounded retry for transient gh failures (rate limit, 5xx, network).
 # NOT for calls whose failure is meaningful (claim-ref create must see 422).
 gh_retry() {
@@ -208,37 +212,57 @@ release_claim() {
 
 # ------------------------------------------------------- attempts + parking
 
-# A human re-adding the ready label resets the attempt budget — otherwise a
-# re-queued parked issue would instantly re-park at the cap. Only failures
-# NEWER than the latest ralph-ready labeled event count (ISO-8601 Zulu strings
-# compare correctly as text). No event found → count everything.
-# Newest ralph-ready `labeled` event timestamp (empty if none). The budget
-# "since" line: a human re-queuing resets it, so signals from a prior cycle
-# never leak into this one.
+# Newest `ralph-ready` labeled event — the shared reset boundary: re-adding the
+# label deliberately restarts BOTH the attempt budget and next.sh's PR-history
+# guard, so a re-queued parked issue never instantly re-parks at the cap and a
+# prior cycle's signals never leak into this one. Only failures/PRs newer than
+# this timestamp count (ISO-8601 Zulu strings compare correctly as text). Prints
+# the timestamp, empty when no such event exists, or the literal `unknown` when
+# the API call itself failed — callers fail closed on `unknown` (skip/fail, never
+# park) rather than counting from epoch (the old fail-open bit us past the cap).
 latest_ready_label_at() {
-  gh api "repos/$(repo_slug)/issues/$1/events" --paginate 2>/dev/null |
-    jq -rs --arg l "$RALPH_READY_LABEL" \
-      '[add[] | select(.event == "labeled" and .label.name == $l)] | (last.created_at // empty)' \
-      2>/dev/null || true
+  local n=$1 events
+  events=$(gh api "repos/$(repo_slug)/issues/$n/events" --paginate 2>/dev/null) || {
+    echo unknown
+    return 0
+  }
+  jq -rs --arg l "$RALPH_READY_LABEL" \
+    '[add[] | select(.event == "labeled" and .label.name == $l)] | (last.created_at // empty)' \
+    <<<"$events" 2>/dev/null || echo unknown
 }
 
+# count_failed_attempts <n> [since] — failures NEWER than the latest ralph-ready
+# labeled event. No event → count everything (conservative). Prints the literal
+# `unknown` when the boundary or the comment fetch is unavailable, so a
+# transient API flake can never re-select a should-be-parked issue (the old
+# `|| echo 0` fail-open did exactly that); callers must skip/fail, never park.
 count_failed_attempts() {
-  local n=$1 since
-  since=$(latest_ready_label_at "$n")
-  gh issue view "$n" --json comments 2>/dev/null |
-    jq -r --arg since "${since:-1970-01-01T00:00:00Z}" \
-      '[.comments[] | select((.body | startswith("ralph-attempt-failed")) and (.createdAt > $since))] | length' \
-      2>/dev/null || echo 0
+  local n=$1 since=${2:-} comments
+  [ -z "$since" ] && since=$(latest_ready_label_at "$n")
+  [ "$since" = "unknown" ] && {
+    echo unknown
+    return 0
+  }
+  comments=$(gh issue view "$n" --json comments 2>/dev/null) || {
+    echo unknown
+    return 0
+  }
+  jq -r --arg since "${since:-1970-01-01T00:00:00Z}" \
+    '[.comments[] | select((.body | startswith("ralph-attempt-failed")) and (.createdAt > $since))] | length' \
+    <<<"$comments" 2>/dev/null || echo unknown
 }
 
 # Did the model post a `ralph-blocked` sentinel THIS cycle? That comment is the
 # model's explicit "I followed the blocked/ambiguous → comment and STOP
 # contract; this is a clean hand-off to a human, not a crashed attempt" signal
 # (prompt.md §1). Gated by latest_ready_label_at so a stale sentinel from a
-# prior cycle can't suppress a genuine failure after a re-queue.
+# prior cycle can't suppress a genuine failure after a re-queue. An unknowable
+# boundary (events API down) → treat as unsignalled, so the conservative
+# attempt path runs rather than a possibly-stale sentinel suppressing a failure.
 model_signalled_blocked() {
   local n=$1 since count
   since=$(latest_ready_label_at "$n")
+  [ "$since" = "unknown" ] && return 1
   count=$(gh issue view "$n" --json comments 2>/dev/null |
     jq -r --arg since "${since:-1970-01-01T00:00:00Z}" \
       '[.comments[] | select((.body | ascii_downcase | startswith("ralph-blocked")) and (.createdAt > $since))] | length' \
@@ -272,18 +296,43 @@ park_issue() {
 
 # ---------------------------------------------------------------- reconcile
 
+# run_claim_time <n> <run_id> — the start-of-run boundary: the server-side
+# created_at of THIS run's `ralph-claim <run_id>` comment (posted by
+# claim_issue), so runner clock skew can't move it. The comment's post is
+# ||-guarded and can be missing — fall back to the widest window this run
+# could possibly have spanned.
+run_claim_time() {
+  local n=$1 run_id=$2 t
+  t=$(gh api "repos/$(repo_slug)/issues/$n/comments" --paginate 2>/dev/null |
+    jq -rs --arg b "ralph-claim $run_id" \
+      '[add[] | select(.body == $b)] | (last.created_at // empty)' 2>/dev/null || true)
+  if [ -n "$t" ]; then
+    echo "$t"
+    return 0
+  fi
+  iso_of "$(($(date -u +%s) - RALPH_ITER_TIMEOUT - 600))"
+}
+
 # reconcile_issue <n> <run_id> <work_status>
 # State-based post-iteration reconciliation — the single place that decides
 # what actually happened, regardless of how the work step died. Prints one
 # token: pr:<num> | parked:<why> | failed:<why>. Never returns non-zero.
 reconcile_issue() {
-  local n=$1 run_id=$2 work_status=$3 all pr closed branch i fails why eligible
-  all=$(gh pr list --state all --limit 200 --json number,headRefName,state \
+  local n=$1 run_id=$2 work_status=$3 all since pr closed branch i fails why eligible
+  all=$(gh pr list --state all --limit 200 --json number,headRefName,state,createdAt \
     --jq "[.[] | select(.headRefName | startswith(\"ralph/issue-$n-\"))]" \
     2>/dev/null || echo '[]')
-  # 1) An OPEN or MERGED PR → success. A CLOSED one was rejected by a human —
-  #    it must never count as shipped, and its branch is never resurrected.
-  pr=$(jq -r '[.[] | select(.state == "OPEN" or .state == "MERGED")] | (first.number // empty)' <<<"$all")
+  # PRs from PAST runs must never count as THIS run's shipment: hds#126 looped
+  # forever because two long-merged PRs made every no-op iteration reconcile
+  # as "success" — no attempt recorded, never parked, reselected every tick.
+  # 60s allowance for the gap between ref-create and claim-comment post.
+  since=$(iso_of "$(($(epoch_of "$(run_claim_time "$n" "$run_id")") - 60))")
+  # 1) An OPEN PR (any age — in-flight work; single-flight holds the loop) or
+  #    a PR merged DURING this run → success. A CLOSED one was rejected by a
+  #    human — it must never count as shipped, and its branch is never
+  #    resurrected.
+  pr=$(jq -r --arg s "$since" \
+    '[.[] | select(.state == "OPEN" or (.state == "MERGED" and .createdAt >= $s))] | (first.number // empty)' <<<"$all")
   if [ -n "$pr" ]; then
     release_claim "$n"
     echo "pr:$pr"
@@ -291,12 +340,16 @@ reconcile_issue() {
   fi
   closed=$(jq -r '[.[] | select(.state == "CLOSED")] | length' <<<"$all")
   # 2) Branch pushed but no PR (the PR step failed / response was lost) →
-  #    open it ourselves, bounded retry with backoff.
-  branch=$(git ls-remote --heads origin "ralph/issue-$n-*" 2>/dev/null |
-    awk '{print $2}' | sed 's#refs/heads/##' | head -n1)
-  if [ -n "$branch" ] && [ "${closed:-0}" -gt 0 ]; then
-    why="branch $branch exists but its PR was closed by a human — not resurrecting it"
-    branch=""
+  #    open it ourselves, bounded retry with backoff. Never when a CLOSED PR
+  #    exists — that would resurrect human-rejected work (parked in 4 below).
+  branch=""
+  if [ "${closed:-0}" -eq 0 ]; then
+    branch=$(git ls-remote --heads origin "ralph/issue-$n-*" 2>/dev/null |
+      awk '{print $2}' | sed 's#refs/heads/##')
+    if [ "$(grep -c . <<<"$branch")" -gt 1 ]; then
+      echo "ralph: WARNING — multiple ralph/issue-$n-* branches exist; recovering the first" >&2
+    fi
+    branch=$(head -n1 <<<"$branch")
   fi
   if [ -n "$branch" ]; then
     if [ "$RALPH_DRY_RUN" = "1" ]; then
@@ -318,7 +371,7 @@ Opened by ralph reconciliation (run \`$run_id\`): the iteration pushed this bran
     done
     why="branch $branch pushed but PR creation failed after 3 attempts (auth/network?)"
   else
-    why="${why:-iteration ended without a pushed branch ($work_status)}"
+    why="iteration ended without a pushed branch ($work_status)"
   fi
   # 3) Deliberate stop vs genuine failure. "No branch pushed" is ambiguous: the
   #    model may have crashed/timed out (a real failed attempt → retry), OR it
@@ -343,25 +396,51 @@ Opened by ralph reconciliation (run \`$run_id\`): the iteration pushed this bran
        elif ([.labels[].name] | index($l)) == null then "unqueued"
        elif ([.labels[].name] | (index("needs-adrian") or index("blocked"))) then "handed-off"
        else "queued" end' 2>/dev/null || echo queued)
+  # A dead `gh issue view` leaves jq with empty input → empty string, which
+  # must read as "queued" (conservative), never as a deliberate stop.
+  [ -z "$eligible" ] && eligible=queued
   if [ "$eligible" != "queued" ]; then
     release_claim "$n"
     echo "parked:#$n left the ready queue mid-iteration ($eligible) — deliberate stop, no attempt recorded ($why)"
     return 0
   fi
+  # 4) Model signalled a deliberate blocked-stop THIS cycle (`ralph-blocked`
+  #    comment) but left labels alone (loop hygiene: the harness owns queue
+  #    labels). Route to needs-adrian without counting an attempt — the exact
+  #    class that reddened the run and halted the chain in site-engine#86.
   if model_signalled_blocked "$n"; then
-    # Model flagged a human blocker but left the labels alone (loop hygiene
-    # says the harness owns queue labels). Apply needs-adrian here so the issue
-    # routes to a human and next.sh skips it — without counting an attempt.
     park_issue "$n" "the model signalled it is blocked on a human decision (\`ralph-blocked\`) and stopped without a PR — $why" needs-adrian
     release_claim "$n"
     echo "parked:#$n — model signalled \`ralph-blocked\` (routed to needs-adrian), no attempt recorded"
     return 0
   fi
-  # 4) Genuine no-ship → record the attempt, release the claim, park on cap.
+  # 5) A human closed Ralph PR(s) for this issue → a rejection needs direction,
+  #    not a retry that re-proposes the same rejected change.
+  if [ "${closed:-0}" -gt 0 ]; then
+    release_claim "$n"
+    park_issue "$n" "Ralph PR(s) for this issue were closed without merging — a human rejection needs direction, not a retry. Decide the path, then re-add \`$RALPH_READY_LABEL\`." needs-adrian
+    echo "parked:human-closed Ralph PR(s) exist for #$n — needs direction, not a retry"
+    return 0
+  fi
+  # 6) Nothing new this run but PR(s) from PAST runs already merged → the
+  #    remainder of the issue is evidently not agent-actionable (hds#126:
+  #    merged work + human-only DoD items kept the issue open and looping).
+  if jq -e --arg s "$since" \
+    '[.[] | select(.state == "MERGED" and .createdAt < $s)] | length > 0' <<<"$all" >/dev/null; then
+    release_claim "$n"
+    park_issue "$n" "prior Ralph PR(s) merged but the issue is still open and this iteration produced nothing new — the remainder looks not agent-actionable. Close the issue or split what's left into a new issue, then re-add \`$RALPH_READY_LABEL\`." needs-adrian
+    echo "parked:prior merged PR(s) but issue still open — remainder not agent-actionable"
+    return 0
+  fi
+  # 7) Genuine no-ship → record the attempt, release the claim, park on cap.
+  #    An `unknown` count (API blindness) fails WITHOUT parking — next.sh
+  #    re-checks the budget fail-closed before ever re-offering the issue.
   record_failed_attempt "$n" "$run_id" "$why"
   release_claim "$n"
   fails=$(count_failed_attempts "$n")
-  if [ "${fails:-0}" -ge "$RALPH_MAX_ATTEMPTS" ]; then
+  if [ "$fails" = "unknown" ]; then
+    echo "failed:$why (attempt budget unverifiable — API failure; selection re-checks fail-closed)"
+  elif [ "${fails:-0}" -ge "$RALPH_MAX_ATTEMPTS" ]; then
     park_issue "$n" "gave up after $fails failed attempt(s) — last: $why" ralph-parked
     echo "parked:$why"
   else
