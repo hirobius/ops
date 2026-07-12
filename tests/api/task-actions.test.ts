@@ -430,8 +430,10 @@ describe('applyTaskAction — ralph_approve (injected GitHub port, ops#137)', ()
 });
 
 describe('applyTaskAction — ralph_dispatch (injected GitHub port, ops#113)', () => {
+  const task = { key: 'github:hirobius/ops#113', title: 'Run Ralph action' };
+
   it('503s when no port is configured (no GITHUB_TOKEN)', async () => {
-    const { sb } = makeSb();
+    const { sb } = makeSb({ task });
     expect(
       await applyTaskAction(
         sb,
@@ -441,16 +443,28 @@ describe('applyTaskAction — ralph_dispatch (injected GitHub port, ops#113)', (
     ).toMatchObject({ status: 503, body: { code: 'ENV_MISSING_GITHUB_TOKEN' } });
   });
 
+  it('404s when the task is missing — a raw key never fires GitHub for an untracked row', async () => {
+    const { sb } = makeSb({ task: null });
+    const github = { dispatchWorkflow: async () => ({}) };
+    expect(
+      await applyTaskAction(
+        sb,
+        { key: 'github:hirobius/ops#113', action: 'ralph_dispatch' },
+        { github },
+      ),
+    ).toMatchObject({ status: 404 });
+  });
+
   it('400s when the task is not a github-tracked issue', async () => {
-    const { sb } = makeSb();
+    const { sb } = makeSb({ task: { key: 't1', title: 'Do it' } });
     const github = { dispatchWorkflow: async () => ({}) };
     expect(
       await applyTaskAction(sb, { key: 't1', action: 'ralph_dispatch' }, { github }),
     ).toMatchObject({ status: 400 });
   });
 
-  it('dispatches ralph.yml with the parsed owner/repo/issue via the port — no Supabase round trip', async () => {
-    const { sb } = makeSb();
+  it('dispatches ralph.yml with the parsed owner/repo/issue via the port', async () => {
+    const { sb } = makeSb({ task });
     const calls: Array<{ owner: string; repo: string; workflow: string; inputs: object }> = [];
     const github = {
       dispatchWorkflow: async (i: {
@@ -481,7 +495,7 @@ describe('applyTaskAction — ralph_dispatch (injected GitHub port, ops#113)', (
   });
 
   it('502s naming the Actions: write permission when the port throws 403', async () => {
-    const { sb } = makeSb();
+    const { sb } = makeSb({ task });
     const github = {
       dispatchWorkflow: async () => {
         throw new Error('HTTP 403');
@@ -498,7 +512,7 @@ describe('applyTaskAction — ralph_dispatch (injected GitHub port, ops#113)', (
   });
 
   it('502s naming the Actions: write permission when the port throws 404 (private-repo permission errors are obscured as 404)', async () => {
-    const { sb } = makeSb();
+    const { sb } = makeSb({ task });
     const github = {
       dispatchWorkflow: async () => {
         throw new Error('HTTP 404');
@@ -515,7 +529,7 @@ describe('applyTaskAction — ralph_dispatch (injected GitHub port, ops#113)', (
   });
 
   it('502s generically (existing dispatch code) when the port throws an unrelated error', async () => {
-    const { sb } = makeSb();
+    const { sb } = makeSb({ task });
     const github = {
       dispatchWorkflow: async () => {
         throw new Error('network timeout');

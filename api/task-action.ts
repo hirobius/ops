@@ -37,13 +37,14 @@
  * `{ ok: true, note }` rather than erroring; no matching PR is a 404.
  *
  * 'ralph_dispatch' (ops#113, "Run Ralph") resolves the task's
- * `github:<owner>/<repo>#<n>` key straight into a workflow_dispatch call on
- * that repo's `ralph.yml` with `inputs.issue = <n>` — no Supabase round trip,
- * nothing on the row changes. An explicit issue number overrides ralph.yml's
- * single-flight + priority guard, so this genuinely jumps the queue. Needs
- * GITHUB_TOKEN scoped with "Actions: write" (distinct from the "Issues:
- * write" the rest of this route needs) — 401/403/404 responds 502 naming
- * that permission. Returns `{ ok: true, runUrl? }`; runUrl points at the
+ * `github:<owner>/<repo>#<n>` key into a workflow_dispatch call on that
+ * repo's `ralph.yml` with `inputs.issue = <n>` — nothing on the row changes
+ * (it's a fire, not a write), but the task must still exist (404 otherwise,
+ * same as every other action here). An explicit issue number overrides
+ * ralph.yml's single-flight + priority guard, so this genuinely jumps the
+ * queue. Needs GITHUB_TOKEN scoped with "Actions: write" (distinct from the
+ * "Issues: write" the rest of this route needs) — 401/403/404 responds 502
+ * naming that permission. Returns `{ ok: true, runUrl? }`; runUrl points at the
  * workflow's Actions page (GitHub's dispatch response has no run id to hand
  * back synchronously).
  *

@@ -267,6 +267,18 @@ export default function TasksPage() {
   );
 }
 
+// Shared shape for both toast tones — only the border color differs.
+const TOAST_BASE: CSSProperties = {
+  ...hds.typeStyles.ui,
+  textAlign: 'left',
+  padding: `${hds.space.px8} ${hds.space.px12}`,
+  borderRadius: hds.borderRadius[8],
+  background: 'var(--semantic-color-surface-raised)',
+  color: 'var(--semantic-color-content-primary)',
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+  cursor: 'pointer',
+};
+
 const s = {
   page: {
     display: 'flex',
@@ -374,26 +386,6 @@ const s = {
     maxWidth: '360px',
     zIndex: 1000,
   },
-  toastSuccess: {
-    ...hds.typeStyles.ui,
-    textAlign: 'left' as const,
-    padding: `${hds.space.px8} ${hds.space.px12}`,
-    borderRadius: hds.borderRadius[8],
-    background: 'var(--semantic-color-surface-raised)',
-    border: '1px solid var(--semantic-color-feedback-success)',
-    color: 'var(--semantic-color-content-primary)',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-    cursor: 'pointer',
-  },
-  toastDanger: {
-    ...hds.typeStyles.ui,
-    textAlign: 'left' as const,
-    padding: `${hds.space.px8} ${hds.space.px12}`,
-    borderRadius: hds.borderRadius[8],
-    background: 'var(--semantic-color-surface-raised)',
-    border: '1px solid var(--semantic-color-feedback-error)',
-    color: 'var(--semantic-color-content-primary)',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-    cursor: 'pointer',
-  },
+  toastSuccess: { ...TOAST_BASE, border: '1px solid var(--semantic-color-feedback-success)' },
+  toastDanger: { ...TOAST_BASE, border: '1px solid var(--semantic-color-feedback-error)' },
 } satisfies Record<string, CSSProperties>;
