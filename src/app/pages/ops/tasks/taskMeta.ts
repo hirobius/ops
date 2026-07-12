@@ -59,6 +59,75 @@ export function matchesCategory(t: Task, category: TaskCategory): boolean {
   return category === 'all' || CATEGORY_PREDICATES[category](t);
 }
 
+// ─── Card chip taxonomy (ops#158/#138) ───────────────────────────────────────
+// The card face carries a deliberate hierarchy, not a flat sticker strip:
+//   1. ONE leading priority chip (priorityChip)
+//   2. the work-state phase badge (deriveWorkState, rendered in TaskRow)
+//   3. only the routing/automation labels that change what happens next
+//      (cardLabelTags) — GitHub taxonomy labels are noise on an action board.
+
+export type PriorityChip = { label: string; tone: ChipTone };
+
+const P_LABEL_TONE: Record<LabelPriority, ChipTone> = {
+  p0: 'danger',
+  p1: 'warning',
+  p2: 'neutral',
+  p3: 'neutral',
+};
+
+/**
+ * The single leading priority chip for a card: the p0–p3 label first (the fleet
+ * scale), else the legacy DB priority word. Null when the task has neither, so
+ * the slot simply collapses. Kept separate from the label chips so priority is
+ * always in the same position at the same weight.
+ */
+export function priorityChip(t: Task): PriorityChip | null {
+  const lp = labelPriority(t);
+  if (lp) return { label: lp.toUpperCase(), tone: P_LABEL_TONE[lp] };
+  if (t.priority) return { label: t.priority.toUpperCase(), tone: priorityTone(t.priority) };
+  return null;
+}
+
+// Already surfaced elsewhere on the card, so never re-rendered as a generic chip:
+//   PHASE_TAGS → the work-state phase badge · PRIORITY_TAGS → the priority chip.
+const PHASE_TAGS = new Set(['ralph-ready', 'ralph-wip', 'ralph-parked', 'needs-adrian', 'backlog']);
+const PRIORITY_TAGS = new Set(['p0', 'p1', 'p2', 'p3']);
+// GitHub type/triage taxonomy — the title prefix (feat/fix/chore) and the
+// board's own axes already convey this; as chips they only add visual noise.
+const TAXONOMY_TAGS = new Set([
+  'bug',
+  'chore',
+  'enhancement',
+  'feature',
+  'docs',
+  'documentation',
+  'design-system',
+  'triage',
+  'question',
+  'duplicate',
+  'wontfix',
+  'invalid',
+  'help wanted',
+]);
+const TAXONOMY_PREFIXES = ['epic:', 'area:', 'status:'];
+
+/**
+ * The labels worth a chip on the card face: routing/automation signals
+ * (needs-human, ralph-auto, ralph-approved, and any unrecognised custom label),
+ * minus the ones already shown as the phase badge or priority chip, minus the
+ * GitHub taxonomy noise. Order is preserved.
+ */
+export function cardLabelTags(tags: string[] | null | undefined): string[] {
+  if (!Array.isArray(tags)) return [];
+  return tags.filter(
+    (t) =>
+      !PHASE_TAGS.has(t) &&
+      !PRIORITY_TAGS.has(t) &&
+      !TAXONOMY_TAGS.has(t) &&
+      !TAXONOMY_PREFIXES.some((p) => t.startsWith(p)),
+  );
+}
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEK_MS = 7 * DAY_MS;
 

@@ -15,6 +15,8 @@ import {
   matchesCategory,
   TASK_CATEGORIES,
   labelPriority,
+  priorityChip,
+  cardLabelTags,
   type GroupBy,
 } from './taskMeta';
 import type { Task } from './types';
@@ -263,6 +265,48 @@ describe('matchesCategory — routing/readiness filter', () => {
     for (const c of TASK_CATEGORIES) {
       expect(() => matchesCategory(task({ tags: ['backlog'] }), c)).not.toThrow();
     }
+  });
+});
+
+describe('priorityChip — one leading priority chip', () => {
+  it('prefers the p0–p3 label, upper-cased, toned p0=danger p1=warning', () => {
+    expect(priorityChip(task({ tags: ['p0'] }))).toEqual({ label: 'P0', tone: 'danger' });
+    expect(priorityChip(task({ tags: ['p1', 'enhancement'] }))).toEqual({
+      label: 'P1',
+      tone: 'warning',
+    });
+    expect(priorityChip(task({ tags: ['p2'] }))?.label).toBe('P2');
+  });
+  it('falls back to the legacy DB priority word when no p-label', () => {
+    expect(priorityChip(task({ priority: 'high' }))).toEqual({ label: 'HIGH', tone: 'danger' });
+  });
+  it('is null when the task has neither', () => {
+    expect(priorityChip(task({ tags: ['backlog'] }))).toBeNull();
+  });
+});
+
+describe('cardLabelTags — routing/automation chips only', () => {
+  it('keeps routing + automation labels', () => {
+    expect(cardLabelTags(['needs-human', 'ralph-auto', 'ralph-approved'])).toEqual([
+      'needs-human',
+      'ralph-auto',
+      'ralph-approved',
+    ]);
+  });
+  it('drops phase, priority, and GitHub taxonomy noise', () => {
+    expect(
+      cardLabelTags(['ralph-ready', 'needs-adrian', 'backlog', 'p2', 'chore', 'enhancement', 'bug']),
+    ).toEqual([]);
+  });
+  it('drops prefixed taxonomy (epic:/area:/status:) but keeps unknown custom labels', () => {
+    expect(cardLabelTags(['epic:tailwind', 'area:figma', 'status:deferred', 'ralph-auto'])).toEqual([
+      'ralph-auto',
+    ]);
+    expect(cardLabelTags(['some-custom-label'])).toEqual(['some-custom-label']);
+  });
+  it('is empty for null/absent tags', () => {
+    expect(cardLabelTags(null)).toEqual([]);
+    expect(cardLabelTags(undefined)).toEqual([]);
   });
 });
 

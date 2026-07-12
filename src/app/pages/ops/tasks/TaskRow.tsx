@@ -1,21 +1,25 @@
-/* hds-bypass: ops-internal page. Inline styles intentional for ops dashboard. */
+/* hds-bypass: ops-internal page. Structure is HDS Card slot anatomy; the few
+ * remaining inline styles are the quiet footer-meta text + the bespoke
+ * multi-select control (no DS checkbox-as-toggle primitive fits this use). */
 
 /**
- * TaskRow — one presentational board row (ops#136).
+ * TaskRow — one task as an HDS Card (ops#158/#138).
  *
- * Information hierarchy, in order of operator value:
- *   1. title line — issue #, title (links to the GitHub issue: dispatch_url,
- *      else source_url — ops#156)
- *   2. chip line — state first (the derived work-state phase, ops#135), then the
- *      scheduling facts the operator tracks by (priority / due / effort, toned),
- *      then remaining labels, then routing (tier·model) and provenance ("no
- *      Ralph" for personal repos)
- *   3. meta line — provenance + freshness, deliberately quiet
- * Actions: ONE primary (Dispatch / Re-dispatch, or Reopen when done) plus the
- * governed ⋯ menu. Everything else moved into the menu.
+ * Hierarchy, top to bottom:
+ *   1. metadata slot — the decision signals in a fixed order: a leading
+ *      priority chip (P0–P3), the derived work-state phase badge, an optional
+ *      due chip, then only the routing/automation labels that change what
+ *      happens next (cardLabelTags). GitHub taxonomy labels (chore/enhancement/
+ *      bug/backlog/epic:*…) are dropped — noise on an action board.
+ *   2. title — issue #, linked title (dispatch_url, else source_url, ops#156).
+ *   3. footer — quiet provenance/freshness on the left; the ONE primary action
+ *      (Dispatch / Re-dispatch, or Reopen) + governed ⋯ menu on the right.
+ *
+ * The card's BORDER TONE is the work-state signal (#158) — so the phase is a
+ * quiet reinforcing badge, never the loudest thing on the card.
  */
 
-import { Badge, Button } from '@hirobius/design-system';
+import { Badge, Button, Card, Cluster } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import type { ComponentProps, CSSProperties } from 'react';
 import { deriveWorkState, WORK_STATE_TONE } from '../../../../../lib/tasks/work-state.mjs';
@@ -24,38 +28,39 @@ import {
   isNoRalphSource,
   taskRef,
   issueLinkFor,
-  priorityTone,
+  priorityChip,
+  cardLabelTags,
   dueToneNow,
   relTimeNow,
 } from './taskMeta';
 import { TaskActionsMenu } from './TaskActionsMenu';
 
-// Stay in lockstep with the DS Badge contract instead of shadowing it.
+// Stay in lockstep with the DS contracts instead of shadowing them.
 type BadgeTone = NonNullable<ComponentProps<typeof Badge>['tone']>;
+type CardTone = NonNullable<ComponentProps<typeof Card>['tone']>;
 
-// Tags folded into the derived work-state phase (ops#135) — no longer rendered
-// as their own chips, so "done"/"blocked"/"dispatched" aren't encoded twice.
-// `backlog` is the phase's fallback (work-state.mjs step 9): whenever the label
-// is present the phase badge already shows the row's state (backlog, or a more
-// specific one that outranks it), so a separate `backlog` chip was pure
-// duplication — most visibly "backlog backlog" on plain backlog rows.
-const STATE_TAGS = new Set([
-  'ralph-ready',
-  'ralph-wip',
-  'ralph-parked',
-  'needs-adrian',
-  'backlog',
-]);
+// The card border tone per work-state — the border IS the state signal (#158).
+// WorkState carries an 'inProgress' badge tone that CardTone lacks, so the
+// in-flight phases map to 'info'; finished/backlog stay neutral (a quiet
+// border, not a shout).
+const WORK_STATE_CARD_TONE: Record<string, CardTone> = {
+  done: 'neutral',
+  'needs-adrian': 'danger',
+  parked: 'warning',
+  blocked: 'danger',
+  wip: 'info',
+  dispatched: 'info',
+  queued: 'info',
+  ready: 'success',
+  backlog: 'neutral',
+};
 
-// Remaining label-borne chips (GitHub labels sync into tags on import) that
-// the phase badge doesn't absorb — approval/auto markers and priority/type labels.
+// Tone per routing/automation chip. cardLabelTags already dropped the noise, so
+// anything unrecognised falls through as a neutral custom label.
 const TAG_TONE: Record<string, BadgeTone> = {
+  'needs-human': 'warning',
   'ralph-auto': 'info',
   'ralph-approved': 'success',
-  p0: 'danger',
-  p1: 'warning',
-  bug: 'danger',
-  blocked: 'warning',
 };
 
 export interface TaskRowProps {
@@ -70,72 +75,75 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
   const dispatched = !!t.dispatch_url;
   const ref = taskRef(t);
   const issueLink = issueLinkFor(t);
-  const tags = t.tags ?? [];
-  const flags = t.import_flags ?? [];
-  const dTone = dueToneNow(t.due);
   const workState = deriveWorkState(t);
-  const labelTags = tags.filter((tag) => !STATE_TAGS.has(tag));
+  const cardTone = WORK_STATE_CARD_TONE[workState] ?? 'neutral';
+  const pChip = priorityChip(t);
+  const dTone = dueToneNow(t.due);
+  const labelTags = cardLabelTags(t.tags);
 
+  // Quiet footer line: provenance + routing facts + freshness, deliberately low
+  // contrast so it never competes with the title or the decision chips.
   const metaParts = [t.source];
   if (t.phase) metaParts.push(t.phase);
   if (t.owner) metaParts.push(`@${t.owner}`);
+  if (t.tier) metaParts.push(t.tier);
+  if (t.model) metaParts.push(t.model);
+  if (t.effort) metaParts.push(`effort ${t.effort}`);
+  if (t.claimed_by) metaParts.push(t.claimed_by);
+  for (const f of t.import_flags ?? []) metaParts.push(f);
   const updated = relTimeNow(t.updated_at);
   if (updated) metaParts.push(`updated ${updated}`);
 
   return (
-    <li style={s.row}>
-      {ref && (
-        <button
-          type="button"
-          aria-pressed={isSelected}
-          onClick={() => onToggleSelect(t.key)}
-          style={isSelected ? s.checkOn : s.check}
-          title={isSelected ? 'Deselect' : `Select ${ref}`}
-        >
-          {isSelected ? '✓' : ''}
-        </button>
-      )}
-      <div style={s.rowMain}>
-        <div style={s.titleLine}>
+    <Card as="li" bordered tone={cardTone} padding="none" style={s.card}>
+      <Card.Header
+        metadata={
+          <Cluster gap="tight" align="center">
+            {ref && (
+              <button
+                type="button"
+                aria-pressed={isSelected}
+                onClick={() => onToggleSelect(t.key)}
+                style={isSelected ? s.checkOn : s.check}
+                title={isSelected ? 'Deselect' : `Select ${ref}`}
+              >
+                {isSelected ? '✓' : ''}
+              </button>
+            )}
+            {pChip && <Badge tone={pChip.tone as BadgeTone}>{pChip.label}</Badge>}
+            <Badge tone={(WORK_STATE_TONE[workState] as BadgeTone) ?? 'neutral'}>{workState}</Badge>
+            {t.due && dTone && <Badge tone={dTone}>due {t.due}</Badge>}
+            {labelTags.map((tag) => (
+              <Badge key={tag} tone={TAG_TONE[tag] ?? 'neutral'}>
+                {tag}
+              </Badge>
+            ))}
+            {isNoRalphSource(t.source) && (
+              <Badge
+                tone="warning"
+                title="Personal repo — the Ralph loop only runs in hirobius repos"
+              >
+                no Ralph
+              </Badge>
+            )}
+          </Cluster>
+        }
+      >
+        <Card.Title style={s.title}>
           {ref && <span style={s.num}>#{ref.slice(ref.indexOf('#') + 1)}</span>}
           {issueLink ? (
             <a href={issueLink} target="_blank" rel="noreferrer" style={s.titleLink}>
               {t.title} ↗
             </a>
           ) : (
-            <span style={s.title}>{t.title}</span>
+            <span>{t.title}</span>
           )}
-        </div>
-        <div style={s.badgeLine}>
-          <Badge tone={(WORK_STATE_TONE[workState] as BadgeTone) ?? 'neutral'}>{workState}</Badge>
-          {t.priority && <Badge tone={priorityTone(t.priority)}>P:{t.priority}</Badge>}
-          {t.due && dTone && <Badge tone={dTone}>due {t.due}</Badge>}
-          {t.effort && <Badge tone="neutral">E:{t.effort}</Badge>}
-          {labelTags.map((tag) => (
-            <Badge key={tag} tone={TAG_TONE[tag] ?? 'neutral'}>
-              {tag}
-            </Badge>
-          ))}
-          {t.tier && <Badge tone="neutral">{t.tier}</Badge>}
-          {t.model && <Badge tone="neutral">{t.model}</Badge>}
-          {isNoRalphSource(t.source) && (
-            <Badge
-              tone="warning"
-              title="Personal repo — the Ralph loop only runs in hirobius repos"
-            >
-              no Ralph
-            </Badge>
-          )}
-          {flags.map((f) => (
-            <Badge key={f} tone="neutral">
-              {f}
-            </Badge>
-          ))}
-          {t.claimed_by && <span style={s.claim}>{t.claimed_by}</span>}
-        </div>
+        </Card.Title>
+      </Card.Header>
+
+      <Card.Footer style={s.footer}>
         <span style={s.meta}>{metaParts.join('  ·  ')}</span>
-      </div>
-      <div style={s.rowAside}>
+        <span style={s.spacer} />
         {t.status === 'done' ? (
           <Button
             size="sm"
@@ -161,69 +169,42 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
           </Button>
         )}
         <TaskActionsMenu task={t} busy={busy} onAction={onAction} />
-      </div>
-    </li>
+      </Card.Footer>
+    </Card>
   );
 }
 
 const s = {
-  row: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: hds.space.px16,
-    flexWrap: 'wrap' as const,
-    padding: `${hds.space.px8} 0`,
-    borderBottom: '1px solid var(--semantic-color-border-default)',
-  },
-  rowMain: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: hds.space.px4,
+  card: { listStyle: 'none' },
+  title: {
+    ...hds.typeStyles.ui,
+    margin: 0,
     minWidth: 0,
-    flex: '1 1 18rem',
-  },
-  titleLine: {
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: hds.space.px8,
-    minWidth: 0,
-    flexWrap: 'wrap' as const,
   },
   num: {
     fontFamily: hds.monoFamily,
     fontSize: hds.fontSize.xs,
     color: 'var(--semantic-color-content-secondary)',
     fontVariantNumeric: 'tabular-nums',
+    marginRight: hds.space.px8,
   },
-  title: { ...hds.typeStyles.ui, color: 'var(--semantic-color-content-primary)' },
   titleLink: {
-    ...hds.typeStyles.ui,
     color: 'var(--semantic-color-content-primary)',
     textDecoration: 'none',
   },
-  badgeLine: {
+  footer: {
     display: 'flex',
     alignItems: 'center',
-    gap: hds.space.px4,
+    gap: hds.space.px8,
     flexWrap: 'wrap' as const,
   },
   meta: {
     fontFamily: hds.monoFamily,
     fontSize: hds.fontSize.xs,
     color: 'var(--semantic-color-content-secondary)',
+    minWidth: 0,
   },
-  claim: {
-    fontFamily: hds.monoFamily,
-    fontSize: hds.fontSize.xs,
-    color: 'var(--semantic-color-content-secondary)',
-  },
-  rowAside: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: hds.space.px8,
-    flexWrap: 'wrap' as const,
-  },
+  spacer: { flex: 1 },
   check: {
     width: hds.space.px20,
     height: hds.space.px20,

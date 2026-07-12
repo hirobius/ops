@@ -14,10 +14,10 @@
  * "Copy refs" subsystem lives in useTaskSelection; the operator ordering /
  * grouping / chip-tone logic is pure and unit-tested in taskMeta.ts.
  *
- * DS note: everything used here (Badge, Button, Menu, SegmentedControl, Tag)
- * exists in BOTH @hirobius/design-system 0.11 and 0.13. Adopting the
- * 0.13-only static.css layer is deferred until the #127/#133 bump merges
- * (blocked on the ralph-gate engine outage, ops#144).
+ * DS note: on @hirobius/design-system 0.13. Rows are HDS Cards with slot
+ * anatomy + a work-state-toned border (TaskRow, ops#158); page chrome uses
+ * Badge / Button / Menu / SegmentedControl / Tag. Remaining inline styles are
+ * ops-internal layout glue (hds-bypass), not restyled DS primitives.
  */
 
 import { useMemo, useState } from 'react';
@@ -341,5 +341,6 @@ const s = {
     padding: 0,
     display: 'flex',
     flexDirection: 'column' as const,
+    gap: hds.space.px8,
   },
 } satisfies Record<string, CSSProperties>;
