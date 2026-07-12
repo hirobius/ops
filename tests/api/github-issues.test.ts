@@ -206,18 +206,53 @@ describe('makeGitHubPort().findRalphPr', () => {
   });
 
   it('throws an actionable error on 401/403', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue({
-        ok: false,
-        status: 401,
-        headers: { get: () => null },
-        text: async () => '',
-      });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      headers: { get: () => null },
+      text: async () => '',
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(
       makeGitHubPort().findRalphPr({ owner: 'hirobius', repo: 'ops', issueNumber: 137 }),
     ).rejects.toThrow(/GITHUB_TOKEN/);
+  });
+});
+
+describe('makeGitHubPort().addLabel — pull request URLs (ops#137 review finding)', () => {
+  beforeEach(() => {
+    vi.stubEnv('GITHUB_TOKEN', 'test-token');
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it('labels a PR via its /pull/N URL (PRs are issues to the labels API)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(pageResponse([]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await makeGitHubPort().addLabel({
+      issueUrl: 'https://github.com/hirobius/ops/pull/154',
+      label: 'ralph-approved',
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://api.github.com/repos/hirobius/ops/issues/154/labels');
+  });
+
+  it('still labels a plain issue URL unchanged', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(pageResponse([]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await makeGitHubPort().addLabel({
+      issueUrl: 'https://github.com/hirobius/ops/issues/99',
+      label: 'ralph-ready',
+    });
+
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://api.github.com/repos/hirobius/ops/issues/99/labels');
   });
 });
