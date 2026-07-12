@@ -262,3 +262,34 @@
 - Gate green: typecheck + test (525 passed, incl. 3 new) + lint.
 - Files: src/app/pages/ops/tasks/{taskMeta.ts,taskMeta.test.ts,TaskRow.tsx}.
 - Branch ralph/issue-156-issue-link-fallback.
+
+## Issue #99 — importer reconcile (attempt 3, github:*-scoped, non-destructive)
+Prior attempts #101/#114 rejected: listOpenIssues() was unpaginated (fixed
+separately, ops#143 — lib/github/issues.mjs now follows Link rel=next up to
+5 pages and THROWS on truncation past the cap, so a truncated live set can
+never reach the reconcile). This attempt adds the second guard the review
+comments required + the reconcile itself, per the 2026-07-11 cockpit design
+notes on the issue.
+- lib/tasks/reconcile-github-tasks.mjs (new): pure `reconcileGithubTasks(existingKeys, liveKeys)`
+  Set-diff, and `reconcileGuard(existingKeys, liveKeys)` — refuses to retire
+  on an empty-live-set-while-stored-keys-exist, or a >=5-key retire batch
+  that's >50% of stored keys (mass-retire). Guard runs before any retire call.
+- lib/supabase/tasks.mjs: added `listGithubTaskKeys` (scoped `source LIKE
+  'github:%'`, excludes deleted + already-done) and `retireTasks` (soft
+  action: flips `status: 'done'`, not deleted_at — per the design notes'
+  "board lifecycle: card flips to done when the issue closes" decision,
+  which supersedes #114's deleted_at approach).
+- api/tasks.ts importIssuesHandler: now list -> map -> upsert -> list stored
+  github:* keys -> guard -> diff -> retire -> 200 { imported, retired,
+  reconcile: 'ok'|'skipped:<reason>' }. `deps.github` injectable (mirrors
+  applyTaskAction) so the wiring test needs no env/fetch stub.
+- Tests: tests/api/reconcile-github-tasks.test.ts (9, pure helper incl. the
+  issue's exact DoD scenario), tests/api/tasks-repo.test.ts (+4 repo-layer),
+  tests/api/import-issues-handler.test.ts (6, handler-level end-to-end wiring
+  incl. empty-live-set skip + mass-retire skip).
+- Gate green: typecheck + 549 tests + lint. Branch:
+  ralph/issue-99-github-tasks-reconcile. Notes for next iteration: none —
+  self-healing property (a false done-flip corrects on the next complete
+  import since mapIssuesToTasks always re-upserts status:'open') is
+  documented in retireTasks' docstring but not separately unit-tested since
+  it's just upsertTasks's existing overwrite-on-conflict behavior.

@@ -8,23 +8,24 @@
 //   - POST /api/route                  → never intercepted (auto-assigner).
 //   - non-GET in general               → never intercepted.
 
-const CACHE_NAME = 'hirobius-ops-v2';
-const APP_SHELL  = ['/', '/ops', '/ops/sessions', '/index.html'];
+// v3: /ops/sessions removed from the shell — the route was retired and the
+// cached entry meant every home-screen launch (manifest start_url) opened on
+// the 404 page. Bumping CACHE_NAME purges the stale shell on installed clients.
+const CACHE_NAME = 'hirobius-ops-v3';
+const APP_SHELL = ['/', '/ops', '/index.html'];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((names) =>
-      Promise.all(
-        names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n))
-      )
-    )
+    caches
+      .keys()
+      .then((names) =>
+        Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n))),
+      ),
   );
   self.clients.claim();
 });
@@ -40,8 +41,7 @@ self.addEventListener('fetch', (event) => {
   // or any request that accepts text/html. Network-first so route additions
   // / removals propagate immediately on the next page load.
   const isNavigation =
-    request.mode === 'navigate' ||
-    (request.headers.get('accept') || '').includes('text/html');
+    request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html');
 
   if (isNavigation) {
     event.respondWith(
@@ -53,7 +53,7 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match(request).then((m) => m || caches.match('/index.html')))
+        .catch(() => caches.match(request).then((m) => m || caches.match('/index.html'))),
     );
     return;
   }
@@ -71,6 +71,6 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
       );
-    })
+    }),
   );
 });
