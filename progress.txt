@@ -360,3 +360,58 @@ opened a PR. Re-verified independently this iteration against current main:
   wired) and docs/ai/orchestration.json (Score A5's source) no longer exists
   — both flagged by the prior dispatch as out-of-scope follow-ups, not fixed
   here.
+
+## Issue #67 — investigate: B6 OSV/npm-audit score drift 100->95
+Origin: docs/ai/handoff-2026-05-06-late.md "Open question #3" — during the
+initial B6 wiring session, the first regen showed 100 (0 critical/0 high),
+the final regen of the same session showed 95 (implies exactly 1 high
+appeared). Never investigated; carried into the board as t_5f36efeb.
+- computeB6() (scripts/generate-strength-report.mjs) does a *live*
+  `pnpm audit --json` network call on every run — it is not reading a fixed
+  snapshot. docs/security/osv-report.json (its cache) is gitignored and was
+  never committed, so the exact advisory behind the 2026-05-06 95 reading is
+  unrecoverable — there is no historical artifact to diff.
+- Ran `pnpm audit --json` fresh (2026-07-12, this sandbox, full registry
+  reachability, 3x for stability): consistently 0 critical / 24 high / 20
+  moderate / 11 low. That's a *lower* real score than either 100 or 95 —
+  clamped to 0 under the existing formula (100 - 20*critical - 5*high).
+  `pnpm audit --prod --json` (production deps only) shows 0 critical / 4
+  high, all four on `react-router@7.13.0` (pinned exact in package.json),
+  all four advisories disclosed 2026-06-03/04 — weeks after the original
+  100->95 reading, so they cannot be what caused it. The other 20 high
+  entries are devDependency/build-tooling transitive deps (undici, ws, vite,
+  minimatch, tmp, fast-uri, basic-ftp, @cyclonedx/cyclonedx-npm), oldest
+  dated 2026-02-18 — also all postdate nothing, i.e. some already existed by
+  2026-05-06 and should have already been counted then. That inconsistency
+  (95 in May vs 0-clamped in July, no dependency changes needed to explain
+  the delta) points at *audit completeness varying with the sandbox's live
+  network reachability to the npm registry at run time*, not a real security
+  regression that happened between the two May regens.
+- Conclusion (documented reason, not restored): B6 is inherently volatile
+  by design — it queries a live, constantly-updated external advisory
+  database on every run with only a 60s timeout and silent fallback to
+  stale cache on failure (see computeB6 code). Drift between regens,
+  including downward drift, is expected behavior, not a bug — added a code
+  comment at the call site (ops#67) so future sessions don't re-chase this
+  as a regression without checking `raw.notes`/`raw.source` first.
+- Did NOT scope computeB6 to `--prod` to "fix" the number down to a smaller
+  count: audit-deps.mjs, generate-security-posture.mjs and
+  .github/workflows/quality.yml all intentionally audit the whole tree
+  (prod+dev), and changing B6 alone to `--prod` would silently diverge from
+  that established repo-wide convention rather than follow it.
+- Real, current, actionable finding surfaced along the way: production dep
+  `react-router@7.13.0` has 4 unpatched high-severity CVEs (RCE via
+  turbo-stream deserialization, DoS via unbounded path expansion, DoS via
+  reflected input in single-fetch, XSS in unstable RSC redirect handling),
+  fixed by 7.15.0/7.15.1; latest is 7.18.1. That's a real security posture
+  gap independent of the original drift question, but a multi-minor version
+  bump on the app's routing library isn't a safe mechanical Ralph edit — it
+  needs a changelog read + smoke test. Filed as a separate follow-up:
+  ops#182 (fix(security): bump react-router past 4 unpatched high-severity
+  CVEs), not attempted in this PR.
+- Gate green: typecheck + tests + lint (docs/comment-only change, no logic
+  touched). Branch: ralph/issue-67-b6-osv-audit-drift. Notes for next
+  iteration: ops#182 is the real remediation; B6's honest current score
+  (given react-router alone) is 80 prod-scoped / 0 clamped whole-tree — both
+  far from the "95" that prompted this investigation, so don't expect
+  `pnpm strength` to read 95 or 100 again until #182 lands.
