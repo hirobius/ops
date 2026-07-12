@@ -70,6 +70,19 @@ for (const route of ALL_ROUTES) {
     await page.setViewportSize(DESKTOP);
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(`${e.message}`));
+    // Authenticate past OpsGate so the audited surface is the REAL dashboard,
+    // not the production login screen. The suite runs against `vite preview`
+    // (a production build, so DEV_BYPASS = import.meta.env.DEV is false) and
+    // that server has no /api/ops-me function — without this stub, OpsGate
+    // renders the login/checking `<main>` for every /ops route and the layout
+    // audit is vacuous on the entire dashboard (BS1c).
+    await page.route('**/api/ops-me', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ authed: true }),
+      }),
+    );
     await page.goto(route);
     await page.waitForLoadState('networkidle');
     // Allow one animation frame for layout to settle after hydration.

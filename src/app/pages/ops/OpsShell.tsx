@@ -29,7 +29,7 @@ export function OpsShell() {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen(prev => !prev);
+        setOpen((prev) => !prev);
       }
     }
 
@@ -39,7 +39,15 @@ export function OpsShell() {
 
   return (
     <>
-      <Outlet />
+      {/* `<main>` landmark: the routed dashboard content. Serves a11y (a named
+          main region) AND the layout-integrity auditor, which scopes its
+          collision/overflow/stretch checks to `document.querySelector('main')`
+          — without this landmark the auditor early-returns and those checks
+          are vacuous on every /ops route (BS1c). The Cmd-K modal and FAB are
+          fixed-position overlays and stay outside main by design. */}
+      <main>
+        <Outlet />
+      </main>
 
       {/* Global Cmd-K / Ctrl-K modal */}
       <OpsCommandPalette open={open} onOpenChange={setOpen} />

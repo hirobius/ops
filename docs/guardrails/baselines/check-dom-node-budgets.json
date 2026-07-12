@@ -16,7 +16,7 @@
     "src/app/pages/ops/ClientsIndexPage.tsx": 41,
     "src/app/pages/ops/Disclosure.tsx": 8,
     "src/app/pages/ops/OpsCommandPalette.tsx": 5,
-    "src/app/pages/ops/OpsShell.tsx": 4,
+    "src/app/pages/ops/OpsShell.tsx": 5,
     "src/app/pages/ops/PageHeader.tsx": 8,
     "src/app/pages/ops/SessionInputForm.tsx": 25,
     "src/app/pages/ops/agentic-os/AgenticOSPage.tsx": 32,
@@ -50,6 +50,6 @@
     "src/app/pages/portal/ClientPortalPage.tsx": 54,
     "src/app/routes.tsx": 29
   },
-  "updatedAt": "2026-07-12T17:54:01.330Z",
-  "sha": "7de082c"
+  "updatedAt": "2026-07-12T18:57:55.657Z",
+  "sha": "9998eae"
 }
