@@ -7,7 +7,7 @@
  * Request:  { key: string, action: Action, actor?: string }
  *   Action = 'done' | 'reopen' | 'claim' | 'unclaim' | 'trash' | 'restore' | 'dispatch'
  *          | 'auto_on' | 'auto_off' | 'queue' | 'unqueue'
- *          | 'ralph_ready_on' | 'ralph_ready_off' | 'ralph_approve'
+ *          | 'ralph_ready_on' | 'ralph_ready_off' | 'ralph_approve' | 'ralph_dispatch'
  *
  * 'auto_on' / 'auto_off' flip `auto_ok` (migration 0008) — the Fleet
  * auto-dispatch opt-in (epic #41). Slice 2's dispatcher only picks up rows
@@ -35,6 +35,18 @@
  * `ralph-approved`, arming the ralph-gate workflow's human-approved
  * auto-merge from the board. A PR that's already merged/closed responds
  * `{ ok: true, note }` rather than erroring; no matching PR is a 404.
+ *
+ * 'ralph_dispatch' (ops#113, "Run Ralph") resolves the task's
+ * `github:<owner>/<repo>#<n>` key into a workflow_dispatch call on that
+ * repo's `ralph.yml` with `inputs.issue = <n>` — nothing on the row changes
+ * (it's a fire, not a write), but the task must still exist (404 otherwise,
+ * same as every other action here). An explicit issue number overrides
+ * ralph.yml's single-flight + priority guard, so this genuinely jumps the
+ * queue. Needs GITHUB_TOKEN scoped with "Actions: write" (distinct from the
+ * "Issues: write" the rest of this route needs) — 401/403/404 responds 502
+ * naming that permission. Returns `{ ok: true, runUrl? }`; runUrl points at the
+ * workflow's Actions page (GitHub's dispatch response has no run id to hand
+ * back synchronously).
  *
  * In dev, the same contract is served by scripts/tasks-middleware.mjs.
  * Success:  { ok: true, ...extra } · Error: { error, code? } 400/401/404/405/500/503

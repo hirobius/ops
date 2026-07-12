@@ -343,3 +343,79 @@ describe('makeGitHubPort() — Ralph fleet reads (ops#112)', () => {
     ]);
   });
 });
+
+describe('makeGitHubPort().dispatchWorkflow (ops#113 — "Run Ralph" board action)', () => {
+  beforeEach(() => {
+    vi.stubEnv('GITHUB_TOKEN', 'test-token');
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it('POSTs a workflow_dispatch event with ref + inputs and returns a runUrl', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 204,
+      headers: { get: () => null },
+      text: async () => '',
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await makeGitHubPort()!.dispatchWorkflow({
+      owner: 'hirobius',
+      repo: 'ops',
+      workflow: 'ralph.yml',
+      inputs: { issue: '113' },
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, opts] = fetchMock.mock.calls[0];
+    expect(url).toBe(
+      'https://api.github.com/repos/hirobius/ops/actions/workflows/ralph.yml/dispatches',
+    );
+    expect(opts.method).toBe('POST');
+    expect(JSON.parse(opts.body)).toEqual({ ref: 'main', inputs: { issue: '113' } });
+    expect(result).toEqual({
+      runUrl: 'https://github.com/hirobius/ops/actions/workflows/ralph.yml',
+    });
+  });
+
+  it('throws an actionable error on 401/403 (token missing Actions: write)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      headers: { get: () => null },
+      text: async () => '',
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      makeGitHubPort()!.dispatchWorkflow({
+        owner: 'hirobius',
+        repo: 'ops',
+        workflow: 'ralph.yml',
+        inputs: { issue: '113' },
+      }),
+    ).rejects.toThrow(/GITHUB_TOKEN/);
+  });
+
+  it('throws an actionable error on 404 (private-repo permission errors are obscured as 404)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      headers: { get: () => null },
+      text: async () => '',
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      makeGitHubPort()!.dispatchWorkflow({
+        owner: 'hirobius',
+        repo: 'ops',
+        workflow: 'ralph.yml',
+        inputs: { issue: '113' },
+      }),
+    ).rejects.toThrow(/GITHUB_TOKEN/);
+  });
+});
