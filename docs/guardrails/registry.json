@@ -106,6 +106,19 @@
       "scope": "full-tree"
     },
     {
+      "id": "audit-orphan-modules",
+      "description": "Orphan-module sweeper. Wraps knip --reporter json's unused-files category (parsed.files) and reports each as a warn-severity violation — source files no entry point or import graph reaches. Never blocks (warn only, same precedent as audit-deps). Run via 'pnpm audit:orphan-modules'.",
+      "severity": "warn",
+      "gateScript": "scripts/audit-orphan-modules.mjs",
+      "fixturePath": "fixtures/audit-orphan-modules",
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "pnpm-meta",
+      "supportsJson": true
+    },
+    {
       "id": "audit-pages",
       "description": "Token compliance auditor for page surfaces. This is intentionally looser than audit-components.mjs — reusable components must be strict, pages must still avoid raw design values but can keep justified editorial layout.",
       "severity": "warn",
