@@ -67,7 +67,8 @@ export type TaskAction =
   | 'unqueue'
   | 'ralph_ready_on'
   | 'ralph_ready_off'
-  | 'ralph_approve';
+  | 'ralph_approve'
+  | 'ralph_requeue';
 
 export interface TasksResponse {
   tasks: Task[];

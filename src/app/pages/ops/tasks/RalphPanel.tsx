@@ -1,19 +1,25 @@
 /* hds-bypass: ops-internal page. Inline styles intentional for ops dashboard. */
 
 /**
- * RalphPanel — live fleet view of the autonomous loop (ops#112).
+ * RalphPanel — live fleet view of the autonomous loop (ops#112, extended by
+ * ops#141).
  *
- * Two lanes, straight from GitHub via GET /api/tasks?ralph=1 (labels are the
- * loop's state store): "now" — the most recent Ralph run per fleet repo — and
+ * Four lanes, straight from GitHub via GET /api/tasks?ralph=1 (labels are the
+ * loop's state store): "now" — the most recent Ralph run per fleet repo —
  * "queue" — eligible ralph-ready issues in the EXACT deterministic selector
- * order (lib/tasks/ralph-queue.mjs mirrors ralph/next.sh). Per-repo fetch
- * failures render as loud per-repo lines; the healthy repos still show.
+ * order (lib/tasks/ralph-queue.mjs mirrors ralph/next.sh) — "parked" — issues
+ * the loop gave up on (ralph-parked/needs-adrian), each with the reason from
+ * its latest 🅿️ comment and a one-tap re-queue — and "PRs" — open Ralph PRs,
+ * badged wedged when classifyWedged (lib/tasks/ralph-wedge.mjs, mirrors
+ * ralph/lib.sh's classify_wedged) says the gate failed or stalled ≥3h. Per-repo
+ * fetch failures render as loud per-repo lines; the healthy repos still show.
  */
 
-import { Badge } from '@hirobius/design-system';
+import { Badge, Button } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
-import type { ComponentProps, CSSProperties } from 'react';
+import { useState, type ComponentProps, type CSSProperties } from 'react';
 import { usePoll } from '../../../lib/usePoll';
+import { opsApi } from '../../../lib/opsApi';
 import { relTimeNow } from './taskMeta';
 
 type BadgeTone = NonNullable<ComponentProps<typeof Badge>['tone']>;
@@ -39,9 +45,29 @@ interface RalphQueueItem {
   prio: string | null;
   wip: boolean;
 }
+interface RalphParkedItem {
+  repo: string;
+  number: number;
+  title: string;
+  url: string;
+  key: string;
+  reason: string | null;
+  needsAdrian: boolean;
+  needsDod: boolean;
+}
+interface RalphPrItem {
+  repo: string;
+  number: number;
+  title: string;
+  url: string;
+  wedged: boolean;
+  wedgeReason: string | null;
+}
 interface RalphStatus {
   runs: RalphRepoRuns[];
   queue: RalphQueueItem[];
+  parked: RalphParkedItem[];
+  prs: RalphPrItem[];
   errors: { repo: string; error: string }[];
 }
 
@@ -74,7 +100,7 @@ function runChip(entry: RalphRepoRuns): { tone: BadgeTone; label: string; url?: 
 }
 
 export function RalphPanel() {
-  const { data, isOffline, isInitialLoading } = usePoll<RalphStatus>(
+  const { data, isOffline, isInitialLoading, refetch } = usePoll<RalphStatus>(
     async (signal) => {
       const res = await fetch('/api/tasks?ralph=1', { signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -82,6 +108,24 @@ export function RalphPanel() {
     },
     { intervalMs: POLL_MS, offlineIntervalMs: POLL_MS * 2, requestTimeoutMs: 15_000 },
   );
+
+  const [requeuing, setRequeuing] = useState<ReadonlySet<string>>(new Set());
+
+  async function requeue(key: string) {
+    setRequeuing((prev) => new Set(prev).add(key));
+    try {
+      await opsApi.post('/api/task-action', { key, action: 'ralph_requeue' });
+    } catch {
+      /* surfaced on next poll */
+    } finally {
+      setRequeuing((prev) => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
+      refetch();
+    }
+  }
 
   return (
     <section style={s.panel} aria-labelledby="ralph-panel-label" data-role="ralph-panel">
@@ -145,6 +189,65 @@ export function RalphPanel() {
           {data.queue.length > QUEUE_SHOWN && (
             <span style={s.quiet}>+{data.queue.length - QUEUE_SHOWN} more in queue</span>
           )}
+
+          {data.prs.length > 0 && (
+            <ol style={s.queue} aria-label="Open Ralph PRs" data-role="ralph-prs">
+              {data.prs.map((pr) => (
+                <li key={`${pr.repo}#${pr.number}`} style={s.queueItem}>
+                  <a href={pr.url} target="_blank" rel="noreferrer" style={s.queueLink}>
+                    <span style={s.queueNum}>
+                      {shortRepo(pr.repo)}#{pr.number}
+                    </span>{' '}
+                    {pr.title}
+                  </a>
+                  {pr.wedged && (
+                    <span title={pr.wedgeReason ?? undefined}>
+                      <Badge tone="danger">wedged</Badge>
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          )}
+
+          <div style={s.parkedSection} data-role="ralph-parked-lane">
+            <span style={s.label}>Parked</span>
+            <ol style={s.queue}>
+              {data.parked.map((p) => (
+                <li key={p.key} style={s.parkedItem}>
+                  <div style={s.parkedRow}>
+                    <a href={p.url} target="_blank" rel="noreferrer" style={s.queueLink}>
+                      <span style={s.queueNum}>
+                        {shortRepo(p.repo)}#{p.number}
+                      </span>{' '}
+                      {p.title}
+                    </a>
+                    <Badge tone={p.needsAdrian ? 'warning' : 'neutral'}>
+                      {p.needsAdrian ? 'needs-adrian' : 'ralph-parked'}
+                    </Badge>
+                    {p.needsAdrian ? (
+                      <span style={s.quiet}>
+                        {p.needsDod
+                          ? 'needs a DoD checklist first — add a `- [ ]` acceptance/DoD section, then re-queue.'
+                          : 'needs a human decision before re-queuing.'}
+                      </span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={requeuing.has(p.key)}
+                        onClick={() => void requeue(p.key)}
+                      >
+                        Re-queue
+                      </Button>
+                    )}
+                  </div>
+                  {p.reason && <p style={s.parkedReason}>{p.reason}</p>}
+                </li>
+              ))}
+              {data.parked.length === 0 && <li style={s.quiet}>nothing parked</li>}
+            </ol>
+          </div>
         </div>
       )}
     </section>
@@ -216,5 +319,26 @@ const s = {
     fontFamily: hds.monoFamily,
     color: 'var(--semantic-color-content-secondary)',
     fontVariantNumeric: 'tabular-nums',
+  },
+  parkedSection: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: hds.space.px4,
+    borderTop: '1px solid var(--semantic-color-border-default)',
+    paddingTop: hds.space.px8,
+  },
+  parkedItem: { display: 'flex', flexDirection: 'column' as const, gap: hds.space.px4 },
+  parkedRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: hds.space.px8,
+    minWidth: 0,
+    flexWrap: 'wrap' as const,
+  },
+  parkedReason: {
+    margin: 0,
+    fontFamily: hds.monoFamily,
+    fontSize: hds.fontSize.xs,
+    color: 'var(--semantic-color-content-secondary)',
   },
 } satisfies Record<string, CSSProperties>;

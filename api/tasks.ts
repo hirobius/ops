@@ -49,6 +49,8 @@ import {
 import { listTasks, upsertTasks, listGithubTaskKeys, retireTasks } from '../lib/supabase/tasks.mjs';
 import { mapIssuesToTasks } from '../lib/tasks/import-issues.mjs';
 import { orderRalphQueue } from '../lib/tasks/ralph-queue.mjs';
+import { parseParkedReason, hasDodMarker } from '../lib/tasks/ralph-parked.mjs';
+import { classifyWedged } from '../lib/tasks/ralph-wedge.mjs';
 import { reconcileGithubTasks, reconcileGuard } from '../lib/tasks/reconcile-github-tasks.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
 
@@ -70,11 +72,13 @@ export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Prom
 }
 
 /**
- * GET /api/tasks?ralph=1 — the fleet Ralph panel's read (ops#112): recent runs
- * + the selector-ordered queue per fleet repo, straight from GitHub (labels ARE
- * the loop's state store; Supabase isn't consulted). Folded in here to stay
- * under the Vercel Hobby function cap. Per-repo GitHub failures surface as
- * `errors` entries (fail-soft per repo, loud per message).
+ * GET /api/tasks?ralph=1 — the fleet Ralph panel's read (ops#112, extended by
+ * #141): recent runs + the selector-ordered queue + the parked inbox
+ * (ralph-parked/needs-adrian issues with their latest 🅿️ reason) + open Ralph
+ * PRs classified wedged/healthy — all per fleet repo, straight from GitHub
+ * (labels ARE the loop's state store; Supabase isn't consulted). Folded in
+ * here to stay under the Vercel Hobby function cap. Per-repo GitHub failures
+ * surface as `errors` entries (fail-soft per repo, loud per message).
  */
 export async function ralphStatusHandler(): Promise<HandlerResult> {
   const gh = makeGitHubPort();
@@ -90,15 +94,52 @@ export async function ralphStatusHandler(): Promise<HandlerResult> {
     };
   }
   try {
-    const [runs, ready] = await Promise.all([
+    const [runs, ready, parkedByRepo, prsByRepo] = await Promise.all([
       gh.listRalphRuns({ repos: FLEET_REPOS }),
       gh.listRalphReadyIssues({ repos: FLEET_REPOS }),
+      gh.listParkedIssues({ repos: FLEET_REPOS }),
+      gh.listOpenRalphPrs({ repos: FLEET_REPOS }),
     ]);
     const queue = orderRalphQueue(ready.flatMap((r) => r.issues));
-    const errors = [...runs, ...ready]
+
+    const parked = parkedByRepo.flatMap((r) =>
+      r.issues.map((i) => {
+        const needsAdrian = i.labels.includes('needs-adrian');
+        return {
+          repo: i.repo,
+          number: i.number,
+          title: i.title,
+          url: i.url,
+          key: `github:${i.repo}#${i.number}`,
+          reason: parseParkedReason(i.parkedComment),
+          needsAdrian,
+          needsDod: needsAdrian && !hasDodMarker(i.body),
+        };
+      }),
+    );
+
+    const now = Date.now();
+    const prs = prsByRepo.flatMap((r) =>
+      r.prs.map((pr) => {
+        const { wedged, reason } = classifyWedged(
+          { gate: pr.gate, updatedAt: pr.updated_at },
+          now,
+        );
+        return {
+          repo: r.repo,
+          number: pr.number,
+          title: pr.title,
+          url: pr.url,
+          wedged,
+          wedgeReason: reason,
+        };
+      }),
+    );
+
+    const errors = [...runs, ...ready, ...parkedByRepo, ...prsByRepo]
       .filter((e) => e.error)
       .map((e) => ({ repo: e.repo, error: e.error as string }));
-    return { status: 200, body: { runs, queue, errors } };
+    return { status: 200, body: { runs, queue, parked, prs, errors } };
   } catch (err) {
     return { status: 502, body: { error: messageOf(err), code: 'GITHUB_RALPH_STATUS_FAILED' } };
   }

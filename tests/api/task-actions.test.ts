@@ -288,6 +288,105 @@ describe('applyTaskAction — ralph_ready_on/off (injected GitHub port)', () => 
   });
 });
 
+describe('applyTaskAction — ralph_requeue (injected GitHub port, ops#141)', () => {
+  const parked = {
+    key: 'github:hirobius/ops#141',
+    title: 'Parked issue',
+    dispatch_url: 'https://github.com/hirobius/ops/issues/141',
+    tags: ['triage', 'ralph-parked'],
+  };
+
+  it('503s when no port is configured (no GITHUB_TOKEN)', async () => {
+    const { sb } = makeSb({ task: parked });
+    expect(
+      await applyTaskAction(sb, { key: parked.key, action: 'ralph_requeue' }, { github: null }),
+    ).toMatchObject({ status: 503, body: { code: 'ENV_MISSING_GITHUB_TOKEN' } });
+  });
+
+  it('404s when the task is missing', async () => {
+    const { sb } = makeSb({ task: null });
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    expect(
+      await applyTaskAction(sb, { key: 'nope', action: 'ralph_requeue' }, { github }),
+    ).toMatchObject({ status: 404 });
+  });
+
+  it('400s when the task has no linked GitHub issue', async () => {
+    const { sb } = makeSb({
+      task: { key: parked.key, title: 'x', dispatch_url: null, source_url: null, tags: [] },
+    });
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    expect(
+      await applyTaskAction(sb, { key: parked.key, action: 'ralph_requeue' }, { github }),
+    ).toMatchObject({ status: 400 });
+  });
+
+  it('removes ralph-parked and adds ralph-ready via the port, mirrored into tags', async () => {
+    const { sb, updates } = makeSb({ task: parked });
+    const calls: Array<{ op: string; issueUrl: string; label: string }> = [];
+    const github = {
+      addLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push({ op: 'add', ...i });
+        return {};
+      },
+      removeLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push({ op: 'remove', ...i });
+        return {};
+      },
+    };
+    const result = await applyTaskAction(sb, { key: parked.key, action: 'ralph_requeue' }, { github });
+    expect(calls).toEqual([
+      { op: 'remove', issueUrl: parked.dispatch_url, label: 'ralph-parked' },
+      { op: 'add', issueUrl: parked.dispatch_url, label: 'ralph-ready' },
+    ]);
+    expect(result).toEqual({ status: 200, body: { ok: true, tags: ['triage', 'ralph-ready'] } });
+    expect(updates.at(-1)).toEqual({ tags: ['triage', 'ralph-ready'] });
+  });
+
+  it('is idempotent on an already-queued (ralph-ready) issue', async () => {
+    const alreadyQueued = { ...parked, tags: ['triage', 'ralph-ready'] };
+    const { sb, updates } = makeSb({ task: alreadyQueued });
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    const result = await applyTaskAction(sb, { key: parked.key, action: 'ralph_requeue' }, { github });
+    expect(result).toEqual({ status: 200, body: { ok: true, tags: ['triage', 'ralph-ready'] } });
+    expect(updates.at(-1)).toEqual({ tags: ['triage', 'ralph-ready'] });
+  });
+
+  it('falls back to source_url when dispatch_url is unset', async () => {
+    const imported = {
+      key: parked.key,
+      title: 'x',
+      dispatch_url: null,
+      source_url: 'https://github.com/hirobius/ops/issues/141',
+      tags: ['ralph-parked'],
+    };
+    const { sb } = makeSb({ task: imported });
+    const calls: Array<{ issueUrl: string }> = [];
+    const github = {
+      addLabel: async (i: { issueUrl: string }) => {
+        calls.push(i);
+        return {};
+      },
+      removeLabel: async () => ({}),
+    };
+    await applyTaskAction(sb, { key: parked.key, action: 'ralph_requeue' }, { github });
+    expect(calls[0].issueUrl).toBe(imported.source_url);
+  });
+
+  it('502s when the port throws', async () => {
+    const { sb } = makeSb({ task: parked });
+    const github = {
+      addLabel: async () => ({}),
+      removeLabel: async () => {
+        throw new Error('HTTP 502');
+      },
+    };
+    const result = await applyTaskAction(sb, { key: parked.key, action: 'ralph_requeue' }, { github });
+    expect(result.status).toBe(502);
+    expect((result.body as { code: string }).code).toBe('GITHUB_LABEL_FAILED');
+  });
+});
+
 describe('applyTaskAction — ralph_approve (injected GitHub port, ops#137)', () => {
   const task = { key: 'github:hirobius/ops#137', title: 'Approve merge action' };
 
