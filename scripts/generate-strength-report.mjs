@@ -377,13 +377,11 @@ function computeB2() {
         g.id.includes('hardcoded-fonts') ||
         g.id.includes('hardcoded-spacing'),
     ),
-    deps: gates.some(
-      (g) =>
-        g.id.includes('token-rebake') ||
-        g.id.includes('token-renames') ||
-        g.id.includes('manifest-drift'),
-    ),
-    license: false, // no license-check gate registered
+    // audit-deps (pnpm audit wrapper) / check-circular-deps cover dependency hygiene.
+    deps: gates.some((g) => g.id.includes('deps')),
+    // check-licenses blocks copyleft/restrictive licenses — was miscounted as
+    // permanently uncovered even after this gate was registered (#66).
+    license: gates.some((g) => g.id.includes('license')),
     accessibility: gates.some(
       (g) =>
         g.id.includes('aria-labels') || g.id.includes('focus-states') || g.id.includes('contrast'),

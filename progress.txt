@@ -329,3 +329,34 @@ fix but never opened a PR. Re-verified independently this iteration:
   ralph/issue-64-kimi-gitignore-cleanup. Notes for next iteration: recommend
   closing #64 as superseded/moot once this PR lands — filed as a bug against
   code that predates the current architecture.
+
+## Issue #66 — investigate: B2 OWASP SAMM score regression 88->75
+A prior @claude dispatch on this issue (2026-07-12, branch
+claude/issue-66-20260712-1854) already root-caused and fixed this but never
+opened a PR. Re-verified independently this iteration against current main:
+- computeB2() in scripts/generate-strength-report.mjs has 8 binary category
+  detectors (secrets, types, lint, deps, license, accessibility, perf, wcag);
+  score = covered/8 x 100. Two detectors had gone stale vs the live registry:
+  `deps` matched retired design-token-drift gate ids (token-rebake,
+  token-renames, manifest-drift) that don't exist in this consumer repo's
+  registry at all; `license` was hardcoded `false` with a stale "no
+  license-check gate registered" comment even though check-licenses is
+  registered and active.
+- Confirmed via `node -e` against docs/guardrails/registry.json: no gate id
+  contains token-rebake/token-renames/manifest-drift (0 matches, so `deps`
+  was always false); check-licenses and audit-deps both exist today.
+- Fix: `deps` now matches any gate id containing "deps" (audit-deps,
+  check-circular-deps); `license` now matches any gate id containing
+  "license" (check-licenses). Ran `pnpm strength` and confirmed B2 recomputes
+  to exactly 88 (7/8 — only `perf` stays uncovered, a real gap: no
+  pre-commit perf-budget gate exists, audit-bundle is manual-only).
+- Scope note: computeB2()/the whole script has no exported surface and zero
+  existing test coverage (scripts/__tests__/ covers other scripts but not
+  this one) — did not retrofit test scaffolding for a 2-line detector fix;
+  verified by running the real script against the real registry instead.
+- Gate green: typecheck + 577 tests + lint. Branch:
+  ralph/issue-66-b2-samm-detectors. Notes for next iteration: strength-history
+  history hasn't snapshotted since 2026-05-06 (daily-snapshot hook never
+  wired) and docs/ai/orchestration.json (Score A5's source) no longer exists
+  — both flagged by the prior dispatch as out-of-scope follow-ups, not fixed
+  here.
