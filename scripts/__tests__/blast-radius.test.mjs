@@ -23,14 +23,14 @@ function tmpRoot() {
 
 // Runs the hook exactly as Claude Code would: pipe the PreToolUse payload on
 // stdin, read stdout. Returns null when the hook emits nothing.
-function runHook(root, filePath, input = 'not json') {
+function runHook(root, filePath) {
   const payload = JSON.stringify({
     hook_event_name: 'PreToolUse',
     tool_name: 'Edit',
     tool_input: { file_path: filePath, old_string: 'a', new_string: 'b' },
   });
   const stdout = execFileSync('node', [SCRIPT], {
-    input: input === 'not json' ? payload : input,
+    input: payload,
     env: { ...process.env, BLAST_RADIUS_ROOT: root },
     encoding: 'utf8',
   });

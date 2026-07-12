@@ -24,7 +24,7 @@
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, dirname, relative, basename, extname } from 'node:path';
+import { join, dirname, relative, basename, extname, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -143,7 +143,7 @@ function main() {
   const filePath = payload?.tool_input?.file_path;
   if (!filePath || typeof filePath !== 'string') return;
 
-  const absPath = filePath.startsWith('/') ? filePath : join(ROOT, filePath);
+  const absPath = isAbsolute(filePath) ? filePath : join(ROOT, filePath);
   const context = formatContext(traceBlastRadius(absPath));
   if (context) {
     process.stdout.write(
