@@ -1,21 +1,32 @@
 /**
- * Unit tests for scripts/fleet-watchdog.mjs's pure pieces (#41 Slice 5).
+ * Unit tests for scripts/fleet-watchdog.mjs (#41 Slice 5, ops#139).
  *
  * `findStale` is pure — no Supabase, no GitHub, no Date-inside (the caller
  * supplies `now`) — so these tests exercise the staleness rule + the
- * re-dispatch/flag decision with plain stub task objects. Live re-dispatch
- * (Supabase writes, @claude issue comments) can't be exercised in this
- * sandbox (network egress blocked + needs GITHUB_TOKEN) — see the session
- * report for the --dry-run verification instead.
+ * re-dispatch/flag decision with plain stub task objects.
+ *
+ * `reDispatch`/`flag` route their actual mutation through
+ * `lib/tasks/actions.mjs::applyTaskAction` (ops#139) rather than writing
+ * Supabase fields directly, so they're exercised here with `applyTaskAction`
+ * mocked — no live Supabase/GitHub/network needed for that part either.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { applyTaskAction } from '../../lib/tasks/actions.mjs';
+import { notifyEvent } from '../../lib/ops/notify.mjs';
+import { appendRun } from '../../lib/ops/run-log.mjs';
 import {
   findStale,
   isMissingColumnError,
+  reDispatch,
+  flag,
   DEFAULT_STALE_HOURS,
   DEFAULT_MAX_RETRIES,
 } from '../fleet-watchdog.mjs';
+
+vi.mock('../../lib/tasks/actions.mjs', () => ({ applyTaskAction: vi.fn() }));
+vi.mock('../../lib/ops/notify.mjs', () => ({ notifyEvent: vi.fn(async () => ({})) }));
+vi.mock('../../lib/ops/run-log.mjs', () => ({ appendRun: vi.fn() }));
 
 const NOW = new Date('2026-07-08T12:00:00.000Z').getTime();
 const HOUR = 3_600_000;
@@ -197,5 +208,85 @@ describe('isMissingColumnError', () => {
 
   it('is false for an unrelated error', () => {
     expect(isMissingColumnError({ code: '23505', message: 'duplicate key value' })).toBe(false);
+  });
+});
+
+/**
+ * `reDispatch`/`flag` used to write `dispatch_count`/`last_dispatched_at`/
+ * `dispatch_status`/`status` directly via `setTaskFields` — a second,
+ * divergent dispatch code path from `lib/tasks/actions.mjs` (ops#139). They
+ * now route every mutation through `applyTaskAction`; these tests spy on it
+ * to pin that seam and assert the notify/run-log side effects still fire.
+ */
+describe('reDispatch — mutates via applyTaskAction, not a direct write (ops#139)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const staleTask = {
+    key: 'github:hirobius/ops#1',
+    title: 'Fix a typo',
+    dispatch_url: 'https://github.com/hirobius/ops/issues/1',
+  };
+
+  it('calls applyTaskAction with the redispatch action + comment/maxRetries, then notifies + logs', async () => {
+    applyTaskAction.mockResolvedValue({ status: 200, body: { ok: true, dispatch_count: 3 } });
+    const sb = {};
+    const github = {};
+    const ok = await reDispatch(sb, github, { task: staleTask, comment: true, maxRetries: 2 });
+    expect(ok).toBe(true);
+    expect(applyTaskAction).toHaveBeenCalledWith(
+      sb,
+      { key: staleTask.key, action: 'redispatch', comment: true, maxRetries: 2 },
+      { github },
+    );
+    expect(notifyEvent).toHaveBeenCalledTimes(1);
+    expect(notifyEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'dispatched', task: staleTask.key, detail: 'retry 3/2' }),
+    );
+    expect(appendRun).toHaveBeenCalledTimes(1);
+    expect(appendRun).toHaveBeenCalledWith(
+      expect.objectContaining({ actor: 'fleet-watchdog', task: staleTask.key, outcome: 're-dispatched' }),
+    );
+  });
+
+  it('returns false and skips notify/log when applyTaskAction fails', async () => {
+    applyTaskAction.mockResolvedValue({ status: 500, body: { error: 'write failed' } });
+    const ok = await reDispatch({}, {}, { task: staleTask, comment: false, maxRetries: 2 });
+    expect(ok).toBe(false);
+    expect(notifyEvent).not.toHaveBeenCalled();
+    expect(appendRun).not.toHaveBeenCalled();
+  });
+});
+
+describe('flag — mutates via applyTaskAction, not a direct write (ops#139)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const exhaustedTask = { key: 'github:hirobius/ops#2', title: 'Rework the auth architecture' };
+
+  it('calls applyTaskAction with the flag action, then notifies + logs', async () => {
+    applyTaskAction.mockResolvedValue({ status: 200, body: { ok: true } });
+    const sb = {};
+    const ok = await flag(sb, { task: exhaustedTask, maxRetries: 2 });
+    expect(ok).toBe(true);
+    expect(applyTaskAction).toHaveBeenCalledWith(sb, { key: exhaustedTask.key, action: 'flag' }, {});
+    expect(notifyEvent).toHaveBeenCalledTimes(1);
+    expect(notifyEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'blocked', task: exhaustedTask.key }),
+    );
+    expect(appendRun).toHaveBeenCalledTimes(1);
+    expect(appendRun).toHaveBeenCalledWith(
+      expect.objectContaining({ actor: 'fleet-watchdog', task: exhaustedTask.key, outcome: 'flagged' }),
+    );
+  });
+
+  it('returns false and skips notify/log when applyTaskAction fails', async () => {
+    applyTaskAction.mockResolvedValue({ status: 500, body: { error: 'write failed' } });
+    const ok = await flag({}, { task: exhaustedTask, maxRetries: 2 });
+    expect(ok).toBe(false);
+    expect(notifyEvent).not.toHaveBeenCalled();
+    expect(appendRun).not.toHaveBeenCalled();
   });
 });

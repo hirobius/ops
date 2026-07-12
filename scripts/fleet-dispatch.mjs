@@ -12,10 +12,14 @@
  *
  * Reuses every piece built in prior slices rather than re-implementing:
  *   - lib/tasks/tier.mjs::routeTask       tier/model routing (Slice 1)
- *   - lib/tasks/actions.mjs::applyTaskAction  the 'dispatch' action already
- *     opens the @claude issue + stamps dispatch_url/claimed_by (Slice 1/pre)
+ *   - lib/tasks/actions.mjs::applyTaskAction  the ONE dispatch-lifecycle write
+ *     seam (ops#139) — the 'dispatch' action opens the @claude issue and
+ *     stamps dispatch_url/claimed_by/claimed_at/dispatch_status/
+ *     last_dispatched_at/dispatch_count; this script never writes those
+ *     columns directly.
  *   - lib/github/issues.mjs::makeGitHubPort   injected GitHub port
- *   - lib/supabase/tasks.mjs::setTaskFields   writes tier/model/dispatch_*
+ *   - lib/supabase/tasks.mjs::setTaskFields   writes tier/model ONLY — the
+ *     routing fields `applyTaskAction('dispatch')` doesn't own
  *   - lib/ops/run-log.mjs::appendRun          run recap (#8)
  *   - lib/ops/notify.mjs::notifyEvent         fleet timeline + Discord (Slice 4)
  *
@@ -24,10 +28,11 @@
  *
  * `--dry-run` is the DEFAULT — it lists eligible tasks + computed tier/model
  * and touches nothing (no writes, no GitHub calls). Pass `--apply` to
- * actually dispatch (write tier/model/dispatch_status back, open the
- * @claude issue, notify + log the run). `--max N` caps dispatches per run
- * (default 3) — both listing and dispatch respect the cap. `--json` prints
- * machine-readable output instead of the human summary.
+ * actually dispatch (write tier/model, open the @claude issue — which stamps
+ * the rest of the dispatch-lifecycle fields — notify + log the run).
+ * `--max N` caps dispatches per run (default 3) — both listing and dispatch
+ * respect the cap. `--json` prints machine-readable output instead of the
+ * human summary.
  *
  * Eligibility: `auto_ok = true AND dispatch_status IS NULL AND status = 'open'`.
  * Already-dispatched rows (dispatch_status set) are never re-picked — the
@@ -243,58 +248,64 @@ async function main() {
 
   for (const { task, tier, model } of selected) {
     if (dispatchedCount >= args.max) break; // guardrail: never exceed --max per run
-
-    const nextCount = (task.dispatch_count ?? 0) + 1;
-    const nowIso = new Date().toISOString();
-
-    const { error: setErr } = await setTaskFields(sb, task.key, {
-      tier,
-      model,
-      dispatch_status: 'dispatched',
-      last_dispatched_at: nowIso,
-      dispatch_count: nextCount,
-    });
-    if (setErr) {
-      console.error(`${task.key}: failed to write routing fields — ${setErr.message}`);
-      continue;
-    }
-
-    const result = await applyTaskAction(
-      sb,
-      { key: task.key, action: 'dispatch', actor: 'fleet-dispatch' },
-      { github },
-    );
-    if (result.status !== 200) {
-      console.error(`${task.key}: dispatch failed — ${result.body?.error ?? 'unknown error'}`);
-      continue;
-    }
-
-    const dispatchUrl = result.body.dispatch_url;
-
-    await notifyEvent({
-      ts: nowIso,
-      kind: 'dispatched',
-      title: `${task.key}: ${task.title}`,
-      detail: `tier=${tier} model=${model}`,
-      url: dispatchUrl,
-      task: task.key,
-    });
-
-    appendRun({
-      ts: nowIso,
-      actor: 'fleet-dispatch',
-      task: task.key,
-      model,
-      tier,
-      outcome: 'dispatched',
-      summary: 'auto-dispatched to @claude fleet',
-    });
-
-    dispatchedCount += 1;
-    console.log(`${task.key}: dispatched — ${dispatchUrl}`);
+    if (await dispatchOne(sb, github, { task, tier, model })) dispatchedCount += 1;
   }
 
   console.log(`\nDispatched ${dispatchedCount}/${selected.length} selected task(s).`);
+}
+
+/**
+ * Dispatch one selected task: stamp its routing fields (tier/model — the one
+ * write this script still owns directly, since `applyTaskAction('dispatch')`
+ * never touches them), then hand every dispatch-lifecycle write
+ * (`dispatch_url`/`claimed_by`/`claimed_at`/`dispatch_status`/
+ * `last_dispatched_at`/`dispatch_count`) to the shared `dispatch` action
+ * (lib/tasks/actions.mjs, ops#139) — one writer per field, no more
+ * pre-stamping `dispatch_status` here just for `dispatch` to stamp it again
+ * a few lines later.
+ */
+export async function dispatchOne(sb, github, { task, tier, model }) {
+  const nowIso = new Date().toISOString();
+
+  const { error: setErr } = await setTaskFields(sb, task.key, { tier, model });
+  if (setErr) {
+    console.error(`${task.key}: failed to write routing fields — ${setErr.message}`);
+    return false;
+  }
+
+  const result = await applyTaskAction(
+    sb,
+    { key: task.key, action: 'dispatch', actor: 'fleet-dispatch' },
+    { github },
+  );
+  if (result.status !== 200) {
+    console.error(`${task.key}: dispatch failed — ${result.body?.error ?? 'unknown error'}`);
+    return false;
+  }
+
+  const dispatchUrl = result.body.dispatch_url;
+
+  await notifyEvent({
+    ts: nowIso,
+    kind: 'dispatched',
+    title: `${task.key}: ${task.title}`,
+    detail: `tier=${tier} model=${model}`,
+    url: dispatchUrl,
+    task: task.key,
+  });
+
+  appendRun({
+    ts: nowIso,
+    actor: 'fleet-dispatch',
+    task: task.key,
+    model,
+    tier,
+    outcome: 'dispatched',
+    summary: 'auto-dispatched to @claude fleet',
+  });
+
+  console.log(`${task.key}: dispatched — ${dispatchUrl}`);
+  return true;
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

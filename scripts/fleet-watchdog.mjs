@@ -18,7 +18,11 @@
  *
  * Reuses every piece prior slices already built rather than re-implementing:
  *   - lib/supabase/server.mjs::getServiceClient   service-role client
- *   - lib/supabase/tasks.mjs::listTasks/setTaskFields   board reads/writes
+ *   - lib/supabase/tasks.mjs::listTasks           board reads
+ *   - lib/tasks/actions.mjs::applyTaskAction      the ONE dispatch-lifecycle
+ *     write seam (ops#139) — `redispatch`/`flag` actions do the actual
+ *     `dispatch_count`/`last_dispatched_at`/`dispatch_status`/`status` writes;
+ *     this script no longer touches those columns directly.
  *   - lib/ops/notify.mjs::notifyEvent             fleet timeline + Discord
  *   - lib/ops/run-log.mjs::appendRun              run recap (#8)
  *   - lib/github/issues.mjs::makeGitHubPort       injected GitHub port
@@ -45,7 +49,8 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getServiceClient } from '../lib/supabase/server.mjs';
-import { listTasks, setTaskFields } from '../lib/supabase/tasks.mjs';
+import { listTasks } from '../lib/supabase/tasks.mjs';
+import { applyTaskAction } from '../lib/tasks/actions.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
 import { appendRun } from '../lib/ops/run-log.mjs';
 import { notifyEvent } from '../lib/ops/notify.mjs';
@@ -198,40 +203,31 @@ function fmtDecisions(decisions) {
     .join('\n');
 }
 
-/** Re-dispatch one stale task: bump dispatch_count, restamp, notify + log. */
-async function reDispatch(sb, github, { task, comment, maxRetries }) {
-  const nowIso = new Date().toISOString();
-  const nextCount = (Number.isFinite(task.dispatch_count) ? task.dispatch_count : 0) + 1;
-
-  const { error } = await setTaskFields(sb, task.key, {
-    dispatch_count: nextCount,
-    last_dispatched_at: nowIso,
-    dispatch_status: 'dispatched',
-  });
-  if (error) {
-    console.error(`${task.key}: failed to write re-dispatch fields — ${error.message}`);
+/**
+ * Re-dispatch one stale task via the `redispatch` action (lib/tasks/actions.mjs,
+ * ops#139) — the field writes (dispatch_count/last_dispatched_at/dispatch_status)
+ * and the optional re-ping comment both happen behind that one seam; this
+ * function only notifies + logs the run recap around it.
+ */
+export async function reDispatch(sb, github, { task, comment, maxRetries }) {
+  const result = await applyTaskAction(
+    sb,
+    { key: task.key, action: 'redispatch', comment, maxRetries },
+    { github },
+  );
+  if (result.status !== 200) {
+    console.error(`${task.key}: failed to re-dispatch — ${result.body?.error ?? 'unknown error'}`);
     return false;
   }
-
-  if (comment) {
-    if (!github) {
-      console.log(
-        `${task.key}: --comment requested but GITHUB_TOKEN is not set — skipping the ` +
-          `issue comment (fields still re-dispatched). Set it at ${VERCEL_ENV_URL}.`,
-      );
-    } else if (!task.dispatch_url) {
-      console.log(`${task.key}: --comment requested but no dispatch_url on record — skipping.`);
-    } else {
-      try {
-        await github.commentOnIssue({
-          issueUrl: task.dispatch_url,
-          body: `@claude this dispatch went stale (no PR after the staleness window) — re-kicking, retry ${nextCount}/${maxRetries}.`,
-        });
-      } catch (err) {
-        console.log(`${task.key}: --comment failed (${err.message}) — fields still re-dispatched.`);
-      }
-    }
+  if (result.body.commentError) {
+    const hint = /GITHUB_TOKEN not set/.test(result.body.commentError)
+      ? ` Set it at ${VERCEL_ENV_URL}.`
+      : '';
+    console.log(`${task.key}: ${result.body.commentError}${hint}`);
   }
+
+  const nowIso = new Date().toISOString();
+  const nextCount = result.body.dispatch_count;
 
   await notifyEvent({
     ts: nowIso,
@@ -254,18 +250,18 @@ async function reDispatch(sb, github, { task, comment, maxRetries }) {
   return true;
 }
 
-/** Flag one stale task that's exhausted its retries: block it, notify + log. */
-async function flag(sb, { task, maxRetries }) {
-  const nowIso = new Date().toISOString();
-
-  const { error } = await setTaskFields(sb, task.key, {
-    dispatch_status: 'failed',
-    status: 'blocked',
-  });
-  if (error) {
-    console.error(`${task.key}: failed to write flag fields — ${error.message}`);
+/**
+ * Flag one stale task that's exhausted its retries via the `flag` action
+ * (lib/tasks/actions.mjs, ops#139) — block it, notify + log.
+ */
+export async function flag(sb, { task, maxRetries }) {
+  const result = await applyTaskAction(sb, { key: task.key, action: 'flag' }, {});
+  if (result.status !== 200) {
+    console.error(`${task.key}: failed to flag — ${result.body?.error ?? 'unknown error'}`);
     return false;
   }
+
+  const nowIso = new Date().toISOString();
 
   await notifyEvent({
     ts: nowIso,

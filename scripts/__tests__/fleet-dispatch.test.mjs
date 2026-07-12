@@ -9,8 +9,22 @@
  * real-Supabase verification instead.
  */
 
-import { describe, it, expect } from 'vitest';
-import { selectAndRoute, isMissingColumnError, DEFAULT_MAX } from '../fleet-dispatch.mjs';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { setTaskFields } from '../../lib/supabase/tasks.mjs';
+import { applyTaskAction } from '../../lib/tasks/actions.mjs';
+import { notifyEvent } from '../../lib/ops/notify.mjs';
+import { appendRun } from '../../lib/ops/run-log.mjs';
+import {
+  selectAndRoute,
+  isMissingColumnError,
+  dispatchOne,
+  DEFAULT_MAX,
+} from '../fleet-dispatch.mjs';
+
+vi.mock('../../lib/supabase/tasks.mjs', () => ({ setTaskFields: vi.fn() }));
+vi.mock('../../lib/tasks/actions.mjs', () => ({ applyTaskAction: vi.fn() }));
+vi.mock('../../lib/ops/notify.mjs', () => ({ notifyEvent: vi.fn(async () => ({})) }));
+vi.mock('../../lib/ops/run-log.mjs', () => ({ appendRun: vi.fn() }));
 
 function task(overrides = {}) {
   return {
@@ -152,5 +166,66 @@ describe('isMissingColumnError', () => {
 
   it('is false for an unrelated error', () => {
     expect(isMissingColumnError({ code: '23505', message: 'duplicate key value' })).toBe(false);
+  });
+});
+
+/**
+ * `dispatchOne` used to pre-stamp `dispatch_status`/`last_dispatched_at`/
+ * `dispatch_count` via `setTaskFields` immediately before calling
+ * `applyTaskAction('dispatch')`, which stamps `dispatch_status` (plus
+ * `claimed_by`/`claimed_at`/the same lifecycle fields) again — a double-write
+ * in one loop iteration (ops#139). It now writes ONLY the routing fields
+ * (`tier`/`model`) directly and hands the rest to `applyTaskAction` — these
+ * tests spy on both calls to pin that split.
+ */
+describe('dispatchOne — writes routing fields directly, dispatches via applyTaskAction (ops#139)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const selected = { key: 'github:hirobius/ops#1', title: 'Fix a typo', dispatch_count: 0 };
+
+  it('writes only tier/model via setTaskFields, then dispatches via applyTaskAction, then notifies + logs', async () => {
+    setTaskFields.mockResolvedValue({ error: null });
+    applyTaskAction.mockResolvedValue({
+      status: 200,
+      body: { ok: true, dispatch_url: 'https://github.com/hirobius/ops/issues/1' },
+    });
+    const sb = {};
+    const github = {};
+    const ok = await dispatchOne(sb, github, { task: selected, tier: 'mechanical', model: 'sonnet' });
+    expect(ok).toBe(true);
+
+    expect(setTaskFields).toHaveBeenCalledTimes(1);
+    expect(setTaskFields).toHaveBeenCalledWith(sb, selected.key, { tier: 'mechanical', model: 'sonnet' });
+    // No dispatch-lifecycle field (dispatch_status/last_dispatched_at/dispatch_count) is
+    // in the direct write — applyTaskAction('dispatch') owns those exclusively.
+    expect(setTaskFields.mock.calls[0][2]).not.toHaveProperty('dispatch_status');
+    expect(setTaskFields.mock.calls[0][2]).not.toHaveProperty('last_dispatched_at');
+    expect(setTaskFields.mock.calls[0][2]).not.toHaveProperty('dispatch_count');
+
+    expect(applyTaskAction).toHaveBeenCalledWith(
+      sb,
+      { key: selected.key, action: 'dispatch', actor: 'fleet-dispatch' },
+      { github },
+    );
+    expect(notifyEvent).toHaveBeenCalledTimes(1);
+    expect(appendRun).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call applyTaskAction when the routing-field write fails', async () => {
+    setTaskFields.mockResolvedValue({ error: { message: 'write failed' } });
+    const ok = await dispatchOne({}, {}, { task: selected, tier: 'mechanical', model: 'sonnet' });
+    expect(ok).toBe(false);
+    expect(applyTaskAction).not.toHaveBeenCalled();
+  });
+
+  it('returns false and skips notify/log when applyTaskAction fails', async () => {
+    setTaskFields.mockResolvedValue({ error: null });
+    applyTaskAction.mockResolvedValue({ status: 502, body: { error: 'boom' } });
+    const ok = await dispatchOne({}, {}, { task: selected, tier: 'mechanical', model: 'sonnet' });
+    expect(ok).toBe(false);
+    expect(notifyEvent).not.toHaveBeenCalled();
+    expect(appendRun).not.toHaveBeenCalled();
   });
 });
