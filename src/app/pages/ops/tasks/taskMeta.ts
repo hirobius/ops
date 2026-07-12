@@ -12,6 +12,53 @@ import type { Task } from './types';
 export type GroupBy = 'lane' | 'priority' | 'due' | 'status';
 export type ChipTone = 'success' | 'neutral' | 'warning' | 'danger';
 
+/**
+ * Routing/readiness categories the board can filter by (ops triage vocabulary).
+ * These are label-borne (GitHub labels sync into `tags` on import), NOT the
+ * derived work-state — an operator filters by the label they actually applied
+ * ("show me everything needing me", "everything still backlog"). `all` is the
+ * no-op pass-through. Membership is not exclusive: a `backlog`+`ralph-ready`
+ * issue matches both `backlog` and `ready`.
+ */
+export type TaskCategory =
+  | 'all'
+  | 'ready'
+  | 'needs-adrian'
+  | 'needs-human'
+  | 'blocked'
+  | 'backlog'
+  | 'parked';
+
+export const TASK_CATEGORIES: TaskCategory[] = [
+  'all',
+  'ready',
+  'needs-adrian',
+  'needs-human',
+  'blocked',
+  'backlog',
+  'parked',
+];
+
+function hasTag(t: Task, tag: string): boolean {
+  return Array.isArray(t.tags) && t.tags.includes(tag);
+}
+
+const CATEGORY_PREDICATES: Record<Exclude<TaskCategory, 'all'>, (t: Task) => boolean> = {
+  ready: (t) => hasTag(t, 'ralph-ready'),
+  'needs-adrian': (t) => hasTag(t, 'needs-adrian'),
+  'needs-human': (t) => hasTag(t, 'needs-human'),
+  // `blocked` lives as either the status column (tracker rows) or a GitHub
+  // label (imported issues keep status='open'), so honour both.
+  blocked: (t) => t.status === 'blocked' || hasTag(t, 'blocked'),
+  backlog: (t) => hasTag(t, 'backlog'),
+  parked: (t) => hasTag(t, 'ralph-parked'),
+};
+
+/** True when a task belongs to the given category (`all` always matches). */
+export function matchesCategory(t: Task, category: TaskCategory): boolean {
+  return category === 'all' || CATEGORY_PREDICATES[category](t);
+}
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEK_MS = 7 * DAY_MS;
 

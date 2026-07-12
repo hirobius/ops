@@ -31,7 +31,13 @@ import { useTaskActions } from './useTaskActions';
 import { useTaskSelection } from './useTaskSelection';
 import { TaskRow } from './TaskRow';
 import { RalphPanel } from './RalphPanel';
-import { groupTasksNow, type GroupBy } from './taskMeta';
+import {
+  groupTasksNow,
+  matchesCategory,
+  TASK_CATEGORIES,
+  type GroupBy,
+  type TaskCategory,
+} from './taskMeta';
 import type { TaskStatus } from './types';
 
 type StatusFilter = TaskStatus | 'all';
@@ -66,6 +72,7 @@ export default function TasksPage() {
   const { selected, toggleSelect, clearSelection, copySelectedRefs } = useTaskSelection(tasks);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<TaskCategory>('all');
   const [groupBy, setGroupBy] = useState<GroupBy>('lane');
 
   const sourceFilters = useMemo(() => {
@@ -75,7 +82,10 @@ export default function TasksPage() {
     return ['all', ...[...seen].sort()];
   }, [tasks]);
 
-  const filtered = useMemo(() => {
+  // Rows in scope for the category chips (status + source applied, category NOT)
+  // so each chip's count reflects "how many, given the other filters" and the
+  // active category never zeroes out its own denominator.
+  const categoryScope = useMemo(() => {
     if (!tasks) return [];
     return tasks.filter(
       (t) =>
@@ -83,6 +93,19 @@ export default function TasksPage() {
         (sourceFilter === 'all' || t.source === sourceFilter),
     );
   }, [tasks, statusFilter, sourceFilter]);
+
+  const categoryCounts = useMemo(() => {
+    const counts = {} as Record<TaskCategory, number>;
+    for (const c of TASK_CATEGORIES) {
+      counts[c] = categoryScope.filter((t) => matchesCategory(t, c)).length;
+    }
+    return counts;
+  }, [categoryScope]);
+
+  const filtered = useMemo(
+    () => categoryScope.filter((t) => matchesCategory(t, categoryFilter)),
+    [categoryScope, categoryFilter],
+  );
 
   const groups = useMemo(() => groupTasksNow(filtered, groupBy), [filtered, groupBy]);
 
@@ -135,6 +158,20 @@ export default function TasksPage() {
         <Button size="sm" variant="secondary" onClick={refetch}>
           refresh
         </Button>
+      </div>
+
+      <div style={s.sourceRow}>
+        <span style={s.groupLabel}>category</span>
+        {TASK_CATEGORIES.map((c) => (
+          <Tag
+            key={c}
+            active={c === categoryFilter}
+            onClick={() => setCategoryFilter(c)}
+            aria-label={`Filter by ${c}`}
+          >
+            {c} {categoryCounts[c] ?? 0}
+          </Tag>
+        ))}
       </div>
 
       <RalphPanel />

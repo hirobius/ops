@@ -12,6 +12,8 @@ import {
   groupTasks,
   priorityTone,
   dueTone,
+  matchesCategory,
+  TASK_CATEGORIES,
   type GroupBy,
 } from './taskMeta';
 import type { Task } from './types';
@@ -187,6 +189,39 @@ describe('groupTasks', () => {
   it('accepts every GroupBy without throwing', () => {
     for (const g of ['lane', 'priority', 'due', 'status'] as GroupBy[]) {
       expect(() => groupTasks(tasks, g, NOW)).not.toThrow();
+    }
+  });
+});
+
+describe('matchesCategory — routing/readiness filter', () => {
+  it('all matches everything, including untagged rows', () => {
+    expect(matchesCategory(task({}), 'all')).toBe(true);
+    expect(matchesCategory(task({ tags: ['bug'] }), 'all')).toBe(true);
+  });
+  it('matches the label-borne categories from tags', () => {
+    expect(matchesCategory(task({ tags: ['ralph-ready', 'p2'] }), 'ready')).toBe(true);
+    expect(matchesCategory(task({ tags: ['needs-adrian'] }), 'needs-adrian')).toBe(true);
+    expect(matchesCategory(task({ tags: ['needs-human'] }), 'needs-human')).toBe(true);
+    expect(matchesCategory(task({ tags: ['backlog'] }), 'backlog')).toBe(true);
+    expect(matchesCategory(task({ tags: ['ralph-parked'] }), 'parked')).toBe(true);
+  });
+  it('blocked matches EITHER the status column OR a blocked label', () => {
+    expect(matchesCategory(task({ status: 'blocked' }), 'blocked')).toBe(true);
+    expect(matchesCategory(task({ status: 'open', tags: ['blocked'] }), 'blocked')).toBe(true);
+    expect(matchesCategory(task({ status: 'open', tags: ['backlog'] }), 'blocked')).toBe(false);
+  });
+  it('is non-exclusive — a backlog+ready row matches both', () => {
+    const t = task({ tags: ['backlog', 'ralph-ready'] });
+    expect(matchesCategory(t, 'backlog')).toBe(true);
+    expect(matchesCategory(t, 'ready')).toBe(true);
+  });
+  it('does not match a category whose label is absent', () => {
+    expect(matchesCategory(task({ tags: ['ralph-ready'] }), 'needs-adrian')).toBe(false);
+    expect(matchesCategory(task({ tags: null }), 'backlog')).toBe(false);
+  });
+  it('every category is accepted without throwing', () => {
+    for (const c of TASK_CATEGORIES) {
+      expect(() => matchesCategory(task({ tags: ['backlog'] }), c)).not.toThrow();
     }
   });
 });

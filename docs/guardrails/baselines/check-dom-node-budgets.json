@@ -43,10 +43,10 @@
     "src/app/pages/ops/tasks/RalphPanel.tsx": 21,
     "src/app/pages/ops/tasks/TaskActionsMenu.tsx": 13,
     "src/app/pages/ops/tasks/TaskRow.tsx": 23,
-    "src/app/pages/ops/tasks/TasksPage.tsx": 30,
+    "src/app/pages/ops/tasks/TasksPage.tsx": 33,
     "src/app/pages/portal/ClientPortalPage.tsx": 54,
     "src/app/routes.tsx": 28
   },
-  "updatedAt": "2026-07-12T07:43:05.903Z",
-  "sha": "f870eed"
+  "updatedAt": "2026-07-12T09:17:25.752Z",
+  "sha": "8716c89"
 }

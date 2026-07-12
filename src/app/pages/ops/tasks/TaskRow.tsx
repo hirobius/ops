@@ -35,7 +35,17 @@ type BadgeTone = NonNullable<ComponentProps<typeof Badge>['tone']>;
 
 // Tags folded into the derived work-state phase (ops#135) — no longer rendered
 // as their own chips, so "done"/"blocked"/"dispatched" aren't encoded twice.
-const STATE_TAGS = new Set(['ralph-ready', 'ralph-wip', 'ralph-parked', 'needs-adrian']);
+// `backlog` is the phase's fallback (work-state.mjs step 9): whenever the label
+// is present the phase badge already shows the row's state (backlog, or a more
+// specific one that outranks it), so a separate `backlog` chip was pure
+// duplication — most visibly "backlog backlog" on plain backlog rows.
+const STATE_TAGS = new Set([
+  'ralph-ready',
+  'ralph-wip',
+  'ralph-parked',
+  'needs-adrian',
+  'backlog',
+]);
 
 // Remaining label-borne chips (GitHub labels sync into tags on import) that
 // the phase badge doesn't absorb — approval/auto markers and priority/type labels.
