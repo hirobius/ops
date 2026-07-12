@@ -42,7 +42,7 @@ BS1a). A visual gate can't be made required until that's stable in CI.
 layout / contrast invariant is blocked from auto-merge in all three repos.
 Children below.
 
-### BS1a — ops: stabilize Playwright browser provisioning (no manual symlinks)
+### BS1a — ops: stabilize Playwright browser provisioning (no manual symlinks) ✅ DONE (2026-07-12, branch claude/hirobius-design-skills-jr28dm)
 **Repo:** ops · **Labels:** `bug`
 
 Playwright resolves a versioned browser path (`chromium_headless_shell-<build>`)
@@ -53,7 +53,7 @@ Fix: detect the installed browser and pass `executablePath` (or set the resolved
 run anywhere with zero manual bridging. **DoD:** fresh remote session runs
 `pnpm test:layout` green with no symlink step; documented in the config.
 
-### BS1b — site-engine: stabilize Playwright browser provisioning
+### BS1b — site-engine: stabilize Playwright browser provisioning ✅ DONE (2026-07-12, same branch)
 **Repo:** site-engine · **Labels:** `bug`
 
 Same failure as BS1a — the `demo-*`/`preview-*` app smoke suites
