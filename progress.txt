@@ -515,3 +515,33 @@ this issue reopened the orphan-sweeper slice specifically)
 - Note for next iteration: prod is still inert for this feature until Adrian
   widens the ops GITHUB_TOKEN scope to include "Actions: write" — documented
   in the PR body and HANDOFF.md, not something this iteration can unblock.
+
+## Issue #138 — p0–p3 priority chips + ralph-auto toggle (label writes)
+- Extended lib/tasks/actions.mjs: new `set_priority` (mutually-exclusive
+  p0-p3 label write, `priority: null` clears) and `ralph_auto_on`/`off`
+  (ralph-auto label toggle, arms ralph-gate auto-merge without a human
+  `ralph_approve` tap) actions.
+- Fixed the `dispatch_url`-only gate: extracted `resolveIssueUrl(task)`
+  (dispatch_url -> source_url fallback, ops#105 shape) and refactored
+  `setRalphReady` into a shared `toggleIssueLabel(sb, key, github, label, on)`
+  used by both ralph_ready_on/off and the new ralph_auto_on/off — so an
+  imported-but-never-dispatched (source_url-only) row is now toggleable for
+  every label action, not just some.
+- Test-first: tests/api/task-actions.test.ts — 35 new cases (503/404/400
+  fail-loud, idempotency, source_url-only success, priority swap p3->p1,
+  clear-all, invalid-priority 400, 502 on port throw). Confirmed red before
+  implementing, green after (50 total in that file, 629 repo-wide).
+- UI: TaskActionsMenu row menu gains an "Auto-merge" toggle + a "Priority"
+  submenu (Menu.Sub/RadioGroup, p0-p3 + Clear) on github:* rows only, per the
+  issue's UI spec. useTaskActions.act now threads an optional payload object
+  into the POST body (`set_priority` needs `{priority}` alongside key/action).
+- DOM-node budget gate ratcheted for TaskActionsMenu.tsx (13->21, the new
+  menu items) via `node scripts/check-dom-node-budgets.mjs --update` —
+  legitimate growth, not a workaround.
+- Gate green: typecheck + 629 tests + lint (ralph/gate.sh). Branch:
+  ralph/issue-138-priority-chips-ralph-auto-toggle.
+- Could NOT run `pnpm test:layout` — Playwright's chromium_headless_shell
+  isn't installed in this sandbox (`/opt/pw-browsers` doesn't exist here) and
+  there's no network access to `pnpm exec playwright install`. Noted in the
+  PR body; a human/CI run with Playwright available should verify layout
+  before merge.
