@@ -373,3 +373,10 @@ fix but never opened a PR. Re-verified independently this iteration:
   follow-ups (currently unlabeled for ralph-* per loop hygiene — a human/
   triage pass should add ralph-ready + priority if they want them picked up
   automatically).
+- Bonus finding while committing this iteration: pre-commit hook's
+  validate-fixture-proof-of-firing.mjs caches non-'pass' fixture results
+  (e.g. check-secrets' legitimate 'skip' when gitleaks isn't installed) and
+  then reports them as "cached failure" on the next run — blocks any commit
+  in a gitleaks-less sandbox until .fixture-proof-cache.json (gitignored,
+  local) is deleted by hand. Unrelated to #65's scope; filed separately as
+  #180 rather than folding into this PR.
