@@ -1,4 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
+import { resolveChromiumExecutable } from './scripts/lib/resolve-playwright-browser.mjs';
+
+// BS1a: in the remote sandbox, point at the pre-installed, version-stable
+// Chromium symlink so the suites run with no manual binary bridging. undefined
+// everywhere else → Playwright's normal browser resolution (CI/local).
+const chromiumExecutable = resolveChromiumExecutable();
 
 export default defineConfig({
   testDir: './tests',
@@ -29,6 +35,12 @@ export default defineConfig({
     timeout: 180_000,
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        ...(chromiumExecutable ? { launchOptions: { executablePath: chromiumExecutable } } : {}),
+      },
+    },
   ],
 });
