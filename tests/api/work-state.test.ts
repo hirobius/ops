@@ -53,6 +53,10 @@ describe('deriveWorkState — precedence rules', () => {
     expect(deriveWorkState(task({ dispatch_status: 'dispatched' }))).toBe('dispatched');
   });
 
+  it('6. dispatch_status=running → dispatched (live poller PR-open state, ops#107)', () => {
+    expect(deriveWorkState(task({ dispatch_status: 'running' }))).toBe('dispatched');
+  });
+
   it('6. claimed_by=claude AND dispatch_url set → dispatched', () => {
     expect(
       deriveWorkState(

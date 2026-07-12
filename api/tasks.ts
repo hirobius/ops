@@ -23,6 +23,12 @@
  *        `github:*` keys; other sources are untouched.
  *        Success: { imported: n, retired: n, reconcile: 'ok' | 'skipped:<reason>' }
  *
+ * GET also resolves live dispatch status (ops#107): every github:*-keyed task
+ * currently `dispatch_status` 'dispatched'/'running' gets its linked PR polled
+ * (lib/tasks/dispatch-status.mjs, TTL-cached + fail-soft) and advanced toward
+ * running/done/failed, persisting the patch to Supabase and reflecting it in
+ * this response so the board never lags a poll cycle behind.
+ *
  * Both methods are service-role + ops-gated, so no Supabase/GitHub credential
  * reaches the browser. In dev, GET is also served by scripts/tasks-middleware.mjs.
  *
@@ -46,10 +52,17 @@ import {
   messageOf,
   type HandlerResult,
 } from '../lib/api/handler.js';
-import { listTasks, upsertTasks, listGithubTaskKeys, retireTasks } from '../lib/supabase/tasks.mjs';
+import {
+  listTasks,
+  upsertTasks,
+  listGithubTaskKeys,
+  retireTasks,
+  updateTask,
+} from '../lib/supabase/tasks.mjs';
 import { mapIssuesToTasks } from '../lib/tasks/import-issues.mjs';
 import { orderRalphQueue } from '../lib/tasks/ralph-queue.mjs';
 import { reconcileGithubTasks, reconcileGuard } from '../lib/tasks/reconcile-github-tasks.mjs';
+import { resolveLiveDispatchStatuses } from '../lib/tasks/dispatch-status.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
 
 const DEFAULT_LIMIT = 1000;
@@ -58,7 +71,11 @@ const MAX_LIMIT = 2000;
 /** The repos whose Ralph loops the board's fleet panel watches (ops#112). */
 const FLEET_REPOS = ['hirobius/ops', 'hirobius/hds', 'hirobius/site-engine'];
 
-export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Promise<HandlerResult> {
+export async function tasksHandler(
+  sb: SupabaseClient,
+  req: VercelRequest,
+  deps: { github?: ReturnType<typeof makeGitHubPort>; now?: number } = {},
+): Promise<HandlerResult> {
   if (pick(req.query['ralph']) === '1') return ralphStatusHandler();
 
   const limit = clampLimit(pick(req.query['limit']));
@@ -66,7 +83,15 @@ export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Prom
 
   const { data, error } = await listTasks(sb, { limit, includeDeleted });
   if (error) return { status: 500, body: { error: error.message } };
-  return { status: 200, body: { tasks: data ?? [] } };
+
+  const github = deps.github !== undefined ? deps.github : makeGitHubPort();
+  const tasks = await resolveLiveDispatchStatuses(data ?? [], {
+    github,
+    now: deps.now ?? Date.now(),
+    writePatch: (key, patch) => updateTask(sb, key, patch),
+  });
+
+  return { status: 200, body: { tasks } };
 }
 
 /**

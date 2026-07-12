@@ -63,6 +63,16 @@ const TAG_TONE: Record<string, BadgeTone> = {
   'ralph-approved': 'success',
 };
 
+// The live dispatch-status poller's badge (ops#107) — only rendered for the
+// states that add information beyond the phase badge above ('dispatched' is
+// already the phase badge's own label; 'done'/'queued' already show as the
+// 'done'/'queued' phase). 'running' says the linked PR is open; 'failed' says
+// it closed unmerged (the phase badge already reads 'blocked' for that case).
+const DISPATCH_BADGE_TONE: Record<string, BadgeTone> = {
+  running: 'info',
+  failed: 'danger',
+};
+
 export interface TaskRowProps {
   task: Task;
   busy: boolean;
@@ -112,6 +122,9 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
             )}
             {pChip && <Badge tone={pChip.tone as BadgeTone}>{pChip.label}</Badge>}
             <Badge tone={(WORK_STATE_TONE[workState] as BadgeTone) ?? 'neutral'}>{workState}</Badge>
+            {DISPATCH_BADGE_TONE[t.dispatch_status ?? ''] && (
+              <Badge tone={DISPATCH_BADGE_TONE[t.dispatch_status ?? '']}>{t.dispatch_status}</Badge>
+            )}
             {t.due && dTone && <Badge tone={dTone}>due {t.due}</Badge>}
             {labelTags.map((tag) => (
               <Badge key={tag} tone={TAG_TONE[tag] ?? 'neutral'}>
@@ -144,6 +157,11 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
       <Card.Footer style={s.footer}>
         <span style={s.meta}>{metaParts.join('  ·  ')}</span>
         <span style={s.spacer} />
+        {t.pr_url && (
+          <a href={t.pr_url} target="_blank" rel="noreferrer" style={s.prLink}>
+            PR ↗
+          </a>
+        )}
         {t.status === 'done' ? (
           <Button
             size="sm"
@@ -191,6 +209,13 @@ const s = {
   titleLink: {
     color: 'var(--semantic-color-content-primary)',
     textDecoration: 'none',
+  },
+  prLink: {
+    ...hds.typeStyles.ui,
+    fontSize: hds.fontSize.xs,
+    color: 'var(--semantic-color-content-accent)',
+    textDecoration: 'none',
+    whiteSpace: 'nowrap' as const,
   },
   footer: {
     display: 'flex',

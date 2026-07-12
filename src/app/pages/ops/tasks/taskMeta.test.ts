@@ -17,6 +17,7 @@ import {
   labelPriority,
   priorityChip,
   cardLabelTags,
+  recentlyCompletedTasks,
   type GroupBy,
 } from './taskMeta';
 import type { Task } from './types';
@@ -62,6 +63,7 @@ function task(overrides: Partial<Task>): Task {
     dispatch_status: null,
     dispatch_count: null,
     last_dispatched_at: null,
+    pr_url: null,
     ...overrides,
   };
 }
@@ -324,5 +326,34 @@ describe('chip tones', () => {
   });
   it('a task due TODAY is due, not overdue (dates are end-of-day, not UTC midnight)', () => {
     expect(dueTone('2026-07-11', NOW)).toBe('warning');
+  });
+});
+
+describe('recentlyCompletedTasks (ops#107)', () => {
+  it('excludes tasks with no completed_at', () => {
+    expect(recentlyCompletedTasks([task({ completed_at: null })], NOW)).toEqual([]);
+  });
+
+  it('includes a task completed within the last 24h', () => {
+    const t = task({ key: 'tracker:a', completed_at: '2026-07-11T06:00:00Z' });
+    expect(recentlyCompletedTasks([t], NOW)).toEqual([t]);
+  });
+
+  it('excludes a task completed more than 24h ago', () => {
+    const t = task({ completed_at: '2026-07-09T12:00:00Z' });
+    expect(recentlyCompletedTasks([t], NOW)).toEqual([]);
+  });
+
+  it('sorts newest-completed first', () => {
+    const older = task({ key: 'tracker:older', completed_at: '2026-07-11T01:00:00Z' });
+    const newer = task({ key: 'tracker:newer', completed_at: '2026-07-11T10:00:00Z' });
+    expect(recentlyCompletedTasks([older, newer], NOW)).toEqual([newer, older]);
+  });
+
+  it('caps at 5 even when more are recently completed', () => {
+    const tasks = Array.from({ length: 8 }, (_, i) =>
+      task({ key: `tracker:${i}`, completed_at: `2026-07-11T0${i}:00:00Z` }),
+    );
+    expect(recentlyCompletedTasks(tasks, NOW)).toHaveLength(5);
   });
 });

@@ -312,6 +312,31 @@ export function dueToneNow(due: string | null): ChipTone | null {
   return dueTone(due, Date.now());
 }
 
+const RECENTLY_COMPLETED_WINDOW_MS = 24 * 60 * 60 * 1000;
+const RECENTLY_COMPLETED_MAX = 5;
+
+/**
+ * Tasks the live dispatch poller (ops#107) just finished — `completed_at` set
+ * within the last 24h — newest first, capped at 5. Independent of the board's
+ * status/category filters so a just-finished task doesn't vanish from view the
+ * moment it flips to 'done' and drops out of the default 'open' filter.
+ */
+export function recentlyCompletedTasks(tasks: Task[], now: number): Task[] {
+  return tasks
+    .filter((t) => {
+      if (!t.completed_at) return false;
+      const ms = new Date(t.completed_at).getTime();
+      return Number.isFinite(ms) && now - ms <= RECENTLY_COMPLETED_WINDOW_MS;
+    })
+    .sort((a, b) => new Date(b.completed_at!).getTime() - new Date(a.completed_at!).getTime())
+    .slice(0, RECENTLY_COMPLETED_MAX);
+}
+
+/** Render-time wrapper over recentlyCompletedTasks — see groupTasksNow. */
+export function recentlyCompletedTasksNow(tasks: Task[]): Task[] {
+  return recentlyCompletedTasks(tasks, Date.now());
+}
+
 /** Render-time "x ago" freshness stamp (same idiom as the page's other formatters). */
 export function relTimeNow(iso: string | null): string {
   if (!iso) return '';

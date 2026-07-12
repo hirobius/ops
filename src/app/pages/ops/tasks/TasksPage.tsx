@@ -34,6 +34,7 @@ import { RalphPanel } from './RalphPanel';
 import {
   groupTasksNow,
   matchesCategory,
+  recentlyCompletedTasksNow,
   TASK_CATEGORIES,
   type GroupBy,
   type TaskCategory,
@@ -108,6 +109,10 @@ export default function TasksPage() {
   );
 
   const groups = useMemo(() => groupTasksNow(filtered, groupBy), [filtered, groupBy]);
+  // Independent of statusFilter/categoryFilter (ops#107) — a task the live
+  // dispatch poller just finished shouldn't vanish from view because the
+  // default filter is 'open'.
+  const recentlyCompleted = useMemo(() => recentlyCompletedTasksNow(tasks ?? []), [tasks]);
 
   const summary = tasks ? `${filtered.length} shown · ${tasks.length} total` : '';
   const queuedCount = useMemo(
@@ -214,6 +219,29 @@ export default function TasksPage() {
       )}
 
       {!isOffline && isInitialLoading && <p style={s.notice}>Loading tasks…</p>}
+
+      {!isOffline && recentlyCompleted.length > 0 && (
+        <section style={s.lane} aria-labelledby="group-recently-completed">
+          <header style={s.laneHeader}>
+            <span id="group-recently-completed" style={s.laneLabel}>
+              Recently completed
+            </span>
+            <span style={s.laneCount}>{recentlyCompleted.length}</span>
+          </header>
+          <ul style={s.list}>
+            {recentlyCompleted.map((t) => (
+              <TaskRow
+                key={t.key}
+                task={t}
+                busy={busyKeys.has(t.key)}
+                isSelected={selected.has(t.key)}
+                onToggleSelect={toggleSelect}
+                onAction={act}
+              />
+            ))}
+          </ul>
+        </section>
+      )}
 
       {!isOffline && tasks && filtered.length === 0 && (
         <p style={s.notice}>No tasks match this filter.</p>

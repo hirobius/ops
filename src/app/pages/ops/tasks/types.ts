@@ -51,6 +51,9 @@ export interface Task {
   dispatch_status: 'queued' | 'dispatched' | 'running' | 'done' | 'failed' | null;
   dispatch_count: number | null;
   last_dispatched_at: string | null;
+  // The live-resolved linked PR (supabase/migrations/0011_task_pr_url.sql,
+  // ops#107) — set once dispatch_status advances past 'dispatched'.
+  pr_url: string | null;
 }
 
 export type TaskAction =

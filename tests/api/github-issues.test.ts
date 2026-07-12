@@ -257,6 +257,146 @@ describe('makeGitHubPort().addLabel — pull request URLs (ops#137 review findin
   });
 });
 
+function timelineEvent(overrides: Record<string, unknown> = {}) {
+  return {
+    event: 'cross-referenced',
+    created_at: '2026-07-12T00:00:00Z',
+    source: {
+      type: 'issue',
+      issue: {
+        number: 9,
+        html_url: 'https://github.com/hirobius/ops/pull/9',
+        state: 'open',
+        pull_request: {},
+      },
+    },
+    ...overrides,
+  };
+}
+
+describe('makeGitHubPort().getLinkedPullRequest (ops#107)', () => {
+  const originalToken = process.env.GITHUB_TOKEN;
+
+  beforeEach(() => {
+    process.env.GITHUB_TOKEN = 'test-token';
+  });
+
+  afterEach(() => {
+    process.env.GITHUB_TOKEN = originalToken;
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it('normalizes a cross-referenced PR event', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(pageResponse([timelineEvent()]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const prs = await makeGitHubPort()!.getLinkedPullRequest({
+      owner: 'hirobius',
+      repo: 'ops',
+      issueNumber: 107,
+    });
+
+    expect(String(fetchMock.mock.calls[0][0])).toBe(
+      'https://api.github.com/repos/hirobius/ops/issues/107/timeline?per_page=100',
+    );
+    expect(prs).toEqual([
+      {
+        number: 9,
+        url: 'https://github.com/hirobius/ops/pull/9',
+        state: 'open',
+        merged: false,
+        created_at: '2026-07-12T00:00:00Z',
+      },
+    ]);
+  });
+
+  it('reports a merged PR as merged', async () => {
+    const merged = timelineEvent({
+      source: {
+        type: 'issue',
+        issue: {
+          number: 9,
+          html_url: 'https://github.com/hirobius/ops/pull/9',
+          state: 'closed',
+          pull_request: { merged_at: '2026-07-12T01:00:00Z' },
+        },
+      },
+    });
+    const fetchMock = vi.fn().mockResolvedValue(pageResponse([merged]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const prs = await makeGitHubPort()!.getLinkedPullRequest({
+      owner: 'hirobius',
+      repo: 'ops',
+      issueNumber: 107,
+    });
+
+    expect(prs).toEqual([
+      {
+        number: 9,
+        url: 'https://github.com/hirobius/ops/pull/9',
+        state: 'closed',
+        merged: true,
+        created_at: '2026-07-12T00:00:00Z',
+      },
+    ]);
+  });
+
+  it('drops non-PR cross-references (a linked issue, not a pull request)', async () => {
+    const linkedIssue = timelineEvent({
+      source: {
+        type: 'issue',
+        issue: {
+          number: 12,
+          html_url: 'https://github.com/hirobius/ops/issues/12',
+          state: 'open',
+          // no `pull_request` key — this is a plain linked issue
+        },
+      },
+    });
+    const fetchMock = vi.fn().mockResolvedValue(pageResponse([linkedIssue]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const prs = await makeGitHubPort()!.getLinkedPullRequest({
+      owner: 'hirobius',
+      repo: 'ops',
+      issueNumber: 107,
+    });
+
+    expect(prs).toEqual([]);
+  });
+
+  it('drops unrelated timeline event types', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(pageResponse([{ event: 'labeled', created_at: '2026-07-12T00:00:00Z' }]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const prs = await makeGitHubPort()!.getLinkedPullRequest({
+      owner: 'hirobius',
+      repo: 'ops',
+      issueNumber: 107,
+    });
+
+    expect(prs).toEqual([]);
+  });
+
+  it('throws an actionable error on 401/403', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      headers: { get: () => null },
+      text: async () => '',
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      makeGitHubPort()!.getLinkedPullRequest({ owner: 'hirobius', repo: 'ops', issueNumber: 107 }),
+    ).rejects.toThrow(/GITHUB_TOKEN/);
+  });
+});
+
 describe('makeGitHubPort() — Ralph fleet reads (ops#112)', () => {
   beforeEach(() => {
     vi.stubEnv('GITHUB_TOKEN', 'test-token');
