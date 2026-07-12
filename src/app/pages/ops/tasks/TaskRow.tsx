@@ -95,7 +95,15 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
   if (updated) metaParts.push(`updated ${updated}`);
 
   return (
-    <Card as="li" bordered tone={cardTone} padding="none" style={s.card}>
+    <Card
+      as="li"
+      bordered
+      tone={cardTone}
+      padding="none"
+      style={s.card}
+      data-task-key={t.key}
+      tabIndex={-1}
+    >
       <Card.Header
         metadata={
           <Cluster gap="tight" align="center">

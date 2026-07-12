@@ -18,9 +18,13 @@
  * anatomy + a work-state-toned border (TaskRow, ops#158); page chrome uses
  * Badge / Button / Menu / SegmentedControl / Tag. Remaining inline styles are
  * ops-internal layout glue (hds-bypass), not restyled DS primitives.
+ *
+ * ⌘K/Ctrl-K CommandPalette (ops#142, TaskCommandPalette.tsx): jump-to-task
+ * (fuzzy title/ref/lane match, taskPaletteMatch.ts) then act on it
+ * (taskPaletteActions.ts) through the same `act` seam as the row menu.
  */
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { Button, SegmentedControl, Tag } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
@@ -31,6 +35,7 @@ import { useTaskActions } from './useTaskActions';
 import { useTaskSelection } from './useTaskSelection';
 import { TaskRow } from './TaskRow';
 import { RalphPanel } from './RalphPanel';
+import { TaskCommandPalette } from './TaskCommandPalette';
 import {
   groupTasksNow,
   matchesCategory,
@@ -38,7 +43,7 @@ import {
   type GroupBy,
   type TaskCategory,
 } from './taskMeta';
-import type { TaskStatus } from './types';
+import type { Task, TaskStatus } from './types';
 
 type StatusFilter = TaskStatus | 'all';
 
@@ -109,6 +114,16 @@ export default function TasksPage() {
 
   const groups = useMemo(() => groupTasksNow(filtered, groupBy), [filtered, groupBy]);
 
+  // The palette searches every loaded task (not just what's currently
+  // filtered into view) — a filter mismatch just means the jumped-to row
+  // isn't on screen; scrollIntoView/focus is then a harmless no-op.
+  const jumpToTask = useCallback((t: Task) => {
+    const el = document.querySelector<HTMLElement>(`[data-task-key="${t.key}"]`);
+    if (!el) return;
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    el.focus();
+  }, []);
+
   const summary = tasks ? `${filtered.length} shown · ${tasks.length} total` : '';
   const queuedCount = useMemo(
     () => (tasks ? tasks.filter((t) => t.dispatch_status === 'queued').length : 0),
@@ -158,6 +173,7 @@ export default function TasksPage() {
         <Button size="sm" variant="secondary" onClick={refetch}>
           refresh
         </Button>
+        <TaskCommandPalette tasks={tasks ?? []} act={act} onJump={jumpToTask} />
       </div>
 
       <div style={s.sourceRow}>
