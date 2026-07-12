@@ -30,6 +30,7 @@ import { useTasks } from './useTasks';
 import { useTaskActions } from './useTaskActions';
 import { useTaskSelection } from './useTaskSelection';
 import { TaskRow } from './TaskRow';
+import { RalphPanel } from './RalphPanel';
 import { groupTasksNow, type GroupBy } from './taskMeta';
 import type { TaskStatus } from './types';
 
@@ -135,6 +136,8 @@ export default function TasksPage() {
           refresh
         </Button>
       </div>
+
+      <RalphPanel />
 
       {sourceFilters.length > 2 && (
         <div style={s.sourceRow}>

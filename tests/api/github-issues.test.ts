@@ -256,3 +256,90 @@ describe('makeGitHubPort().addLabel — pull request URLs (ops#137 review findin
     expect(url).toBe('https://api.github.com/repos/hirobius/ops/issues/99/labels');
   });
 });
+
+describe('makeGitHubPort() — Ralph fleet reads (ops#112)', () => {
+  beforeEach(() => {
+    vi.stubEnv('GITHUB_TOKEN', 'test-token');
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it('listRalphRuns: one Actions query per repo, normalized, newest first', async () => {
+    const fetchMock = vi.fn(async (url: string) =>
+      pageResponse({
+        workflow_runs: [
+          {
+            run_number: 69,
+            status: 'in_progress',
+            conclusion: null,
+            display_title: 'Ralph 69',
+            html_url: `https://github.com/${/repos\/([^/]+\/[^/]+)\//.exec(url)![1]}/actions/runs/1`,
+            run_started_at: '2026-07-12T04:00:00Z',
+          },
+        ],
+      } as never),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const out = await makeGitHubPort()!.listRalphRuns({ repos: ['hirobius/ops', 'hirobius/hds'] });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[0][0])).toContain(
+      '/repos/hirobius/ops/actions/workflows/ralph.yml/runs',
+    );
+    expect(out).toHaveLength(2);
+    expect(out[0]).toMatchObject({
+      repo: 'hirobius/ops',
+      runs: [{ number: 69, status: 'in_progress', conclusion: null, title: 'Ralph 69' }],
+    });
+  });
+
+  it('listRalphRuns: a failing repo yields an error entry, not a thrown batch', async () => {
+    const fetchMock = vi.fn(async (url: string) =>
+      String(url).includes('/hds/')
+        ? ({
+            ok: false,
+            status: 404,
+            text: async () => 'nope',
+            headers: { get: () => null },
+          } as never)
+        : pageResponse({ workflow_runs: [] } as never),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const out = await makeGitHubPort()!.listRalphRuns({ repos: ['hirobius/ops', 'hirobius/hds'] });
+    expect(out[0]).toMatchObject({ repo: 'hirobius/ops', runs: [] });
+    expect(out[1].repo).toBe('hirobius/hds');
+    expect(out[1].error).toContain('404');
+  });
+
+  it('listRalphReadyIssues: queries labels=ralph-ready per repo, drops PRs, normalizes', async () => {
+    const fetchMock = vi.fn(async () =>
+      pageResponse([
+        { ...rawIssue(7), labels: [{ name: 'ralph-ready' }, { name: 'p1' }] },
+        { ...rawIssue(8), labels: [{ name: 'ralph-ready' }], pull_request: {} },
+      ] as never),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const out = await makeGitHubPort()!.listRalphReadyIssues({ repos: ['hirobius/ops'] });
+
+    expect(String(fetchMock.mock.calls[0][0])).toContain('labels=ralph-ready');
+    expect(out).toEqual([
+      {
+        repo: 'hirobius/ops',
+        issues: [
+          {
+            repo: 'hirobius/ops',
+            number: 7,
+            title: 'issue 7',
+            url: 'https://github.com/hirobius/ops/issues/7',
+            labels: ['ralph-ready', 'p1'],
+          },
+        ],
+      },
+    ]);
+  });
+});
