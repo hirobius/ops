@@ -515,3 +515,20 @@ this issue reopened the orphan-sweeper slice specifically)
 - Note for next iteration: prod is still inert for this feature until Adrian
   widens the ops GITHUB_TOKEN scope to include "Actions: write" — documented
   in the PR body and HANDOFF.md, not something this iteration can unblock.
+
+## Issue #128 — fix Ralph quality bar copy-paste artifact
+A prior @claude dispatch (2026-07-12, branch claude/issue-128-20260712-1847)
+already made this exact edit but never opened a PR (branch has no PR). This
+iteration redid the same fix on a properly-named ralph/ branch rather than
+reusing that branch (naming convention the harness keys reconciliation on).
+- AGENTS.md line 35: "Private client automation (Lilac/EZLynx)" ->
+  "Agency operations dashboard (leads pipeline, client CRM, task board).
+  Production is live." Kept "Correctness over speed. No destructive ops."
+  verbatim (still true for ops).
+- Verified via repo-wide grep -ri "lilac|ezlynx": AGENTS.md was the only
+  copy-paste artifact. Every other hit (docs/operations/m365-dev-tenant-setup.md,
+  scripts/discord-bot.mjs, scripts/sync-client-emails.mjs, etc.) is a factual
+  reference to the real Lilac Insure/Lilac Bonds client engagement — left as-is
+  per the DoD.
+- Gate green: typecheck + 611 tests + lint + all 14 pre-commit registry gates.
+  Branch: ralph/issue-128-fix-quality-bar-copy-artifact. PR #194.
