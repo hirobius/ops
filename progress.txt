@@ -293,3 +293,16 @@ notes on the issue.
   import since mapIssuesToTasks always re-upserts status:'open') is
   documented in retireTasks' docstring but not separately unit-tested since
   it's just upsertTasks's existing overwrite-on-conflict behavior.
+
+## Issue #3 — Playwright MCP for UI self-verification
+Re-armed 2026-07-11 with DoD after prior auto-park (missing acceptance criteria).
+- .mcp.json (new, repo root): registers `playwright` MCP server
+  (`npx @playwright/mcp@latest`) — the artifact `claude mcp add playwright
+  npx @playwright/mcp@latest --scope project` produces. `enableAllProjectMcpServers`
+  is already true in the global settings, so project MCP servers load without
+  a per-session prompt.
+- CLAUDE.md: added item 6 to the AGENT EXECUTION PROTOCOL — UI-touching
+  sessions should verify changes via the Playwright MCP browser when
+  available (Chromium preinstalled at /opt/pw-browsers in remote sessions).
+- Gate green: typecheck + 577 tests + lint. Branch: ralph/issue-3-playwright-mcp.
+  Notes for next iteration: none — additive config only, no code paths touched.

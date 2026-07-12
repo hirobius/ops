@@ -34,6 +34,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 3. **SELF-HEAL:** If tests fail, read the output, fix the error, and re-run until green — don't ask for help.
 4. **FINALIZATION:** Only report a task complete when tests are 100% green.
 5. **RECAP (#8):** Autonomous sub-agents/sessions post a one-line recap on completion via `node scripts/log-run.mjs` (or `appendRun` from `lib/ops/run-log.mjs`) — nothing runs silent. The `/ops` Runs panel renders the most recent entries.
+6. **BROWSER-VERIFY:** UI-touching sessions should verify changes via the Playwright MCP browser when available (Chromium preinstalled at `/opt/pw-browsers` in remote sessions).
 
 ### Working-with-Adrian conventions (standing prefs, 2026-07-06)
 
@@ -50,7 +51,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 
 Applies to any agent working a dispatched `@claude` task — and to any session dispatching them.
 
-- **Decompose epics; never build one wholesale.** If a dispatched task is actually an epic — multiple deliverables, or a design/spec/roadmap doc (e.g. a "fleet mayor", "compliance", "consolidation", "live status feed" issue) — do NOT attempt the whole thing in one PR. File concrete sub-issues, implement the smallest well-scoped slice, and link the rest. A dispatching session splits an epic into tasks *before* dispatch; an agent that receives one decomposes rather than flailing at all of it.
+- **Decompose epics; never build one wholesale.** If a dispatched task is actually an epic — multiple deliverables, or a design/spec/roadmap doc (e.g. a "fleet mayor", "compliance", "consolidation", "live status feed" issue) — do NOT attempt the whole thing in one PR. File concrete sub-issues, implement the smallest well-scoped slice, and link the rest. A dispatching session splits an epic into tasks _before_ dispatch; an agent that receives one decomposes rather than flailing at all of it.
 - **Never false-close.** An agent that cannot make real, mergeable progress — blocked on a human decision, a missing key/paid account, out-of-scope, or genuinely not agent-actionable — must NOT mark the task `done`. Set it `blocked` (or `on-hold`) with a one-line reason on the issue, so the thought is recycled, never lost to a false "completed". **"I analyzed it" is not "done".**
 - **Ask, don't guess.** When input is genuinely needed, drain every non-blocked part first (open a draft PR), then post the specific question, apply `needs-adrian`, and set the task blocked (see ops#51) — rather than guessing or closing.
 
@@ -59,7 +60,7 @@ Applies to any agent working a dispatched `@claude` task — and to any session 
 `.claude/skills/` vendors Matt Pocock's engineering skills. They only earn their keep if invoked **deterministically** — so this is a routing mandate, not a suggestion the model may skip:
 
 - **Building anything (feature or fix) → `/implement` + `/tdd`** (test-first, red-green-refactor). No "just write it."
-- **Epic / multi-part / fuzzy task → `/to-tickets`** (split into dependency-ordered tickets); `/grill-me` first if the *plan* itself is unclear. Pairs with the Dispatched-task discipline above.
+- **Epic / multi-part / fuzzy task → `/to-tickets`** (split into dependency-ordered tickets); `/grill-me` first if the _plan_ itself is unclear. Pairs with the Dispatched-task discipline above.
 - **Before opening ANY PR → `/code-review`** (dual-axis: standards + spec).
 - **A bug → `/diagnosing-bugs`** (reproduce → minimize → hypothesize → fix), then `/tdd`.
 - **Design-touching / new module → `/codebase-design`**; periodic design-debt sweep → `/improve-codebase-architecture`.
