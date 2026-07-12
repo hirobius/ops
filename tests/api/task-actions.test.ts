@@ -428,3 +428,105 @@ describe('applyTaskAction — ralph_approve (injected GitHub port, ops#137)', ()
     expect((result.body as { code: string }).code).toBe('GITHUB_TOKEN_REJECTED');
   });
 });
+
+describe('applyTaskAction — ralph_dispatch (injected GitHub port, ops#113)', () => {
+  it('503s when no port is configured (no GITHUB_TOKEN)', async () => {
+    const { sb } = makeSb();
+    expect(
+      await applyTaskAction(
+        sb,
+        { key: 'github:hirobius/ops#113', action: 'ralph_dispatch' },
+        { github: null },
+      ),
+    ).toMatchObject({ status: 503, body: { code: 'ENV_MISSING_GITHUB_TOKEN' } });
+  });
+
+  it('400s when the task is not a github-tracked issue', async () => {
+    const { sb } = makeSb();
+    const github = { dispatchWorkflow: async () => ({}) };
+    expect(
+      await applyTaskAction(sb, { key: 't1', action: 'ralph_dispatch' }, { github }),
+    ).toMatchObject({ status: 400 });
+  });
+
+  it('dispatches ralph.yml with the parsed owner/repo/issue via the port — no Supabase round trip', async () => {
+    const { sb } = makeSb();
+    const calls: Array<{ owner: string; repo: string; workflow: string; inputs: object }> = [];
+    const github = {
+      dispatchWorkflow: async (i: {
+        owner: string;
+        repo: string;
+        workflow: string;
+        inputs: object;
+      }) => {
+        calls.push(i);
+        return { runUrl: 'https://github.com/hirobius/ops/actions/workflows/ralph.yml' };
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#113', action: 'ralph_dispatch' },
+      { github },
+    );
+    expect(calls[0]).toEqual({
+      owner: 'hirobius',
+      repo: 'ops',
+      workflow: 'ralph.yml',
+      inputs: { issue: '113' },
+    });
+    expect(result).toEqual({
+      status: 200,
+      body: { ok: true, runUrl: 'https://github.com/hirobius/ops/actions/workflows/ralph.yml' },
+    });
+  });
+
+  it('502s naming the Actions: write permission when the port throws 403', async () => {
+    const { sb } = makeSb();
+    const github = {
+      dispatchWorkflow: async () => {
+        throw new Error('HTTP 403');
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#113', action: 'ralph_dispatch' },
+      { github },
+    );
+    expect(result.status).toBe(502);
+    expect((result.body as { code: string }).code).toBe('GITHUB_TOKEN_REJECTED');
+    expect((result.body as { error: string }).error).toContain('Actions: write');
+  });
+
+  it('502s naming the Actions: write permission when the port throws 404 (private-repo permission errors are obscured as 404)', async () => {
+    const { sb } = makeSb();
+    const github = {
+      dispatchWorkflow: async () => {
+        throw new Error('HTTP 404');
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#113', action: 'ralph_dispatch' },
+      { github },
+    );
+    expect(result.status).toBe(502);
+    expect((result.body as { code: string }).code).toBe('GITHUB_TOKEN_REJECTED');
+    expect((result.body as { error: string }).error).toContain('Actions: write');
+  });
+
+  it('502s generically (existing dispatch code) when the port throws an unrelated error', async () => {
+    const { sb } = makeSb();
+    const github = {
+      dispatchWorkflow: async () => {
+        throw new Error('network timeout');
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#113', action: 'ralph_dispatch' },
+      { github },
+    );
+    expect(result.status).toBe(502);
+    expect((result.body as { code: string }).code).toBe('GITHUB_WORKFLOW_DISPATCH_FAILED');
+  });
+});

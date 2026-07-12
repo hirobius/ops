@@ -312,6 +312,21 @@ export function dueToneNow(due: string | null): ChipTone | null {
   return dueTone(due, Date.now());
 }
 
+/**
+ * Turns a failed `POST /api/task-action` body into the toast text for the
+ * "Run Ralph" board action (ops#113 DoD: "handle the no-workflows-permission
+ * / 404 case with a clear toast — don't silently fail"). `applyTaskAction`
+ * always answers an error with `{ error: string, code? }`; this falls back to
+ * a generic message for a body that doesn't have that shape (a network
+ * failure never reaches the server at all).
+ */
+export function ralphDispatchErrorMessage(body: unknown): string {
+  if (body && typeof body === 'object' && typeof (body as { error?: unknown }).error === 'string') {
+    return (body as { error: string }).error;
+  }
+  return 'Run Ralph failed — could not reach the server. Check your connection and try again.';
+}
+
 /** Render-time "x ago" freshness stamp (same idiom as the page's other formatters). */
 export function relTimeNow(iso: string | null): string {
   if (!iso) return '';

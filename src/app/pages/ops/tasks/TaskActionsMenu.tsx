@@ -10,14 +10,14 @@
  */
 
 import { Button, Menu } from '@hirobius/design-system';
-import type { Task, TaskAction } from './types';
+import type { Task, TaskAction, TaskActionResult } from './types';
 import { taskRef } from './taskMeta';
 import { copyText } from './clipboard';
 
 export interface TaskActionsMenuProps {
   task: Task;
   busy: boolean;
-  onAction: (key: string, action: TaskAction) => void;
+  onAction: (key: string, action: TaskAction) => Promise<TaskActionResult>;
 }
 
 export function TaskActionsMenu({ task: t, busy, onAction }: TaskActionsMenuProps) {

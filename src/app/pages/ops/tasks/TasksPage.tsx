@@ -12,7 +12,9 @@
  * is a presentational TaskRow with one primary action and a governed menu
  * (TaskActionsMenu); mutations live in useTaskActions; the multi-select
  * "Copy refs" subsystem lives in useTaskSelection; the operator ordering /
- * grouping / chip-tone logic is pure and unit-tested in taskMeta.ts.
+ * grouping / chip-tone logic is pure and unit-tested in taskMeta.ts. The
+ * "Run Ralph" queue-jump (ops#113) reports failures through useToast — the
+ * board's one non-silent action; everything else is fire-and-refetch.
  *
  * DS note: on @hirobius/design-system 0.13. Rows are HDS Cards with slot
  * anatomy + a work-state-toned border (TaskRow, ops#158); page chrome uses
@@ -28,6 +30,7 @@ import type { CSSProperties } from 'react';
 import { PageHeader } from '../PageHeader';
 import { useTasks } from './useTasks';
 import { useTaskActions } from './useTaskActions';
+import { useToast } from './useToast';
 import { useTaskSelection } from './useTaskSelection';
 import { TaskRow } from './TaskRow';
 import { RalphPanel } from './RalphPanel';
@@ -70,6 +73,7 @@ export default function TasksPage() {
   const { tasks, isOffline, isInitialLoading, lastUpdatedAt, refetch } = useTasks();
   const { act, busyKeys, importing, importIssues } = useTaskActions(refetch);
   const { selected, toggleSelect, clearSelection, copySelectedRefs } = useTaskSelection(tasks);
+  const { toasts, notify, dismiss } = useToast();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<TaskCategory>('all');
@@ -237,11 +241,28 @@ export default function TasksPage() {
                   isSelected={selected.has(t.key)}
                   onToggleSelect={toggleSelect}
                   onAction={act}
+                  onNotify={notify}
                 />
               ))}
             </ul>
           </section>
         ))}
+
+      {toasts.length > 0 && (
+        <div style={s.toastStack} role="status" aria-live="polite">
+          {toasts.map((toast) => (
+            <button
+              key={toast.id}
+              type="button"
+              style={toast.tone === 'danger' ? s.toastDanger : s.toastSuccess}
+              onClick={() => dismiss(toast.id)}
+              title="Dismiss"
+            >
+              {toast.text}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -342,5 +363,37 @@ const s = {
     display: 'flex',
     flexDirection: 'column' as const,
     gap: hds.space.px8,
+  },
+  toastStack: {
+    position: 'fixed' as const,
+    bottom: hds.space.px24,
+    right: hds.space.px24,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: hds.space.px8,
+    maxWidth: '360px',
+    zIndex: 1000,
+  },
+  toastSuccess: {
+    ...hds.typeStyles.ui,
+    textAlign: 'left' as const,
+    padding: `${hds.space.px8} ${hds.space.px12}`,
+    borderRadius: hds.borderRadius[8],
+    background: 'var(--semantic-color-surface-raised)',
+    border: '1px solid var(--semantic-color-feedback-success)',
+    color: 'var(--semantic-color-content-primary)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+    cursor: 'pointer',
+  },
+  toastDanger: {
+    ...hds.typeStyles.ui,
+    textAlign: 'left' as const,
+    padding: `${hds.space.px8} ${hds.space.px12}`,
+    borderRadius: hds.borderRadius[8],
+    background: 'var(--semantic-color-surface-raised)',
+    border: '1px solid var(--semantic-color-feedback-error)',
+    color: 'var(--semantic-color-content-primary)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+    cursor: 'pointer',
   },
 } satisfies Record<string, CSSProperties>;

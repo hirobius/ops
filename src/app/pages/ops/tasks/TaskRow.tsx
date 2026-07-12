@@ -13,17 +13,19 @@
  *      bug/backlog/epic:*…) are dropped — noise on an action board.
  *   2. title — issue #, linked title (dispatch_url, else source_url, ops#156).
  *   3. footer — quiet provenance/freshness on the left; the ONE primary action
- *      (Dispatch / Re-dispatch, or Reopen) + governed ⋯ menu on the right.
+ *      (Dispatch / Re-dispatch, or Reopen), the one-tap "Run Ralph" queue-jump
+ *      (github:* rows only, ops#113), + governed ⋯ menu on the right.
  *
  * The card's BORDER TONE is the work-state signal (#158) — so the phase is a
  * quiet reinforcing badge, never the loudest thing on the card.
  */
 
+import { useState } from 'react';
 import { Badge, Button, Card, Cluster } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import type { ComponentProps, CSSProperties } from 'react';
 import { deriveWorkState, WORK_STATE_TONE } from '../../../../../lib/tasks/work-state.mjs';
-import type { Task, TaskAction } from './types';
+import type { Task, TaskAction, TaskActionResult } from './types';
 import {
   isNoRalphSource,
   taskRef,
@@ -32,6 +34,7 @@ import {
   cardLabelTags,
   dueToneNow,
   relTimeNow,
+  ralphDispatchErrorMessage,
 } from './taskMeta';
 import { TaskActionsMenu } from './TaskActionsMenu';
 
@@ -68,10 +71,22 @@ export interface TaskRowProps {
   busy: boolean;
   isSelected: boolean;
   onToggleSelect: (key: string) => void;
-  onAction: (key: string, action: TaskAction) => void;
+  onAction: (key: string, action: TaskAction) => Promise<TaskActionResult>;
+  /** Reports a "Run Ralph" outcome (ops#113 DoD: no silent failure). */
+  onNotify: (message: string, tone: 'success' | 'danger') => void;
 }
 
-export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }: TaskRowProps) {
+/** How long the optimistic "Ralph queued" chip stays up after a successful dispatch. */
+const RALPH_QUEUED_CHIP_MS = 5000;
+
+export function TaskRow({
+  task: t,
+  busy,
+  isSelected,
+  onToggleSelect,
+  onAction,
+  onNotify,
+}: TaskRowProps) {
   const dispatched = !!t.dispatch_url;
   const ref = taskRef(t);
   const issueLink = issueLinkFor(t);
@@ -80,6 +95,28 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
   const pChip = priorityChip(t);
   const dTone = dueToneNow(t.due);
   const labelTags = cardLabelTags(t.tags);
+  const canRunRalph = t.key.startsWith('github:');
+  const [runRalphState, setRunRalphState] = useState<'idle' | 'pending' | 'queued'>('idle');
+
+  async function handleRunRalph() {
+    if (runRalphState !== 'idle') return; // disabled window prevents a double-fire
+    const proceed = window.confirm(
+      `Run Ralph now for ${ref ?? t.key}?\n\n` +
+        'This dispatches ralph.yml immediately for this issue — it overrides ' +
+        "single-flight and priority ordering to jump the queue.",
+    );
+    if (!proceed) return;
+    setRunRalphState('pending');
+    const result = await onAction(t.key, 'ralph_dispatch');
+    if (result.ok) {
+      setRunRalphState('queued');
+      onNotify('Ralph dispatched — check the repo’s Actions tab for the run.', 'success');
+      setTimeout(() => setRunRalphState('idle'), RALPH_QUEUED_CHIP_MS);
+    } else {
+      setRunRalphState('idle');
+      onNotify(ralphDispatchErrorMessage(result.body), 'danger');
+    }
+  }
 
   // Quiet footer line: provenance + routing facts + freshness, deliberately low
   // contrast so it never competes with the title or the decision chips.
@@ -126,6 +163,11 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
                 no Ralph
               </Badge>
             )}
+            {runRalphState === 'queued' && (
+              <Badge tone="info" title="Run Ralph fired — check the repo's Actions tab for the run">
+                Ralph queued
+              </Badge>
+            )}
           </Cluster>
         }
       >
@@ -166,6 +208,21 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
             }
           >
             {busy ? '…' : dispatched ? 'Re-dispatch' : 'Dispatch'}
+          </Button>
+        )}
+        {canRunRalph && (
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={busy || runRalphState !== 'idle'}
+            onClick={() => void handleRunRalph()}
+            title="Fires ralph.yml immediately for this issue — jumps the queue, overrides single-flight."
+          >
+            {runRalphState === 'pending'
+              ? '…'
+              : runRalphState === 'queued'
+                ? 'Queued ✓'
+                : 'Run Ralph'}
           </Button>
         )}
         <TaskActionsMenu task={t} busy={busy} onAction={onAction} />
