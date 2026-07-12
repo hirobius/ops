@@ -12,7 +12,16 @@
  *        `github:<owner>/<repo>#<number>` so re-running is idempotent. This is
  *        the single issues+tasks board — the standalone /ops/issues surface was
  *        retired into /ops/tasks (#52, 2026-07-09).
- *        Success: { imported: n }
+ *
+ *        After the upsert, reconciles: any stored `github:*` task whose key
+ *        dropped out of the live-open set (issue closed, or repo renamed/
+ *        transferred — the old slug never re-imports) is retired to
+ *        `status: 'done'` (ops#99). `reconcileGuard` (lib/tasks/
+ *        reconcile-github-tasks.mjs) skips the retire step on a suspect live
+ *        fetch (empty while stored keys exist, or a would-be mass-retire) —
+ *        never mass-retire on one anomalous read. Scoped strictly to
+ *        `github:*` keys; other sources are untouched.
+ *        Success: { imported: n, retired: n, reconcile: 'ok' | 'skipped:<reason>' }
  *
  * Both methods are service-role + ops-gated, so no Supabase/GitHub credential
  * reaches the browser. In dev, GET is also served by scripts/tasks-middleware.mjs.
@@ -37,9 +46,10 @@ import {
   messageOf,
   type HandlerResult,
 } from '../lib/api/handler.js';
-import { listTasks, upsertTasks } from '../lib/supabase/tasks.mjs';
+import { listTasks, upsertTasks, listGithubTaskKeys, retireTasks } from '../lib/supabase/tasks.mjs';
 import { mapIssuesToTasks } from '../lib/tasks/import-issues.mjs';
 import { orderRalphQueue } from '../lib/tasks/ralph-queue.mjs';
+import { reconcileGithubTasks, reconcileGuard } from '../lib/tasks/reconcile-github-tasks.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
 
 const DEFAULT_LIMIT = 1000;
@@ -97,8 +107,9 @@ export async function ralphStatusHandler(): Promise<HandlerResult> {
 export async function importIssuesHandler(
   sb: SupabaseClient,
   _req: VercelRequest,
+  deps: { github?: ReturnType<typeof makeGitHubPort> } = {},
 ): Promise<HandlerResult> {
-  const gh = makeGitHubPort();
+  const gh = deps.github !== undefined ? deps.github : makeGitHubPort();
   if (!gh) {
     return {
       status: 503,
@@ -119,9 +130,32 @@ export async function importIssuesHandler(
   }
 
   const rows = mapIssuesToTasks(issues);
-  const { error } = await upsertTasks(sb, rows);
-  if (error) return { status: 500, body: { error: error.message } };
-  return { status: 200, body: { imported: rows.length } };
+  const { error: upsertError } = await upsertTasks(sb, rows);
+  if (upsertError) return { status: 500, body: { error: upsertError.message } };
+
+  const liveKeys = rows.map((row) => row.key);
+  const { data: existingRows, error: listError } = await listGithubTaskKeys(sb);
+  if (listError) return { status: 500, body: { error: listError.message } };
+  const existingKeys = (existingRows ?? []).map((row: { key: string }) => row.key);
+
+  const guard = reconcileGuard(existingKeys, liveKeys);
+  if (!guard.ok) {
+    return {
+      status: 200,
+      body: { imported: rows.length, retired: 0, reconcile: `skipped:${guard.reason}` },
+    };
+  }
+
+  const keysToRetire = reconcileGithubTasks(existingKeys, liveKeys);
+  if (keysToRetire.length) {
+    const { error: retireError } = await retireTasks(sb, keysToRetire);
+    if (retireError) return { status: 500, body: { error: retireError.message } };
+  }
+
+  return {
+    status: 200,
+    body: { imported: rows.length, retired: keysToRetire.length, reconcile: 'ok' },
+  };
 }
 
 const getHandler = withOpsHandler('GET', withServiceClient(tasksHandler));
