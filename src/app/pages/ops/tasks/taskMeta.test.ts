@@ -17,6 +17,7 @@ import {
   labelPriority,
   priorityChip,
   cardLabelTags,
+  ralphDispatchErrorMessage,
   type GroupBy,
 } from './taskMeta';
 import type { Task } from './types';
@@ -295,13 +296,21 @@ describe('cardLabelTags — routing/automation chips only', () => {
   });
   it('drops phase, priority, and GitHub taxonomy noise', () => {
     expect(
-      cardLabelTags(['ralph-ready', 'needs-adrian', 'backlog', 'p2', 'chore', 'enhancement', 'bug']),
+      cardLabelTags([
+        'ralph-ready',
+        'needs-adrian',
+        'backlog',
+        'p2',
+        'chore',
+        'enhancement',
+        'bug',
+      ]),
     ).toEqual([]);
   });
   it('drops prefixed taxonomy (epic:/area:/status:) but keeps unknown custom labels', () => {
-    expect(cardLabelTags(['epic:tailwind', 'area:figma', 'status:deferred', 'ralph-auto'])).toEqual([
-      'ralph-auto',
-    ]);
+    expect(cardLabelTags(['epic:tailwind', 'area:figma', 'status:deferred', 'ralph-auto'])).toEqual(
+      ['ralph-auto'],
+    );
     expect(cardLabelTags(['some-custom-label'])).toEqual(['some-custom-label']);
   });
   it('is empty for null/absent tags', () => {
@@ -324,5 +333,22 @@ describe('chip tones', () => {
   });
   it('a task due TODAY is due, not overdue (dates are end-of-day, not UTC midnight)', () => {
     expect(dueTone('2026-07-11', NOW)).toBe('warning');
+  });
+});
+
+describe('ralphDispatchErrorMessage — "Run Ralph" toast text (ops#113)', () => {
+  it('surfaces the server-provided error string', () => {
+    expect(
+      ralphDispatchErrorMessage({
+        error:
+          'GitHub rejected the token (401/403/404). GITHUB_TOKEN is expired, revoked, or missing the "Actions: write" permission.',
+        code: 'GITHUB_TOKEN_REJECTED',
+      }),
+    ).toContain('Actions: write');
+  });
+  it('falls back to a generic message for a body with no error string (e.g. a network failure)', () => {
+    expect(ralphDispatchErrorMessage(null)).toContain('Run Ralph failed');
+    expect(ralphDispatchErrorMessage(undefined)).toContain('Run Ralph failed');
+    expect(ralphDispatchErrorMessage({})).toContain('Run Ralph failed');
   });
 });

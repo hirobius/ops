@@ -36,11 +36,11 @@
     "src/app/pages/ops/projects/ProjectsPage.tsx": 21,
     "src/app/pages/ops/tasks/RalphPanel.tsx": 21,
     "src/app/pages/ops/tasks/TaskActionsMenu.tsx": 13,
-    "src/app/pages/ops/tasks/TaskRow.tsx": 19,
-    "src/app/pages/ops/tasks/TasksPage.tsx": 33,
+    "src/app/pages/ops/tasks/TaskRow.tsx": 21,
+    "src/app/pages/ops/tasks/TasksPage.tsx": 35,
     "src/app/pages/portal/ClientPortalPage.tsx": 54,
     "src/app/routes.tsx": 28
   },
-  "updatedAt": "2026-07-12T21:30:39.965Z",
-  "sha": "7f6d539"
+  "updatedAt": "2026-07-12T22:39:04.430Z",
+  "sha": "ae48df4"
 }

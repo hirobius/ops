@@ -67,8 +67,15 @@ export type TaskAction =
   | 'unqueue'
   | 'ralph_ready_on'
   | 'ralph_ready_off'
-  | 'ralph_approve';
+  | 'ralph_approve'
+  | 'ralph_dispatch';
 
 export interface TasksResponse {
   tasks: Task[];
+}
+
+/** What `useTaskActions.act` resolves to — the raw `POST /api/task-action` outcome. */
+export interface TaskActionResult {
+  ok: boolean;
+  body: unknown;
 }
