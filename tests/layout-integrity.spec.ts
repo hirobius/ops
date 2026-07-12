@@ -29,8 +29,8 @@ const DESKTOP = { width: 1440, height: 900 };
  * Every page in the app must appear in this list. Standing directive
  * (Adrian, 2026-05-04): no exceptions, even for internal/experimental pages.
  * The lab sketchbook (/vibe-sketchbook/*) is the only exempt surface and is
- * tested separately. Parameterized routes (/ops/clients/:slug,
- * /admin/approvals/:id) are pinned to known-good fixtures.
+ * tested separately. Parameterized routes (/ops/clients/:slug) are pinned to
+ * known-good fixtures.
  */
 const ALL_ROUTES = [
   // ── Root + info ─────────────────────────────────────────────────────────────
@@ -53,10 +53,6 @@ const ALL_ROUTES = [
   '/ops/clients/lilac-insure/report',
   '/ops/clients/lilac-insure/brand-audit',
   // ── Ops · temporary (deleted with OpsDashboardPage once harvest is finalized) ──
-
-  // ── Admin ───────────────────────────────────────────────────────────────────
-  '/admin/approvals',
-  '/admin/approvals/p0-1-repo-structure',
 
   // ── Client portal (public, token-gated; visited without ?token= renders the
   //    "Not authorized" surface — that surface still has to layout-cleanly). ──

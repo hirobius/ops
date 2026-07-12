@@ -21,7 +21,6 @@
  */
 
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router';
 import { Button, SegmentedControl, Tag } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import type { CSSProperties } from 'react';
@@ -110,10 +109,6 @@ export default function TasksPage() {
   const groups = useMemo(() => groupTasksNow(filtered, groupBy), [filtered, groupBy]);
 
   const summary = tasks ? `${filtered.length} shown · ${tasks.length} total` : '';
-  const queuedCount = useMemo(
-    () => (tasks ? tasks.filter((t) => t.dispatch_status === 'queued').length : 0),
-    [tasks],
-  );
 
   return (
     <div style={s.page}>
@@ -147,11 +142,6 @@ export default function TasksPage() {
               ? 'loading…'
               : `${summary} · updated ${formatLastUpdated(lastUpdatedAt)}`}
         </span>
-        {queuedCount > 0 && (
-          <Link to="/admin/approvals" style={s.approvalsLink} data-role="approvals-indicator">
-            {queuedCount} awaiting approval
-          </Link>
-        )}
         <Button size="sm" variant="secondary" disabled={importing} onClick={importIssues}>
           {importing ? 'importing…' : 'Import GitHub issues'}
         </Button>
@@ -279,15 +269,6 @@ const s = {
     fontFamily: hds.monoFamily,
     fontSize: hds.fontSize.xs,
     color: 'var(--semantic-color-content-secondary)',
-  },
-  approvalsLink: {
-    ...hds.typeStyles.ui,
-    fontSize: hds.fontSize.xs,
-    padding: '4px 10px',
-    border: '1px solid var(--semantic-color-content-accent)',
-    borderRadius: hds.borderRadius[8],
-    color: 'var(--semantic-color-content-accent)',
-    textDecoration: 'none',
   },
   batchBar: {
     display: 'flex',

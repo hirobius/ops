@@ -8,8 +8,6 @@
     "src/app/pages/ErrorPage.tsx": 2,
     "src/app/pages/InfoPageWrapper.tsx": 13,
     "src/app/pages/NotFoundPage.tsx": 1,
-    "src/app/pages/admin/ApprovalDetail.tsx": 16,
-    "src/app/pages/admin/Approvals.tsx": 9,
     "src/app/pages/ops/ClientBrandAuditPage.tsx": 41,
     "src/app/pages/ops/ClientDashboardPage.tsx": 128,
     "src/app/pages/ops/ClientReportPage.tsx": 55,

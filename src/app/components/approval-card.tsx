@@ -102,9 +102,10 @@ function truncate(text: string, max: number): string {
  * (Approve / Deny / Grill) that fire callbacks the page wires to the
  * bridge endpoint.
  *
- * Purely presentational — no fetch logic lives here. The page
- * (src/app/pages/admin/Approvals.tsx) owns the optimistic-update / reconcile
- * flow and supplies the disabled flag while a mutation is in flight.
+ * Purely presentational — no fetch logic lives here. The consuming page
+ * owns the optimistic-update / reconcile flow and supplies the disabled flag
+ * while a mutation is in flight. (The `/admin/approvals` inbox this served
+ * was retired 2026-07-12, ops#157 — currently no live consumer; see ops#140.)
  */
 export const ApprovalCard = React.forwardRef<HTMLDivElement, ApprovalCardProps>(
   function ApprovalCard(

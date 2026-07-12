@@ -350,18 +350,12 @@ function runRouteLinksCheck() {
     '/ops/atlas',
     '/ops/build',
     '/ops/sessions',
-    '/admin/approvals',
   ]);
 
   // HDS doc routes moved from /hds/* to /ops/hds/* (commit 3bf17b5b, 2026-05-10).
   // Defined under routes.tsx children of 'ops' (lines 297-366) with a wildcard
   // fallback redirecting unknown /ops/hds/* paths to /ops/hds/color.
-  const PREFIX_ROUTES = [
-    '/portfolio/',
-    '/ops/clients/',
-    '/ops/hds/',
-    '/admin/approvals/',
-  ];
+  const PREFIX_ROUTES = ['/portfolio/', '/ops/clients/', '/ops/hds/'];
 
   const ROUTE_RE = /(?:href|to)\s*=\s*["'](\/[^"'#?]*)["']/g;
 

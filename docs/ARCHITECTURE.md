@@ -37,10 +37,9 @@ outreach engine.
 ### Cross-cutting: the command center (`/ops`) — 🟢 live
 
 Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home
-(+ Runs panel) · admin/approvals (live — tasks-store approvals inbox, epic #41
-Slice 3: `dispatch_status='queued'` tasks await an Approve/Deny click, reusing
-`ApprovalCard` + `/api/task-action`'s `dispatch`/`unqueue` actions; the dead
-`localhost:3005/orchestration/*` bridge is fully retired). Auth:
+(+ Runs panel). The `/admin/approvals` inbox (epic #41 Slice 3) was retired
+2026-07-12 (ops#157, superseded by ralph-gate's `ralph-auto`/`ralph-approved`
+merge governance — see the task board's ⋯ menu "Approve merge"). Auth:
 `OPS_GATE_PASSWORD`+`OPS_SESSION_SECRET` (gate), `OPS_AGENT_KEY` (machine auth,
 #25). Fleet: `/ops/projects` + `scripts/deploy-alert.mjs` (#11). Task machinery:
 `tasks` table + GitHub-issue importer (#25) + dispatch (opens an issue @-mentioning

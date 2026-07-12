@@ -33,21 +33,11 @@ export function TaskActionsMenu({ task: t, busy, onAction }: TaskActionsMenuProp
         </Button>
       </Menu.Trigger>
       <Menu.Content align="end">
-        {t.status !== 'done' && (
+        {t.status !== 'done' && !t.key.startsWith('github:') && (
           <Menu.Item onSelect={() => onAction(t.key, 'done')}>Mark done</Menu.Item>
         )}
         {ref && <Menu.Item onSelect={() => void copyText(ref)}>Copy {ref}</Menu.Item>}
-        <Menu.Separator />
-        <Menu.Item onSelect={() => onAction(t.key, t.auto_ok ? 'auto_off' : 'auto_on')}>
-          {t.auto_ok ? 'Auto-dispatch: on → turn off' : 'Auto-dispatch: off → turn on'}
-        </Menu.Item>
-        {!dispatched && (
-          <Menu.Item
-            onSelect={() => onAction(t.key, t.dispatch_status === 'queued' ? 'unqueue' : 'queue')}
-          >
-            {t.dispatch_status === 'queued' ? 'Remove from approvals queue' : 'Queue for approval'}
-          </Menu.Item>
-        )}
+        {(dispatched || t.key.startsWith('github:')) && <Menu.Separator />}
         {dispatched && (
           <Menu.Item
             onSelect={() => onAction(t.key, ralphReady ? 'ralph_ready_off' : 'ralph_ready_on')}

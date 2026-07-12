@@ -45,9 +45,6 @@ const config: KnipConfig = {
     'src/app/pages/hds/IconsPage.tsx',
     'src/app/pages/hds/portfolioData.tsx',
     'src/app/pages/SketchPage.tsx',
-    // Admin/ops dashboard pages — in-flight Workspace HQ surfaces, not yet
-    // wired into routes.tsx. Tracked by ops dashboard manifest.
-    'src/app/pages/admin/**',
     // Pattern doc draft pages — same intent as the HDS draft pages above:
     // structured surfaces awaiting route promotion. Source of truth is the
     // hds-registry.json + pattern manifest, not knip's reachability graph.
