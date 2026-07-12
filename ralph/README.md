@@ -35,6 +35,32 @@ error (bounded backoff, never silent).
 | `needs-adrian` | loop | malformed/blocked on a human (e.g. no acceptance criteria) |
 | `ralph-selfheal-attempted` | gate | the one bounded self-heal was spent on this PR |
 
+## Bounded metric loop (ops#90)
+
+Distinct from the issue-queue loop above: `ralph-metric.yml` is a Ralph
+variant whose **queue and stop-condition are a number**, not a human-tagged
+issue — safe to run fully hands-off because the target bounds it.
+
+```
+measure metric → at target? → yes: emit COMPLETE, stop (no PR)
+                             → no:  fix one batch → ralph/gate.sh → PR →
+                                    ralph-gate merge → next dispatch re-measures
+```
+
+`ralph/metric.sh <gate-id> <target>` does the measuring: `<gate-id>` is an
+entry in `docs/guardrails/registry.json` whose `gateScript` supports
+`--json` and returns the canonical `{ violations: Array }` shape (see
+`scripts/audit-gates-supportjson.mjs`, the compliance ratchet for that
+contract — pick a compliant gate, or bring one into compliance first).
+Exit `0` = at/below target (COMPLETE), `1` = needs a batch, `2` = usage or
+contract error (fails loud, names the fix).
+
+`.github/workflows/ralph-metric.yml` wraps it: `workflow_dispatch` only —
+no `schedule:` trigger without Adrian's explicit per-item cron yes
+(standing rule); each dispatch does one measure→batch cycle, and re-dispatch
+manually to continue. Between dispatches nothing runs — that's expected,
+not a bug.
+
 ## Add Ralph to another hirobius repo
 
 1. **Vendor this directory** into the repo (from a local ops checkout):
@@ -71,3 +97,5 @@ error (bounded backoff, never silent).
 - `config.env` — **per-repo** knobs
 - `status.sh` — read-only "is it stuck?" snapshot
 - `prompt.md` — the one-iteration instructions the model gets
+- `metric.sh` — measures a registry gate's violation count against a target;
+  powers the bounded metric loop (`ralph-metric.yml`, see above)

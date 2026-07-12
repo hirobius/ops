@@ -1,0 +1,107 @@
+name: Ralph Metric
+
+# Bounded metric loop (ops#90) — a Ralph variant whose queue AND
+# stop-condition are a number, not a human-tagged issue. workflow_dispatch
+# ONLY for now: a `schedule:` trigger needs Adrian's explicit per-item cron
+# yes (CLAUDE.md standing rule) — until then, each dispatch does ONE
+# measure -> batch cycle; re-dispatch manually to re-measure and continue.
+#
+# Shape: measure the named registry gate's violation count -> at/below
+# target?  yes: comment COMPLETE, stop (no PR).
+#          no:  one claude-code-action iteration scoped to "reduce it by a
+#               batch" -> ralph/gate.sh (fails closed, no PR on red) -> PR
+#               -> ralph-gate.yml picks it up from there (human-approved
+#               merge, or ralph-auto batch pre-approval — same policy as
+#               the issue loop).
+#
+# metric must be a gate id in docs/guardrails/registry.json whose --json
+# output matches the canonical `{ violations: Array }` contract (see
+# scripts/audit-gates-supportjson.mjs) — ralph/metric.sh enforces this and
+# fails loud, naming the fix, if it doesn't.
+
+on:
+  workflow_dispatch:
+    inputs:
+      metric:
+        description: 'Gate id from docs/guardrails/registry.json (its --json must return { violations: Array })'
+        required: true
+        type: string
+      target:
+        description: 'Violation count to reach (0 = fully clean)'
+        required: true
+        type: string
+
+concurrency:
+  group: ralph-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      complete: ${{ steps.measure.outputs.complete }}
+      current: ${{ steps.measure.outputs.current }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - id: measure
+        run: |
+          set +e
+          out=$(bash ralph/metric.sh "${{ inputs.metric }}" "${{ inputs.target }}")
+          code=$?
+          set -e
+          echo "$out"
+          current=$(sed -nE 's/^current=([0-9]+).*/\1/p' <<<"$out")
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          if [ "$code" -eq 0 ]; then
+            echo "complete=true" >> "$GITHUB_OUTPUT"
+          elif [ "$code" -eq 1 ]; then
+            echo "complete=false" >> "$GITHUB_OUTPUT"
+          else
+            exit "$code"
+          fi
+
+  complete:
+    needs: measure
+    if: needs.measure.outputs.complete == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "::notice::metric '${{ inputs.metric }}' at target (current=${{ needs.measure.outputs.current }}, target=${{ inputs.target }}) — COMPLETE, no PR."
+
+  batch:
+    needs: measure
+    if: needs.measure.outputs.complete == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --allowedTools "Bash,Read,Write,Edit,Glob,Grep"
+          prompt: |
+            Bounded metric batch (ops#90 / ralph-metric.yml). Metric
+            '${{ inputs.metric }}' is currently at ${{ needs.measure.outputs.current }},
+            target is ${{ inputs.target }} (docs/guardrails/registry.json gate,
+            measured via `bash ralph/metric.sh ${{ inputs.metric }} ${{ inputs.target }}`).
+
+            Fix ONE bounded batch that reduces this metric — do not attempt the
+            whole gap in one PR if it's large; leave the rest for the next
+            dispatch. Work on a new branch, then run `bash ralph/gate.sh` — it
+            fails closed, so do not open a PR unless it's green. Open the PR
+            against main; do NOT merge it yourself (ralph-gate.yml + human
+            approval / ralph-auto handles that). Reference this run and the
+            metric/target in the PR body.
