@@ -32,7 +32,7 @@ Quality gates are registered in `docs/guardrails/registry.json`
 ## Ralph quality bar
 
 REPO_TYPE: production
-QUALITY BAR: Private client automation (Lilac/EZLynx). Correctness over speed. No destructive ops.
+QUALITY BAR: Agency operations dashboard (leads pipeline, client CRM, task board). Production is live. Correctness over speed. No destructive ops.
 
 Rules for any autonomous loop in this repo:
 
