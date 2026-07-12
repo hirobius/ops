@@ -329,3 +329,47 @@ fix but never opened a PR. Re-verified independently this iteration:
   ralph/issue-64-kimi-gitignore-cleanup. Notes for next iteration: recommend
   closing #64 as superseded/moot once this PR lands — filed as a bug against
   code that predates the current architecture.
+
+## Issue #65 — triage the 7 investigate-broken soft gates (2026-07-12)
+- Re-ran `pnpm audit:soft-gates` fresh (checked-in
+  docs/guardrails/soft-gate-promotion-plan.md was stale from 2026-05-06 and
+  listed a different 5-gate set). Current run: 6 gates in investigate-broken.
+  Left that canonical doc untouched (refreshing it re-scores unrelated
+  promotable/baseline buckets too — out of scope for this issue) and instead
+  wrote a scoped doc: docs/guardrails/investigate-broken-triage.md.
+- Ran each of the 6 gates directly (not just trusting the audit summary) to
+  get real root causes:
+  - audit-tiers, check-contrast: crash on ENOENT for DS-authoring artifacts
+    (public/hds-manifest.json, hirobius.tokens.json) that don't exist in this
+    consumer repo. Disposition: retire. Filed #175.
+  - check-link-integrity: NOT actually broken — runs clean, flags
+    src/app/routes.tsx:78 (/ops/tasks) as an invalid route, but it's a real
+    nested child route. Root cause: EXACT_ROUTES/PREFIX_ROUTES in the script
+    is a hardcoded, stale allowlist (missing /ops/tasks, /ops/leads,
+    /ops/digest, /ops/projects, exact /ops/clients; still lists dead routes
+    /ops/sessions, /ops/briefing, /ops/atlas, /ops/build). Also lacks --json
+    output, which is *why* the auditor misclassifies it as broken instead of
+    baseline-then-promote. Disposition: fix now. Filed #176.
+  - check-focus-states: also NOT broken — same --json gap, found 7 real
+    missing-hds-focus violations across 4 files (LeadsPage, PullLeadsForm,
+    RalphPanel, TaskRow). Disposition: fix now (UI change, needs
+    typecheck+test:layout). Filed #177.
+  - check-route-smoke: fails on missing Playwright browser binary in this
+    sandbox (no /opt/pw-browsers here). Unclear if real gap or
+    environment-only. Filed #178 to confirm in a real target environment.
+  - audit-sites: fails loud on missing PAGESPEED_API_KEY /
+    SUPABASE_SERVICE_ROLE_KEY — exactly CLAUDE.md's fail-loud-and-actionable
+    convention for secret-backed features. Working as designed, no action.
+- Kept this PR docs-only (no source fixes) since #65's DoD is the enumeration
+  + disposition call, not the fixes themselves — matches the repo's
+  epic-decomposition convention (same pattern as how #66/#67 split off).
+- Reverted two unrelated regen side-effects from running the audit script
+  locally (docs/security/sbom.json, docs/guardrails/soft-gate-promotion-plan.md)
+  before committing — they're real artifact-generators but not this issue's
+  scope.
+- Gate green: typecheck + 577 tests + lint. Branch:
+  ralph/issue-65-triage-soft-gates. PR #179.
+- Notes for next iteration: #175/#176/#177/#178 are now ralph-queueable
+  follow-ups (currently unlabeled for ralph-* per loop hygiene — a human/
+  triage pass should add ralph-ready + priority if they want them picked up
+  automatically).
