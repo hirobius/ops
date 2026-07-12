@@ -7,10 +7,14 @@ name: Ralph
 # Triggers: manual dispatch (optionally naming an issue — a human override
 # that steals any claim), `issues: labeled` (fires when something is tagged
 # ralph-ready; the guard filters every other label — load-bearing, see the
-# reusable), and push-to-main (the chain: an approved+merged Ralph PR pushes
-# main, which grabs the next issue). Selection, claiming, single-flight,
-# wedge alerts, and reconciliation all live in the reusable workflow +
-# ralph/lib.sh — one logic for CI and local runs.
+# reusable), push-to-main (the chain: an approved+merged Ralph PR pushes
+# main, which grabs the next issue), and an hourly schedule (the idle
+# watchdog: the event-driven chain halts silently after a failed iteration,
+# and label runs queued behind an in-flight run are cancelled by the
+# concurrency dedup — the tick re-enters the guard and restarts the queue;
+# an idle tick with nothing to do is a quiet no-op). Selection, claiming,
+# single-flight, wedge alerts, and reconciliation all live in the reusable
+# workflow + ralph/lib.sh — one logic for CI and local runs.
 #
 # ops is private client automation — correctness over speed, no destructive
 # ops, merges are human-approved (`ralph-approved` on the PR, or the issue
@@ -27,6 +31,8 @@ on:
     types: [labeled]
   push:
     branches: [main] # chain: a merged Ralph PR grabs the next ralph-ready issue
+  schedule:
+    - cron: "11 * * * *" # idle watchdog (staggered minute; site-engine/hds use others)
 
 concurrency:
   group: ralph-${{ github.repository }}

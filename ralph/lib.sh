@@ -255,7 +255,7 @@ park_issue() {
 # what actually happened, regardless of how the work step died. Prints one
 # token: pr:<num> | parked:<why> | failed:<why>. Never returns non-zero.
 reconcile_issue() {
-  local n=$1 run_id=$2 work_status=$3 all pr closed branch i fails why
+  local n=$1 run_id=$2 work_status=$3 all pr closed branch i fails why eligible
   all=$(gh pr list --state all --limit 200 --json number,headRefName,state \
     --jq "[.[] | select(.headRefName | startswith(\"ralph/issue-$n-\"))]" \
     2>/dev/null || echo '[]')
@@ -298,7 +298,26 @@ Opened by ralph reconciliation (run \`$run_id\`): the iteration pushed this bran
   else
     why="${why:-iteration ended without a pushed branch ($work_status)}"
   fi
-  # 3) Nothing shippable → record the attempt, release the claim, park on cap.
+  # 3) Deliberate stop, not a failure: prompt.md tells the model "blocked or
+  #    ambiguous → comment on the issue and STOP", which reaches here as
+  #    "no branch pushed" — but the model (or a human, mid-run) took the issue
+  #    out of the queue: closed it, pulled the ready label, or tagged it
+  #    needs-adrian / blocked. Recording an attempt would double-count one
+  #    decision, and needs-adrian often rides ALONGSIDE a kept ready label, so
+  #    no re-label event ever resets that budget. On API failure assume
+  #    "queued" and fall through to the conservative attempt-recording path.
+  eligible=$(gh issue view "$n" --json state,labels 2>/dev/null |
+    jq -r --arg l "$RALPH_READY_LABEL" \
+      'if .state != "OPEN" then "closed"
+       elif ([.labels[].name] | index($l)) == null then "unqueued"
+       elif ([.labels[].name] | (index("needs-adrian") or index("blocked"))) then "handed off"
+       else "queued" end' 2>/dev/null || echo queued)
+  if [ "$eligible" != "queued" ]; then
+    release_claim "$n"
+    echo "parked:#$n was $eligible during the iteration ($why) — deliberate stop, no attempt recorded"
+    return 0
+  fi
+  # 4) Nothing shippable → record the attempt, release the claim, park on cap.
   record_failed_attempt "$n" "$run_id" "$why"
   release_claim "$n"
   fails=$(count_failed_attempts "$n")
