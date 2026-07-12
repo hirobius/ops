@@ -17,7 +17,11 @@ import { opsApi } from '../../../lib/opsApi';
 import type { TaskAction, TaskActionResult } from './types';
 
 export interface UseTaskActionsResult {
-  act: (key: string, action: TaskAction) => Promise<TaskActionResult>;
+  act: (
+    key: string,
+    action: TaskAction,
+    payload?: Record<string, unknown>,
+  ) => Promise<TaskActionResult>;
   busyKeys: ReadonlySet<string>;
   importing: boolean;
   importIssues: () => Promise<void>;
@@ -28,10 +32,14 @@ export function useTaskActions(refetch: () => void): UseTaskActionsResult {
   const [importing, setImporting] = useState(false);
 
   const act = useCallback(
-    async (key: string, action: TaskAction): Promise<TaskActionResult> => {
+    async (
+      key: string,
+      action: TaskAction,
+      payload?: Record<string, unknown>,
+    ): Promise<TaskActionResult> => {
       setBusyKeys((prev) => new Set(prev).add(key));
       try {
-        const res = await opsApi.post('/api/task-action', { key, action });
+        const res = await opsApi.post('/api/task-action', { key, action, ...payload });
         const body = await res.json().catch(() => null);
         return { ok: res.ok, body };
       } catch {

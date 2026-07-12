@@ -35,12 +35,12 @@
     "src/app/pages/ops/leads/PullLeadsForm.tsx": 19,
     "src/app/pages/ops/projects/ProjectsPage.tsx": 21,
     "src/app/pages/ops/tasks/RalphPanel.tsx": 21,
-    "src/app/pages/ops/tasks/TaskActionsMenu.tsx": 13,
+    "src/app/pages/ops/tasks/TaskActionsMenu.tsx": 21,
     "src/app/pages/ops/tasks/TaskRow.tsx": 21,
     "src/app/pages/ops/tasks/TasksPage.tsx": 35,
     "src/app/pages/portal/ClientPortalPage.tsx": 54,
     "src/app/routes.tsx": 28
   },
-  "updatedAt": "2026-07-12T22:39:04.430Z",
-  "sha": "ae48df4"
+  "updatedAt": "2026-07-12T23:23:29.076Z",
+  "sha": "ea1fc1e"
 }

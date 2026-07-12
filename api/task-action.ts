@@ -4,10 +4,11 @@
  * Mutates one task on the /ops/tasks board. The `tasks_audit` trigger logs every
  * change to `task_events`, so this stays a thin row update.
  *
- * Request:  { key: string, action: Action, actor?: string }
+ * Request:  { key: string, action: Action, actor?: string, priority?: 'p0'|'p1'|'p2'|'p3'|null }
  *   Action = 'done' | 'reopen' | 'claim' | 'unclaim' | 'trash' | 'restore' | 'dispatch'
  *          | 'auto_on' | 'auto_off' | 'queue' | 'unqueue'
  *          | 'ralph_ready_on' | 'ralph_ready_off' | 'ralph_approve' | 'ralph_dispatch'
+ *          | 'ralph_auto_on' | 'ralph_auto_off' | 'set_priority'
  *
  * 'auto_on' / 'auto_off' flip `auto_ok` (migration 0008) — the Fleet
  * auto-dispatch opt-in (epic #41). Slice 2's dispatcher only picks up rows
@@ -48,6 +49,17 @@
  * workflow's Actions page (GitHub's dispatch response has no run id to hand
  * back synchronously).
  *
+ * 'ralph_auto_on' / 'ralph_auto_off' (ops#138) add/remove the `ralph-auto`
+ * label on the task's linked GitHub issue — the pre-approval that arms a
+ * Ralph-shipped PR's merge without a human `ralph_approve` tap. Same
+ * dispatch_url-or-source_url gate + tags mirror as `ralph_ready_on/off`.
+ *
+ * 'set_priority' (ops#138) sets the task's linked GitHub issue to carry
+ * exactly one of the mutually-exclusive `p0`–`p3` labels — removes any other
+ * priority label first, then adds the requested one; `priority: null` clears
+ * the priority (removes without adding). Requires `priority` in the body;
+ * 400 on a value outside `p0`–`p3`/`null`. Mirrors into the row's `tags`.
+ *
  * In dev, the same contract is served by scripts/tasks-middleware.mjs.
  * Success:  { ok: true, ...extra } · Error: { error, code? } 400/401/404/405/500/503
  *
@@ -68,13 +80,17 @@ export async function taskActionHandler(
   sb: SupabaseClient,
   req: VercelRequest,
 ): Promise<HandlerResult> {
-  const body = req.body as { key?: unknown; action?: unknown; actor?: unknown } | undefined;
+  const body = req.body as
+    | { key?: unknown; action?: unknown; actor?: unknown; priority?: unknown }
+    | undefined;
   const key = typeof body?.key === 'string' ? body.key.trim() : '';
   const action = typeof body?.action === 'string' ? body.action.trim() : '';
   const actor = typeof body?.actor === 'string' ? body.actor.trim() : 'adrian';
+  const priority =
+    body?.priority === null ? null : typeof body?.priority === 'string' ? body.priority : undefined;
   if (!key || !action) return { status: 400, body: { error: 'key and action are required' } };
 
-  return applyTaskAction(sb, { key, action, actor }, { github: makeGitHubPort() });
+  return applyTaskAction(sb, { key, action, actor, priority }, { github: makeGitHubPort() });
 }
 
 export default withOpsHandler('POST', withServiceClient(taskActionHandler));

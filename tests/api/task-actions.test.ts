@@ -286,6 +286,300 @@ describe('applyTaskAction — ralph_ready_on/off (injected GitHub port)', () => 
     expect((result.body as { error: string }).error).toContain('422');
     expect((result.body as { code: string }).code).toBe('GITHUB_LABEL_FAILED');
   });
+
+  it('succeeds on a source_url-only row (ops#138 — the dispatch_url-only gate fails this today)', async () => {
+    const imported = {
+      key: 't1',
+      title: 'Do it',
+      dispatch_url: null,
+      source_url: 'https://github.com/hirobius/ops/issues/105',
+      tags: ['triage'],
+    };
+    const { sb, updates } = makeSb({ task: imported });
+    const calls: Array<{ issueUrl: string; label: string }> = [];
+    const github = {
+      addLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push(i);
+        return {};
+      },
+      removeLabel: async () => ({}),
+    };
+    const result = await applyTaskAction(sb, { key: 't1', action: 'ralph_ready_on' }, { github });
+    expect(calls[0]).toEqual({
+      issueUrl: 'https://github.com/hirobius/ops/issues/105',
+      label: 'ralph-ready',
+    });
+    expect(result).toEqual({ status: 200, body: { ok: true, tags: ['triage', 'ralph-ready'] } });
+    expect(updates.at(-1)).toEqual({ tags: ['triage', 'ralph-ready'] });
+  });
+});
+
+describe('applyTaskAction — ralph_auto_on/off (injected GitHub port, ops#138)', () => {
+  const issued = {
+    key: 't1',
+    title: 'Do it',
+    dispatch_url: 'https://github.com/hirobius/ops/issues/9',
+    tags: ['triage'],
+  };
+
+  it('503s when no port is configured (no GITHUB_TOKEN)', async () => {
+    const { sb } = makeSb({ task: issued });
+    expect(
+      await applyTaskAction(sb, { key: 't1', action: 'ralph_auto_on' }, { github: null }),
+    ).toMatchObject({ status: 503, body: { code: 'ENV_MISSING_GITHUB_TOKEN' } });
+  });
+
+  it('404s when the task is missing', async () => {
+    const { sb } = makeSb({ task: null });
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    expect(
+      await applyTaskAction(sb, { key: 'nope', action: 'ralph_auto_on' }, { github }),
+    ).toMatchObject({ status: 404 });
+  });
+
+  it('400s when the task has no linked GitHub issue', async () => {
+    const { sb } = makeSb({ task: { key: 't1', title: 'Do it', dispatch_url: null, tags: [] } });
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    expect(
+      await applyTaskAction(sb, { key: 't1', action: 'ralph_auto_on' }, { github }),
+    ).toMatchObject({ status: 400 });
+  });
+
+  it('adds the ralph-auto label via the port and merges it into tags', async () => {
+    const { sb, updates } = makeSb({ task: issued });
+    const calls: Array<{ issueUrl: string; label: string }> = [];
+    const github = {
+      addLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push(i);
+        return {};
+      },
+      removeLabel: async () => ({}),
+    };
+    const result = await applyTaskAction(sb, { key: 't1', action: 'ralph_auto_on' }, { github });
+    expect(calls[0]).toEqual({
+      issueUrl: 'https://github.com/hirobius/ops/issues/9',
+      label: 'ralph-auto',
+    });
+    expect(result).toEqual({ status: 200, body: { ok: true, tags: ['triage', 'ralph-auto'] } });
+    expect(updates.at(-1)).toEqual({ tags: ['triage', 'ralph-auto'] });
+  });
+
+  it('is idempotent — adding an already-present label does not duplicate it in tags', async () => {
+    const alreadyOn = { ...issued, tags: ['triage', 'ralph-auto'] };
+    const { sb, updates } = makeSb({ task: alreadyOn });
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    const result = await applyTaskAction(sb, { key: 't1', action: 'ralph_auto_on' }, { github });
+    expect(result).toEqual({ status: 200, body: { ok: true, tags: ['triage', 'ralph-auto'] } });
+    expect(updates.at(-1)).toEqual({ tags: ['triage', 'ralph-auto'] });
+  });
+
+  it('removes the ralph-auto label via the port and drops it from tags', async () => {
+    const on = { ...issued, tags: ['triage', 'ralph-auto'] };
+    const { sb, updates } = makeSb({ task: on });
+    const calls: Array<{ issueUrl: string; label: string }> = [];
+    const github = {
+      addLabel: async () => ({}),
+      removeLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push(i);
+        return {};
+      },
+    };
+    const result = await applyTaskAction(sb, { key: 't1', action: 'ralph_auto_off' }, { github });
+    expect(calls[0]).toEqual({
+      issueUrl: 'https://github.com/hirobius/ops/issues/9',
+      label: 'ralph-auto',
+    });
+    expect(result).toEqual({ status: 200, body: { ok: true, tags: ['triage'] } });
+    expect(updates.at(-1)).toEqual({ tags: ['triage'] });
+  });
+
+  it('502s when the port throws', async () => {
+    const { sb } = makeSb({ task: issued });
+    const github = {
+      addLabel: async () => {
+        throw new Error('HTTP 422');
+      },
+      removeLabel: async () => ({}),
+    };
+    const result = await applyTaskAction(sb, { key: 't1', action: 'ralph_auto_on' }, { github });
+    expect(result.status).toBe(502);
+    expect((result.body as { code: string }).code).toBe('GITHUB_LABEL_FAILED');
+  });
+
+  it('succeeds on a source_url-only row', async () => {
+    const imported = {
+      key: 't1',
+      title: 'Do it',
+      dispatch_url: null,
+      source_url: 'https://github.com/hirobius/ops/issues/105',
+      tags: [],
+    };
+    const { sb, updates } = makeSb({ task: imported });
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    const result = await applyTaskAction(sb, { key: 't1', action: 'ralph_auto_on' }, { github });
+    expect(result).toEqual({ status: 200, body: { ok: true, tags: ['ralph-auto'] } });
+    expect(updates.at(-1)).toEqual({ tags: ['ralph-auto'] });
+  });
+});
+
+describe('applyTaskAction — set_priority (injected GitHub port, ops#138)', () => {
+  const issued = {
+    key: 't1',
+    title: 'Do it',
+    dispatch_url: 'https://github.com/hirobius/ops/issues/9',
+    tags: ['triage', 'p3'],
+  };
+
+  it('503s when no port is configured (no GITHUB_TOKEN)', async () => {
+    const { sb } = makeSb({ task: issued });
+    expect(
+      await applyTaskAction(
+        sb,
+        { key: 't1', action: 'set_priority', priority: 'p1' },
+        { github: null },
+      ),
+    ).toMatchObject({ status: 503, body: { code: 'ENV_MISSING_GITHUB_TOKEN' } });
+  });
+
+  it('404s when the task is missing', async () => {
+    const { sb } = makeSb({ task: null });
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    expect(
+      await applyTaskAction(
+        sb,
+        { key: 'nope', action: 'set_priority', priority: 'p1' },
+        { github },
+      ),
+    ).toMatchObject({ status: 404 });
+  });
+
+  it('400s when the task has no linked GitHub issue', async () => {
+    const { sb } = makeSb({ task: { key: 't1', title: 'Do it', dispatch_url: null, tags: [] } });
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    expect(
+      await applyTaskAction(sb, { key: 't1', action: 'set_priority', priority: 'p1' }, { github }),
+    ).toMatchObject({ status: 400 });
+  });
+
+  it('400s on an invalid priority value', async () => {
+    const { sb } = makeSb({ task: issued });
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    expect(
+      await applyTaskAction(sb, { key: 't1', action: 'set_priority', priority: 'p9' }, { github }),
+    ).toMatchObject({ status: 400 });
+  });
+
+  it('set p1 removes the existing p3 label then adds p1', async () => {
+    const { sb, updates } = makeSb({ task: issued });
+    const added: string[] = [];
+    const removed: string[] = [];
+    const github = {
+      addLabel: async (i: { issueUrl: string; label: string }) => {
+        added.push(i.label);
+        return {};
+      },
+      removeLabel: async (i: { issueUrl: string; label: string }) => {
+        removed.push(i.label);
+        return {};
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'set_priority', priority: 'p1' },
+      { github },
+    );
+    expect(removed).toEqual(['p3']);
+    expect(added).toEqual(['p1']);
+    expect(result).toEqual({ status: 200, body: { ok: true, tags: ['triage', 'p1'] } });
+    expect(updates.at(-1)).toEqual({ tags: ['triage', 'p1'] });
+  });
+
+  it('clearing (priority: null) removes all p0–p3 labels and adds none', async () => {
+    const multi = { ...issued, tags: ['triage', 'p3'] };
+    const { sb, updates } = makeSb({ task: multi });
+    const added: string[] = [];
+    const removed: string[] = [];
+    const github = {
+      addLabel: async (i: { issueUrl: string; label: string }) => {
+        added.push(i.label);
+        return {};
+      },
+      removeLabel: async (i: { issueUrl: string; label: string }) => {
+        removed.push(i.label);
+        return {};
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'set_priority', priority: null },
+      { github },
+    );
+    expect(removed).toEqual(['p3']);
+    expect(added).toEqual([]);
+    expect(result).toEqual({ status: 200, body: { ok: true, tags: ['triage'] } });
+    expect(updates.at(-1)).toEqual({ tags: ['triage'] });
+  });
+
+  it('is idempotent — setting the already-current priority does not re-add or remove it', async () => {
+    const { sb, updates } = makeSb({ task: issued });
+    const added: string[] = [];
+    const removed: string[] = [];
+    const github = {
+      addLabel: async (i: { issueUrl: string; label: string }) => {
+        added.push(i.label);
+        return {};
+      },
+      removeLabel: async (i: { issueUrl: string; label: string }) => {
+        removed.push(i.label);
+        return {};
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'set_priority', priority: 'p3' },
+      { github },
+    );
+    expect(removed).toEqual([]);
+    expect(added).toEqual([]);
+    expect(result).toEqual({ status: 200, body: { ok: true, tags: ['triage', 'p3'] } });
+    expect(updates.at(-1)).toEqual({ tags: ['triage', 'p3'] });
+  });
+
+  it('502s when the port throws', async () => {
+    const { sb } = makeSb({ task: issued });
+    const github = {
+      addLabel: async () => {
+        throw new Error('HTTP 422');
+      },
+      removeLabel: async () => ({}),
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'set_priority', priority: 'p1' },
+      { github },
+    );
+    expect(result.status).toBe(502);
+    expect((result.body as { code: string }).code).toBe('GITHUB_LABEL_FAILED');
+  });
+
+  it('succeeds on a source_url-only row', async () => {
+    const imported = {
+      key: 't1',
+      title: 'Do it',
+      dispatch_url: null,
+      source_url: 'https://github.com/hirobius/ops/issues/105',
+      tags: [],
+    };
+    const { sb, updates } = makeSb({ task: imported });
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'set_priority', priority: 'p0' },
+      { github },
+    );
+    expect(result).toEqual({ status: 200, body: { ok: true, tags: ['p0'] } });
+    expect(updates.at(-1)).toEqual({ tags: ['p0'] });
+  });
 });
 
 describe('applyTaskAction — ralph_approve (injected GitHub port, ops#137)', () => {

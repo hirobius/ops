@@ -68,7 +68,10 @@ export type TaskAction =
   | 'ralph_ready_on'
   | 'ralph_ready_off'
   | 'ralph_approve'
-  | 'ralph_dispatch';
+  | 'ralph_dispatch'
+  | 'ralph_auto_on'
+  | 'ralph_auto_off'
+  | 'set_priority';
 
 export interface TasksResponse {
   tasks: Task[];

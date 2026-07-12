@@ -11,19 +11,28 @@
 
 import { Button, Menu } from '@hirobius/design-system';
 import type { Task, TaskAction, TaskActionResult } from './types';
-import { taskRef } from './taskMeta';
+import { taskRef, labelPriority, type LabelPriority } from './taskMeta';
 import { copyText } from './clipboard';
+
+const PRIORITIES: LabelPriority[] = ['p0', 'p1', 'p2', 'p3'];
 
 export interface TaskActionsMenuProps {
   task: Task;
   busy: boolean;
-  onAction: (key: string, action: TaskAction) => Promise<TaskActionResult>;
+  onAction: (
+    key: string,
+    action: TaskAction,
+    payload?: Record<string, unknown>,
+  ) => Promise<TaskActionResult>;
 }
 
 export function TaskActionsMenu({ task: t, busy, onAction }: TaskActionsMenuProps) {
   const dispatched = !!t.dispatch_url;
   const ref = taskRef(t);
   const ralphReady = (t.tags ?? []).includes('ralph-ready');
+  const ralphAuto = (t.tags ?? []).includes('ralph-auto');
+  const isGithubTracked = t.key.startsWith('github:');
+  const currentPriority = labelPriority(t);
 
   return (
     <Menu>
@@ -56,13 +65,44 @@ export function TaskActionsMenu({ task: t, busy, onAction }: TaskActionsMenuProp
             {ralphReady ? 'Ralph-ready: on → turn off' : 'Ralph-ready: off → turn on'}
           </Menu.Item>
         )}
-        {t.key.startsWith('github:') && (
+        {isGithubTracked && (
           <Menu.Item
             onSelect={() => onAction(t.key, 'ralph_approve')}
             title="Labels the linked ralph/issue-N PR ralph-approved, arming the ralph-gate workflow's auto-merge."
           >
             Approve merge
           </Menu.Item>
+        )}
+        {isGithubTracked && (
+          <Menu.Item
+            onSelect={() => onAction(t.key, ralphAuto ? 'ralph_auto_off' : 'ralph_auto_on')}
+            title="Adds/removes the ralph-auto label on the linked GitHub issue — pre-approves the shipped PR's merge with no ralph_approve tap needed."
+          >
+            {ralphAuto ? 'Auto-merge: on → turn off' : 'Auto-merge: off → turn on'}
+          </Menu.Item>
+        )}
+        {isGithubTracked && (
+          <Menu.Sub>
+            <Menu.SubTrigger>
+              Priority{currentPriority ? `: ${currentPriority.toUpperCase()}` : ''}
+            </Menu.SubTrigger>
+            <Menu.SubContent>
+              <Menu.RadioGroup
+                value={currentPriority ?? ''}
+                onValueChange={(value) =>
+                  onAction(t.key, 'set_priority', { priority: value || null })
+                }
+              >
+                {PRIORITIES.map((p) => (
+                  <Menu.RadioItem key={p} value={p}>
+                    {p.toUpperCase()}
+                  </Menu.RadioItem>
+                ))}
+                <Menu.Separator />
+                <Menu.RadioItem value="">Clear priority</Menu.RadioItem>
+              </Menu.RadioGroup>
+            </Menu.SubContent>
+          </Menu.Sub>
         )}
         <Menu.Separator />
         <Menu.Item onSelect={() => onAction(t.key, 'trash')}>Trash task (soft-delete)</Menu.Item>
