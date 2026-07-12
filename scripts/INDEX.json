@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 117,
+  "totalScripts": 116,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,7 +41,7 @@
     }
   },
   "categoryCounts": {
-    "other": 57,
+    "other": 56,
     "audit": 16,
     "build": 1,
     "gate": 25,
@@ -578,14 +578,6 @@
       "prefix": "convert",
       "purpose": "(no header description)",
       "pnpm": ["assets:convert"],
-      "gate": null
-    },
-    {
-      "name": "correlation.mjs",
-      "category": "other",
-      "prefix": null,
-      "purpose": "Request/response correlation Map used by `scripts/hds-bridge.mjs`. Build unit p5-2.",
-      "pnpm": [],
       "gate": null
     },
     {

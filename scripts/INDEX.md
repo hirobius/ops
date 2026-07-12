@@ -4,7 +4,7 @@
 > Regenerate with `pnpm scripts:index`. Deterministic (no timestamps), so it
 > only changes when scripts do.
 
-**117 scripts** across 9 categories.
+**116 scripts** across 9 categories.
 
 ## Prefix taxonomy
 
@@ -123,7 +123,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `test-phase1.mjs`            | (no header description)                                                                                     | `test:phase1`  | —     |
 | `test-prompt-regression.mjs` | Regression suite for LLM prompt outputs. Walks fixtures/llm-prompts/<slug>/ directories. Each must contain: | `test:prompts` | —     |
 
-## other (57)
+## other (56)
 
 | Script                           | Purpose                                                                                                                                                                                                                  | pnpm                                                                      | Fires |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ----- |
@@ -136,7 +136,6 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `client-digest.mjs`              | Walks the last N days of git log restricted to clients/<slug>/, buckets commits into shipped / next / blocker / other, and emits a markdown email draft ready to paste. Solo agencies live on perceived momentum; this   | —                                                                         | —     |
 | `component-discovery.mjs`        | (no header description)                                                                                                                                                                                                  | —                                                                         | —     |
 | `convert-incoming-assets.mjs`    | (no header description)                                                                                                                                                                                                  | `assets:convert`                                                          | —     |
-| `correlation.mjs`                | Request/response correlation Map used by `scripts/hds-bridge.mjs`. Build unit p5-2.                                                                                                                                      | —                                                                         | —     |
 | `derive-routes.mjs`              | Auto-derive the route list from: 1. src/app/routes.tsx (the React Router config) 2. src/app/data/component-api.json (component doc pages)                                                                                | —                                                                         | —     |
 | `discord-bot.mjs`                | Hirobius HQ — Discord bot with Claude API integration.                                                                                                                                                                   | `bot`                                                                     | —     |
 | `dispatch-pod.mjs`               | Worktree-isolation verification for sub-agent dispatch.                                                                                                                                                                  | —                                                                         | —     |
