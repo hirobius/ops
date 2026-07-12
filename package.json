@@ -48,6 +48,7 @@
     "audit:bundle": "node scripts/audit-bundle.mjs",
     "audit:deps": "node scripts/audit-deps.mjs",
     "audit:gate-replaceability": "node scripts/audit-gate-replaceability.mjs --summary",
+    "audit:orphan-modules": "node scripts/audit-orphan-modules.mjs",
     "audit:soft-gates": "node scripts/audit-soft-gates.mjs --summary",
     "audit:sbom": "node scripts/audit-sbom.mjs",
     "audit:sidecar": "node scripts/generate-security-posture.mjs",

@@ -1,0 +1,36 @@
+{
+  "issues": [
+    {
+      "file": "src/lib/unused-example-helper.ts",
+      "owners": [],
+      "files": [
+        {
+          "name": "src/lib/unused-example-helper.ts"
+        }
+      ],
+      "dependencies": [],
+      "devDependencies": [],
+      "unlisted": [],
+      "unresolved": [],
+      "exports": [],
+      "types": [],
+      "duplicates": []
+    },
+    {
+      "file": "scripts/some-script.mjs",
+      "owners": [],
+      "files": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "unlisted": [
+        {
+          "name": "connect"
+        }
+      ],
+      "unresolved": [],
+      "exports": [],
+      "types": [],
+      "duplicates": []
+    }
+  ]
+}

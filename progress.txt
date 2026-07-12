@@ -446,3 +446,40 @@ a PR and the branch went stale (4 commits behind main). This iteration:
   ralph/issue-78-digest-state-foundation. Foundation only, per the issue's
   scope — analyze/promote (P2-P4, LLM-backed) are follow-up work under epic
   #77, not filed as separate issues yet.
+
+#103 — orphan-module sweeper (audit-orphan-modules.mjs), clean redo of the
+dead PR #91 branch (part of #69, already closed as done via #94/#XX slices;
+this issue reopened the orphan-sweeper slice specifically)
+- New gate scripts/audit-orphan-modules.mjs: wraps `knip --reporter json`,
+  warn severity, always exits 0 (never blocks — same precedent as audit-deps).
+  Registered in registry.json under pnpm-meta; `pnpm audit:orphan-modules`
+  wired in package.json.
+- Found and fixed a real bug vs. the PR #91 reference diff (which I used only
+  as a reference, not merged/cherry-picked — that branch is stale, predates
+  the digest_items work and would've deleted merged files): the reference
+  assumed knip's `--reporter json` shape is `{ files: [...] }`. Verified
+  against a live `pnpm exec knip --reporter json` run — actual shape is
+  `{ issues: [{ file, files: [...], dependencies: [...], unlisted: [...], ... }] }`,
+  grouped per-file; an entry is an unused file when its own `files` array is
+  non-empty. The reference's assumption meant the gate would have silently
+  always reported 0 orphans in production. Fixed the parse logic + rewrote
+  both fixtures to match the real shape (violating fixture includes a second
+  issue entry with only an `unlisted` dep, to prove the parser doesn't
+  conflate issue categories). Verified live: matches `knip`'s text-reporter
+  "Unused files (4)" output exactly.
+- Real fixture pair + vitest test (scripts/__tests__/audit-orphan-modules.test.mjs)
+  — not stubs, per the issue's DoD (avoids regressing the stub-fixture ratchet).
+- Note for next iteration: `node scripts/validate-fixture-proof-of-firing.mjs`
+  (bare, no flags) has a pre-existing cache bug unrelated to this issue —
+  `.fixture-proof-cache.json` (gitignored) caches 'skip' results (for
+  always-exit-0 gates like this one and audit-orphan-wip) but the cache-hit
+  read path only special-cases 'pass', so a second local run misreports
+  cached 'skip' as "cached failure". Confirmed pre-existing (same shape would
+  hit audit-orphan-wip), confirmed harmless for CI/gate.sh (script isn't
+  in the pretest chain; check-fixture-stubs-ratchet.mjs always calls it with
+  --json which sets NO_CACHE); confirmed a fresh/--no-cache run is green.
+  Left unfixed — out of scope for a single-gate PR. Worth its own issue.
+- Gate green: typecheck + 599 tests + lint. All 3 DoD validators green
+  (validate-guardrail-registry, check-validator-wiring,
+  validate-fixture-proof-of-firing --no-cache). Branch:
+  ralph/issue-103-orphan-module-sweeper.
