@@ -274,9 +274,14 @@ function validate() {
       cached.passingMtime === passingMtime &&
       cached.lastResult !== undefined
     ) {
-      // Cache hit — skip re-run
+      // Cache hit — skip re-run. A cached 'skip' (gate exited 78: required
+      // tool unavailable, e.g. gitleaks in a sandbox) must stay a skip, not
+      // become a failure — otherwise the first run after a cache wipe passes
+      // and every later run is red purely from the cache echo.
       if (cached.lastResult === 'pass') {
         real.push({ id: gateId, fromCache: true });
+      } else if (cached.lastResult === 'skip') {
+        if (VERBOSE) console.warn(`  [REAL/SKIP] ${gateId}: cached skip (tool unavailable)`);
       } else {
         failures.push({ id: gateId, reason: 'cached failure', fromCache: true });
       }
