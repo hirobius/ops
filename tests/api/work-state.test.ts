@@ -6,7 +6,11 @@
  * when both are present on the same row.
  */
 import { describe, it, expect } from 'vitest';
-import { deriveWorkState, WORK_STATE_TONE } from '../../lib/tasks/work-state.mjs';
+import {
+  deriveWorkState,
+  WORK_STATE_TONE,
+  WORK_STATE_CARD_TONE,
+} from '../../lib/tasks/work-state.mjs';
 
 function task(overrides: Record<string, unknown> = {}) {
   return {
@@ -123,6 +127,61 @@ describe('WORK_STATE_TONE', () => {
     ];
     for (const phase of phases) {
       expect(WORK_STATE_TONE[phase]).toBeTruthy();
+    }
+  });
+});
+
+describe('WORK_STATE_CARD_TONE — the Card border tone per phase (ops#158)', () => {
+  it('needs-adrian → danger', () => {
+    expect(WORK_STATE_CARD_TONE['needs-adrian']).toBe('danger');
+  });
+
+  it('parked → warning', () => {
+    expect(WORK_STATE_CARD_TONE.parked).toBe('warning');
+  });
+
+  it('blocked → warning', () => {
+    expect(WORK_STATE_CARD_TONE.blocked).toBe('warning');
+  });
+
+  it('done → success', () => {
+    expect(WORK_STATE_CARD_TONE.done).toBe('success');
+  });
+
+  it('wip → neutral (mid-flight phases stay quiet; the badge carries the nuance)', () => {
+    expect(WORK_STATE_CARD_TONE.wip).toBe('neutral');
+  });
+
+  it('dispatched → neutral', () => {
+    expect(WORK_STATE_CARD_TONE.dispatched).toBe('neutral');
+  });
+
+  it('queued → neutral', () => {
+    expect(WORK_STATE_CARD_TONE.queued).toBe('neutral');
+  });
+
+  it('ready → neutral', () => {
+    expect(WORK_STATE_CARD_TONE.ready).toBe('neutral');
+  });
+
+  it('backlog → neutral', () => {
+    expect(WORK_STATE_CARD_TONE.backlog).toBe('neutral');
+  });
+
+  it('has a tone for every phase deriveWorkState can return', () => {
+    const phases = [
+      'done',
+      'needs-adrian',
+      'parked',
+      'blocked',
+      'wip',
+      'dispatched',
+      'queued',
+      'ready',
+      'backlog',
+    ];
+    for (const phase of phases) {
+      expect(WORK_STATE_CARD_TONE[phase]).toBeTruthy();
     }
   });
 });
