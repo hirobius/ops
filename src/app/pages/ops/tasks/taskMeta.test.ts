@@ -14,6 +14,7 @@ import {
   dueTone,
   matchesCategory,
   TASK_CATEGORIES,
+  labelPriority,
   type GroupBy,
 } from './taskMeta';
 import type { Task } from './types';
@@ -114,8 +115,22 @@ describe('issueLinkFor', () => {
   });
 });
 
+describe('labelPriority — p0–p3 from GitHub labels', () => {
+  it('reads the p0–p3 label out of tags', () => {
+    expect(labelPriority(task({ tags: ['enhancement', 'p1', 'ralph-ready'] }))).toBe('p1');
+    expect(labelPriority(task({ tags: ['p0'] }))).toBe('p0');
+  });
+  it('is null when no p-label (or no tags) is present', () => {
+    expect(labelPriority(task({ tags: ['bug', 'backlog'] }))).toBeNull();
+    expect(labelPriority(task({ tags: null }))).toBeNull();
+  });
+  it('returns the most urgent when several are present', () => {
+    expect(labelPriority(task({ tags: ['p3', 'p1'] }))).toBe('p1');
+  });
+});
+
 describe('compareTasks — operator order', () => {
-  it('ranks priority high > med > low > none', () => {
+  it('ranks priority high > med > low > none (legacy DB column)', () => {
     const high = task({ priority: 'high' });
     const med = task({ priority: 'med' });
     const low = task({ priority: 'low' });
@@ -124,6 +139,20 @@ describe('compareTasks — operator order', () => {
     expect(compareTasks(med, low)).toBeLessThan(0);
     expect(compareTasks(low, none)).toBeLessThan(0);
     expect(compareTasks(none, high)).toBeGreaterThan(0);
+  });
+  it('ranks p0 > p1 > p2 > p3 > none from labels', () => {
+    const p0 = task({ tags: ['p0'] });
+    const p1 = task({ tags: ['p1'] });
+    const p2 = task({ tags: ['p2'] });
+    const p3 = task({ tags: ['p3'] });
+    const none = task({ tags: ['backlog'] });
+    expect(compareTasks(p0, p1)).toBeLessThan(0);
+    expect(compareTasks(p1, p2)).toBeLessThan(0);
+    expect(compareTasks(p2, p3)).toBeLessThan(0);
+    expect(compareTasks(p3, none)).toBeLessThan(0);
+  });
+  it('a p-label outranks a row with neither label nor DB priority', () => {
+    expect(compareTasks(task({ tags: ['p3'] }), task({}))).toBeLessThan(0);
   });
   it('within equal priority, earlier due comes first and no-due sorts last', () => {
     const soon = task({ priority: 'high', due: '2026-07-12' });
@@ -161,6 +190,17 @@ describe('groupTasks', () => {
       low: ['a'],
       'no priority': ['c'],
     });
+  });
+  it('priority grouping buckets by the p0–p3 label, ordered p0 → p3 → no priority', () => {
+    const labelled = [
+      task({ key: 'x', tags: ['p2'] }),
+      task({ key: 'y', tags: ['p0'] }),
+      task({ key: 'z', tags: ['backlog'] }), // no p-label
+      task({ key: 'w', tags: ['p0', 'ralph-ready'] }),
+    ];
+    const groups = groupTasks(labelled, 'priority', NOW);
+    expect(groups.map(([l]) => l)).toEqual(['p0', 'p2', 'no priority']);
+    expect(keysOf(groups)).toEqual({ p0: ['y', 'w'], p2: ['x'], 'no priority': ['z'] });
   });
   it('due grouping buckets overdue / this week / later / no due against now', () => {
     const groups = groupTasks(tasks, 'due', NOW);

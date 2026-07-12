@@ -93,10 +93,39 @@ export function issueLinkFor(t: Task): string | null {
   return t.dispatch_url ?? t.source_url ?? null;
 }
 
-const PRIORITY_RANK: Record<string, number> = { high: 0, med: 1, low: 2 };
+export type LabelPriority = 'p0' | 'p1' | 'p2' | 'p3';
 
+const LABEL_PRIORITIES: LabelPriority[] = ['p0', 'p1', 'p2', 'p3'];
+
+/**
+ * The p0–p3 priority a task carries as a GitHub label (labels sync into `tags`
+ * on import). This is the fleet's real priority signal — the Ralph selector and
+ * the board both order by it — whereas the legacy DB `priority` column
+ * (high/med/low) is only ever set on old tracker rows, never on imported
+ * issues. Highest wins if a row somehow carries more than one. Null when none.
+ */
+export function labelPriority(t: Task): LabelPriority | null {
+  if (!Array.isArray(t.tags)) return null;
+  return LABEL_PRIORITIES.find((p) => t.tags!.includes(p)) ?? null;
+}
+
+const LABEL_RANK: Record<LabelPriority, number> = { p0: 0, p1: 1, p2: 2, p3: 3 };
+const DB_RANK: Record<string, number> = { high: 0, med: 1, low: 2 };
+
+/**
+ * Unified priority rank (lower = more urgent): the p0–p3 label wins, else the
+ * legacy DB priority, else last. p0/high share rank 0 etc. — the two scales
+ * don't co-occur on a live row, so this only has to order each on its own.
+ */
 function priorityRank(t: Task): number {
-  return t.priority != null ? (PRIORITY_RANK[t.priority] ?? 3) : 3;
+  const lp = labelPriority(t);
+  if (lp) return LABEL_RANK[lp];
+  return t.priority != null ? (DB_RANK[t.priority] ?? 8) : 9;
+}
+
+/** The group-by-priority bucket label: p0–p3 label first, else DB priority, else none. */
+function priorityBucket(t: Task): string {
+  return labelPriority(t) ?? t.priority ?? 'no priority';
 }
 
 function dueMs(t: Task): number {
@@ -105,7 +134,7 @@ function dueMs(t: Task): number {
   return Number.isFinite(ms) ? ms : Number.POSITIVE_INFINITY;
 }
 
-/** Operator order: priority (high→low→none), then due date (earliest first, none last). */
+/** Operator order: priority (p0→p3 label, else DB high→low, none last), then due date (earliest first). */
 export function compareTasks(a: Task, b: Task): number {
   const p = priorityRank(a) - priorityRank(b);
   if (p !== 0) return p;
@@ -149,7 +178,9 @@ function dueBucket(t: Task, now: number): string {
 }
 
 const GROUP_ORDERS: Partial<Record<GroupBy, string[]>> = {
-  priority: ['high', 'med', 'low', 'no priority'],
+  // p0–p3 (the fleet label scale) first, then the legacy high/med/low for any
+  // old tracker rows that still carry it; empty buckets are omitted at render.
+  priority: ['p0', 'p1', 'p2', 'p3', 'high', 'med', 'low', 'no priority'],
   due: ['overdue', 'this week', 'later', 'no due'],
   status: ['open', 'blocked', 'done'],
 };
@@ -159,7 +190,7 @@ function groupLabel(t: Task, groupBy: GroupBy, now: number): string {
     case 'lane':
       return t.lane;
     case 'priority':
-      return t.priority ?? 'no priority';
+      return priorityBucket(t);
     case 'due':
       return dueBucket(t, now);
     case 'status':
