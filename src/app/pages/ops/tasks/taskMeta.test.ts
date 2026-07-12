@@ -7,6 +7,7 @@ import { describe, it, expect } from 'vitest';
 import {
   isNoRalphSource,
   taskRef,
+  issueLinkFor,
   compareTasks,
   groupTasks,
   priorityTone,
@@ -81,12 +82,33 @@ describe('taskRef', () => {
     expect(taskRef(task({ key: 'github:hirobius/ops#42' }))).toBe('hirobius/ops#42');
   });
   it('falls back to the dispatch_url issue URL', () => {
-    expect(
-      taskRef(task({ dispatch_url: 'https://github.com/hirobius/ops/issues/7' })),
-    ).toBe('hirobius/ops#7');
+    expect(taskRef(task({ dispatch_url: 'https://github.com/hirobius/ops/issues/7' }))).toBe(
+      'hirobius/ops#7',
+    );
   });
   it('is null for non-issue-backed tasks', () => {
     expect(taskRef(task({}))).toBeNull();
+  });
+});
+
+describe('issueLinkFor', () => {
+  it('dispatch_url wins when both are set', () => {
+    expect(
+      issueLinkFor(
+        task({
+          dispatch_url: 'https://github.com/hirobius/ops/issues/7',
+          source_url: 'https://github.com/hirobius/ops/issues/1',
+        }),
+      ),
+    ).toBe('https://github.com/hirobius/ops/issues/7');
+  });
+  it('falls back to source_url when dispatch_url is unset', () => {
+    expect(issueLinkFor(task({ source_url: 'https://github.com/hirobius/ops/issues/1' }))).toBe(
+      'https://github.com/hirobius/ops/issues/1',
+    );
+  });
+  it('is null when neither is set', () => {
+    expect(issueLinkFor(task({}))).toBeNull();
   });
 });
 

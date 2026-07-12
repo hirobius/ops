@@ -4,7 +4,8 @@
  * TaskRow — one presentational board row (ops#136).
  *
  * Information hierarchy, in order of operator value:
- *   1. title line — issue #, title (links to the issue when dispatched)
+ *   1. title line — issue #, title (links to the GitHub issue: dispatch_url,
+ *      else source_url — ops#156)
  *   2. chip line — state first (the derived work-state phase, ops#135), then the
  *      scheduling facts the operator tracks by (priority / due / effort, toned),
  *      then remaining labels, then routing (tier·model) and provenance ("no
@@ -19,7 +20,14 @@ import hds from '@hirobius/design-system/tokens';
 import type { ComponentProps, CSSProperties } from 'react';
 import { deriveWorkState, WORK_STATE_TONE } from '../../../../../lib/tasks/work-state.mjs';
 import type { Task, TaskAction } from './types';
-import { isNoRalphSource, taskRef, priorityTone, dueToneNow, relTimeNow } from './taskMeta';
+import {
+  isNoRalphSource,
+  taskRef,
+  issueLinkFor,
+  priorityTone,
+  dueToneNow,
+  relTimeNow,
+} from './taskMeta';
 import { TaskActionsMenu } from './TaskActionsMenu';
 
 // Stay in lockstep with the DS Badge contract instead of shadowing it.
@@ -51,6 +59,7 @@ export interface TaskRowProps {
 export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }: TaskRowProps) {
   const dispatched = !!t.dispatch_url;
   const ref = taskRef(t);
+  const issueLink = issueLinkFor(t);
   const tags = t.tags ?? [];
   const flags = t.import_flags ?? [];
   const dTone = dueToneNow(t.due);
@@ -79,8 +88,8 @@ export function TaskRow({ task: t, busy, isSelected, onToggleSelect, onAction }:
       <div style={s.rowMain}>
         <div style={s.titleLine}>
           {ref && <span style={s.num}>#{ref.slice(ref.indexOf('#') + 1)}</span>}
-          {dispatched ? (
-            <a href={t.dispatch_url ?? '#'} target="_blank" rel="noreferrer" style={s.titleLink}>
+          {issueLink ? (
+            <a href={issueLink} target="_blank" rel="noreferrer" style={s.titleLink}>
               {t.title} ↗
             </a>
           ) : (

@@ -244,3 +244,21 @@
   {github-issues.test.ts,task-actions.test.ts}, docs/guardrails/baselines/
   check-dom-node-budgets.json.
 - Branch ralph/issue-137-approve-merge-action.
+
+## issue-156 (2026-07-12)
+- Problem: card titles only linked to GitHub when dispatch_url was set;
+  post org-token import (2026-07-11) most rows are imported-but-never-
+  dispatched and carry the issue URL in source_url, unused.
+- Fix: new pure helper issueLinkFor(task) in taskMeta.ts — dispatch_url
+  wins, else source_url, else null. TaskRow.tsx title anchor switched from
+  `dispatched ? t.dispatch_url : null` to issueLinkFor(t); same target=_blank
+  rel=noreferrer + '↗' affordance. `dispatched` var kept as-is — still drives
+  the Dispatch/Re-dispatch button label, unrelated to the link.
+- Tests (red->green, TDD): taskMeta.test.ts issueLinkFor describe block —
+  dispatch_url beats source_url; source_url alone links; neither -> null.
+- test:layout: confirmed pre-existing failure on main (Playwright chromium
+  browser binary not installed in this sandbox) — not caused by this change,
+  did not attempt to fix (out of scope, infra-only).
+- Gate green: typecheck + test (525 passed, incl. 3 new) + lint.
+- Files: src/app/pages/ops/tasks/{taskMeta.ts,taskMeta.test.ts,TaskRow.tsx}.
+- Branch ralph/issue-156-issue-link-fallback.

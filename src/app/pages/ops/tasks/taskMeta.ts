@@ -37,6 +37,15 @@ export function taskRef(t: Task): string | null {
   return m ? `${m[1]}/${m[2]}#${m[3]}` : null;
 }
 
+/**
+ * The GitHub issue URL to link a card title to, or null if the task isn't
+ * issue-backed. `dispatch_url` (set once Ralph dispatches) wins over
+ * `source_url` (the import-time provenance link) — see ops#156.
+ */
+export function issueLinkFor(t: Task): string | null {
+  return t.dispatch_url ?? t.source_url ?? null;
+}
+
 const PRIORITY_RANK: Record<string, number> = { high: 0, med: 1, low: 2 };
 
 function priorityRank(t: Task): number {
