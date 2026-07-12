@@ -61,6 +61,13 @@ no `schedule:` trigger without Adrian's explicit per-item cron yes
 manually to continue. Between dispatches nothing runs — that's expected,
 not a bug.
 
+**Status:** `ralph/metric.sh` ships here, verified against a real registry
+gate. The `.github/workflows/ralph-metric.yml` thin wrapper is drafted but
+not committed — GitHub App tokens used by both Ralph and dispatched Claude
+sessions are rejected outright on any push touching `.github/workflows/*`
+(no `workflows` permission scope). A human has to add that one file; see
+ops#90 for the exact YAML to paste in.
+
 ## Add Ralph to another hirobius repo
 
 1. **Vendor this directory** into the repo (from a local ops checkout):
