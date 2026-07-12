@@ -287,3 +287,144 @@ describe('applyTaskAction — ralph_ready_on/off (injected GitHub port)', () => 
     expect((result.body as { code: string }).code).toBe('GITHUB_LABEL_FAILED');
   });
 });
+
+describe('applyTaskAction — ralph_approve (injected GitHub port, ops#137)', () => {
+  const task = { key: 'github:hirobius/ops#137', title: 'Approve merge action' };
+
+  it('503s when no port is configured (no GITHUB_TOKEN)', async () => {
+    const { sb } = makeSb({ task });
+    expect(
+      await applyTaskAction(
+        sb,
+        { key: 'github:hirobius/ops#137', action: 'ralph_approve' },
+        { github: null },
+      ),
+    ).toMatchObject({ status: 503, body: { code: 'ENV_MISSING_GITHUB_TOKEN' } });
+  });
+
+  it('404s when the task is missing', async () => {
+    const { sb } = makeSb({ task: null });
+    const github = { findRalphPr: async () => null, addLabel: async () => ({}) };
+    expect(
+      await applyTaskAction(sb, { key: 'nope', action: 'ralph_approve' }, { github }),
+    ).toMatchObject({ status: 404 });
+  });
+
+  it('400s when the task is not a github-tracked issue', async () => {
+    const { sb } = makeSb({ task: { key: 't1', title: 'Do it' } });
+    const github = { findRalphPr: async () => null, addLabel: async () => ({}) };
+    expect(
+      await applyTaskAction(sb, { key: 't1', action: 'ralph_approve' }, { github }),
+    ).toMatchObject({ status: 400 });
+  });
+
+  it('404s naming the expected branch prefix when no PR is found', async () => {
+    const { sb } = makeSb({ task });
+    const github = { findRalphPr: async () => null, addLabel: async () => ({}) };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#137', action: 'ralph_approve' },
+      { github },
+    );
+    expect(result.status).toBe(404);
+    expect((result.body as { error: string }).error).toContain('ralph/issue-137-');
+  });
+
+  it('labels the open PR ralph-approved via the port', async () => {
+    const { sb } = makeSb({ task });
+    const calls: Array<{ issueUrl: string; label: string }> = [];
+    const github = {
+      findRalphPr: async (i: { owner: string; repo: string; issueNumber: string }) => {
+        expect(i).toEqual({ owner: 'hirobius', repo: 'ops', issueNumber: '137' });
+        return {
+          number: 9,
+          url: 'https://github.com/hirobius/ops/pull/9',
+          state: 'open',
+          merged: false,
+        };
+      },
+      addLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push(i);
+        return {};
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#137', action: 'ralph_approve' },
+      { github },
+    );
+    expect(calls[0]).toEqual({
+      issueUrl: 'https://github.com/hirobius/ops/pull/9',
+      label: 'ralph-approved',
+    });
+    expect(result).toEqual({
+      status: 200,
+      body: { ok: true, prUrl: 'https://github.com/hirobius/ops/pull/9' },
+    });
+  });
+
+  it('gracefully no-ops when the PR is already merged', async () => {
+    const { sb } = makeSb({ task });
+    const github = {
+      findRalphPr: async () => ({
+        number: 9,
+        url: 'https://github.com/hirobius/ops/pull/9',
+        state: 'closed',
+        merged: true,
+      }),
+      addLabel: async () => {
+        throw new Error('should not be called');
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#137', action: 'ralph_approve' },
+      { github },
+    );
+    expect(result).toEqual({
+      status: 200,
+      body: { ok: true, note: 'already merged', prUrl: 'https://github.com/hirobius/ops/pull/9' },
+    });
+  });
+
+  it('gracefully no-ops when the PR is closed without merging', async () => {
+    const { sb } = makeSb({ task });
+    const github = {
+      findRalphPr: async () => ({
+        number: 9,
+        url: 'https://github.com/hirobius/ops/pull/9',
+        state: 'closed',
+        merged: false,
+      }),
+      addLabel: async () => {
+        throw new Error('should not be called');
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#137', action: 'ralph_approve' },
+      { github },
+    );
+    expect(result).toEqual({
+      status: 200,
+      body: { ok: true, note: 'closed', prUrl: 'https://github.com/hirobius/ops/pull/9' },
+    });
+  });
+
+  it('502s with a token-rejected hint when the port throws 401/403', async () => {
+    const { sb } = makeSb({ task });
+    const github = {
+      findRalphPr: async () => {
+        throw new Error('HTTP 401');
+      },
+      addLabel: async () => ({}),
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#137', action: 'ralph_approve' },
+      { github },
+    );
+    expect(result.status).toBe(502);
+    expect((result.body as { code: string }).code).toBe('GITHUB_TOKEN_REJECTED');
+  });
+});

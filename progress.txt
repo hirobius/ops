@@ -211,3 +211,36 @@
   approval-card.tsx, src/app/pages/admin/useApprovalsInbox.ts,
   docs/guardrails/baselines/check-dom-node-budgets.json.
 - Branch ralph/issue-135-derive-work-state.
+
+## Issue #137 — Approve-merge card action (2026-07-11)
+- New action ralph_approve in lib/tasks/actions.mjs, folded into the existing
+  POST /api/task-action (no new api/*.ts file — Vercel Hobby cap), mirroring
+  the shipped #97 ralph_ready_on/off pattern: parse owner/repo/#n from the
+  task's github:<owner>/<repo>#<n> key, resolve the ralph/issue-<n>-* PR via
+  a new findRalphPr port method, addLabel 'ralph-approved' on success.
+- lib/github/issues.mjs: findRalphPr({owner, repo, issueNumber}) fetches
+  state=all pulls (not just open) so a merged/closed match can be told apart
+  from no-PR-yet rather than both reading as not-found; multi-match resolves
+  to newest by created_at. Returns {number, url, state, merged, head_ref,
+  created_at} or null.
+- actions.mjs::approveRalphMerge: no port -> 503 ENV_MISSING_GITHUB_TOKEN;
+  task missing -> 404; non-github: key -> 400; no PR match -> 404 naming the
+  expected branch prefix; PR merged/closed -> graceful {ok:true, note} (not
+  an error — approval intent is moot, not failed); open PR -> addLabel ->
+  {ok:true, prUrl}. Reuses the existing githubPortError 401/403 mapper.
+- UI: TaskActionsMenu.tsx adds an "Approve merge" item gated on
+  t.key.startsWith('github:') (v1 scope per the issue — relies on the
+  graceful no-PR/merged/closed responses rather than pre-filtering PR state
+  client-side). types.ts + api/task-action.ts doc comment updated.
+- Tests: tests/api/github-issues.test.ts (new findRalphPr describe block —
+  no-match, open match, merged, closed-not-merged, multi-match newest-wins,
+  401/403), tests/api/task-actions.test.ts (new ralph_approve describe block
+  mirroring ralph_ready_on/off's coverage shape).
+- Re-locked docs/guardrails/baselines/check-dom-node-budgets.json:
+  TaskActionsMenu.tsx 12->13 (one new Menu.Item, ratchet --update).
+- Gate green: typecheck + test (523 passed, incl. 15 new) + lint.
+- Files: lib/github/issues.mjs, lib/tasks/actions.mjs, api/task-action.ts,
+  src/app/pages/ops/tasks/{types.ts,TaskActionsMenu.tsx}, tests/api/
+  {github-issues.test.ts,task-actions.test.ts}, docs/guardrails/baselines/
+  check-dom-node-budgets.json.
+- Branch ralph/issue-137-approve-merge-action.

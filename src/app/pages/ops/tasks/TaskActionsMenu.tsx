@@ -36,9 +36,7 @@ export function TaskActionsMenu({ task: t, busy, onAction }: TaskActionsMenuProp
         {t.status !== 'done' && (
           <Menu.Item onSelect={() => onAction(t.key, 'done')}>Mark done</Menu.Item>
         )}
-        {ref && (
-          <Menu.Item onSelect={() => void copyText(ref)}>Copy {ref}</Menu.Item>
-        )}
+        {ref && <Menu.Item onSelect={() => void copyText(ref)}>Copy {ref}</Menu.Item>}
         <Menu.Separator />
         <Menu.Item onSelect={() => onAction(t.key, t.auto_ok ? 'auto_off' : 'auto_on')}>
           {t.auto_ok ? 'Auto-dispatch: on → turn off' : 'Auto-dispatch: off → turn on'}
@@ -56,6 +54,14 @@ export function TaskActionsMenu({ task: t, busy, onAction }: TaskActionsMenuProp
             title="Adds/removes the ralph-ready label on the linked GitHub issue — the Ralph loop picks up ralph-ready issues automatically."
           >
             {ralphReady ? 'Ralph-ready: on → turn off' : 'Ralph-ready: off → turn on'}
+          </Menu.Item>
+        )}
+        {t.key.startsWith('github:') && (
+          <Menu.Item
+            onSelect={() => onAction(t.key, 'ralph_approve')}
+            title="Labels the linked ralph/issue-N PR ralph-approved, arming the ralph-gate workflow's auto-merge."
+          >
+            Approve merge
           </Menu.Item>
         )}
         <Menu.Separator />
