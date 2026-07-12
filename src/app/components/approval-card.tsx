@@ -19,25 +19,21 @@ type BadgeTone = NonNullable<ComponentProps<typeof Badge>['tone']>;
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-export type ApprovalState = 'proposed' | 'approved' | 'denied' | 'needs-grilling';
-
 export interface ApprovalUnitSummary {
-  /** Unit id (matches docs/ai/orchestration.json, or a tasks-store `task.key`). */
+  /** Unit id — a tasks-store `task.key`. */
   id: string;
   /** Human-readable unit name. */
   name: string;
-  /** Sprint bucket (0..6). */
-  sprint?: number;
-  /** Priority (1..5, 1 = highest). */
-  priority?: number;
+  /** Task priority (tasks-store `priority`). */
+  priority?: 'high' | 'med' | 'low' | null;
+  /** Task due date (tasks-store `due`, ISO date). */
+  due?: string | null;
   /** Cluster tag grouping units in the approval inbox. */
   cluster?: string;
   /** Where the unit was proposed from (free-text source attribution). */
   source?: string;
   /** Full description; the card renders a truncated form. */
   description?: string;
-  /** Current approval state. */
-  approval?: ApprovalState;
   /**
    * Fleet auto-dispatch routing tier (migration 0008, epic #41) — set when the
    * unit is backed by a `tasks` row that's been through `lib/tasks/tier.mjs`.
@@ -61,14 +57,6 @@ export interface ApprovalCardProps {
   onApprove?: (unit: ApprovalUnitSummary) => void;
   /** Deny action — flips approval to `denied`. */
   onDeny?: (unit: ApprovalUnitSummary) => void;
-  /** Grill action — flips approval to `needs-grilling`. */
-  onGrill?: (unit: ApprovalUnitSummary) => void;
-  /**
-   * Render the "Grill" action. Default true. The tasks-store approvals inbox
-   * (epic #41 Slice 3, v1) has no `needs-grilling` equivalent state — pass
-   * false there rather than wiring a dead button.
-   */
-  showGrill?: boolean;
   /** Disable buttons while a mutation is in flight. */
   pending?: boolean;
   /** Optional click handler for the title — typically a link to the detail view. */
@@ -87,41 +75,32 @@ function truncate(text: string, max: number): string {
   return `${text.slice(0, max).trimEnd()}…`;
 }
 
+/** high=danger, med=warning, low=neutral — mirrors taskMeta.ts::priorityTone. */
+function priorityTone(priority: 'high' | 'med' | 'low'): BadgeTone {
+  return priority === 'high' ? 'danger' : priority === 'med' ? 'warning' : 'neutral';
+}
+
 // ── Component ──────────────────────────────────────────────────────────────────
 
 /**
- * ApprovalCard — proposed-unit summary card for the autonomous build's
- * approval inbox.
+ * ApprovalCard — proposed-task summary card for the tasks-store approval inbox.
  * @category Display
  * @tier utility
  *
- * Composes Card + Button + Tag into a compact decision surface for
- * a single orchestration.json unit awaiting human ratification. Renders the
- * unit's id, name, sprint / priority / cluster metadata as tag pills, the
- * source attribution, a truncated description, and three action buttons
- * (Approve / Deny / Grill) that fire callbacks the page wires to the
- * bridge endpoint.
+ * Composes Card + Button + Tag into a compact decision surface for a single
+ * `dispatch_status='queued'` task awaiting human ratification. Renders the
+ * task's id, name, priority / due / tier / model metadata as tag pills, the
+ * source attribution, a truncated description, and Approve / Deny action
+ * buttons that fire callbacks the page wires to the tasks-store mutation.
  *
  * Purely presentational — no fetch logic lives here. The page
  * (src/app/pages/admin/Approvals.tsx) owns the optimistic-update / reconcile
  * flow and supplies the disabled flag while a mutation is in flight.
  */
 export const ApprovalCard = React.forwardRef<HTMLDivElement, ApprovalCardProps>(
-  function ApprovalCard(
-    {
-      unit,
-      onApprove,
-      onDeny,
-      onGrill,
-      showGrill = true,
-      onOpenDetail,
-      pending = false,
-      className,
-    },
-    ref,
-  ) {
-    const sprintLabel = typeof unit.sprint === 'number' ? `Sprint ${unit.sprint}` : null;
-    const priorityLabel = typeof unit.priority === 'number' ? `Priority ${unit.priority}` : null;
+  function ApprovalCard({ unit, onApprove, onDeny, onOpenDetail, pending = false, className }, ref) {
+    const priorityLabel = unit.priority ? unit.priority.toUpperCase() : null;
+    const dueLabel = unit.due ? `due ${unit.due}` : null;
     const clusterLabel = unit.cluster ? unit.cluster : null;
     const tierLabel = unit.tier ? unit.tier : null;
     const modelLabel = unit.model ? unit.model : null;
@@ -162,8 +141,15 @@ export const ApprovalCard = React.forwardRef<HTMLDivElement, ApprovalCardProps>(
                 {unit.workState}
               </Badge>
             ) : null}
-            {sprintLabel ? <Tag>{sprintLabel}</Tag> : null}
-            {priorityLabel ? <Tag>{priorityLabel}</Tag> : null}
+            {priorityLabel ? (
+              <Badge
+                tone={priorityTone(unit.priority as 'high' | 'med' | 'low')}
+                data-role="unit-priority"
+              >
+                {priorityLabel}
+              </Badge>
+            ) : null}
+            {dueLabel ? <Tag data-role="unit-due">{dueLabel}</Tag> : null}
             {clusterLabel ? <Tag>{clusterLabel}</Tag> : null}
             {tierLabel ? <Tag>{tierLabel}</Tag> : null}
             {modelLabel ? <Tag>{modelLabel}</Tag> : null}
@@ -197,18 +183,6 @@ export const ApprovalCard = React.forwardRef<HTMLDivElement, ApprovalCardProps>(
           >
             Deny
           </Button>
-          {showGrill ? (
-            <Button
-              variant="tertiary"
-              size="sm"
-              disabled={pending}
-              onClick={() => onGrill?.(unit)}
-              aria-label={`Grill ${unit.id}`}
-              data-role="grill-button"
-            >
-              Grill
-            </Button>
-          ) : null}
         </Card.Footer>
       </Card>
     );

@@ -114,14 +114,14 @@ export function useApprovalsInbox(): ApprovalsInboxResult {
 export function taskToApprovalUnit(t: Task): ApprovalUnitSummary {
   const metaParts = [
     t.phase,
-    t.priority ? `P:${t.priority}` : null,
     t.effort ? `E:${t.effort}` : null,
     t.owner ? `@${t.owner}` : null,
-    t.due ? `due ${t.due}` : null,
   ].filter((p): p is string => Boolean(p));
   return {
     id: t.key,
     name: t.title,
+    priority: t.priority,
+    due: t.due,
     cluster: t.lane,
     source: t.source,
     description: metaParts.join('  ·  '),

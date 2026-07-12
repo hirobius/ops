@@ -92,7 +92,6 @@ export default function ApprovalDetailPage() {
           <ApprovalCard
             unit={taskToApprovalUnit(task)}
             pending={busyKeys.has(task.key)}
-            showGrill={false}
             onApprove={() => approve(task.key)}
             onDeny={handleDeny}
           />

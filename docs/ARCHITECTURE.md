@@ -37,15 +37,15 @@ outreach engine.
 ### Cross-cutting: the command center (`/ops`) — 🟢 live
 
 Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home
-(+ Runs panel) · admin/approvals (live — tasks-store approvals inbox, epic #41
+· admin/approvals (live — tasks-store approvals inbox, epic #41
 Slice 3: `dispatch_status='queued'` tasks await an Approve/Deny click, reusing
 `ApprovalCard` + `/api/task-action`'s `dispatch`/`unqueue` actions; the dead
 `localhost:3005/orchestration/*` bridge is fully retired). Auth:
 `OPS_GATE_PASSWORD`+`OPS_SESSION_SECRET` (gate), `OPS_AGENT_KEY` (machine auth,
 #25). Fleet: `/ops/projects` + `scripts/deploy-alert.mjs` (#11). Task machinery:
 `tasks` table + GitHub-issue importer (#25) + dispatch (opens an issue @-mentioning
-Claude). Run-log: `docs/ops/run-log.jsonl` + Runs panel (#8 half). Gaps: autonomy
-dial, tier→model dispatch UI polish (#13).
+Claude). Run-log: `docs/ops/run-log.jsonl`, rendered via FleetTimeline (#8 half,
+RunsPanel retired ops#140). Gaps: autonomy dial, tier→model dispatch UI polish (#13).
 
 ### Active env vars (pipeline) vs. dead weight
 

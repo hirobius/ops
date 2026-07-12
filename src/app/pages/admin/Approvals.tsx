@@ -55,7 +55,6 @@ export default function ApprovalsPage() {
                   key={t.key}
                   unit={taskToApprovalUnit(t)}
                   pending={busyKeys.has(t.key)}
-                  showGrill={false}
                   onApprove={() => approve(t.key)}
                   onDeny={() => deny(t.key)}
                   onOpenDetail={(u) => navigate(`/admin/approvals/${encodeURIComponent(u.id)}`)}
