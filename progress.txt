@@ -483,3 +483,35 @@ this issue reopened the orphan-sweeper slice specifically)
   (validate-guardrail-registry, check-validator-wiring,
   validate-fixture-proof-of-firing --no-cache). Branch:
   ralph/issue-103-orphan-module-sweeper.
+
+## ops#113 — "Run Ralph" per-task dispatch action
+- Found a prior, unmerged implementation already sitting on
+  `claude/issue-113-20260712-1847` (the `@claude` dispatch bot's session,
+  never opened as a PR, and its sandbox couldn't run pnpm/typecheck/test/lint
+  at all — fully unverified). Reviewed the diff end-to-end (backend port
+  method, task-action wiring, error-message regex change, UI button + new
+  useToast) before adopting it rather than reimplementing from scratch —
+  matched the issue DoD and the 2026-07-11 scope-pin comment exactly
+  (dispatchWorkflow port method name, Actions:write permission naming,
+  literal Vercel env-vars URL in the failure message).
+- One correctness check worth recording: `githubPortError`'s auth-detection
+  regex was widened from `40[13]` to `40[134]` (403->401/403/404) so
+  workflow_dispatch's github-obscures-403-as-404-on-private-repos behavior
+  gets the right message. Verified this doesn't regress the other callers
+  (dispatch/approveRalphMerge/setRalphReady) — none of them throw a raw
+  "404" message; addLabel/removeLabel/findRalphPr only throw authHint on
+  401/403 and handle 404 via return value, not throw.
+- Merged that branch onto `ralph/issue-113-run-ralph-dispatch` off current
+  main. Only conflicts were docs/ai/HANDOFF.md + status.json (main had moved
+  on past ops#78 digest work since that branch was cut) — resolved by
+  keeping main's content, then adding an accurate new entry for this session
+  on top rather than reintroducing stale state.
+- DOM-node budget gate failed after the merge (TaskRow 19->21,
+  TasksPage 33->35 — the new Run Ralph button + toast stack). Ratcheted via
+  `node scripts/check-dom-node-budgets.mjs --update`, a legitimate/expected
+  bump, not a workaround.
+- Gate green: typecheck + 611 tests + lint (ralph/gate.sh). Branch:
+  ralph/issue-113-run-ralph-dispatch.
+- Note for next iteration: prod is still inert for this feature until Adrian
+  widens the ops GITHUB_TOKEN scope to include "Actions: write" — documented
+  in the PR body and HANDOFF.md, not something this iteration can unblock.
