@@ -415,3 +415,34 @@ appeared). Never investigated; carried into the board as t_5f36efeb.
   (given react-router alone) is 80 prod-scoped / 0 clamped whole-tree — both
   far from the "95" that prompted this investigation, so don't expect
   `pnpm strength` to read 95 or 100 again until #182 lands.
+
+## Issue #78 — Digest P1: state foundation (digest_items store + dismiss/stash)
+A prior fleet dispatch (@claude, non-interactive, no Bash approval granted)
+already implemented this on `claude/issue-78-20260712-1846` but never opened
+a PR and the branch went stale (4 commits behind main). This iteration:
+- Cherry-picked the 2 commits cleanly onto fresh main as
+  `ralph/issue-78-digest-state-foundation` (no conflicts — the stale-looking
+  diff vs main was just base drift, not real conflicts).
+- Ran the toolchain that dispatch couldn't: `pnpm install`, then
+  typecheck/typecheck:api/test/lint/build all green. `test:layout` could not
+  run — no Playwright browser binary in this runner
+  (chromium_headless_shell-1208 missing); environment gap, not a code issue.
+- DOM-node budget baseline (docs/guardrails/baselines/check-dom-node-budgets.json)
+  needed `--update`: DigestPage.tsx legitimately grew 15->38 JSX elements
+  (status filter + collapsible dismissed stash). Same update also pruned
+  stale entries for files deleted by the already-merged mobile-declutter PR
+  (#172) that never got swept from the baseline — a bonus cleanup, not
+  something I introduced.
+- Reverted an incidental `docs/guardrails/registry.json` timestamp-only diff
+  produced by running the audit scripts locally (lastFiringAt bumps) — noise,
+  not a real change.
+- Rewrote the 3 stale HANDOFF.md/status.json references to the old
+  never-opened branch + "unverified in-sandbox" caveats to reflect what
+  actually got verified this iteration and the real branch name.
+- Migration `supabase/migrations/0011_digest_items.sql` still needs Adrian to
+  apply it manually via the Supabase SQL editor (same convention as 0008/0010)
+  before `/ops/digest` can read live data — flagged in status.json next[].
+- Gate green: typecheck + 595 tests + lint. Branch:
+  ralph/issue-78-digest-state-foundation. Foundation only, per the issue's
+  scope — analyze/promote (P2-P4, LLM-backed) are follow-up work under epic
+  #77, not filed as separate issues yet.

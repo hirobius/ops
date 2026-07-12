@@ -14,6 +14,7 @@ import { createCcPluginsMiddleware } from './scripts/cc-plugins-middleware.mjs';
 import { createResearchFeedMiddleware } from './scripts/research-feed-middleware.mjs';
 import { createLeadsMiddleware } from './scripts/leads-middleware.mjs';
 import { createTasksMiddleware } from './scripts/tasks-middleware.mjs';
+import { createDigestMiddleware } from './scripts/digest-middleware.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -127,6 +128,17 @@ export default defineConfig(({ mode }) => {
           const tasks = createTasksMiddleware();
           server.middlewares.use('/api/task-action', tasks.action);
           server.middlewares.use('/api/tasks', tasks.list);
+        },
+      },
+      // Dev-only: digest board — GET /api/digest, POST /api/digest-action.
+      // Mirrors the prod Vercel functions via the same lib/digests logic.
+      {
+        name: 'ops-digest-api',
+        apply: 'serve',
+        configureServer(server) {
+          const digest = createDigestMiddleware();
+          server.middlewares.use('/api/digest-action', digest.action);
+          server.middlewares.use('/api/digest', digest.list);
         },
       },
       // Dev-only: POST /api/skills/:id — whitelisted skill runner that backs the
