@@ -67,8 +67,6 @@ public/hds-manifest-agent.json
 # Backslashes must be escaped in gitignore — these are literal filename
 # bytes (WSL2 + Windows-Chrome treats `C:\Users\...` as one filename).
 /C:\\*
-# Kimi-agent drain-notify throttle state (local-only, regenerates per host).
-docs/ai/.kimi-drain-state.json
 .youtube-oauth-client.json
 .youtube-token-*.json
 
