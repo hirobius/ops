@@ -31,15 +31,26 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { withOpsHandler, withServiceClient, messageOf, type HandlerResult } from '../lib/api/handler.js';
+import {
+  withOpsHandler,
+  withServiceClient,
+  messageOf,
+  type HandlerResult,
+} from '../lib/api/handler.js';
 import { listTasks, upsertTasks } from '../lib/supabase/tasks.mjs';
 import { mapIssuesToTasks } from '../lib/tasks/import-issues.mjs';
+import { orderRalphQueue } from '../lib/tasks/ralph-queue.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
 
 const DEFAULT_LIMIT = 1000;
 const MAX_LIMIT = 2000;
 
+/** The repos whose Ralph loops the board's fleet panel watches (ops#112). */
+const FLEET_REPOS = ['hirobius/ops', 'hirobius/hds', 'hirobius/site-engine'];
+
 export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Promise<HandlerResult> {
+  if (pick(req.query['ralph']) === '1') return ralphStatusHandler();
+
   const limit = clampLimit(pick(req.query['limit']));
   const includeDeleted = pick(req.query['include_deleted']) === '1';
 
@@ -48,7 +59,45 @@ export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Prom
   return { status: 200, body: { tasks: data ?? [] } };
 }
 
-export async function importIssuesHandler(sb: SupabaseClient, _req: VercelRequest): Promise<HandlerResult> {
+/**
+ * GET /api/tasks?ralph=1 — the fleet Ralph panel's read (ops#112): recent runs
+ * + the selector-ordered queue per fleet repo, straight from GitHub (labels ARE
+ * the loop's state store; Supabase isn't consulted). Folded in here to stay
+ * under the Vercel Hobby function cap. Per-repo GitHub failures surface as
+ * `errors` entries (fail-soft per repo, loud per message).
+ */
+export async function ralphStatusHandler(): Promise<HandlerResult> {
+  const gh = makeGitHubPort();
+  if (!gh) {
+    return {
+      status: 503,
+      body: {
+        error:
+          'GITHUB_TOKEN not set — needed for the Ralph fleet panel. Add it in Vercel → ' +
+          'Settings → Environment Variables (Production + Preview), then redeploy.',
+        code: 'ENV_MISSING_GITHUB_TOKEN',
+      },
+    };
+  }
+  try {
+    const [runs, ready] = await Promise.all([
+      gh.listRalphRuns({ repos: FLEET_REPOS }),
+      gh.listRalphReadyIssues({ repos: FLEET_REPOS }),
+    ]);
+    const queue = orderRalphQueue(ready.flatMap((r) => r.issues));
+    const errors = [...runs, ...ready]
+      .filter((e) => e.error)
+      .map((e) => ({ repo: e.repo, error: e.error as string }));
+    return { status: 200, body: { runs, queue, errors } };
+  } catch (err) {
+    return { status: 502, body: { error: messageOf(err), code: 'GITHUB_RALPH_STATUS_FAILED' } };
+  }
+}
+
+export async function importIssuesHandler(
+  sb: SupabaseClient,
+  _req: VercelRequest,
+): Promise<HandlerResult> {
   const gh = makeGitHubPort();
   if (!gh) {
     return {
