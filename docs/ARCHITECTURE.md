@@ -36,7 +36,10 @@ outreach engine.
 
 ### Cross-cutting: the command center (`/ops`) — 🟢 live
 
-Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home
+Surfaces: leads · tasks · digest · projects · skills (design toolkit, 2026-07-12:
+static `external-skills.ts` catalog — impeccable/shadcn/SkillUI/Mobbin — plus the
+repo's installed Claude Code skills, all copy-to-run; PluginsBar falls back to a
+build-time `.claude/skills` manifest in prod) · issues · clients · agentic-os home
 (+ Runs panel) · admin/approvals (live — tasks-store approvals inbox, epic #41
 Slice 3: `dispatch_status='queued'` tasks await an Approve/Deny click, reusing
 `ApprovalCard` + `/api/task-action`'s `dispatch`/`unqueue` actions; the dead

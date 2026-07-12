@@ -44,6 +44,11 @@ const TILES: readonly SurfaceTile[] = [
     label: 'Projects',
     description: 'Live fleet — deploy state across every Vercel project',
   },
+  {
+    to: '/ops/skills',
+    label: 'Skills',
+    description: 'Design toolkit — impeccable, shadcn, Mobbin · copy & run in Claude',
+  },
 ] as const;
 
 export interface SurfacesRailProps {
