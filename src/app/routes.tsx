@@ -11,7 +11,6 @@ const ClientsIndexPage = lazy(() => import('./pages/ops/ClientsIndexPage'));
 const ClientDashboardPage = lazy(() => import('./pages/ops/ClientDashboardPage'));
 const ClientReportPage = lazy(() => import('./pages/ops/ClientReportPage'));
 const ClientBrandAuditPage = lazy(() => import('./pages/ops/ClientBrandAuditPage'));
-const OpsShell = lazy(() => import('./pages/ops/OpsShell').then((m) => ({ default: m.OpsShell })));
 const LeadsPage = lazy(() => import('./pages/ops/leads/LeadsPage'));
 const TasksPage = lazy(() => import('./pages/ops/tasks/TasksPage'));
 const DigestPage = lazy(() => import('./pages/ops/digest/DigestPage'));
@@ -38,8 +37,8 @@ function LazyHDS({ Page }: { Page: ComponentType }) {
 }
 
 // Minimal root layout. The design-system doc shell (HDSLayout) now lives in the
-// @hirobius/design-system site; the ops dashboard provides its own chrome via
-// OpsShell. Context providers are wired in App.tsx.
+// @hirobius/design-system site; pages provide their own chrome. Context
+// providers are wired in App.tsx.
 function RootLayout() {
   return <Outlet />;
 }
@@ -63,7 +62,7 @@ export const router = createBrowserRouter([
         element: (
           <OpsGate>
             <Suspense fallback={<HDSFallback />}>
-              <OpsShell />
+              <Outlet />
             </Suspense>
           </OpsGate>
         ),

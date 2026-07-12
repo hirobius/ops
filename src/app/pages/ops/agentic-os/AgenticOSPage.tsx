@@ -9,19 +9,17 @@
  * Surface flow (top → bottom):
  *   1. PageHeader        locked-down chrome (Clash anchor + divider)
  *   2. SurfacesRail      inline jump-tiles to sibling /ops surfaces
- *   3. StrengthTab       Score A/B + --json compliance
- *   4. KpiCards          live metrics — active · cost
- *   5. PillarRail        BUILD / GROW / RUN distribution + filter chips
- *   6. Routes            (atlas import) — interactive route tree
- *   7. Clients           (atlas import) — registry card grid
- *   8. Gates             (atlas import) — guardrail validators table
- *   9. Skills / New skill / Plugins / Research (collapsed disclosures)
+ *   3. Fleet / Runs      live activity feeds
+ *   4. Routes            (atlas import) — interactive route tree
+ *   5. Clients           (atlas import) — registry card grid
+ *   6. Gates             (atlas import) — guardrail validators table
+ *   7. Skills / New skill / Plugins / Research (collapsed disclosures)
  *
  * @category Internal
  * @tier utility
  */
 
-import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { type CSSProperties, type ReactNode } from 'react';
 
 import { Page, Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
@@ -32,10 +30,7 @@ import { Disclosure } from '../Disclosure';
 import RoutesTree from '../atlas/routes-tree';
 import ClientsTab from '../atlas/clients-tab';
 import ValidatorsTab from '../atlas/validators-tab';
-import StrengthTab from '../atlas/strength-tab';
 import { useTasks } from '../tasks/useTasks';
-import { KpiCards } from './KpiCards';
-import { PillarRail, type PillarFilter } from './PillarRail';
 import { RunsPanel } from './RunsPanel';
 import { FleetTimeline } from './FleetTimeline';
 import { SurfacesRail } from './SurfacesRail';
@@ -44,19 +39,11 @@ import { SkillCreatorForm } from './SkillCreatorForm';
 import { PluginsBar } from './PluginsBar';
 import { ResearchBar } from './ResearchBar';
 import { ServicesBar } from './ServicesBar';
-import { UNITS } from './data';
 
 /** @public */
 export default function AgenticOSPage() {
-  const [pillarFilter, setPillarFilter] = useState<PillarFilter>(null);
   const { tasks } = useTasks();
   const approvalsCount = tasks ? tasks.filter((t) => t.dispatch_status === 'queued').length : null;
-
-  const filteredUnits = useMemo(() => {
-    if (pillarFilter === null) return UNITS;
-    if (pillarFilter === 'UNCLASSIFIED') return UNITS.filter((u) => !u.pillar);
-    return UNITS.filter((u) => u.pillar === pillarFilter);
-  }, [pillarFilter]);
 
   return (
     <Page>
@@ -64,12 +51,6 @@ export default function AgenticOSPage() {
         <PageHeader breadcrumbs={[{ label: 'Ops' }]} title="Ops" />
 
         <SurfacesRail approvalsCount={approvalsCount} />
-
-        <StrengthTab />
-
-        <KpiCards units={filteredUnits} />
-
-        <PillarRail units={UNITS} filter={pillarFilter} onFilterChange={setPillarFilter} />
 
         <Section label="Fleet" hint="run-log + events + alerts, merged — newest 20">
           <FleetTimeline />
