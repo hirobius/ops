@@ -63,15 +63,28 @@ the sandbox. Add committed env-detection of the pre-installed Chromium
 convention). **DoD:** `pnpm test` (Playwright smoke included) green in a fresh
 remote session with no manual bridge.
 
-### BS1c — ops: add visual/layout verification to the merge gate
+### BS1c — ops: add visual/layout verification to the merge gate ✅ DONE (2026-07-12, branch claude/hirobius-design-skills-jr28dm)
 **Repo:** ops · **Labels:** `backlog` · **Depends on** ops#(BS1a)
 
-Add `pnpm test:layout` (route-coverage + layout-integrity) — and consider
-`test:a11y` + `test:collision` — to `ralph/gate.sh` so the gate fails closed on
-layout/collision/a11y regressions. Keep runtime sane (layout-integrity is the
-cheap desktop pass). **DoD:** a deliberately-broken layout PR is blocked by the
-gate. Branch-protection change (making the enriched gate required) is Adrian's
-manual step — note it, don't assume it.
+Added route-coverage + layout-integrity + a11y to `ralph/gate.sh` (browser
+ensured via BS1a in-sandbox / one-time CI fetch; one webServer build for both
+suites). **Landmine found & fixed while proving it:** layout-integrity ran
+against the `vite preview` PRODUCTION build, where OpsGate is active and the
+preview server has no `/api/ops-me` — so every /ops route rendered the LOGIN
+screen, and auditPageLayout early-returns without a `<main>`, making the
+collision/overflow/stretch checks **vacuous on the whole dashboard** (17/17
+"passed" by auditing the gate). Fixed by (a) stubbing `/api/ops-me→{authed:true}`
+in the spec so the real dashboard renders, and (b) adding a `<main>` landmark to
+OpsShell. Proven: an injected overflow now fails the suite (exit 1) where it
+passed before the fix. **Branch-protection (make the enriched `ralph-gate` the
+required check) is Adrian's manual step:** github.com/hirobius/ops/settings/branches.
+
+**Spun off (new follow-up):** a11y.spec still audits only public/login surfaces
+(`/`, `/info`, `/ops`-gate) — it needs the same `/api/ops-me` bypass to reach
+the dashboard, but that will surface real axe violations to triage before it can
+gate. File as **ops: auth-bypass a11y.spec + triage dashboard axe violations**
+(`backlog`). Same latent vacuousness likely affects `visual`/`collision`/
+`responsive` specs — audit them too.
 
 ### BS1d — site-engine: add a design-quality gate step to the merge gate
 **Repo:** site-engine · **Labels:** `backlog` · **Depends on** site-engine#(BS1b)
