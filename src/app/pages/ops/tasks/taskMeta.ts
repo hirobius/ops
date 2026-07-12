@@ -12,6 +12,122 @@ import type { Task } from './types';
 export type GroupBy = 'lane' | 'priority' | 'due' | 'status';
 export type ChipTone = 'success' | 'neutral' | 'warning' | 'danger';
 
+/**
+ * Routing/readiness categories the board can filter by (ops triage vocabulary).
+ * These are label-borne (GitHub labels sync into `tags` on import), NOT the
+ * derived work-state — an operator filters by the label they actually applied
+ * ("show me everything needing me", "everything still backlog"). `all` is the
+ * no-op pass-through. Membership is not exclusive: a `backlog`+`ralph-ready`
+ * issue matches both `backlog` and `ready`.
+ */
+export type TaskCategory =
+  | 'all'
+  | 'ready'
+  | 'needs-adrian'
+  | 'needs-human'
+  | 'blocked'
+  | 'backlog'
+  | 'parked';
+
+export const TASK_CATEGORIES: TaskCategory[] = [
+  'all',
+  'ready',
+  'needs-adrian',
+  'needs-human',
+  'blocked',
+  'backlog',
+  'parked',
+];
+
+function hasTag(t: Task, tag: string): boolean {
+  return Array.isArray(t.tags) && t.tags.includes(tag);
+}
+
+const CATEGORY_PREDICATES: Record<Exclude<TaskCategory, 'all'>, (t: Task) => boolean> = {
+  ready: (t) => hasTag(t, 'ralph-ready'),
+  'needs-adrian': (t) => hasTag(t, 'needs-adrian'),
+  'needs-human': (t) => hasTag(t, 'needs-human'),
+  // `blocked` lives as either the status column (tracker rows) or a GitHub
+  // label (imported issues keep status='open'), so honour both.
+  blocked: (t) => t.status === 'blocked' || hasTag(t, 'blocked'),
+  backlog: (t) => hasTag(t, 'backlog'),
+  parked: (t) => hasTag(t, 'ralph-parked'),
+};
+
+/** True when a task belongs to the given category (`all` always matches). */
+export function matchesCategory(t: Task, category: TaskCategory): boolean {
+  return category === 'all' || CATEGORY_PREDICATES[category](t);
+}
+
+// ─── Card chip taxonomy (ops#158/#138) ───────────────────────────────────────
+// The card face carries a deliberate hierarchy, not a flat sticker strip:
+//   1. ONE leading priority chip (priorityChip)
+//   2. the work-state phase badge (deriveWorkState, rendered in TaskRow)
+//   3. only the routing/automation labels that change what happens next
+//      (cardLabelTags) — GitHub taxonomy labels are noise on an action board.
+
+export type PriorityChip = { label: string; tone: ChipTone };
+
+const P_LABEL_TONE: Record<LabelPriority, ChipTone> = {
+  p0: 'danger',
+  p1: 'warning',
+  p2: 'neutral',
+  p3: 'neutral',
+};
+
+/**
+ * The single leading priority chip for a card: the p0–p3 label first (the fleet
+ * scale), else the legacy DB priority word. Null when the task has neither, so
+ * the slot simply collapses. Kept separate from the label chips so priority is
+ * always in the same position at the same weight.
+ */
+export function priorityChip(t: Task): PriorityChip | null {
+  const lp = labelPriority(t);
+  if (lp) return { label: lp.toUpperCase(), tone: P_LABEL_TONE[lp] };
+  if (t.priority) return { label: t.priority.toUpperCase(), tone: priorityTone(t.priority) };
+  return null;
+}
+
+// Already surfaced elsewhere on the card, so never re-rendered as a generic chip:
+//   PHASE_TAGS → the work-state phase badge · PRIORITY_TAGS → the priority chip.
+const PHASE_TAGS = new Set(['ralph-ready', 'ralph-wip', 'ralph-parked', 'needs-adrian', 'backlog']);
+const PRIORITY_TAGS = new Set(['p0', 'p1', 'p2', 'p3']);
+// GitHub type/triage taxonomy — the title prefix (feat/fix/chore) and the
+// board's own axes already convey this; as chips they only add visual noise.
+const TAXONOMY_TAGS = new Set([
+  'bug',
+  'chore',
+  'enhancement',
+  'feature',
+  'docs',
+  'documentation',
+  'design-system',
+  'triage',
+  'question',
+  'duplicate',
+  'wontfix',
+  'invalid',
+  'help wanted',
+]);
+const TAXONOMY_PREFIXES = ['epic:', 'area:', 'status:'];
+
+/**
+ * The labels worth a chip on the card face: routing/automation signals
+ * (needs-human, ralph-auto, ralph-approved, and any unrecognised custom label),
+ * minus the ones already shown as the phase badge or priority chip, minus the
+ * GitHub taxonomy noise. Order is preserved.
+ */
+export function cardLabelTags(tags: string[] | null | undefined): string[] {
+  if (!Array.isArray(tags)) return [];
+  return tags.filter(
+    (t) =>
+      !PHASE_TAGS.has(t) &&
+      !PRIORITY_TAGS.has(t) &&
+      !TAXONOMY_TAGS.has(t) &&
+      !TAXONOMY_PREFIXES.some((p) => t.startsWith(p)),
+  );
+}
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEK_MS = 7 * DAY_MS;
 
@@ -46,10 +162,39 @@ export function issueLinkFor(t: Task): string | null {
   return t.dispatch_url ?? t.source_url ?? null;
 }
 
-const PRIORITY_RANK: Record<string, number> = { high: 0, med: 1, low: 2 };
+export type LabelPriority = 'p0' | 'p1' | 'p2' | 'p3';
 
+const LABEL_PRIORITIES: LabelPriority[] = ['p0', 'p1', 'p2', 'p3'];
+
+/**
+ * The p0–p3 priority a task carries as a GitHub label (labels sync into `tags`
+ * on import). This is the fleet's real priority signal — the Ralph selector and
+ * the board both order by it — whereas the legacy DB `priority` column
+ * (high/med/low) is only ever set on old tracker rows, never on imported
+ * issues. Highest wins if a row somehow carries more than one. Null when none.
+ */
+export function labelPriority(t: Task): LabelPriority | null {
+  if (!Array.isArray(t.tags)) return null;
+  return LABEL_PRIORITIES.find((p) => t.tags!.includes(p)) ?? null;
+}
+
+const LABEL_RANK: Record<LabelPriority, number> = { p0: 0, p1: 1, p2: 2, p3: 3 };
+const DB_RANK: Record<string, number> = { high: 0, med: 1, low: 2 };
+
+/**
+ * Unified priority rank (lower = more urgent): the p0–p3 label wins, else the
+ * legacy DB priority, else last. p0/high share rank 0 etc. — the two scales
+ * don't co-occur on a live row, so this only has to order each on its own.
+ */
 function priorityRank(t: Task): number {
-  return t.priority != null ? (PRIORITY_RANK[t.priority] ?? 3) : 3;
+  const lp = labelPriority(t);
+  if (lp) return LABEL_RANK[lp];
+  return t.priority != null ? (DB_RANK[t.priority] ?? 8) : 9;
+}
+
+/** The group-by-priority bucket label: p0–p3 label first, else DB priority, else none. */
+function priorityBucket(t: Task): string {
+  return labelPriority(t) ?? t.priority ?? 'no priority';
 }
 
 function dueMs(t: Task): number {
@@ -58,7 +203,7 @@ function dueMs(t: Task): number {
   return Number.isFinite(ms) ? ms : Number.POSITIVE_INFINITY;
 }
 
-/** Operator order: priority (high→low→none), then due date (earliest first, none last). */
+/** Operator order: priority (p0→p3 label, else DB high→low, none last), then due date (earliest first). */
 export function compareTasks(a: Task, b: Task): number {
   const p = priorityRank(a) - priorityRank(b);
   if (p !== 0) return p;
@@ -102,7 +247,9 @@ function dueBucket(t: Task, now: number): string {
 }
 
 const GROUP_ORDERS: Partial<Record<GroupBy, string[]>> = {
-  priority: ['high', 'med', 'low', 'no priority'],
+  // p0–p3 (the fleet label scale) first, then the legacy high/med/low for any
+  // old tracker rows that still carry it; empty buckets are omitted at render.
+  priority: ['p0', 'p1', 'p2', 'p3', 'high', 'med', 'low', 'no priority'],
   due: ['overdue', 'this week', 'later', 'no due'],
   status: ['open', 'blocked', 'done'],
 };
@@ -112,7 +259,7 @@ function groupLabel(t: Task, groupBy: GroupBy, now: number): string {
     case 'lane':
       return t.lane;
     case 'priority':
-      return t.priority ?? 'no priority';
+      return priorityBucket(t);
     case 'due':
       return dueBucket(t, now);
     case 'status':
