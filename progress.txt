@@ -446,3 +446,39 @@ a PR and the branch went stale (4 commits behind main). This iteration:
   ralph/issue-78-digest-state-foundation. Foundation only, per the issue's
   scope — analyze/promote (P2-P4, LLM-backed) are follow-up work under epic
   #77, not filed as separate issues yet.
+
+## Issue #90 — Bounded metric loop (ralph-metric.yml), first fully-closed self-terminating slice
+A prior dispatched Claude session already built this on
+`claude/issue-90-20260712-1845` but that branch was based on stale main
+(predates the digest_items merge, #184) and no PR was ever opened. This
+iteration re-did it clean on `ralph/issue-90-metric-loop` off current main:
+- Ported `ralph/metric.sh <gate-id> <target>` (measures a registry gate's
+  `--json` violation count against a target; exit 0=at target, 1=needs a
+  batch, 2=usage/contract error) and the `ralph/README.md` "Bounded metric
+  loop" section, content unchanged from the prior session's draft — it was
+  sound, just never landed.
+- Verified end-to-end this time (prior session couldn't run it in-sandbox):
+  ran all 4 exit paths against real registry gates
+  (`audit-gates-supportjson` at 29 violations vs target 0 -> exit 1; vs
+  target 100 -> exit 0; bad gate id -> exit 2; non-`--json`-compliant gate
+  `audit-soft-gates` -> exit 2; non-integer target -> exit 2).
+- Confirmed (again) this session's GitHub App token also has no `workflows`
+  permission scope — pushing `.github/workflows/ralph-metric.yml` was
+  rejected outright by the remote, same as the prior session hit. Dropped
+  that file from the branch/PR; posted the exact YAML as an issue comment
+  for Adrian to paste in, and noted the status in ralph/README.md so it's
+  not lost.
+- Side effect to watch: running gate scripts manually (e.g.
+  `audit-soft-gates.mjs`) writes/mutates gitignored generated artifacts
+  (`.fixture-proof-cache.json`, `docs/guardrails/soft-gate-promotion-plan.md`,
+  `docs/guardrails/baselines/check-fixture-stubs-count.json`,
+  `docs/security/sbom.json`) — reverted/deleted these before committing;
+  `.fixture-proof-cache.json` getting stale even caused a spurious
+  pre-commit hook failure (`validate-fixture-proof-of-firing` cached
+  failure) that cleared once deleted. Not a code bug, just a footgun for
+  future iterations that manually exercise gate scripts.
+- Gate green: typecheck + 595 tests + lint. PR #189 (Closes #90). Remaining
+  DoD items (workflow file live + >=2 proven dispatched batches) are
+  necessarily follow-up — can't complete inside one PR regardless of
+  permissions, since they require the file merged and then multiple manual
+  dispatches over time.
