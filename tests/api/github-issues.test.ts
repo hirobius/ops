@@ -94,3 +94,165 @@ describe('makeGitHubPort().listOpenIssues — pagination', () => {
     expect(issues[0]).toMatchObject({ repo: 'hirobius/ops', number: 1 });
   });
 });
+
+function rawPr(
+  number,
+  {
+    ref = `ralph/issue-137-approve-merge`,
+    state = 'open',
+    mergedAt = null,
+    createdAt = '2026-07-01T00:00:00Z',
+  } = {},
+) {
+  return {
+    number,
+    html_url: `https://github.com/hirobius/ops/pull/${number}`,
+    state,
+    merged_at: mergedAt,
+    created_at: createdAt,
+    head: { ref },
+  };
+}
+
+describe('makeGitHubPort().findRalphPr', () => {
+  const originalToken = process.env.GITHUB_TOKEN;
+
+  beforeEach(() => {
+    process.env.GITHUB_TOKEN = 'test-token';
+  });
+
+  afterEach(() => {
+    process.env.GITHUB_TOKEN = originalToken;
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it('returns null when no PR matches the branch prefix', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(pageResponse([rawPr(1, { ref: 'unrelated-branch' })]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const pr = await makeGitHubPort().findRalphPr({
+      owner: 'hirobius',
+      repo: 'ops',
+      issueNumber: 137,
+    });
+
+    expect(pr).toBeNull();
+  });
+
+  it('finds an open PR matching the ralph/issue-<n>- prefix', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(pageResponse([rawPr(9)]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const pr = await makeGitHubPort().findRalphPr({
+      owner: 'hirobius',
+      repo: 'ops',
+      issueNumber: 137,
+    });
+
+    expect(pr).toMatchObject({
+      number: 9,
+      url: 'https://github.com/hirobius/ops/pull/9',
+      state: 'open',
+      merged: false,
+    });
+  });
+
+  it('reports a merged PR as merged rather than dropping it', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        pageResponse([rawPr(9, { state: 'closed', mergedAt: '2026-07-02T00:00:00Z' })]),
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const pr = await makeGitHubPort().findRalphPr({
+      owner: 'hirobius',
+      repo: 'ops',
+      issueNumber: 137,
+    });
+
+    expect(pr).toMatchObject({ number: 9, state: 'closed', merged: true });
+  });
+
+  it('reports a closed-not-merged PR distinctly', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(pageResponse([rawPr(9, { state: 'closed' })]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const pr = await makeGitHubPort().findRalphPr({
+      owner: 'hirobius',
+      repo: 'ops',
+      issueNumber: 137,
+    });
+
+    expect(pr).toMatchObject({ number: 9, state: 'closed', merged: false });
+  });
+
+  it('resolves multiple matches to the newest by created_at', async () => {
+    const older = rawPr(5, { createdAt: '2026-06-01T00:00:00Z' });
+    const newer = rawPr(9, { createdAt: '2026-07-01T00:00:00Z' });
+    const fetchMock = vi.fn().mockResolvedValue(pageResponse([older, newer]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const pr = await makeGitHubPort().findRalphPr({
+      owner: 'hirobius',
+      repo: 'ops',
+      issueNumber: 137,
+    });
+
+    expect(pr?.number).toBe(9);
+  });
+
+  it('throws an actionable error on 401/403', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      headers: { get: () => null },
+      text: async () => '',
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      makeGitHubPort().findRalphPr({ owner: 'hirobius', repo: 'ops', issueNumber: 137 }),
+    ).rejects.toThrow(/GITHUB_TOKEN/);
+  });
+});
+
+describe('makeGitHubPort().addLabel — pull request URLs (ops#137 review finding)', () => {
+  beforeEach(() => {
+    vi.stubEnv('GITHUB_TOKEN', 'test-token');
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it('labels a PR via its /pull/N URL (PRs are issues to the labels API)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(pageResponse([]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await makeGitHubPort().addLabel({
+      issueUrl: 'https://github.com/hirobius/ops/pull/154',
+      label: 'ralph-approved',
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://api.github.com/repos/hirobius/ops/issues/154/labels');
+  });
+
+  it('still labels a plain issue URL unchanged', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(pageResponse([]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await makeGitHubPort().addLabel({
+      issueUrl: 'https://github.com/hirobius/ops/issues/99',
+      label: 'ralph-ready',
+    });
+
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://api.github.com/repos/hirobius/ops/issues/99/labels');
+  });
+});

@@ -340,6 +340,13 @@ requires an explicit per-item yes from Adrian (standing rule).
 
 ## Decisions (dated, newest first)
 
+- 2026-07-11 (evening, Adrian): **feature freeze LIFTED** — the fleet burns
+  everything tagged ralph-ready regardless of feature/bug class (everything
+  carries ralph-auto per the same-day standing decision). #44 stays parked
+  until the first manual Monroe preview ship (unmet dependency). The 66
+  legacy BACKLOG.md-era board rows were soft-deleted with a provenance note —
+  GitHub issues are now the board's sole task source, literally.
+
 - 2026-07-11 (Adrian, cockpit session): **everything ralph-auto** — batch
   pre-approval is the ops default; every open `ralph-ready` issue carries
   `ralph-auto` and new tickets get both labels together. Loop PRs merge on
