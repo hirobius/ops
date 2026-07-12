@@ -32,22 +32,32 @@ import { useTaskSelection } from './useTaskSelection';
 import { TaskRow } from './TaskRow';
 import { RalphPanel } from './RalphPanel';
 import {
+  countByStatus,
   groupTasksNow,
   matchesCategory,
   TASK_CATEGORIES,
   type GroupBy,
+  type StatusCounts,
   type TaskCategory,
 } from './taskMeta';
 import type { TaskStatus } from './types';
 
 type StatusFilter = TaskStatus | 'all';
 
-const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
-  { value: 'open', label: 'open' },
-  { value: 'blocked', label: 'blocked' },
-  { value: 'done', label: 'done' },
-  { value: 'all', label: 'all' },
-];
+/** `n`, or `n+` once the loaded set has hit the API row cap (a floor, not a total). */
+function fmtCount(n: number, clipped: boolean): string {
+  return clipped ? `${n}+` : `${n}`;
+}
+
+function statusOptions(counts: StatusCounts | null): { value: StatusFilter; label: string }[] {
+  const suffix = (n: number) => (counts ? ` (${fmtCount(n, counts.clipped)})` : '');
+  return [
+    { value: 'open', label: `open${suffix(counts?.open ?? 0)}` },
+    { value: 'blocked', label: `blocked${suffix(counts?.blocked ?? 0)}` },
+    { value: 'done', label: `done${suffix(counts?.done ?? 0)}` },
+    { value: 'all', label: `all${suffix(counts?.all ?? 0)}` },
+  ];
+}
 
 const GROUP_OPTIONS: { value: GroupBy; label: string }[] = [
   { value: 'lane', label: 'repo' },
@@ -109,7 +119,18 @@ export default function TasksPage() {
 
   const groups = useMemo(() => groupTasksNow(filtered, groupBy), [filtered, groupBy]);
 
-  const summary = tasks ? `${filtered.length} shown · ${tasks.length} total` : '';
+  // Full loaded set, NOT categoryScope/filtered — the status control reads as a
+  // global inventory, not a moving target as the source/category filters change.
+  const statusCounts = useMemo(() => (tasks ? countByStatus(tasks) : null), [tasks]);
+  const statusControlOptions = useMemo(() => statusOptions(statusCounts), [statusCounts]);
+  const clipWarning = statusCounts?.clipped
+    ? 'row limit reached — counts are a floor, not a total'
+    : undefined;
+
+  const summary =
+    tasks && statusCounts
+      ? `${filtered.length} shown · ${fmtCount(statusCounts.open + statusCounts.blocked, statusCounts.clipped)} active · ${fmtCount(statusCounts.done, statusCounts.clipped)} done`
+      : '';
   const queuedCount = useMemo(
     () => (tasks ? tasks.filter((t) => t.dispatch_status === 'queued').length : 0),
     [tasks],
@@ -124,13 +145,15 @@ export default function TasksPage() {
       />
 
       <div style={s.controls}>
-        <SegmentedControl
-          aria-label="Filter by status"
-          size="sm"
-          options={STATUS_OPTIONS}
-          value={statusFilter}
-          onChange={(v) => setStatusFilter(v as StatusFilter)}
-        />
+        <span title={clipWarning}>
+          <SegmentedControl
+            aria-label="Filter by status"
+            size="sm"
+            options={statusControlOptions}
+            value={statusFilter}
+            onChange={(v) => setStatusFilter(v as StatusFilter)}
+          />
+        </span>
         <span style={s.groupLabel}>group by</span>
         <SegmentedControl
           aria-label="Group tasks by"
@@ -140,7 +163,7 @@ export default function TasksPage() {
           onChange={(v) => setGroupBy(v as GroupBy)}
         />
         <span style={s.spacer} />
-        <span style={s.statusLine}>
+        <span style={s.statusLine} title={clipWarning}>
           {isOffline
             ? 'offline'
             : isInitialLoading

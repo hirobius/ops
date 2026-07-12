@@ -312,6 +312,39 @@ export function dueToneNow(due: string | null): ChipTone | null {
   return dueTone(due, Date.now());
 }
 
+// The board polls GET /api/tasks with no ?limit=, so it always gets the
+// server's DEFAULT_LIMIT (api/tasks.ts) rows back. The two files can't share a
+// runtime import (api/ is server-only), so this is kept in sync by hand.
+const TASKS_REQUEST_LIMIT = 1000;
+
+export interface StatusCounts {
+  open: number;
+  blocked: number;
+  done: number;
+  all: number;
+  /** The loaded set is at (or past) the request row cap — these are a floor, not a total. */
+  clipped: boolean;
+}
+
+/**
+ * Per-status counts for the status `SegmentedControl` (ops#159). Counted over
+ * the FULL loaded set, not the current source/category filter — deliberately,
+ * so the control reads as a global inventory rather than shifting as other
+ * filters change. `clipped` flags when the loaded set has hit the API's row
+ * cap, so a clipped number is never presented as the true total.
+ */
+export function countByStatus(tasks: Task[], limit = TASKS_REQUEST_LIMIT): StatusCounts {
+  const counts: StatusCounts = {
+    open: 0,
+    blocked: 0,
+    done: 0,
+    all: tasks.length,
+    clipped: tasks.length >= limit,
+  };
+  for (const t of tasks) counts[t.status]++;
+  return counts;
+}
+
 /** Render-time "x ago" freshness stamp (same idiom as the page's other formatters). */
 export function relTimeNow(iso: string | null): string {
   if (!iso) return '';

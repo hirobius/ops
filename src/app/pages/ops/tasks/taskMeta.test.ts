@@ -17,6 +17,7 @@ import {
   labelPriority,
   priorityChip,
   cardLabelTags,
+  countByStatus,
   type GroupBy,
 } from './taskMeta';
 import type { Task } from './types';
@@ -307,6 +308,33 @@ describe('cardLabelTags — routing/automation chips only', () => {
   it('is empty for null/absent tags', () => {
     expect(cardLabelTags(null)).toEqual([]);
     expect(cardLabelTags(undefined)).toEqual([]);
+  });
+});
+
+describe('countByStatus — per-status counts for the status filter (ops#159)', () => {
+  it('is all-zero for an empty set', () => {
+    expect(countByStatus([])).toEqual({ open: 0, blocked: 0, done: 0, all: 0, clipped: false });
+  });
+  it('tallies open/blocked/done independently, all = total regardless of status', () => {
+    const tasks = [
+      task({ key: 'a', status: 'open' }),
+      task({ key: 'b', status: 'open' }),
+      task({ key: 'c', status: 'blocked' }),
+      task({ key: 'd', status: 'done' }),
+    ];
+    expect(countByStatus(tasks)).toEqual({ open: 2, blocked: 1, done: 1, all: 4, clipped: false });
+  });
+  it('counts the FULL set, ignoring nothing (callers pass the unfiltered list)', () => {
+    const tasks = [task({ status: 'done' }), task({ status: 'done' })];
+    expect(countByStatus(tasks)).toEqual({ open: 0, blocked: 0, done: 2, all: 2, clipped: false });
+  });
+  it('is not clipped below the request limit', () => {
+    const tasks = Array.from({ length: 9 }, (_, i) => task({ key: `t${i}` }));
+    expect(countByStatus(tasks, 10).clipped).toBe(false);
+  });
+  it('is clipped once the loaded set hits the request limit (a floor, not a total)', () => {
+    const tasks = Array.from({ length: 10 }, (_, i) => task({ key: `t${i}` }));
+    expect(countByStatus(tasks, 10).clipped).toBe(true);
   });
 });
 
