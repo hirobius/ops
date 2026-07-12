@@ -783,6 +783,15 @@ function computeB5() {
  * Cache: the raw JSON is saved to docs/security/osv-report.json on each run
  *   by executing `pnpm audit --json` inline. If execution fails (e.g. network
  *   offline), the stale cached file is used with a note in `notes`.
+ *
+ * Volatility (ops#67): this score reads a *live* external advisory database
+ * on every run, not a fixed snapshot — it legitimately drifts between two
+ * regens with zero dependency or code changes in this repo, either because
+ * a new CVE was disclosed against an already-pinned version, or because the
+ * sandbox's network reachability to the registry varied (a partial/failed
+ * fetch under-reports). A downward drift is not automatically a regression
+ * to chase; check `raw.source` / `raw.notes` and re-run before treating it
+ * as signal.
  */
 function computeB6() {
   const osvReportPath = resolve(ROOT, 'docs/security/osv-report.json');
