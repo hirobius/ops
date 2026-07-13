@@ -22,8 +22,8 @@ Deployed on Vercel; `main` is production.
 - **The dispatch loop (no API key).** **Dispatch** opens a GitHub Issue that
   `@claude`s — GitHub then spins up a Claude Code session on a branch that opens
   a PR. The board stamps the issue URL and `claimed_by='claude'`. Needs
-  `GITHUB_TOKEN`. *(Direction: GitHub Issues become the source of truth; the
-  board becomes a triage + launcher + multi-repo issue view.)*
+  `GITHUB_TOKEN`. _(Direction: GitHub Issues become the source of truth; the
+  board becomes a triage + launcher + multi-repo issue view.)_
 - **`/ops/leads` — lead → site pipeline.** `lib/lead-gen` (Outscraper sourcing)
   → `lib/agent` (enrich → generate → judge → loop → validated `ClientConfig`) →
   `lib/render` (hand-off to the `hirobius/clients` Astro factory). State in
@@ -31,8 +31,9 @@ Deployed on Vercel; `main` is production.
 - **`/ops/clients` — client CRM.** `clients/<slug>/*.json` rendered as client
   dashboards / reports / brand audits, plus a public token-gated portal at
   `/c/:slug`.
-- **`/ops/projects`, `/ops/digest`, `/ops` index, `/admin/approvals`** — fleet
-  views + the approval inbox.
+- **`/ops/projects`, `/ops/digest`, `/ops` index** — fleet views. Merge
+  governance runs through ralph-gate's `ralph-auto`/`ralph-approved` labels on
+  the linked PR (the pre-Ralph `/admin/approvals` inbox was retired, ops#157).
 - **The `/ops` gate.** Server-side password: `api/ops-login.ts` checks
   `OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` and sets an httpOnly session cookie.
   `pnpm dev` bypasses it; production is gated.
@@ -41,13 +42,13 @@ Deployed on Vercel; `main` is production.
 
 Set by a human in the Vercel dashboard (Production scope) — never committed.
 
-| Variable | Purpose | Needed for |
-| --- | --- | --- |
-| `OPS_GATE_PASSWORD`, `OPS_SESSION_SECRET` | server-side `/ops` login | the whole dashboard |
-| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Supabase service client | tasks + leads boards |
-| `GITHUB_TOKEN` (+ optional `GITHUB_REPO`) | open dispatch issues (Issues: write) | the Dispatch loop |
-| `OUTSCRAPER_API_KEY` | Places sourcing | live lead pulls |
-| `VITE_PORTAL_HMAC_SECRET` | `/c/:slug` portal token | client portal |
+| Variable                                    | Purpose                              | Needed for           |
+| ------------------------------------------- | ------------------------------------ | -------------------- |
+| `OPS_GATE_PASSWORD`, `OPS_SESSION_SECRET`   | server-side `/ops` login             | the whole dashboard  |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Supabase service client              | tasks + leads boards |
+| `GITHUB_TOKEN` (+ optional `GITHUB_REPO`)   | open dispatch issues (Issues: write) | the Dispatch loop    |
+| `OUTSCRAPER_API_KEY`                        | Places sourcing                      | live lead pulls      |
+| `VITE_PORTAL_HMAC_SECRET`                   | `/c/:slug` portal token              | client portal        |
 
 The Supabase↔Vercel integration may inject `NEXT_PUBLIC_SUPABASE_URL` instead of
 `SUPABASE_URL`; the server accepts either. Schema lives in

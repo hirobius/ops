@@ -63,8 +63,6 @@ export type TaskAction =
   | 'dispatch'
   | 'auto_on'
   | 'auto_off'
-  | 'queue'
-  | 'unqueue'
   | 'ralph_ready_on'
   | 'ralph_ready_off'
   | 'ralph_approve'

@@ -16,10 +16,6 @@ const TasksPage = lazy(() => import('./pages/ops/tasks/TasksPage'));
 const DigestPage = lazy(() => import('./pages/ops/digest/DigestPage'));
 const ProjectsPage = lazy(() => import('./pages/ops/projects/ProjectsPage'));
 
-// ── Admin (approval inbox) — lazy loaded ─────────────────────────────────────
-const ApprovalsPage = lazy(() => import('./pages/admin/Approvals'));
-const ApprovalDetailPage = lazy(() => import('./pages/admin/ApprovalDetail'));
-
 // ── Client portal — public token-gated route at /c/:slug ─────────────────────
 const ClientPortalPage = lazy(() => import('./pages/portal/ClientPortalPage'));
 
@@ -82,14 +78,6 @@ export const router = createBrowserRouter([
           { path: 'clients/:slug/brand-audit', element: <LazyHDS Page={ClientBrandAuditPage} /> },
           // Legacy /ops/hds/* doc routes now live in the standalone DS site.
           { path: 'hds/*', element: <Navigate to="/ops" replace /> },
-        ],
-      },
-      {
-        path: 'admin',
-        children: [
-          { index: true, element: <Navigate to="/admin/approvals" replace /> },
-          { path: 'approvals', element: <LazyHDS Page={ApprovalsPage} /> },
-          { path: 'approvals/:id', element: <LazyHDS Page={ApprovalDetailPage} /> },
         ],
       },
       { path: '*', Component: NotFoundPage },

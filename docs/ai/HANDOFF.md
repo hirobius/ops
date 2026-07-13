@@ -48,6 +48,12 @@ _Last updated: 2026-07-13 (**Ralph parked inbox — reasons, one-tap re-queue, w
   not a code bug), so `--dry-run` against real Supabase couldn't be exercised
   either. Adrian should run `--dry-run` then `--apply` for real once migration
   0008 is applied and `GITHUB_TOKEN` is confirmed live.
+- **RETIRED 2026-07-13 (ops#157):** the `/admin/approvals` inbox described
+  below (epic #41 Slice 3), the board's Auto-dispatch UI toggle, and the
+  `queue`/`unqueue` task actions are gone — merge governance now runs
+  entirely through ralph-gate's `ralph-auto`/`ralph-approved` labels. `auto_on`/
+  `auto_off` stay in `lib/tasks/actions.mjs` (`scripts/fleet-dispatch.mjs`
+  still reads `auto_ok`). Kept for history:
 - **NEW: Fleet auto-dispatch epic #41, Slice 3 landed (2026-07-08)** — the
   real approvals inbox. `/admin/approvals` reads the live `tasks` store
   (`useTasks`/`GET /api/tasks`) and lists rows with `dispatch_status ===

@@ -5,7 +5,7 @@ const config: KnipConfig = {
     // src/index.ts is auto-detected as the package entry; explicit entry was redundant.
     // src/main.tsx is auto-detected via index.html; no explicit entry needed.
     'src/app/App.tsx!',
-    'src/app/routes.tsx!',   // lazy import() calls for all pages
+    'src/app/routes.tsx!', // lazy import() calls for all pages
     'scripts/**/*.mjs!',
     // Validator pipeline — entries to surface acorn/acorn-jsx + AST helpers
     // that knip's project graph cannot reach via the React app alone.
@@ -45,9 +45,6 @@ const config: KnipConfig = {
     'src/app/pages/hds/IconsPage.tsx',
     'src/app/pages/hds/portfolioData.tsx',
     'src/app/pages/SketchPage.tsx',
-    // Admin/ops dashboard pages — in-flight Workspace HQ surfaces, not yet
-    // wired into routes.tsx. Tracked by ops dashboard manifest.
-    'src/app/pages/admin/**',
     // Pattern doc draft pages — same intent as the HDS draft pages above:
     // structured surfaces awaiting route promotion. Source of truth is the
     // hds-registry.json + pattern manifest, not knip's reachability graph.
