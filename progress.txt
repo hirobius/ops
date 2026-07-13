@@ -606,3 +606,37 @@ this issue reopened the orphan-sweeper slice specifically)
   it showed the entire digest feature being deleted, an artifact of the
   branch predating it, not an intentional change). Did not reuse or merge
   that branch; re-implemented fresh against current main instead.
+
+#158 -- task rows as HDS Cards: close the remaining DoD gap on top of #170
+- #170 already merged the whole Card/slot-anatomy structure this issue
+  asked for (bordered Card, Header/Footer slots, work-state-toned border,
+  flex-column lane lists) -- confirmed on main before touching anything.
+  Only 3 DoD items were still open (per an earlier stalled @claude dispatch's
+  comment on the issue, which never opened a PR -- see below).
+- Moved WORK_STATE_CARD_TONE out of TaskRow.tsx (was a local const) into
+  lib/tasks/work-state.mjs, exported next to WORK_STATE_TONE so badge + card
+  tones can't drift apart (issue's explicit ask).
+- Realigned tone values to the issue's literal spec: needs-adrian->danger,
+  parked/blocked->warning, done->success, everything else (wip/dispatched/
+  queued/ready/backlog)->neutral. Previous local map had done->neutral,
+  blocked->danger, wip/dispatched/queued->info -- didn't match the spec text.
+  TaskRow.tsx now imports WORK_STATE_CARD_TONE and casts to CardTone at the
+  call site (plain-JS module, same pattern as WORK_STATE_TONE/BadgeTone).
+- Added a red-first unit suite in tests/api/work-state.test.ts: one case per
+  tone + an "everything else" sweep + a completeness check over every phase
+  deriveWorkState can return.
+- Files: lib/tasks/work-state.mjs, src/app/pages/ops/tasks/TaskRow.tsx,
+  tests/api/work-state.test.ts.
+- Gate green: typecheck + 659 tests (incl. the 6 new cases above) + lint.
+  Also ran
+  pnpm test:layout for real (installed Playwright chromium in-sandbox first,
+  none was preinstalled) -- all 14 routes pass including /ops/tasks, no
+  visual regression from the tone realignment.
+- Prior context: an earlier (non-Ralph) @claude dispatch on this issue built
+  the same conceptual fix (export move, tone realignment, test additions) on
+  branch claude/issue-158-20260712-1847, but that branch is stale against
+  main -- it predates #113's "Run Ralph" per-task dispatch button and would
+  have deleted that feature if merged as-is. Did not reuse that branch;
+  re-implemented the same fix fresh against current main, preserving Run
+  Ralph and everything else #170/#113 added since.
+- Branch: ralph/issue-158-card-tone-export.
