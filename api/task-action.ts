@@ -8,7 +8,7 @@
  *   Action = 'done' | 'reopen' | 'claim' | 'unclaim' | 'trash' | 'restore' | 'dispatch'
  *          | 'auto_on' | 'auto_off' | 'queue' | 'unqueue'
  *          | 'ralph_ready_on' | 'ralph_ready_off' | 'ralph_approve' | 'ralph_dispatch'
- *          | 'ralph_auto_on' | 'ralph_auto_off' | 'set_priority'
+ *          | 'ralph_requeue' | 'ralph_auto_on' | 'ralph_auto_off' | 'set_priority'
  *
  * 'auto_on' / 'auto_off' flip `auto_ok` (migration 0008) — the Fleet
  * auto-dispatch opt-in (epic #41). Slice 2's dispatcher only picks up rows
@@ -48,6 +48,13 @@
  * naming that permission. Returns `{ ok: true, runUrl? }`; runUrl points at the
  * workflow's Actions page (GitHub's dispatch response has no run id to hand
  * back synchronously).
+ *
+ * 'ralph_requeue' (ops#141, the fleet panel's parked inbox lane) removes
+ * `ralph-parked` and adds `ralph-ready` on the task's linked GitHub issue —
+ * the documented un-park gesture. Resolves owner/repo/issue straight from
+ * `key` (a `github:<owner>/<repo>#<n>` reference) rather than a Supabase
+ * task row, since a parked issue surfaced by the panel need not have one.
+ * Idempotent; 400 if `key` isn't that shape.
  *
  * 'ralph_auto_on' / 'ralph_auto_off' (ops#138) add/remove the `ralph-auto`
  * label on the task's linked GitHub issue — the pre-approval that arms a

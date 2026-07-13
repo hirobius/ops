@@ -50,6 +50,8 @@ import { listTasks, upsertTasks, listGithubTaskKeys, retireTasks } from '../lib/
 import { mapIssuesToTasks } from '../lib/tasks/import-issues.mjs';
 import { orderRalphQueue } from '../lib/tasks/ralph-queue.mjs';
 import { reconcileGithubTasks, reconcileGuard } from '../lib/tasks/reconcile-github-tasks.mjs';
+import { parseParkedReason, hasDodMarker } from '../lib/tasks/ralph-parked.mjs';
+import { classifyWedged } from '../lib/tasks/ralph-wedge.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
 
 const DEFAULT_LIMIT = 1000;
@@ -70,11 +72,14 @@ export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Prom
 }
 
 /**
- * GET /api/tasks?ralph=1 — the fleet Ralph panel's read (ops#112): recent runs
- * + the selector-ordered queue per fleet repo, straight from GitHub (labels ARE
- * the loop's state store; Supabase isn't consulted). Folded in here to stay
- * under the Vercel Hobby function cap. Per-repo GitHub failures surface as
- * `errors` entries (fail-soft per repo, loud per message).
+ * GET /api/tasks?ralph=1 — the fleet Ralph panel's read (ops#112, parked inbox
+ * + wedge flag ops#141): recent runs, the selector-ordered queue, the parked
+ * inbox (ralph-parked/needs-adrian issues with their park reason), and the
+ * open-Ralph-PRs wedge classification — all per fleet repo, straight from
+ * GitHub (labels ARE the loop's state store; Supabase isn't consulted).
+ * Folded in here to stay under the Vercel Hobby function cap. Per-repo GitHub
+ * failures surface as `errors` entries (fail-soft per repo, loud per
+ * message).
  */
 export async function ralphStatusHandler(): Promise<HandlerResult> {
   const gh = makeGitHubPort();
@@ -90,18 +95,73 @@ export async function ralphStatusHandler(): Promise<HandlerResult> {
     };
   }
   try {
-    const [runs, ready] = await Promise.all([
+    const [runs, ready, parkedByRepo, prsByRepo] = await Promise.all([
       gh.listRalphRuns({ repos: FLEET_REPOS }),
       gh.listRalphReadyIssues({ repos: FLEET_REPOS }),
+      gh.listRalphParkedIssues({ repos: FLEET_REPOS }),
+      gh.listRalphOpenPrs({ repos: FLEET_REPOS }),
     ]);
     const queue = orderRalphQueue(ready.flatMap((r) => r.issues));
-    const errors = [...runs, ...ready]
+    const parked = parkedByRepo.flatMap((r) => r.issues).map(buildParkedRow);
+    const now = Date.now();
+    const prs = prsByRepo.flatMap((r) => r.prs).map((pr) => buildPrRow(pr, now));
+    const errors = [...runs, ...ready, ...parkedByRepo, ...prsByRepo]
       .filter((e) => e.error)
       .map((e) => ({ repo: e.repo, error: e.error as string }));
-    return { status: 200, body: { runs, queue, errors } };
+    return { status: 200, body: { runs, queue, parked, prs, errors } };
   } catch (err) {
     return { status: 502, body: { error: messageOf(err), code: 'GITHUB_RALPH_STATUS_FAILED' } };
   }
+}
+
+/**
+ * A parked/needs-adrian GitHub issue → the panel's parked-lane row. The
+ * needs-adrian `hint` steers away from a blind re-queue: `ralph/next.sh`'s
+ * intake filter re-parks a DoD-less body on sight, so the hint says so
+ * instead of promising a re-queue that would just bounce back.
+ */
+function buildParkedRow(issue: {
+  repo: string;
+  number: number;
+  title: string;
+  url: string;
+  body: string;
+  labels: string[];
+  parkComment: string | null;
+}) {
+  const label = issue.labels.includes('ralph-parked') ? 'ralph-parked' : 'needs-adrian';
+  const hint =
+    label === 'needs-adrian'
+      ? hasDodMarker(issue.body)
+        ? 'needs a human decision'
+        : 'needs a DoD checklist first, then re-queue'
+      : null;
+  return {
+    repo: issue.repo,
+    number: issue.number,
+    title: issue.title,
+    url: issue.url,
+    label,
+    reason: parseParkedReason(issue.parkComment),
+    hint,
+  };
+}
+
+/** An open Ralph PR → the panel's wedge-badge row. */
+function buildPrRow(
+  pr: { repo: string; number: number; url: string; title: string; updatedAt: string; gate: string },
+  now: number,
+) {
+  const ageHours = (now - new Date(pr.updatedAt).getTime()) / 3_600_000;
+  const { wedged, reason } = classifyWedged({ gate: pr.gate, ageHours });
+  return {
+    repo: pr.repo,
+    number: pr.number,
+    url: pr.url,
+    title: pr.title,
+    wedged,
+    wedgeReason: reason,
+  };
 }
 
 export async function importIssuesHandler(

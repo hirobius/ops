@@ -545,3 +545,64 @@ this issue reopened the orphan-sweeper slice specifically)
   there's no network access to `pnpm exec playwright install`. Noted in the
   PR body; a human/CI run with Playwright available should verify layout
   before merge.
+
+## Issue #141 — Ralph parked inbox: reasons, one-tap re-queue, wedge flag
+- Extends #112's RalphPanel (GET /api/tasks?ralph=1), no new api/*.ts file,
+  per the issue's explicit constraint.
+- New pure libs (TDD, tested first): lib/tasks/ralph-parked.mjs
+  (parseParkedReason — mirrors ralph/lib.sh's park_issue() comment shape
+  verbatim; hasDodMarker — ports ralph/next.sh's has_dod_marker() regex
+  verbatim) and lib/tasks/ralph-wedge.mjs (classifyWedged — ports
+  ralph/lib.sh's classify_wedged() verbatim: failure -> wedged; none/pending
+  >=3h -> wedged).
+- lib/github/issues.mjs: two new port methods, listRalphParkedIssues (merges
+  ralph-parked + needs-adrian per repo, dedupes by issue number, attaches
+  each issue's raw body + latest raw park-comment body — parsing stays in
+  the pure lib) and listRalphOpenPrs (open PRs on ralph/* branches, excludes
+  ralph/claim-* lock refs, attaches each PR's latest ralph-gate commit-status
+  state). Same per-repo fail-soft shape as the existing listRalphRuns/
+  listRalphReadyIssues.
+- api/tasks.ts ralphStatusHandler: fetches both new lists alongside the
+  existing runs/queue, builds `parked` (repo/number/title/url/label/reason/
+  hint — needs-adrian rows get a DoD-checklist-first hint instead of a
+  re-queue button, since next.sh's intake filter would just re-park a
+  DoD-less body) and `prs` (repo/number/url/title/wedged/wedgeReason) via the
+  pure classifiers.
+- lib/tasks/actions.mjs: new `ralph_requeue` action — removes ralph-parked,
+  adds ralph-ready on the linked issue, the documented un-park gesture.
+  Resolves owner/repo/issue straight from the `github:<owner>/<repo>#<n>`
+  key (parseGithubTaskKey) rather than a Supabase getTask lookup — parked
+  issues come from GitHub directly (same as the queue lane), not
+  necessarily a tracked task row. Idempotent (both label ops are themselves
+  idempotent on the port).
+- RalphPanel.tsx: two new lanes (Parked, Open Ralph PRs) wired through the
+  existing useTaskActions `act` seam (no duplicated mutation logic) +
+  useToast's `notify` for fail-loud re-queue errors, matching the "Run
+  Ralph" (ops#113) convention. TasksPage now passes `act`/`onNotify` into
+  RalphPanel.
+- DOM-node budget gate ratcheted for RalphPanel.tsx (21->41, the two new
+  lanes) via `node scripts/check-dom-node-budgets.mjs --update` — legitimate
+  growth, not a workaround.
+- Test-first: tests/api/ralph-parked.test.ts, tests/api/ralph-wedge.test.ts
+  (new, pure-fn), tests/api/github-issues.test.ts (+4 cases for the two new
+  port methods, happy path + fail-soft), tests/api/task-actions.test.ts (+5
+  cases for ralph_requeue: 503/400/success/idempotent/502). 653 tests total
+  (was 622 on main), all green.
+- Verified in a real browser: installed Playwright chromium in-sandbox
+  (`pnpm exec playwright install chromium` — none was preinstalled here) and
+  ran `pnpm test:layout` for real — all 16 routes pass, including /ops/tasks
+  with the new panel mounted (no console/layout errors). Did not exercise
+  the panel against live GitHub data (no GITHUB_TOKEN in this sandbox, and
+  CLAUDE.md forbids touching .env* — the browser-tool permission prompt for
+  a mocked-fetch manual check also had no user to approve it in this
+  autonomous run).
+- Gate green: typecheck + typecheck:api + 653 tests + lint + test:layout
+  (ralph/gate.sh + the DoD's extra checks). Branch:
+  ralph/issue-141-parked-inbox.
+- Prior context: an earlier (non-Ralph) @claude dispatch on this issue
+  produced a full implementation on branch claude/issue-141-20260712-1845,
+  but never opened a PR and never ran the gate (sandboxed, pnpm/node
+  blocked) — and that branch had drifted badly stale against main (diffing
+  it showed the entire digest feature being deleted, an artifact of the
+  branch predating it, not an intentional change). Did not reuse or merge
+  that branch; re-implemented fresh against current main instead.

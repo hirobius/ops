@@ -1,20 +1,26 @@
 /* hds-bypass: ops-internal page. Inline styles intentional for ops dashboard. */
 
 /**
- * RalphPanel — live fleet view of the autonomous loop (ops#112).
+ * RalphPanel — live fleet view of the autonomous loop (ops#112, parked inbox
+ * + wedge flag ops#141).
  *
- * Two lanes, straight from GitHub via GET /api/tasks?ralph=1 (labels are the
- * loop's state store): "now" — the most recent Ralph run per fleet repo — and
+ * Four lanes, straight from GitHub via GET /api/tasks?ralph=1 (labels are the
+ * loop's state store): "now" — the most recent Ralph run per fleet repo;
  * "queue" — eligible ralph-ready issues in the EXACT deterministic selector
- * order (lib/tasks/ralph-queue.mjs mirrors ralph/next.sh). Per-repo fetch
- * failures render as loud per-repo lines; the healthy repos still show.
+ * order (lib/tasks/ralph-queue.mjs mirrors ralph/next.sh); "parked" — the
+ * ralph-parked/needs-adrian inbox with a one-tap re-queue; "PRs" — open Ralph
+ * PRs, badged wedged per lib/tasks/ralph-wedge.mjs (mirrors ralph/lib.sh's
+ * classify_wedged). Per-repo fetch failures render as loud per-repo lines;
+ * the healthy repos still show.
  */
 
-import { Badge } from '@hirobius/design-system';
+import { useState } from 'react';
+import { Badge, Button } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import type { ComponentProps, CSSProperties } from 'react';
 import { usePoll } from '../../../lib/usePoll';
 import { relTimeNow } from './taskMeta';
+import type { TaskAction, TaskActionResult } from './types';
 
 type BadgeTone = NonNullable<ComponentProps<typeof Badge>['tone']>;
 
@@ -39,14 +45,42 @@ interface RalphQueueItem {
   prio: string | null;
   wip: boolean;
 }
+interface RalphParkedItem {
+  repo: string;
+  number: number;
+  title: string;
+  url: string;
+  label: 'ralph-parked' | 'needs-adrian';
+  reason: string | null;
+  hint: string | null;
+}
+interface RalphPrItem {
+  repo: string;
+  number: number;
+  url: string;
+  title: string;
+  wedged: boolean;
+  wedgeReason: string | null;
+}
 interface RalphStatus {
   runs: RalphRepoRuns[];
   queue: RalphQueueItem[];
+  parked: RalphParkedItem[];
+  prs: RalphPrItem[];
   errors: { repo: string; error: string }[];
+}
+
+export interface RalphPanelProps {
+  /** Re-queue is a board mutation, so it goes through the shared action seam (ops#136). */
+  act: (key: string, action: TaskAction) => Promise<TaskActionResult>;
+  /** Reports a re-queue outcome — never fails silently (CLAUDE.md fail-loud convention). */
+  onNotify: (message: string, tone: 'success' | 'danger') => void;
 }
 
 const POLL_MS = 45_000;
 const QUEUE_SHOWN = 8;
+const PARKED_SHOWN = 8;
+const PRS_SHOWN = 8;
 
 function shortRepo(full: string): string {
   return full.slice(full.indexOf('/') + 1);
@@ -73,8 +107,8 @@ function runChip(entry: RalphRepoRuns): { tone: BadgeTone; label: string; url?: 
   };
 }
 
-export function RalphPanel() {
-  const { data, isOffline, isInitialLoading } = usePoll<RalphStatus>(
+export function RalphPanel({ act, onNotify }: RalphPanelProps) {
+  const { data, isOffline, isInitialLoading, refetch } = usePoll<RalphStatus>(
     async (signal) => {
       const res = await fetch('/api/tasks?ralph=1', { signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -82,6 +116,25 @@ export function RalphPanel() {
     },
     { intervalMs: POLL_MS, offlineIntervalMs: POLL_MS * 2, requestTimeoutMs: 15_000 },
   );
+
+  const [requeuing, setRequeuing] = useState<ReadonlySet<string>>(new Set());
+
+  async function handleRequeue(repo: string, number: number) {
+    const key = `github:${repo}#${number}`;
+    setRequeuing((prev) => new Set(prev).add(key));
+    const result = await act(key, 'ralph_requeue');
+    setRequeuing((prev) => {
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+    if (result.ok) {
+      onNotify(`Re-queued ${shortRepo(repo)}#${number} — ralph-ready re-added.`, 'success');
+      refetch();
+    } else {
+      onNotify(requeueErrorMessage(result.body), 'danger');
+    }
+  }
 
   return (
     <section style={s.panel} aria-labelledby="ralph-panel-label" data-role="ralph-panel">
@@ -145,10 +198,82 @@ export function RalphPanel() {
           {data.queue.length > QUEUE_SHOWN && (
             <span style={s.quiet}>+{data.queue.length - QUEUE_SHOWN} more in queue</span>
           )}
+
+          <span style={s.label}>Parked</span>
+          <ol style={s.queue}>
+            {data.parked.slice(0, PARKED_SHOWN).map((p) => {
+              const key = `${p.repo}#${p.number}`;
+              const busy = requeuing.has(`github:${p.repo}#${p.number}`);
+              return (
+                <li key={key} style={s.parkedItem}>
+                  <div style={s.parkedMain}>
+                    <a href={p.url} target="_blank" rel="noreferrer" style={s.queueLink}>
+                      <span style={s.queueNum}>
+                        {shortRepo(p.repo)}#{p.number}
+                      </span>{' '}
+                      {p.title}
+                    </a>
+                    <Badge tone={p.label === 'ralph-parked' ? 'danger' : 'warning'}>
+                      {p.label}
+                    </Badge>
+                  </div>
+                  <p style={s.parkedReason}>{p.reason ?? p.hint ?? 'no reason recorded'}</p>
+                  {p.label === 'ralph-parked' ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={busy}
+                      onClick={() => handleRequeue(p.repo, p.number)}
+                    >
+                      {busy ? 're-queuing…' : 're-queue'}
+                    </Button>
+                  ) : (
+                    p.hint && <span style={s.quiet}>{p.hint}</span>
+                  )}
+                </li>
+              );
+            })}
+            {data.parked.length === 0 && <li style={s.quiet}>nothing parked</li>}
+          </ol>
+          {data.parked.length > PARKED_SHOWN && (
+            <span style={s.quiet}>+{data.parked.length - PARKED_SHOWN} more parked</span>
+          )}
+
+          <span style={s.label}>Open Ralph PRs</span>
+          <ol style={s.queue}>
+            {data.prs.slice(0, PRS_SHOWN).map((pr) => (
+              <li key={`${pr.repo}#${pr.number}`} style={s.queueItem}>
+                <a href={pr.url} target="_blank" rel="noreferrer" style={s.queueLink}>
+                  <span style={s.queueNum}>
+                    {shortRepo(pr.repo)}#{pr.number}
+                  </span>{' '}
+                  {pr.title}
+                </a>
+                {pr.wedged && (
+                  <Badge tone="danger" title={pr.wedgeReason ?? 'wedged'}>
+                    wedged
+                  </Badge>
+                )}
+              </li>
+            ))}
+            {data.prs.length === 0 && <li style={s.quiet}>no open Ralph PRs</li>}
+          </ol>
+          {data.prs.length > PRS_SHOWN && (
+            <span style={s.quiet}>+{data.prs.length - PRS_SHOWN} more open</span>
+          )}
         </div>
       )}
     </section>
   );
+}
+
+/** Names the failure so a re-queue click never fails silently (CLAUDE.md fail-loud convention). */
+function requeueErrorMessage(body: unknown): string {
+  const error =
+    body && typeof body === 'object' && 'error' in body && typeof body.error === 'string'
+      ? body.error
+      : null;
+  return error ? `Re-queue failed: ${error}` : 'Re-queue failed — check the repo’s issue directly.';
 }
 
 const s = {
@@ -216,5 +341,20 @@ const s = {
     fontFamily: hds.monoFamily,
     color: 'var(--semantic-color-content-secondary)',
     fontVariantNumeric: 'tabular-nums',
+  },
+  parkedItem: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: hds.space.px4,
+    padding: `${hds.space.px8} 0`,
+    borderTop:
+      '1px solid var(--semantic-color-border-subtle, var(--semantic-color-border-default))',
+  },
+  parkedMain: { display: 'flex', alignItems: 'center', gap: hds.space.px8, minWidth: 0 },
+  parkedReason: {
+    margin: 0,
+    ...hds.typeStyles.ui,
+    fontSize: hds.fontSize.xs,
+    color: 'var(--semantic-color-content-secondary)',
   },
 } satisfies Record<string, CSSProperties>;
