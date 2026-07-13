@@ -14,7 +14,8 @@
     "src/app/pages/ops/ClientsIndexPage.tsx": 41,
     "src/app/pages/ops/Disclosure.tsx": 8,
     "src/app/pages/ops/PageHeader.tsx": 8,
-    "src/app/pages/ops/agentic-os/AgenticOSPage.tsx": 29,
+    "src/app/pages/ops/agentic-os/AgenticOSPage.tsx": 31,
+    "src/app/pages/ops/agentic-os/ClientFeedbackPanel.tsx": 10,
     "src/app/pages/ops/agentic-os/FleetTimeline.tsx": 19,
     "src/app/pages/ops/agentic-os/PluginsBar.tsx": 19,
     "src/app/pages/ops/agentic-os/ResearchBar.tsx": 31,
@@ -39,6 +40,6 @@
     "src/app/pages/portal/ClientPortalPage.tsx": 54,
     "src/app/routes.tsx": 25
   },
-  "updatedAt": "2026-07-13T00:57:34.010Z",
-  "sha": "da2c080"
+  "updatedAt": "2026-07-13T04:47:18.152Z",
+  "sha": "382ff4f"
 }

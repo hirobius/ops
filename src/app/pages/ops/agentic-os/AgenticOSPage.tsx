@@ -32,6 +32,7 @@ import ClientsTab from '../atlas/clients-tab';
 import ValidatorsTab from '../atlas/validators-tab';
 import { RunsPanel } from './RunsPanel';
 import { FleetTimeline } from './FleetTimeline';
+import { ClientFeedbackPanel } from './ClientFeedbackPanel';
 import { SurfacesRail } from './SurfacesRail';
 import { SkillsBar } from './SkillsBar';
 import { SkillCreatorForm } from './SkillCreatorForm';
@@ -50,6 +51,10 @@ export default function AgenticOSPage() {
 
         <Section label="Fleet" hint="run-log + events + alerts, merged — newest 20">
           <FleetTimeline />
+        </Section>
+
+        <Section label="Client feedback" hint="portal change requests — newest 15">
+          <ClientFeedbackPanel />
         </Section>
 
         <Section label="Runs" hint="autonomous run recap — newest 15">

@@ -379,21 +379,33 @@ function FeedbackSection({ slug }: FeedbackSectionProps) {
     e.preventDefault();
     if (!text.trim()) return;
     setState('submitting');
-    // Stub endpoint: log to console in dev so Adrian can capture feedback
-    // during preview sessions. Production will swap this for a real POST
-    // when there's a server-side intake (out of scope for this unit).
+    // Real intake: POST to /api/portal-verify (action:'feedback'), which
+    // persists to the client_feedback store (migration 0012) under the portal
+    // session cookie the token exchange set. Read back on /ops.
     try {
-      // Intentional console.log: this IS the persistence layer for now.
-      console.log('[client-portal:feedback]', {
-        slug,
-        body: text,
-        submittedAt: new Date().toISOString(),
+      const res = await fetch('/api/portal-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, action: 'feedback', message: text }),
       });
-      // Yield to the next tick so the UI feels reactive on instant submits.
-      await new Promise((r) => setTimeout(r, 200));
+      if (!res.ok) throw new Error(`feedback POST → ${res.status}`);
       setState('sent');
       setText('');
-    } catch {
+    } catch (err) {
+      // Dev has no /api routes (and DEV_BYPASS means no portal cookie) — keep
+      // the old console.log demo behavior there so preview sessions still feel
+      // complete; production surfaces the failure.
+      if (import.meta.env.DEV) {
+        console.log('[client-portal:feedback:dev-fallback]', {
+          slug,
+          body: text,
+          submittedAt: new Date().toISOString(),
+          err,
+        });
+        setState('sent');
+        setText('');
+        return;
+      }
       setState('error');
     }
   }
