@@ -1,3 +1,19 @@
+/**
+ * src/app/pages/ops/useServicesStatus.ts — polls local dev-tooling process
+ * status (HDS Bridge, Discord bot) for the ServicesBar start/stop widget.
+ *
+ * `/api/services/status` is served ONLY by the Vite dev server
+ * (`scripts/service-manager-middleware.mjs`) — there is no matching
+ * `api/services/status.ts` Vercel function. In production every poll 404s;
+ * the catch block below swallows that and keeps the last known state
+ * (`loading` forever, since it never got a first success), which is the
+ * intended behavior — ServicesBar is dev-only chrome, not a prod feature,
+ * and this hook must fail silent rather than surface a permanent error.
+ *
+ * `pid`/`startedAt` come from the middleware shelling out to `pgrep`/`ps`,
+ * so they reflect the real OS process — including one started outside the
+ * service manager (see `docs/superpowers/plans/2026-05-07-services-bar-process-info.md`).
+ */
 import { useState, useEffect } from 'react';
 
 export type ServiceName   = 'hds-bridge' | 'discord-bot';
@@ -17,6 +33,11 @@ function initialState(): Record<ServiceName, ServiceState> {
   ) as Record<ServiceName, ServiceState>;
 }
 
+/**
+ * Polls `/api/services/status` every 2s and returns the latest known state
+ * per service. Network/404 errors are swallowed (see module doc) — the
+ * hook never throws and never surfaces an error state to the caller.
+ */
 export function useServicesStatus(): Record<ServiceName, ServiceState> {
   const [state, setState] = useState<Record<ServiceName, ServiceState>>(initialState);
 
