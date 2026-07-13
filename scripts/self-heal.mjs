@@ -34,7 +34,6 @@ const DEFAULT_SMOKE_PATHS = [
   '/ops/sessions',
   '/ops/kanban',
   '/ops/clients',
-  '/admin/approvals',
 ];
 
 const BOILERPLATE_PATTERNS = [
@@ -88,14 +87,16 @@ function parseArgs(argv) {
 
 function resolveSmokePaths(cliPaths) {
   const envPaths = process.env.HEAL_TARGET_PATHS
-    ? process.env.HEAL_TARGET_PATHS.split(',').map((value) => value.trim()).filter(Boolean)
+    ? process.env.HEAL_TARGET_PATHS.split(',')
+        .map((value) => value.trim())
+        .filter(Boolean)
     : process.env.HEAL_TARGET_PATH
       ? [process.env.HEAL_TARGET_PATH.trim()].filter(Boolean)
       : [];
 
   const paths = [...cliPaths, ...envPaths];
   return (paths.length > 0 ? paths : DEFAULT_SMOKE_PATHS)
-    .map((path) => path.startsWith('/') ? path : `/${path}`)
+    .map((path) => (path.startsWith('/') ? path : `/${path}`))
     .filter((path, index, collection) => collection.indexOf(path) === index);
 }
 
@@ -180,7 +181,9 @@ async function serializeConsoleArg(handle) {
 }
 
 async function formatConsoleError(message, path) {
-  const serializedArgs = (await Promise.all(message.args().map(serializeConsoleArg))).filter(Boolean);
+  const serializedArgs = (await Promise.all(message.args().map(serializeConsoleArg))).filter(
+    Boolean,
+  );
   const location = message.location();
   const locationText = location.url
     ? `${location.url}:${location.lineNumber ?? 0}:${location.columnNumber ?? 0}`
@@ -219,14 +222,17 @@ async function detectWhiteScreen(page) {
       const style = window.getComputedStyle(element);
       const rect = element.getBoundingClientRect();
 
-      return style.display !== 'none'
-        && style.visibility !== 'hidden'
-        && rect.width > 0
-        && rect.height > 0
-        && element.innerText.trim().length > 0;
+      return (
+        style.display !== 'none' &&
+        style.visibility !== 'hidden' &&
+        rect.width > 0 &&
+        rect.height > 0 &&
+        element.innerText.trim().length > 0
+      );
     });
     const mediaContent = Boolean((root ?? body).querySelector('img,svg,canvas,video'));
-    const empty = bodyText.length === 0 && rootText.length === 0 && !visibleContent && !mediaContent;
+    const empty =
+      bodyText.length === 0 && rootText.length === 0 && !visibleContent && !mediaContent;
 
     return {
       empty,
@@ -265,11 +271,13 @@ async function smokeTest(paths) {
       const consoleTasks = [];
 
       page.on('pageerror', (error) => {
-        pageErrors.push([
-          `Page error on ${path}`,
-          '',
-          cleanOutput(error?.stack ?? error?.message ?? String(error)),
-        ].join('\n'));
+        pageErrors.push(
+          [
+            `Page error on ${path}`,
+            '',
+            cleanOutput(error?.stack ?? error?.message ?? String(error)),
+          ].join('\n'),
+        );
       });
 
       page.on('console', (message) => {
@@ -296,17 +304,19 @@ async function smokeTest(paths) {
         const details = [
           ...pageErrors,
           ...consoleErrors,
-          ...(whiteScreen.empty ? [
-            [
-              `White Screen detected on ${path}`,
-              '',
-              `Reason: ${whiteScreen.reason}`,
-              `Body children: ${whiteScreen.bodyChildren}`,
-              `Root children: ${whiteScreen.rootChildren}`,
-              `Body text: ${whiteScreen.bodyText || '(empty)'}`,
-              `Root text: ${whiteScreen.rootText || '(empty)'}`,
-            ].join('\n'),
-          ] : []),
+          ...(whiteScreen.empty
+            ? [
+                [
+                  `White Screen detected on ${path}`,
+                  '',
+                  `Reason: ${whiteScreen.reason}`,
+                  `Body children: ${whiteScreen.bodyChildren}`,
+                  `Root children: ${whiteScreen.rootChildren}`,
+                  `Body text: ${whiteScreen.bodyText || '(empty)'}`,
+                  `Root text: ${whiteScreen.rootText || '(empty)'}`,
+                ].join('\n'),
+              ]
+            : []),
         ].join('\n\n');
 
         failures.push({ path, details });
@@ -322,10 +332,14 @@ async function smokeTest(paths) {
       command: `smokeTest(${paths.join(', ')})`,
       ok: failures.length === 0,
       stdout: '',
-      stderr: cleanOutput([
-        failures.map((failure) => `### ${failure.path}\n\n${failure.details}`).join('\n\n'),
-        cleanOutput(serverStderr),
-      ].filter(Boolean).join('\n\n')),
+      stderr: cleanOutput(
+        [
+          failures.map((failure) => `### ${failure.path}\n\n${failure.details}`).join('\n\n'),
+          cleanOutput(serverStderr),
+        ]
+          .filter(Boolean)
+          .join('\n\n'),
+      ),
       serverStdout: cleanOutput(serverStdout),
     };
   } finally {
@@ -334,8 +348,10 @@ async function smokeTest(paths) {
 }
 
 function formatFailureSection(result) {
-  const details = result.details
-    ?? ([result.stdout, result.stderr].filter(Boolean).join('\n\n').trim() || 'No diagnostic output captured.');
+  const details =
+    result.details ??
+    ([result.stdout, result.stderr].filter(Boolean).join('\n\n').trim() ||
+      'No diagnostic output captured.');
 
   return [
     `#### ${result.name}`,
@@ -354,19 +370,23 @@ async function main() {
   const results = options.smoke
     ? [await smokeTest(paths)]
     : await STATIC_CHECKS.reduce(async (promise, check) => {
-      const collected = await promise;
-      const result = await runCheck(check);
-      return [...collected, result];
-    }, Promise.resolve([]));
+        const collected = await promise;
+        const result = await runCheck(check);
+        return [...collected, result];
+      }, Promise.resolve([]));
   const failures = results.filter((result) => !result.ok);
 
   if (failures.length === 0) {
     if (options.smoke) {
-      console.log(`Self-heal smoke passed: runtime render checks are green for ${paths.join(', ')}.`);
+      console.log(
+        `Self-heal smoke passed: runtime render checks are green for ${paths.join(', ')}.`,
+      );
       return;
     }
 
-    console.log('Self-heal checks passed: typecheck, token/layout audit, accessibility gates, and layout integrity are green.');
+    console.log(
+      'Self-heal checks passed: typecheck, token/layout audit, accessibility gates, and layout integrity are green.',
+    );
     return;
   }
 

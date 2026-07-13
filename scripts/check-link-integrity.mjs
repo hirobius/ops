@@ -66,21 +66,14 @@ function runDocRefsCheck() {
   ];
 
   // In fixture mode, scan only the provided fixture file (using relative path from ROOT)
-  const DOC_FILES = isFixtureMode && fixtureFile
-    ? [relative(ROOT, resolve(fixtureFile))]
-    : DOC_FILES_BASE;
+  const DOC_FILES =
+    isFixtureMode && fixtureFile ? [relative(ROOT, resolve(fixtureFile))] : DOC_FILES_BASE;
 
   const FILEISH_EXT = /\.(md|tsx?|mjs|cjs|json|css|html|ya?ml|toml)$/i;
   const BACKTICK_RE = /`([^`\n]+)`/g;
   const QUOTED_PATH_RE = /['"]([^'"\n]+?\.(?:md|tsx?|mjs|cjs|json|css|html|ya?ml|toml))['"]/gi;
 
-  const SKIP_EXACT = new Set([
-    'main',
-    'MIT',
-    'CC BY 4.0',
-    'Light/Dark',
-    'W3C DTCG 2025.10',
-  ]);
+  const SKIP_EXACT = new Set(['main', 'MIT', 'CC BY 4.0', 'Light/Dark', 'W3C DTCG 2025.10']);
 
   function looksLikeLocalFileRef(token) {
     if (FILEISH_EXT.test(token) && token.includes('/')) return true;
@@ -107,7 +100,13 @@ function runDocRefsCheck() {
     if (token.startsWith('~/')) return true;
     if (token.startsWith('http://') || token.startsWith('https://')) return true;
     if (token.startsWith('/')) return true;
-    if (token.startsWith('pnpm ') || token.startsWith('git ') || token.startsWith('node ') || token.startsWith('npx ')) return true;
+    if (
+      token.startsWith('pnpm ') ||
+      token.startsWith('git ') ||
+      token.startsWith('node ') ||
+      token.startsWith('npx ')
+    )
+      return true;
     if (token.startsWith('<!--')) return true;
     if (token.includes('://')) return true;
     if (token.includes('*')) return true;
@@ -119,7 +118,7 @@ function runDocRefsCheck() {
   }
 
   function resolveCandidate(raw, filePath) {
-    const trimmed = raw.trim().replace(/^[./]+(?=[^/])/, match => match);
+    const trimmed = raw.trim().replace(/^[./]+(?=[^/])/, (match) => match);
     if (isAbsolute(trimmed)) return normalize(trimmed);
     return normalize(join(dirname(filePath), trimmed));
   }
@@ -155,12 +154,18 @@ function runDocRefsCheck() {
   }
 
   if (violations.length === 0) {
-    console.log('\n✓ check-link-integrity [doc-refs] — active docs point at existing local files.\n');
+    console.log(
+      '\n✓ check-link-integrity [doc-refs] — active docs point at existing local files.\n',
+    );
     return true;
   }
 
-  console.error(`\n✗ check-link-integrity [doc-refs] — ${violations.length} missing local reference(s).\n`);
-  console.error('  Fix the path, trim the stale reference, or add <!-- doc-ref-ok: reason --> on the line.\n');
+  console.error(
+    `\n✗ check-link-integrity [doc-refs] — ${violations.length} missing local reference(s).\n`,
+  );
+  console.error(
+    '  Fix the path, trim the stale reference, or add <!-- doc-ref-ok: reason --> on the line.\n',
+  );
   for (const violation of violations) {
     console.error(`  ${violation.file}:${violation.line}`);
     console.error(`    missing: ${violation.ref}`);
@@ -241,8 +246,15 @@ async function runExternalLinksCheck() {
         }
       });
 
-      req.on('error', (e) => { clearTimeout(timeout); resolve({ status: 0, error: e.message }); });
-      req.on('timeout', () => { req.destroy(); clearTimeout(timeout); resolve({ status: 0, error: `Timeout after ${TIMEOUT_MS}ms` }); });
+      req.on('error', (e) => {
+        clearTimeout(timeout);
+        resolve({ status: 0, error: e.message });
+      });
+      req.on('timeout', () => {
+        req.destroy();
+        clearTimeout(timeout);
+        resolve({ status: 0, error: `Timeout after ${TIMEOUT_MS}ms` });
+      });
       req.end();
     });
   }
@@ -286,7 +298,9 @@ async function runExternalLinksCheck() {
     console.log('\n✓ check-link-integrity [external] — all external links healthy.\n');
     return true;
   }
-  console.error(`\n✗ check-link-integrity [external] — ${failures.length} broken external link(s).\n`);
+  console.error(
+    `\n✗ check-link-integrity [external] — ${failures.length} broken external link(s).\n`,
+  );
   return false;
 }
 
@@ -350,24 +364,18 @@ function runRouteLinksCheck() {
     '/ops/atlas',
     '/ops/build',
     '/ops/sessions',
-    '/admin/approvals',
   ]);
 
   // HDS doc routes moved from /hds/* to /ops/hds/* (commit 3bf17b5b, 2026-05-10).
   // Defined under routes.tsx children of 'ops' (lines 297-366) with a wildcard
   // fallback redirecting unknown /ops/hds/* paths to /ops/hds/color.
-  const PREFIX_ROUTES = [
-    '/portfolio/',
-    '/ops/clients/',
-    '/ops/hds/',
-    '/admin/approvals/',
-  ];
+  const PREFIX_ROUTES = ['/portfolio/', '/ops/clients/', '/ops/hds/'];
 
   const ROUTE_RE = /(?:href|to)\s*=\s*["'](\/[^"'#?]*)["']/g;
 
   function isAllowedRoute(route) {
     if (EXACT_ROUTES.has(route)) return true;
-    return PREFIX_ROUTES.some(prefix => route.startsWith(prefix));
+    return PREFIX_ROUTES.some((prefix) => route.startsWith(prefix));
   }
 
   const violations = [];
@@ -406,12 +414,18 @@ function runRouteLinksCheck() {
   }
 
   if (violations.length === 0) {
-    console.log('\n✓ check-link-integrity [route-links] — internal route targets resolve to known app routes.\n');
+    console.log(
+      '\n✓ check-link-integrity [route-links] — internal route targets resolve to known app routes.\n',
+    );
     return true;
   }
 
-  console.error(`\n✗ check-link-integrity [route-links] — ${violations.length} invalid internal route reference(s).\n`);
-  console.error('  Fix the route, add the missing route definition, or add // route-ok: reason on the line.\n');
+  console.error(
+    `\n✗ check-link-integrity [route-links] — ${violations.length} invalid internal route reference(s).\n`,
+  );
+  console.error(
+    '  Fix the route, add the missing route definition, or add // route-ok: reason on the line.\n',
+  );
   for (const violation of violations) {
     console.error(`  ${violation.file}:${violation.line}`);
     console.error(`    invalid route: ${violation.route}`);
