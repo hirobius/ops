@@ -18,6 +18,7 @@ import {
   priorityChip,
   cardLabelTags,
   ralphDispatchErrorMessage,
+  describeTaskActionOutcome,
   type GroupBy,
 } from './taskMeta';
 import type { Task } from './types';
@@ -350,5 +351,34 @@ describe('ralphDispatchErrorMessage — "Run Ralph" toast text (ops#113)', () =>
     expect(ralphDispatchErrorMessage(null)).toContain('Run Ralph failed');
     expect(ralphDispatchErrorMessage(undefined)).toContain('Run Ralph failed');
     expect(ralphDispatchErrorMessage({})).toContain('Run Ralph failed');
+  });
+});
+
+describe('describeTaskActionOutcome — board-wide inline feedback text (ops#108)', () => {
+  it('reports a successful action in past tense', () => {
+    expect(describeTaskActionOutcome('trash', { ok: true, body: null })).toEqual({
+      text: 'Trashed.',
+      tone: 'success',
+    });
+    expect(describeTaskActionOutcome('dispatch', { ok: true, body: null })).toEqual({
+      text: 'Dispatched.',
+      tone: 'success',
+    });
+  });
+  it('surfaces the server-provided error string, named after the action', () => {
+    expect(
+      describeTaskActionOutcome('trash', { ok: false, body: { error: 'row is locked' } }),
+    ).toEqual({ text: 'Trashed failed: row is locked', tone: 'danger' });
+  });
+  it('falls back to a generic message for a body with no error string (e.g. a network failure)', () => {
+    expect(describeTaskActionOutcome('done', { ok: false, body: null }).text).toContain(
+      'Marked done failed',
+    );
+    expect(describeTaskActionOutcome('done', { ok: false, body: undefined }).tone).toBe('danger');
+  });
+  it('falls back to a generic action label for an action with no mapped past tense', () => {
+    // TypeScript would normally prevent an unmapped action; guard the runtime fallback anyway.
+    const unmapped = 'unmapped_action' as unknown as Parameters<typeof describeTaskActionOutcome>[0];
+    expect(describeTaskActionOutcome(unmapped, { ok: true, body: null }).text).toBe('Action.');
   });
 });

@@ -35,6 +35,7 @@ import {
   dueToneNow,
   relTimeNow,
   ralphDispatchErrorMessage,
+  describeTaskActionOutcome,
 } from './taskMeta';
 import { TaskActionsMenu } from './TaskActionsMenu';
 
@@ -118,6 +119,14 @@ export function TaskRow({
     }
   }
 
+  /** The row's one primary action (Dispatch/Re-dispatch or Reopen) reports its outcome — no silent failure (ops#108). */
+  async function handlePrimaryAction() {
+    const action: TaskAction = t.status === 'done' ? 'reopen' : 'dispatch';
+    const result = await onAction(t.key, action);
+    const { text, tone } = describeTaskActionOutcome(action, result);
+    onNotify(text, tone);
+  }
+
   // Quiet footer line: provenance + routing facts + freshness, deliberately low
   // contrast so it never competes with the title or the decision chips.
   const metaParts = [t.source];
@@ -191,7 +200,7 @@ export function TaskRow({
             size="sm"
             variant="secondary"
             disabled={busy}
-            onClick={() => onAction(t.key, 'reopen')}
+            onClick={() => void handlePrimaryAction()}
           >
             {busy ? '…' : 'Reopen'}
           </Button>
@@ -200,7 +209,7 @@ export function TaskRow({
             size="sm"
             variant="primary"
             disabled={busy}
-            onClick={() => onAction(t.key, 'dispatch')}
+            onClick={() => void handlePrimaryAction()}
             title={
               dispatched
                 ? 'Re-ping @claude on the linked issue'
@@ -225,7 +234,7 @@ export function TaskRow({
                 : 'Run Ralph'}
           </Button>
         )}
-        <TaskActionsMenu task={t} busy={busy} onAction={onAction} />
+        <TaskActionsMenu task={t} busy={busy} onAction={onAction} onNotify={onNotify} />
       </Card.Footer>
     </Card>
   );

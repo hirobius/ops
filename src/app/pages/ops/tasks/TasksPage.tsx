@@ -248,21 +248,22 @@ export default function TasksPage() {
           </section>
         ))}
 
-      {toasts.length > 0 && (
-        <div style={s.toastStack} role="status" aria-live="polite">
-          {toasts.map((toast) => (
-            <button
-              key={toast.id}
-              type="button"
-              style={toast.tone === 'danger' ? s.toastDanger : s.toastSuccess}
-              onClick={() => dismiss(toast.id)}
-              title="Dismiss"
-            >
-              {toast.text}
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Present from initial render (not gated on toasts.length) so a screen
+          reader has already registered the live region before the first
+          action announcement lands in it (ops#108). */}
+      <div style={s.toastStack} role="status" aria-live="polite">
+        {toasts.map((toast) => (
+          <button
+            key={toast.id}
+            type="button"
+            style={toast.tone === 'danger' ? s.toastDanger : s.toastSuccess}
+            onClick={() => dismiss(toast.id)}
+            title="Dismiss"
+          >
+            {toast.text}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

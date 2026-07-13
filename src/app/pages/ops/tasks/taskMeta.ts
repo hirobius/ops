@@ -7,7 +7,7 @@
  * inside.
  */
 
-import type { Task } from './types';
+import type { Task, TaskAction, TaskActionResult } from './types';
 
 export type GroupBy = 'lane' | 'priority' | 'due' | 'status';
 export type ChipTone = 'success' | 'neutral' | 'warning' | 'danger';
@@ -325,6 +325,62 @@ export function ralphDispatchErrorMessage(body: unknown): string {
     return (body as { error: string }).error;
   }
   return 'Run Ralph failed — could not reach the server. Check your connection and try again.';
+}
+
+// Past-tense, human-readable label per action — the board's inline feedback
+// toasts and aria-live announcements are built from these (ops#108).
+const ACTION_PAST_TENSE: Record<TaskAction, string> = {
+  done: 'Marked done',
+  reopen: 'Reopened',
+  claim: 'Claimed',
+  unclaim: 'Unclaimed',
+  trash: 'Trashed',
+  restore: 'Restored',
+  dispatch: 'Dispatched',
+  auto_on: 'Auto-dispatch turned on',
+  auto_off: 'Auto-dispatch turned off',
+  queue: 'Queued for approval',
+  unqueue: 'Removed from approvals queue',
+  ralph_ready_on: 'Ralph-ready turned on',
+  ralph_ready_off: 'Ralph-ready turned off',
+  ralph_approve: 'Merge approved',
+  ralph_dispatch: 'Ralph dispatched',
+  ralph_requeue: 'Re-queued',
+  ralph_auto_on: 'Auto-merge turned on',
+  ralph_auto_off: 'Auto-merge turned off',
+  set_priority: 'Priority updated',
+};
+
+/**
+ * Turns a failed `POST /api/task-action` body into toast text, named after the
+ * action that failed. Mirrors `ralphDispatchErrorMessage`'s body-shape check
+ * (`applyTaskAction` always answers an error with `{ error: string, code? }`)
+ * but is action-agnostic, for actions other than "Run Ralph".
+ */
+function taskActionErrorMessage(body: unknown, label: string): string {
+  const error =
+    body && typeof body === 'object' && typeof (body as { error?: unknown }).error === 'string'
+      ? (body as { error: string }).error
+      : null;
+  return error
+    ? `${label} failed: ${error}`
+    : `${label} failed — could not reach the server. Check your connection and try again.`;
+}
+
+/**
+ * Turns an `act()` result into the toast text + tone for the board's inline
+ * feedback (ops#108: no action fails/succeeds silently). Every row/menu
+ * action funnels through this one seam so the message wording stays
+ * consistent and is unit-tested independently of the components that render it.
+ */
+export function describeTaskActionOutcome(
+  action: TaskAction,
+  result: TaskActionResult,
+): { text: string; tone: 'success' | 'danger' } {
+  const label = ACTION_PAST_TENSE[action] ?? 'Action';
+  return result.ok
+    ? { text: `${label}.`, tone: 'success' }
+    : { text: taskActionErrorMessage(result.body, label), tone: 'danger' };
 }
 
 /** Render-time "x ago" freshness stamp (same idiom as the page's other formatters). */
