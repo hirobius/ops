@@ -606,3 +606,39 @@ this issue reopened the orphan-sweeper slice specifically)
   it showed the entire digest feature being deleted, an artifact of the
   branch predating it, not an intentional change). Did not reuse or merge
   that branch; re-implemented fresh against current main instead.
+
+#157 — retire pre-Ralph dispatch-era controls
+- One logical change: removed the Auto-dispatch on/off menu item, the whole
+  /admin/approvals inbox surface (queue/unqueue menu item + task-action +
+  Approvals.tsx/ApprovalDetail.tsx/useApprovalsInbox.ts + routes + the
+  board's "N awaiting approval" link + SurfacesRail's queued-count badge),
+  and demoted "Mark done" off github:*-tracked rows (the importer reverts
+  board-done on the next sync; closing the issue is the real gesture).
+- Decision: kept auto_on/auto_off actions in lib/tasks/actions.mjs per the
+  issue's explicit instruction (scripts/fleet-dispatch.mjs still reads
+  auto_ok) — UI-only removal for that one. Removed queue/unqueue entirely
+  (task-action + TaskAction type) since nothing calls it once the UI +
+  inbox are gone — no equivalent "keep" instruction in the issue for those.
+- Decision: left approval-card.tsx in place, now consumerless — the issue's
+  overlap note points that cleanup at ops#140, don't duplicate.
+- Files: TaskActionsMenu.tsx, TasksPage.tsx, SurfacesRail.tsx,
+  AgenticOSPage.tsx, routes.tsx, lib/tasks/actions.mjs, types.ts,
+  api/task-action.ts, approval-card.tsx (comment only) — deleted
+  Approvals.tsx/ApprovalDetail.tsx/useApprovalsInbox.ts. Docs/config kept in
+  lockstep: tests/layout-integrity.spec.ts, scripts/self-heal.mjs,
+  scripts/check-link-integrity.mjs, knip.config.ts, DOM-node budget baseline
+  (regenerated via --update), docs/ARCHITECTURE.md,
+  docs/pipeline-walkthrough.html, README.md, docs/ai/HANDOFF.md,
+  status.json.
+- Prior context: an earlier (non-Ralph) @claude dispatch on this issue had
+  drafted an implementation on claude/issue-157-20260712-1845, but never
+  opened a PR/ran the gate, and had drifted stale against main (diffing it
+  showed unrelated digest/mcp/etc. features being reverted — a branch-age
+  artifact, same class as ops#141's stale-branch note). Did not reuse; grep
+  the live repo state and re-implemented fresh instead.
+- Verified: pnpm typecheck, pnpm test (653/653), pnpm lint, pnpm test:layout
+  (14/14 — correctly down from 16 with the two /admin/approvals routes
+  gone; installed Playwright chromium in-sandbox), bash ralph/gate.sh — all
+  green. Grep-verified zero dangling references to the removed surfaces.
+- Branch: ralph/issue-157-retire-dispatch-era-controls. PR #198 opened
+  (Closes #157). Issue commented.
