@@ -9,10 +9,11 @@
  *
  * Quick shortcuts (! prefix):
  *   !help    — list shortcuts
- *   !status  — BACKLOG.md summary embed (fast, no AI)
- *   !backlog [filter] — backlog digest; filter by category or status
+ *   !status  — live GitHub Issues + fleet deploy-health summary (fast, no AI)
+ *   !backlog [filter] — task digest; filter by repo (fuzzy) or category
+ *                       (ready/blocked/needs-adrian/needs-human/backlog/parked/done)
  *   !next / !today — AI picks top 1-3 ready items for today + reasoning
- *   !recent [days] — BACKLOG.md changes from git log (default 7d)
+ *   !recent [days] — tasks with GitHub-Issues activity in the window (default 7d)
  *   !shell <cmd> — raw shell passthrough
  *   !log [n] — tail cron log
  *   !provider [name] — show or set AI provider for this channel
@@ -26,6 +27,14 @@
  *   DISCORD_BOT_TOKEN=<bot token from Discord Dev Portal>
  *   DISCORD_OWNER_ID=<your Discord user ID (right-click → Copy User ID)>
  *   DISCORD_GUILD_ID=<your server ID (optional — limits to one server)>
+ *
+ * Live ops hub — !status / !recent / !backlog read GitHub Issues + fleet
+ * deploy status through the deployed /ops hub's gated API (ops#30; BACKLOG.md,
+ * the old data source, was retired 2026-07-06):
+ *   OPS_HUB_URL=https://<your-ops-deployment>.vercel.app   ← no trailing slash
+ *   OPS_AGENT_KEY=<same machine-auth token as the hub's OPS_AGENT_KEY>
+ *     Set OPS_AGENT_KEY in Vercel first, then copy the same value here:
+ *     https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables
  *
  * AI provider — Ollama is the local-first default (machine has to be
  * running for /ops/kanban + Hermes anyway; cloud calls cost money). Override
@@ -55,6 +64,12 @@ import { execSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import {
+  taskCategories,
+  formatStatusDigest,
+  formatRecentDigest,
+  formatLaneDigest,
+} from '../lib/discord/tasks-digest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -80,7 +95,8 @@ const OLLAMA_MODEL    = process.env.OLLAMA_MODEL || 'hermes3';
 // cloud provider when its key is configured. In-channel `!provider <name>`
 // overrides the default per-channel/thread.
 const BOT_PROVIDER_DEFAULT = (process.env.DISCORD_BOT_PROVIDER || 'ollama').toLowerCase();
-const BACKLOG_PATH    = path.join(ROOT, 'BACKLOG.md');
+const OPS_HUB_URL     = (process.env.OPS_HUB_URL || '').replace(/\/+$/, '');
+const OPS_AGENT_KEY   = process.env.OPS_AGENT_KEY;
 // Default client for the auto-assigner when a non-! message has no [slug]
 // prefix. Override via env when the bot lives in a multi-client server.
 const DEFAULT_CLIENT  = process.env.DISCORD_DEFAULT_CLIENT || 'lilac-insure';
@@ -197,60 +213,59 @@ function shell(cmd, timeoutMs = 30_000) {
   }).trim();
 }
 
-// ── BACKLOG.md parsing ────────────────────────────────────────────────────────
-// Parses the single source of truth at /BACKLOG.md. Format per item:
-//   - `status` **id** — title
-// Sections delimited by `## Category Name _(N)_` headers.
+// ── Ops hub client (GitHub Issues + fleet status, ops#30) ─────────────────────
+// !status / !recent / !backlog read the deployed /ops hub's gated API instead
+// of the retired BACKLOG.md — same GitHub-Issues-backed `tasks` table
+// /ops/tasks renders, plus /api/projects for fleet deploy health. Both routes
+// accept OPS_AGENT_KEY as a bearer token (lib/ops-auth.mjs's checkAgentKey),
+// so the bot authenticates the same way any headless agent would.
 
-function parseBacklog() {
-  if (!fs.existsSync(BACKLOG_PATH)) {
-    return { items: [], categories: {}, statuses: {} };
-  }
-  const text = fs.readFileSync(BACKLOG_PATH, 'utf8');
-  const items = [];
-  let currentCategory = 'Uncategorized';
-  for (const line of text.split('\n')) {
-    const sectMatch = line.match(/^##\s+(.+?)(?:\s+_\([0-9]+\)_)?\s*$/);
-    if (sectMatch) {
-      const heading = sectMatch[1].trim();
-      // Skip non-category sections like "Conventions" and "What used to live here"
-      if (/^(Conventions|What used to live here)$/i.test(heading)) {
-        currentCategory = null;
-        continue;
-      }
-      currentCategory = heading;
-      continue;
-    }
-    if (!currentCategory) continue;
-    const itemMatch = line.match(/^-\s+`([^`]+)`\s+\*\*([^*]+)\*\*\s+—\s+(.+?)\s*$/);
-    if (itemMatch) {
-      const [, status, id, title] = itemMatch;
-      items.push({ status: status.trim(), id: id.trim(), title: title.trim(), category: currentCategory });
-    }
-  }
-  const byCategory = {}, byStatus = {};
-  for (const it of items) {
-    (byCategory[it.category] = byCategory[it.category] || []).push(it);
-    byStatus[it.status] = (byStatus[it.status] || 0) + 1;
-  }
-  return { items, categories: byCategory, statuses: byStatus };
+function opsHubSetupHint() {
+  const missing = [];
+  if (!OPS_HUB_URL) missing.push('OPS_HUB_URL');
+  if (!OPS_AGENT_KEY) missing.push('OPS_AGENT_KEY');
+  return (
+    `${missing.join(' and ')} not set in .env.local — !status/!recent/!backlog need both to ` +
+    `reach the live GitHub Issues board. OPS_AGENT_KEY must match the value set in Vercel: ` +
+    `https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables`
+  );
 }
 
-// Tiny fuzzy category resolver for !backlog <name> — accepts partial / case-insensitive
-function resolveCategory(input, categories) {
-  if (!input) return null;
-  const q = input.toLowerCase().trim();
-  return Object.keys(categories).find(c => c.toLowerCase().includes(q)) || null;
+async function fetchOpsHub(urlPath) {
+  if (!OPS_HUB_URL || !OPS_AGENT_KEY) throw new Error(opsHubSetupHint());
+  const res = await fetch(`${OPS_HUB_URL}${urlPath}`, {
+    headers: { Authorization: `Bearer ${OPS_AGENT_KEY}` },
+  });
+  if (res.status === 401 || res.status === 403) {
+    throw new Error(
+      `Ops hub rejected OPS_AGENT_KEY (HTTP ${res.status}) — it's stale, wrong, or the hub's copy ` +
+      `was rotated. Rotate/verify it in Vercel → Settings → Environment Variables (Production), ` +
+      `then update .env.local to match: ` +
+      `https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables`,
+    );
+  }
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Ops hub ${urlPath} returned HTTP ${res.status}${text ? ` — ${text.slice(0, 200)}` : ''}`);
+  }
+  return res.json();
 }
 
-const STATUS_EMOJI = {
-  ready:           '🟢',
-  blocked:         '🔴',
-  parked:          '⚪',
-  'needs-grilling': '🟡',
-  idea:            '💡',
-};
-function statusEmoji(s) { return STATUS_EMOJI[s] || '⬜'; }
+async function fetchTasks() {
+  const data = await fetchOpsHub('/api/tasks?limit=2000');
+  return Array.isArray(data.tasks) ? data.tasks : [];
+}
+
+/** Fleet deploy status is a bonus on `!status` — degrade quietly if it errors. */
+async function fetchProjectsQuiet() {
+  try {
+    const data = await fetchOpsHub('/api/projects');
+    return Array.isArray(data.projects) ? data.projects : [];
+  } catch (e) {
+    console.warn('[bot] !status: /api/projects fetch failed, omitting deploy health:', e.message);
+    return [];
+  }
+}
 
 // ── Client workspace summary ──────────────────────────────────────────────────
 
@@ -641,10 +656,10 @@ async function cmdHelp(channel) {
     'Anything that isn\'t a task falls through to natural-language chat.',
     '',
     '**Quick shortcuts (no API cost):**',
-    '`!status` — BACKLOG.md summary by category + git head',
-    '`!backlog [filter]` — backlog digest. Filter by category (`portfolio`, `concrete`, `hds`…) or status (`ready`, `blocked`, `parked`, `idea`)',
+    '`!status` — live GitHub Issues + fleet deploy health summary + git head',
+    '`!backlog [filter]` — task digest from the live board. Filter by repo (`ops`, `hds`…) or category (`ready`, `blocked`, `needs-adrian`, `needs-human`, `backlog`, `parked`, `done`)',
     '`!next` / `!today` — AI picks top 1-3 ready items focused on portfolio/storefront, with reasoning',
-    '`!recent [days]` — BACKLOG.md changes from git log (default last 7 days)',
+    '`!recent [days]` — task activity from the live board (default last 7 days)',
     '`!agents` — running Hermes processes + memory',
     '`!log hermes [n]` — tail Hermes log',
     '`!shell <cmd>` — raw shell passthrough',
@@ -684,118 +699,25 @@ async function cmdProvider(channel, channelId, args) {
 
 async function cmdStatus(channel, channelId) {
   try {
-    const b = parseBacklog();
+    const [tasks, projects] = await Promise.all([fetchTasks(), fetchProjectsQuiet()]);
     const gitBranch = shell('git rev-parse --abbrev-ref HEAD');
     const gitShort  = shell('git rev-parse --short HEAD');
     const providerLine = channelId ? `_AI provider here: ${describeProvider(pickProvider(channelId))}_` : null;
-
-    const totalOpen = b.items.length;
-    const ready     = b.statuses.ready || 0;
-    const blocked   = b.statuses.blocked || 0;
-    const parked    = b.statuses.parked || 0;
-    const ideas     = b.statuses.idea || 0;
-
-    const lines = [
-      `**Status** — \`${gitBranch}\` @ \`${gitShort}\``,
-      `📋 **${totalOpen}** open items in BACKLOG.md`,
-      `🟢 ready: **${ready}**  🔴 blocked: **${blocked}**  ⚪ parked: **${parked}**  💡 idea: **${ideas}**`,
-    ];
-    if (providerLine) lines.push('', providerLine);
-
-    // Per-category headline + top ready item
-    const cats = Object.entries(b.categories).sort((a, b) => b[1].length - a[1].length);
-    if (cats.length > 0) {
-      lines.push('', '**By category:**');
-      for (const [cat, arr] of cats) {
-        const readyHere = arr.filter(i => i.status === 'ready');
-        const summary = `${arr.length} (${readyHere.length} ready)`;
-        const top = readyHere[0];
-        const topLine = top ? ` — next: \`${top.id}\`` : '';
-        lines.push(`• **${cat}** — ${summary}${topLine}`);
-      }
-    }
-
-    lines.push('', '_Use_ `!backlog <category>` _to drill into a section, or_ `!backlog ready` _for actionable items._');
-    await send(channel, lines.join('\n'));
+    await send(channel, formatStatusDigest({ tasks, projects, gitBranch, gitShort, providerLine }));
   } catch (e) {
-    await send(channel, `Error reading BACKLOG.md: ${e.message}`);
+    await send(channel, `Error reaching ops hub: ${e.message}`);
   }
 }
 
 // ── !backlog [filter] ─────────────────────────────────────────────────────────
-// Filter is optional and can be a category (fuzzy) or a status (ready/blocked/etc.)
+// Filter is optional and can be a repo/lane (fuzzy) or a category
+// (ready/blocked/needs-adrian/needs-human/backlog/parked/done).
 async function cmdBacklog(channel, args) {
   try {
-    const b = parseBacklog();
-    if (b.items.length === 0) {
-      await send(channel, 'BACKLOG.md is empty or unreadable.');
-      return;
-    }
-    const filter = (args || '').trim().toLowerCase();
-    const KNOWN_STATUSES = ['ready', 'blocked', 'parked', 'needs-grilling', 'idea'];
-
-    // No arg → show top 3 ready items per category (actionable digest)
-    if (!filter) {
-      const lines = [`**Backlog digest** — ${b.items.length} open items total`];
-      const cats = Object.entries(b.categories).sort((a, b) => b[1].length - a[1].length);
-      for (const [cat, arr] of cats) {
-        const ready = arr.filter(i => i.status === 'ready');
-        if (ready.length === 0) continue;
-        lines.push('', `**${cat}** (${ready.length} ready)`);
-        for (const it of ready.slice(0, 3)) {
-          lines.push(`${statusEmoji(it.status)} \`${it.id}\` — ${it.title.slice(0, 80)}`);
-        }
-        if (ready.length > 3) lines.push(`_…+${ready.length - 3} more in this category_`);
-      }
-      lines.push('', '_`!backlog blocked` for blocked items · `!backlog <category>` to drill in_');
-      await send(channel, lines.join('\n'));
-      return;
-    }
-
-    // Filter by status if it matches a known one
-    if (KNOWN_STATUSES.includes(filter)) {
-      const matches = b.items.filter(i => i.status === filter);
-      const lines = [`**Backlog: ${matches.length} item(s) with status \`${filter}\`**`];
-      if (matches.length === 0) {
-        lines.push('_None._');
-      } else {
-        // Group by category for readability
-        const byCat = {};
-        matches.forEach(i => (byCat[i.category] = byCat[i.category] || []).push(i));
-        for (const [cat, arr] of Object.entries(byCat)) {
-          lines.push('', `**${cat}** (${arr.length})`);
-          for (const it of arr.slice(0, 8)) {
-            lines.push(`${statusEmoji(it.status)} \`${it.id}\` — ${it.title.slice(0, 80)}`);
-          }
-          if (arr.length > 8) lines.push(`_…+${arr.length - 8} more_`);
-        }
-      }
-      await send(channel, lines.join('\n').slice(0, 1900));
-      return;
-    }
-
-    // Otherwise treat as category name (fuzzy)
-    const cat = resolveCategory(filter, b.categories);
-    if (!cat) {
-      await send(channel,
-        `No category matched \`${filter}\`. Try: ${Object.keys(b.categories).map(c => `\`${c.split(' ')[0].toLowerCase()}\``).join(', ')}\n` +
-        `Or filter by status: \`!backlog ready\` · \`!backlog blocked\` · \`!backlog parked\` · \`!backlog idea\``);
-      return;
-    }
-    const arr = b.categories[cat];
-    const counts = arr.reduce((acc, i) => { acc[i.status] = (acc[i.status] || 0) + 1; return acc; }, {});
-    const countLine = Object.entries(counts).map(([s, n]) => `${statusEmoji(s)} ${s}: ${n}`).join(' · ');
-    const lines = [`**${cat}** (${arr.length} items) — ${countLine}`];
-    // Sort: ready → blocked → needs-grilling → parked → idea
-    const sortOrder = { ready: 0, blocked: 1, 'needs-grilling': 2, parked: 3, idea: 4 };
-    const sorted = [...arr].sort((a, b) => (sortOrder[a.status] ?? 99) - (sortOrder[b.status] ?? 99));
-    for (const it of sorted.slice(0, 15)) {
-      lines.push(`${statusEmoji(it.status)} \`${it.id}\` — ${it.title.slice(0, 80)}`);
-    }
-    if (sorted.length > 15) lines.push(`_…+${sorted.length - 15} more in this category_`);
-    await send(channel, lines.join('\n').slice(0, 1900));
+    const tasks = await fetchTasks();
+    await send(channel, formatLaneDigest(tasks, args).slice(0, 1900));
   } catch (e) {
-    await send(channel, `Error reading BACKLOG.md: ${e.message}`);
+    await send(channel, `Error reaching ops hub: ${e.message}`);
   }
 }
 
@@ -848,10 +770,10 @@ async function askOneShot(channelId, systemPrompt, userMessage) {
 // ── !next — AI-recommended top tasks ──────────────────────────────────────────
 async function cmdNext(channel, channelId) {
   try {
-    const b = parseBacklog();
-    const ready = b.items.filter(i => i.status === 'ready');
+    const tasks = await fetchTasks();
+    const ready = tasks.filter(t => t.status !== 'done' && taskCategories(t).includes('ready'));
     if (ready.length === 0) {
-      await send(channel, 'No `ready` items in BACKLOG.md. Promote some `idea`/`parked` items first.');
+      await send(channel, 'No `ralph-ready` tasks on the board right now.');
       return;
     }
 
@@ -859,7 +781,7 @@ async function cmdNext(channel, channelId) {
     const recentCommits = shell('git log -5 --pretty=format:"%h %s"');
     const today = new Date().toISOString().slice(0, 10);
 
-    const readyList = ready.map(i => `- [${i.category}] \`${i.id}\` — ${i.title}`).join('\n');
+    const readyList = ready.map(i => `- [${i.lane}] \`${i.key}\` — ${i.title}`).join('\n');
 
     const systemPrompt = [
       'You are a focused execution coach for Adrian, a solo design engineer.',
@@ -896,44 +818,14 @@ async function cmdNext(channel, channelId) {
   }
 }
 
-// ── !recent — BACKLOG.md changes in last 7 days ───────────────────────────────
+// ── !recent — task activity from the live GitHub Issues board ────────────────
 async function cmdRecent(channel, args) {
   try {
     const days = parseInt((args || '').trim()) || 7;
-    const since = `${days} days ago`;
-    const log = shell(`git log --since="${since}" --pretty=format:"%h|%ad|%s" --date=short -- BACKLOG.md`);
-    if (!log) {
-      await send(channel, `No BACKLOG.md commits in the last ${days} days.`);
-      return;
-    }
-
-    const commits = log.split('\n').filter(Boolean).map(line => {
-      const [hash, date, ...rest] = line.split('|');
-      return { hash, date, subject: rest.join('|') };
-    });
-
-    // For each commit, get the diff and pull out added / deleted backlog-item lines.
-    const lines = [`**BACKLOG.md changes (last ${days}d)** — ${commits.length} commit(s)`];
-    for (const c of commits.slice(0, 10)) {
-      const diff = shell(`git show --pretty=format: --no-color ${c.hash} -- BACKLOG.md`);
-      const added = diff.split('\n').filter(l => /^\+- `/.test(l)).map(l => l.slice(1));
-      const removed = diff.split('\n').filter(l => /^-- `/.test(l)).map(l => l.slice(1));
-      lines.push('', `\`${c.hash}\` ${c.date} — ${c.subject.slice(0, 70)}`);
-      if (added.length > 0) {
-        lines.push(`  + ${added.length} added:`);
-        for (const a of added.slice(0, 3)) lines.push(`     ${a.slice(0, 90)}`);
-        if (added.length > 3) lines.push(`     …+${added.length - 3} more`);
-      }
-      if (removed.length > 0) {
-        lines.push(`  − ${removed.length} removed (shipped or dropped):`);
-        for (const r of removed.slice(0, 3)) lines.push(`     ${r.slice(0, 90)}`);
-        if (removed.length > 3) lines.push(`     …+${removed.length - 3} more`);
-      }
-    }
-    if (commits.length > 10) lines.push('', `_…+${commits.length - 10} older commits_`);
-    await send(channel, lines.join('\n').slice(0, 1900));
+    const tasks = await fetchTasks();
+    await send(channel, formatRecentDigest(tasks, { days, now: Date.now() }).slice(0, 1900));
   } catch (e) {
-    await send(channel, `Error reading git log: ${e.message}`);
+    await send(channel, `Error reaching ops hub: ${e.message}`);
   }
 }
 
