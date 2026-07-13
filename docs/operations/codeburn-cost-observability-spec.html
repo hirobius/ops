@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>codeburn — cost-observability spec (ops#71)</title>
+<style>
+  :root {
+    --bg: #f5f7f8;
+    --surface: #ffffff;
+    --surface-2: #fafbfc;
+    --ink: #161b22;
+    --muted: #59626f;
+    --faint: #838d9b;
+    --hairline: #e3e8ee;
+    --hairline-strong: #cfd6df;
+    --accent: #0e7c86;
+    --accent-soft: #d7ecee;
+    --chip-bg: #f0f2f5;
+    --chip-ink: #37414f;
+
+    --ok: #17924a; --ok-bg: #e6f5ec;
+    --warn: #b26a06; --warn-bg: #fbefd9;
+    --gap: #cf2f2f; --gap-bg: #fbe6e6;
+    --info: #2560d4; --info-bg: #e6edfb;
+
+    --radius: 12px;
+    --sans: ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #0e131a; --surface: #161d26; --surface-2: #1a222c;
+      --ink: #e7ecf2; --muted: #97a1af; --faint: #6e7987;
+      --hairline: #232d38; --hairline-strong: #313d4a;
+      --accent: #38c7be; --accent-soft: #123539;
+      --chip-bg: #1f2833; --chip-ink: #b9c2ce;
+      --ok: #46c07d; --ok-bg: #12291d;
+      --warn: #e2a13f; --warn-bg: #2c2213;
+      --gap: #ef6f6f; --gap-bg: #2e1717;
+      --info: #6fa0ef; --info-bg: #16223a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--sans); line-height: 1.55;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 40px 24px 96px; }
+  header.top { margin-bottom: 8px; }
+  h1 { font-size: 1.7rem; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 0.95rem; margin: 0 0 20px; }
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.75rem; font-weight: 600; padding: 4px 10px;
+    border-radius: 999px; background: var(--chip-bg); color: var(--chip-ink);
+    border: 1px solid var(--hairline-strong);
+  }
+  .badge.draft { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+  .badge.info { background: var(--info-bg); color: var(--info); border-color: transparent; }
+
+  section { margin: 36px 0; }
+  h2 {
+    font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--faint); margin: 0 0 14px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  h3 { font-size: 1.05rem; margin: 22px 0 8px; }
+  p { margin: 0 0 12px; }
+  ul, ol { margin: 0 0 12px; padding-left: 22px; }
+  li { margin: 4px 0; }
+  code {
+    font-family: var(--mono); font-size: 0.85em; background: var(--chip-bg);
+    padding: 1px 5px; border-radius: 5px; color: var(--chip-ink);
+  }
+  pre {
+    background: var(--surface-2); border: 1px solid var(--hairline);
+    border-radius: var(--radius); padding: 14px 16px; overflow-x: auto;
+    font-family: var(--mono); font-size: 0.82rem; line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--hairline);
+    border-radius: var(--radius); padding: 18px 20px; margin: 14px 0;
+  }
+  .card.callout-gap { border-left: 4px solid var(--gap); }
+  .card.callout-info { border-left: 4px solid var(--info); }
+  .card.callout-ok { border-left: 4px solid var(--ok); }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+  th { color: var(--faint); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:last-child td { border-bottom: none; }
+  td.tag { white-space: nowrap; }
+
+  .tag-pill {
+    display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .tag-gap { background: var(--gap-bg); color: var(--gap); }
+  .tag-ok { background: var(--ok-bg); color: var(--ok); }
+  .tag-warn { background: var(--warn-bg); color: var(--warn); }
+  .tag-info { background: var(--info-bg); color: var(--info); }
+
+  .slice {
+    display: flex; gap: 14px; align-items: flex-start; margin: 14px 0;
+    padding: 14px 16px; background: var(--surface); border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+  }
+  .slice .n {
+    flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent); font-weight: 700;
+    display: flex; align-items: center; justify-content: center; font-size: 0.82rem;
+  }
+  .slice .body h4 { margin: 0 0 4px; font-size: 0.95rem; }
+  .slice .body p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+  .qa {
+    background: var(--warn-bg); border: 1px solid transparent; border-radius: var(--radius);
+    padding: 16px 18px; margin: 12px 0;
+  }
+  .qa h4 { margin: 0 0 6px; color: var(--warn); font-size: 0.9rem; }
+
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--hairline); color: var(--faint); font-size: 0.8rem; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>codeburn — cost-observability + moving-parts spec</h1>
+    <p class="sub">ops#71 · captured from board-comb 2026-07-09 (<code>backlog-14-agency-dashboard-codeburn</code>) · parked under the 2026-07-08 feature freeze — this doc is the spec-writing half of the DoD, not a build</p>
+    <div class="badges">
+      <span class="badge draft">● Draft — awaiting Adrian review</span>
+      <span class="badge info">Overlaps #41 Slice 4 (events.jsonl)</span>
+      <span class="badge">No code shipped by this doc</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>1 — Why this exists</h2>
+    <p>
+      The fleet (Ralph loop + dispatched <code>@claude</code> issues + the lead-gen agent pipeline)
+      runs a growing number of autonomous Claude sessions with <strong>zero cost/volume signal</strong>
+      anywhere in <code>/ops</code>. Today the only way to know "how much are we burning" is to open
+      GitHub Actions and eyeball run counts. <code>docs/signal/SIGNAL.md</code> FIX-014 flagged this in
+      the old orchestration era as a LangSmith-style gap; the board-comb recycled it as this issue.
+      This doc answers the three DoD questions — <strong>what's measured, where it surfaces, what
+      feeds it</strong> — so Adrian can accept (or redirect) the shape before any of it gets built.
+    </p>
+  </section>
+
+  <section>
+    <h2>2 — The core finding: "burn" is two different things here</h2>
+    <div class="card callout-gap">
+      <p><strong>This is the load-bearing fact the rest of the spec follows from.</strong> Every
+      dispatch path was traced to its auth secret to find out what's actually metered.</p>
+    </div>
+    <table>
+      <tr><th>Surface</th><th>Auth</th><th>What it actually costs</th><th>Where it runs today</th></tr>
+      <tr>
+        <td><strong>Fleet dispatch</strong><br /><span style="color:var(--muted)">Ralph loop + <code>@claude</code> issue/PR mentions</span></td>
+        <td><code>CLAUDE_CODE_OAUTH_TOKEN</code><br /><span style="color:var(--muted)">Adrian's Claude Max subscription</span></td>
+        <td><span class="tag-pill tag-info">quota pressure, not $</span> — flat-rate subscription; a session either fits inside the plan's rate/usage window or it 429s. There is <strong>no per-token invoice</strong> to sum.</td>
+        <td><code>.github/workflows/claude.yml</code>, <code>.github/workflows/ralph.yml</code></td>
+      </tr>
+      <tr>
+        <td><strong>Lead-gen agent pipeline</strong><br /><span style="color:var(--muted)">enrich → generate → judge</span></td>
+        <td><code>ANTHROPIC_API_KEY</code><br /><span style="color:var(--muted)">metered Console billing</span></td>
+        <td><span class="tag-pill tag-gap">real $/1M-token spend</span> — <code>response.usage.{input_tokens,output_tokens}</code> comes back on every SDK call today and is currently <strong>discarded</strong>.</td>
+        <td><code>lib/agent/llm.mjs</code> (<code>callStructuredTool</code>), <code>lib/agent/index.mjs</code>, <code>api/lead-action.ts</code>; also <code>scripts/page-clone.mjs</code>, <code>video-clone.mjs</code>, <code>discord-bot.mjs</code>, <code>sync-client-emails.mjs</code></td>
+      </tr>
+      <tr>
+        <td><strong>Legacy local tier</strong><br /><span style="color:var(--muted)">Hermes/Ollama kanban, pre-Ralph era</span></td>
+        <td>none (local inference)</td>
+        <td><span class="tag-pill tag-ok">$0 by design</span> — token counting is already wired (<code>telemetry/pod-runs.jsonl</code>) but broken: <code>totalTokens</code> is always <code>0</code> for hermes3 rows (open as <code>SIGNAL.md</code> FIX-019, never filed as its own issue). Likely mostly dead weight now that Ralph is the live loop — worth a "still alive?" check before extending it.</td>
+        <td><code>telemetry/pod-runs.mjs</code>, <code>scripts/telemetry-report.mjs</code></td>
+      </tr>
+    </table>
+    <p>
+      Conflating these would produce a nonsense dashboard (a "$0.00 total spend" tile sitting next to
+      real invoice dollars). The spec below treats them as <strong>two panels, one page</strong>, not
+      one merged number.
+    </p>
+  </section>
+
+  <section>
+    <h2>3 — What's measured</h2>
+
+    <h3>3a. Metered API spend (real $)</h3>
+    <table>
+      <tr><th>Metric</th><th>Source</th><th>Granularity</th></tr>
+      <tr><td>Input / output tokens per call</td><td><code>response.usage</code> off every <code>anthropic.messages.create()</code> return in <code>lib/agent/llm.mjs</code></td><td>per call</td></tr>
+      <tr><td>$ cost per call</td><td>tokens × <code>docs/ai/MODEL_TIERS.md</code> price table (already has sonnet/opus/haiku $/1M — needs a refresh pass, last dated May 2026)</td><td>per call → summed per lead/run/day</td></tr>
+      <tr><td>Cost per lead processed</td><td>sum of enrich+generate+judge calls tagged with the same <code>lead_id</code></td><td>per lead</td></tr>
+      <tr><td>Daily / weekly $ burn</td><td>aggregation over the log below</td><td>rollup</td></tr>
+    </table>
+
+    <h3>3b. Fleet dispatch volume (quota pressure, not $)</h3>
+    <table>
+      <tr><th>Metric</th><th>Source</th><th>Granularity</th></tr>
+      <tr><td>Sessions dispatched / day, by repo</td><td><code>docs/ops/run-log.jsonl</code> (already captures <code>actor</code>/<code>model</code>/<code>tier</code>/<code>task</code>) — count, no cost field needed</td><td>daily rollup</td></tr>
+      <tr><td>Session wall-clock duration</td><td>GitHub Actions run duration via <code>gh run list</code>/API — not currently captured anywhere</td><td>per run</td></tr>
+      <tr><td>Rate-limit proximity (429s / retries)</td><td>would need to be scraped from Action run logs — <strong>open question, see §6</strong></td><td>per run</td></tr>
+      <tr><td>Ralph loop iterations / outcome mix</td><td><code>ralph/runs.jsonl</code> (shipped/parked/blocked/wedged counts) — already exists, just not surfaced as a burn signal</td><td>daily rollup</td></tr>
+    </table>
+    <p style="color:var(--muted); font-size:0.88rem;">
+      No dollar figure belongs on this half. The useful signal is <em>volume trending toward the Max
+      plan's ceiling</em>, not spend — closer to a rate-limit gauge than a bill.
+    </p>
+  </section>
+
+  <section>
+    <h2>4 — Data sources — what changes, what's reused</h2>
+    <table>
+      <tr><th>Piece</th><th>Status today</th><th>Change needed</th></tr>
+      <tr>
+        <td><code>lib/agent/llm.mjs</code></td>
+        <td class="tag">discards <code>response.usage</code></td>
+        <td><span class="tag-pill tag-gap">capture</span> return <code>usage</code> alongside the parsed tool input; thread a caller-supplied tag (<code>{feature: 'lead-enrich', leadId}</code>) through so spend attributes back to a lead/run</td>
+      </tr>
+      <tr>
+        <td><code>docs/ops/burn.jsonl</code> <em>(new)</em></td>
+        <td class="tag">doesn't exist</td>
+        <td><span class="tag-pill tag-info">new</span> same append-only JSONL pattern as <code>run-log.mjs</code>/<code>notify.mjs</code> — one row per metered API call: <code>{ts, feature, model, input_tokens, output_tokens, cost_usd, ref}</code></td>
+      </tr>
+      <tr>
+        <td><code>docs/ai/MODEL_TIERS.md</code> price table</td>
+        <td class="tag">present, dated May 2026, written for the Hermes-era ceiling gate</td>
+        <td><span class="tag-pill tag-warn">reuse + verify</span> confirm current per-model $/1M against the Console before trusting it for real dollar totals</td>
+      </tr>
+      <tr>
+        <td><code>docs/ops/run-log.jsonl</code> + <code>lib/ops/run-log.mjs</code></td>
+        <td class="tag">tracks fleet sessions already (no cost field, correctly — see §2)</td>
+        <td><span class="tag-pill tag-ok">no schema change</span> just a new aggregation read, no writer change</td>
+      </tr>
+      <tr>
+        <td><code>ralph/runs.jsonl</code></td>
+        <td class="tag">per-iteration audit trail, exit-code contract</td>
+        <td><span class="tag-pill tag-ok">reuse as-is</span> for the volume/outcome rollup</td>
+      </tr>
+      <tr>
+        <td><code>telemetry/pod-runs.jsonl</code></td>
+        <td class="tag">legacy, <code>totalTokens</code> broken</td>
+        <td><span class="tag-pill tag-warn">confirm still-alive</span> before spending effort on FIX-019 — see open question in §6</td>
+      </tr>
+    </table>
+
+    <h3>Row shape — <code>docs/ops/burn.jsonl</code> (proposed)</h3>
+    <pre><code>{
+  "ts": "2026-07-13T04:12:00Z",
+  "feature": "lead-enrich",       // caller-tagged: lead-enrich | lead-generate | lead-judge | page-clone | ...
+  "model": "claude-opus-4-8",
+  "input_tokens": 4820,
+  "output_tokens": 612,
+  "cost_usd": 0.0813,             // derived at write-time from MODEL_TIERS.md price table
+  "ref": "lead:access-tech-42"    // optional — lead id / task ref for per-lead rollup
+}</code></pre>
+    <p style="color:var(--muted); font-size:0.85rem;">
+      Same idiom as <code>run-log.mjs</code>/<code>notify.mjs</code>: pure <code>appendBurn</code>/<code>readBurn</code>
+      functions, <code>{path}</code> override for tests, tolerant JSONL parsing, no Supabase migration,
+      no new <code>api/*.ts</code> route (Hobby plan is already at 12/12 function slots per the
+      2026-07-12 digest ship — a burn API would need a fold, same constraint every new route hits now).
+    </p>
+  </section>
+
+  <section>
+    <h2>5 — Where it surfaces</h2>
+    <p>
+      <code>/ops</code> already has the right shelf: <strong>Fleet</strong> (events+run-log+alert-log
+      merged timeline) sits above <strong>Runs</strong>. A new <strong>Codeburn</strong> panel slots
+      next to them, same build-time <code>import.meta.glob</code> read as <code>RunsPanel</code>/<code>FleetTimeline</code>
+      — no new API route needed for the read side.
+    </p>
+    <table>
+      <tr><th>Tile</th><th>Data</th></tr>
+      <tr><td>$ spent today / this week</td><td><code>burn.jsonl</code> summed, metered-API half only</td></tr>
+      <tr><td>$ per feature (enrich/generate/judge/clone)</td><td><code>burn.jsonl</code> grouped by <code>feature</code></td></tr>
+      <tr><td>$ per lead (top N most expensive)</td><td><code>burn.jsonl</code> grouped by <code>ref</code></td></tr>
+      <tr><td>Fleet sessions today, by repo</td><td><code>run-log.jsonl</code> count — <em>volume, no $ sign anywhere on this tile</em></td></tr>
+      <tr><td>Ralph outcome mix (shipped/parked/blocked)</td><td><code>ralph/runs.jsonl</code> rollup</td></tr>
+    </table>
+    <p>The two halves render as visually distinct tiles (a $ tile styled like existing cost UI, a volume
+      tile styled like the existing Runs/Fleet count tiles) so nobody mistakes a session count for a
+      dollar figure.</p>
+  </section>
+
+  <section>
+    <h2>6 — Open questions for Adrian (blocks §7 build, not this spec)</h2>
+    <div class="qa">
+      <h4>Q1 — Is per-session $ tracking for fleet dispatch wanted at all, given it's flat-rate?</h4>
+      <p>The Max subscription has no per-session dollar cost to show. The honest signal is volume/quota
+      pressure. Confirm that's the right framing before a panel gets built that Adrian reads as "$" and
+      isn't.</p>
+    </div>
+    <div class="qa">
+      <h4>Q2 — Is <code>telemetry/pod-runs.jsonl</code> (Hermes/Ollama) still live, or dead weight from the pre-Ralph era?</h4>
+      <p>If the local-model kanban isn't run anymore, FIX-019 (broken token counts) and this whole
+      source can be dropped from scope rather than fixed.</p>
+    </div>
+    <div class="qa">
+      <h4>Q3 — Does GitHub's Actions API expose enough to detect Max-plan rate-limit proximity (429s/backoff), or is that only visible from inside a running session's own transcript?</h4>
+      <p>Unverified in this pass — needs a spike against a real Actions run before committing to that
+      metric.</p>
+    </div>
+    <div class="qa">
+      <h4>Q4 — Cost ceiling / alerting: wanted now, or observability-only first?</h4>
+      <p><code>docs/ai/MODEL_TIERS.md</code> already documents a ceiling-gate concept
+      (<code>costCeiling = projected × 1.25</code>) from the Hermes era. Reasonable to resurrect for
+      the metered-API half once burn.jsonl exists — but that's a second slice, not this one.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>7 — Proposed build slices (smallest first, once accepted)</h2>
+    <div class="slice">
+      <div class="n">A</div>
+      <div class="body">
+        <h4>Capture usage at the source</h4>
+        <p><code>lib/agent/llm.mjs</code> returns <code>{result, usage}</code> instead of swallowing
+        <code>response.usage</code>; callers in <code>lib/agent/index.mjs</code> pass a <code>feature</code>/<code>ref</code>
+        tag; <code>lib/ops/burn.mjs</code> (new, mirrors <code>run-log.mjs</code>) appends to
+        <code>docs/ops/burn.jsonl</code>. No UI yet — this slice just stops throwing the data away.</p>
+      </div>
+    </div>
+    <div class="slice">
+      <div class="n">B</div>
+      <div class="body">
+        <h4>/ops Codeburn panel — metered $ half</h4>
+        <p>Reads <code>burn.jsonl</code> at build time (same idiom as RunsPanel), renders the tiles in
+        §5's first three rows. Ships once slice A has real data to render.</p>
+      </div>
+    </div>
+    <div class="slice">
+      <div class="n">C</div>
+      <div class="body">
+        <h4>/ops Codeburn panel — fleet volume half</h4>
+        <p>Reads existing <code>run-log.jsonl</code> + <code>ralph/runs.jsonl</code> — no new writer.
+        Independent of A/B; can ship first if Q1 resolves toward "volume only, skip the $ half for now."</p>
+      </div>
+    </div>
+    <div class="slice">
+      <div class="n">D</div>
+      <div class="body">
+        <h4>Cost ceiling / alerting (only if Q4 says yes)</h4>
+        <p>Resurrect the Hermes-era ceiling-gate pattern against real <code>burn.jsonl</code> data;
+        fan out through the existing <code>lib/ops/notify.mjs</code> seam (already has a
+        <code>blocked</code>/<code>deploy_error</code> kind vocabulary to extend).</p>
+      </div>
+    </div>
+    <p style="color:var(--muted); font-size:0.85rem;">
+      Per CLAUDE.md's dispatched-task discipline, these ship as separate sub-issues once Adrian accepts
+      this spec — not bundled into one PR.
+    </p>
+  </section>
+
+  <section>
+    <h2>8 — Non-goals</h2>
+    <ul>
+      <li>Not attempting to invoice-reconcile against the actual Anthropic Console bill in this pass — <code>MODEL_TIERS.md</code> prices are an estimate, not a source of truth for accounting.</li>
+      <li>Not touching the Max-subscription billing/plan itself — this is read-only observability.</li>
+      <li>Not building the alerting/ceiling slice (D) without an explicit yes on Q4.</li>
+      <li>Still under the 2026-07-08 feature freeze — none of §7 ships until the freeze lifts or Adrian explicitly carves out an exception for this issue.</li>
+    </ul>
+  </section>
+
+  <footer>
+    ops#71 · spec doc only, no code in this PR · reviewed/accepted by Adrian is the remaining DoD item
+    (this doc cannot close its own review gate) · related: #41 Slice 4 (events.jsonl observability layer),
+    <code>docs/signal/SIGNAL.md</code> FIX-014/FIX-019
+  </footer>
+
+</div>
+</body>
+</html>
