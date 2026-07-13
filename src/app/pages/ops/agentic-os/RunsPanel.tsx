@@ -29,6 +29,7 @@ export interface RunLogEntry {
   task?: string;
   model?: string;
   tier?: string;
+  tokens?: string;
   session_url?: string;
 }
 
@@ -106,6 +107,7 @@ export function RunsPanel({ limit = 15 }: { limit?: number }) {
                   {r.summary}
                   {r.task ? <span style={s.meta}> · {r.task}</span> : null}
                   {r.model ? <span style={s.meta}> · {r.model}</span> : null}
+                  {r.tokens ? <span style={s.meta}> · {r.tokens} tok</span> : null}
                 </td>
               </tr>
             ))}

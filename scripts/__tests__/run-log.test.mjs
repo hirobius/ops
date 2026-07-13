@@ -77,6 +77,37 @@ describe('appendRun', () => {
     expect(JSON.parse(raw.trim())).toEqual(row);
   });
 
+  it('persists a tokens field when present', () => {
+    path = tmpPath();
+    const row = appendRun(
+      {
+        ts: '2026-07-07T10:00:00Z',
+        actor: 'claude-subagent',
+        outcome: 'shipped',
+        summary: 'did a thing',
+        tokens: '1234',
+      },
+      { path },
+    );
+    expect(row).toEqual({
+      ts: '2026-07-07T10:00:00Z',
+      actor: 'claude-subagent',
+      outcome: 'shipped',
+      summary: 'did a thing',
+      tokens: '1234',
+    });
+    expect(JSON.parse(readFileSync(path, 'utf8').trim())).toEqual(row);
+  });
+
+  it('omits tokens when absent', () => {
+    path = tmpPath();
+    const row = appendRun(
+      { ts: '2026-07-07T10:00:00Z', actor: 'claude', outcome: 'shipped', summary: 'no tokens' },
+      { path },
+    );
+    expect(row).not.toHaveProperty('tokens');
+  });
+
   it('creates the parent directory if missing', () => {
     const dir = mkdtempSync(join(tmpdir(), 'run-log-test-'));
     path = join(dir, 'nested', 'deeper', 'run-log.jsonl');
