@@ -178,7 +178,7 @@ export default function TasksPage() {
         ))}
       </div>
 
-      <RalphPanel />
+      <RalphPanel act={act} onNotify={notify} />
 
       {sourceFilters.length > 2 && (
         <div style={s.sourceRow}>

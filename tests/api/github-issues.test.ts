@@ -344,6 +344,129 @@ describe('makeGitHubPort() — Ralph fleet reads (ops#112)', () => {
   });
 });
 
+describe('makeGitHubPort() — parked inbox + wedge reads (ops#141, extends #112)', () => {
+  beforeEach(() => {
+    vi.stubEnv('GITHUB_TOKEN', 'test-token');
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it('listRalphParkedIssues: merges ralph-parked + needs-adrian, attaches the latest park comment', async () => {
+    const fetchMock = vi.fn(async (url) => {
+      const u = String(url);
+      if (u.includes('labels=ralph-parked')) {
+        return pageResponse([{ ...rawIssue(10), labels: [{ name: 'ralph-parked' }] }]);
+      }
+      if (u.includes('labels=needs-adrian')) {
+        return pageResponse([
+          { ...rawIssue(11), body: 'no DoD here', labels: [{ name: 'needs-adrian' }] },
+        ]);
+      }
+      if (u.includes('/issues/10/comments')) {
+        return pageResponse([
+          { body: 'unrelated comment' },
+          {
+            body: '🅿️ **Ralph parked this issue** — gave up after 2 attempts.\n(To retry: fix the cause, then re-add `ralph-ready`.)',
+          },
+        ]);
+      }
+      if (u.includes('/issues/11/comments')) {
+        return pageResponse([]);
+      }
+      throw new Error(`unexpected fetch: ${u}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const out = await makeGitHubPort().listRalphParkedIssues({ repos: ['hirobius/ops'] });
+
+    expect(out).toHaveLength(1);
+    expect(out[0].issues).toEqual([
+      expect.objectContaining({
+        number: 10,
+        labels: ['ralph-parked'],
+        parkComment: expect.stringContaining('gave up after 2 attempts'),
+      }),
+      expect.objectContaining({ number: 11, labels: ['needs-adrian'], parkComment: null }),
+    ]);
+  });
+
+  it('listRalphParkedIssues: a failing repo yields an error entry, not a thrown batch', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: false,
+      status: 500,
+      text: async () => 'boom',
+      headers: { get: () => null },
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const out = await makeGitHubPort().listRalphParkedIssues({ repos: ['hirobius/ops'] });
+    expect(out[0]).toMatchObject({ repo: 'hirobius/ops', issues: [] });
+    expect(out[0].error).toContain('500');
+  });
+
+  it('listRalphOpenPrs: keeps ralph/* branches, excludes ralph/claim-* and non-ralph branches, attaches gate state', async () => {
+    const fetchMock = vi.fn(async (url) => {
+      const u = String(url);
+      if (u.includes('/pulls?state=open')) {
+        return pageResponse([
+          {
+            number: 9,
+            html_url: 'https://github.com/hirobius/ops/pull/9',
+            title: 'ralph PR',
+            head: { ref: 'ralph/issue-9-foo', sha: 'sha9' },
+            updated_at: '2026-07-12T00:00:00Z',
+          },
+          {
+            number: 10,
+            html_url: 'https://github.com/hirobius/ops/pull/10',
+            title: 'claim ref, not real work',
+            head: { ref: 'ralph/claim-10', sha: 'sha10' },
+            updated_at: '2026-07-12T00:00:00Z',
+          },
+          {
+            number: 11,
+            html_url: 'https://github.com/hirobius/ops/pull/11',
+            title: 'unrelated PR',
+            head: { ref: 'feature/other', sha: 'sha11' },
+            updated_at: '2026-07-12T00:00:00Z',
+          },
+        ]);
+      }
+      if (u.includes('/commits/sha9/status')) {
+        return pageResponse({
+          statuses: [
+            { context: 'ralph-gate', state: 'failure', created_at: '2026-07-12T00:00:00Z' },
+          ],
+        });
+      }
+      throw new Error(`unexpected fetch: ${u}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const out = await makeGitHubPort().listRalphOpenPrs({ repos: ['hirobius/ops'] });
+
+    expect(out[0].prs).toEqual([
+      expect.objectContaining({ number: 9, headSha: 'sha9', gate: 'failure' }),
+    ]);
+  });
+
+  it('listRalphOpenPrs: a failing repo yields an error entry, not a thrown batch', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: false,
+      status: 500,
+      text: async () => 'boom',
+      headers: { get: () => null },
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const out = await makeGitHubPort().listRalphOpenPrs({ repos: ['hirobius/ops'] });
+    expect(out[0]).toMatchObject({ repo: 'hirobius/ops', prs: [] });
+    expect(out[0].error).toContain('500');
+  });
+});
+
 describe('makeGitHubPort().dispatchWorkflow (ops#113 — "Run Ralph" board action)', () => {
   beforeEach(() => {
     vi.stubEnv('GITHUB_TOKEN', 'test-token');

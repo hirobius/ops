@@ -838,3 +838,94 @@ describe('applyTaskAction — ralph_dispatch (injected GitHub port, ops#113)', (
     expect((result.body as { code: string }).code).toBe('GITHUB_WORKFLOW_DISPATCH_FAILED');
   });
 });
+
+describe('applyTaskAction — ralph_requeue (injected GitHub port, ops#141)', () => {
+  it('503s when no port is configured (no GITHUB_TOKEN)', async () => {
+    const { sb } = makeSb();
+    expect(
+      await applyTaskAction(
+        sb,
+        { key: 'github:hirobius/ops#141', action: 'ralph_requeue' },
+        { github: null },
+      ),
+    ).toMatchObject({ status: 503, body: { code: 'ENV_MISSING_GITHUB_TOKEN' } });
+  });
+
+  it('400s when key is not a github:<owner>/<repo>#<n> reference — no Supabase lookup needed', async () => {
+    const { sb } = makeSb();
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    expect(
+      await applyTaskAction(sb, { key: 't1', action: 'ralph_requeue' }, { github }),
+    ).toMatchObject({ status: 400 });
+  });
+
+  it('removes ralph-parked and adds ralph-ready via the port, straight from the key', async () => {
+    const { sb } = makeSb();
+    const calls: Array<{ op: string; issueUrl: string; label: string }> = [];
+    const github = {
+      removeLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push({ op: 'remove', ...i });
+        return {};
+      },
+      addLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push({ op: 'add', ...i });
+        return {};
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#141', action: 'ralph_requeue' },
+      { github },
+    );
+    expect(calls).toEqual([
+      {
+        op: 'remove',
+        issueUrl: 'https://github.com/hirobius/ops/issues/141',
+        label: 'ralph-parked',
+      },
+      { op: 'add', issueUrl: 'https://github.com/hirobius/ops/issues/141', label: 'ralph-ready' },
+    ]);
+    expect(result).toEqual({ status: 200, body: { ok: true } });
+  });
+
+  it('is idempotent — re-queuing an already-queued issue re-applies both idempotent label writes', async () => {
+    const { sb } = makeSb();
+    let removeCalls = 0;
+    let addCalls = 0;
+    const github = {
+      removeLabel: async () => {
+        removeCalls += 1;
+        return { removed: false }; // already absent — the port's 404-tolerant shape
+      },
+      addLabel: async () => {
+        addCalls += 1;
+        return {}; // GitHub no-ops on an already-present label
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#141', action: 'ralph_requeue' },
+      { github },
+    );
+    expect(result).toEqual({ status: 200, body: { ok: true } });
+    expect(removeCalls).toBe(1);
+    expect(addCalls).toBe(1);
+  });
+
+  it('502s when the port throws', async () => {
+    const { sb } = makeSb();
+    const github = {
+      removeLabel: async () => {
+        throw new Error('HTTP 403');
+      },
+      addLabel: async () => ({}),
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#141', action: 'ralph_requeue' },
+      { github },
+    );
+    expect(result.status).toBe(502);
+    expect((result.body as { code: string }).code).toBe('GITHUB_TOKEN_REJECTED');
+  });
+});
