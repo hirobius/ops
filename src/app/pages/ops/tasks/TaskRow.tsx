@@ -24,7 +24,11 @@ import { useState } from 'react';
 import { Badge, Button, Card, Cluster } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import type { ComponentProps, CSSProperties } from 'react';
-import { deriveWorkState, WORK_STATE_TONE } from '../../../../../lib/tasks/work-state.mjs';
+import {
+  deriveWorkState,
+  WORK_STATE_TONE,
+  WORK_STATE_CARD_TONE,
+} from '../../../../../lib/tasks/work-state.mjs';
 import type { Task, TaskAction, TaskActionResult } from './types';
 import {
   isNoRalphSource,
@@ -41,22 +45,6 @@ import { TaskActionsMenu } from './TaskActionsMenu';
 // Stay in lockstep with the DS contracts instead of shadowing them.
 type BadgeTone = NonNullable<ComponentProps<typeof Badge>['tone']>;
 type CardTone = NonNullable<ComponentProps<typeof Card>['tone']>;
-
-// The card border tone per work-state — the border IS the state signal (#158).
-// WorkState carries an 'inProgress' badge tone that CardTone lacks, so the
-// in-flight phases map to 'info'; finished/backlog stay neutral (a quiet
-// border, not a shout).
-const WORK_STATE_CARD_TONE: Record<string, CardTone> = {
-  done: 'neutral',
-  'needs-adrian': 'danger',
-  parked: 'warning',
-  blocked: 'danger',
-  wip: 'info',
-  dispatched: 'info',
-  queued: 'info',
-  ready: 'success',
-  backlog: 'neutral',
-};
 
 // Tone per routing/automation chip. cardLabelTags already dropped the noise, so
 // anything unrecognised falls through as a neutral custom label.
@@ -91,7 +79,7 @@ export function TaskRow({
   const ref = taskRef(t);
   const issueLink = issueLinkFor(t);
   const workState = deriveWorkState(t);
-  const cardTone = WORK_STATE_CARD_TONE[workState] ?? 'neutral';
+  const cardTone = (WORK_STATE_CARD_TONE[workState] as CardTone) ?? 'neutral';
   const pChip = priorityChip(t);
   const dTone = dueToneNow(t.due);
   const labelTags = cardLabelTags(t.tags);
