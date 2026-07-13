@@ -12,7 +12,7 @@ concurrency:
 jobs:
   regression:
     name: Prompt regression against 8 goldens
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RALPH_RUNNER || 'ubuntu-latest' }}
 
     steps:
       - name: Checkout

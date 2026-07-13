@@ -12,7 +12,7 @@ jobs:
     concurrency:
       group: token-scan-${{ github.event.deployment.id || github.sha }}
       cancel-in-progress: true
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RALPH_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 15
 
     steps:

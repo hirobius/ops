@@ -22,7 +22,7 @@ on:
 jobs:
   hds-migration-audit:
     name: HDS Migration Audit
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RALPH_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 5
 
     steps:

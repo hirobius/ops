@@ -13,7 +13,7 @@ concurrency:
 jobs:
   ci:
     name: Typecheck, validators, build, and Playwright (desktop)
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RALPH_RUNNER || 'ubuntu-latest' }}
 
     steps:
       - name: Checkout

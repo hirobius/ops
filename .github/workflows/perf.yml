@@ -11,7 +11,7 @@ concurrency:
 jobs:
   perf-budget:
     name: Lighthouse CI — LCP / CLS / TBT / FCP budgets
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RALPH_RUNNER || 'ubuntu-latest' }}
 
     steps:
       - name: Checkout

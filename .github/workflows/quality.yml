@@ -13,7 +13,7 @@ concurrency:
 jobs:
   gates:
     name: Typecheck, canon validators, and layout tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RALPH_RUNNER || 'ubuntu-latest' }}
 
     steps:
       - name: Checkout

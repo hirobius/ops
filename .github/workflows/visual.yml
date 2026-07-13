@@ -11,7 +11,7 @@ concurrency:
 jobs:
   visual:
     name: Visual regression tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RALPH_RUNNER || 'ubuntu-latest' }}
     # NOTE: Not a required check for merge yet — needs a baseline run to confirm green.
     # Expected to pass; promote to branch-protection-required after first smoke run.
 

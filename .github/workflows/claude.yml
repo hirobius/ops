@@ -23,7 +23,7 @@ jobs:
     if: |
       contains(github.event.issue.body, '@claude') ||
       contains(github.event.comment.body, '@claude')
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RALPH_RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: write
       issues: write
