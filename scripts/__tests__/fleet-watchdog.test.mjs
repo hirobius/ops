@@ -1,20 +1,34 @@
 /**
- * Unit tests for scripts/fleet-watchdog.mjs's pure pieces (#41 Slice 5).
+ * Unit tests for scripts/fleet-watchdog.mjs's pure pieces (#41 Slice 5) plus
+ * `reDispatch`/`flag` (ops#139), which are exercised with `applyTaskAction`,
+ * `notifyEvent`, and `appendRun` mocked — no real Supabase write, no real
+ * GitHub call, and critically no real write to the committed
+ * docs/ops/events.jsonl / docs/ops/run-log.jsonl files.
  *
  * `findStale` is pure — no Supabase, no GitHub, no Date-inside (the caller
- * supplies `now`) — so these tests exercise the staleness rule + the
+ * supplies `now`) — so those tests exercise the staleness rule + the
  * re-dispatch/flag decision with plain stub task objects. Live re-dispatch
  * (Supabase writes, @claude issue comments) can't be exercised in this
  * sandbox (network egress blocked + needs GITHUB_TOKEN) — see the session
  * report for the --dry-run verification instead.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('../../lib/tasks/actions.mjs', () => ({ applyTaskAction: vi.fn() }));
+vi.mock('../../lib/ops/notify.mjs', () => ({ notifyEvent: vi.fn() }));
+vi.mock('../../lib/ops/run-log.mjs', () => ({ appendRun: vi.fn() }));
+
+import { applyTaskAction } from '../../lib/tasks/actions.mjs';
+import { notifyEvent } from '../../lib/ops/notify.mjs';
+import { appendRun } from '../../lib/ops/run-log.mjs';
 import {
   findStale,
   isMissingColumnError,
   DEFAULT_STALE_HOURS,
   DEFAULT_MAX_RETRIES,
+  reDispatch,
+  flag,
 } from '../fleet-watchdog.mjs';
 
 const NOW = new Date('2026-07-08T12:00:00.000Z').getTime();
@@ -197,5 +211,103 @@ describe('isMissingColumnError', () => {
 
   it('is false for an unrelated error', () => {
     expect(isMissingColumnError({ code: '23505', message: 'duplicate key value' })).toBe(false);
+  });
+});
+
+describe('reDispatch (ops#139 — one dispatch seam)', () => {
+  beforeEach(() => {
+    vi.mocked(applyTaskAction).mockReset();
+    vi.mocked(notifyEvent).mockReset();
+    vi.mocked(appendRun).mockReset();
+  });
+
+  it('writes re-dispatch fields via applyTaskAction — no direct setTaskFields call', async () => {
+    vi.mocked(applyTaskAction).mockResolvedValueOnce({
+      status: 200,
+      body: { ok: true, dispatch_count: 1, dispatch_url: 'https://github.com/hirobius/ops/issues/1', commented: false },
+    });
+    const t = task({ key: 'retryable', dispatch_count: 0 });
+
+    const ok = await reDispatch({}, null, { task: t, comment: false, maxRetries: 2 });
+
+    expect(ok).toBe(true);
+    expect(applyTaskAction).toHaveBeenCalledExactlyOnceWith(
+      {},
+      { key: 'retryable', action: 'redispatch', comment: false, maxRetries: 2 },
+      { github: null },
+    );
+    expect(notifyEvent).toHaveBeenCalledOnce();
+    expect(appendRun).toHaveBeenCalledOnce();
+  });
+
+  it('only passes the github port through when --comment is set', async () => {
+    vi.mocked(applyTaskAction).mockResolvedValueOnce({
+      status: 200,
+      body: { ok: true, dispatch_count: 1, dispatch_url: null, commented: false },
+    });
+    const github = {};
+    const t = task({ key: 'retryable' });
+
+    await reDispatch({}, github, { task: t, comment: true, maxRetries: 2 });
+
+    expect(applyTaskAction).toHaveBeenCalledExactlyOnceWith(
+      {},
+      { key: 'retryable', action: 'redispatch', comment: true, maxRetries: 2 },
+      { github },
+    );
+  });
+
+  it('returns false and does not notify/log when the action fails', async () => {
+    vi.mocked(applyTaskAction).mockResolvedValueOnce({
+      status: 500,
+      body: { error: 'write failed' },
+    });
+    const t = task({ key: 'retryable' });
+
+    const ok = await reDispatch({}, null, { task: t, comment: false, maxRetries: 2 });
+
+    expect(ok).toBe(false);
+    expect(notifyEvent).not.toHaveBeenCalled();
+    expect(appendRun).not.toHaveBeenCalled();
+  });
+});
+
+describe('flag (ops#139 — one dispatch seam)', () => {
+  beforeEach(() => {
+    vi.mocked(applyTaskAction).mockReset();
+    vi.mocked(notifyEvent).mockReset();
+    vi.mocked(appendRun).mockReset();
+  });
+
+  it('blocks the task via applyTaskAction — no direct setTaskFields call', async () => {
+    vi.mocked(applyTaskAction).mockResolvedValueOnce({
+      status: 200,
+      body: { ok: true, dispatch_status: 'failed', status: 'blocked' },
+    });
+    const t = task({ key: 'exhausted' });
+
+    const ok = await flag({}, { task: t, maxRetries: 2 });
+
+    expect(ok).toBe(true);
+    expect(applyTaskAction).toHaveBeenCalledExactlyOnceWith(
+      {},
+      { key: 'exhausted', action: 'flag' },
+    );
+    expect(notifyEvent).toHaveBeenCalledOnce();
+    expect(appendRun).toHaveBeenCalledOnce();
+  });
+
+  it('returns false and does not notify/log when the action fails', async () => {
+    vi.mocked(applyTaskAction).mockResolvedValueOnce({
+      status: 500,
+      body: { error: 'write failed' },
+    });
+    const t = task({ key: 'exhausted' });
+
+    const ok = await flag({}, { task: t, maxRetries: 2 });
+
+    expect(ok).toBe(false);
+    expect(notifyEvent).not.toHaveBeenCalled();
+    expect(appendRun).not.toHaveBeenCalled();
   });
 });

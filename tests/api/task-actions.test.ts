@@ -109,6 +109,23 @@ describe('applyTaskAction — dispatch (injected GitHub port)', () => {
     });
   });
 
+  it('stamps last_dispatched_at + bumps dispatch_count so the watchdog can see this dispatch (ops#139)', async () => {
+    const { sb, updates } = makeSb({ task: { ...task, dispatch_count: 2 } });
+    const github = { createIssue: async () => ({ html_url: 'https://gh/issues/1' }) };
+    await applyTaskAction(sb, { key: 't1', action: 'dispatch' }, { github });
+    expect(updates.at(-1)).toMatchObject({
+      dispatch_count: 3,
+      last_dispatched_at: expect.any(String),
+    });
+  });
+
+  it('treats a missing dispatch_count as 0 when stamping the first dispatch', async () => {
+    const { sb, updates } = makeSb({ task });
+    const github = { createIssue: async () => ({ html_url: 'https://gh/issues/1' }) };
+    await applyTaskAction(sb, { key: 't1', action: 'dispatch' }, { github });
+    expect(updates.at(-1)).toMatchObject({ dispatch_count: 1 });
+  });
+
   it('502s when the port throws', async () => {
     const { sb } = makeSb({ task });
     const github = {
@@ -927,5 +944,146 @@ describe('applyTaskAction — ralph_requeue (injected GitHub port, ops#141)', ()
     );
     expect(result.status).toBe(502);
     expect((result.body as { code: string }).code).toBe('GITHUB_TOKEN_REJECTED');
+  });
+});
+
+describe('applyTaskAction — flag (fleet-watchdog stale-dispatch outcome, ops#139)', () => {
+  it('blocks the task — no GitHub port needed, plain field flip', async () => {
+    const { sb, updates } = makeSb({ task: { key: 't1', title: 'Do it' } });
+    const result = await applyTaskAction(sb, { key: 't1', action: 'flag' });
+    expect(result).toEqual({
+      status: 200,
+      body: { ok: true, dispatch_status: 'failed', status: 'blocked' },
+    });
+    expect(updates.at(-1)).toEqual({ dispatch_status: 'failed', status: 'blocked' });
+  });
+
+  it('500s when the write fails', async () => {
+    const { sb } = makeSb({ updateError: { message: 'write failed' } });
+    expect(await applyTaskAction(sb, { key: 't1', action: 'flag' })).toMatchObject({
+      status: 500,
+    });
+  });
+});
+
+describe('applyTaskAction — redispatch (fleet-watchdog re-kick, ops#139)', () => {
+  const task = {
+    key: 't1',
+    title: 'Do it',
+    dispatch_url: 'https://github.com/hirobius/ops/issues/9',
+    dispatch_count: 1,
+  };
+
+  it('404s when the task is missing', async () => {
+    const { sb } = makeSb({ task: null });
+    expect(
+      await applyTaskAction(sb, { key: 'nope', action: 'redispatch' }, { github: null }),
+    ).toMatchObject({ status: 404 });
+  });
+
+  it('bumps dispatch_count, restamps last_dispatched_at, re-asserts dispatched — no comment requested', async () => {
+    const { sb, updates } = makeSb({ task });
+    const github = {
+      commentOnIssue: async () => {
+        throw new Error('should not be called — comment not requested');
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'redispatch', maxRetries: 2 },
+      { github },
+    );
+    expect(result).toEqual({
+      status: 200,
+      body: {
+        ok: true,
+        dispatch_count: 2,
+        dispatch_url: 'https://github.com/hirobius/ops/issues/9',
+        commented: false,
+      },
+    });
+    expect(updates.at(-1)).toEqual({
+      dispatch_count: 2,
+      last_dispatched_at: expect.any(String),
+      dispatch_status: 'dispatched',
+    });
+  });
+
+  it('treats a missing dispatch_count as 0', async () => {
+    const { sb, updates } = makeSb({ task: { ...task, dispatch_count: undefined } });
+    const result = await applyTaskAction(sb, { key: 't1', action: 'redispatch' }, { github: null });
+    expect(result.body).toMatchObject({ dispatch_count: 1 });
+    expect(updates.at(-1)).toMatchObject({ dispatch_count: 1 });
+  });
+
+  it('500s when the field write fails', async () => {
+    const { sb } = makeSb({ task, updateError: { message: 'write failed' } });
+    expect(
+      await applyTaskAction(sb, { key: 't1', action: 'redispatch' }, { github: null }),
+    ).toMatchObject({ status: 500 });
+  });
+
+  it('leaves a re-ping comment on the issue when comment=true and a port is given', async () => {
+    const { sb } = makeSb({ task });
+    const calls: Array<{ issueUrl: string; body: string }> = [];
+    const github = {
+      commentOnIssue: async (i: { issueUrl: string; body: string }) => {
+        calls.push(i);
+        return {};
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'redispatch', comment: true, maxRetries: 2 },
+      { github },
+    );
+    expect(calls[0].issueUrl).toBe('https://github.com/hirobius/ops/issues/9');
+    expect(calls[0].body).toContain('@claude');
+    expect(calls[0].body).toContain('2/2');
+    expect(result.body).toMatchObject({ commented: true });
+  });
+
+  it('does not attempt a comment when comment=true but no port is given — fields still written', async () => {
+    const { sb, updates } = makeSb({ task });
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'redispatch', comment: true },
+      { github: null },
+    );
+    expect(result.status).toBe(200);
+    expect(result.body).toMatchObject({ commented: false });
+    expect(updates.at(-1)).toMatchObject({ dispatch_status: 'dispatched' });
+  });
+
+  it('does not attempt a comment when the task has no dispatch_url', async () => {
+    const { sb } = makeSb({ task: { ...task, dispatch_url: null } });
+    const github = {
+      commentOnIssue: async () => {
+        throw new Error('should not be called — no dispatch_url');
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'redispatch', comment: true },
+      { github },
+    );
+    expect(result.status).toBe(200);
+    expect(result.body).toMatchObject({ commented: false, dispatch_url: null });
+  });
+
+  it('is best-effort on the comment — a thrown comment does not fail the action (fields already written)', async () => {
+    const { sb } = makeSb({ task });
+    const github = {
+      commentOnIssue: async () => {
+        throw new Error('HTTP 502');
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'redispatch', comment: true },
+      { github },
+    );
+    expect(result.status).toBe(200);
+    expect(result.body).toMatchObject({ ok: true, commented: false });
   });
 });

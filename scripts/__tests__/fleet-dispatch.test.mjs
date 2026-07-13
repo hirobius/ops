@@ -1,7 +1,11 @@
 /**
- * Unit tests for scripts/fleet-dispatch.mjs's pure pieces (#41 Slice 2).
+ * Unit tests for scripts/fleet-dispatch.mjs's pure pieces (#41 Slice 2) plus
+ * `dispatchOne` (ops#139), which is exercised with `applyTaskAction` and
+ * `setTaskFields` mocked — it asserts the one-writer-per-field contract
+ * (routing fields via `setTaskFields`, dispatch-lifecycle fields via
+ * `applyTaskAction`) without touching Supabase or GitHub for real.
  *
- * `selectAndRoute` is pure — no Supabase, no GitHub, no Date — so these
+ * `selectAndRoute` is pure — no Supabase, no GitHub, no Date — so those
  * tests exercise the eligibility filter + routeTask wiring + --max cap with
  * plain stub task objects. Live dispatch (Supabase writes, @claude issue
  * creation) can't be exercised in this sandbox (network egress blocked +
@@ -9,8 +13,14 @@
  * real-Supabase verification instead.
  */
 
-import { describe, it, expect } from 'vitest';
-import { selectAndRoute, isMissingColumnError, DEFAULT_MAX } from '../fleet-dispatch.mjs';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('../../lib/tasks/actions.mjs', () => ({ applyTaskAction: vi.fn() }));
+vi.mock('../../lib/supabase/tasks.mjs', () => ({ setTaskFields: vi.fn() }));
+
+import { applyTaskAction } from '../../lib/tasks/actions.mjs';
+import { setTaskFields } from '../../lib/supabase/tasks.mjs';
+import { selectAndRoute, isMissingColumnError, DEFAULT_MAX, dispatchOne } from '../fleet-dispatch.mjs';
 
 function task(overrides = {}) {
   return {
@@ -152,5 +162,59 @@ describe('isMissingColumnError', () => {
 
   it('is false for an unrelated error', () => {
     expect(isMissingColumnError({ code: '23505', message: 'duplicate key value' })).toBe(false);
+  });
+});
+
+describe('dispatchOne (ops#139 — one dispatch seam)', () => {
+  const selected = { task: task({ key: 'mech', dispatch_count: 0 }), tier: 'mechanical', model: 'sonnet' };
+
+  beforeEach(() => {
+    vi.mocked(applyTaskAction).mockReset();
+    vi.mocked(setTaskFields).mockReset();
+  });
+
+  it('writes only tier/model via setTaskFields, then dispatches via applyTaskAction', async () => {
+    vi.mocked(setTaskFields).mockResolvedValueOnce({ error: null });
+    vi.mocked(applyTaskAction).mockResolvedValueOnce({
+      status: 200,
+      body: { ok: true, dispatch_url: 'https://github.com/hirobius/ops/issues/1' },
+    });
+    const sb = {};
+    const github = {};
+
+    const result = await dispatchOne(sb, selected, { github });
+
+    expect(setTaskFields).toHaveBeenCalledExactlyOnceWith(sb, 'mech', {
+      tier: 'mechanical',
+      model: 'sonnet',
+    });
+    expect(applyTaskAction).toHaveBeenCalledExactlyOnceWith(
+      sb,
+      { key: 'mech', action: 'dispatch', actor: 'fleet-dispatch' },
+      { github },
+    );
+    expect(result).toEqual({ ok: true, dispatchUrl: 'https://github.com/hirobius/ops/issues/1' });
+  });
+
+  it('does not call applyTaskAction when the routing-field write fails', async () => {
+    vi.mocked(setTaskFields).mockResolvedValueOnce({ error: { message: 'boom' } });
+
+    const result = await dispatchOne({}, selected, { github: {} });
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toContain('boom');
+    expect(applyTaskAction).not.toHaveBeenCalled();
+  });
+
+  it('surfaces the applyTaskAction error when the dispatch action fails', async () => {
+    vi.mocked(setTaskFields).mockResolvedValueOnce({ error: null });
+    vi.mocked(applyTaskAction).mockResolvedValueOnce({
+      status: 502,
+      body: { error: 'GitHub dispatch failed: HTTP 422' },
+    });
+
+    const result = await dispatchOne({}, selected, { github: {} });
+
+    expect(result).toEqual({ ok: false, error: 'GitHub dispatch failed: HTTP 422' });
   });
 });

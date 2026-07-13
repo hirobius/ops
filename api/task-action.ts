@@ -6,9 +6,19 @@
  *
  * Request:  { key: string, action: Action, actor?: string, priority?: 'p0'|'p1'|'p2'|'p3'|null }
  *   Action = 'done' | 'reopen' | 'claim' | 'unclaim' | 'trash' | 'restore' | 'dispatch'
+ *          | 'redispatch' | 'flag'
  *          | 'auto_on' | 'auto_off' | 'queue' | 'unqueue'
  *          | 'ralph_ready_on' | 'ralph_ready_off' | 'ralph_approve' | 'ralph_dispatch'
  *          | 'ralph_requeue' | 'ralph_auto_on' | 'ralph_auto_off' | 'set_priority'
+ *
+ * 'redispatch' / 'flag' (ops#139) are `scripts/fleet-watchdog.mjs`'s stale-dispatch
+ * seam, not board UI actions — no `/ops/tasks` button calls them today, but this
+ * route has no action allowlist (same as every action here), so they're reachable
+ * by any authenticated `/ops` session. 'redispatch' bumps `dispatch_count`,
+ * restamps `last_dispatched_at`, re-asserts `dispatch_status='dispatched'`
+ * (this route doesn't forward `comment`/`maxRetries`, so it never re-pings the
+ * issue — that's fleet-watchdog-only). 'flag' sets `dispatch_status='failed'` +
+ * `status='blocked'`.
  *
  * 'auto_on' / 'auto_off' flip `auto_ok` (migration 0008) — the Fleet
  * auto-dispatch opt-in (epic #41). Slice 2's dispatcher only picks up rows

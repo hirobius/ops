@@ -12,10 +12,14 @@
  *
  * Reuses every piece built in prior slices rather than re-implementing:
  *   - lib/tasks/tier.mjs::routeTask       tier/model routing (Slice 1)
- *   - lib/tasks/actions.mjs::applyTaskAction  the 'dispatch' action already
- *     opens the @claude issue + stamps dispatch_url/claimed_by (Slice 1/pre)
+ *   - lib/tasks/actions.mjs::applyTaskAction  the 'dispatch' action opens the
+ *     @claude issue and owns every dispatch-lifecycle field (dispatch_url,
+ *     claimed_by/at, dispatch_status, last_dispatched_at, dispatch_count —
+ *     ops#139: the one writer for those fields, regardless of dispatch source)
  *   - lib/github/issues.mjs::makeGitHubPort   injected GitHub port
- *   - lib/supabase/tasks.mjs::setTaskFields   writes tier/model/dispatch_*
+ *   - lib/supabase/tasks.mjs::setTaskFields   writes tier/model — the routing
+ *     fields `dispatch` doesn't own, so this script keeps them as a distinct
+ *     write (ops#139)
  *   - lib/ops/run-log.mjs::appendRun          run recap (#8)
  *   - lib/ops/notify.mjs::notifyEvent         fleet timeline + Discord (Slice 4)
  *
@@ -150,6 +154,33 @@ function fmtSelected(selected) {
     .join('\n');
 }
 
+/**
+ * Dispatch one selected task (ops#139): writes the routing fields `dispatch`
+ * doesn't own (`tier`/`model`) directly, then hands every dispatch-lifecycle
+ * write to `applyTaskAction('dispatch')` — the one seam every dispatch
+ * source shares, so `dispatch_status` is never double-stamped.
+ *
+ * @param {import('@supabase/supabase-js').SupabaseClient} sb
+ * @param {{ task: object, tier: string, model: string }} selected
+ * @param {{ github: import('../lib/github/issues.mjs').GitHubIssuePort }} deps
+ * @returns {Promise<{ ok: true, dispatchUrl: string } | { ok: false, error: string }>}
+ */
+export async function dispatchOne(sb, { task, tier, model }, { github }) {
+  const { error: setErr } = await setTaskFields(sb, task.key, { tier, model });
+  if (setErr) return { ok: false, error: `failed to write routing fields — ${setErr.message}` };
+
+  const result = await applyTaskAction(
+    sb,
+    { key: task.key, action: 'dispatch', actor: 'fleet-dispatch' },
+    { github },
+  );
+  if (result.status !== 200) {
+    return { ok: false, error: result.body?.error ?? 'unknown error' };
+  }
+
+  return { ok: true, dispatchUrl: result.body.dispatch_url };
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
@@ -244,32 +275,15 @@ async function main() {
   for (const { task, tier, model } of selected) {
     if (dispatchedCount >= args.max) break; // guardrail: never exceed --max per run
 
-    const nextCount = (task.dispatch_count ?? 0) + 1;
     const nowIso = new Date().toISOString();
 
-    const { error: setErr } = await setTaskFields(sb, task.key, {
-      tier,
-      model,
-      dispatch_status: 'dispatched',
-      last_dispatched_at: nowIso,
-      dispatch_count: nextCount,
-    });
-    if (setErr) {
-      console.error(`${task.key}: failed to write routing fields — ${setErr.message}`);
+    const result = await dispatchOne(sb, { task, tier, model }, { github });
+    if (!result.ok) {
+      console.error(`${task.key}: ${result.error}`);
       continue;
     }
 
-    const result = await applyTaskAction(
-      sb,
-      { key: task.key, action: 'dispatch', actor: 'fleet-dispatch' },
-      { github },
-    );
-    if (result.status !== 200) {
-      console.error(`${task.key}: dispatch failed — ${result.body?.error ?? 'unknown error'}`);
-      continue;
-    }
-
-    const dispatchUrl = result.body.dispatch_url;
+    const dispatchUrl = result.dispatchUrl;
 
     await notifyEvent({
       ts: nowIso,
