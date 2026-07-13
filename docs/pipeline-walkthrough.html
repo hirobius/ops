@@ -677,15 +677,15 @@
     </div>
     <p class="desc" style="max-width: 72ch">
       Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home (with the new
-      Runs panel) · admin/approvals (live — tasks-store approvals inbox, epic #41 Slice 3).
-      Password-gated, with a machine-auth key for headless agents. The fleet view watches every
-      Vercel deploy + repo status; the task board imports GitHub issues and dispatches them by
-      @-mentioning Claude; a task marked "queue" awaits a human Approve/Deny in the approvals inbox
-      before dispatch; every autonomous run posts a recap to the run-log.
+      Runs panel). Password-gated, with a machine-auth key for headless agents. The fleet view
+      watches every Vercel deploy + repo status; the task board imports GitHub issues and dispatches
+      them by @-mentioning Claude; merge governance runs through ralph-gate's
+      <code>ralph-auto</code>/<code>ralph-approved</code> labels via the board's "Approve merge" /
+      "Auto-merge" menu items — the pre-Ralph <code>/admin/approvals</code> inbox was retired
+      (ops#157); every autonomous run posts a recap to the run-log.
     </p>
     <div class="chips">
       <span class="chip">/ops/* surfaces</span>
-      <span class="chip">/admin/approvals (#41 Slice 3)</span>
       <span class="chip">scripts/deploy-alert.mjs</span>
       <span class="chip">tasks importer (#25)</span>
       <span class="chip">docs/ops/run-log.jsonl</span>

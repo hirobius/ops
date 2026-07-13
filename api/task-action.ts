@@ -6,24 +6,19 @@
  *
  * Request:  { key: string, action: Action, actor?: string, priority?: 'p0'|'p1'|'p2'|'p3'|null }
  *   Action = 'done' | 'reopen' | 'claim' | 'unclaim' | 'trash' | 'restore' | 'dispatch'
- *          | 'auto_on' | 'auto_off' | 'queue' | 'unqueue'
+ *          | 'auto_on' | 'auto_off'
  *          | 'ralph_ready_on' | 'ralph_ready_off' | 'ralph_approve' | 'ralph_dispatch'
  *          | 'ralph_requeue' | 'ralph_auto_on' | 'ralph_auto_off' | 'set_priority'
  *
  * 'auto_on' / 'auto_off' flip `auto_ok` (migration 0008) — the Fleet
- * auto-dispatch opt-in (epic #41). Slice 2's dispatcher only picks up rows
- * with auto_ok=true; this action alone does not dispatch anything.
- *
- * 'queue' / 'unqueue' flip `dispatch_status` to/from 'queued' (epic #41 Slice
- * 3) — the /admin/approvals inbox flag. A queued task is proposed for
- * dispatch but awaiting a human's Approve/Deny click; distinct from auto_ok
- * (which skips approval entirely).
+ * auto-dispatch opt-in (epic #41), read by scripts/fleet-dispatch.mjs. No UI
+ * surfaces this toggle (ops#157); this action alone does not dispatch anything.
  *
  * 'dispatch' is the agentic-loop hand-off (decided design: no Claude API). It opens
  * a GitHub issue that @mentions Claude — GitHub turns that into a Claude Code
  * session on a branch — and stamps dispatch_url + claimed_by='claude' +
- * dispatch_status='dispatched' (clears 'queued' so an approved task leaves the
- * inbox). Requires GITHUB_TOKEN (repo Issues: write); 503 if unset.
+ * dispatch_status='dispatched'. Requires GITHUB_TOKEN (repo Issues: write);
+ * 503 if unset.
  *
  * 'ralph_ready_on' / 'ralph_ready_off' (ops#88) add/remove the `ralph-ready`
  * label on the task's linked GitHub issue — the one human-approval tap the

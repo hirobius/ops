@@ -31,8 +31,7 @@ Deployed on Vercel; `main` is production.
 - **`/ops/clients` — client CRM.** `clients/<slug>/*.json` rendered as client
   dashboards / reports / brand audits, plus a public token-gated portal at
   `/c/:slug`.
-- **`/ops/projects`, `/ops/digest`, `/ops` index, `/admin/approvals`** — fleet
-  views + the approval inbox.
+- **`/ops/projects`, `/ops/digest`, `/ops` index** — fleet views.
 - **The `/ops` gate.** Server-side password: `api/ops-login.ts` checks
   `OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` and sets an httpOnly session cookie.
   `pnpm dev` bypasses it; production is gated.

@@ -30,7 +30,6 @@ import { Disclosure } from '../Disclosure';
 import RoutesTree from '../atlas/routes-tree';
 import ClientsTab from '../atlas/clients-tab';
 import ValidatorsTab from '../atlas/validators-tab';
-import { useTasks } from '../tasks/useTasks';
 import { RunsPanel } from './RunsPanel';
 import { FleetTimeline } from './FleetTimeline';
 import { SurfacesRail } from './SurfacesRail';
@@ -42,15 +41,12 @@ import { ServicesBar } from './ServicesBar';
 
 /** @public */
 export default function AgenticOSPage() {
-  const { tasks } = useTasks();
-  const approvalsCount = tasks ? tasks.filter((t) => t.dispatch_status === 'queued').length : null;
-
   return (
     <Page>
       <Stack direction="column" gap="px40">
         <PageHeader breadcrumbs={[{ label: 'Ops' }]} title="Ops" />
 
-        <SurfacesRail approvalsCount={approvalsCount} />
+        <SurfacesRail />
 
         <Section label="Fleet" hint="run-log + events + alerts, merged — newest 20">
           <FleetTimeline />

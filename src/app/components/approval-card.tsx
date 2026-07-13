@@ -64,9 +64,7 @@ export interface ApprovalCardProps {
   /** Grill action — flips approval to `needs-grilling`. */
   onGrill?: (unit: ApprovalUnitSummary) => void;
   /**
-   * Render the "Grill" action. Default true. The tasks-store approvals inbox
-   * (epic #41 Slice 3, v1) has no `needs-grilling` equivalent state — pass
-   * false there rather than wiring a dead button.
+   * Render the "Grill" action. Default true.
    */
   showGrill?: boolean;
   /** Disable buttons while a mutation is in flight. */
@@ -102,9 +100,10 @@ function truncate(text: string, max: number): string {
  * (Approve / Deny / Grill) that fire callbacks the page wires to the
  * bridge endpoint.
  *
- * Purely presentational — no fetch logic lives here. The page
- * (src/app/pages/admin/Approvals.tsx) owns the optimistic-update / reconcile
- * flow and supplies the disabled flag while a mutation is in flight.
+ * Purely presentational — no fetch logic lives here; a consuming page owns
+ * the optimistic-update / reconcile flow and supplies the disabled flag while
+ * a mutation is in flight. Currently consumerless — the tasks-store approvals
+ * inbox that rendered this was retired (ops#157); cleanup tracked in ops#140.
  */
 export const ApprovalCard = React.forwardRef<HTMLDivElement, ApprovalCardProps>(
   function ApprovalCard(

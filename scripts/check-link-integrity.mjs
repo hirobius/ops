@@ -350,7 +350,6 @@ function runRouteLinksCheck() {
     '/ops/atlas',
     '/ops/build',
     '/ops/sessions',
-    '/admin/approvals',
   ]);
 
   // HDS doc routes moved from /hds/* to /ops/hds/* (commit 3bf17b5b, 2026-05-10).
@@ -360,7 +359,6 @@ function runRouteLinksCheck() {
     '/portfolio/',
     '/ops/clients/',
     '/ops/hds/',
-    '/admin/approvals/',
   ];
 
   const ROUTE_RE = /(?:href|to)\s*=\s*["'](\/[^"'#?]*)["']/g;

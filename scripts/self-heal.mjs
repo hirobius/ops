@@ -34,7 +34,6 @@ const DEFAULT_SMOKE_PATHS = [
   '/ops/sessions',
   '/ops/kanban',
   '/ops/clients',
-  '/admin/approvals',
 ];
 
 const BOILERPLATE_PATTERNS = [
