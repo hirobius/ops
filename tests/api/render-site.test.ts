@@ -15,7 +15,7 @@ const CONFIG = {
   slug: 'pressure-pros',
   business: {
     name: 'Pressure Pros',
-    phone: '+1-555-1234',
+    phone: '+1-555-010-0000',
     email: 'info@pressurepros.com',
     hours: [{ days: 'Mon–Fri', hours: '8–6' }],
     serviceAreas: ['Austin'],
