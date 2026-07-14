@@ -1,5 +1,10 @@
 # HANDOFF — the living session-to-session state
 
+> ⛔ **READ `docs/ai/ROADMAP.md` FIRST.** As of 2026-07-14 the roadmap is the
+> single source of truth for goal, scope, and sequencing — it overrides
+> everything below. This file is retained as historical context only; do not
+> plan from it. If it disagrees with the roadmap, the roadmap wins.
+
 > **Contract.** This is the single universal handoff. Any session (any device,
 > any agent) that gets a short prompt — "continue", "status", "pick up", "go" —
 > reads THIS file first and acts from it. Any session that does real work
