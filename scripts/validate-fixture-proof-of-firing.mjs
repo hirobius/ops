@@ -274,10 +274,15 @@ function validate() {
       cached.passingMtime === passingMtime &&
       cached.lastResult !== undefined
     ) {
-      // Cache hit — skip re-run
-      if (cached.lastResult === 'pass') {
-        real.push({ id: gateId, fromCache: true });
-      } else {
+      // Cache hit — skip re-run. Every cached real-fixture gate counts toward
+      // `real` (attempted), mirroring the fresh path which pushes to `real`
+      // before running. Only a cached 'fail' is a proof-of-firing failure; a
+      // cached 'skip' (gate not runnable in this environment — e.g. an optional
+      // tool like gitleaks is absent) is accounted-for, exactly as a fresh skip
+      // is. The previous code mis-counted any non-'pass' cached result
+      // (including 'skip') as a failure, so the cache disagreed with a fresh run.
+      real.push({ id: gateId, fromCache: true });
+      if (cached.lastResult === 'fail') {
         failures.push({ id: gateId, reason: 'cached failure', fromCache: true });
       }
       newCache[gateId] = cached;
