@@ -221,6 +221,18 @@
       "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
+      "id": "check-editorconfig",
+      "description": "Graceful-degradation guard around editorconfig-checker — skips with a warning when its platform binary is unreachable (network-restricted session) instead of hard-failing the whole check chain, enforces normally otherwise.",
+      "severity": "warn",
+      "gateScript": "scripts/check-editorconfig.mjs",
+      "fixturePath": null,
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual"
+    },
+    {
       "id": "check-link-integrity",
       "description": "Unified link integrity gate: (1) active docs do not point at missing local files, (2) external href URLs return non-4xx, (3) internal route targets are known app routes. Merged from check-doc-references, check-external-links, check-route-links (13z-6).",
       "severity": "warn",
