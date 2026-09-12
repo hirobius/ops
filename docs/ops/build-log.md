@@ -17,6 +17,9 @@
   (local/gitignored; meta, retainer, checklist, tasks, goals, status).
 - **Legal templates** — `docs/legal/MSA-template.md` + `SOW-template.md`
   (reusable; filled Access Tech version handed to Adrian separately).
+- **Determinism & autonomy audit** — 46 gates (27 enforced / 19 manual), Ralph
+  idle-watchdog found DISABLED (the bottleneck), `--no-verify` gate hole, token
+  source of truth already exists. Published as an artifact; findings below.
 - **This build log.**
 
 ## Decisions
@@ -42,6 +45,14 @@
    copies); an evals workstream to harden site-engine's LLM generation.
 8. **`access-tech-internal` repo → private** (portal content was readable on a
    public repo despite the password gate).
+
+## Audit findings (2026-09-12) → punch list
+1. **Re-arm the Ralph idle-watchdog** (dial: A cloud cron every ~3h [rec] · B reliable local runner · C manual=status quo). PENDING Adrian.
+2. Fix the `--no-verify` hole — editorconfig-checker skip-when-unavailable so remote sessions keep every pre-commit gate. (Claude, branch+PR)
+3. Codify the Operating Contract → `~/.claude/CLAUDE.md` + client-repo CLAUDE.md.
+4. Promote the top ~6 manual gates to CI; mark the rest advisory in the registry.
+5. Add 3 cross-repo gates: client-repo privacy · portal client-safe lint · token-drift guard.
+6. Token unification — portal-kit + Lilac consume `hirobius.tokens.json`.
 
 ## Open / to validate at end of push
 - [ ] Access Tech workspace extracted into desktop `clients/access-tech/` +
