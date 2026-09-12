@@ -640,3 +640,37 @@ this issue reopened the orphan-sweeper slice specifically)
   re-implemented the same fix fresh against current main, preserving Run
   Ralph and everything else #170/#113 added since.
 - Branch: ralph/issue-158-card-tone-export.
+
+## Issue #233 — pre-commit --no-verify hole (editorconfig-checker binary 403)
+- Repro'd for real in this sandbox: node_modules/.bin/editorconfig-checker
+  fails with "Failed to download binary: Error: The binary 'ec-linux-amd64*'
+  not found" (network-restricted egress). Confirmed .husky/pre-commit itself
+  does NOT invoke editorconfig-checker directly today (only gitleaks, which
+  already degrades gracefully) -- the raw `pnpm exec editorconfig-checker`
+  call lives in check:fast/check:full/check:mojibake (package.json), and
+  check:full is what CI's ci.yml runs. Issue's DoD names those three script
+  chains explicitly, so fixed there regardless of the current hook wiring.
+- Added scripts/check-editorconfig.mjs: runs the real tool, detects its own
+  "Failed to download binary" stderr marker (or a hang past a timeout) and
+  treats ONLY that as tool-unavailable -> warns by name, exits 0. Any other
+  outcome (clean pass, real violations, unrelated errors) forwards untouched.
+  Same shape as check-secrets.mjs's `which gitleaks` guard, the precedent
+  the issue asked to mirror.
+- Swapped `pnpm exec editorconfig-checker` -> `node scripts/check-editorconfig.mjs`
+  in check:fast/check:full/check:mojibake.
+- Registered check-editorconfig in docs/guardrails/registry.json as
+  firingChannel:"manual" (matches check-contrast/check-doc-structure, which
+  are also only invoked from check:full) -- manual-channel gates are exempt
+  from validate-fixture-proof-of-firing's fixture requirement, so no fixture
+  dir needed.
+- Did NOT touch the other pre-commit steps the issue mentions auditing
+  (pnpm install --frozen-lockfile is already --offline; check-secrets/
+  check-licenses were checked and either already degrade gracefully or
+  don't hit network) -- smallest complete slice, per the DoD's explicit ask.
+  Left as a follow-up if Adrian wants a fuller audit.
+- Test: scripts/__tests__/check-editorconfig.test.mjs -- 6 cases (marker
+  detection, clean pass, real-violation forwarding, binary-unavailable skip,
+  timeout skip) using CHECK_EDITORCONFIG_BIN/ARGS/TIMEOUT_MS env overrides
+  to fake the binary, never touching the real network-dependent one.
+- Gate green: typecheck + 665 tests (56 files, incl. new file) + lint.
+- Branch: ralph/issue-233-editorconfig-guard.
