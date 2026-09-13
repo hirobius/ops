@@ -9,8 +9,8 @@
  * standalone hirobius-design-system repo (own visual-regression CI); here
  * `/hds/*` is a client-side redirect to /ops (src/app/routes.tsx), so every
  * one of those routes was auditing the same page under different labels.
- * Scoped to ops's real, statically-reachable routes instead — see
- * tests/visual.spec.ts for the identical fix (#54) applied earlier.
+ * Scoped to ops's real, statically-reachable routes instead — the same fix
+ * (#54) applied earlier to the now-deleted tests/visual.spec.ts (#122).
  *
  * Run:  pnpm test:collision
  * CI:   included in check:release

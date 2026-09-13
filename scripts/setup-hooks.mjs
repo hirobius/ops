@@ -6,7 +6,7 @@
  *
  * Hook tier:
  *   pre-commit → pnpm typecheck
- *   pre-push   → pnpm check:full + test:a11y + heal + visual parity ingest
+ *   pre-push   → pnpm typecheck + pnpm test
  */
 
 import { existsSync } from 'fs';
@@ -14,7 +14,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import installHusky from 'husky';
 
-const ROOT      = join(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const HOOKS_DIR = join(ROOT, '.git');
 
 if (!existsSync(HOOKS_DIR)) {
