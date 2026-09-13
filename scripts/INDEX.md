@@ -4,7 +4,7 @@
 > Regenerate with `pnpm scripts:index`. Deterministic (no timestamps), so it
 > only changes when scripts do.
 
-**130 scripts** across 9 categories.
+**131 scripts** across 9 categories.
 
 ## Prefix taxonomy
 
@@ -23,7 +23,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `figma-`    | figma    | Figma bridge — design-system sync, diff, or canvas ops.                               |
 | _(other)_   | other    | One-off utilities, middleware, and domain scripts without a taxonomy prefix.          |
 
-## gate (27)
+## gate (28)
 
 | Script                              | Purpose                                                                                                                                                                                                                   | pnpm                                                                       | Fires              |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------ |
@@ -33,6 +33,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `check-commit-message-task-ref.mjs` | Validates that commits on feature branches reference an open Hermes Kanban task via a `Refs: <task-id>` line in the commit body. Soft-warn by default; promote to error via KANBAN_REF_ENFORCE=error.                     | —                                                                          | commit-msg · warn  |
 | `check-doc-structure.mjs`           | Validates structural invariants of HDS documentation pages.                                                                                                                                                               | `check:doc-structure`, `check:full`                                        | manual · warn      |
 | `check-dom-node-budgets.mjs`        | Counts the number of JSX elements authored in each `src/app/**` component / page (a static, parser-accurate proxy for rendered DOM weight — measured via                                                                  | —                                                                          | manual · error     |
+| `check-editorconfig.mjs`            | Graceful-degradation guard around `editorconfig-checker`. The npm package downloads a per-platform Go binary on first run; that download 403s in network-constrained sessions (remote/web sandboxes, egress-              | `check:fast`, `check:full`, `check:mojibake`                               | pnpm-meta · warn   |
 | `check-exemptions.mjs`              | Keeps escape hatches visible and well-formed.                                                                                                                                                                             | `check:exemptions`, `check:full`                                           | pre-commit · warn  |
 | `check-fixture-stubs-ratchet.mjs`   | Reads the current withStubFixtures count from validate-fixture-proof-of-firing (--json mode) and enforces that this count strictly decreases over time. The                                                               | —                                                                          | ci-pr · error      |
 | `check-focus-states.mjs`            | A11y focus state checker for HDS components and pages. Every interactive element must have a visible focus indicator.                                                                                                     | `check:focus`, `check:full`                                                | manual · warn      |

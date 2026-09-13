@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 130,
+  "totalScripts": 131,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -44,7 +44,7 @@
     "other": 66,
     "audit": 16,
     "build": 1,
-    "gate": 27,
+    "gate": 28,
     "generate": 11,
     "sync": 3,
     "test": 2,
@@ -345,6 +345,17 @@
       "gate": {
         "channel": "manual",
         "severity": "error"
+      }
+    },
+    {
+      "name": "check-editorconfig.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Graceful-degradation guard around `editorconfig-checker`. The npm package downloads a per-platform Go binary on first run; that download 403s in network-constrained sessions (remote/web sandboxes, egress-",
+      "pnpm": ["check:fast", "check:full", "check:mojibake"],
+      "gate": {
+        "channel": "pnpm-meta",
+        "severity": "warn"
       }
     },
     {
