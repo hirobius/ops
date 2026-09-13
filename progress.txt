@@ -640,3 +640,44 @@ this issue reopened the orphan-sweeper slice specifically)
   re-implemented the same fix fresh against current main, preserving Run
   Ralph and everything else #170/#113 added since.
 - Branch: ralph/issue-158-card-tone-export.
+
+## Issue #206 — guardrail scripts duplicated with no drift detection (slice 1: canonical = ops)
+- Implemented the drift gate proposed in the issue's "Implementation-ready"
+  comment: docs/guardrails/shared-manifest.json pins sha256 of the shared
+  guardrail-harness scripts (validate-fixture-proof-of-firing.mjs,
+  run-gates.mjs, validate-guardrail-registry.mjs, check-guardrail-drift.mjs
+  itself); scripts/check-guardrail-drift.mjs verifies/re-pins (--write) /
+  reports (--json). ops is the canonical repo per the issue's design.
+- Deviated from the pasted snippet in one place: swapped join(ROOT, rel) for
+  resolve(ROOT, rel) when resolving manifest file paths, and added
+  --fixture-mode / FIXTURE_FILE support (mirrors validate-orchestration.mjs's
+  pattern) so both the proof-of-firing fixture pair AND the node:test suite
+  can point the gate at a scratch manifest instead of the real one -- avoids
+  a unit-test suite that mutates docs/guardrails/shared-manifest.json.
+- Registered in docs/guardrails/registry.json (firingChannel: ci-pr,
+  supportsJson: true) right after check-frozen-demos -- no run-gates.mjs
+  edit needed, it already reads the registry.
+- fixtures/check-guardrail-drift/{target.txt,violating.example.json,
+  passing.example.json}: a self-contained fixture pair (points the manifest
+  at the fixture's own target.txt rather than a real shared script) so the
+  proof-of-firing fixture never goes stale when an unrelated shared script's
+  content changes later. Verified via
+  node scripts/validate-fixture-proof-of-firing.mjs --json --no-cache ->
+  ok:true, no violation for check-guardrail-drift.
+- scripts/__tests__/check-guardrail-drift.test.mjs: 6 vitest cases (no
+  manifest -> exit 2, --write then verify -> exit 0, drift -> exit 1 +
+  [drift], --json structured findings, deleted file -> exit 1 [missing],
+  the real committed manifest matches the real repo files today).
+- Ran --write once to pin the real manifest against the 4 real shared
+  scripts' current content.
+- Files: scripts/check-guardrail-drift.mjs, scripts/__tests__/
+  check-guardrail-drift.test.mjs, docs/guardrails/shared-manifest.json,
+  docs/guardrails/registry.json, fixtures/check-guardrail-drift/*.
+- Gate green: typecheck + 665 tests (incl. the 6 new cases) + lint.
+- Scope: slice 1 only (ops as canonical + the gate mechanism), per the
+  issue's own "Follow-up (slice 2, sub-issue)" note. Sibling adoption
+  (hds / site-engine consuming this manifest) is explicitly out of scope for
+  this PR -- left as the noted follow-up, not filed as a new sub-issue this
+  iteration (no gh write access needed beyond the PR/issue comment for #206
+  itself).
+- Branch: ralph/issue-206-guardrail-drift-gate.

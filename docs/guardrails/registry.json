@@ -298,6 +298,19 @@
       "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
+      "id": "check-guardrail-drift",
+      "description": "Verifies shared guardrail harness scripts match the pinned canonical hashes in docs/guardrails/shared-manifest.json; fails on drift so a fix to a shared script can't silently fail to reach a sibling repo.",
+      "severity": "error",
+      "gateScript": "scripts/check-guardrail-drift.mjs",
+      "fixturePath": "fixtures/check-guardrail-drift",
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "ci-pr",
+      "supportsJson": true
+    },
+    {
       "id": "check-hardcoded-colors",
       "description": "Catches hardcoded color values in non-CSS color contexts that bypass the CSS custom property cascade and are invisible to check-inline-styles / check-tier-bypass.",
       "severity": "warn",

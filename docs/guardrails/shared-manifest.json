@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "canonicalRepo": "hirobius/ops",
+  "note": "Pinned sha256 of shared guardrail harness scripts. Regenerate with `node scripts/check-guardrail-drift.mjs --write` in the canonical repo after any intentional change.",
+  "files": {
+    "scripts/validate-fixture-proof-of-firing.mjs": "sha256:c4ecba38881433e447e23f8d5bc3b1959c42995f9a4583812cfb2a2e295e0d1c",
+    "scripts/run-gates.mjs": "sha256:82dc35be38ebfa8a664358752185465d197282aebac2550cae4273e1b7c7367b",
+    "scripts/validate-guardrail-registry.mjs": "sha256:39c5c941b2ae73307a35872bf256d0df52b66529999d37bc313d6f8d89ce8fc0",
+    "scripts/check-guardrail-drift.mjs": "sha256:cdf9d69aa93d7cc2dbb12d0298ee1f3b51a3e4f3295388aa1da18158b12433d2"
+  }
+}
