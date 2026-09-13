@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 117,
+  "totalScripts": 130,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,12 +41,12 @@
     }
   },
   "categoryCounts": {
-    "other": 57,
+    "other": 66,
     "audit": 16,
     "build": 1,
-    "gate": 25,
-    "generate": 10,
-    "sync": 2,
+    "gate": 27,
+    "generate": 11,
+    "sync": 3,
     "test": 2,
     "validate": 3,
     "verify": 1
@@ -157,6 +157,17 @@
       "gate": null
     },
     {
+      "name": "audit-orphan-modules.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "(no header description)",
+      "pnpm": ["audit:orphan-modules"],
+      "gate": {
+        "channel": "pnpm-meta",
+        "severity": "warn"
+      }
+    },
+    {
       "name": "audit-orphan-wip.mjs",
       "category": "audit",
       "prefix": "audit",
@@ -223,17 +234,6 @@
       }
     },
     {
-      "name": "audit-tiers.mjs",
-      "category": "audit",
-      "prefix": "audit",
-      "purpose": "Heuristic tier classifier for every src/app/components/Hds*.tsx (and recursive subdirs like src/app/components/lab/). Proposes one of: primitive | pattern | template | utility.",
-      "pnpm": [],
-      "gate": {
-        "channel": "manual",
-        "severity": "warn"
-      }
-    },
-    {
       "name": "auto-assigner.mjs",
       "category": "other",
       "prefix": "auto",
@@ -293,6 +293,17 @@
       }
     },
     {
+      "name": "check-circular-deps.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Builds the intra-`src/` static import graph (relative + `@/*` alias imports), finds every import cycle via Tarjan's strongly-connected-components algorithm,",
+      "pnpm": [],
+      "gate": {
+        "channel": "manual",
+        "severity": "error"
+      }
+    },
+    {
       "name": "check-code-connect.mjs",
       "category": "gate",
       "prefix": "check",
@@ -315,17 +326,6 @@
       }
     },
     {
-      "name": "check-contrast.mjs",
-      "category": "gate",
-      "prefix": "check",
-      "purpose": "WCAG 2.1 contrast ratio checker for HDS semantic color pairs. Reads hirobius.tokens.json, resolves primitive + semantic color aliases, and reports contrast ratios for critical text/bg pairings in both",
-      "pnpm": ["check:contrast", "check:full"],
-      "gate": {
-        "channel": "manual",
-        "severity": "warn"
-      }
-    },
-    {
       "name": "check-doc-structure.mjs",
       "category": "gate",
       "prefix": "check",
@@ -334,6 +334,17 @@
       "gate": {
         "channel": "manual",
         "severity": "warn"
+      }
+    },
+    {
+      "name": "check-dom-node-budgets.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Counts the number of JSX elements authored in each `src/app/**` component / page (a static, parser-accurate proxy for rendered DOM weight — measured via",
+      "pnpm": [],
+      "gate": {
+        "channel": "manual",
+        "severity": "error"
       }
     },
     {
@@ -378,6 +389,17 @@
       "gate": {
         "channel": "manual",
         "severity": "warn"
+      }
+    },
+    {
+      "name": "check-guardrail-drift.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Shared guardrail harness scripts (proof-of-firing, run-gates, the registry validator, …) are vendored into multiple repos (ops / hds / site-engine). When one repo fixes a bug in a shared script, the fix can silently…",
+      "pnpm": [],
+      "gate": {
+        "channel": "ci-pr",
+        "severity": "error"
       }
     },
     {
@@ -589,10 +611,34 @@
       "gate": null
     },
     {
+      "name": "daily-review.mjs",
+      "category": "other",
+      "prefix": "daily",
+      "purpose": "Agentic-ops review loop — Slice 1 (issue #29). A read-only review pass:",
+      "pnpm": ["review:daily"],
+      "gate": null
+    },
+    {
+      "name": "deploy-alert.mjs",
+      "category": "other",
+      "prefix": "deploy",
+      "purpose": "Watches the SAME sources /ops/projects reads — Vercel deploy states via lib/projects/index.mjs::listProjects() (VERCEL_TOKEN) and each repo's root status.json `blocked[]` via GITHUB_TOKEN (attachRepoStatuses, called…",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "derive-routes.mjs",
       "category": "other",
       "prefix": "derive",
       "purpose": "Auto-derive the route list from: 1. src/app/routes.tsx (the React Router config) 2. src/app/data/component-api.json (component doc pages)",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "digest-middleware.mjs",
+      "category": "other",
+      "prefix": "digest",
+      "purpose": "/api/digest-action. Reuses lib/digests/actions.mjs + lib/supabase/digests.mjs (same logic as the prod functions). Wired in vite.config.mjs with apply:'serve' so it never ships to prod.",
       "pnpm": [],
       "gate": null
     },
@@ -629,6 +675,22 @@
       "gate": null
     },
     {
+      "name": "fleet-dispatch.mjs",
+      "category": "other",
+      "prefix": "fleet",
+      "purpose": "The mayor's fleet-mode worker: scans the `tasks` board for rows Adrian has opted into auto-dispatch (`auto_ok=true`, via the /ops/tasks toggle from Slice 1), routes each through the deterministic `lib/tasks/tier.mjs`",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "fleet-watchdog.mjs",
+      "category": "other",
+      "prefix": "fleet",
+      "purpose": "Closes the loop Slice 2 opened: `fleet-dispatch.mjs` opens `@claude` issues and stamps `dispatch_status='dispatched'`, but nothing previously noticed when a dispatched session died / never opened a PR. This script…",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "generate-changelog.mjs",
       "category": "generate",
       "prefix": "generate",
@@ -657,6 +719,14 @@
       "category": "generate",
       "prefix": "generate",
       "purpose": "generate-portal-token — mint a /c/:slug?token=… HMAC token for a client.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "generate-pwa-icons.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "references, with zero image-library dependencies (raw PNG encoding via zlib).",
       "pnpm": [],
       "gate": null
     },
@@ -744,10 +814,26 @@
       "gate": null
     },
     {
+      "name": "log-run.mjs",
+      "category": "other",
+      "prefix": "log",
+      "purpose": "(no header description)",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "meeting-to-tasks.mjs",
       "category": "other",
       "prefix": "meeting",
       "purpose": "meeting transcript, append them to docs/ai/proposed-units.jsonl.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "notify.mjs",
+      "category": "other",
+      "prefix": null,
+      "purpose": "dispatcher/other scripts call `notifyEvent` directly rather than shelling out to this. The timestamp is stamped here at post-time (`new Date()` is fine in a normal one-shot CLI; only workflow scripts that must stay",
       "pnpm": [],
       "gate": null
     },
@@ -864,6 +950,14 @@
       "gate": null
     },
     {
+      "name": "push-outreach.mjs",
+      "category": "other",
+      "prefix": "push",
+      "purpose": "into a Smartlead cold-outreach campaign (#9 outreach engine, scaffolding).",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "record-health.mjs",
       "category": "other",
       "prefix": "record",
@@ -928,6 +1022,14 @@
       "gate": null
     },
     {
+      "name": "seed-digest-items.mjs",
+      "category": "other",
+      "prefix": "seed",
+      "purpose": "digest_items store (Digest P1, ops#78).",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "self-heal.mjs",
       "category": "other",
       "prefix": "self",
@@ -973,6 +1075,14 @@
       "prefix": "sync",
       "purpose": "Scans src/ for lucide-react imports and emits a registry of the icon exports currently used by the app.",
       "pnpm": ["icons:sync"],
+      "gate": null
+    },
+    {
+      "name": "sync-preview-urls.mjs",
+      "category": "sync",
+      "prefix": "sync",
+      "purpose": "Closes the manual-paste nav gap: today, after a client site deploys to Vercel, someone has to hand-paste the preview URL onto the lead's `preview_url` so it",
+      "pnpm": [],
       "gate": null
     },
     {

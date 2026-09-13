@@ -681,3 +681,38 @@ this issue reopened the orphan-sweeper slice specifically)
   iteration (no gh write access needed beyond the PR/issue comment for #206
   itself).
 - Branch: ralph/issue-206-guardrail-drift-gate.
+
+Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target artifact in ops).
+- Decision: full removal, not just unregister. Both gates read artifacts owned
+  by hirobius-design-system (public/hds-manifest.json, hirobius.tokens.json)
+  that structurally cannot exist in ops (ops consumes the DS, doesn't author
+  it) -- same class as #39/#54's DS-authoring gate split. Unlike sibling
+  already-retired gates (check-attributions, check-code-connect,
+  check-doc-structure) which still run and pass trivially, these two crash
+  (ENOENT) every run, so leaving dead crashing scripts around was pure debt.
+- Removed: registry.json entries for both ids; scripts/audit-tiers.mjs +
+  scripts/check-contrast.mjs; fixtures/audit-tiers/ + fixtures/check-contrast/;
+  package.json's check:contrast alias + its use in check:full; the two
+  matching dead lookup-table entries in scripts/audit-gate-replaceability.mjs.
+  Regenerated scripts/INDEX.md + INDEX.json.
+- Left alone (out of scope, pre-existing/historical): scripts/lib/
+  token-resolver.mjs (has its own test suite, generic token-resolution lib,
+  not exclusively check-contrast's), and dated historical docs that mention
+  either script (SYSTEMS-LOG.md, SIGNAL.md, wiring-audit.md,
+  checks-hooks-triggers-inventory.md, full-strictness-inventory*.json,
+  gate-audit-2026-05-06.md, archive/TIER_AUDIT.md, etc.) -- rewriting
+  point-in-time audit logs to match current state would be revisionist.
+  SYSTEMS_REGISTRY.md's check:full table was already stale for several other
+  scripts pre-existing this change; not touched here either.
+- Note from the issue (hds-manifest.json is also read by watch-roadmap.mjs,
+  build-roadmap-data.mjs, check-snapshot-staleness.mjs, scaffold-component.mjs,
+  check-component-docs.mjs, audit-strengths.mjs, audit-gate-replaceability.mjs)
+  is explicitly out of scope for this issue -- flagged, not touched.
+- Verified: node scripts/validate-guardrail-registry.mjs -> all 42 registered.
+  node scripts/check-validator-wiring.mjs -> 45 gates wired as declared.
+  bash ralph/gate.sh -> typecheck + 665 tests + lint all green.
+- Files: docs/guardrails/registry.json, package.json, scripts/INDEX.json,
+  scripts/INDEX.md, scripts/audit-gate-replaceability.mjs; deleted
+  scripts/audit-tiers.mjs, scripts/check-contrast.mjs, fixtures/audit-tiers/*,
+  fixtures/check-contrast/*.
+- Branch: ralph/issue-175-retire-audit-tiers-check-contrast.
