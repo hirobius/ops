@@ -98,6 +98,7 @@ export function PullLeadsForm({ onInserted }: PullLeadsFormProps) {
           <button
             type="submit"
             disabled={!canSubmit}
+            className="hds-focus"
             style={canSubmit ? buttonStyle : buttonDisabledStyle}
           >
             {status.kind === 'sending' ? 'Pulling…' : 'Pull leads'}
