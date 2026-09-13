@@ -918,3 +918,51 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Branch: ralph/issue-122-delete-dead-visual-a11y-suites.
 - Note for next iteration: none — DoD fully met (no dangling references, all
   three flagged scripts read+updated carefully), gate green.
+
+## Issue #210 — HANDOFF "Now" drifts from Decisions log
+- Decision: build the "optional check-handoff-freshness.mjs" half of the
+  DoD (not the session-end-checklist half) since a script is what actually
+  "catches" drift before it misleads, per the DoD wording.
+- New scripts/check-handoff-freshness.mjs: parses docs/ai/HANDOFF.md's
+  "Now" and "Decisions" sections; flags a Now bullet whose bolded, dated
+  lead phrase (e.g. "FEATURE FREEZE (2026-07-08, Adrian)") is contradicted
+  by a Decisions entry dated strictly later that shares 2+ significant
+  words (len>=4, stopword-filtered) with the bold phrase. Deliberately
+  under-flags (skips Now bullets with no inline date) rather than guess —
+  false negatives are safer than false positives in a heuristic doc-lint.
+  Verified by hand against the live HANDOFF.md: fires exactly once, on the
+  real still-live "FEATURE FREEZE" bullet vs. the 2026-07-11 "feature
+  freeze LIFTED" Decisions entry — zero false positives on the rest of the
+  Now section.
+- Registered in docs/guardrails/registry.json via
+  `validate-guardrail-registry.mjs --update` (id: check-handoff-freshness,
+  severity: warn, firingChannel: manual) — this also alphabetically
+  re-sorted the whole gates array (46->47 entries); content-diffed old vs
+  new by id to confirm nothing else changed, just reordering + the one
+  new entry.
+- New `pnpm check:handoff-freshness` alias in package.json.
+- Deliberately did NOT wire it into check:full or ralph/gate.sh: it already
+  fires on the live doc's real stale FEATURE FREEZE bullet, so a blocking
+  gate would either force an unrelated doc-content fix into this slice or
+  hard-fail every future PR on existing debt. Left manual/session-end per
+  CLAUDE.md's HANDOFF contract; noted on the issue as a natural follow-up
+  (promote to blocking + reconcile the doc).
+- Deliberately did NOT regenerate scripts/INDEX.md/INDEX.json — confirmed
+  via a throwaway run that the generator's output format has drifted from
+  what's committed on main (pre-existing, unrelated ~800-line reformat),
+  so running it here would bury my one-line addition in unrelated noise.
+  Left for its own cleanup pass.
+- Tests: scripts/__tests__/check-handoff-freshness.test.mjs (5 cases,
+  synthetic fixtures via --fixture-mode/FIXTURE_FILE — never touches the
+  real HANDOFF.md, which drifts every session).
+- Verified: bash ralph/gate.sh -> typecheck + 676 tests (5 new) + lint all
+  green. node scripts/validate-guardrail-registry.mjs -> all registered,
+  content-diff clean.
+- Files: scripts/check-handoff-freshness.mjs (new),
+  scripts/__tests__/check-handoff-freshness.test.mjs (new),
+  docs/guardrails/registry.json, package.json.
+- Branch: ralph/issue-210-handoff-freshness-check. PR #251.
+- Note for next iteration: the live docs/ai/HANDOFF.md FEATURE FREEZE
+  bullet (line ~19) is a real instance of the bug this issue names — worth
+  a follow-up to reconcile it against the 2026-07-11 Decisions entry, then
+  consider promoting check-handoff-freshness to a blocking gate.

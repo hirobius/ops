@@ -75,6 +75,7 @@
     "check:format": "pnpm exec lint-staged",
     "check:full": "pnpm typecheck && node scripts/audit-pages.mjs && pnpm check:docs && node scripts/check-doc-structure.mjs && node scripts/check-focus-states.mjs && node scripts/check-reduced-motion.mjs && node scripts/check-unresponsive-grids.mjs && node scripts/check-page-shell.mjs && node scripts/check-motion.mjs && node scripts/check-editorconfig.mjs && node scripts/check-hardcoded-colors.mjs && node scripts/check-tier-bypass.mjs && node scripts/check-link-integrity.mjs && node scripts/check-og-meta.mjs && node scripts/check-security-baseline.mjs && node scripts/check-attributions.mjs && node scripts/check-exemptions.mjs && node scripts/check-registry.mjs",
     "check:grids": "node scripts/check-unresponsive-grids.mjs",
+    "check:handoff-freshness": "node scripts/check-handoff-freshness.mjs",
     "check:knip": "knip",
     "check:knip-ratchet": "knip --max-issues 60",
     "check:licenses": "node scripts/check-licenses.mjs",
