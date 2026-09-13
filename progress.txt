@@ -918,3 +918,24 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Branch: ralph/issue-122-delete-dead-visual-a11y-suites.
 - Note for next iteration: none — DoD fully met (no dangling references, all
   three flagged scripts read+updated carefully), gate green.
+
+## Issue #248 (2026-09-13)
+- Follow-up to #242/#247 (part of #239): strip DS-authoring/dead-route
+  residue. Issue lists 5 candidates; took the smallest complete slice —
+  dropping the dead `/hds` URL entry from the Lighthouse CI budget list.
+- Verified `/hds` is dead: src/app/routes.tsx has `{ path: 'hds/*', element:
+  <Navigate to="/ops" replace /> }` (both top-level and legacy /ops/hds/*) —
+  running a perf budget against a redirect target is pointless, it just
+  re-measures /ops.
+- Did NOT touch the other 4 candidates in this iteration (figma-sync.ts,
+  generate-visual-catalog.mjs + visual-ingest.mjs, check-code-connect.mjs,
+  sync-figma-variables.yml) — each needs its own load-bearing check (they
+  have live pnpm scripts / registry entries wired in) and is a separate
+  logical change; commented back on the issue for a follow-up slice.
+- Files: .lighthouserc.json (removed "http://localhost/hds" from collect.url).
+- Verified: bash ralph/gate.sh -> typecheck + 671 tests + lint all green.
+- Branch: ralph/issue-248-drop-hds-perf-entry.
+- Note for next iteration: remaining 4 candidates from #248 still open —
+  each is check:code-connect / catalog / visual-ingest / test:figma /
+  sync-figma-variables.yml, all still wired into package.json scripts or
+  the guardrail registry, so each needs its own verify-then-remove pass.
