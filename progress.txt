@@ -716,3 +716,64 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   scripts/audit-tiers.mjs, scripts/check-contrast.mjs, fixtures/audit-tiers/*,
   fixtures/check-contrast/*.
 - Branch: ralph/issue-175-retire-audit-tiers-check-contrast.
+
+## Issue #233 — editorconfig-checker graceful degradation (rebuild after #235 closed stale)
+- editorconfig-checker downloads a per-platform binary on first run, which
+  403s in network-constrained sessions and hard-fails check:fast/check:full/
+  check:mojibake outright -- voiding every other gate in the chain. Same
+  failure mode .husky/pre-commit already avoids for gitleaks.
+- This issue had already been fixed once in PR #235, but Adrian closed it
+  unmerged: it conflicted with main after #244 (both edited package.json's
+  check:full) and #175 (registry/INDEX drift from a since-retired base).
+  Re-dispatched #233 asking for a clean rebuild against current main --
+  no work lost, but redone from scratch rather than force-merging the stale
+  branch.
+- Added scripts/check-editorconfig.mjs: spawns the real editorconfig-checker,
+  forwards clean pass / real violation untouched, skips with a named warning
+  (exit 0) only when its own binary download failed or timed out (detected
+  via "Failed to download binary" marker or a timeout kill). CI keeps the
+  hard version (real egress).
+  Test-only seam: CHECK_EDITORCONFIG_BIN/ARGS/TIMEOUT_MS env overrides
+  (used by scripts/__tests__/check-editorconfig.test.mjs, 6 cases).
+- Swapped `pnpm exec editorconfig-checker` -> `node scripts/check-editorconfig.mjs`
+  in check:fast/check:full/check:mojibake (package.json). Did NOT carry over
+  #235's unrelated check:contrast line -- that script was retired by #175
+  after #235's branch forked; including it would have been dead code.
+- Registered the gate in docs/guardrails/registry.json: firingChannel
+  "pnpm-meta" (matches check-tier-bypass/check-link-integrity -- it auto-fires
+  via pnpm scripts, so "manual" would have been an inaccurate label even
+  though validate-fixture-proof-of-firing exempts manual-channel gates from
+  needing a fixture). Inserted the single new entry inline near
+  check-doc-structure rather than running validate-guardrail-registry.mjs
+  --update, which re-serializes/re-sorts the *entire* gates array and would
+  have produced a 250-line diff of pure reordering noise (root cause of the
+  #235 conflict in the first place).
+- pnpm-meta channel means validate-fixture-proof-of-firing requires a real
+  (non-stub) fixture pair, not just a TODO stub -- adding a new stub would
+  also have failed check-fixture-stubs-ratchet's monotonic-decrease gate
+  (ci-pr channel) down the line. Gave check-editorconfig.mjs a --fixture-mode
+  branch (same convention as check-fixture-stubs-ratchet.mjs): with
+  --fixture-mode + FIXTURE_FILE set, runs `node <FIXTURE_FILE>` in place of
+  the real binary. fixtures/check-editorconfig/{passing,violating}.example.mjs
+  are real fake-binary scripts (exit 0 / print+exit 1), so proof-of-firing
+  exercises the actual code path, not a synthetic stand-in.
+- Regenerated scripts/INDEX.json + INDEX.md, ran through prettier to match
+  existing formatting (raw JSON.stringify output collapses short arrays
+  differently than the repo's committed style -- always prettier --write
+  generated JSON/MD before diffing, or the diff balloons with reformatting
+  noise unrelated to the actual change).
+- Verified: node scripts/check-editorconfig.mjs (real sandbox) -> warns +
+  skips (exit 0) on the actual 403. pnpm exec vitest run
+  scripts/__tests__/check-editorconfig.test.mjs -> 6/6 green.
+  node scripts/validate-fixture-proof-of-firing.mjs --verbose -> [REAL/PASS]
+  check-editorconfig, 0 missing. node scripts/validate-guardrail-registry.mjs
+  -> all registered. bash ralph/gate.sh -> typecheck + 671 tests + lint green.
+  Committed through the real unmodified pre-commit hook (no --no-verify).
+- Files: package.json, scripts/check-editorconfig.mjs (new),
+  scripts/__tests__/check-editorconfig.test.mjs (new),
+  fixtures/check-editorconfig/{passing,violating}.example.mjs (new),
+  docs/guardrails/registry.json, scripts/INDEX.json, scripts/INDEX.md.
+- Branch: ralph/issue-233-editorconfig-graceful-guard. PR #246 (Closes #233).
+- Note for next iteration: PR #235 (branch ralph/issue-233-editorconfig-guard,
+  stale/closed) can be deleted once #246 merges -- left it alone here since
+  branch deletion wasn't asked for and isn't this session's call to make.
