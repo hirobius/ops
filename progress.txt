@@ -966,3 +966,32 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   bullet (line ~19) is a real instance of the bug this issue names — worth
   a follow-up to reconcile it against the 2026-07-11 Decisions entry, then
   consider promoting check-handoff-freshness to a blocking gate.
+
+## Issue #248 — strip DS-authoring residue (slice: dead /hds Lighthouse CI entry)
+- Re-slice of the same smallest-complete-slice tried in a previously
+  closed PR (#252): dropped `http://localhost/hds` from `.lighthouserc.json`'s
+  URL list. #252 was closed by adr-eng because main advanced past it before
+  ralph-gate ran, with a re-dispatch note on the issue to redo cleanly.
+- Verified before removing: src/app/routes.tsx has TWO `/hds/*` entries
+  (top-level line 55, and `/ops/hds/*` line 80), both plain `Navigate to`
+  redirects (`/hds/*` -> `/ops`, `/ops/hds/*` -> `/ops`) -- no real page
+  renders at either path. Also confirmed no script reads .lighthouserc.json
+  programmatically (`grep -rn lighthouserc scripts/*.mjs
+  docs/guardrails/registry.json` -- no hits); only the Lighthouse CI GitHub
+  Action consumes it.
+- Did not touch the other 4 candidates named in the issue (figma-sync.ts,
+  generate-visual-catalog.mjs/visual-ingest.mjs, check-code-connect.mjs,
+  sync-figma-variables.yml) -- each needs its own verify-then-remove pass
+  per the issue's own "Approach" section; commented back on the issue as
+  follow-up slices, per CLAUDE.md epic-decomposition discipline.
+- Reverted an incidental docs/guardrails/registry.json lastFiringAt-only
+  diff produced by running the gate locally (pre-commit hook side effect,
+  same noise pattern as #78's progress note) -- not part of this change.
+- Gate green: typecheck + 676 tests + lint (bash ralph/gate.sh).
+- Files: .lighthouserc.json.
+- Branch: ralph/issue-248-lighthouse-hds-entry. PR #253.
+- Next iteration for #248: pick one of the remaining 4 candidates and
+  verify-then-remove it as its own slice (same discipline #247 used, which
+  correctly kept several mislabeled candidates on the original #242 list —
+  don't assume "DS-authoring" without checking it isn't a live consumer
+  surface first).
