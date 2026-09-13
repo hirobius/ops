@@ -9,8 +9,8 @@
  * (#242) ROUTES used to list a portfolio + `/hds/*` doc-gallery site this repo
  * no longer hosts (portfolio/vibe-sketchbook routes were retired; `/hds/*` is
  * now a client-side redirect to /ops — src/app/routes.tsx). Scoped to the
- * routes the router actually serves; see tests/visual.spec.ts for the
- * identical fix (#54) applied earlier.
+ * routes the router actually serves — the same fix (#54) applied earlier to
+ * the now-deleted tests/visual.spec.ts (#122).
  *
  * Run:  pnpm test:responsive
  * Or:   npx playwright test tests/responsive.spec.ts
