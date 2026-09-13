@@ -244,6 +244,7 @@ export default function TasksPage() {
             <button
               key={toast.id}
               type="button"
+              className="hds-focus"
               style={toast.tone === 'danger' ? s.toastDanger : s.toastSuccess}
               onClick={() => dismiss(toast.id)}
               title="Dismiss"

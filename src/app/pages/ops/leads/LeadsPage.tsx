@@ -116,7 +116,13 @@ export default function LeadsPage() {
     if (st === 'publishing') return <span style={s.score}>Publishing…</span>;
     if (st === 'published') {
       return lead.live_url ? (
-        <a href={lead.live_url} target="_blank" rel="noreferrer" style={s.linkAction}>
+        <a
+          href={lead.live_url}
+          target="_blank"
+          rel="noreferrer"
+          className="hds-focus"
+          style={s.linkAction}
+        >
           Live ↗
         </a>
       ) : null;
@@ -132,6 +138,7 @@ export default function LeadsPage() {
           <button
             type="button"
             onClick={() => handleSiteAction(lead.id, 'publish')}
+            className="hds-focus"
             style={s.genButton}
           >
             {st === 'publish_failed' ? 'Retry publish' : 'Publish'}
@@ -145,6 +152,7 @@ export default function LeadsPage() {
         <button
           type="button"
           onClick={() => handleSiteAction(lead.id, 'build')}
+          className="hds-focus"
           style={s.genButton}
         >
           {st === 'build_failed' ? 'Retry build' : 'Build site'}
@@ -233,6 +241,7 @@ export default function LeadsPage() {
                     type="button"
                     disabled={inFlight}
                     onClick={() => handleGenerate(lead.id)}
+                    className="hds-focus"
                     style={inFlight ? s.genButtonDisabled : s.genButton}
                   >
                     {inFlight

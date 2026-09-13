@@ -155,7 +155,13 @@ export function RalphPanel({ act, onNotify }: RalphPanelProps) {
                 <span key={entry.repo} style={s.repoCell}>
                   <span style={s.repoName}>{shortRepo(entry.repo)}</span>
                   {chip.url ? (
-                    <a href={chip.url} target="_blank" rel="noreferrer" style={s.chipLink}>
+                    <a
+                      href={chip.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hds-focus"
+                      style={s.chipLink}
+                    >
                       <Badge tone={chip.tone}>{chip.label}</Badge>
                     </a>
                   ) : (
@@ -175,7 +181,13 @@ export function RalphPanel({ act, onNotify }: RalphPanelProps) {
           <ol style={s.queue}>
             {data.queue.slice(0, QUEUE_SHOWN).map((q) => (
               <li key={`${q.repo}#${q.number}`} style={s.queueItem}>
-                <a href={q.url} target="_blank" rel="noreferrer" style={s.queueLink}>
+                <a
+                  href={q.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hds-focus"
+                  style={s.queueLink}
+                >
                   <span style={s.queueNum}>
                     {shortRepo(q.repo)}#{q.number}
                   </span>{' '}
@@ -207,7 +219,13 @@ export function RalphPanel({ act, onNotify }: RalphPanelProps) {
               return (
                 <li key={key} style={s.parkedItem}>
                   <div style={s.parkedMain}>
-                    <a href={p.url} target="_blank" rel="noreferrer" style={s.queueLink}>
+                    <a
+                      href={p.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hds-focus"
+                      style={s.queueLink}
+                    >
                       <span style={s.queueNum}>
                         {shortRepo(p.repo)}#{p.number}
                       </span>{' '}
@@ -243,7 +261,13 @@ export function RalphPanel({ act, onNotify }: RalphPanelProps) {
           <ol style={s.queue}>
             {data.prs.slice(0, PRS_SHOWN).map((pr) => (
               <li key={`${pr.repo}#${pr.number}`} style={s.queueItem}>
-                <a href={pr.url} target="_blank" rel="noreferrer" style={s.queueLink}>
+                <a
+                  href={pr.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hds-focus"
+                  style={s.queueLink}
+                >
                   <span style={s.queueNum}>
                     {shortRepo(pr.repo)}#{pr.number}
                   </span>{' '}

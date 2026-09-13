@@ -829,3 +829,27 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   triage comment on #242 -- generate-visual-catalog.mjs + visual-ingest.mjs
   (both target the same dead /hds/* route set, natural next pair) look like
   the next cleanest slice.
+
+## Issue #177 — check-focus-states: 7 missing hds-focus violations across 4 ops pages
+- Fix: added className="hds-focus" to each flagged raw <button>/<a> element,
+  matching the existing style={...} objects already on those elements (this
+  codebase pairs inline style with className="hds-focus" for focus rings —
+  confirmed pattern via grep across src/app, e.g. ProjectsPage.tsx,
+  DigestPage.tsx).
+- Scope note: the issue body listed 7 violations (LeadsPage x3, PullLeadsForm
+  x1, RalphPanel x2, TaskRow x1) but `node scripts/check-focus-states.mjs` now
+  reports 10 — RalphPanel gained 2 more <a> links (parked-queue + PR-queue
+  rows) and TasksPage.tsx gained a new toast-dismiss <button>, all added by
+  code that landed after the issue was filed. Fixed all 10 rather than only
+  the original 7, since the DoD explicitly requires "check-focus-states exits
+  clean" — leaving the new ones would fail that acceptance criterion and the
+  fix is the same one-line pattern, not new scope.
+- Did NOT add --json output to the audit script (issue called it optional).
+- Verified: node scripts/check-focus-states.mjs -> clean. pnpm typecheck ->
+  clean. pnpm test:layout -> 14/14 passed (had to `pnpm exec playwright
+  install chromium` first, browsers weren't preinstalled in this session).
+  bash ralph/gate.sh -> typecheck + 671 tests + lint all green.
+- Files: src/app/pages/ops/leads/LeadsPage.tsx, PullLeadsForm.tsx,
+  src/app/pages/ops/tasks/RalphPanel.tsx, TaskRow.tsx, TasksPage.tsx.
+- Branch: ralph/issue-177-focus-states-hds-focus.
+- Note for next iteration: none — DoD fully met, gate green.
