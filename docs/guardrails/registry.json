@@ -5,18 +5,6 @@
   "precommitStructureHashUpdatedAt": "2026-07-11T16:59:33.379Z",
   "gates": [
     {
-      "id": "audit-soft-gates",
-      "description": "Meta-audit: reads registry.json, filters to soft-channel gates (manual / pnpm-meta / ci-scheduled), runs each gate against the current tree, and emits a triage report at /tmp/soft-gates-audit.json + docs/guardrails/soft-gate-promotion-plan.md. Classifies each gate as promote-to-pre-commit, promote-to-pre-push, promote-to-ci-pr, baseline-then-promote, investigate-broken, or stay-soft. Runs on demand; never modifies firingChannel values.",
-      "severity": "warn",
-      "gateScript": "scripts/audit-soft-gates.mjs",
-      "fixturePath": null,
-      "lastFiringAt": null,
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "generated",
-      "firingChannel": "manual"
-    },
-    {
       "id": "audit-batch-deliverables",
       "description": "TODO: add description — audit-batch-deliverables.mjs JSDoc block is empty.",
       "severity": "warn",
@@ -92,6 +80,19 @@
       "supportsJson": true
     },
     {
+      "id": "audit-gate-replaceability",
+      "description": "Planning artifact: reads registry.json and produces a per-gate replaceability verdict (fully-replaceable / partially-replaceable / genuinely-custom) with industry-tool replacements and migration cost estimates. Output: /tmp/gate-replaceability-audit.json + docs/guardrails/gate-replaceability-plan.md. Manual channel only — run on demand when evaluating gate rationalization.",
+      "severity": "warn",
+      "gateScript": "scripts/audit-gate-replaceability.mjs",
+      "fixturePath": "fixtures/audit-gate-replaceability",
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual",
+      "supportsJson": false
+    },
+    {
       "id": "audit-gates-supportjson",
       "description": "Meta-gate ratchet for the --json rollout (per unit 13p-8). For each registered gate outside pnpm-meta, spawns `node <gateScript> --json` with a 30s timeout and verifies stdout parses as { violations: Array }. Reports compliance counters; emits Violation rows for non-compliant gates so they surface in the strict-gate inventory. Severity:warn initially; flip to error once 100% comply.",
       "severity": "warn",
@@ -119,6 +120,19 @@
       "supportsJson": true
     },
     {
+      "id": "audit-orphan-wip",
+      "description": "Scans every branch ahead of main and classifies each commit as tracked/orphan based on whether it has a 'Refs: <task-id>' line that points to an open Hermes Kanban task. Companion to check-commit-message-task-ref (which catches new orphans pre-commit); this catches the existing backlog. Always exits 0 — purely informational. Run via 'pnpm audit:wip'. Writes docs/guardrails/orphan-wip-report.json.",
+      "severity": "info",
+      "gateScript": "scripts/audit-orphan-wip.mjs",
+      "fixturePath": "fixtures/audit-orphan-wip",
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual",
+      "scope": "full-tree"
+    },
+    {
       "id": "audit-pages",
       "description": "Token compliance auditor for page surfaces. This is intentionally looser than audit-components.mjs — reusable components must be strict, pages must still avoid raw design values but can keep justified editorial layout.",
       "severity": "warn",
@@ -142,6 +156,30 @@
       "source": "human",
       "firingChannel": "manual",
       "supportsJson": true
+    },
+    {
+      "id": "audit-sites",
+      "description": "Site-quality / redesign-need auditor (#21). Reads custom-site leads from Supabase, calls Google PageSpeed Insights, and scores each site (0-100 inverse). Operator CLI + data tool, not a guardrail — manual channel, needs PAGESPEED_API_KEY + migration 0006.",
+      "severity": "warn",
+      "gateScript": "scripts/audit-sites.mjs",
+      "fixturePath": null,
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual"
+    },
+    {
+      "id": "audit-soft-gates",
+      "description": "Meta-audit: reads registry.json, filters to soft-channel gates (manual / pnpm-meta / ci-scheduled), runs each gate against the current tree, and emits a triage report at /tmp/soft-gates-audit.json + docs/guardrails/soft-gate-promotion-plan.md. Classifies each gate as promote-to-pre-commit, promote-to-pre-push, promote-to-ci-pr, baseline-then-promote, investigate-broken, or stay-soft. Runs on demand; never modifies firingChannel values.",
+      "severity": "warn",
+      "gateScript": "scripts/audit-soft-gates.mjs",
+      "fixturePath": null,
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "generated",
+      "firingChannel": "manual"
     },
     {
       "id": "audit-strengths",
@@ -169,6 +207,18 @@
       "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
+      "id": "check-circular-deps",
+      "description": "Circular-dependency lock (ratchet) for src/: builds the intra-src static import graph, finds every import cycle via Tarjan SCC, and locks the count against docs/guardrails/baselines/check-circular-deps.json. New cycles fail; removed cycles tighten the lock.",
+      "severity": "error",
+      "gateScript": "scripts/check-circular-deps.mjs",
+      "fixturePath": "fixtures/check-circular-deps",
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual"
+    },
+    {
       "id": "check-code-connect",
       "description": "CI check: every Figma component with a Code Connect mapping (.figma.tsx) has a corresponding React component, and vice versa.",
       "severity": "warn",
@@ -180,6 +230,19 @@
       "source": "human",
       "firingChannel": "manual",
       "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+    },
+    {
+      "id": "check-commit-message-task-ref",
+      "description": "Validates that commits on feature branches reference an open Hermes Kanban task via 'Refs: <task-id>' line in the commit body. Wired in .husky/commit-msg. Warn-only by default; promote with KANBAN_REF_ENFORCE=error. Skips main/release/*/hotfix/*, [skip-kanban] tag, merge/revert commits. Accepts kanban IDs (t_<hex>) and legacy unit IDs (1[0-9][a-z]-<n>).",
+      "severity": "warn",
+      "gateScript": "scripts/check-commit-message-task-ref.mjs",
+      "fixturePath": "fixtures/check-commit-message-task-ref",
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "commit-msg",
+      "scope": "full-tree"
     },
     {
       "id": "check-doc-structure",
@@ -195,6 +258,18 @@
       "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
+      "id": "check-dom-node-budgets",
+      "description": "Per-file DOM-node budget lock (ratchet) for src/app: counts JSX elements per component/page via the TypeScript AST and locks each file's count against docs/guardrails/baselines/check-dom-node-budgets.json. Files that grow past their budget fail; files that shrink tighten; new files are recorded.",
+      "severity": "error",
+      "gateScript": "scripts/check-dom-node-budgets.mjs",
+      "fixturePath": "fixtures/check-dom-node-budgets",
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual"
+    },
+    {
       "id": "check-editorconfig",
       "description": "Graceful-degradation guard around editorconfig-checker: runs the real tool and forwards clean passes / real violations untouched, but skips with a named warning (exit 0) when the tool's own binary download failed or timed out, so a network-blocked session doesn't void the rest of the check chain.",
       "severity": "warn",
@@ -205,32 +280,6 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "pnpm-meta"
-    },
-    {
-      "id": "check-link-integrity",
-      "description": "Unified link integrity gate: (1) active docs do not point at missing local files, (2) external href URLs return non-4xx, (3) internal route targets are known app routes. Merged from check-doc-references, check-external-links, check-route-links (13z-6).",
-      "severity": "warn",
-      "gateScript": "scripts/check-link-integrity.mjs",
-      "fixturePath": "fixtures/check-link-integrity",
-      "lastFiringAt": null,
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "pnpm-meta",
-      "subModes": [
-        {
-          "flag": "--doc-refs-only",
-          "replaces": "check-doc-references"
-        },
-        {
-          "flag": "--external-only",
-          "replaces": "check-external-links"
-        },
-        {
-          "flag": "--route-links-only",
-          "replaces": "check-route-links"
-        }
-      ]
     },
     {
       "id": "check-exemptions",
@@ -297,6 +346,18 @@
       "supportsJson": true
     },
     {
+      "id": "check-handoff-freshness",
+      "description": "Flags a docs/ai/HANDOFF.md \"Now\" bullet whose claim is contradicted by a newer dated \"Decisions\" entry on the same topic (ops#210) — e.g. a lifted freeze left standing as an active Now bullet.",
+      "severity": "warn",
+      "gateScript": "scripts/check-handoff-freshness.mjs",
+      "fixturePath": null,
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual"
+    },
+    {
       "id": "check-hardcoded-colors",
       "description": "Catches hardcoded color values in non-CSS color contexts that bypass the CSS custom property cascade and are invisible to check-inline-styles / check-tier-bypass.",
       "severity": "warn",
@@ -323,6 +384,32 @@
       "firingChannel": "pre-commit",
       "scope": "full-tree",
       "supportsJson": true
+    },
+    {
+      "id": "check-link-integrity",
+      "description": "Unified link integrity gate: (1) active docs do not point at missing local files, (2) external href URLs return non-4xx, (3) internal route targets are known app routes. Merged from check-doc-references, check-external-links, check-route-links (13z-6).",
+      "severity": "warn",
+      "gateScript": "scripts/check-link-integrity.mjs",
+      "fixturePath": "fixtures/check-link-integrity",
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "pnpm-meta",
+      "subModes": [
+        {
+          "flag": "--doc-refs-only",
+          "replaces": "check-doc-references"
+        },
+        {
+          "flag": "--external-only",
+          "replaces": "check-external-links"
+        },
+        {
+          "flag": "--route-links-only",
+          "replaces": "check-route-links"
+        }
+      ]
     },
     {
       "id": "check-motion",
@@ -440,6 +527,19 @@
       "firingChannel": "pre-commit"
     },
     {
+      "id": "check-snapshot-staleness",
+      "description": "Warns when a committed snapshot baseline JSON is older than any of its source files — catching baselines that should have been regenerated after a source change but weren't. Covers fixtures/figma-masters/snapshot-pre-8v3.json (sources: pipeline/figma-masters-batch.mjs + public/hds-manifest.json) and fixtures/doc-pages/snapshot.json (sources: src/app/pages/docs/**/*.tsx). Warn-only by default; set STALENESS_ENFORCE=error to make blocking.",
+      "severity": "warn",
+      "gateScript": "scripts/check-snapshot-staleness.mjs",
+      "fixturePath": null,
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual",
+      "supportsJson": true
+    },
+    {
       "id": "check-tier-bypass",
       "description": "Enforces the primitive -> semantic -> component aliasing hierarchy in source files. Direct use of var(--primitive-*) in component and page files bypasses the semantic tier.",
       "severity": "warn",
@@ -474,32 +574,6 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "pre-commit",
-      "scope": "full-tree"
-    },
-    {
-      "id": "check-commit-message-task-ref",
-      "description": "Validates that commits on feature branches reference an open Hermes Kanban task via 'Refs: <task-id>' line in the commit body. Wired in .husky/commit-msg. Warn-only by default; promote with KANBAN_REF_ENFORCE=error. Skips main/release/*/hotfix/*, [skip-kanban] tag, merge/revert commits. Accepts kanban IDs (t_<hex>) and legacy unit IDs (1[0-9][a-z]-<n>).",
-      "severity": "warn",
-      "gateScript": "scripts/check-commit-message-task-ref.mjs",
-      "fixturePath": "fixtures/check-commit-message-task-ref",
-      "lastFiringAt": null,
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "commit-msg",
-      "scope": "full-tree"
-    },
-    {
-      "id": "audit-orphan-wip",
-      "description": "Scans every branch ahead of main and classifies each commit as tracked/orphan based on whether it has a 'Refs: <task-id>' line that points to an open Hermes Kanban task. Companion to check-commit-message-task-ref (which catches new orphans pre-commit); this catches the existing backlog. Always exits 0 — purely informational. Run via 'pnpm audit:wip'. Writes docs/guardrails/orphan-wip-report.json.",
-      "severity": "info",
-      "gateScript": "scripts/audit-orphan-wip.mjs",
-      "fixturePath": "fixtures/audit-orphan-wip",
-      "lastFiringAt": null,
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "manual",
       "scope": "full-tree"
     },
     {
@@ -542,68 +616,6 @@
       "firingChannel": "pre-commit",
       "strictArgv": "--strict-validation",
       "glob": "docs/ai/orchestration.json"
-    },
-    {
-      "id": "audit-gate-replaceability",
-      "description": "Planning artifact: reads registry.json and produces a per-gate replaceability verdict (fully-replaceable / partially-replaceable / genuinely-custom) with industry-tool replacements and migration cost estimates. Output: /tmp/gate-replaceability-audit.json + docs/guardrails/gate-replaceability-plan.md. Manual channel only — run on demand when evaluating gate rationalization.",
-      "severity": "warn",
-      "gateScript": "scripts/audit-gate-replaceability.mjs",
-      "fixturePath": "fixtures/audit-gate-replaceability",
-      "lastFiringAt": null,
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "manual",
-      "supportsJson": false
-    },
-    {
-      "id": "check-snapshot-staleness",
-      "description": "Warns when a committed snapshot baseline JSON is older than any of its source files — catching baselines that should have been regenerated after a source change but weren't. Covers fixtures/figma-masters/snapshot-pre-8v3.json (sources: pipeline/figma-masters-batch.mjs + public/hds-manifest.json) and fixtures/doc-pages/snapshot.json (sources: src/app/pages/docs/**/*.tsx). Warn-only by default; set STALENESS_ENFORCE=error to make blocking.",
-      "severity": "warn",
-      "gateScript": "scripts/check-snapshot-staleness.mjs",
-      "fixturePath": null,
-      "lastFiringAt": null,
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "manual",
-      "supportsJson": true
-    },
-    {
-      "id": "audit-sites",
-      "description": "Site-quality / redesign-need auditor (#21). Reads custom-site leads from Supabase, calls Google PageSpeed Insights, and scores each site (0-100 inverse). Operator CLI + data tool, not a guardrail — manual channel, needs PAGESPEED_API_KEY + migration 0006.",
-      "severity": "warn",
-      "gateScript": "scripts/audit-sites.mjs",
-      "fixturePath": null,
-      "lastFiringAt": null,
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "manual"
-    },
-    {
-      "id": "check-circular-deps",
-      "description": "Circular-dependency lock (ratchet) for src/: builds the intra-src static import graph, finds every import cycle via Tarjan SCC, and locks the count against docs/guardrails/baselines/check-circular-deps.json. New cycles fail; removed cycles tighten the lock.",
-      "severity": "error",
-      "gateScript": "scripts/check-circular-deps.mjs",
-      "fixturePath": "fixtures/check-circular-deps",
-      "lastFiringAt": null,
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "manual"
-    },
-    {
-      "id": "check-dom-node-budgets",
-      "description": "Per-file DOM-node budget lock (ratchet) for src/app: counts JSX elements per component/page via the TypeScript AST and locks each file's count against docs/guardrails/baselines/check-dom-node-budgets.json. Files that grow past their budget fail; files that shrink tighten; new files are recorded.",
-      "severity": "error",
-      "gateScript": "scripts/check-dom-node-budgets.mjs",
-      "fixturePath": "fixtures/check-dom-node-budgets",
-      "lastFiringAt": null,
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "manual"
     }
   ]
 }
