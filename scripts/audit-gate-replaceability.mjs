@@ -140,23 +140,6 @@ const REPLACEMENT_TABLE = {
       'A simple eslint rule (or jsx-a11y/img-loading) catches missing loading= attribute. The custom scanner is ~118 LOC for what is a 2-line regex check.',
   },
 
-  'check-contrast': {
-    verdict: 'partially-replaceable',
-    replacement: {
-      tool: 'axe-core / Storybook a11y addon',
-      source: 'https://github.com/dequelabs/axe-core',
-      npmPackage: '@axe-core/react',
-      configEffort: 'small',
-      exampleConfig: '// vitest-axe in component tests; or Storybook a11y addon for visual checks',
-    },
-    keepReason:
-      'The custom gate reads hirobius.tokens.json directly and validates the token-level contrast pairs in design-time, before any component is rendered. axe-core only evaluates rendered DOM. The token-level design-time check has no industry equivalent.',
-    migrationCost: 'medium',
-    coverageGain: 'higher',
-    notes:
-      'axe-core catches runtime contrast violations better (real rendered DOM). The design-time token audit is genuinely custom. Recommended: keep 1 design-time token-pair check, add axe-core for runtime coverage.',
-  },
-
   // ── Tailwind gates ──────────────────────────────────────────────────────────
 
   'check-tailwind-arbitrary': {
@@ -716,22 +699,6 @@ const REPLACEMENT_TABLE = {
     migrationCost: null,
     coverageGain: null,
     notes: 'Genuinely custom. Keep.',
-  },
-
-  'audit-tiers': {
-    verdict: 'genuinely-custom',
-    replacement: {
-      tool: null,
-      source: null,
-      npmPackage: null,
-      configEffort: null,
-      exampleConfig: null,
-    },
-    keepReason:
-      'HDS-specific component tier classification (primitive/pattern/utility). No industry equivalent for design-system tier governance.',
-    migrationCost: null,
-    coverageGain: null,
-    notes: 'Core HDS governance. Keep.',
   },
 
   'audit-tokens': {

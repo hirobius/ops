@@ -156,19 +156,6 @@
       "firingChannel": "ci-pr"
     },
     {
-      "id": "audit-tiers",
-      "description": "Heuristic tier classifier for every src/app/components/Hds*.tsx (and recursive subdirs like src/app/components/lab/). Proposes one of: primitive | pattern | utility | unknown.",
-      "severity": "warn",
-      "gateScript": "scripts/audit-tiers.mjs",
-      "fixturePath": "fixtures/audit-tiers",
-      "lastFiringAt": "2026-05-10T16:58:27.890Z",
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
-    },
-    {
       "id": "check-attributions",
       "description": "Keeps the attribution registry machine-checkable. Checks that registry IDs in ATTRIBUTIONS.md are present and unique, and that asset manifest sourceId values resolve to known registry IDs.",
       "severity": "warn",
@@ -188,19 +175,6 @@
       "gateScript": "scripts/check-code-connect.mjs",
       "fixturePath": "fixtures/check-code-connect",
       "lastFiringAt": "2026-05-10T16:58:29.008Z",
-      "lastViolationAt": null,
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
-    },
-    {
-      "id": "check-contrast",
-      "description": "WCAG 2.1 contrast ratio checker for HDS semantic color pairs. Reads hirobius.tokens.json, resolves primitive + semantic color aliases, and reports contrast ratios for critical text/bg pairings in both light and dark mode.",
-      "severity": "warn",
-      "gateScript": "scripts/check-contrast.mjs",
-      "fixturePath": "fixtures/check-contrast",
-      "lastFiringAt": "2026-05-10T16:58:29.035Z",
       "lastViolationAt": null,
       "owner": "Adrian",
       "source": "human",
