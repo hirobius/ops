@@ -777,3 +777,55 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Note for next iteration: PR #235 (branch ralph/issue-233-editorconfig-guard,
   stale/closed) can be deleted once #246 merges -- left it alone here since
   branch deletion wasn't asked for and isn't this session's call to make.
+
+## Issue #242 — strip DS-authoring gates/scripts/workflows from ops (epic; this is one slice)
+- Epic covers ~10 scripts + 8 workflows (see issue body). Per dispatch
+  discipline (decompose epics, land in small batches -- issue itself says
+  "do NOT remove all at once"), did ONE slice this iteration and left the
+  rest for follow-up.
+- Investigated every candidate before touching anything (issue: "verify each
+  isn't load-bearing for an ops surface first"):
+  - check-motion/check-reduced-motion/check-page-shell/check-unresponsive-
+    grids/check-tier-bypass: all scan ops's OWN src/app/components, src/app/
+    pages, src/styles/*.css -- these are scoped consumer checks (does ops's
+    code correctly consume HDS tokens/motion/tiers), not DS-gallery authoring.
+    Keep.
+  - generate-portal-token.mjs: unrelated to DS entirely -- mints the /c/:slug
+    portal HMAC token ops's own portal auth depends on. Issue's candidate list
+    mis-scoped this one. Keep, flagged in the PR/issue comment.
+  - hds-migration-audit.yml / token-scan.yml: audit ops's own src/app/** and
+    deployed preview URL respectively -- legitimate consumer-scoped checks.
+    Keep.
+  - collision.yml+tests/collision.spec.ts and responsive.yml+tests/
+    responsive.spec.ts: ROUTES arrays were 100% (collision) / mostly
+    (responsive) dead -- /hds/* now client-side-redirects to /ops
+    (src/app/routes.tsx), and responsive.spec.ts also still listed retired
+    /portfolio, /vibe-sketchbook routes that 404 under the current router.
+    Every one of those "routes" was really auditing the same /ops gate
+    screen (or a 404) under a different label -- exact same problem
+    tests/visual.spec.ts already hit and fixed under #54 (see that file's
+    header comment). THIS is the slice: scoped both files' ROUTES down to
+    the real router surface (/, /info, /ops), mirroring visual.spec.ts's
+    and a11y.spec.ts's already-established pattern. Also deleted
+    responsive.spec.ts's checkShellChrome isHdsRoute nav-trigger/sidebar
+    branches (dead now that no /hds route is under test) -- kept the
+    generic skip-link-in-DOM check.
+  - figma-sync.ts, generate-visual-catalog.mjs, visual-ingest.mjs,
+    check-code-connect.mjs, sync-figma-variables.yml,
+    hds-migration-audit.yml's sibling scripts, and perf.yml/
+    .lighthouserc.json's `/hds` URL entry: NOT touched this iteration --
+    real DS-authoring/dead-route candidates but out of scope for one small
+    diff. Commented back on #242 with per-candidate verdicts so the next
+    Ralph iteration (or a human) doesn't have to re-derive this triage.
+- Verified: ran both suites against a real `pnpm build && vite preview`
+  (installed chromium first) -- 33/33 passing (was silently "passing" before
+  too, since redirect targets/404s don't collide or overflow, but that was
+  false confidence: it was auditing the /ops gate 10x under fake route
+  names, not real HDS gallery content). bash ralph/gate.sh -> typecheck +
+  671 tests + lint all green.
+- Files: tests/collision.spec.ts, tests/responsive.spec.ts.
+- Branch: ralph/issue-242-strip-ds-authoring-collision-responsive-hds-routes.
+- Note for next iteration: pick up the next candidate from the per-item
+  triage comment on #242 -- generate-visual-catalog.mjs + visual-ingest.mjs
+  (both target the same dead /hds/* route set, natural next pair) look like
+  the next cleanest slice.
