@@ -141,10 +141,15 @@ pipeline is intact (`scripts/persist-learned-rule.mjs`,
 caller was `scripts/hermes-unit.mjs runPostMortem()`, which went with the
 orchestration retirement. The two `[auto]` rules still sitting in
 `AGENT_GUIDELINES.md` are May-2026 Hermes output, and they're task artifacts, not
-durable rules. So the loop needs a **new trigger**, not a new tool: a Ralph park
-or a self-heal engagement is the natural one — both are already-detected moments
-where the agent's context was provably insufficient. Sessions that hit a context
-gap the steering should have prevented append one line.
+durable rules. So the loop needs a **new trigger**, not a new tool — and the
+trigger's data already exists: `ralph/lib.sh` and `ralph/next.sh` write a marked
+comment on every failure (`ralph-attempt-failed`, `🅿️ Ralph parked this issue`,
+the model's own `ralph-blocked:`). The fix is therefore a **reader**, harvesting
+those pairs retroactively (#298), not an engine change. The highest-value signal
+is the **pair**: the loop's verdict plus the human's recovery comment saying what
+actually broke. And note *why* Hermes produced junk rules — it ran its post-mortem
+on task **completion**, so it distilled task trivia. Trigger on **failure**.
+Sessions that hit a context gap the steering should have prevented append one line.
 
 ## 5. Human gates — essential vs. friction
 
