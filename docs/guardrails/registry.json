@@ -396,6 +396,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "pnpm-meta",
+      "supportsJson": true,
       "subModes": [
         {
           "flag": "--doc-refs-only",

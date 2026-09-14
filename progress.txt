@@ -1099,3 +1099,47 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - bash ralph/gate.sh green: typecheck + 676 tests + lint.
 - Files: .lighthouserc.json.
 - Branch: ralph/issue-123-ops-seo-budget-exemption.
+
+## Issue #176 — check-link-integrity route allowlist stale (false pos + neg, no --json)
+- Root cause: runRouteLinksCheck() in scripts/check-link-integrity.mjs
+  validated hrefs/`to` targets against a hand-maintained EXACT_ROUTES/
+  PREFIX_ROUTES Set/array that drifted from src/app/routes.tsx (false
+  positive on /ops/tasks — flagged via the Navigate target inside
+  routes.tsx itself; false negatives on retired /ops/sessions,
+  /ops/briefing, /ops/atlas, /ops/build).
+- Fix: replaced the hardcoded lists with deriveKnownRoutes(), a TS-AST
+  walk of src/app/routes.tsx (same createBrowserRouter-walking approach
+  scripts/check-route-coverage.mjs already used for a different purpose —
+  duplicated rather than shared, since coverage excludes Navigate-only
+  routes and link-integrity wants them included as valid destinations).
+  Composes nested `children` paths; wildcard (`foo/*`) and dynamic
+  (`:param`) segments become prefix matches; bare `*` (404 catch-all) is
+  excluded so it can't become an allow-everything hole.
+- Added --json (scripts/lib/gate-output.mjs's hasJsonFlag/emitResult
+  contract) across all three sub-checks (doc-refs, external, route-links)
+  so `pnpm audit:soft-gates` can parse a violationCount instead of
+  bucketing any non-zero exit as investigate-broken. Set
+  supportsJson:true on the registry entry (docs/guardrails/registry.json)
+  to match.
+- Extended fixture-mode (--fixture-mode + FIXTURE_FILE) to the
+  route-links sub-check (previously doc-refs only) so it's unit-testable
+  without touching real src/app content — matches known routes against
+  the REAL routes.tsx while scanning a scratch fixture file for hrefs.
+- Running --route-links-only after the fix surfaces one genuine
+  pre-existing dead link that the old stale allowlist was masking:
+  src/app/pages/InfoPageWrapper.tsx:164 links to /case-studies/hirobius,
+  which no longer exists in routes.tsx (HDS case-study pages moved to
+  the standalone DS site). Left it flagged rather than guessing a
+  destination or suppressing it — that's a product/content decision, not
+  a mechanical fix; commented back on the issue as a follow-on. This
+  gate is pnpm-meta (soft, not in ralph/gate.sh), so it doesn't block
+  this PR.
+- Tests: scripts/__tests__/check-link-integrity.test.mjs (4 cases) —
+  real derived route allowed (/ops/tasks, the false-positive case),
+  stale route flagged (/ops/sessions, the false-negative case), dynamic
+  param prefix match (/ops/clients/acme), route-ok escape hatch.
+- bash ralph/gate.sh green: typecheck + 680 tests + lint.
+- Files: scripts/check-link-integrity.mjs,
+  scripts/__tests__/check-link-integrity.test.mjs,
+  docs/guardrails/registry.json.
+- Branch: ralph/issue-176-derive-route-allowlist.
