@@ -1393,3 +1393,40 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Notes for next iteration: 20+ other high advisories remain in
   devDependencies/build tooling per the issue — separate, out-of-scope
   follow-up if wanted.
+
+#275 — fix(ci): ci.yml Playwright step crashing on tests/primitive-contracts
+- Root cause (not what the issue title implied): the failure is in CI's
+  "Playwright — desktop" step, NOT `pnpm check:full` (which doesn't invoke
+  vitest/playwright at all). Playwright's default testMatch also globs
+  `**/*.test.*`, so it was loading every Vitest-owned tests/*.test.ts(x) file
+  too, alongside its own *.spec.ts e2e specs. Those files `import ... from
+  'vitest'`, colliding with Playwright's own expect (shared
+  Symbol($$jest-matchers-object)) -> crash. tests/primitive-contracts/*.tsx
+  additionally import @testing-library/react, which was never a declared
+  devDependency (knip.config.ts carried it as a "phantom dep" exemption) ->
+  the "Cannot find package" half of the reported error.
+- Fix: playwright.config.ts `testMatch: '**/*.spec.ts'` (repo's actual e2e
+  convention) + testIgnore for tests/check-source-canon.spec.ts (a second,
+  oppositely-mislabeled file: a Vitest suite under a .spec.ts name, for a
+  validator script removed in #17 — it matched the same broadened testMatch).
+  Declared @testing-library/react as a real devDependency; dropped its
+  ignoreDependencies entry from knip.config.ts.
+- Did NOT touch vitest.config.ts's own include glob to add tests/*.tsx: doing
+  so would make `pnpm test` actually execute tests/primitive-contracts/*, and
+  every one of those 11 files fails immediately — they import primitives
+  (@/app/components/alert, HdsButton, card, divider, icon, input,
+  segmented-control, HdsSurface, tag, text) that don't exist anywhere in this
+  repo (Ops consumes @hirobius/design-system per CLAUDE.md, doesn't author
+  it). That suite is fully orphaned/aspirational, predates the design-system
+  extraction, and fixing/deleting it is a separate, bigger follow-up —
+  commented back on #275, left out of vitest's include (unchanged) so gate
+  stays green.
+- Verified: bash ralph/gate.sh green (typecheck + 697 tests + lint), pnpm
+  check:full green, `pnpm exec playwright test --project=chromium --list`
+  clean (65 tests/5 files, zero errors), full run 65/65 passed.
+- Files: package.json, pnpm-lock.yaml (@testing-library/react ^16.3.3 added),
+  playwright.config.ts, vitest.config.ts (comment only), knip.config.ts.
+- Branch: ralph/issue-275-ci-testing-library-resolution. PR #276.
+- Next iteration: file a follow-up issue for tests/primitive-contracts/* —
+  either wire real imports (if/when these primitives get consumed from
+  @hirobius/design-system) or delete the orphaned suite.
