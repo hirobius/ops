@@ -11,7 +11,11 @@
  * ralph-parked/needs-adrian inbox with a one-tap re-queue; "PRs" — open Ralph
  * PRs, badged wedged per lib/tasks/ralph-wedge.mjs (mirrors ralph/lib.sh's
  * classify_wedged). Per-repo fetch failures render as loud per-repo lines;
- * the healthy repos still show.
+ * the healthy repos still show. A connector-wide failure (GITHUB_TOKEN
+ * missing/rejected — the whole GET 503s) surfaces as a red header badge with
+ * the backend's named, actionable message instead of a silent "unreachable"
+ * (ops#204 — the Ralph loop depends on this token, so its loss can't be a
+ * no-op).
  */
 
 import { useState } from 'react';
@@ -86,6 +90,11 @@ function shortRepo(full: string): string {
   return full.slice(full.indexOf('/') + 1);
 }
 
+/** Truncates a connector-failure message for the header badge; the full text rides the `title` tooltip. */
+function shortError(message: string): string {
+  return message.length > 60 ? `${message.slice(0, 57)}…` : message;
+}
+
 function runChip(entry: RalphRepoRuns): { tone: BadgeTone; label: string; url?: string } {
   if (entry.error) return { tone: 'danger', label: 'unreachable' };
   const latest = entry.runs[0];
@@ -108,11 +117,18 @@ function runChip(entry: RalphRepoRuns): { tone: BadgeTone; label: string; url?: 
 }
 
 export function RalphPanel({ act, onNotify }: RalphPanelProps) {
-  const { data, isOffline, isInitialLoading, refetch } = usePoll<RalphStatus>(
+  const { data, error, isOffline, isInitialLoading, refetch } = usePoll<RalphStatus>(
     async (signal) => {
       const res = await fetch('/api/tasks?ralph=1', { signal });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return (await res.json()) as RalphStatus;
+      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        const message =
+          body && typeof body === 'object' && typeof body.error === 'string'
+            ? body.error
+            : `HTTP ${res.status}`;
+        throw new Error(message);
+      }
+      return body as RalphStatus;
     },
     { intervalMs: POLL_MS, offlineIntervalMs: POLL_MS * 2, requestTimeoutMs: 15_000 },
   );
@@ -143,7 +159,13 @@ export function RalphPanel({ act, onNotify }: RalphPanelProps) {
           Ralph — fleet
         </span>
         {isInitialLoading && <span style={s.quiet}>loading…</span>}
-        {isOffline && <span style={s.quiet}>unreachable — retrying</span>}
+        {error ? (
+          <Badge tone="danger" title={error}>
+            GitHub: {shortError(error)}
+          </Badge>
+        ) : (
+          isOffline && <span style={s.quiet}>unreachable — retrying</span>
+        )}
       </header>
 
       {data && (
@@ -155,7 +177,13 @@ export function RalphPanel({ act, onNotify }: RalphPanelProps) {
                 <span key={entry.repo} style={s.repoCell}>
                   <span style={s.repoName}>{shortRepo(entry.repo)}</span>
                   {chip.url ? (
-                    <a href={chip.url} target="_blank" rel="noreferrer" style={s.chipLink}>
+                    <a
+                      href={chip.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hds-focus"
+                      style={s.chipLink}
+                    >
                       <Badge tone={chip.tone}>{chip.label}</Badge>
                     </a>
                   ) : (
@@ -175,7 +203,13 @@ export function RalphPanel({ act, onNotify }: RalphPanelProps) {
           <ol style={s.queue}>
             {data.queue.slice(0, QUEUE_SHOWN).map((q) => (
               <li key={`${q.repo}#${q.number}`} style={s.queueItem}>
-                <a href={q.url} target="_blank" rel="noreferrer" style={s.queueLink}>
+                <a
+                  href={q.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hds-focus"
+                  style={s.queueLink}
+                >
                   <span style={s.queueNum}>
                     {shortRepo(q.repo)}#{q.number}
                   </span>{' '}
@@ -207,7 +241,13 @@ export function RalphPanel({ act, onNotify }: RalphPanelProps) {
               return (
                 <li key={key} style={s.parkedItem}>
                   <div style={s.parkedMain}>
-                    <a href={p.url} target="_blank" rel="noreferrer" style={s.queueLink}>
+                    <a
+                      href={p.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hds-focus"
+                      style={s.queueLink}
+                    >
                       <span style={s.queueNum}>
                         {shortRepo(p.repo)}#{p.number}
                       </span>{' '}
@@ -243,7 +283,13 @@ export function RalphPanel({ act, onNotify }: RalphPanelProps) {
           <ol style={s.queue}>
             {data.prs.slice(0, PRS_SHOWN).map((pr) => (
               <li key={`${pr.repo}#${pr.number}`} style={s.queueItem}>
-                <a href={pr.url} target="_blank" rel="noreferrer" style={s.queueLink}>
+                <a
+                  href={pr.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hds-focus"
+                  style={s.queueLink}
+                >
                   <span style={s.queueNum}>
                     {shortRepo(pr.repo)}#{pr.number}
                   </span>{' '}

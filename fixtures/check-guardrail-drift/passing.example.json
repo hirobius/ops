@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "canonicalRepo": "hirobius/ops",
+  "files": {
+    "fixtures/check-guardrail-drift/target.txt": "sha256:51244237bcaf2c21cd53b218b23d3d25f155c11549ea061f1d1b708714819bfc"
+  }
+}

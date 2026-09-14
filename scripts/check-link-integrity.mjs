@@ -32,12 +32,15 @@ import { join, dirname, normalize, isAbsolute, relative, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import http from 'node:http';
 import https from 'node:https';
+import ts from 'typescript';
+import { hasJsonFlag, emitResult } from './lib/gate-output.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
 const args = process.argv.slice(2);
 const argSet = new Set(args);
+const jsonMode = hasJsonFlag(args);
 
 const MODE_DOC_REFS = argSet.has('--doc-refs-only');
 const MODE_EXTERNAL = argSet.has('--external-only');
@@ -154,24 +157,28 @@ function runDocRefsCheck() {
   }
 
   if (violations.length === 0) {
-    console.log(
-      '\n✓ check-link-integrity [doc-refs] — active docs point at existing local files.\n',
-    );
-    return true;
+    if (!jsonMode) {
+      console.log(
+        '\n✓ check-link-integrity [doc-refs] — active docs point at existing local files.\n',
+      );
+    }
+    return { ok: true, violations };
   }
 
-  console.error(
-    `\n✗ check-link-integrity [doc-refs] — ${violations.length} missing local reference(s).\n`,
-  );
-  console.error(
-    '  Fix the path, trim the stale reference, or add <!-- doc-ref-ok: reason --> on the line.\n',
-  );
-  for (const violation of violations) {
-    console.error(`  ${violation.file}:${violation.line}`);
-    console.error(`    missing: ${violation.ref}`);
+  if (!jsonMode) {
+    console.error(
+      `\n✗ check-link-integrity [doc-refs] — ${violations.length} missing local reference(s).\n`,
+    );
+    console.error(
+      '  Fix the path, trim the stale reference, or add <!-- doc-ref-ok: reason --> on the line.\n',
+    );
+    for (const violation of violations) {
+      console.error(`  ${violation.file}:${violation.line}`);
+      console.error(`    missing: ${violation.ref}`);
+    }
+    console.error('');
   }
-  console.error('');
-  return false;
+  return { ok: false, violations };
 }
 
 // ─── Sub-check 2: External links (check-external-links logic) ─────────────────
@@ -262,11 +269,13 @@ async function runExternalLinksCheck() {
   const links = extractExternalLinksFromSource();
 
   if (links.length === 0) {
-    console.log('✓ check-link-integrity [external] — no external links found in source.');
-    return true;
+    if (!jsonMode) {
+      console.log('✓ check-link-integrity [external] — no external links found in source.');
+    }
+    return { ok: true, violations: [] };
   }
 
-  console.log(`Checking ${links.length} external link(s)...`);
+  if (!jsonMode) console.log(`Checking ${links.length} external link(s)...`);
   const failures = [];
   const results = [];
 
@@ -278,33 +287,120 @@ async function runExternalLinksCheck() {
       const passed = !isDeadLink && !isNetworkError;
       results.push({ url, status, error, passed });
       if (isNetworkError) {
-        console.log(`⚠ ${url} → ${status || 'TIMEOUT'} (skipped)`);
+        if (!jsonMode) console.log(`⚠ ${url} → ${status || 'TIMEOUT'} (skipped)`);
       } else if (!passed) {
         failures.push({ url, status, error });
-        console.log(`✗ ${url} → ${status || 'ERROR'} ${error ? `(${error})` : ''}`);
+        if (!jsonMode) console.log(`✗ ${url} → ${status || 'ERROR'} ${error ? `(${error})` : ''}`);
       } else {
-        console.log(`✓ ${url} → ${status}`);
+        if (!jsonMode) console.log(`✓ ${url} → ${status}`);
       }
     } catch (e) {
       results.push({ url, status: 0, error: e.message, passed: true });
-      console.log(`⚠ ${url} → ERROR (${e.message}, skipped)`);
+      if (!jsonMode) console.log(`⚠ ${url} → ERROR (${e.message}, skipped)`);
     }
   }
 
-  console.log('');
-  console.log(`Results: ${results.length - failures.length}/${results.length} passed`);
+  if (!jsonMode) {
+    console.log('');
+    console.log(`Results: ${results.length - failures.length}/${results.length} passed`);
+  }
 
   if (failures.length === 0) {
-    console.log('\n✓ check-link-integrity [external] — all external links healthy.\n');
-    return true;
+    if (!jsonMode) {
+      console.log('\n✓ check-link-integrity [external] — all external links healthy.\n');
+    }
+    return { ok: true, violations: [] };
   }
-  console.error(
-    `\n✗ check-link-integrity [external] — ${failures.length} broken external link(s).\n`,
-  );
-  return false;
+  if (!jsonMode) {
+    console.error(
+      `\n✗ check-link-integrity [external] — ${failures.length} broken external link(s).\n`,
+    );
+  }
+  return { ok: false, violations: failures };
 }
 
 // ─── Sub-check 3: Route links (check-route-links logic) ────────────────────────
+
+// Derive the known-routes set straight from the router config, instead of
+// maintaining a hand-written allowlist that drifts every time routes.tsx
+// changes (ops#176). Composes nested `children` paths into absolute routes;
+// wildcard (`foo/*`) and dynamic (`:param`) segments become prefix matches.
+function joinRoutePath(parent, child) {
+  if (child.startsWith('/')) return child;
+  if (parent === '/') return '/' + child;
+  return (parent + '/' + child).replace(/\/+/g, '/');
+}
+
+function getRouteStringProp(obj, name) {
+  const prop = obj.properties.find(
+    (p) => ts.isPropertyAssignment(p) && p.name && p.name.getText() === name,
+  );
+  if (!prop) return undefined;
+  if (ts.isStringLiteral(prop.initializer)) return prop.initializer.text;
+  return undefined;
+}
+
+function getRouteObjProp(obj, name) {
+  return obj.properties.find(
+    (p) => ts.isPropertyAssignment(p) && p.name && p.name.getText() === name,
+  );
+}
+
+function walkRouteTree(node, parentPath, exactRoutes, prefixRoutes) {
+  if (!ts.isObjectLiteralExpression(node)) return;
+
+  const childPath = getRouteStringProp(node, 'path');
+  const childrenProp = getRouteObjProp(node, 'children');
+  const indexProp = getRouteObjProp(node, 'index');
+  const isIndex = indexProp && indexProp.initializer.kind === ts.SyntaxKind.TrueKeyword;
+
+  const here = childPath !== undefined ? joinRoutePath(parentPath, childPath) : parentPath;
+
+  // Bare catch-all (404) — not a real, linkable destination.
+  if (childPath === '*') return;
+
+  if (childPath !== undefined && childPath.includes('*')) {
+    prefixRoutes.add(here.slice(0, here.lastIndexOf('*')));
+  } else if (here.includes(':')) {
+    const segments = here.split('/');
+    const paramIdx = segments.findIndex((seg) => seg.startsWith(':'));
+    prefixRoutes.add(segments.slice(0, paramIdx).join('/') + '/');
+  } else if (childPath !== undefined || isIndex) {
+    exactRoutes.add(here);
+  }
+
+  if (childrenProp && ts.isArrayLiteralExpression(childrenProp.initializer)) {
+    for (const el of childrenProp.initializer.elements) {
+      walkRouteTree(el, here, exactRoutes, prefixRoutes);
+    }
+  }
+}
+
+function deriveKnownRoutes() {
+  const routesFile = join(ROOT, 'src/app/routes.tsx');
+  const src = readFileSync(routesFile, 'utf8');
+  const sf = ts.createSourceFile(routesFile, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+
+  const exactRoutes = new Set();
+  const prefixRoutes = new Set();
+
+  function visit(node) {
+    if (
+      ts.isCallExpression(node) &&
+      node.expression.getText() === 'createBrowserRouter' &&
+      node.arguments[0] &&
+      ts.isArrayLiteralExpression(node.arguments[0])
+    ) {
+      for (const el of node.arguments[0].elements) {
+        walkRouteTree(el, '', exactRoutes, prefixRoutes);
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sf);
+
+  return { exactRoutes, prefixRoutes: [...prefixRoutes] };
+}
 
 function runRouteLinksCheck() {
   const SCAN_DIRS = [join(ROOT, 'src/app')];
@@ -312,70 +408,13 @@ function runRouteLinksCheck() {
   const SKIP_DIRS = new Set(['figma', 'node_modules', 'dist', 'demos']);
   const SKIP_FILES = new Set(['generated-tokens.ts']);
 
-  const EXACT_ROUTES = new Set([
-    '/',
-    '/info',
-    '/lab',
-    '/lab/particle-tunnel',
-    '/404',
-    '/portfolio',
-    '/hds',
-    '/hds/system',
-    '/hds/process',
-    '/hds/color',
-    '/hds/typography',
-    '/hds/spacing',
-    '/hds/shape',
-    '/hds/borders',
-    '/hds/elevation',
-    '/hds/motion',
-    '/hds/breakpoints',
-    '/hds/components',
-    '/hds/components/actions',
-    '/hds/components/inputs',
-    '/hds/components/display',
-    '/hds/components/media',
-    '/hds/components/navigation',
-    '/hds/components/layout',
-    '/hds/components/doc-utilities',
-    '/hds/components/system-primitives',
-    '/hds/icons',
-    '/hds/guidance',
-    '/hds/tech-stack',
-    '/hds/license',
-    '/hds/tokens',
-    '/hds/case-studies/xbox-design-system',
-    '/hds/case-studies/microsoft-game-dev',
-    '/hds/case-studies/xbox-design-lab-xdd',
-    '/hds/case-studies/hirobius',
-    '/case-studies/hirobius',
-    '/vibe-sketchbook',
-    '/vibe-sketchbook/cloth-simulation',
-    '/hds/system-contract',
-    '/hds/component-health',
-    '/hds/burn-down',
-    '/hds/sandbox',
-    '/hds/contribution-guide',
-    '/hds/brand-theming',
-    '/hds/architecture-snapshot',
-    '/microsoft-design-systems',
-    '/ops',
-    '/ops/briefing',
-    '/ops/atlas',
-    '/ops/build',
-    '/ops/sessions',
-  ]);
-
-  // HDS doc routes moved from /hds/* to /ops/hds/* (commit 3bf17b5b, 2026-05-10).
-  // Defined under routes.tsx children of 'ops' (lines 297-366) with a wildcard
-  // fallback redirecting unknown /ops/hds/* paths to /ops/hds/color.
-  const PREFIX_ROUTES = ['/portfolio/', '/ops/clients/', '/ops/hds/'];
+  const { exactRoutes, prefixRoutes } = deriveKnownRoutes();
 
   const ROUTE_RE = /(?:href|to)\s*=\s*["'](\/[^"'#?]*)["']/g;
 
   function isAllowedRoute(route) {
-    if (EXACT_ROUTES.has(route)) return true;
-    return PREFIX_ROUTES.some((prefix) => route.startsWith(prefix));
+    if (exactRoutes.has(route)) return true;
+    return prefixRoutes.some((prefix) => route.startsWith(prefix));
   }
 
   const violations = [];
@@ -409,48 +448,89 @@ function runRouteLinksCheck() {
     }
   }
 
-  for (const dir of SCAN_DIRS) {
-    scanDir(dir);
+  if (isFixtureMode && fixtureFile) {
+    scanFile(resolve(fixtureFile));
+  } else {
+    for (const dir of SCAN_DIRS) {
+      scanDir(dir);
+    }
   }
 
   if (violations.length === 0) {
-    console.log(
-      '\n✓ check-link-integrity [route-links] — internal route targets resolve to known app routes.\n',
-    );
-    return true;
+    if (!jsonMode) {
+      console.log(
+        '\n✓ check-link-integrity [route-links] — internal route targets resolve to known app routes.\n',
+      );
+    }
+    return { ok: true, violations };
   }
 
-  console.error(
-    `\n✗ check-link-integrity [route-links] — ${violations.length} invalid internal route reference(s).\n`,
-  );
-  console.error(
-    '  Fix the route, add the missing route definition, or add // route-ok: reason on the line.\n',
-  );
-  for (const violation of violations) {
-    console.error(`  ${violation.file}:${violation.line}`);
-    console.error(`    invalid route: ${violation.route}`);
+  if (!jsonMode) {
+    console.error(
+      `\n✗ check-link-integrity [route-links] — ${violations.length} invalid internal route reference(s).\n`,
+    );
+    console.error(
+      '  Fix the route, add the missing route definition, or add // route-ok: reason on the line.\n',
+    );
+    for (const violation of violations) {
+      console.error(`  ${violation.file}:${violation.line}`);
+      console.error(`    invalid route: ${violation.route}`);
+    }
+    console.error('');
   }
-  console.error('');
-  return false;
+  return { ok: false, violations };
 }
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
   try {
+    const canonicalViolations = [];
+
     if (RUN_ALL || MODE_DOC_REFS) {
-      const ok = runDocRefsCheck();
+      const { ok, violations } = runDocRefsCheck();
       if (!ok) hadFailure = true;
+      for (const v of violations) {
+        canonicalViolations.push({
+          file: v.file,
+          line: v.line,
+          rule: 'doc-ref-missing',
+          severity: 'warn',
+          message: `missing local reference: ${v.ref}`,
+        });
+      }
     }
 
     if ((RUN_ALL || MODE_EXTERNAL) && !isFixtureMode) {
-      const ok = await runExternalLinksCheck();
+      const { ok, violations } = await runExternalLinksCheck();
       if (!ok) hadFailure = true;
+      for (const v of violations) {
+        canonicalViolations.push({
+          file: '*',
+          line: null,
+          rule: 'external-link-dead',
+          severity: 'warn',
+          message: `${v.url} → ${v.status || 'ERROR'}${v.error ? ` (${v.error})` : ''}`,
+        });
+      }
     }
 
-    if ((RUN_ALL || MODE_ROUTE_LINKS) && !isFixtureMode) {
-      const ok = runRouteLinksCheck();
+    if (RUN_ALL || MODE_ROUTE_LINKS) {
+      const { ok, violations } = runRouteLinksCheck();
       if (!ok) hadFailure = true;
+      for (const v of violations) {
+        canonicalViolations.push({
+          file: v.file,
+          line: v.line,
+          rule: 'route-link-unknown',
+          severity: 'warn',
+          message: `invalid route: ${v.route}`,
+        });
+      }
+    }
+
+    if (jsonMode) {
+      emitResult({ violations: canonicalViolations, ok: !hadFailure }, true);
     }
 
     process.exit(hadFailure ? 1 : 0);
