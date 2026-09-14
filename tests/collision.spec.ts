@@ -30,6 +30,15 @@ const ROUTES = ['/', '/info', '/ops'] as const;
 for (const viewport of VIEWPORTS) {
   for (const route of ROUTES) {
     test(`integrity [${viewport.name}] ${route}`, async ({ page }) => {
+      // vite preview has no deployed /api/* functions, so OpsGate's
+      // /api/ops-me check always fails and /ops would render the login
+      // screen instead of the dashboard. Stub it to audit the real page.
+      await page.route('**/api/ops-me', (opsMeRoute) =>
+        opsMeRoute.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify({ authed: true }),
+        }),
+      );
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await page.goto(route);

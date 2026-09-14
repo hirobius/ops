@@ -82,6 +82,15 @@ async function checkShellChrome(page: any) {
 for (const vp of VIEWPORTS) {
   for (const route of ROUTES) {
     test(`responsive [${vp.name}] ${route}`, async ({ page }) => {
+      // vite preview has no deployed /api/* functions, so OpsGate's
+      // /api/ops-me check always fails and /ops would render the login
+      // screen instead of the dashboard. Stub it to audit the real page.
+      await page.route('**/api/ops-me', (opsMeRoute) =>
+        opsMeRoute.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify({ authed: true }),
+        }),
+      );
       if (vp.userAgent) {
         await page.setExtraHTTPHeaders({ 'user-agent': vp.userAgent });
       }
