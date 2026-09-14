@@ -37,8 +37,8 @@
     "src/app/pages/ops/tasks/TaskRow.tsx": 21,
     "src/app/pages/ops/tasks/TasksPage.tsx": 34,
     "src/app/pages/portal/ClientPortalPage.tsx": 54,
-    "src/app/routes.tsx": 25
+    "src/app/routes.tsx": 26
   },
-  "updatedAt": "2026-09-14T03:13:52.094Z",
-  "sha": "6804adb"
+  "updatedAt": "2026-09-14T03:37:44.100Z",
+  "sha": "b28d6d6"
 }

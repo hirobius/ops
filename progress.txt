@@ -1301,3 +1301,49 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   freshness becomes a real complaint, the next step would be wiring
   `guardrail:firing-stats:bake` into a scheduled CI job that commits on a
   cadence, rather than reintroducing a per-commit hook write.
+
+## Issue #207 — layout/a11y/visual specs vacuous behind OpsGate
+- Investigated the issue's premise first: it claimed layout-integrity was
+  "fixed this session" (ops-me stub + OpsShell <main>) and asked to extend
+  the same fix to a11y.spec.ts. Neither claim held on main:
+  - The referenced fix (commit d75da96, "BS1c") only ever existed on an
+    orphaned branch (origin/claude/hirobius-design-skills-jr28dm) with no PR
+    — never merged. layout-integrity.spec.ts on main was still vacuous.
+  - tests/a11y.spec.ts and tests/visual.spec.ts no longer exist — deleted by
+    #250 (issue #122, merged 2026-09-13) as dead weight testing a retired
+    /hds/* doc gallery. So checklist items 1 and 3 (extend a11y.spec, then
+    wire a11y into ralph/gate.sh) are moot — nothing to extend or wire.
+  - Item 2 ("audit visual/collision/responsive for the same vacuousness")
+    is still live for collision.spec.ts and responsive.spec.ts — both hit
+    `/ops` and, same root cause, render OpsGate's login screen under
+    `vite preview` (no deployed /api/* functions, DEV_BYPASS false).
+- Fix (root-caused once, applied everywhere it actually still applies):
+  - tests/layout-integrity.spec.ts, tests/collision.spec.ts,
+    tests/responsive.spec.ts: stub `GET /api/ops-me` → `{authed: true}` via
+    `page.route()` before navigation, so OpsGate renders the real dashboard
+    instead of the login form.
+  - src/app/routes.tsx: wrapped the authenticated `/ops/*` outlet in a
+    `<main>` landmark (dashboard pages had none — auditPageLayout scopes
+    text-overflow/stretch checks to `document.querySelector('main')`, so
+    without one those checks stay silently empty even once authenticated).
+  - docs/guardrails/baselines/check-dom-node-budgets.json: ratchet-updated
+    routes.tsx 25→26 for the new <main> (manual-channel gate, not in
+    ralph/gate.sh, but `node scripts/check-dom-node-budgets.mjs` would have
+    flagged it on the next manual run otherwise).
+- Verified for real, not just green CI: installed Chromium
+  (`pnpm exec playwright install chromium` — wasn't preinstalled in this
+  sandbox), then ran a throwaway spec asserting the stubbed `/ops` page body
+  does NOT contain the login copy and has exactly one `<main>` — confirmed
+  the fix renders the actual dashboard, not just a passing assertion count.
+  Then ran the three real suites: test:layout (14/14), test:collision
+  (9/9), test:responsive (24/24) — all green against real dashboard content.
+- Did NOT touch: a11y.spec.ts/visual.spec.ts (gone), ralph/gate.sh wiring
+  (that's the issue's 3rd checkbox, contingent on a11y triage that's now
+  moot), or /info's missing <main> (pre-existing, outside OpsGate, unrelated
+  to this issue's "extend the auth bypass" scope).
+- Gate green: typecheck + test (697 passed) + lint.
+- Branch: ralph/issue-207-extend-opsgate-bypass.
+- Notes for next iteration: if dashboard-route layout/collision/responsive
+  coverage should be enforced pre-merge, wiring test:layout (or a trimmed
+  subset) into ralph/gate.sh is a separate, deliberate follow-up — it wasn't
+  wired before this PR either, so this doesn't newly gate anything.
