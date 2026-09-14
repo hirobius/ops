@@ -58,16 +58,16 @@ cat design-extract-output/*-design-language.md
 
 ## Output Files (8)
 
-| File                     | Purpose                                                     |
-| ------------------------ | ----------------------------------------------------------- |
-| `*-design-language.md`   | AI-optimized markdown — the full design system for LLMs     |
-| `*-preview.html`         | Visual HTML report with swatches, type scale, shadows, a11y |
-| `*-design-tokens.json`   | W3C Design Tokens format                                    |
-| `*-tailwind.config.js`   | Ready-to-use Tailwind CSS theme                             |
-| `*-variables.css`        | CSS custom properties                                       |
-| `*-figma-variables.json` | Figma Variables import format                               |
-| `*-theme.js`             | React/CSS-in-JS theme object                                |
-| `*-shadcn-theme.css`     | shadcn/ui theme CSS variables                               |
+| File | Purpose |
+|------|---------|
+| `*-design-language.md` | AI-optimized markdown — the full design system for LLMs |
+| `*-preview.html` | Visual HTML report with swatches, type scale, shadows, a11y |
+| `*-design-tokens.json` | W3C Design Tokens format |
+| `*-tailwind.config.js` | Ready-to-use Tailwind CSS theme |
+| `*-variables.css` | CSS custom properties |
+| `*-figma-variables.json` | Figma Variables import format |
+| `*-theme.js` | React/CSS-in-JS theme object |
+| `*-shadcn-theme.css` | shadcn/ui theme CSS variables |
 
 ## Additional Commands
 
@@ -76,11 +76,11 @@ cat design-extract-output/*-design-language.md
 
 ## Options
 
-| Flag                 | Description                                           |
-| -------------------- | ----------------------------------------------------- |
-| `--out <dir>`        | Output directory (default: `./design-extract-output`) |
-| `--dark`             | Also extract dark mode color scheme                   |
-| `--depth <n>`        | Crawl N internal pages for site-wide extraction       |
-| `--screenshots`      | Capture component screenshots (buttons, cards, nav)   |
-| `--wait <ms>`        | Wait time after page load for SPAs                    |
-| `--framework <type>` | Generate only specific theme (`react` or `shadcn`)    |
+| Flag | Description |
+|------|-------------|
+| `--out <dir>` | Output directory (default: `./design-extract-output`) |
+| `--dark` | Also extract dark mode color scheme |
+| `--depth <n>` | Crawl N internal pages for site-wide extraction |
+| `--screenshots` | Capture component screenshots (buttons, cards, nav) |
+| `--wait <ms>` | Wait time after page load for SPAs |
+| `--framework <type>` | Generate only specific theme (`react` or `shadcn`) |
