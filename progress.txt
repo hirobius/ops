@@ -1442,3 +1442,41 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   src/app/pages/ops/agentic-os/RunsPanel.tsx,
   docs/guardrails/baselines/check-dom-node-budgets.json.
 - Branch: ralph/issue-109-run-log-tokens-field.
+
+## Issue #139 — one dispatch seam: watchdog + fleet-dispatch route lifecycle writes through applyTaskAction
+- Two prior dispatched `@claude` sessions (branches claude/issue-139-20260712-1847,
+  claude/issue-139-20260713-0031) implemented this same slice but never opened a
+  PR; their merge-base is far behind current main (main moved through #279's
+  dispatch-body tier/model change since), so reimplemented fresh against
+  current main rather than trying to port a stale diff — decisions below are
+  independently derived, though they land on the same shape.
+- lib/tasks/actions.mjs: added `flag` (SIMPLE table: dispatch_status='failed',
+  status='blocked') and `redispatch` (bumps dispatch_count, restamps
+  last_dispatched_at, re-asserts dispatch_status='dispatched'; comment/maxRetries
+  are optional and drive a best-effort re-ping via the injected github port —
+  failure/absence reported back as `commentNote`, never fails the write).
+  `dispatch` itself now also stamps last_dispatched_at/dispatch_count via a new
+  `nextDispatchCount(task)` helper shared with `redispatch` — every dispatch
+  source is now watchdog-visible without a caller pre-stamping.
+- scripts/fleet-watchdog.mjs: `reDispatch`/`flag` (now exported) call
+  `applyTaskAction` instead of `setTaskFields` directly — removed the import.
+- scripts/fleet-dispatch.mjs: extracted exported `dispatchOne` — writes only
+  tier/model via setTaskFields (the routing fields `dispatch` doesn't own),
+  hands the rest to `applyTaskAction('dispatch')`. Kills the double-stamp of
+  dispatch_status that existed before (fleet-dispatch pre-stamped, then
+  `dispatch` stamped again).
+- api/task-action.ts: docblock lists the two new actions; noted the route
+  never forwards comment/maxRetries so a redispatch through HTTP can't re-ping.
+- Tests: tests/api/task-actions.test.ts gains `flag`/`redispatch` coverage +
+  dispatch-stamp assertions; scripts/__tests__/fleet-dispatch.test.mjs gains a
+  `dispatchOne` suite (mocks applyTaskAction/setTaskFields, asserts the patch
+  sent to setTaskFields never carries a lifecycle field);
+  scripts/__tests__/fleet-watchdog.test.mjs gains `reDispatch`/`flag` suites
+  (mocks applyTaskAction, asserts neither writes Supabase directly anymore).
+- Verified: bash ralph/gate.sh green (typecheck clean, 729 tests incl. 34 new
+  ones, lint clean).
+- Files: lib/tasks/actions.mjs, scripts/fleet-watchdog.mjs,
+  scripts/fleet-dispatch.mjs, api/task-action.ts,
+  tests/api/task-actions.test.ts, scripts/__tests__/fleet-dispatch.test.mjs,
+  scripts/__tests__/fleet-watchdog.test.mjs.
+- Branch: ralph/issue-139-one-dispatch-seam.

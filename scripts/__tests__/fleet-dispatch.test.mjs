@@ -1,5 +1,6 @@
 /**
- * Unit tests for scripts/fleet-dispatch.mjs's pure pieces (#41 Slice 2).
+ * Unit tests for scripts/fleet-dispatch.mjs's pure pieces (#41 Slice 2) plus
+ * `dispatchOne` (ops#139).
  *
  * `selectAndRoute` is pure — no Supabase, no GitHub, no Date — so these
  * tests exercise the eligibility filter + routeTask wiring + --max cap with
@@ -7,10 +8,40 @@
  * creation) can't be exercised in this sandbox (network egress blocked +
  * needs GITHUB_TOKEN) — see the session report for the --dry-run-against-
  * real-Supabase verification instead.
+ *
+ * `dispatchOne` is exercised with `applyTaskAction`/`setTaskFields` mocked —
+ * this asserts the ops#139 seam directly: `dispatchOne` writes ONLY
+ * tier/model via `setTaskFields`, never a dispatch-lifecycle field
+ * (dispatch_status/last_dispatched_at/dispatch_count/dispatch_url/
+ * claimed_by), and hands everything else to `applyTaskAction('dispatch')`.
  */
 
-import { describe, it, expect } from 'vitest';
-import { selectAndRoute, isMissingColumnError, DEFAULT_MAX } from '../fleet-dispatch.mjs';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('../../lib/supabase/tasks.mjs', () => ({ setTaskFields: vi.fn() }));
+vi.mock('../../lib/tasks/actions.mjs', () => ({ applyTaskAction: vi.fn() }));
+vi.mock('../../lib/ops/notify.mjs', () => ({ notifyEvent: vi.fn() }));
+vi.mock('../../lib/ops/run-log.mjs', () => ({ appendRun: vi.fn() }));
+
+import { setTaskFields } from '../../lib/supabase/tasks.mjs';
+import { applyTaskAction } from '../../lib/tasks/actions.mjs';
+import { notifyEvent } from '../../lib/ops/notify.mjs';
+import { appendRun } from '../../lib/ops/run-log.mjs';
+import {
+  selectAndRoute,
+  isMissingColumnError,
+  DEFAULT_MAX,
+  dispatchOne,
+} from '../fleet-dispatch.mjs';
+
+const LIFECYCLE_FIELDS = [
+  'dispatch_status',
+  'dispatch_url',
+  'last_dispatched_at',
+  'dispatch_count',
+  'claimed_by',
+  'claimed_at',
+];
 
 function task(overrides = {}) {
   return {
@@ -152,5 +183,66 @@ describe('isMissingColumnError', () => {
 
   it('is false for an unrelated error', () => {
     expect(isMissingColumnError({ code: '23505', message: 'duplicate key value' })).toBe(false);
+  });
+});
+
+describe('dispatchOne (ops#139 — one dispatch seam)', () => {
+  const task = { key: 'github:hirobius/ops#1', title: 'Fix a typo', dispatch_count: 0 };
+  const sb = {};
+  const github = {};
+
+  beforeEach(() => {
+    vi.mocked(setTaskFields).mockReset().mockResolvedValue({ error: null });
+    vi.mocked(applyTaskAction)
+      .mockReset()
+      .mockResolvedValue({ status: 200, body: { ok: true, dispatch_url: 'https://gh/1' } });
+    vi.mocked(notifyEvent).mockReset().mockResolvedValue(undefined);
+    vi.mocked(appendRun).mockReset();
+  });
+
+  it('writes only tier/model via setTaskFields — no dispatch-lifecycle field', async () => {
+    await dispatchOne(sb, github, { task, tier: 'mechanical', model: 'sonnet' });
+    expect(setTaskFields).toHaveBeenCalledWith(sb, task.key, {
+      tier: 'mechanical',
+      model: 'sonnet',
+    });
+    const patch = vi.mocked(setTaskFields).mock.calls[0][2];
+    for (const field of LIFECYCLE_FIELDS) {
+      expect(patch).not.toHaveProperty(field);
+    }
+  });
+
+  it('hands off to applyTaskAction("dispatch") after writing routing fields', async () => {
+    await dispatchOne(sb, github, { task, tier: 'judgment', model: 'opus' });
+    expect(applyTaskAction).toHaveBeenCalledWith(
+      sb,
+      { key: task.key, action: 'dispatch', actor: 'fleet-dispatch' },
+      { github },
+    );
+  });
+
+  it('returns true and notifies/logs on a successful dispatch', async () => {
+    const ok = await dispatchOne(sb, github, { task, tier: 'mechanical', model: 'sonnet' });
+    expect(ok).toBe(true);
+    expect(notifyEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'dispatched', task: task.key, url: 'https://gh/1' }),
+    );
+    expect(appendRun).toHaveBeenCalledWith(expect.objectContaining({ outcome: 'dispatched' }));
+  });
+
+  it('returns false and skips applyTaskAction when setTaskFields errors', async () => {
+    vi.mocked(setTaskFields).mockResolvedValue({ error: { message: 'boom' } });
+    const ok = await dispatchOne(sb, github, { task, tier: 'mechanical', model: 'sonnet' });
+    expect(ok).toBe(false);
+    expect(applyTaskAction).not.toHaveBeenCalled();
+    expect(notifyEvent).not.toHaveBeenCalled();
+  });
+
+  it('returns false without notifying when applyTaskAction fails', async () => {
+    vi.mocked(applyTaskAction).mockResolvedValue({ status: 502, body: { error: 'gh down' } });
+    const ok = await dispatchOne(sb, github, { task, tier: 'mechanical', model: 'sonnet' });
+    expect(ok).toBe(false);
+    expect(notifyEvent).not.toHaveBeenCalled();
+    expect(appendRun).not.toHaveBeenCalled();
   });
 });

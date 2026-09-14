@@ -6,6 +6,7 @@
  *
  * Request:  { key: string, action: Action, actor?: string, priority?: 'p0'|'p1'|'p2'|'p3'|null }
  *   Action = 'done' | 'reopen' | 'claim' | 'unclaim' | 'trash' | 'restore' | 'dispatch'
+ *          | 'redispatch' | 'flag'
  *          | 'auto_on' | 'auto_off'
  *          | 'ralph_ready_on' | 'ralph_ready_off' | 'ralph_approve' | 'ralph_dispatch'
  *          | 'ralph_requeue' | 'ralph_auto_on' | 'ralph_auto_off' | 'set_priority'
@@ -19,6 +20,14 @@
  * session on a branch — and stamps dispatch_url + claimed_by='claude' +
  * dispatch_status='dispatched'. Requires GITHUB_TOKEN (repo Issues: write);
  * 503 if unset.
+ *
+ * 'redispatch' / 'flag' (ops#139) are the stale-dispatch watchdog's two
+ * lifecycle writes (scripts/fleet-watchdog.mjs) — 'redispatch' re-stamps
+ * dispatch_status/last_dispatched_at/dispatch_count (a re-kick), 'flag' sets
+ * dispatch_status='failed' + status='blocked' (retries exhausted). Reachable
+ * via this route like every other action here (no allowlist), but the route
+ * never forwards `comment`/`maxRetries`, so a 'redispatch' through here can't
+ * trigger the watchdog's re-ping issue comment.
  *
  * 'ralph_ready_on' / 'ralph_ready_off' (ops#88) add/remove the `ralph-ready`
  * label on the task's linked GitHub issue — the one human-approval tap the

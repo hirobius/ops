@@ -12,10 +12,12 @@
  *
  * Reuses every piece built in prior slices rather than re-implementing:
  *   - lib/tasks/tier.mjs::routeTask       tier/model routing (Slice 1)
- *   - lib/tasks/actions.mjs::applyTaskAction  the 'dispatch' action already
- *     opens the @claude issue + stamps dispatch_url/claimed_by (Slice 1/pre)
+ *   - lib/tasks/actions.mjs::applyTaskAction  the 'dispatch' action opens the
+ *     @claude issue and is the ONE writer of dispatch_url/claimed_by/
+ *     dispatch_status/last_dispatched_at/dispatch_count (ops#139) — this
+ *     script writes only tier/model, the routing fields dispatch doesn't own
  *   - lib/github/issues.mjs::makeGitHubPort   injected GitHub port
- *   - lib/supabase/tasks.mjs::setTaskFields   writes tier/model/dispatch_*
+ *   - lib/supabase/tasks.mjs::setTaskFields   writes tier/model
  *   - lib/ops/run-log.mjs::appendRun          run recap (#8)
  *   - lib/ops/notify.mjs::notifyEvent         fleet timeline + Discord (Slice 4)
  *
@@ -241,60 +243,67 @@ async function main() {
   const github = makeGitHubPort();
   let dispatchedCount = 0;
 
-  for (const { task, tier, model } of selected) {
+  for (const selection of selected) {
     if (dispatchedCount >= args.max) break; // guardrail: never exceed --max per run
-
-    const nextCount = (task.dispatch_count ?? 0) + 1;
-    const nowIso = new Date().toISOString();
-
-    const { error: setErr } = await setTaskFields(sb, task.key, {
-      tier,
-      model,
-      dispatch_status: 'dispatched',
-      last_dispatched_at: nowIso,
-      dispatch_count: nextCount,
-    });
-    if (setErr) {
-      console.error(`${task.key}: failed to write routing fields — ${setErr.message}`);
-      continue;
-    }
-
-    const result = await applyTaskAction(
-      sb,
-      { key: task.key, action: 'dispatch', actor: 'fleet-dispatch' },
-      { github },
-    );
-    if (result.status !== 200) {
-      console.error(`${task.key}: dispatch failed — ${result.body?.error ?? 'unknown error'}`);
-      continue;
-    }
-
-    const dispatchUrl = result.body.dispatch_url;
-
-    await notifyEvent({
-      ts: nowIso,
-      kind: 'dispatched',
-      title: `${task.key}: ${task.title}`,
-      detail: `tier=${tier} model=${model}`,
-      url: dispatchUrl,
-      task: task.key,
-    });
-
-    appendRun({
-      ts: nowIso,
-      actor: 'fleet-dispatch',
-      task: task.key,
-      model,
-      tier,
-      outcome: 'dispatched',
-      summary: 'auto-dispatched to @claude fleet',
-    });
-
-    dispatchedCount += 1;
-    console.log(`${task.key}: dispatched — ${dispatchUrl}`);
+    if (await dispatchOne(sb, github, selection)) dispatchedCount += 1;
   }
 
   console.log(`\nDispatched ${dispatchedCount}/${selected.length} selected task(s).`);
+}
+
+/**
+ * Dispatch one selected task: write the routing fields `dispatch` doesn't
+ * own (`tier`/`model`), then hand off to `applyTaskAction('dispatch')` —
+ * the ONE writer of dispatch_url/claimed_by/dispatch_status/
+ * last_dispatched_at/dispatch_count (ops#139). Notifies + logs the run on
+ * success; returns false (no throw) on either write failing so the caller's
+ * loop can skip and continue with the rest of the batch.
+ *
+ * @param {import('@supabase/supabase-js').SupabaseClient} sb
+ * @param {import('../lib/github/issues.mjs').GitHubIssuePort} github
+ * @param {{ task: object, tier: string, model: string }} selection
+ */
+export async function dispatchOne(sb, github, { task, tier, model }) {
+  const { error: setErr } = await setTaskFields(sb, task.key, { tier, model });
+  if (setErr) {
+    console.error(`${task.key}: failed to write routing fields — ${setErr.message}`);
+    return false;
+  }
+
+  const result = await applyTaskAction(
+    sb,
+    { key: task.key, action: 'dispatch', actor: 'fleet-dispatch' },
+    { github },
+  );
+  if (result.status !== 200) {
+    console.error(`${task.key}: dispatch failed — ${result.body?.error ?? 'unknown error'}`);
+    return false;
+  }
+
+  const dispatchUrl = result.body.dispatch_url;
+  const nowIso = new Date().toISOString();
+
+  await notifyEvent({
+    ts: nowIso,
+    kind: 'dispatched',
+    title: `${task.key}: ${task.title}`,
+    detail: `tier=${tier} model=${model}`,
+    url: dispatchUrl,
+    task: task.key,
+  });
+
+  appendRun({
+    ts: nowIso,
+    actor: 'fleet-dispatch',
+    task: task.key,
+    model,
+    tier,
+    outcome: 'dispatched',
+    summary: 'auto-dispatched to @claude fleet',
+  });
+
+  console.log(`${task.key}: dispatched — ${dispatchUrl}`);
+  return true;
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
