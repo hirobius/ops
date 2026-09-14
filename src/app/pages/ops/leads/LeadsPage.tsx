@@ -28,7 +28,8 @@ import { opsApi } from '../../../lib/opsApi';
 import { useLeads } from './useLeads';
 import { PullLeadsForm } from './PullLeadsForm';
 import { LeadSweepPanel } from './LeadSweepPanel';
-import type { Lead, LeadStatus, SiteStatus } from './types';
+import { RenderHandoffPanel } from './RenderHandoffPanel';
+import type { Lead, LeadStatus } from './types';
 
 type BadgeTone = 'success' | 'neutral' | 'warning' | 'danger';
 
@@ -36,10 +37,13 @@ const STATUS_TONE: Record<LeadStatus, BadgeTone> = {
   sourced: 'neutral',
   generating: 'warning',
   scored: 'success',
+  rendered: 'success',
   sent: 'success',
   won: 'success',
   lost: 'danger',
 };
+
+type RenderResult = { configFile: string; commands: string } | { error: string };
 
 function formatLastUpdated(epochMs: number | null): string {
   if (!epochMs) return 'never';
@@ -66,6 +70,7 @@ export default function LeadsPage() {
   const { leads, isOffline, isInitialLoading, lastUpdatedAt, refetch } = useLeads();
   const [generatingIds, setGeneratingIds] = useState<ReadonlySet<string>>(new Set());
   const [siteBusyIds, setSiteBusyIds] = useState<ReadonlySet<string>>(new Set());
+  const [renderResults, setRenderResults] = useState<Record<string, RenderResult>>({});
 
   const handleGenerate = useCallback(
     async (leadId: string) => {
@@ -86,14 +91,31 @@ export default function LeadsPage() {
     [refetch],
   );
 
-  // Build (unpublished) or publish a lead's Duda site. One in-flight action per lead.
-  const handleSiteAction = useCallback(
-    async (leadId: string, action: 'build' | 'publish') => {
+  // Render a scored lead's client.config.ts + deploy commands. One in-flight
+  // render per lead; the response is captured for display, not discarded.
+  const handleRenderSite = useCallback(
+    async (leadId: string) => {
       setSiteBusyIds((prev) => new Set(prev).add(leadId));
       try {
-        await opsApi.post('/api/lead-action', { leadId, action });
+        const res = await opsApi.post('/api/lead-action', { leadId, action: 'render' });
+        const body = (await res.json()) as {
+          ok?: boolean;
+          configFile?: string;
+          commands?: string;
+          error?: string;
+        };
+        setRenderResults((prev) => ({
+          ...prev,
+          [leadId]:
+            body.ok && body.configFile && body.commands
+              ? { configFile: body.configFile, commands: body.commands }
+              : { error: body.error || 'render failed' },
+        }));
       } catch {
-        /* surfaced via row site_status on next poll */
+        setRenderResults((prev) => ({
+          ...prev,
+          [leadId]: { error: 'render failed — network error' },
+        }));
       } finally {
         setSiteBusyIds((prev) => {
           const next = new Set(prev);
@@ -107,27 +129,8 @@ export default function LeadsPage() {
   );
 
   function renderSiteActions(lead: Lead) {
-    if (siteBusyIds.has(lead.id)) {
-      const publishing = lead.site_status === 'built' || lead.site_status === 'publish_failed';
-      return <span style={s.score}>{publishing ? 'Publishing…' : 'Building…'}</span>;
-    }
-    const st: SiteStatus = lead.site_status ?? 'none';
-    if (st === 'building') return <span style={s.score}>Building…</span>;
-    if (st === 'publishing') return <span style={s.score}>Publishing…</span>;
-    if (st === 'published') {
-      return lead.live_url ? (
-        <a
-          href={lead.live_url}
-          target="_blank"
-          rel="noreferrer"
-          className="hds-focus"
-          style={s.linkAction}
-        >
-          Live ↗
-        </a>
-      ) : null;
-    }
-    if (st === 'built' || st === 'publish_failed') {
+    const busy = siteBusyIds.has(lead.id);
+    if (lead.status === 'rendered') {
       return (
         <>
           {lead.preview_url && (
@@ -137,25 +140,27 @@ export default function LeadsPage() {
           )}
           <button
             type="button"
-            onClick={() => handleSiteAction(lead.id, 'publish')}
+            disabled={busy}
+            onClick={() => handleRenderSite(lead.id)}
             className="hds-focus"
-            style={s.genButton}
+            style={busy ? s.genButtonDisabled : s.genButton}
           >
-            {st === 'publish_failed' ? 'Retry publish' : 'Publish'}
+            {busy ? 'Rendering…' : 'Re-render'}
           </button>
         </>
       );
     }
-    // 'none' / 'build_failed' — only offer build once there's a config to build from
+    // Only offer render once there's a generated config to render from.
     if (lead.status === 'scored' || lead.config != null) {
       return (
         <button
           type="button"
-          onClick={() => handleSiteAction(lead.id, 'build')}
+          disabled={busy}
+          onClick={() => handleRenderSite(lead.id)}
           className="hds-focus"
-          style={s.genButton}
+          style={busy ? s.genButtonDisabled : s.genButton}
         >
-          {st === 'build_failed' ? 'Retry build' : 'Build site'}
+          {busy ? 'Rendering…' : 'Render site'}
         </button>
       );
     }
@@ -164,7 +169,9 @@ export default function LeadsPage() {
 
   const summary = useMemo(() => {
     if (!leads) return '';
-    const scored = leads.filter((l) => l.status === 'scored' || l.status === 'sent').length;
+    const scored = leads.filter(
+      (l) => l.status === 'scored' || l.status === 'rendered' || l.status === 'sent',
+    ).length;
     return `${leads.length} lead${leads.length === 1 ? '' : 's'} · ${scored} scored`;
   }, [leads]);
 
@@ -222,36 +229,57 @@ export default function LeadsPage() {
         <ul style={s.list}>
           {leads.map((lead) => {
             const inFlight = generatingIds.has(lead.id) || lead.status === 'generating';
+            const renderResult = renderResults[lead.id];
             return (
               <li key={lead.id} style={s.row}>
-                <div style={s.rowMain}>
-                  <span style={s.name}>{lead.name ?? lead.place_id ?? 'Unnamed'}</span>
-                  <span style={s.meta}>{metaLine(lead)}</span>
+                <div style={s.rowInner}>
+                  <div style={s.rowMain}>
+                    <span style={s.name}>{lead.name ?? lead.place_id ?? 'Unnamed'}</span>
+                    <span style={s.meta}>{metaLine(lead)}</span>
+                  </div>
+                  <div style={s.rowAside}>
+                    {lead.qualified && !lead.has_website && (
+                      <Badge tone="warning">no website</Badge>
+                    )}
+                    {lead.eval_score != null && (
+                      <span style={s.score}>
+                        score {Math.round(lead.eval_score)}
+                        {lead.eval_pass != null ? (lead.eval_pass ? ' · pass' : ' · review') : ''}
+                      </span>
+                    )}
+                    <Badge tone={STATUS_TONE[lead.status] ?? 'neutral'}>{lead.status}</Badge>
+                    <button
+                      type="button"
+                      disabled={inFlight}
+                      onClick={() => handleGenerate(lead.id)}
+                      className="hds-focus"
+                      style={inFlight ? s.genButtonDisabled : s.genButton}
+                    >
+                      {inFlight
+                        ? 'Generating…'
+                        : lead.status === 'sourced'
+                          ? 'Generate site'
+                          : 'Regenerate'}
+                    </button>
+                    {renderSiteActions(lead)}
+                  </div>
                 </div>
-                <div style={s.rowAside}>
-                  {lead.qualified && !lead.has_website && <Badge tone="warning">no website</Badge>}
-                  {lead.eval_score != null && (
-                    <span style={s.score}>
-                      score {Math.round(lead.eval_score)}
-                      {lead.eval_pass != null ? (lead.eval_pass ? ' · pass' : ' · review') : ''}
-                    </span>
-                  )}
-                  <Badge tone={STATUS_TONE[lead.status] ?? 'neutral'}>{lead.status}</Badge>
-                  <button
-                    type="button"
-                    disabled={inFlight}
-                    onClick={() => handleGenerate(lead.id)}
-                    className="hds-focus"
-                    style={inFlight ? s.genButtonDisabled : s.genButton}
-                  >
-                    {inFlight
-                      ? 'Generating…'
-                      : lead.status === 'sourced'
-                        ? 'Generate site'
-                        : 'Regenerate'}
-                  </button>
-                  {renderSiteActions(lead)}
-                </div>
+                {renderResult && 'error' in renderResult && (
+                  <p style={s.renderError}>{renderResult.error}</p>
+                )}
+                {renderResult && 'configFile' in renderResult && (
+                  <RenderHandoffPanel
+                    configFile={renderResult.configFile}
+                    commands={renderResult.commands}
+                    onDismiss={() =>
+                      setRenderResults((prev) => {
+                        const next = { ...prev };
+                        delete next[lead.id];
+                        return next;
+                      })
+                    }
+                  />
+                )}
               </li>
             );
           })}
@@ -308,12 +336,22 @@ const s = {
   },
   row: {
     display: 'flex',
+    flexDirection: 'column' as const,
+    padding: `${hds.space.px12} 0`,
+    borderBottom: '1px solid var(--semantic-color-border-default)',
+  },
+  rowInner: {
+    display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: hds.space.px16,
     flexWrap: 'wrap' as const,
-    padding: `${hds.space.px12} 0`,
-    borderBottom: '1px solid var(--semantic-color-border-default)',
+  },
+  renderError: {
+    margin: `${hds.space.px8} 0 0`,
+    fontFamily: hds.monoFamily,
+    fontSize: hds.fontSize.xs,
+    color: 'var(--semantic-color-content-danger, #b3423a)',
   },
   rowMain: {
     display: 'flex',
