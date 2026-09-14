@@ -3,7 +3,10 @@
  * (supabase/migrations/0001_leads.sql). The board reads rows via GET /api/leads.
  */
 
-export type LeadStatus = 'sourced' | 'generating' | 'scored' | 'sent' | 'won' | 'lost';
+// 'rendered' is written server-side by renderLeadSite() when a preview deploy is
+// reported (lib/leads/pipeline.mjs). It was missing here, so the board fell
+// through to the neutral badge fallback for it (#185).
+export type LeadStatus = 'sourced' | 'generating' | 'scored' | 'rendered' | 'sent' | 'won' | 'lost';
 
 export type SiteStatus =
   | 'none'

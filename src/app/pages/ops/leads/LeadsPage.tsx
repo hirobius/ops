@@ -8,9 +8,11 @@
  *
  *   1. "Pull leads" (niche + metro)  → POST /api/pull-leads  → rows status='sourced'
  *   2. per-lead lifecycle actions    → POST /api/lead-action { leadId, action }
- *        action 'generate' → row status='scored'; 'build'/'publish'/'render'
- *        drive the site state machine. (One route dispatches all four to stay
- *        under the Vercel Hobby-plan 12-function cap.)
+ *        action 'generate' → row status='scored'; 'render' returns the
+ *        paste-ready client.config.ts + deploy commands. (One route dispatches
+ *        them to stay under the Vercel Hobby-plan 12-function cap.) The board
+ *        no longer dispatches 'build'/'publish' — those terminate in the Duda
+ *        stub retired 2026-06-30 and fabricate URLs (#185).
  *   3. the board polls GET /api/leads (useLeads) and renders live status
  *
  * Data persists in the Supabase `leads` table. In prod the /api/* routes are
@@ -28,18 +30,9 @@ import { opsApi } from '../../../lib/opsApi';
 import { useLeads } from './useLeads';
 import { PullLeadsForm } from './PullLeadsForm';
 import { LeadSweepPanel } from './LeadSweepPanel';
-import type { Lead, LeadStatus, SiteStatus } from './types';
-
-type BadgeTone = 'success' | 'neutral' | 'warning' | 'danger';
-
-const STATUS_TONE: Record<LeadStatus, BadgeTone> = {
-  sourced: 'neutral',
-  generating: 'warning',
-  scored: 'success',
-  sent: 'success',
-  won: 'success',
-  lost: 'danger',
-};
+import type { Lead } from './types';
+import { STATUS_TONE, siteActionFor, isRenderHandoff, type RenderHandoff } from './leadActions';
+import { RenderHandoffPanel } from './RenderHandoffPanel';
 
 function formatLastUpdated(epochMs: number | null): string {
   if (!epochMs) return 'never';
@@ -66,6 +59,8 @@ export default function LeadsPage() {
   const { leads, isOffline, isInitialLoading, lastUpdatedAt, refetch } = useLeads();
   const [generatingIds, setGeneratingIds] = useState<ReadonlySet<string>>(new Set());
   const [siteBusyIds, setSiteBusyIds] = useState<ReadonlySet<string>>(new Set());
+  // Per-lead render hand-off (paste-ready config + commands) or an error message.
+  const [handoffs, setHandoffs] = useState<Record<string, RenderHandoff | { error: string }>>({});
 
   const handleGenerate = useCallback(
     async (leadId: string) => {
@@ -86,14 +81,44 @@ export default function LeadsPage() {
     [refetch],
   );
 
-  // Build (unpublished) or publish a lead's Duda site. One in-flight action per lead.
-  const handleSiteAction = useCallback(
-    async (leadId: string, action: 'build' | 'publish') => {
+  /**
+   * Dispatch the `render` action and keep its response.
+   *
+   * Unlike the retired build/publish path, render returns a paste-ready
+   * hand-off (client.config.ts + scaffold commands) rather than driving a
+   * remote site builder — so the response is surfaced, not discarded.
+   */
+  const handleRender = useCallback(
+    async (leadId: string) => {
       setSiteBusyIds((prev) => new Set(prev).add(leadId));
+      setHandoffs((prev) => {
+        const next = { ...prev };
+        delete next[leadId];
+        return next;
+      });
       try {
-        await opsApi.post('/api/lead-action', { leadId, action });
+        const res = await opsApi.post('/api/lead-action', { leadId, action: 'render' });
+        const body: unknown = await res.json().catch(() => null);
+        if (res.ok && isRenderHandoff(body)) {
+          setHandoffs((prev) => ({
+            ...prev,
+            [leadId]: { configFile: body.configFile, commands: body.commands },
+          }));
+        } else {
+          // 409 NO_CONFIG / 422 CONFIG_INVALID carry a usable message; never fail silently.
+          const message =
+            typeof body === 'object' &&
+            body !== null &&
+            typeof (body as { error?: unknown }).error === 'string'
+              ? (body as { error: string }).error
+              : `Render failed (HTTP ${res.status})`;
+          setHandoffs((prev) => ({ ...prev, [leadId]: { error: message } }));
+        }
       } catch {
-        /* surfaced via row site_status on next poll */
+        setHandoffs((prev) => ({
+          ...prev,
+          [leadId]: { error: 'Render failed — could not reach /api/lead-action.' },
+        }));
       } finally {
         setSiteBusyIds((prev) => {
           const next = new Set(prev);
@@ -107,64 +132,40 @@ export default function LeadsPage() {
   );
 
   function renderSiteActions(lead: Lead) {
-    if (siteBusyIds.has(lead.id)) {
-      const publishing = lead.site_status === 'built' || lead.site_status === 'publish_failed';
-      return <span style={s.score}>{publishing ? 'Publishing…' : 'Building…'}</span>;
-    }
-    const st: SiteStatus = lead.site_status ?? 'none';
-    if (st === 'building') return <span style={s.score}>Building…</span>;
-    if (st === 'publishing') return <span style={s.score}>Publishing…</span>;
-    if (st === 'published') {
-      return lead.live_url ? (
-        <a
-          href={lead.live_url}
-          target="_blank"
-          rel="noreferrer"
-          className="hds-focus"
-          style={s.linkAction}
-        >
-          Live ↗
-        </a>
-      ) : null;
-    }
-    if (st === 'built' || st === 'publish_failed') {
-      return (
-        <>
-          {lead.preview_url && (
-            <a href={lead.preview_url} target="_blank" rel="noreferrer" style={s.linkAction}>
-              Preview ↗
-            </a>
-          )}
+    if (siteBusyIds.has(lead.id)) return <span style={s.score}>Rendering…</span>;
+    const action = siteActionFor(lead);
+    return (
+      <>
+        {lead.preview_url && (
+          <a
+            href={lead.preview_url}
+            target="_blank"
+            rel="noreferrer"
+            className="hds-focus"
+            style={s.linkAction}
+          >
+            Preview ↗
+          </a>
+        )}
+        {action && (
           <button
             type="button"
-            onClick={() => handleSiteAction(lead.id, 'publish')}
+            onClick={() => handleRender(lead.id)}
             className="hds-focus"
             style={s.genButton}
           >
-            {st === 'publish_failed' ? 'Retry publish' : 'Publish'}
+            {action.label}
           </button>
-        </>
-      );
-    }
-    // 'none' / 'build_failed' — only offer build once there's a config to build from
-    if (lead.status === 'scored' || lead.config != null) {
-      return (
-        <button
-          type="button"
-          onClick={() => handleSiteAction(lead.id, 'build')}
-          className="hds-focus"
-          style={s.genButton}
-        >
-          {st === 'build_failed' ? 'Retry build' : 'Build site'}
-        </button>
-      );
-    }
-    return null;
+        )}
+      </>
+    );
   }
 
   const summary = useMemo(() => {
     if (!leads) return '';
-    const scored = leads.filter((l) => l.status === 'scored' || l.status === 'sent').length;
+    const scored = leads.filter(
+      (l) => l.status === 'scored' || l.status === 'rendered' || l.status === 'sent',
+    ).length;
     return `${leads.length} lead${leads.length === 1 ? '' : 's'} · ${scored} scored`;
   }, [leads]);
 
@@ -236,7 +237,7 @@ export default function LeadsPage() {
                       {lead.eval_pass != null ? (lead.eval_pass ? ' · pass' : ' · review') : ''}
                     </span>
                   )}
-                  <Badge tone={STATUS_TONE[lead.status] ?? 'neutral'}>{lead.status}</Badge>
+                  <Badge tone={STATUS_TONE[lead.status]}>{lead.status}</Badge>
                   <button
                     type="button"
                     disabled={inFlight}
@@ -252,6 +253,12 @@ export default function LeadsPage() {
                   </button>
                   {renderSiteActions(lead)}
                 </div>
+                {handoffs[lead.id] && (
+                  <RenderHandoffPanel
+                    leadName={lead.name ?? 'this lead'}
+                    handoff={handoffs[lead.id]}
+                  />
+                )}
               </li>
             );
           })}
