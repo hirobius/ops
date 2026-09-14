@@ -2,6 +2,20 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
+  // Repo convention: `.spec.ts` = Playwright e2e, `.test.{ts,tsx}` = Vitest
+  // unit/contract tests (see vitest.config.ts). Playwright's default
+  // testMatch also globs up `*.test.*`, which pulls in the Vitest-owned
+  // files here too — they import `vitest`, which crashes the runner
+  // (double registration of the shared jest-matchers-object symbol) and/or
+  // fails to resolve Vitest-only deps like @testing-library/react. Scope
+  // Playwright to its own naming convention instead.
+  testMatch: '**/*.spec.ts',
+  // check-source-canon.spec.ts is itself mislabeled — it's a Vitest suite
+  // (imports `describe`/`it`/`expect` from 'vitest') for a validator script
+  // that no longer exists (removed in #17, de-authoring the design system).
+  // It matches testMatch by name but would crash the runner the same way;
+  // ignore it here rather than rename it into a Vitest run it can't pass.
+  testIgnore: '**/check-source-canon.spec.ts',
   timeout: 30_000,
   // 10o-11: retries: 0 → 2. Long-running visual.spec (~7 min, 77 tests) hits
   // intermittent vite dev-server crashes and HMR-triggered page reloads.
@@ -28,7 +42,5 @@ export default defineConfig({
     reuseExistingServer: true,
     timeout: 180_000,
   },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-  ],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });

@@ -26,6 +26,12 @@ export default defineConfig({
       'src/**/*.{test,spec}.{ts,tsx,js,jsx}',
       'tests/**/*.test.ts',
     ],
+    // tests/primitive-contracts/*.contract.test.tsx are intentionally NOT
+    // included here (the .ts-only glob above skips them): they import
+    // primitives (e.g. @/app/components/alert) that don't exist in this repo
+    // — Ops consumes @hirobius/design-system, it doesn't author it. Tracked
+    // as a follow-up to either wire real imports or delete the suite; see
+    // ops#275.
     environmentMatchPatterns: [
       // Run scripts tests in Node environment (they use fs, path, url builtins)
       [/scripts\//, 'node'],
