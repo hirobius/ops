@@ -9,10 +9,10 @@
  *
  * Quick shortcuts (! prefix):
  *   !help    — list shortcuts
- *   !status  — BACKLOG.md summary embed (fast, no AI)
- *   !backlog [filter] — backlog digest; filter by category or status
- *   !next / !today — AI picks top 1-3 ready items for today + reasoning
- *   !recent [days] — BACKLOG.md changes from git log (default 7d)
+ *   !status  — open GitHub issues + fleet deploy summary (fast, no AI)
+ *   !backlog [filter] — open issues digest; filter by repo or label
+ *   !next / !today — AI picks top 1-3 ralph-ready issues for today + reasoning
+ *   !recent [days] — recently updated GitHub issues (default 7d)
  *   !shell <cmd> — raw shell passthrough
  *   !log [n] — tail cron log
  *   !provider [name] — show or set AI provider for this channel
@@ -26,6 +26,12 @@
  *   DISCORD_BOT_TOKEN=<bot token from Discord Dev Portal>
  *   DISCORD_OWNER_ID=<your Discord user ID (right-click → Copy User ID)>
  *   DISCORD_GUILD_ID=<your server ID (optional — limits to one server)>
+ *
+ * Live workflow data — !status / !backlog / !recent / !next (BACKLOG.md was
+ * retired 2026-07-09, ops#52; these now read GitHub Issues the same way
+ * /ops/tasks does):
+ *   GITHUB_TOKEN=<token with Issues: read scope on the fleet repos>  ← required for these commands
+ *   VERCEL_TOKEN=<read-scoped Vercel token>  ← optional, adds fleet deploy state to !status
  *
  * AI provider — Ollama is the local-first default (machine has to be
  * running for /ops/kanban + Hermes anyway; cloud calls cost money). Override
@@ -55,6 +61,8 @@ import { execSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { makeGitHubPort } from '../lib/github/issues.mjs';
+import { listProjects } from '../lib/projects/index.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -67,28 +75,33 @@ if (fs.existsSync(envLocal)) {
   }
 }
 
-const BOT_TOKEN       = process.env.DISCORD_BOT_TOKEN;
-const OWNER_ID        = process.env.DISCORD_OWNER_ID;
-const GUILD_ID        = process.env.DISCORD_GUILD_ID;
-const OPENROUTER_KEY  = process.env.OPENROUTER_API_KEY;
-const ANTHROPIC_KEY   = process.env.ANTHROPIC_API_KEY;
-const BOT_MODEL       = process.env.DISCORD_BOT_MODEL || 'anthropic/claude-sonnet-4-6';
-const OLLAMA_BASE     = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-const OLLAMA_MODEL    = process.env.OLLAMA_MODEL || 'hermes3';
+const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+const OWNER_ID = process.env.DISCORD_OWNER_ID;
+const GUILD_ID = process.env.DISCORD_GUILD_ID;
+const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
+const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+const BOT_MODEL = process.env.DISCORD_BOT_MODEL || 'anthropic/claude-sonnet-4-6';
+const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'hermes3';
 // Provider default: 'ollama' (local, free, machine has to be running anyway).
 // Override with DISCORD_BOT_PROVIDER=anthropic | openrouter to default to a
 // cloud provider when its key is configured. In-channel `!provider <name>`
 // overrides the default per-channel/thread.
 const BOT_PROVIDER_DEFAULT = (process.env.DISCORD_BOT_PROVIDER || 'ollama').toLowerCase();
-const BACKLOG_PATH    = path.join(ROOT, 'BACKLOG.md');
 // Default client for the auto-assigner when a non-! message has no [slug]
 // prefix. Override via env when the bot lives in a multi-client server.
-const DEFAULT_CLIENT  = process.env.DISCORD_DEFAULT_CLIENT || 'lilac-insure';
-const LOG_FILE        = '/tmp/youtube-knowledge-cron.log';
-const HERMES_LOG      = '/tmp/hermes-loop.log';
+const DEFAULT_CLIENT = process.env.DISCORD_DEFAULT_CLIENT || 'lilac-insure';
+const LOG_FILE = '/tmp/youtube-knowledge-cron.log';
+const HERMES_LOG = '/tmp/hermes-loop.log';
 
-if (!BOT_TOKEN) { console.error('[bot] DISCORD_BOT_TOKEN not set in .env.local'); process.exit(1); }
-if (!OWNER_ID)  { console.error('[bot] DISCORD_OWNER_ID not set in .env.local');  process.exit(1); }
+if (!BOT_TOKEN) {
+  console.error('[bot] DISCORD_BOT_TOKEN not set in .env.local');
+  process.exit(1);
+}
+if (!OWNER_ID) {
+  console.error('[bot] DISCORD_OWNER_ID not set in .env.local');
+  process.exit(1);
+}
 
 // ── AI provider selection ─────────────────────────────────────────────────────
 // Default: Ollama (local). Adrian's machine is always running for /ops/kanban
@@ -99,7 +112,7 @@ if (!OWNER_ID)  { console.error('[bot] DISCORD_OWNER_ID not set in .env.local');
 let Anthropic;
 let anthropic = null;
 
-const ANTHROPIC_AVAILABLE  = !!ANTHROPIC_KEY;
+const ANTHROPIC_AVAILABLE = !!ANTHROPIC_KEY;
 const OPENROUTER_AVAILABLE = !!OPENROUTER_KEY;
 
 // Initialize Anthropic SDK lazily if its key is present, regardless of
@@ -114,17 +127,21 @@ if (ANTHROPIC_AVAILABLE) {
 }
 
 function describeProvider(name) {
-  if (name === 'anthropic')  return `Anthropic — model: claude-sonnet-4-6`;
+  if (name === 'anthropic') return `Anthropic — model: claude-sonnet-4-6`;
   if (name === 'openrouter') return `OpenRouter — model: ${BOT_MODEL}`;
   return `Ollama (local) — model: ${OLLAMA_MODEL} @ ${OLLAMA_BASE}`;
 }
 
 console.log(`[bot] default AI provider: ${describeProvider(BOT_PROVIDER_DEFAULT)}`);
 if (BOT_PROVIDER_DEFAULT === 'anthropic' && !anthropic) {
-  console.warn('[bot] DISCORD_BOT_PROVIDER=anthropic but ANTHROPIC_API_KEY missing or SDK not loaded — falling back to Ollama at runtime');
+  console.warn(
+    '[bot] DISCORD_BOT_PROVIDER=anthropic but ANTHROPIC_API_KEY missing or SDK not loaded — falling back to Ollama at runtime',
+  );
 }
 if (BOT_PROVIDER_DEFAULT === 'openrouter' && !OPENROUTER_AVAILABLE) {
-  console.warn('[bot] DISCORD_BOT_PROVIDER=openrouter but OPENROUTER_API_KEY missing — falling back to Ollama at runtime');
+  console.warn(
+    '[bot] DISCORD_BOT_PROVIDER=openrouter but OPENROUTER_API_KEY missing — falling back to Ollama at runtime',
+  );
 }
 
 // ── Discord ───────────────────────────────────────────────────────────────────
@@ -151,7 +168,7 @@ function pickProvider(channelId) {
   const override = providerOverrides.get(channelId);
   const choice = override ?? BOT_PROVIDER_DEFAULT;
   // Runtime fallback if a provider is requested but unavailable.
-  if (choice === 'anthropic'  && !anthropic)           return 'ollama';
+  if (choice === 'anthropic' && !anthropic) return 'ollama';
   if (choice === 'openrouter' && !OPENROUTER_AVAILABLE) return 'ollama';
   return choice;
 }
@@ -197,60 +214,63 @@ function shell(cmd, timeoutMs = 30_000) {
   }).trim();
 }
 
-// ── BACKLOG.md parsing ────────────────────────────────────────────────────────
-// Parses the single source of truth at /BACKLOG.md. Format per item:
-//   - `status` **id** — title
-// Sections delimited by `## Category Name _(N)_` headers.
+// ── GitHub Issues (live source) ───────────────────────────────────────────────
+// BACKLOG.md was retired 2026-07-09 (ops#52) — !status / !backlog / !recent /
+// !next now read open issues fleet-wide, the same feed /ops/tasks renders,
+// via lib/github/issues.mjs's listOpenIssues(). Fails loud + actionable when
+// GITHUB_TOKEN isn't set rather than silently degrading to empty (ops#30).
 
-function parseBacklog() {
-  if (!fs.existsSync(BACKLOG_PATH)) {
-    return { items: [], categories: {}, statuses: {} };
-  }
-  const text = fs.readFileSync(BACKLOG_PATH, 'utf8');
-  const items = [];
-  let currentCategory = 'Uncategorized';
-  for (const line of text.split('\n')) {
-    const sectMatch = line.match(/^##\s+(.+?)(?:\s+_\([0-9]+\)_)?\s*$/);
-    if (sectMatch) {
-      const heading = sectMatch[1].trim();
-      // Skip non-category sections like "Conventions" and "What used to live here"
-      if (/^(Conventions|What used to live here)$/i.test(heading)) {
-        currentCategory = null;
-        continue;
-      }
-      currentCategory = heading;
-      continue;
-    }
-    if (!currentCategory) continue;
-    const itemMatch = line.match(/^-\s+`([^`]+)`\s+\*\*([^*]+)\*\*\s+—\s+(.+?)\s*$/);
-    if (itemMatch) {
-      const [, status, id, title] = itemMatch;
-      items.push({ status: status.trim(), id: id.trim(), title: title.trim(), category: currentCategory });
-    }
-  }
-  const byCategory = {}, byStatus = {};
-  for (const it of items) {
-    (byCategory[it.category] = byCategory[it.category] || []).push(it);
-    byStatus[it.status] = (byStatus[it.status] || 0) + 1;
-  }
-  return { items, categories: byCategory, statuses: byStatus };
+let githubPort;
+function getGithubPort() {
+  if (githubPort === undefined) githubPort = makeGitHubPort();
+  return githubPort;
 }
 
-// Tiny fuzzy category resolver for !backlog <name> — accepts partial / case-insensitive
-function resolveCategory(input, categories) {
+/** @returns {Promise<Array<{repo: string, number: number, title: string, url: string, state: string, labels: string[], updated_at: string}>>} */
+async function fetchOpenIssues() {
+  const port = getGithubPort();
+  if (!port) {
+    throw new Error(
+      'GITHUB_TOKEN is not set — add a token with "Issues: read" scope on the ' +
+        'fleet repos to .env.local to read live issue data.',
+    );
+  }
+  return port.listOpenIssues();
+}
+
+// Tiny fuzzy repo resolver for !backlog <name> — accepts partial / case-insensitive,
+// matches against either the full "owner/repo" or just the "repo" part.
+function resolveRepo(input, repos) {
   if (!input) return null;
   const q = input.toLowerCase().trim();
-  return Object.keys(categories).find(c => c.toLowerCase().includes(q)) || null;
+  return repos.find((r) => r.toLowerCase().includes(q)) || null;
 }
 
-const STATUS_EMOJI = {
-  ready:           '🟢',
-  blocked:         '🔴',
-  parked:          '⚪',
-  'needs-grilling': '🟡',
-  idea:            '💡',
+const KNOWN_LABELS = [
+  'ralph-ready',
+  'blocked',
+  'ralph-parked',
+  'needs-adrian',
+  'ralph-wip',
+  'p0',
+  'p1',
+  'p2',
+  'p3',
+];
+const LABEL_EMOJI = {
+  'ralph-ready': '🟢',
+  blocked: '🔴',
+  'ralph-parked': '⚪',
+  'needs-adrian': '🟡',
+  'ralph-wip': '🔵',
 };
-function statusEmoji(s) { return STATUS_EMOJI[s] || '⬜'; }
+/** First matching known label's emoji for an issue, else a blank box. */
+function primaryLabelEmoji(labels) {
+  for (const [label, emoji] of Object.entries(LABEL_EMOJI)) {
+    if (labels.includes(label)) return emoji;
+  }
+  return '⬜';
+}
 
 // ── Client workspace summary ──────────────────────────────────────────────────
 
@@ -263,15 +283,17 @@ function getClientStatus(slug) {
     return fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : null;
   };
 
-  const meta      = read('meta.json');
-  const tasks     = read('tasks.json');
-  const retainer  = read('retainer.json');
+  const meta = read('meta.json');
+  const tasks = read('tasks.json');
+  const retainer = read('retainer.json');
   const checklist = read('checklist.json');
 
   const lines = [];
 
   if (meta) {
-    lines.push(`**${meta.company || slug}**  |  ${meta.location || ''}  |  ${meta.customerCount || '?'} customers`);
+    lines.push(
+      `**${meta.company || slug}**  |  ${meta.location || ''}  |  ${meta.customerCount || '?'} customers`,
+    );
     lines.push(`Phase: ${meta.currentPhase || '?'}  |  Status: ${meta.status || '?'}`);
     lines.push('');
   }
@@ -286,7 +308,7 @@ function getClientStatus(slug) {
   }
 
   if (tasks) {
-    const phases = Array.isArray(tasks) ? tasks : (tasks.phases || [tasks]);
+    const phases = Array.isArray(tasks) ? tasks : tasks.phases || [tasks];
     for (const phase of phases) {
       const buckets = phase.buckets || [];
       const phaseLabel = phase.phase || phase.id || 'Tasks';
@@ -294,7 +316,7 @@ function getClientStatus(slug) {
       lines.push(`**${phaseLabel}** ${status}`);
       for (const bucket of buckets) {
         const items = bucket.tasks || [];
-        const open  = items.filter(t => t.status !== 'done' && t.status !== 'complete');
+        const open = items.filter((t) => t.status !== 'done' && t.status !== 'complete');
         if (!open.length) continue;
         lines.push(`  [${bucket.name || bucket.id}]`);
         for (const t of open.slice(0, 4)) {
@@ -309,13 +331,25 @@ function getClientStatus(slug) {
 
   if (checklist) {
     const cats = checklist.categories || [];
-    const blockedItems = cats.flatMap(c => (c.items || []).filter(i => i.status === 'blocked'));
-    const inProgress   = cats.flatMap(c => (c.items || []).filter(i => i.status === 'in-progress'));
+    const blockedItems = cats.flatMap((c) => (c.items || []).filter((i) => i.status === 'blocked'));
+    const inProgress = cats.flatMap((c) =>
+      (c.items || []).filter((i) => i.status === 'in-progress'),
+    );
     if (blockedItems.length) {
-      lines.push(`**Blocked (${blockedItems.length}):** ${blockedItems.map(i => i.item).slice(0, 3).join('; ')}`);
+      lines.push(
+        `**Blocked (${blockedItems.length}):** ${blockedItems
+          .map((i) => i.item)
+          .slice(0, 3)
+          .join('; ')}`,
+      );
     }
     if (inProgress.length) {
-      lines.push(`**In-progress (${inProgress.length}):** ${inProgress.map(i => i.item).slice(0, 3).join('; ')}`);
+      lines.push(
+        `**In-progress (${inProgress.length}):** ${inProgress
+          .map((i) => i.item)
+          .slice(0, 3)
+          .join('; ')}`,
+      );
     }
   }
 
@@ -327,7 +361,8 @@ function getClientStatus(slug) {
 const TOOL_DEFS = [
   {
     name: 'shell_exec',
-    description: 'Run a shell command in the project root (/home/adrian/projects/adrian-milsap). Use for git status, running scripts, checking logs, triggering builds. Returns stdout. Avoid interactive or long-running commands.',
+    description:
+      'Run a shell command in the project root (/home/adrian/projects/adrian-milsap). Use for git status, running scripts, checking logs, triggering builds. Returns stdout. Avoid interactive or long-running commands.',
     parameters: {
       type: 'object',
       properties: {
@@ -350,7 +385,8 @@ const TOOL_DEFS = [
   },
   {
     name: 'client_status',
-    description: 'Get a status summary for a Hirobius client workspace: tasks by phase/swimlane, checklist blockers, retainer/payment status. Use when asked about a client like "lilac", "lilac insure", "Conrad", etc.',
+    description:
+      'Get a status summary for a Hirobius client workspace: tasks by phase/swimlane, checklist blockers, retainer/payment status. Use when asked about a client like "lilac", "lilac insure", "Conrad", etc.',
     parameters: {
       type: 'object',
       properties: {
@@ -361,7 +397,8 @@ const TOOL_DEFS = [
   },
   {
     name: 'sync_client_emails',
-    description: 'Parse Gmail threads for a client and extract action items / status updates into the client workspace files. Runs scripts/sync-client-emails.mjs.',
+    description:
+      'Parse Gmail threads for a client and extract action items / status updates into the client workspace files. Runs scripts/sync-client-emails.mjs.',
     parameters: {
       type: 'object',
       properties: {
@@ -374,14 +411,14 @@ const TOOL_DEFS = [
 ];
 
 // Anthropic SDK format
-const TOOLS_ANTHROPIC = TOOL_DEFS.map(t => ({
+const TOOLS_ANTHROPIC = TOOL_DEFS.map((t) => ({
   name: t.name,
   description: t.description,
   input_schema: t.parameters,
 }));
 
 // OpenAI/OpenRouter format
-const TOOLS_OPENAI = TOOL_DEFS.map(t => ({
+const TOOLS_OPENAI = TOOL_DEFS.map((t) => ({
   type: 'function',
   function: { name: t.name, description: t.description, parameters: t.parameters },
 }));
@@ -464,14 +501,14 @@ async function askOpenRouter(channelId, userMessage) {
   addToHistory(channelId, 'user', userMessage);
   let messages = [
     { role: 'system', content: SYSTEM_PROMPT },
-    ...getHistory(channelId).map(m => ({ role: m.role, content: m.content })),
+    ...getHistory(channelId).map((m) => ({ role: m.role, content: m.content })),
   ];
 
   for (let i = 0; i < 5; i++) {
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_KEY}`,
+        Authorization: `Bearer ${OPENROUTER_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://hirobius.com',
         'X-Title': 'Hirobius HQ Bot',
@@ -504,7 +541,11 @@ async function askOpenRouter(channelId, userMessage) {
     messages.push({ role: 'assistant', content: msg.content || null, tool_calls: msg.tool_calls });
     for (const call of msg.tool_calls) {
       let input;
-      try { input = JSON.parse(call.function.arguments); } catch { input = {}; }
+      try {
+        input = JSON.parse(call.function.arguments);
+      } catch {
+        input = {};
+      }
       messages.push({
         role: 'tool',
         tool_call_id: call.id,
@@ -520,7 +561,7 @@ async function askOpenRouter(channelId, userMessage) {
 
 async function askAnthropic(channelId, userMessage) {
   addToHistory(channelId, 'user', userMessage);
-  let messages = getHistory(channelId).map(m => ({ role: m.role, content: m.content }));
+  let messages = getHistory(channelId).map((m) => ({ role: m.role, content: m.content }));
 
   for (let i = 0; i < 5; i++) {
     const response = await anthropic.messages.create({
@@ -532,7 +573,10 @@ async function askAnthropic(channelId, userMessage) {
     });
 
     if (response.stop_reason === 'end_turn') {
-      const text = response.content.filter(b => b.type === 'text').map(b => b.text).join('');
+      const text = response.content
+        .filter((b) => b.type === 'text')
+        .map((b) => b.text)
+        .join('');
       addToHistory(channelId, 'assistant', text);
       return text;
     }
@@ -540,8 +584,12 @@ async function askAnthropic(channelId, userMessage) {
     if (response.stop_reason === 'tool_use') {
       messages.push({ role: 'assistant', content: response.content });
       const results = response.content
-        .filter(b => b.type === 'tool_use')
-        .map(b => ({ type: 'tool_result', tool_use_id: b.id, content: executeTool(b.name, b.input) }));
+        .filter((b) => b.type === 'tool_use')
+        .map((b) => ({
+          type: 'tool_result',
+          tool_use_id: b.id,
+          content: executeTool(b.name, b.input),
+        }));
       messages.push({ role: 'user', content: results });
       continue;
     }
@@ -558,7 +606,7 @@ async function askOllama(channelId, userMessage) {
   addToHistory(channelId, 'user', userMessage);
   const messages = [
     { role: 'system', content: SYSTEM_PROMPT },
-    ...getHistory(channelId).map(m => ({ role: m.role, content: m.content })),
+    ...getHistory(channelId).map((m) => ({ role: m.role, content: m.content })),
   ];
 
   for (let i = 0; i < 5; i++) {
@@ -582,7 +630,7 @@ async function askOllama(channelId, userMessage) {
     messages.push({ role: 'assistant', content: msg.content || '', tool_calls: msg.tool_calls });
     for (const call of msg.tool_calls) {
       const args = call.function.arguments;
-      const input = typeof args === 'string' ? JSON.parse(args) : (args || {});
+      const input = typeof args === 'string' ? JSON.parse(args) : args || {};
       messages.push({ role: 'tool', content: executeTool(call.function.name, input) });
     }
   }
@@ -594,7 +642,7 @@ async function askOllama(channelId, userMessage) {
 
 async function ask(channelId, userMessage) {
   const provider = pickProvider(channelId);
-  if (provider === 'anthropic')  return askAnthropic(channelId, userMessage);
+  if (provider === 'anthropic') return askAnthropic(channelId, userMessage);
   if (provider === 'openrouter') return askOpenRouter(channelId, userMessage);
   return askOllama(channelId, userMessage);
 }
@@ -609,10 +657,10 @@ async function cmdAgents(channel) {
     if (procs.trim()) {
       for (const row of procs.trim().split('\n')) {
         const cols = row.trim().split(/\s+/);
-        const pid  = cols[1];
-        const cpu  = cols[2];
-        const mem  = cols[3];
-        const cmd  = cols.slice(10).join(' ').slice(0, 60);
+        const pid = cols[1];
+        const cpu = cols[2];
+        const mem = cols[3];
+        const cmd = cols.slice(10).join(' ').slice(0, 60);
         lines.push(`🟠 Hermes PID \`${pid}\` — CPU ${cpu}% MEM ${mem}% — \`${cmd}\``);
       }
     } else {
@@ -620,7 +668,9 @@ async function cmdAgents(channel) {
     }
 
     lines.push('');
-    const mem = shell(`free -h | awk '/^Mem:/{print "RAM: " $3 " used / " $2 " total — " $7 " available"}'`);
+    const mem = shell(
+      `free -h | awk '/^Mem:/{print "RAM: " $3 " used / " $2 " total — " $7 " available"}'`,
+    );
     lines.push(mem);
 
     const hermesTail = shell(`tail -3 ${HERMES_LOG} 2>/dev/null || echo "(no hermes log)"`);
@@ -633,48 +683,63 @@ async function cmdAgents(channel) {
 }
 
 async function cmdHelp(channel) {
-  await send(channel, [
-    '**Hirobius HQ Bot**',
-    '',
-    `Type a task description and the auto-assigner classifies + routes it to a tier (\`${DEFAULT_CLIENT}\` by default).`,
-    'Prefix with \`[client-slug]\` to target a different client: \`[the-ranch-foundation] do X\`.',
-    'Anything that isn\'t a task falls through to natural-language chat.',
-    '',
-    '**Quick shortcuts (no API cost):**',
-    '`!status` — BACKLOG.md summary by category + git head',
-    '`!backlog [filter]` — backlog digest. Filter by category (`portfolio`, `concrete`, `hds`…) or status (`ready`, `blocked`, `parked`, `idea`)',
-    '`!next` / `!today` — AI picks top 1-3 ready items focused on portfolio/storefront, with reasoning',
-    '`!recent [days]` — BACKLOG.md changes from git log (default last 7 days)',
-    '`!agents` — running Hermes processes + memory',
-    '`!log hermes [n]` — tail Hermes log',
-    '`!shell <cmd>` — raw shell passthrough',
-    '`!provider [name]` — show or set AI provider for this channel',
-    '`!local` — switch this channel to Ollama (free, local)',
-    '`!cloud` — switch this channel to Anthropic (best reasoning)',
-    '`!help` — this message',
-    '',
-    'Start a Discord **thread** for isolated conversation with full context.',
-  ].join('\n'));
+  await send(
+    channel,
+    [
+      '**Hirobius HQ Bot**',
+      '',
+      `Type a task description and the auto-assigner classifies + routes it to a tier (\`${DEFAULT_CLIENT}\` by default).`,
+      'Prefix with \`[client-slug]\` to target a different client: \`[the-ranch-foundation] do X\`.',
+      "Anything that isn't a task falls through to natural-language chat.",
+      '',
+      '**Quick shortcuts (no API cost):**',
+      '`!status` — open GitHub issues by repo + fleet deploy state + git head',
+      '`!backlog [filter]` — open issues digest. Filter by repo (`ops`…) or label (`ralph-ready`, `blocked`, `ralph-parked`, `needs-adrian`, `p0`-`p3`)',
+      '`!next` / `!today` — AI picks top 1-3 `ralph-ready` issues for today, with reasoning',
+      '`!recent [days]` — GitHub issues updated in the last N days (default 7)',
+      '`!agents` — running Hermes processes + memory',
+      '`!log hermes [n]` — tail Hermes log',
+      '`!shell <cmd>` — raw shell passthrough',
+      '`!provider [name]` — show or set AI provider for this channel',
+      '`!local` — switch this channel to Ollama (free, local)',
+      '`!cloud` — switch this channel to Anthropic (best reasoning)',
+      '`!help` — this message',
+      '',
+      'Start a Discord **thread** for isolated conversation with full context.',
+    ].join('\n'),
+  );
 }
 
 async function cmdProvider(channel, channelId, args) {
   const requested = (args || '').trim().toLowerCase();
   if (!requested) {
     const current = pickProvider(channelId);
-    await send(channel, `Provider for this channel: **${describeProvider(current)}**\nUse \`!provider ollama|anthropic|openrouter\` to switch.`);
+    await send(
+      channel,
+      `Provider for this channel: **${describeProvider(current)}**\nUse \`!provider ollama|anthropic|openrouter\` to switch.`,
+    );
     return;
   }
   if (!['ollama', 'anthropic', 'openrouter'].includes(requested)) {
-    await send(channel, `Unknown provider \`${requested}\`. Try: \`ollama\`, \`anthropic\`, \`openrouter\`.`);
+    await send(
+      channel,
+      `Unknown provider \`${requested}\`. Try: \`ollama\`, \`anthropic\`, \`openrouter\`.`,
+    );
     return;
   }
   if (requested === 'anthropic' && !anthropic) {
-    await send(channel, '`anthropic` unavailable — `ANTHROPIC_API_KEY` not configured. Falling back to Ollama for this channel.');
+    await send(
+      channel,
+      '`anthropic` unavailable — `ANTHROPIC_API_KEY` not configured. Falling back to Ollama for this channel.',
+    );
     providerOverrides.set(channelId, 'ollama');
     return;
   }
   if (requested === 'openrouter' && !OPENROUTER_AVAILABLE) {
-    await send(channel, '`openrouter` unavailable — `OPENROUTER_API_KEY` not configured. Falling back to Ollama for this channel.');
+    await send(
+      channel,
+      '`openrouter` unavailable — `OPENROUTER_API_KEY` not configured. Falling back to Ollama for this channel.',
+    );
     providerOverrides.set(channelId, 'ollama');
     return;
   }
@@ -684,88 +749,113 @@ async function cmdProvider(channel, channelId, args) {
 
 async function cmdStatus(channel, channelId) {
   try {
-    const b = parseBacklog();
+    const issues = await fetchOpenIssues();
     const gitBranch = shell('git rev-parse --abbrev-ref HEAD');
-    const gitShort  = shell('git rev-parse --short HEAD');
-    const providerLine = channelId ? `_AI provider here: ${describeProvider(pickProvider(channelId))}_` : null;
+    const gitShort = shell('git rev-parse --short HEAD');
+    const providerLine = channelId
+      ? `_AI provider here: ${describeProvider(pickProvider(channelId))}_`
+      : null;
 
-    const totalOpen = b.items.length;
-    const ready     = b.statuses.ready || 0;
-    const blocked   = b.statuses.blocked || 0;
-    const parked    = b.statuses.parked || 0;
-    const ideas     = b.statuses.idea || 0;
+    const countByLabel = (label) => issues.filter((i) => i.labels.includes(label)).length;
+    const ready = countByLabel('ralph-ready');
+    const blocked = countByLabel('blocked');
+    const parked = countByLabel('ralph-parked') + countByLabel('needs-adrian');
 
     const lines = [
       `**Status** — \`${gitBranch}\` @ \`${gitShort}\``,
-      `📋 **${totalOpen}** open items in BACKLOG.md`,
-      `🟢 ready: **${ready}**  🔴 blocked: **${blocked}**  ⚪ parked: **${parked}**  💡 idea: **${ideas}**`,
+      `📋 **${issues.length}** open issues across the fleet`,
+      `🟢 ralph-ready: **${ready}**  🔴 blocked: **${blocked}**  🟡 needs-adrian/parked: **${parked}**`,
     ];
     if (providerLine) lines.push('', providerLine);
 
-    // Per-category headline + top ready item
-    const cats = Object.entries(b.categories).sort((a, b) => b[1].length - a[1].length);
-    if (cats.length > 0) {
-      lines.push('', '**By category:**');
-      for (const [cat, arr] of cats) {
-        const readyHere = arr.filter(i => i.status === 'ready');
-        const summary = `${arr.length} (${readyHere.length} ready)`;
-        const top = readyHere[0];
-        const topLine = top ? ` — next: \`${top.id}\`` : '';
-        lines.push(`• **${cat}** — ${summary}${topLine}`);
+    // Per-repo headline + ready count
+    const byRepo = {};
+    for (const i of issues) (byRepo[i.repo] = byRepo[i.repo] || []).push(i);
+    const repos = Object.entries(byRepo).sort((a, b) => b[1].length - a[1].length);
+    if (repos.length > 0) {
+      lines.push('', '**By repo:**');
+      for (const [repo, arr] of repos.slice(0, 10)) {
+        const readyHere = arr.filter((i) => i.labels.includes('ralph-ready'));
+        lines.push(`• **${repo}** — ${arr.length} (${readyHere.length} ready)`);
       }
+      if (repos.length > 10) lines.push(`_…+${repos.length - 10} more repos_`);
     }
 
-    lines.push('', '_Use_ `!backlog <category>` _to drill into a section, or_ `!backlog ready` _for actionable items._');
+    const fleet = await listProjects();
+    if (fleet.ok) {
+      const states = {};
+      for (const p of fleet.projects) {
+        const s = p.latestDeployment?.state || 'UNKNOWN';
+        states[s] = (states[s] || 0) + 1;
+      }
+      const stateLine = Object.entries(states)
+        .map(([s, n]) => `${s}: ${n}`)
+        .join(' · ');
+      lines.push('', `**Fleet deploys:** ${stateLine || 'no projects'}`);
+    } else if (fleet.code === 'ENV_MISSING_VERCEL_TOKEN') {
+      lines.push('', '_Fleet deploys: VERCEL_TOKEN not set in .env.local — skipped._');
+    } else {
+      lines.push('', `_Fleet deploys unavailable: ${fleet.error}_`);
+    }
+
+    lines.push(
+      '',
+      '_Use_ `!backlog <repo or label>` _to drill in, or_ `!backlog ralph-ready` _for actionable items._',
+    );
     await send(channel, lines.join('\n'));
   } catch (e) {
-    await send(channel, `Error reading BACKLOG.md: ${e.message}`);
+    await send(channel, `Error: ${e.message}`);
   }
 }
 
 // ── !backlog [filter] ─────────────────────────────────────────────────────────
-// Filter is optional and can be a category (fuzzy) or a status (ready/blocked/etc.)
+// Filter is optional and can be a repo name (fuzzy) or a known label.
 async function cmdBacklog(channel, args) {
   try {
-    const b = parseBacklog();
-    if (b.items.length === 0) {
-      await send(channel, 'BACKLOG.md is empty or unreadable.');
+    const issues = await fetchOpenIssues();
+    if (issues.length === 0) {
+      await send(channel, 'No open issues found across the fleet.');
       return;
     }
     const filter = (args || '').trim().toLowerCase();
-    const KNOWN_STATUSES = ['ready', 'blocked', 'parked', 'needs-grilling', 'idea'];
 
-    // No arg → show top 3 ready items per category (actionable digest)
+    // No arg → show top 3 ralph-ready issues per repo (actionable digest)
     if (!filter) {
-      const lines = [`**Backlog digest** — ${b.items.length} open items total`];
-      const cats = Object.entries(b.categories).sort((a, b) => b[1].length - a[1].length);
-      for (const [cat, arr] of cats) {
-        const ready = arr.filter(i => i.status === 'ready');
+      const lines = [`**Issues digest** — ${issues.length} open across the fleet`];
+      const byRepo = {};
+      for (const i of issues) (byRepo[i.repo] = byRepo[i.repo] || []).push(i);
+      const repos = Object.entries(byRepo).sort((a, b) => b[1].length - a[1].length);
+      for (const [repo, arr] of repos) {
+        const ready = arr.filter((i) => i.labels.includes('ralph-ready'));
         if (ready.length === 0) continue;
-        lines.push('', `**${cat}** (${ready.length} ready)`);
+        lines.push('', `**${repo}** (${ready.length} ready)`);
         for (const it of ready.slice(0, 3)) {
-          lines.push(`${statusEmoji(it.status)} \`${it.id}\` — ${it.title.slice(0, 80)}`);
+          lines.push(
+            `${primaryLabelEmoji(it.labels)} \`#${it.number}\` — ${it.title.slice(0, 80)}`,
+          );
         }
-        if (ready.length > 3) lines.push(`_…+${ready.length - 3} more in this category_`);
+        if (ready.length > 3) lines.push(`_…+${ready.length - 3} more in this repo_`);
       }
-      lines.push('', '_`!backlog blocked` for blocked items · `!backlog <category>` to drill in_');
+      lines.push('', '_`!backlog blocked` for blocked items · `!backlog <repo>` to drill in_');
       await send(channel, lines.join('\n'));
       return;
     }
 
-    // Filter by status if it matches a known one
-    if (KNOWN_STATUSES.includes(filter)) {
-      const matches = b.items.filter(i => i.status === filter);
-      const lines = [`**Backlog: ${matches.length} item(s) with status \`${filter}\`**`];
+    // Filter by label if it matches a known one
+    if (KNOWN_LABELS.includes(filter)) {
+      const matches = issues.filter((i) => i.labels.includes(filter));
+      const lines = [`**Issues: ${matches.length} with label \`${filter}\`**`];
       if (matches.length === 0) {
         lines.push('_None._');
       } else {
-        // Group by category for readability
-        const byCat = {};
-        matches.forEach(i => (byCat[i.category] = byCat[i.category] || []).push(i));
-        for (const [cat, arr] of Object.entries(byCat)) {
-          lines.push('', `**${cat}** (${arr.length})`);
+        const byRepo = {};
+        matches.forEach((i) => (byRepo[i.repo] = byRepo[i.repo] || []).push(i));
+        for (const [repo, arr] of Object.entries(byRepo)) {
+          lines.push('', `**${repo}** (${arr.length})`);
           for (const it of arr.slice(0, 8)) {
-            lines.push(`${statusEmoji(it.status)} \`${it.id}\` — ${it.title.slice(0, 80)}`);
+            lines.push(
+              `${primaryLabelEmoji(it.labels)} \`#${it.number}\` — ${it.title.slice(0, 80)}`,
+            );
           }
           if (arr.length > 8) lines.push(`_…+${arr.length - 8} more_`);
         }
@@ -774,28 +864,38 @@ async function cmdBacklog(channel, args) {
       return;
     }
 
-    // Otherwise treat as category name (fuzzy)
-    const cat = resolveCategory(filter, b.categories);
-    if (!cat) {
-      await send(channel,
-        `No category matched \`${filter}\`. Try: ${Object.keys(b.categories).map(c => `\`${c.split(' ')[0].toLowerCase()}\``).join(', ')}\n` +
-        `Or filter by status: \`!backlog ready\` · \`!backlog blocked\` · \`!backlog parked\` · \`!backlog idea\``);
+    // Otherwise treat as a repo name (fuzzy)
+    const repoNames = [...new Set(issues.map((i) => i.repo))];
+    const repo = resolveRepo(filter, repoNames);
+    if (!repo) {
+      await send(
+        channel,
+        `No repo matched \`${filter}\`. Try: ${repoNames.map((r) => `\`${(r.split('/')[1] || r).toLowerCase()}\``).join(', ')}\n` +
+          `Or filter by label: ${KNOWN_LABELS.map((l) => `\`${l}\``).join(', ')}`,
+      );
       return;
     }
-    const arr = b.categories[cat];
-    const counts = arr.reduce((acc, i) => { acc[i.status] = (acc[i.status] || 0) + 1; return acc; }, {});
-    const countLine = Object.entries(counts).map(([s, n]) => `${statusEmoji(s)} ${s}: ${n}`).join(' · ');
-    const lines = [`**${cat}** (${arr.length} items) — ${countLine}`];
-    // Sort: ready → blocked → needs-grilling → parked → idea
-    const sortOrder = { ready: 0, blocked: 1, 'needs-grilling': 2, parked: 3, idea: 4 };
-    const sorted = [...arr].sort((a, b) => (sortOrder[a.status] ?? 99) - (sortOrder[b.status] ?? 99));
+    const arr = issues.filter((i) => i.repo === repo);
+    const counts = arr.reduce((acc, i) => {
+      const label = KNOWN_LABELS.find((l) => i.labels.includes(l)) || 'other';
+      acc[label] = (acc[label] || 0) + 1;
+      return acc;
+    }, {});
+    const countLine = Object.entries(counts)
+      .map(([l, n]) => `${l}: ${n}`)
+      .join(' · ');
+    const lines = [`**${repo}** (${arr.length} issues) — ${countLine}`];
+    // Sort: ralph-ready → blocked → needs-adrian → ralph-parked → everything else
+    const sortOrder = { 'ralph-ready': 0, blocked: 1, 'needs-adrian': 2, 'ralph-parked': 3 };
+    const rank = (i) => Math.min(99, ...i.labels.map((l) => sortOrder[l] ?? 99));
+    const sorted = [...arr].sort((a, b) => rank(a) - rank(b));
     for (const it of sorted.slice(0, 15)) {
-      lines.push(`${statusEmoji(it.status)} \`${it.id}\` — ${it.title.slice(0, 80)}`);
+      lines.push(`${primaryLabelEmoji(it.labels)} \`#${it.number}\` — ${it.title.slice(0, 80)}`);
     }
-    if (sorted.length > 15) lines.push(`_…+${sorted.length - 15} more in this category_`);
+    if (sorted.length > 15) lines.push(`_…+${sorted.length - 15} more in this repo_`);
     await send(channel, lines.join('\n').slice(0, 1900));
   } catch (e) {
-    await send(channel, `Error reading BACKLOG.md: ${e.message}`);
+    await send(channel, `Error: ${e.message}`);
   }
 }
 
@@ -822,7 +922,7 @@ async function askOneShot(channelId, systemPrompt, userMessage) {
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_KEY}`,
+        Authorization: `Bearer ${OPENROUTER_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://hirobius.com',
         'X-Title': 'Hirobius HQ Bot',
@@ -848,10 +948,13 @@ async function askOneShot(channelId, systemPrompt, userMessage) {
 // ── !next — AI-recommended top tasks ──────────────────────────────────────────
 async function cmdNext(channel, channelId) {
   try {
-    const b = parseBacklog();
-    const ready = b.items.filter(i => i.status === 'ready');
+    const issues = await fetchOpenIssues();
+    const ready = issues.filter((i) => i.labels.includes('ralph-ready'));
     if (ready.length === 0) {
-      await send(channel, 'No `ready` items in BACKLOG.md. Promote some `idea`/`parked` items first.');
+      await send(
+        channel,
+        'No `ralph-ready` issues open across the fleet. Label some issues `ralph-ready` first.',
+      );
       return;
     }
 
@@ -859,20 +962,19 @@ async function cmdNext(channel, channelId) {
     const recentCommits = shell('git log -5 --pretty=format:"%h %s"');
     const today = new Date().toISOString().slice(0, 10);
 
-    const readyList = ready.map(i => `- [${i.category}] \`${i.id}\` — ${i.title}`).join('\n');
+    const readyList = ready.map((i) => `- [${i.repo}] \`#${i.number}\` — ${i.title}`).join('\n');
 
     const systemPrompt = [
-      'You are a focused execution coach for Adrian, a solo design engineer.',
-      'Adrian is currently focused on adrianmilsap.com (his portfolio) and apps/concrete (Hirobius Studio storefront).',
-      'Given a list of READY backlog items, recommend the top 1-3 items he should do TODAY.',
+      'You are a focused execution coach for Adrian, a solo founder running an agency ops dashboard.',
+      'Given a list of READY GitHub issues from across his fleet of repos, recommend the top 1-3 he should do TODAY.',
       'Prioritize items that:',
-      ' 1. Unblock the active portfolio deploy or storefront launch',
+      ' 1. Unblock the leads → site pipeline or a live client engagement',
       ' 2. Are short enough to ship in one focused session (<2 hours)',
-      ' 3. Have visible/proof-able outcomes (real content, real deploy, real screenshot)',
-      'Avoid recommending: infrastructure refactors, HDS deep work, ops/agent tooling, anything that needs >1 session.',
+      ' 3. Have visible/proof-able outcomes (a merged PR, a real deploy, a real screenshot)',
+      'Avoid recommending: infrastructure refactors, design-system deep work, anything that needs >1 session.',
       'Output format (markdown, max 200 words total):',
       '**Top picks for today:**',
-      '1. `<id>` — <one sentence on WHY this is the move now>',
+      '1. `<repo>#<number>` — <one sentence on WHY this is the move now>',
       '2. ...',
       '3. ...',
       '',
@@ -884,7 +986,7 @@ async function cmdNext(channel, channelId) {
       `Branch: ${gitBranch}`,
       `Recent commits:\n${recentCommits}`,
       '',
-      `READY items (${ready.length}):`,
+      `READY issues (${ready.length}):`,
       readyList,
     ].join('\n');
 
@@ -896,49 +998,40 @@ async function cmdNext(channel, channelId) {
   }
 }
 
-// ── !recent — BACKLOG.md changes in last 7 days ───────────────────────────────
+// ── !recent — GitHub issues updated in the last N days ────────────────────────
 async function cmdRecent(channel, args) {
   try {
     const days = parseInt((args || '').trim()) || 7;
-    const since = `${days} days ago`;
-    const log = shell(`git log --since="${since}" --pretty=format:"%h|%ad|%s" --date=short -- BACKLOG.md`);
-    if (!log) {
-      await send(channel, `No BACKLOG.md commits in the last ${days} days.`);
+    const since = Date.now() - days * 24 * 60 * 60 * 1000;
+    const issues = await fetchOpenIssues();
+    // listOpenIssues() is already sorted by updated_at desc.
+    const recent = issues.filter((i) => new Date(i.updated_at).getTime() >= since);
+    if (recent.length === 0) {
+      await send(channel, `No open issues updated in the last ${days} days.`);
       return;
     }
 
-    const commits = log.split('\n').filter(Boolean).map(line => {
-      const [hash, date, ...rest] = line.split('|');
-      return { hash, date, subject: rest.join('|') };
-    });
-
-    // For each commit, get the diff and pull out added / deleted backlog-item lines.
-    const lines = [`**BACKLOG.md changes (last ${days}d)** — ${commits.length} commit(s)`];
-    for (const c of commits.slice(0, 10)) {
-      const diff = shell(`git show --pretty=format: --no-color ${c.hash} -- BACKLOG.md`);
-      const added = diff.split('\n').filter(l => /^\+- `/.test(l)).map(l => l.slice(1));
-      const removed = diff.split('\n').filter(l => /^-- `/.test(l)).map(l => l.slice(1));
-      lines.push('', `\`${c.hash}\` ${c.date} — ${c.subject.slice(0, 70)}`);
-      if (added.length > 0) {
-        lines.push(`  + ${added.length} added:`);
-        for (const a of added.slice(0, 3)) lines.push(`     ${a.slice(0, 90)}`);
-        if (added.length > 3) lines.push(`     …+${added.length - 3} more`);
-      }
-      if (removed.length > 0) {
-        lines.push(`  − ${removed.length} removed (shipped or dropped):`);
-        for (const r of removed.slice(0, 3)) lines.push(`     ${r.slice(0, 90)}`);
-        if (removed.length > 3) lines.push(`     …+${removed.length - 3} more`);
-      }
+    const lines = [
+      `**Recently updated issues (last ${days}d)** — ${recent.length} of ${issues.length} open`,
+    ];
+    for (const it of recent.slice(0, 15)) {
+      const when = it.updated_at.slice(0, 10);
+      lines.push(
+        `${primaryLabelEmoji(it.labels)} \`${it.repo}#${it.number}\` (${when}) — ${it.title.slice(0, 70)}`,
+      );
     }
-    if (commits.length > 10) lines.push('', `_…+${commits.length - 10} older commits_`);
+    if (recent.length > 15) lines.push('', `_…+${recent.length - 15} more_`);
     await send(channel, lines.join('\n').slice(0, 1900));
   } catch (e) {
-    await send(channel, `Error reading git log: ${e.message}`);
+    await send(channel, `Error: ${e.message}`);
   }
 }
 
 async function cmdShell(channel, args) {
-  if (!args.trim()) { await send(channel, 'Usage: `!shell <command>`'); return; }
+  if (!args.trim()) {
+    await send(channel, 'Usage: `!shell <command>`');
+    return;
+  }
   try {
     const out = shell(args) || '(no output)';
     await send(channel, '```\n' + out.slice(0, 1800) + '\n```');
@@ -969,12 +1062,20 @@ function runAssigner(text, clientSlug) {
     });
     let stdout = '';
     let stderr = '';
-    proc.stdout.on('data', (c) => { stdout += c.toString(); });
-    proc.stderr.on('data', (c) => { stderr += c.toString(); });
+    proc.stdout.on('data', (c) => {
+      stdout += c.toString();
+    });
+    proc.stderr.on('data', (c) => {
+      stderr += c.toString();
+    });
     proc.on('error', reject);
     proc.on('close', (code) => {
       let result = null;
-      try { result = JSON.parse(stdout); } catch { /* result stays null */ }
+      try {
+        result = JSON.parse(stdout);
+      } catch {
+        /* result stays null */
+      }
       resolve({ code, result, stderr });
     });
     proc.stdin.write(text);
@@ -985,7 +1086,7 @@ function runAssigner(text, clientSlug) {
 function formatRoutingDecision(result, clientSlug) {
   const { taskId, tier, model, effort, costCeiling, rationale, createdNew } = result;
   const created = createdNew ? '🆕 created' : '🔄 re-routed';
-  const cost    = costCeiling > 0 ? `$${costCeiling.toFixed(4)} ceiling` : 'free (local)';
+  const cost = costCeiling > 0 ? `$${costCeiling.toFixed(4)} ceiling` : 'free (local)';
   return [
     `${created} \`${taskId}\` → \`${model}\` (${tier}, ${effort})`,
     `${cost} · ${rationale}`,
@@ -998,7 +1099,10 @@ async function cmdLog(channel, args) {
   let logFile = LOG_FILE;
   let n = 20;
   for (const p of parts) {
-    if (p === 'hermes') { logFile = HERMES_LOG; continue; }
+    if (p === 'hermes') {
+      logFile = HERMES_LOG;
+      continue;
+    }
     const num = parseInt(p, 10);
     if (!isNaN(num)) n = num;
   }
@@ -1029,7 +1133,9 @@ const client = new Client({
 client.once('ready', () => {
   console.log(`[bot] Online as ${client.user?.tag}`);
   console.log(`[bot] Default provider: ${describeProvider(BOT_PROVIDER_DEFAULT)}`);
-  console.log(`[bot] Available: ollama=yes anthropic=${anthropic ? 'yes' : 'no'} openrouter=${OPENROUTER_AVAILABLE ? 'yes' : 'no'}`);
+  console.log(
+    `[bot] Available: ollama=yes anthropic=${anthropic ? 'yes' : 'no'} openrouter=${OPENROUTER_AVAILABLE ? 'yes' : 'no'}`,
+  );
 });
 
 client.on('messageCreate', async (msg) => {
@@ -1051,18 +1157,42 @@ client.on('messageCreate', async (msg) => {
     const args = rest.join(' ');
     try {
       switch (cmd.toLowerCase()) {
-        case 'help':    await cmdHelp(msg.channel);          return;
-        case 'status':  await cmdStatus(msg.channel, msg.channelId); return;
-        case 'backlog': await cmdBacklog(msg.channel, args);  return;
-        case 'next':    await cmdNext(msg.channel, msg.channelId); return;
-        case 'today':   await cmdNext(msg.channel, msg.channelId); return;
-        case 'recent':  await cmdRecent(msg.channel, args);   return;
-        case 'agents': await cmdAgents(msg.channel);        return;
-        case 'shell':  await cmdShell(msg.channel, args);   return;
-        case 'log':    await cmdLog(msg.channel, args);     return;
-        case 'provider': await cmdProvider(msg.channel, msg.channelId, args); return;
-        case 'local':    await cmdProvider(msg.channel, msg.channelId, 'ollama'); return;
-        case 'cloud':    await cmdProvider(msg.channel, msg.channelId, 'anthropic'); return;
+        case 'help':
+          await cmdHelp(msg.channel);
+          return;
+        case 'status':
+          await cmdStatus(msg.channel, msg.channelId);
+          return;
+        case 'backlog':
+          await cmdBacklog(msg.channel, args);
+          return;
+        case 'next':
+          await cmdNext(msg.channel, msg.channelId);
+          return;
+        case 'today':
+          await cmdNext(msg.channel, msg.channelId);
+          return;
+        case 'recent':
+          await cmdRecent(msg.channel, args);
+          return;
+        case 'agents':
+          await cmdAgents(msg.channel);
+          return;
+        case 'shell':
+          await cmdShell(msg.channel, args);
+          return;
+        case 'log':
+          await cmdLog(msg.channel, args);
+          return;
+        case 'provider':
+          await cmdProvider(msg.channel, msg.channelId, args);
+          return;
+        case 'local':
+          await cmdProvider(msg.channel, msg.channelId, 'ollama');
+          return;
+        case 'cloud':
+          await cmdProvider(msg.channel, msg.channelId, 'anthropic');
+          return;
         default:
           // Unknown ! command → fall through to Claude
           break;
