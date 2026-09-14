@@ -11,6 +11,11 @@
  * In dev (`pnpm dev`), the same per-action contracts are served by the Vite
  * middleware in scripts/leads-middleware.mjs (wired in vite.config.mjs).
  *
+ * DEPRECATED ACTIONS: 'build' and 'publish' route to the retired Duda path
+ * (lib/duda, retired 2026-06-30 — docs/ARCHITECTURE.md) and are dead code
+ * scheduled for removal (ops#187). No UI dispatches them since ops#185; the live
+ * hand-off is 'render' → renderLeadSite → lib/render. Do not add callers.
+ *
  * Request:  { leadId: string, action: 'generate'|'build'|'publish'|'render',
  *             previewUrl?: string }   (previewUrl only used by 'render')
  * Success:  the wrapped pipeline result for that action (shape varies):
@@ -35,6 +40,8 @@ import {
   renderLeadSite,
 } from '../lib/leads/pipeline.mjs';
 
+// 'build' and 'publish' are deprecated dead code — see the header. They stay in
+// the union only so the retired handlers keep type-checking until the removal PR.
 const ACTIONS = ['generate', 'build', 'publish', 'render'] as const;
 type LeadAction = (typeof ACTIONS)[number];
 
