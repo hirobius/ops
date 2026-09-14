@@ -191,7 +191,7 @@
       "lastViolationAt": null,
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "ci-pr"
+      "firingChannel": "ci-scheduled"
     },
     {
       "id": "check-attributions",
