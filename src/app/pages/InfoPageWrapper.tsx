@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { AssetImg, InlineLink, Stack, Text } from '@hirobius/design-system';
+import { AssetImg, Stack, Text } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 
 // Ported from @hirobius/design-system's InfoPage (present through ^0.11, removed
@@ -160,9 +160,8 @@ export default function InfoPageWrapper() {
             >
               Product Designer focused on design and visual systems at scale. I build modular
               libraries, frameworks and visual languages that drive efficiency and consistency
-              across complex ecosystems. Currently building{' '}
-              <InlineLink href="/case-studies/hirobius">Hirobius</InlineLink>, a code-first design
-              system that powers this site.
+              across complex ecosystems. Currently building Hirobius, a code-first design system
+              that powers this site.
             </Text>
           </Stack>
         </div>
