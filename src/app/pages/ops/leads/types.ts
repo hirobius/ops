@@ -3,7 +3,7 @@
  * (supabase/migrations/0001_leads.sql). The board reads rows via GET /api/leads.
  */
 
-export type LeadStatus = 'sourced' | 'generating' | 'scored' | 'sent' | 'won' | 'lost';
+export type LeadStatus = 'sourced' | 'generating' | 'scored' | 'rendered' | 'sent' | 'won' | 'lost';
 
 export type SiteStatus =
   | 'none'
