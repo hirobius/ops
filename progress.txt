@@ -1393,3 +1393,22 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Notes for next iteration: 20+ other high advisories remain in
   devDependencies/build tooling per the issue — separate, out-of-scope
   follow-up if wanted.
+
+## Issue #106 — tasks: carry tier/model into the @claude dispatch body (2026-09-14)
+- Two prior stale attempt branches existed (claude/issue-106-20260710-1920,
+  claude/issue-106-20260712-1847) but neither ever opened a PR (sandbox
+  blocked test/typecheck execution in that prior flow) — both too diverged
+  from current main to reuse as a base, so implemented fresh on top of
+  current main.
+- Added `task.tier ? \`**Tier:** ${task.tier}\` : ''` /
+  `task.model ? \`**Model:** ${task.model}\` : ''` lines to the dispatch()
+  body array in lib/tasks/actions.mjs, right after **Lane:**, matching the
+  existing deps conditional-line pattern (`.filter(Boolean).join('\n')`
+  already drops empty strings cleanly).
+- Two new tests in tests/api/task-actions.test.ts (dispatch describe block):
+  one asserts both lines appear when tier='judgment'/model='opus' are set on
+  the task row, one asserts both are cleanly absent when unset.
+- Files changed: lib/tasks/actions.mjs, tests/api/task-actions.test.ts.
+- Gate green: typecheck + test (705 passed) + lint. Pre-push hook (full
+  typecheck + vitest run) also green.
+- Branch: ralph/issue-106-dispatch-tier-model. PR #279.
