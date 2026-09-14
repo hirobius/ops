@@ -14,6 +14,7 @@ import { describe, it, expect } from 'vitest';
 import {
   contrastRatio,
   checkContrast,
+  checkPalette,
   isLazyPalette,
   PALETTE_KEYS,
   toCssVarOverrides,
@@ -153,5 +154,52 @@ describe('toCssVarOverrides', () => {
 
   it('covers exactly the declared palette keys', () => {
     expect(Object.keys(toCssVarOverrides(distinct))).toHaveLength(PALETTE_KEYS.length);
+  });
+});
+
+describe('checkPalette (the combined gate generate() calls)', () => {
+  it('passes a distinct, accessible palette', () => {
+    const r = checkPalette(distinct);
+    expect(r.ok).toBe(true);
+    expect(r.note).toBe('');
+  });
+
+  it('fails a stock preset and says which one, so the retry is specific', () => {
+    const p = PALETTE_PRESETS.landscaping;
+    const r = checkPalette({
+      primary: p['--brand-primary'], accent: p['--brand-accent'], bg: p['--brand-bg'],
+      fg: p['--brand-fg'], muted: p['--brand-muted'], onPrimary: p['--brand-on-primary'],
+    });
+    expect(r.ok).toBe(false);
+    expect(r.note).toMatch(/landscaping/);
+  });
+
+  it('fails a low-contrast palette and names the pair and ratio', () => {
+    const r = checkPalette({ ...distinct, fg: '#cccccc', bg: '#ffffff' });
+    expect(r.ok).toBe(false);
+    expect(r.note).toMatch(/fg\/bg/);
+    expect(r.note).toMatch(/4\.5/);
+  });
+
+  it('reports both problems at once rather than one per round-trip', () => {
+    const p = PALETTE_PRESETS['junk-removal'];
+    const lazyAndLowContrast = {
+      primary: p['--brand-primary'], accent: p['--brand-accent'], bg: p['--brand-bg'],
+      fg: p['--brand-fg'], muted: p['--brand-muted'], onPrimary: p['--brand-on-primary'],
+    };
+    const r = checkPalette({ ...lazyAndLowContrast, fg: '#fdfdfd' });
+    expect(r.ok).toBe(false);
+    expect(r.note.split('\n').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('treats a missing palette as a pass — overrides are optional at assemble time', () => {
+    expect(checkPalette(undefined).ok).toBe(true);
+    expect(checkPalette(null).ok).toBe(true);
+  });
+
+  it('fails loudly on a malformed hex rather than scoring it', () => {
+    const r = checkPalette({ ...distinct, primary: 'not-a-hex' });
+    expect(r.ok).toBe(false);
+    expect(r.note).toMatch(/hex/i);
   });
 });
