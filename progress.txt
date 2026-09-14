@@ -1655,3 +1655,49 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   lint. test:layout 14/14 green.
 - Files: src/app/pages/ops/leads/LeadsPage.tsx, types.ts,
   RenderHandoffPanel.tsx (new), RenderHandoffPanel.test.tsx (new).
+
+## Issue #186 — pipeline: forward hours, street_address, photos[], logo_url from the lead row to the agent (2026-09-14)
+
+- Independent of #185 (pipeline/agent-only, no UI). generateLeadSite
+  (lib/leads/pipeline.mjs) was dropping lead.hours/street_address/photos/
+  logo_url before calling runPipeline even though getLead('*') already
+  returns them — assemble() (lib/agent/generate.mjs) therefore always shipped
+  hardcoded hours + a bare city/region map query.
+- lib/agent/types.mjs: LeadSchema gains optional hours (record<string,string>),
+  streetAddress, photos (string[], default []), logoUrl — camelCase to match
+  the existing reviewCount-style convention (DB is snake_case, the agent Lead
+  type is camelCase).
+- lib/leads/pipeline.mjs: forward all four into the runPipeline() call.
+- lib/agent/generate.mjs assemble() (now exported for direct unit testing):
+  - business.hours uses formatHours(lead.hours) when lead.hours is a non-empty
+    object (`{mon_fri:'...'}` / `{Monday:'...'}` -> `[{days:'Mon–Fri',
+    hours:'...'}]`), else the same 3-line stub as before, unchanged.
+  - business.address = lead.streetAddress when present.
+  - map.embedQuery prepends streetAddress when present; falls back to the
+    original `${city}, ${region}` when absent.
+  - gallery: filters lead.photos to entries that already look like local
+    public/ paths (startsWith('/')) and maps them to {src, alt}; remote URLs
+    are dropped, never emitted — defineClient's publicPath rejects anything
+    not under public/, and the epic doc (docs/specs/leads-to-site.md on
+    claude/hirobius-frontier-engineering-v6duri) explicitly rejects emitting
+    remote photo URLs as an alternative. Since sourcing currently always
+    hardcodes photos:[] (Outscraper search-v3 has no photo-URL field — a
+    details pass is the separate, blocked #190), this is a no-op today and
+    activates automatically once #190 lands a local download step.
+  - logo_url is threaded through Lead/runPipeline but NOT consumed in
+    assemble() — ClientConfigSchema has no logo field, and adding one is out
+    of this issue's scope (no acceptance criterion asks for it); forwarding it
+    now just means #190/a later issue doesn't need another pipeline.mjs edit.
+  - Fabrication ban respected throughout: absent hours/address/photos stay
+    absent (stub or empty), nothing invented.
+- New test: tests/agent/generate.test.ts — unit-tests assemble() directly
+  (no LLM call) via defineClient(assemble(lead, content)): real hours+address
+  land in the config and sharpen embedQuery; their absence leaves today's
+  stubs unchanged; remote photo URLs are dropped from gallery, local ones kept.
+- No new required fields in GENERATED_CONTENT_SCHEMA / GeneratedContentSchema
+  — existing agent fixtures unaffected.
+- Gate green: typecheck + 739 tests (4 new) + lint.
+- Files: lib/agent/types.mjs, lib/agent/generate.mjs, lib/leads/pipeline.mjs,
+  tests/agent/generate.test.ts (new).
+- Next: #190 (blocked on Adrian's go — Outscraper details spend) is what
+  actually populates photos[]/logo_url with real data; #188/#191 build on this.
