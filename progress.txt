@@ -1602,3 +1602,22 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Gate green: typecheck + 733 tests + lint. Branch:
   ralph/issue-284-delete-orphan-primitive-contracts.
 - Files: tests/primitive-contracts/ (11 files, deleted), vitest.config.ts.
+
+#221 — a11y: add heading structure to /info page (SandboxPage confirmed gone)
+- Verified SandboxPage really doesn't exist (no Sandbox*.tsx, no route) — per
+  the issue's own scope correction, correctly skipped.
+- Checked InfoPageWrapper.tsx: it already renders exactly one real <h1>
+  ("Adrian Milsap" via HDS `Text variant="heading3" as="h1"`), added back in
+  #133 (design-system bump). The original board-comb's "zero h1/h2" claim was
+  a false negative — it likely grepped literal `<h1>` JSX tags, which misses
+  HDS's `as="h1"` prop pattern. Confirmed via Playwright: rendered DOM has
+  exactly 1 <h1>, zero <h2>+, and @axe-core/playwright reports zero
+  heading-order violations (only unrelated landmark-one-main/region, out of
+  scope). No second top-level section exists on the page to need an <h2>.
+- So no page fix was needed. Smallest complete slice: added a permanent a11y
+  regression test (tests/info-page-headings.spec.ts) asserting exactly one
+  <h1> with the expected text + axe heading-order == [] on /info, so this
+  can't silently regress. No visual/DOM change to the page itself.
+- Gate green: typecheck + 733 tests + lint. pnpm test:layout green (14/14,
+  including /info, unaffected). New spec passes standalone too.
+- Files: tests/info-page-headings.spec.ts (new).
