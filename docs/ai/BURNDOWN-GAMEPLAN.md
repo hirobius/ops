@@ -37,6 +37,16 @@
   Quality gates, etc.) are informational — a PR at `mergeable_state: unstable` is still mergeable.
 - **Single-flight:** one `ralph/*` PR at a time. Merging any PR to `main` chain-triggers the loop
   to grab the next `ralph-ready` issue. The 6h cron is the backstop if the chain stalls.
+- **A park does NOT chain-trigger the loop.** Only a *merge* to `main` hops the chain. When an
+  iteration ends in a park (or in "queue empty"), nothing re-dispatches — the loop sits idle until
+  something re-labels an issue (the `issues` event wakes `ralph.yml`) or the 6h watchdog fires.
+  Observed twice on 2026-09-14: idle 15:54→16:29 after the queue emptied, and 16:36→17:14 after
+  #63 parked. **Feeding the queue is therefore also how you restart the loop.**
+- **Before queueing anything, check it hasn't already shipped.** Read the issue's
+  `closed_by_pull_requests` (and spot-check `main`) first. Several board-era issues are done but
+  never auto-closed — the "Closes #N" auto-close raced the next claim. Queueing one burns an
+  iteration and parks it via the PR-history guard. #156 (shipped in #162) and #103 (shipped in
+  #192) both did exactly this on 2026-09-14; both are now closed.
 - **Parking causes (all recoverable):** missing a `- [ ]` DoD checklist in the body; 2 failed
   attempts; `ralph-blocked` (cross-repo, or a real human decision); a prior PR merged but the issue
   didn't auto-close. **Recovery: fix the cause, re-add `ralph-ready`.**
