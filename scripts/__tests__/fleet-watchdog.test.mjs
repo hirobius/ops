@@ -1,5 +1,6 @@
 /**
- * Unit tests for scripts/fleet-watchdog.mjs's pure pieces (#41 Slice 5).
+ * Unit tests for scripts/fleet-watchdog.mjs's pure pieces (#41 Slice 5) plus
+ * `reDispatch`/`flag` (ops#139).
  *
  * `findStale` is pure — no Supabase, no GitHub, no Date-inside (the caller
  * supplies `now`) — so these tests exercise the staleness rule + the
@@ -7,14 +8,28 @@
  * (Supabase writes, @claude issue comments) can't be exercised in this
  * sandbox (network egress blocked + needs GITHUB_TOKEN) — see the session
  * report for the --dry-run verification instead.
+ *
+ * `reDispatch`/`flag` are exercised with `applyTaskAction` mocked — this
+ * asserts the ops#139 seam directly: neither function writes Supabase fields
+ * itself anymore, both hand off to `applyTaskAction`.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('../../lib/tasks/actions.mjs', () => ({ applyTaskAction: vi.fn() }));
+vi.mock('../../lib/ops/notify.mjs', () => ({ notifyEvent: vi.fn() }));
+vi.mock('../../lib/ops/run-log.mjs', () => ({ appendRun: vi.fn() }));
+
+import { applyTaskAction } from '../../lib/tasks/actions.mjs';
+import { notifyEvent } from '../../lib/ops/notify.mjs';
+import { appendRun } from '../../lib/ops/run-log.mjs';
 import {
   findStale,
   isMissingColumnError,
   DEFAULT_STALE_HOURS,
   DEFAULT_MAX_RETRIES,
+  reDispatch,
+  flag,
 } from '../fleet-watchdog.mjs';
 
 const NOW = new Date('2026-07-08T12:00:00.000Z').getTime();
@@ -197,5 +212,87 @@ describe('isMissingColumnError', () => {
 
   it('is false for an unrelated error', () => {
     expect(isMissingColumnError({ code: '23505', message: 'duplicate key value' })).toBe(false);
+  });
+});
+
+describe('reDispatch (ops#139 — one dispatch seam)', () => {
+  const sb = {};
+  const github = {};
+
+  beforeEach(() => {
+    vi.mocked(applyTaskAction)
+      .mockReset()
+      .mockResolvedValue({
+        status: 200,
+        body: {
+          ok: true,
+          dispatch_status: 'dispatched',
+          dispatch_count: 1,
+          commentNote: undefined,
+        },
+      });
+    vi.mocked(notifyEvent).mockReset().mockResolvedValue(undefined);
+    vi.mocked(appendRun).mockReset();
+  });
+
+  it('hands off to applyTaskAction("redispatch") with comment/maxRetries, never writes Supabase directly', async () => {
+    const t = task();
+    await reDispatch(sb, github, { task: t, comment: true, maxRetries: 3 });
+    expect(applyTaskAction).toHaveBeenCalledWith(
+      sb,
+      { key: t.key, action: 'redispatch', comment: true, maxRetries: 3 },
+      { github },
+    );
+  });
+
+  it('returns true and notifies/logs on success', async () => {
+    const t = task();
+    const ok = await reDispatch(sb, github, { task: t, comment: false, maxRetries: 2 });
+    expect(ok).toBe(true);
+    expect(notifyEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'dispatched', task: t.key }),
+    );
+    expect(appendRun).toHaveBeenCalledWith(expect.objectContaining({ outcome: 're-dispatched' }));
+  });
+
+  it('returns false and skips notify/log when applyTaskAction fails', async () => {
+    vi.mocked(applyTaskAction).mockResolvedValue({ status: 404, body: { error: 'not found' } });
+    const ok = await reDispatch(sb, github, { task: task(), comment: false, maxRetries: 2 });
+    expect(ok).toBe(false);
+    expect(notifyEvent).not.toHaveBeenCalled();
+    expect(appendRun).not.toHaveBeenCalled();
+  });
+});
+
+describe('flag (ops#139 — one dispatch seam)', () => {
+  const sb = {};
+
+  beforeEach(() => {
+    vi.mocked(applyTaskAction)
+      .mockReset()
+      .mockResolvedValue({ status: 200, body: { ok: true } });
+    vi.mocked(notifyEvent).mockReset().mockResolvedValue(undefined);
+    vi.mocked(appendRun).mockReset();
+  });
+
+  it('hands off to applyTaskAction("flag"), never writes Supabase directly', async () => {
+    const t = task();
+    await flag(sb, { task: t, maxRetries: 2 });
+    expect(applyTaskAction).toHaveBeenCalledWith(sb, { key: t.key, action: 'flag' }, {});
+  });
+
+  it('returns true and notifies/logs on success', async () => {
+    const ok = await flag(sb, { task: task(), maxRetries: 2 });
+    expect(ok).toBe(true);
+    expect(notifyEvent).toHaveBeenCalledWith(expect.objectContaining({ kind: 'blocked' }));
+    expect(appendRun).toHaveBeenCalledWith(expect.objectContaining({ outcome: 'flagged' }));
+  });
+
+  it('returns false and skips notify/log when applyTaskAction fails', async () => {
+    vi.mocked(applyTaskAction).mockResolvedValue({ status: 500, body: { error: 'write failed' } });
+    const ok = await flag(sb, { task: task(), maxRetries: 2 });
+    expect(ok).toBe(false);
+    expect(notifyEvent).not.toHaveBeenCalled();
+    expect(appendRun).not.toHaveBeenCalled();
   });
 });

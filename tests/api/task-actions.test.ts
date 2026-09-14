@@ -221,6 +221,132 @@ describe('applyTaskAction — dispatch (injected GitHub port)', () => {
       dispatch_status: 'dispatched',
     });
   });
+
+  it('stamps last_dispatched_at + dispatch_count=1 for a never-dispatched task (ops#139)', async () => {
+    const { sb, updates } = makeSb({ task });
+    const github = { createIssue: async () => ({ html_url: 'https://gh/issues/1' }) };
+    await applyTaskAction(sb, { key: 't1', action: 'dispatch' }, { github });
+    expect(updates.at(-1)).toMatchObject({
+      dispatch_count: 1,
+    });
+    expect(typeof (updates.at(-1) as { last_dispatched_at: string }).last_dispatched_at).toBe(
+      'string',
+    );
+  });
+
+  it('increments an existing dispatch_count rather than resetting it (ops#139)', async () => {
+    const { sb, updates } = makeSb({ task: { ...task, dispatch_count: 2 } });
+    const github = { createIssue: async () => ({ html_url: 'https://gh/issues/1' }) };
+    await applyTaskAction(sb, { key: 't1', action: 'dispatch' }, { github });
+    expect(updates.at(-1)).toMatchObject({ dispatch_count: 3 });
+  });
+});
+
+describe('applyTaskAction — flag (ops#139)', () => {
+  it('sets dispatch_status=failed and status=blocked', async () => {
+    const { sb, updates } = makeSb();
+    const result = await applyTaskAction(sb, { key: 't1', action: 'flag' });
+    expect(result).toEqual({
+      status: 200,
+      body: { ok: true, dispatch_status: 'failed', status: 'blocked' },
+    });
+    expect(updates[0]).toEqual({ dispatch_status: 'failed', status: 'blocked' });
+  });
+
+  it('500s when the update errors', async () => {
+    const { sb } = makeSb({ updateError: { message: 'write failed' } });
+    expect(await applyTaskAction(sb, { key: 't1', action: 'flag' })).toMatchObject({
+      status: 500,
+    });
+  });
+});
+
+describe('applyTaskAction — redispatch (injected GitHub port, ops#139)', () => {
+  const task = {
+    key: 't1',
+    title: 'Do it',
+    dispatch_url: 'https://github.com/hirobius/ops/issues/9',
+  };
+
+  it('404s when the task is missing', async () => {
+    const { sb } = makeSb({ task: null });
+    expect(await applyTaskAction(sb, { key: 'nope', action: 'redispatch' })).toMatchObject({
+      status: 404,
+    });
+  });
+
+  it('bumps dispatch_count and restamps last_dispatched_at + dispatch_status without a comment request', async () => {
+    const { sb, updates } = makeSb({ task: { ...task, dispatch_count: 1 } });
+    const result = await applyTaskAction(sb, { key: 't1', action: 'redispatch' });
+    expect(result.status).toBe(200);
+    expect((result.body as { commentNote?: string }).commentNote).toBeUndefined();
+    expect(updates[0]).toMatchObject({ dispatch_status: 'dispatched', dispatch_count: 2 });
+  });
+
+  it('500s when the update errors', async () => {
+    const { sb } = makeSb({ task, updateError: { message: 'write failed' } });
+    expect(await applyTaskAction(sb, { key: 't1', action: 'redispatch' })).toMatchObject({
+      status: 500,
+    });
+  });
+
+  it('posts a re-ping comment on dispatch_url when comment:true and a port is injected', async () => {
+    const { sb } = makeSb({ task: { ...task, dispatch_count: 0 } });
+    const comments: Array<{ issueUrl: string; body: string }> = [];
+    const github = {
+      commentOnIssue: async (i: { issueUrl: string; body: string }) => {
+        comments.push(i);
+        return {};
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'redispatch', comment: true, maxRetries: 2 },
+      { github },
+    );
+    expect((result.body as { commentNote: string }).commentNote).toBe('posted');
+    expect(comments[0].issueUrl).toBe('https://github.com/hirobius/ops/issues/9');
+    expect(comments[0].body).toContain('1/2');
+  });
+
+  it('skips the comment (but still writes the fields) when comment:true and no GitHub port is injected', async () => {
+    const { sb, updates } = makeSb({ task });
+    const result = await applyTaskAction(sb, { key: 't1', action: 'redispatch', comment: true });
+    expect((result.body as { commentNote: string }).commentNote).toBe(
+      'skipped: GITHUB_TOKEN not set',
+    );
+    expect(updates).toHaveLength(1);
+  });
+
+  it('skips the comment when comment:true but the task has no dispatch_url', async () => {
+    const { sb } = makeSb({ task: { ...task, dispatch_url: null } });
+    const github = { commentOnIssue: async () => ({}) };
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'redispatch', comment: true },
+      { github },
+    );
+    expect((result.body as { commentNote: string }).commentNote).toBe(
+      'skipped: no dispatch_url on record',
+    );
+  });
+
+  it('still returns 200 with the fields written when the best-effort comment throws', async () => {
+    const { sb, updates } = makeSb({ task });
+    const github = {
+      commentOnIssue: async () => {
+        throw new Error('rate limited');
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 't1', action: 'redispatch', comment: true },
+      { github },
+    );
+    expect(result.status).toBe(200);
+    expect((result.body as { commentNote: string }).commentNote).toBe('failed: rate limited');
+    expect(updates).toHaveLength(1);
+  });
 });
 
 describe('applyTaskAction — ralph_ready_on/off (injected GitHub port)', () => {
