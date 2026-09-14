@@ -1369,3 +1369,27 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   first, unrelated env gap); `bash ralph/gate.sh` green (typecheck + 697 tests + lint).
 - Files: scripts/self-heal.mjs.
 - Part of #239.
+
+#182 — bump react-router past 4 unpatched high-severity CVEs
+- package.json + pnpm-lock.yaml: react-router 7.13.0 -> 7.18.3 (latest 7.x;
+  stayed off v8 major — requires React >=19.2.7/Node >=22.22 and drops
+  react-router-dom, out of scope here since repo pins React 18.3.1/Node >=20).
+- Reviewed upstream CHANGELOG 7.13.0..7.18.3: all breaking/notable entries are
+  RSC Framework Mode, unstable-flag stabilizations, or internal perf — none
+  touch the Data Mode APIs this app uses (createBrowserRouter, RouterProvider,
+  useParams, useSearchParams, Link, Outlet, Navigate, isRouteErrorResponse,
+  createMemoryRouter, matchRoutes).
+- Verified: `pnpm audit --prod` shows 0 react-router advisories (was 4 high +
+  3 moderate/low). Full `pnpm audit` high count 62 -> 56 (rest is
+  devDependencies/build tooling, explicitly out of scope per the issue).
+  tests/pwa-launch.test.ts exercises matchRoutes against the real route tree
+  (nested /ops/* routes + /ops/issues redirect + catch-all) and passes
+  unchanged. `pnpm exec vite build` succeeds. Dev-server curl smoke-check of
+  /, /ops, /ops/tasks, /ops/issues, /ops/leads, /c/:slug, and an unknown path
+  all 200 with no server errors (no interactive browser available this
+  session — flagged for human eyeball-check on the PR).
+- Gate green: typecheck + test (697 passed) + lint.
+- Branch: ralph/issue-182-bump-react-router. PR #272.
+- Notes for next iteration: 20+ other high advisories remain in
+  devDependencies/build tooling per the issue — separate, out-of-scope
+  follow-up if wanted.
