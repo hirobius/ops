@@ -36,6 +36,9 @@ import { RalphPanel } from './RalphPanel';
 import {
   groupTasksNow,
   matchesCategory,
+  countByStatus,
+  formatCount,
+  CLIP_WARNING,
   TASK_CATEGORIES,
   type GroupBy,
   type TaskCategory,
@@ -44,7 +47,7 @@ import type { TaskStatus } from './types';
 
 type StatusFilter = TaskStatus | 'all';
 
-const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
+const STATUS_LABELS: { value: StatusFilter; label: string }[] = [
   { value: 'open', label: 'open' },
   { value: 'blocked', label: 'blocked' },
   { value: 'done', label: 'done' },
@@ -112,7 +115,22 @@ export default function TasksPage() {
 
   const groups = useMemo(() => groupTasksNow(filtered, groupBy), [filtered, groupBy]);
 
-  const summary = tasks ? `${filtered.length} shown · ${tasks.length} total` : '';
+  // Counts are over the FULL loaded set, not the source/category filter, so the
+  // status control reads as a global inventory (ops#159).
+  const statusCounts = useMemo(() => countByStatus(tasks ?? []), [tasks]);
+
+  const statusOptions = useMemo(
+    () =>
+      STATUS_LABELS.map((o) => ({
+        ...o,
+        label: `${o.label} (${formatCount(statusCounts[o.value], statusCounts.clipped)})`,
+      })),
+    [statusCounts],
+  );
+
+  const summary = tasks
+    ? `${filtered.length} shown · ${formatCount(statusCounts.open + statusCounts.blocked, statusCounts.clipped)} active · ${formatCount(statusCounts.done, statusCounts.clipped)} done`
+    : '';
 
   return (
     <div style={s.page}>
@@ -126,7 +144,7 @@ export default function TasksPage() {
         <SegmentedControl
           aria-label="Filter by status"
           size="sm"
-          options={STATUS_OPTIONS}
+          options={statusOptions}
           value={statusFilter}
           onChange={(v) => setStatusFilter(v as StatusFilter)}
         />
@@ -139,7 +157,10 @@ export default function TasksPage() {
           onChange={(v) => setGroupBy(v as GroupBy)}
         />
         <span style={s.spacer} />
-        <span style={s.statusLine}>
+        <span
+          style={s.statusLine}
+          title={!isOffline && !isInitialLoading && statusCounts.clipped ? CLIP_WARNING : undefined}
+        >
           {isOffline
             ? 'offline'
             : isInitialLoading
