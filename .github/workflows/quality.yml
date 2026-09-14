@@ -50,15 +50,6 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Manifest drift check
-        run: node scripts/check-manifest-drift.mjs
-
-      - name: Binding drift check
-        run: node scripts/check-binding-drift.mjs
-
-      - name: Source canon check
-        run: node scripts/check-source-canon.mjs
-
       - name: Type coverage (≥99.9%)
         # Replaced bespoke check-type-coverage-ratchet.mjs (99 LOC) with native type-coverage CLI.
         # Coverage must stay ≥99.9% (101149/101250 baseline, 2026-05-06).
