@@ -110,3 +110,35 @@ Dispatched `@claude` issues carry these invocations in their body (`lib/tasks/ac
 - Run `pnpm typecheck && pnpm exec vite build` after EACH rule pass; STOP and report on failure.
 - If a single rule's fix touches more than 50 files, STOP and ask Adrian.
 - Safe to auto-fix: `@typescript-eslint/no-unused-vars`, `prefer-const`, `no-var`, `quotes`, `semi`, `eol-last`, `comma-dangle`. NEVER auto-fix `react-hooks/exhaustive-deps` or anything that rewrites code blocks rather than tweaking declarations.
+
+---
+
+## 4. Learned rules — promoted from loop failures (2026-09-14)
+
+Distilled from the retro harvest of every Ralph park/blocked/attempt-failed comment
+in ops (ops#274 session; full corpus in `docs/ai/learned-rules.jsonl`, walk it with
+`pnpm guardrail:learned-rules`). These five earned always-on space because they
+change what a session does; the rest stay in the JSONL until promoted.
+
+- **A park is not proof the work is stuck.** `iteration ended without a pushed
+  branch` is frequently loop *infrastructure* (bot-actor push rejection, a
+  permission wall, a sensitive-file edit block) or a deliberate ask-don't-guess
+  stop — not a failure of the issue. Read the agent's own comment before believing
+  the verdict.
+- **Before re-queuing a parked/blocked issue, read its comment history.**
+  `closed_by_pull_requests` plus the current code is not enough — ops#142 burned a
+  full iteration in September rediscovering a blocker written down in July.
+- **A gate failure blaming a missing binary may be a red herring.** Install it and
+  re-run before trusting the diagnosis; ops#178's real faults were a stale route
+  list and an architectural mismatch hiding underneath.
+- **A `ralph-gate` startup_failure with 0 jobs run = caller/reusable permission or
+  version skew on a stale branch.** Update the branch from `main` first; don't
+  conclude the shared engine regressed (ops#144).
+- **Diff a deletion issue's premise against `main` before deleting.** A prior
+  unrelated PR may have solved the problem differently, leaving the DoD stale —
+  stop and ask rather than deleting working code on the issue text's word (ops#122).
+
+**Never queue an issue whose DoD requires editing `.github/workflows/*`** — the
+bot's token lacks the `workflows` scope. Split it: the workflow file goes to a
+human/adr-eng PR, the rest becomes a script-or-registry issue Ralph can push.
+ops#90, #240, #241 and #243 each did the full work and then died at the push.
