@@ -19,7 +19,7 @@ Kiro's frontier-engineering pillars, scored honestly against us:
 
 | Kiro principle | Us | Verdict |
 |---|---|---|
-| Spec-driven development (requirements → design → tasks) | Issues-as-specs, no design step | **Adopt** (§2) |
+| Spec-driven development (requirements → design → tasks) | Issues-as-specs, no design step | **Adopt the design step, not the file count** (§2) |
 | Agent steering files | `CLAUDE.md` + `docs/ai/*` + guardrail registry | **Have it — and it's obese** (§4) |
 | Expand autonomous surface area | Ralph loop, single-flight, auto-merge | **Have it — mis-aimed** (§3) |
 | Trust the boundaries, not the agent | Gate + registry + labels | **Have it; upgrade labels → boundaries** (§5) |
@@ -38,22 +38,27 @@ resources are Adrian's attention and cash. Every Kiro principle gets translated
 through that before we adopt it — maximising autonomous surface without fixing
 aim just accelerates entropy cleanup.
 
-## 2. Spec triad — mandatory for epics, nothing for chores
+## 2. Epic specs — one file, mandatory for epics, nothing for chores
 
-**Decided: full triad** (Adrian, 2026-09-14, overruling a lighter
-single-file recommendation).
+**Decided: one file per epic.** (First decided as Kiro's full three-file triad,
+then collapsed the same day — see the change log. What was load-bearing in the
+triad was the *design step*, not the file count.)
 
-Location: **`docs/specs/<epic-slug>/`** in the repo that owns the code, holding
-three committed files:
+Location: **`docs/specs/<epic-slug>.md`** in the repo that owns the code, with
+these sections:
 
-- `requirements.md` — the outcome, user-visible behaviour, acceptance criteria.
-- `design.md` — the technical shape, the seams touched, **and the alternatives
-  we rejected with why**. This is the step we historically skipped and the one
-  carrying most of the triad's value.
-- `tasks.md` — dependency-ordered slices, each mapping 1:1 to an issue.
+| Section | What it carries |
+|---|---|
+| Outcome | What's true when this ships, in business terms + the north-star test |
+| Acceptance criteria | The checklist, out-of-scope, and the invariants that hold throughout |
+| Current state | What exists today, with `file:line` references |
+| Target shape | Seams, data flow, contracts |
+| **Alternatives rejected** | **The reason this document exists** — the step we historically skipped |
+| Risks | What could go wrong, and what catches it |
+| Tasks | Dependency-ordered slices, one issue / one PR each, with queue posture |
 
-Cross-repo epics live in **ops** with links out. `docs/specs/_template/` holds
-the skeletons.
+Cross-repo epics live in **ops** with links out. `docs/specs/_template.md` is the
+skeleton.
 
 **When it's mandatory.** An epic that (a) spans more than three issues, **or**
 (b) touches client-facing output, client PII, or money. Today that means:
@@ -64,14 +69,14 @@ issue → Ralph path unchanged. A spec for a one-file fix is pure overhead.
 
 **Anti-rot rules** — the known failure mode of this repo is documents outliving
 their truth (`HANDOFF.md` is 119 KB against its own "keep it one page" contract;
-`learned-rules.jsonl` has never been written to; `docs/superpowers/specs/`
-stopped in May). So:
+`learned-rules.jsonl` is 0 bytes because its writer was deleted with Hermes;
+`docs/superpowers/specs/` stopped in May). So:
 
-1. Every spec file carries `Status:` (`draft` / `active` / `shipped` / `abandoned`)
+1. Every spec carries `Status:` (`draft` / `active` / `shipped` / `abandoned`)
    and `Last verified:` at the top.
 2. A spec whose issues are all closed gets marked `shipped` in the same PR that
    closes the last one. A `shipped` spec is history, not instruction.
-3. `tasks.md` links issue numbers. If an issue's scope changes, `tasks.md`
+3. The Tasks table links issue numbers. If an issue's scope changes, the table
    changes in the same PR — the same lockstep rule `ARCHITECTURE.md` ⇄
    `pipeline-walkthrough.html` already has.
 4. **Follow-up: a `check-spec-freshness` guardrail** (registry gate, advisory
@@ -129,10 +134,17 @@ The rule:
 - `status.json`'s `headline` is a *headline*. Its history belongs in the log
   file, not in a single 6,000-word string that every agent loads.
 
-**Continuous tuning.** `docs/ai/learned-rules.jsonl` is 0 bytes — we built the
-learning loop and never fed it. Sessions that hit a real context gap (a wrong
-assumption the steering should have prevented) append one line. Parking reasons
-are the other input: they are a context-gap signal we currently throw away.
+**Continuous tuning.** `docs/ai/learned-rules.jsonl` is 0 bytes — not because we
+never used it, but because **its writer was deleted.** The persist → promote
+pipeline is intact (`scripts/persist-learned-rule.mjs`,
+`scripts/promote-learned-rule.mjs`, `pnpm guardrail:learned-rules`), and its only
+caller was `scripts/hermes-unit.mjs runPostMortem()`, which went with the
+orchestration retirement. The two `[auto]` rules still sitting in
+`AGENT_GUIDELINES.md` are May-2026 Hermes output, and they're task artifacts, not
+durable rules. So the loop needs a **new trigger**, not a new tool: a Ralph park
+or a self-heal engagement is the natural one — both are already-detected moments
+where the agent's context was provably insufficient. Sessions that hit a context
+gap the steering should have prevented append one line.
 
 ## 5. Human gates — essential vs. friction
 
@@ -196,7 +208,7 @@ lines changed.** Volume metrics reward the behaviour that cost us two months.
 ## 8. What this doctrine asks of a session
 
 1. Read `NORTH_STAR.md`, then `HANDOFF.md`. Flag drift in one sentence.
-2. Working an epic? Read its `docs/specs/<slug>/` triad first. No spec and the
+2. Working an epic? Read its `docs/specs/<slug>.md` first. No spec and the
    epic qualifies under §2? Write it before writing code.
 3. Before ending: **leave the ready pool non-empty**, biased toward the
    north-star path. A session that merges work and leaves the queue starved has
@@ -208,5 +220,11 @@ lines changed.** Volume metrics reward the behaviour that cost us two months.
 ## Change log
 
 - 2026-09-14: Initial doctrine, from the ops#274 strategy session. Decisions
-  taken: full spec triad in `docs/specs/` · path-allowlist auto-merge (#238) ·
-  steering budget with an enforcing gate.
+  taken: epic specs in `docs/specs/` · path-allowlist auto-merge (#238) ·
+  steering budget with an enforcing gate. Kiro's productivity metrics rejected.
+- 2026-09-14 (same session, revised): the spec format was first adopted as
+  Kiro's full three-file triad, then collapsed to **one file per epic** before
+  anything merged. Rationale: this repo demonstrably rots documents, the triad's
+  value is concentrated in its design/rejected-alternatives step, and one file
+  is one thing to keep true. Recorded rather than silently rewritten — the
+  reversal is itself a data point about our ceremony tolerance.
