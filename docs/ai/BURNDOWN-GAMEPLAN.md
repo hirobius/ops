@@ -10,7 +10,10 @@
 
 - **The autonomous machine works now.** `ralph-auto` + `ralph-ready` issues self-merge on a
   green `ralph-gate`; the 6h idle-watchdog (PR #232) auto-restarts a wedged chain; CI is green.
-  **The ~22 `ralph-auto` issues drain themselves over time — no action needed on them.**
+  **The ~22 `ralph-auto` issues are merge-pre-approved, but `ralph-auto` alone does NOT
+  queue them — `ralph-ready` is what the selector reads.** When the `ralph-ready` set empties,
+  the loop goes idle (guard step succeeds, every later step skipped) and stays idle until
+  something re-labels. Keep 3-5 `ralph-auto` issues carrying `ralph-ready` at all times.
 - **The real constraints are human gates, not agent capacity.** What's left that matters is
   sequencing: revenue path → compliance-before-outreach → core product → platform epics.
 - **This doc = recommendations + a phased plan for all 72**, so you (or a new session) can execute
@@ -19,7 +22,7 @@
 ### How to read the queue at a glance
 | Bucket | Count | Who acts | Meaning |
 |---|---|---|---|
-| `ralph-auto` | ~22 | nobody | drains hands-off; just let the loop run |
+| `ralph-auto` | ~22 | **you/a session** | pre-approved to self-merge, but only moves while also tagged `ralph-ready` |
 | `needs-human` | 18 | **you** | compliance / secrets / outreach / strategic epics |
 | `needs-adrian` | 6 | **you** | decisions (mostly dispositioned below) |
 | untagged | ~26 | triage | real work not yet queued — recs below |
@@ -154,8 +157,10 @@ the compliance gate (Phase 2) before any outreach.
 
 **This session or a new one:**
 1. Read this doc + `docs/ai/HANDOFF.md` + the fleet `status.json`.
-2. Check the loop: `ralph-auto` issues merging? Any newly `ralph-parked`? Recover parks (fix cause →
-   re-add `ralph-ready`); close obsolete/cross-repo/duplicate.
+2. **Check the ready queue first — this is the #1 failure mode.** `gh issue list --label ralph-ready
+   --state open`: if it returns nothing, the loop is idle (not "draining"), and no merge will wake it.
+   Re-label 3-5 `ralph-auto` issues that already carry a DoD checklist. Then: any newly
+   `ralph-parked`? Recover parks (fix cause → re-add `ralph-ready`); close obsolete/cross-repo/duplicate.
 3. To make progress: promote 3–5 cluster-F chores to `ralph-auto` (with DoD checklists), or advance
    the current phase.
 4. Workflow-file edits → manual PR as adr-eng. Everything else → let Ralph do it.
