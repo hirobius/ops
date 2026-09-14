@@ -1347,3 +1347,13 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   coverage should be enforced pre-merge, wiring test:layout (or a trimmed
   subset) into ralph/gate.sh is a separate, deliberate follow-up — it wasn't
   wired before this PR either, so this doesn't newly gate anything.
+
+#269 — drop dead /case-studies/hirobius link on /info page (green ci.yml Full checks)
+- src/app/pages/InfoPageWrapper.tsx: per Adrian's decision on the issue, dropped the InlineLink
+  wrapping "Hirobius" (route no longer exists — HDS case-study pages moved to the standalone
+  design-system site) and made it plain text; removed the now-unused InlineLink import.
+- Verified: node scripts/check-link-integrity.mjs green; pnpm check:full fully green (only benign
+  skip: editorconfig-checker binary unavailable, network-restricted session, unrelated to change);
+  bash ralph/gate.sh green (typecheck + 697 tests + lint).
+- Files: src/app/pages/InfoPageWrapper.tsx.
+- Part of #239 (clears the final ops CI red on ci.yml "Full checks").
