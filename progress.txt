@@ -1566,3 +1566,17 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   {approval-card.tsx, approval-card.test.tsx (new)}, lib/ops/run-log.mjs,
   docs/{ARCHITECTURE.md, pipeline-walkthrough.html,
   guardrails/baselines/check-dom-node-budgets.json}.
+
+#282 — delete orphaned HDS-authoring scripts (hds-sync.js + ask-hds.sh)
+- Both were dead on arrival: read ./public/hds-manifest.json, which doesn't
+  exist in ops (lives in hirobius/hds). Fast-follow to #242/#248 which missed
+  these two root-level scripts.
+- Grep-verified zero references anywhere (package.json, .github/workflows/,
+  scripts/, docs) before and after deletion.
+- axios (hds-sync.js's only import) is NOT a declared dependency at all — not
+  in package.json, pnpm-lock.yaml, or node_modules — so nothing to remove from
+  the dep tree. Noted in the PR per DoD.
+- Gate green (typecheck+test+lint, 733 tests). bridge.config.json left alone
+  (out of scope per issue — still live, read by correlation.mjs/ui-lint.mjs).
+- Files: hds-sync.js (deleted), ask-hds.sh (deleted).
+- PR: https://github.com/hirobius/ops/pull/288
