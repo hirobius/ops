@@ -1216,3 +1216,44 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   docs/guardrails/registry.json, package.json, AGENTS.md,
   scripts/INDEX.{md,json}, .claude/skills/extract-design/SKILL.md.
 - Branch: ralph/issue-203-skills-lock-installer. PR #265.
+
+## Issue #204 — silent-empty GITHUB_TOKEN failures on /ops/tasks
+- Scope: issue asked to audit token-backed surfaces (import, dispatch,
+  projects, PluginsBar) + add a health indicator. Audit found most
+  backend surfaces (api/tasks.ts, lib/tasks/actions.mjs, lib/github/
+  issues.mjs) already fail loud with named+actionable messages
+  (ENV_MISSING_GITHUB_TOKEN / GITHUB_TOKEN_REJECTED) — PluginsBar was
+  already fixed per the issue text. The real remaining gap: TWO
+  frontend call sites on /ops/tasks were dropping those already-good
+  backend messages on the floor, reproducing exactly the "nothing
+  happens" failure mode the issue describes. Shipped the smallest
+  complete slice fixing both (rest of the audit — VERCEL_TOKEN/repo-
+  status enrichment in lib/projects/index.mjs is documented optional
+  no-op by design, not a fail-loud gap — commented back on the issue).
+- Fix 1: RalphPanel.tsx's usePoll fetcher threw a bare `HTTP ${status}`
+  on a non-2xx GET /api/tasks?ralph=1, discarding the backend's actual
+  `{error, code}` body (e.g. "GITHUB_TOKEN not set — needed for the
+  Ralph fleet panel. Add it in Vercel..."). Now reads the body and
+  surfaces it via usePoll's existing `error` field, rendered as a red
+  header Badge (title = full message) instead of the old generic
+  "unreachable — retrying" text — this now also lights up mid-session
+  if the token gets revoked between polls (error persists independent
+  of stale `data`), not just on cold load.
+- Fix 2: useTaskActions.ts's importIssues() (POST /api/tasks, the
+  "Import GitHub issues" button) didn't check res.ok or read the body
+  at all — a missing/rejected token today produces a completely silent
+  no-op click. Wired it through the page's existing useToast (already
+  used for Run Ralph, ops#113) the same way `act` reports failures;
+  TasksPage now passes `notify` into useTaskActions.
+- DOM-node budget baseline ratcheted 41->42 for RalphPanel.tsx (one new
+  Badge element) via `node scripts/check-dom-node-budgets.mjs --update`
+  — expected, same ratchet pattern as ops#141/#113 history in this file.
+- Verified: typecheck, 697 unit tests, lint — bash ralph/gate.sh green.
+- Files: src/app/pages/ops/tasks/{RalphPanel.tsx,useTaskActions.ts,
+  TasksPage.tsx}, docs/guardrails/baselines/check-dom-node-budgets.json.
+- Branch: ralph/issue-204-fail-loud-github-token. PR opened, "Closes #204".
+- Notes for next iteration: the rest of #204's audit ask (a dedicated
+  fleet-wide auth/health indicator beyond the tasks board, e.g. on the
+  main /ops shell) is out of scope for this slice — commented back on
+  the issue as a possible fast-follow if Adrian wants it broader than
+  the tasks board.

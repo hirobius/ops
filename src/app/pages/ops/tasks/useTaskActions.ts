@@ -6,10 +6,11 @@
  * mutation so the poll reflects the write. Most callers fire-and-forget `act`
  * and let the board surface state via the next poll (its resolved
  * `TaskActionResult` is safe to ignore — the return type is `void`-compatible
- * for those call sites). The one exception is "Run Ralph" (ops#113): it
- * can't fail silently per its DoD, so `act` reports back `{ ok, body }`
- * rather than swallowing the response — a caller that needs to react (show a
- * toast) can, everyone else keeps ignoring it.
+ * for those call sites). The exceptions are "Run Ralph" (ops#113) and the
+ * GitHub-issues import (ops#204): both can fail on a missing/rejected
+ * `GITHUB_TOKEN`, and per CLAUDE.md's fail-loud rule that can't be a silent
+ * no-op, so `act` reports back `{ ok, body }` and `importIssues` reports
+ * failures straight to the toast rather than swallowing the response.
  */
 
 import { useCallback, useState } from 'react';
@@ -27,7 +28,17 @@ export interface UseTaskActionsResult {
   importIssues: () => Promise<void>;
 }
 
-export function useTaskActions(refetch: () => void): UseTaskActionsResult {
+/** Pulls the backend's named, actionable `error` string out of a fetch response body, if present. */
+function errorMessageOf(body: unknown, fallback: string): string {
+  return body && typeof body === 'object' && typeof (body as { error?: unknown }).error === 'string'
+    ? (body as { error: string }).error
+    : fallback;
+}
+
+export function useTaskActions(
+  refetch: () => void,
+  onNotify: (message: string, tone: 'success' | 'danger') => void,
+): UseTaskActionsResult {
   const [busyKeys, setBusyKeys] = useState<ReadonlySet<string>>(new Set());
   const [importing, setImporting] = useState(false);
 
@@ -59,14 +70,18 @@ export function useTaskActions(refetch: () => void): UseTaskActionsResult {
   const importIssues = useCallback(async () => {
     setImporting(true);
     try {
-      await opsApi.post('/api/tasks');
-    } catch {
-      /* surfaced on next poll */
+      const res = await opsApi.post('/api/tasks');
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        onNotify(errorMessageOf(body, `Import failed — HTTP ${res.status}`), 'danger');
+      }
+    } catch (err) {
+      onNotify(`Import failed — ${err instanceof Error ? err.message : 'network error'}`, 'danger');
     } finally {
       setImporting(false);
       refetch();
     }
-  }, [refetch]);
+  }, [refetch, onNotify]);
 
   return { act, busyKeys, importing, importIssues };
 }
