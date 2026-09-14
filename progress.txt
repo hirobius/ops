@@ -1393,3 +1393,30 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Notes for next iteration: 20+ other high advisories remain in
   devDependencies/build tooling per the issue — separate, out-of-scope
   follow-up if wanted.
+
+## Issue #159 — per-status counts in the tasks filter (2026-09-14)
+- Added `countByStatus(tasks) -> { open, blocked, done, all, clipped }` (pure,
+  taskMeta.ts) over the FULL loaded set per the issue spec (not the
+  source/category filter), plus `formatCount(n, clipped)` (`n` vs `n+`) and a
+  shared `CLIP_WARNING` string. `TASKS_REQUEST_LIMIT` (1000) mirrors
+  `DEFAULT_LIMIT` in api/tasks.ts by hand since server code isn't importable
+  client-side — documented in-code.
+- TasksPage.tsx: status SegmentedControl labels now read
+  `open (85) · blocked (3) · done (66) · all (154)`; summary line changed
+  from `${filtered.length} shown · ${tasks.length} total` to
+  `${filtered.length} shown · ${active} active · ${done} done`. Once clipped,
+  both render `n+` values; the `title`-attr clip warning lives on the summary
+  span only — wrapping SegmentedControl in a `<span title=...>` to also warn
+  there tripped the locked DOM-node budget (check-dom-node-budgets:
+  TasksPage.tsx locked at 34 elements). Decided the summary-line tooltip is
+  sufficient rather than raising the budget for one attribute.
+- Tests: taskMeta.test.ts — countByStatus (empty set, mixed statuses, one
+  below the limit, at-limit boundary) + formatCount (bare vs `+`).
+- Gate green: typecheck + test (703 passed) + lint. Also ran
+  `pnpm test:layout` (had to `pnpm exec playwright install chromium` first —
+  browsers weren't preinstalled in this session's sandbox); 14/14 green incl.
+  /ops/tasks. Could not get Playwright MCP browser permission for a live
+  visual check this session — relied on the automated layout-integrity spec
+  instead.
+- Files: src/app/pages/ops/tasks/taskMeta.ts, taskMeta.test.ts, TasksPage.tsx.
+- Branch: ralph/issue-159-per-status-counts. PR #278.
