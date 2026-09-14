@@ -1143,3 +1143,28 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   scripts/__tests__/check-link-integrity.test.mjs,
   docs/guardrails/registry.json.
 - Branch: ralph/issue-176-derive-route-allowlist.
+
+## Issue #262 — audit-strengths fails ci-pr channel (2026-09-14)
+- Prior iteration diagnosed this correctly and blocked-stopped on an
+  unrelated pre-commit false-positive (check-validator-wiring flagging
+  a prose mention of audit-sbom in quality.yml as WIRING_DRIFT). That
+  blocker was fixed by #263 (comment reworded) before this iteration
+  started — re-verified clean (check-validator-wiring: 47 gate(s)
+  wired as declared) before proceeding.
+- Fix: docs/guardrails/registry.json — audit-strengths.firingChannel
+  ci-pr -> ci-scheduled. It's a meta/reporting gate (JSON-diff over
+  other gates + a report step that can exceed 30s), not a correctness
+  gate; it already fires weekly via strengths-audit.yml, so
+  check-validator-wiring's legacy-invocation fallback detects it as
+  ci-detected and accepts the ci-scheduled declaration.
+- generate-strength-report was NOT touched — it's already
+  firingChannel: pre-commit in the registry (not ci-pr), so it was
+  out of scope; its own timeout is a separate pre-existing issue.
+- Verified: run-gates.mjs --channel ci-pr --parallel 4 exits 0 (was
+  the DoD blocker), validate-guardrail-registry green,
+  check-validator-wiring green, bash ralph/gate.sh green.
+- Reverted unrelated generated-artifact drift that appeared from
+  running gate scripts locally (check-fixture-stubs-count.json,
+  soft-gate-promotion-plan.md, sbom.json) — not part of this fix.
+- Files: docs/guardrails/registry.json (1-line diff).
+- Branch: ralph/issue-262-audit-strengths-ci-scheduled. PR #264.
