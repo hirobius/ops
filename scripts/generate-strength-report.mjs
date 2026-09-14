@@ -416,63 +416,18 @@ function computeB2() {
 /**
  * B3 — WCAG 2.1 AA (axe-playwright violations)
  *
- * Primary signal: test-results/.last-run.json
- *   - "status": "passed" with empty failedTests[] → all a11y tests passed → 0 blocking violations.
- *   - "status": "failed" → parse failedTests[] for a11y test names to count routes with violations.
- *
- * The a11y.spec.ts hard-fails on any critical or serious axe violation per route.
- * Passing = 0 violations per route. Score formula: 100 - (violations_per_route_mean * 5), clamped [0, 100].
- *
- * Secondary fallback: if last-run.json is absent, mark needs-wiring.
+ * (#122) The axe-core suite this dimension read (tests/a11y.spec.ts) and its
+ * CI gate (.github/workflows/a11y.yml) were deleted — they only ever audited
+ * the dead /hds/* DS-gallery route matrix (#54), then a same-page-under-
+ * different-names smoke set, never a maintained real-route WCAG audit. No
+ * replacement is wired yet, so this dimension has no signal to read.
  */
 function computeB3() {
-  const lastRunPath = 'test-results/.last-run.json';
-  if (!existsSync(resolve(ROOT, lastRunPath))) {
-    return {
-      score: null,
-      status: 'needs-wiring',
-      reason: 'test-results/.last-run.json absent — run pnpm test:a11y first',
-      raw: {},
-    };
-  }
-
-  const lastRun = readJSON(lastRunPath);
-  const totalRoutes = 3; // ROUTES in a11y.spec.ts (#54: scoped down from the dead /hds/* matrix)
-
-  if (lastRun?.status === 'passed') {
-    // All tests passed — 0 blocking violations across all routes
-    return {
-      score: 100,
-      status: 'wired',
-      raw: {
-        source: 'test-results/.last-run.json',
-        status: 'passed',
-        violatingRoutes: 0,
-        totalRoutes,
-        violationsPerRouteMean: 0,
-      },
-    };
-  }
-
-  // status === 'failed': count a11y route tests in failedTests[]
-  const failedTests = Array.isArray(lastRun?.failedTests) ? lastRun.failedTests : [];
-  // a11y spec test titles: "a11y [/route]" — count distinct route violations
-  const a11yFailures = failedTests.filter((t) => typeof t === 'string' && /^a11y \[/.test(t));
-  const violatingRoutes = a11yFailures.length;
-  // Each failing route = at least 1 blocking violation group. Score: 100 - (count * 5), clamped.
-  const violationsPerRouteMean = violatingRoutes;
-  const score = Math.max(0, Math.min(100, 100 - violationsPerRouteMean * 5));
-
   return {
-    score,
-    status: 'wired',
-    raw: {
-      source: 'test-results/.last-run.json',
-      status: 'failed',
-      violatingRoutes,
-      totalRoutes,
-      violationsPerRouteMean,
-    },
+    score: null,
+    status: 'needs-wiring',
+    reason: 'tests/a11y.spec.ts + .github/workflows/a11y.yml removed (#122) — no WCAG audit wired',
+    raw: {},
   };
 }
 

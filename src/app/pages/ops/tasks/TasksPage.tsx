@@ -70,9 +70,9 @@ function formatLastUpdated(epochMs: number | null): string {
 
 export default function TasksPage() {
   const { tasks, isOffline, isInitialLoading, lastUpdatedAt, refetch } = useTasks();
-  const { act, busyKeys, importing, importIssues } = useTaskActions(refetch);
-  const { selected, toggleSelect, clearSelection, copySelectedRefs } = useTaskSelection(tasks);
   const { toasts, notify, dismiss } = useToast();
+  const { act, busyKeys, importing, importIssues } = useTaskActions(refetch, notify);
+  const { selected, toggleSelect, clearSelection, copySelectedRefs } = useTaskSelection(tasks);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<TaskCategory>('all');
@@ -244,6 +244,7 @@ export default function TasksPage() {
             <button
               key={toast.id}
               type="button"
+              className="hds-focus"
               style={toast.tone === 'danger' ? s.toastDanger : s.toastSuccess}
               onClick={() => dismiss(toast.id)}
               title="Dismiss"

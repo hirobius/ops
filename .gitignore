@@ -85,6 +85,11 @@ docs/ai/proposed-skills.jsonl
 docs/guardrails/firing-log.jsonl
 docs/guardrails/firing-log.stderr
 
+# Per-gate lastFiringAt/lastViolationAt sidecar (issue #205) — regenerated on
+# every commit by scripts/refresh-firing-stats.mjs; registry.json stays
+# config-only unless someone deliberately runs `pnpm guardrail:firing-stats:bake`.
+docs/guardrails/firing-stats.json
+
 # Agentic-ops review loop, Slice 1 (#29) — scripts/daily-review.mjs output.
 # findings.jsonl accumulates append-only across runs; the digest is a
 # rewrite-per-run snapshot. Both are local review artifacts, not history.

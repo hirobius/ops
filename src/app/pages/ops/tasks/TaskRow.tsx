@@ -129,6 +129,7 @@ export function TaskRow({
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => onToggleSelect(t.key)}
+                className="hds-focus"
                 style={isSelected ? s.checkOn : s.check}
                 title={isSelected ? 'Deselect' : `Select ${ref}`}
               >

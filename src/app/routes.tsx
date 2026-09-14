@@ -57,9 +57,11 @@ export const router = createBrowserRouter([
         path: 'ops',
         element: (
           <OpsGate>
-            <Suspense fallback={<HDSFallback />}>
-              <Outlet />
-            </Suspense>
+            <main>
+              <Suspense fallback={<HDSFallback />}>
+                <Outlet />
+              </Suspense>
+            </main>
           </OpsGate>
         ),
         children: [

@@ -54,10 +54,14 @@ function listDir(dir) {
  */
 function findCount(dir, namePattern, maxDepth = 20) {
   if (!fs.existsSync(dir)) return 0;
-  const result = spawnSync('find', [dir, '-maxdepth', String(maxDepth), '-type', 'f', '-name', namePattern], {
-    encoding: 'utf8',
-    timeout: 15000,
-  });
+  const result = spawnSync(
+    'find',
+    [dir, '-maxdepth', String(maxDepth), '-type', 'f', '-name', namePattern],
+    {
+      encoding: 'utf8',
+      timeout: 15000,
+    },
+  );
   if (result.error || result.status !== 0) return 0;
   return result.stdout.trim().split('\n').filter(Boolean).length;
 }
@@ -67,10 +71,14 @@ function findCount(dir, namePattern, maxDepth = 20) {
  */
 function findFiles(dir, namePattern, maxDepth = 20) {
   if (!fs.existsSync(dir)) return [];
-  const result = spawnSync('find', [dir, '-maxdepth', String(maxDepth), '-type', 'f', '-name', namePattern], {
-    encoding: 'utf8',
-    timeout: 15000,
-  });
+  const result = spawnSync(
+    'find',
+    [dir, '-maxdepth', String(maxDepth), '-type', 'f', '-name', namePattern],
+    {
+      encoding: 'utf8',
+      timeout: 15000,
+    },
+  );
   if (result.error || result.status !== 0) return [];
   return result.stdout.trim().split('\n').filter(Boolean);
 }
@@ -84,7 +92,13 @@ function findFiles(dir, namePattern, maxDepth = 20) {
 async function checkValidatorCount() {
   const scriptsDir = path.join(repoRoot, 'scripts');
   // Use multiple find patterns and deduplicate
-  const patterns = ['*validator*.mjs', 'check-*.mjs', 'audit-*.mjs', 'validate-*.mjs', 'test-*.mjs'];
+  const patterns = [
+    '*validator*.mjs',
+    'check-*.mjs',
+    'audit-*.mjs',
+    'validate-*.mjs',
+    'test-*.mjs',
+  ];
   const seen = new Set();
   for (const pat of patterns) {
     for (const f of findFiles(scriptsDir, pat, 2)) {
@@ -103,7 +117,7 @@ async function checkValidatorCount() {
 // ---------------------------------------------------------------------------
 // Check 2: Fixture count >= 269
 //
-// Walk fixtures/, tests/**/__fixtures__/, tests/visual.spec.ts-snapshots/
+// Walk fixtures/, tests/**/__fixtures__/
 // ---------------------------------------------------------------------------
 async function checkFixtureCount() {
   let total = 0;
@@ -118,22 +132,18 @@ async function checkFixtureCount() {
     const result = spawnSync(
       'find',
       [testsDir, '-maxdepth', '10', '-type', 'f', '-path', '*/__fixtures__/*'],
-      { encoding: 'utf8', timeout: 15000 }
+      { encoding: 'utf8', timeout: 15000 },
     );
     if (!result.error && result.status === 0) {
       total += result.stdout.trim().split('\n').filter(Boolean).length;
     }
   }
 
-  // Walk tests/visual.spec.ts-snapshots/
-  const snapshotsDir = path.join(repoRoot, 'tests', 'visual.spec.ts-snapshots');
-  total += findCount(snapshotsDir, '*', 5);
-
   const passed = total >= 269;
   return {
     name: 'fixture-count',
     passed,
-    detail: `${total} fixture files found across fixtures/, tests/__fixtures__/, and visual snapshots (threshold: >= 269)`,
+    detail: `${total} fixture files found across fixtures/ and tests/__fixtures__/ (threshold: >= 269)`,
   };
 }
 
@@ -153,7 +163,7 @@ async function checkNoStyleDictionary() {
     ...pkg.peerDependencies,
   };
   const found = Object.keys(allDeps).filter(
-    (k) => k === 'style-dictionary' || k.startsWith('@tokens-studio/')
+    (k) => k === 'style-dictionary' || k.startsWith('@tokens-studio/'),
   );
   const passed = found.length === 0;
   return {
@@ -210,7 +220,8 @@ async function checkManifestSingleSource() {
     for (const filePath of jsonFiles) {
       const rel = path.relative(repoRoot, filePath);
       // Skip snapshots and test fixtures
-      if (rel.includes('snapshot') || rel.includes('.snapshots') || rel.includes('__fixtures__')) continue;
+      if (rel.includes('snapshot') || rel.includes('.snapshots') || rel.includes('__fixtures__'))
+        continue;
       try {
         const data = readJsonSafe(filePath);
         if (!data) continue;
@@ -263,14 +274,18 @@ async function checkAdrNaming() {
       const fullPath = path.join(adrDir, name);
       try {
         if (!fs.statSync(fullPath).isFile()) continue;
-      } catch { continue; }
+      } catch {
+        continue;
+      }
       if (!validPattern.test(name)) {
         issues.push(`docs/adr/${name} does not follow NNNN-kebab-case.md convention`);
       }
     }
   } else {
     // docs/adr doesn't exist yet — note it but don't hard-fail (migration pending)
-    issues.push('docs/adr/ directory does not exist (ADR migration pending 12n-api-rfc-process-formalization)');
+    issues.push(
+      'docs/adr/ directory does not exist (ADR migration pending 12n-api-rfc-process-formalization)',
+    );
   }
 
   // Hard fail only on: RFC files present, or malformed ADR names
@@ -302,7 +317,9 @@ async function checkEcoModelRule() {
   } else {
     const content = fs.readFileSync(claudeMdPath, 'utf8');
     if (!content.includes('always pick the cheapest model')) {
-      issues.push('CLAUDE.md does not contain the eco-model rule ("always pick the cheapest model")');
+      issues.push(
+        'CLAUDE.md does not contain the eco-model rule ("always pick the cheapest model")',
+      );
     }
   }
 
@@ -318,7 +335,11 @@ async function checkEcoModelRule() {
       if (fs.existsSync(memPath)) {
         memoryFound = true;
         const content = fs.readFileSync(memPath, 'utf8');
-        if (content.includes('cheapest model') || content.includes('haiku') || content.includes('eco')) {
+        if (
+          content.includes('cheapest model') ||
+          content.includes('haiku') ||
+          content.includes('eco')
+        ) {
           memoryHasRule = true;
         }
         break;
@@ -329,7 +350,9 @@ async function checkEcoModelRule() {
   if (!memoryFound) {
     issues.push('feedback_eco_efficient_subagents.md not found in ~/.claude/projects/*/memory/');
   } else if (!memoryHasRule) {
-    issues.push('feedback_eco_efficient_subagents.md found but does not reference the eco-model rule');
+    issues.push(
+      'feedback_eco_efficient_subagents.md found but does not reference the eco-model rule',
+    );
   }
 
   const passed = issues.length === 0;

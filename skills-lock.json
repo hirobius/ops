@@ -5,7 +5,10 @@
       "source": "Manavarya09/design-extract",
       "sourceType": "github",
       "skillPath": "skills/extract-design/SKILL.md",
-      "computedHash": "a20e0950c9d1dde2047af456319416281ac4e655862f09506328ee7faca5ea91"
+      "pinnedCommit": "f6566b1a813733a273075b1a818a27f783d0727c",
+      "hashAlgorithm": "sha256",
+      "computedHash": "0523d33cadab98ad082d52b68effe0e35103d5453e98b301891f52cae63b5640",
+      "hashNote": "Reconciled 2026-09-14 (ops#203): the old computedHash predated pinnedCommit tracking and did not verify against any revision of skillPath found in source history — install-skills.mjs's canonical algorithm (sha256 of raw file bytes) recomputed against the pinnedCommit above and this hash is confirmed to match."
     }
   }
 }

@@ -61,6 +61,16 @@ const ALL_ROUTES = [
 
 for (const route of ALL_ROUTES) {
   test(`layout-integrity [desktop] ${route}`, async ({ page }) => {
+    // This suite runs against `vite preview` — a static build with no
+    // deployed /api/* functions — so OpsGate's /api/ops-me check would
+    // always fail and every /ops route would render the login screen
+    // instead of the dashboard. Stub it so the audit exercises real pages.
+    await page.route('**/api/ops-me', (opsMeRoute) =>
+      opsMeRoute.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ authed: true }),
+      }),
+    );
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.setViewportSize(DESKTOP);
     const pageErrors: string[] = [];
