@@ -9,36 +9,6 @@
   },
   "type": "module",
   "packageManager": "pnpm@10.33.0",
-  "module": "./dist/hirobius-ui.js",
-  "types": "./src/index.ts",
-  "sideEffects": [
-    "**/*.css",
-    "./src/styles/**",
-    "./dist/tokens.css"
-  ],
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "import": "./dist/hirobius-ui.js",
-      "default": "./dist/hirobius-ui.js"
-    },
-    "./tokens.css": "./dist/tokens.css",
-    "./tokens": {
-      "types": "./src/app/design-system/tokens.ts",
-      "import": "./dist/tokens.js",
-      "default": "./dist/tokens.js"
-    },
-    "./cn": {
-      "types": "./src/lib/utils.ts",
-      "import": "./dist/cn.js",
-      "default": "./dist/cn.js"
-    },
-    "./package.json": "./package.json"
-  },
-  "files": [
-    "dist",
-    "src"
-  ],
   "scripts": {
     "_comment:a11y-high-value": "The following check:* validators are high-value accessibility checks that catch real violations (check:focus found 1 missing focus class). Kept dormant/manual-only to avoid pre-commit performance regression. Candidates to wire into pretest after CI stability review.",
     "_comment:link-integrity": "check:doc-refs and check:routes both validate internal link integrity (different surfaces: doc refs vs route links). Kept dormant/manual-only to prevent pre-commit cascade.",
