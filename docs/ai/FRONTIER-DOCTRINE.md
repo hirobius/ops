@@ -151,6 +151,30 @@ actually broke. And note *why* Hermes produced junk rules — it ran its post-mo
 on task **completion**, so it distilled task trivia. Trigger on **failure**.
 Sessions that hit a context gap the steering should have prevented append one line.
 
+### The decay rule
+
+Two capture loops in this repo have died the same way, four months apart, and
+neither death was noticed: `learned-rules.jsonl` lost its writer's only caller
+when Hermes was retired, and `agent-heal-log.md`'s last entries restart processes
+that no longer exist. Both had working tooling on the read side. Both went quiet
+silently, because **an empty log and a healthy-but-idle log look identical.**
+
+So:
+
+1. **Never attach a capture step to a process.** Attach it to an event that is
+   written unconditionally — a Ralph park, a merge, a gate failure. A trigger
+   living inside a process dies with that process and leaves the artifact on disk
+   looking fine.
+2. **Every capture pipeline ships a liveness check.** A gate that fails when the
+   pipeline produced nothing in N days *while the source events did occur*. The
+   second clause is load-bearing: a gate that fires during a genuinely quiet
+   period gets ignored within a week.
+3. **Surface the count where a human already passes.** A store that fills
+   silently is worth the same as an empty one.
+
+A pipeline without a decay guard is not instrumented — it is merely unobserved,
+and the difference only shows up months later.
+
 ## 5. Human gates — essential vs. friction
 
 **Essential. Never removed, never "optimised with better context":**
