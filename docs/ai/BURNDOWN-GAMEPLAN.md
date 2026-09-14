@@ -113,7 +113,7 @@ decompose into `ralph-auto` slices rather than one mega-PR.
 
 ### F. Chores / bugs — safe to queue as `ralph-auto` (drain the frontier)
 Well-scoped, low-risk. Promote in small batches (add a DoD checklist first to avoid parking):
-- **#187** (Duda dead code) · **#219** (kimi drain-notify false positives) · **#221** (a11y headings on Info/Sandbox)
+- **#187** (Duda dead code) · **#221** (a11y headings on the /info page)
 - **#226** (triage the 7 investigate-broken gates — some already resolved tonight, re-assess) · **#68** · **#103**
 - **#104** (DOM-node budget guard — needs a ratchet-vs-fixed decision first; light human call)
 - **#256 / #257** (discord `!dispatch` + kill-switch — follow-ups to #30, already delivered #255)
