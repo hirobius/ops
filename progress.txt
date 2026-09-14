@@ -1602,3 +1602,56 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Gate green: typecheck + 733 tests + lint. Branch:
   ralph/issue-284-delete-orphan-primitive-contracts.
 - Files: tests/primitive-contracts/ (11 files, deleted), vitest.config.ts.
+
+#221 — a11y: add heading structure to /info page (SandboxPage confirmed gone)
+- Verified SandboxPage really doesn't exist (no Sandbox*.tsx, no route) — per
+  the issue's own scope correction, correctly skipped.
+- Checked InfoPageWrapper.tsx: it already renders exactly one real <h1>
+  ("Adrian Milsap" via HDS `Text variant="heading3" as="h1"`), added back in
+  #133 (design-system bump). The original board-comb's "zero h1/h2" claim was
+  a false negative — it likely grepped literal `<h1>` JSX tags, which misses
+  HDS's `as="h1"` prop pattern. Confirmed via Playwright: rendered DOM has
+  exactly 1 <h1>, zero <h2>+, and @axe-core/playwright reports zero
+  heading-order violations (only unrelated landmark-one-main/region, out of
+  scope). No second top-level section exists on the page to need an <h2>.
+- So no page fix was needed. Smallest complete slice: added a permanent a11y
+  regression test (tests/info-page-headings.spec.ts) asserting exactly one
+  <h1> with the expected text + axe heading-order == [] on /info, so this
+  can't silently regress. No visual/DOM change to the page itself.
+- Gate green: typecheck + 733 tests + lint. pnpm test:layout green (14/14,
+  including /info, unaffected). New spec passes standalone too.
+- Files: tests/info-page-headings.spec.ts (new).
+
+#185 — leads: wire the render action into LeadsPage + surface the config hand-off
+- Replaced the 'build' dispatch with 'render': handleSiteAction renamed to
+  handleRenderSite (leadId only, action hardcoded to 'render'), response
+  captured (was discarded before) into new renderResults state, keyed by
+  leadId, holding either {configFile, commands} or {error}.
+- New src/app/pages/ops/leads/RenderHandoffPanel.tsx (+ .test.tsx): small
+  presentational component using the design-system CodeBlock (has a built-in
+  copy button — no bespoke clipboard code needed) to show the paste-ready
+  client.config.ts source + deploy commands. Dismissable per-row.
+- types.ts: added 'rendered' to LeadStatus. LeadsPage.tsx: STATUS_TONE gets a
+  'rendered' entry (success), and the summary-counter filter now also counts
+  'rendered' leads.
+- Button gating in renderSiteActions: lead.status==='rendered' -> "Re-render"
+  + preview link when preview_url set; lead.status==='scored' (or has config)
+  -> "Render site"; else nothing.
+- Dropped the old Duda-driven site_status branches entirely (building/
+  built/publishing/published/publish_failed + Build/Publish buttons) — that
+  flow only ever produced fake URLs from the retired lib/duda stub (per the
+  issue's own problem statement), and the issue requires no UI path dispatch
+  'build'/'publish' anymore. SiteStatus type import dropped from LeadsPage.tsx
+  as it's now unused there; the type + DB columns are untouched in types.ts
+  (server/schema unchanged, out of scope).
+- No server changes: api/lead-action.ts and lib/leads/pipeline.mjs untouched;
+  tests/api/render-site.test.ts untouched and green.
+- Verified in a real browser run: pnpm exec playwright install chromium
+  (wasn't preinstalled in this sandbox), then pnpm test:layout — 14/14 green
+  incl. /ops/leads. Interactive Playwright-MCP click-through wasn't grantable
+  in this autonomous run (permission prompt has no one to approve it); the
+  headless layout-integrity spec is the verification that landed.
+- Gate green: typecheck + 735 tests (2 new, RenderHandoffPanel.test.tsx) +
+  lint. test:layout 14/14 green.
+- Files: src/app/pages/ops/leads/LeadsPage.tsx, types.ts,
+  RenderHandoffPanel.tsx (new), RenderHandoffPanel.test.tsx (new).
