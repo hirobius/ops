@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 134,
+  "totalScripts": 133,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,7 +41,7 @@
     }
   },
   "categoryCounts": {
-    "other": 67,
+    "other": 66,
     "audit": 16,
     "build": 1,
     "gate": 30,
@@ -636,14 +636,6 @@
       "gate": null
     },
     {
-      "name": "correlation.mjs",
-      "category": "other",
-      "prefix": null,
-      "purpose": "Request/response correlation Map used by `scripts/hds-bridge.mjs`. Build unit p5-2.",
-      "pnpm": [],
-      "gate": null
-    },
-    {
       "name": "daily-review.mjs",
       "category": "other",
       "prefix": "daily",
@@ -1010,8 +1002,8 @@
       "name": "refresh-firing-stats.mjs",
       "category": "other",
       "prefix": "refresh",
-      "purpose": "Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and updates per-gate `lastFiringAt` and `lastViolationAt` fields in",
-      "pnpm": ["guardrail:firing-stats"],
+      "purpose": "Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and computes per-gate `lastFiringAt` / `lastViolationAt` stats.",
+      "pnpm": ["guardrail:firing-stats", "guardrail:firing-stats:bake"],
       "gate": null
     },
     {

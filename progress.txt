@@ -1480,3 +1480,36 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   tests/api/task-actions.test.ts, scripts/__tests__/fleet-dispatch.test.mjs,
   scripts/__tests__/fleet-watchdog.test.mjs.
 - Branch: ralph/issue-139-one-dispatch-seam.
+
+## Issue #68 — chore: audit scripts/ for unreferenced one-offs and prune
+- Audited all 135 files under scripts/ (excluding scripts/lib, scripts/poc,
+  scripts/__tests__) by grepping the whole repo for each filename: hits in
+  package.json, other scripts/app code, .github/workflows,
+  docs/guardrails/registry.json, and docs all count as "referenced".
+- Only scripts/correlation.mjs had zero references anywhere. Its own header
+  says it exists to serve scripts/hds-bridge.mjs — that file doesn't exist
+  in this repo (checked: only referenced by name in vite.config.mjs,
+  scripts/ui-lint.mjs, scripts/test-phase1.mjs,
+  scripts/service-manager-middleware.mjs, and several docs — a dangling
+  reference to a file that was apparently never committed). Removed
+  correlation.mjs.
+- Note: a stale branch from an earlier dispatch of this same issue
+  (origin/claude/issue-68-20260712-1847) existed but diverged from main so
+  heavily (135 files touched, clearly a much older base) that it was
+  unusable — did a fresh audit against current main instead.
+- Regenerated scripts/INDEX.{json,md} via `pnpm scripts:index`, then
+  `prettier --write` on both (the generator's raw JSON.stringify output
+  doesn't match the repo's array-formatting style; prettier collapses short
+  arrays onto one line, matching what was previously committed).
+- Everything else audited stays: wired into package.json/workflows/other
+  scripts, registered as a guardrail gate in
+  docs/guardrails/registry.json, or a documented manual CLI tool.
+- Out of scope, flagged on the issue/PR instead of fixed: scripts/hds-bridge.mjs
+  is referenced by name in 4 files + docs but doesn't exist — a
+  dangling-reference problem, the inverse of this ticket's scope. Worth its
+  own issue.
+- Verified: bash ralph/gate.sh green (typecheck, 729 tests, lint). Pre-commit
+  and pre-push hooks also green.
+- Files: scripts/correlation.mjs (deleted), scripts/INDEX.json,
+  scripts/INDEX.md.
+- Branch: ralph/issue-68-prune-dead-scripts. PR: #286.

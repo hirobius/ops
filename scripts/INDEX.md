@@ -4,7 +4,7 @@
 > Regenerate with `pnpm scripts:index`. Deterministic (no timestamps), so it
 > only changes when scripts do.
 
-**134 scripts** across 9 categories.
+**133 scripts** across 9 categories.
 
 ## Prefix taxonomy
 
@@ -130,7 +130,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `test-phase1.mjs`            | (no header description)                                                                                     | `test:phase1`  | —     |
 | `test-prompt-regression.mjs` | Regression suite for LLM prompt outputs. Walks fixtures/llm-prompts/<slug>/ directories. Each must contain: | `test:prompts` | —     |
 
-## other (67)
+## other (66)
 
 | Script                           | Purpose                                                                                                                                                                                                                  | pnpm                                                                      | Fires |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ----- |
@@ -143,7 +143,6 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `client-digest.mjs`              | Walks the last N days of git log restricted to clients/<slug>/, buckets commits into shipped / next / blocker / other, and emits a markdown email draft ready to paste. Solo agencies live on perceived momentum; this   | —                                                                         | —     |
 | `component-discovery.mjs`        | (no header description)                                                                                                                                                                                                  | —                                                                         | —     |
 | `convert-incoming-assets.mjs`    | (no header description)                                                                                                                                                                                                  | `assets:convert`                                                          | —     |
-| `correlation.mjs`                | Request/response correlation Map used by `scripts/hds-bridge.mjs`. Build unit p5-2.                                                                                                                                      | —                                                                         | —     |
 | `daily-review.mjs`               | Agentic-ops review loop — Slice 1 (issue #29). A read-only review pass:                                                                                                                                                  | `review:daily`                                                            | —     |
 | `deploy-alert.mjs`               | Watches the SAME sources /ops/projects reads — Vercel deploy states via lib/projects/index.mjs::listProjects() (VERCEL_TOKEN) and each repo's root status.json `blocked[]` via GITHUB_TOKEN (attachRepoStatuses, called… | —                                                                         | —     |
 | `derive-routes.mjs`              | Auto-derive the route list from: 1. src/app/routes.tsx (the React Router config) 2. src/app/data/component-api.json (component doc pages)                                                                                | —                                                                         | —     |
@@ -178,7 +177,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `purge-stale-leads.mjs`          | (compliance #37, Adrian 2026-07-07). Deletes leads that are stale AND unworked AND not suppressed. KEEPS forever: `won` leads, do_not_contact / unsubscribed tombstones (so opt-outs are never re-scraped), and anything | —                                                                         | —     |
 | `push-outreach.mjs`              | into a Smartlead cold-outreach campaign (#9 outreach engine, scaffolding).                                                                                                                                               | —                                                                         | —     |
 | `record-health.mjs`              | Appends the current token audit snapshot to the health history log so the Overview rail can track trend over time.                                                                                                       | `check:semantic-report`, `health:record`                                  | —     |
-| `refresh-firing-stats.mjs`       | Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and updates per-gate `lastFiringAt` and `lastViolationAt` fields in                                        | `guardrail:firing-stats`                                                  | —     |
+| `refresh-firing-stats.mjs`       | Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and computes per-gate `lastFiringAt` / `lastViolationAt` stats.                                            | `guardrail:firing-stats`, `guardrail:firing-stats:bake`                   | —     |
 | `research-feed-middleware.mjs`   | Dev-only HTTP middleware: GET /api/research-feed Returns a flat, time-sorted list of recent auto-research findings so the /ops "Research" disclosure can render a feed without parsing markdown                          | —                                                                         | —     |
 | `run-gates.mjs`                  | Single source of truth for "which gates run on which channel."                                                                                                                                                           | `closure:plan`                                                            | —     |
 | `run-validator-tests.mjs`        | Fixture-driven test runner for validators and pipeline units. Uses Node built-in node:test — no external test dependencies.                                                                                              | —                                                                         | —     |
