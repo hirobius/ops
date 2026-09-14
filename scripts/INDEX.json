@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 131,
+  "totalScripts": 134,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,10 +41,10 @@
     }
   },
   "categoryCounts": {
-    "other": 66,
+    "other": 67,
     "audit": 16,
     "build": 1,
-    "gate": 28,
+    "gate": 30,
     "generate": 11,
     "sync": 3,
     "test": 2,
@@ -229,7 +229,7 @@
       "purpose": "Verifies that each documented differentiator in docs/architecture/strengths-and-differentiators.md is still real.",
       "pnpm": [],
       "gate": {
-        "channel": "ci-pr",
+        "channel": "ci-scheduled",
         "severity": "warn"
       }
     },
@@ -414,6 +414,17 @@
       }
     },
     {
+      "name": "check-handoff-freshness.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "(no header description)",
+      "pnpm": ["check:handoff-freshness"],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
       "name": "check-hardcoded-colors.mjs",
       "category": "gate",
       "prefix": "check",
@@ -543,6 +554,17 @@
       "gate": {
         "channel": "pre-commit",
         "severity": "warn"
+      }
+    },
+    {
+      "name": "check-skills-lock.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Drift gate for skills-lock.json: for every pinned skill, asserts it is installed under `.claude/skills/<id>/` and its files hash-match the lock. Read-only, no network — run `node scripts/install-skills.mjs` first to",
+      "pnpm": ["check:skills-lock"],
+      "gate": {
+        "channel": "manual",
+        "severity": "error"
       }
     },
     {
@@ -806,6 +828,14 @@
       "prefix": "headless",
       "purpose": "(no header description)",
       "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "install-skills.mjs",
+      "category": "other",
+      "prefix": "install",
+      "purpose": "Installer for skills-lock.json. Fetches each pinned skill's files from raw.githubusercontent.com at the lock's pinnedCommit, verifies the fetched bytes against computedHash (owns the canonical hash algorithm — see",
+      "pnpm": ["skills:install"],
       "gate": null
     },
     {

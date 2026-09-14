@@ -1168,3 +1168,51 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   soft-gate-promotion-plan.md, sbom.json) — not part of this fix.
 - Files: docs/guardrails/registry.json (1-line diff).
 - Branch: ralph/issue-262-audit-strengths-ci-scheduled. PR #264.
+
+## Issue #203 — skills-lock.json is an unenforced pin (2026-09-14)
+- Built the installer + drift gate the issue asked for:
+  scripts/install-skills.mjs (fetches raw.githubusercontent.com/<source>/
+  <pinnedCommit>/<path>, verifies computedHash before writing, owns the
+  canonical hash algorithm) and scripts/check-skills-lock.mjs (read-only
+  gate, no network — verifies what's on disk against the lock).
+  Shared logic in scripts/lib/skills-lock.mjs (loadLock/entryFiles/
+  computeHash/rawUrl/verifyInstalled).
+- Reconciled the "unrecovered" extract-design hash: the old computedHash
+  didn't verify against any revision of skillPath in source git history
+  (checked several candidate revisions + git-blob-hash + no-trailing-
+  newline variants — none matched, confirms the issue's claim). Resolved
+  the actual latest commit touching that path (f6566b1), verified sha256
+  of its content, and pinned pinnedCommit + hashAlgorithm + the corrected
+  computedHash + a hashNote explaining the reconciliation. Ran the new
+  installer for real (network available in this sandbox) — it installs
+  and verifies cleanly; committed the resulting
+  .claude/skills/extract-design/SKILL.md so the DoD ("fresh clone
+  reconstitutes every pinned skill") is actually true now, not just
+  wired-but-empty.
+- Decision on committed-vs-gitignored (item 3): ops already tracks
+  .claude/skills/ in git (confirmed via existing .gitignore comment) —
+  documented that explicitly in AGENTS.md rather than re-deciding it.
+  hds/site-engine's mechanisms are a different repo, out of scope here.
+- Deliberately did NOT wire check-skills-lock into pre-commit/CI —
+  registered it `manual`/`error` in docs/guardrails/registry.json instead.
+  This repo has direct history of the "aspirational guardrail" failure
+  mode (check-validator-wiring's own JSDoc references it, plus recent
+  #263/#260 fixing false-positive wiring-drift noise) — wiring a brand
+  new gate into a blocking channel in the same PR that introduces it,
+  without seeing its real-world false-positive rate first, would risk
+  repeating that. Noted as a fast-follow on the issue comment.
+- Support for multi-file skills (optional `paths` field) is implemented
+  and unit-tested even though no current lock entry uses it — the issue
+  explicitly asked install-skills.mjs to read it.
+- bash ralph/gate.sh green: typecheck + 697 tests (17 new) + lint.
+  validate-guardrail-registry and check-validator-wiring both clean with
+  the new gate registered.
+- Reverted unrelated docs/guardrails/registry.json lastFiringAt/unicode-
+  escape churn that appeared from running the gate suite locally (twice,
+  via git commit's own pre-commit hook) — not part of this change.
+- Files: scripts/install-skills.mjs, scripts/check-skills-lock.mjs,
+  scripts/lib/skills-lock.mjs, scripts/__tests__/{skills-lock,
+  install-skills,check-skills-lock}.test.mjs, skills-lock.json,
+  docs/guardrails/registry.json, package.json, AGENTS.md,
+  scripts/INDEX.{md,json}, .claude/skills/extract-design/SKILL.md.
+- Branch: ralph/issue-203-skills-lock-installer. PR #265.

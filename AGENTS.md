@@ -23,6 +23,16 @@ alias, and firing channel. Regenerate with `node scripts/generate-script-index.m
 Quality gates are registered in `docs/guardrails/registry.json`
 (`validate-guardrail-registry` keeps registry ↔ scripts consistent).
 
+**Vendored skills** (`.claude/skills/`, pinned in `skills-lock.json`) are
+**tracked in git** in this repo — not gitignored — so a fresh clone or Ralph
+re-clone gets them without a separate install step for anything already
+committed. `skills-lock.json` pins each externally-sourced skill (source
+repo, exact `pinnedCommit`, and a verified content hash); `pnpm
+skills:install` (`scripts/install-skills.mjs`) fetches and verifies a pinned
+skill from source, and `pnpm check:skills-lock` (`scripts/check-skills-lock.mjs`,
+`manual` channel) is the read-only drift gate confirming what's on disk still
+matches the lock.
+
 ## Guidance hygiene
 
 - Update this file and [CLAUDE.md](./CLAUDE.md) only with stable, repo-wide rules.
