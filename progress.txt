@@ -1412,3 +1412,33 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Gate green: typecheck + test (705 passed) + lint. Pre-push hook (full
   typecheck + vitest run) also green.
 - Branch: ralph/issue-106-dispatch-tier-model. PR #279.
+
+## Issue #109 — run-log recap: add tokens field, render on Runs panel (2026-09-14)
+- Test-first: added 2 cases to scripts/__tests__/run-log.test.mjs
+  ("persists a tokens field when present", "omits tokens when absent"),
+  confirmed red before implementing.
+- lib/ops/run-log.mjs: added 'tokens' to OPTIONAL_FIELDS (was task/model/
+  tier/session_url only, despite #8's own wording asking for "task, model
+  tier, tokens, outcome"); doc comment + appendRun jsdoc updated to match.
+- scripts/log-run.mjs: new `--tokens <n>` CLI flag, wired through to
+  appendRun; usage/help text updated.
+- src/app/pages/ops/agentic-os/RunsPanel.tsx: RunLogEntry gains
+  `tokens?: string`; rendered as a `· <n> tok` meta span next to task/model,
+  mirroring the existing pattern exactly.
+- docs/guardrails/baselines/check-dom-node-budgets.json: RunsPanel.tsx
+  ratcheted 20->21 (one new conditional span is real authored structure).
+  Reverted an unrelated auto-tightening of InfoPageWrapper.tsx (13->12) that
+  --update also picked up — pre-existing drift on main, not touched by this
+  change, out of scope for a single-field slice.
+- A prior claude/issue-109-20260713-0031 dispatch claimed this exact scope
+  but never opened a PR and none of it exists on main (confirmed: no
+  ApprovalsPanel.tsx anywhere, OPTIONAL_FIELDS unchanged before this
+  iteration) — not reused, implemented fresh per the issue's own note.
+- Verified: bash ralph/gate.sh green (typecheck + 707 tests + lint);
+  pnpm typecheck clean; pnpm test:layout 14/14 (installed Playwright
+  chromium in-sandbox to run it for real, per CLAUDE.md AUTO-VALIDATE).
+- Files: lib/ops/run-log.mjs, scripts/log-run.mjs,
+  scripts/__tests__/run-log.test.mjs,
+  src/app/pages/ops/agentic-os/RunsPanel.tsx,
+  docs/guardrails/baselines/check-dom-node-budgets.json.
+- Branch: ralph/issue-109-run-log-tokens-field.
