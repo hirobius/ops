@@ -1,11 +1,22 @@
+/**
+ * src/app/pages/ops/useServicesStatus — polls local-dev tool status for the
+ * `/ops` agentic-os ServicesBar (hds-bridge, discord-bot).
+ *
+ * `GET /api/services/status` is served ONLY by the dev-only Connect
+ * middleware `scripts/service-manager-middleware.mjs`, mounted in
+ * `vite.config.mjs`; there is no production `api/services/status.ts`. In
+ * prod every poll 404s and is swallowed by the empty `catch` below — that's
+ * deliberate (keep last-known state, no error UI for a surface that isn't
+ * meant to exist outside `pnpm dev`), not an unhandled error case.
+ */
 import { useState, useEffect } from 'react';
 
-export type ServiceName   = 'hds-bridge' | 'discord-bot';
+export type ServiceName = 'hds-bridge' | 'discord-bot';
 export type ServiceStatus = 'running' | 'stopped' | 'loading';
 
 export interface ServiceState {
-  status:     ServiceStatus;
-  pid?:       number;
+  status: ServiceStatus;
+  pid?: number;
   startedAt?: string; // ISO string
 }
 
@@ -27,7 +38,10 @@ export function useServicesStatus(): Record<ServiceName, ServiceState> {
       try {
         const res = await fetch('/api/services/status');
         if (!res.ok || !mounted) return;
-        const data = (await res.json()) as Record<string, { status: string; pid?: number; startedAt?: string }>;
+        const data = (await res.json()) as Record<
+          string,
+          { status: string; pid?: number; startedAt?: string }
+        >;
         setState((prev) => {
           const next = { ...prev };
           for (const name of SERVICE_NAMES) {

@@ -995,3 +995,34 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   correctly kept several mislabeled candidates on the original #242 list —
   don't assume "DS-authoring" without checking it isn't a live consumer
   surface first).
+
+## Issue #72 — AI-optimized context JSDoc convention
+- DoD: convention documented + applied to one sample module.
+- A prior non-Ralph @claude dispatch (2026-07-13, branch
+  claude/issue-72-20260713-0031) had already drafted this same doc +
+  applied it to the same file, but never opened a PR and never ran the
+  gate; that branch is now ~250 commits stale against main (diff showed
+  dozens of unrelated files), so not reused -- re-implemented fresh
+  against current main instead.
+- New docs/ai/rules/JSDOC_CONTEXT.md: module-header + function-level
+  JSDoc pattern (why it exists, non-obvious invariants, anti-patterns),
+  citing lib/tasks/tier.mjs / lib/ops/notify.mjs / lib/tasks/actions.mjs
+  as pre-existing worked examples.
+- Applied fresh to src/app/pages/ops/useServicesStatus.ts (previously
+  undocumented) as the .ts/React-hook reference case: confirmed via grep
+  that GET /api/services/status is served only by the dev-only
+  scripts/service-manager-middleware.mjs (mounted in vite.config.mjs),
+  no prod api/services/status.ts exists -- so the hook's silent-catch/
+  keep-stale-state behavior is deliberate, documented as such.
+- Comment-only diff, no logic changed.
+- Did not touch docs/ai/AGENT_GUIDELINES.md's rules-doc reference list
+  (`REACT_COMPONENTS.md`/`MANIFEST_SYNC.md`/`FIGMA_BRIDGE.md`) -- that
+  file is HDS-authoring-era content out of this issue's scope; adding a
+  cross-reference there is optional follow-up, not required by the DoD.
+- Verified: bash ralph/gate.sh -> typecheck + 676 tests + lint all green.
+- Reverted an incidental docs/guardrails/registry.json lastFiringAt-only
+  diff produced by running the gate locally (same noise pattern noted in
+  #248's entry above) -- not part of this change.
+- Files: docs/ai/rules/JSDOC_CONTEXT.md (new),
+  src/app/pages/ops/useServicesStatus.ts.
+- Branch: ralph/issue-72-jsdoc-context-convention. PR #254.
