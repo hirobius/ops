@@ -1580,3 +1580,25 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   (out of scope per issue — still live, read by correlation.mjs/ui-lint.mjs).
 - Files: hds-sync.js (deleted), ask-hds.sh (deleted).
 - PR: https://github.com/hirobius/ops/pull/288
+
+#284 — delete orphan tests/primitive-contracts/* specs
+- Direct follow-up to #276 which excluded these from Playwright but deferred
+  the deletion-vs-repoint decision. Chose option (a) delete per the issue's
+  own recommendation: ops consumes @hirobius/design-system, it doesn't author
+  it — contract-testing HDS primitives from a consumer repo tests the wrong
+  thing in the wrong place; real coverage lives in hirobius/hds.
+- Found an 11th orphan not named in the issue body: text.contract.test.tsx
+  (imports @/app/components/text, same nonexistent-module pattern as the
+  other 10). Deleted it too — DoD explicitly requires
+  `tests/primitive-contracts/` gone, which only holds if all files in it go.
+- @testing-library/react kept: still imported by
+  src/app/pages/ops/agentic-os/SkillsBar.test.tsx and
+  src/app/components/approval-card.test.tsx.
+- No knip.config.ts entries reference the directory (nothing to clean up
+  there). playwright.config.ts already scopes testMatch to **/*.spec.ts (from
+  #276) — no per-file testIgnore entry existed for this suite to remove.
+- Removed the now-dead explanatory comment block in vitest.config.ts (lines
+  documenting why the suite was excluded from `include`).
+- Gate green: typecheck + 733 tests + lint. Branch:
+  ralph/issue-284-delete-orphan-primitive-contracts.
+- Files: tests/primitive-contracts/ (11 files, deleted), vitest.config.ts.
