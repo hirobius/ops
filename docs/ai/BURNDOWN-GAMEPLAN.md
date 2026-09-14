@@ -47,6 +47,17 @@
   never auto-closed — the "Closes #N" auto-close raced the next claim. Queueing one burns an
   iteration and parks it via the PR-history guard. #156 (shipped in #162) and #103 (shipped in
   #192) both did exactly this on 2026-09-14; both are now closed.
+- **A large slice of the `ralph-auto` pool is already shipped but never closed.** On 2026-09-14 a
+  verification sweep closed 8 in one cycle (#3 #78 #103 #108 #113 #156 #158, plus cross-repo #63) —
+  most had a merged PR the auto-close raced. **Sweep before you queue:** check
+  `closed_by_pull_requests`, then confirm against `main` (`git show origin/main:<file> | grep ...`).
+  Closing a done issue is worth as much burndown as building a new one, and costs one API call
+  instead of a whole iteration.
+- **Two shapes that always park — never tag them `ralph-ready` as-is:**
+  (a) an issue whose deliverable is a file under `.github/workflows/` (the bot has no `workflows`
+  scope — #90; split the logic into a `scripts/*.mjs` Ralph *can* write, or route the `.yml`
+  through an adr-eng PR); (b) an issue whose DoD is "reviewed/accepted by Adrian" (#71) or that
+  has no `- [ ]`/DoD section at all (#5, #51).
 - **Parking causes (all recoverable):** missing a `- [ ]` DoD checklist in the body; 2 failed
   attempts; `ralph-blocked` (cross-repo, or a real human decision); a prior PR merged but the issue
   didn't auto-close. **Recovery: fix the cause, re-add `ralph-ready`.**
