@@ -18,6 +18,9 @@ import {
   priorityChip,
   cardLabelTags,
   ralphDispatchErrorMessage,
+  countByStatus,
+  formatCount,
+  TASKS_REQUEST_LIMIT,
   type GroupBy,
 } from './taskMeta';
 import type { Task } from './types';
@@ -80,6 +83,43 @@ describe('isNoRalphSource', () => {
     expect(isNoRalphSource('tracker')).toBe(false);
     expect(isNoRalphSource('backlog')).toBe(false);
     expect(isNoRalphSource('client')).toBe(false);
+  });
+});
+
+describe('countByStatus', () => {
+  it('is all zeros for an empty set', () => {
+    expect(countByStatus([])).toEqual({ open: 0, blocked: 0, done: 0, all: 0, clipped: false });
+  });
+
+  it('tallies each status independently, done not folded into open', () => {
+    const tasks = [
+      task({ status: 'open' }),
+      task({ status: 'open' }),
+      task({ status: 'blocked' }),
+      task({ status: 'done' }),
+      task({ status: 'done' }),
+      task({ status: 'done' }),
+    ];
+    expect(countByStatus(tasks)).toEqual({ open: 2, blocked: 1, done: 3, all: 6, clipped: false });
+  });
+
+  it('is not clipped one below the request limit', () => {
+    const tasks = Array.from({ length: TASKS_REQUEST_LIMIT - 1 }, () => task({ status: 'open' }));
+    expect(countByStatus(tasks).clipped).toBe(false);
+  });
+
+  it('is clipped once the loaded set hits the request limit', () => {
+    const tasks = Array.from({ length: TASKS_REQUEST_LIMIT }, () => task({ status: 'open' }));
+    expect(countByStatus(tasks).clipped).toBe(true);
+  });
+});
+
+describe('formatCount', () => {
+  it('renders the bare number when not clipped', () => {
+    expect(formatCount(42, false)).toBe('42');
+  });
+  it('appends + once clipped', () => {
+    expect(formatCount(1000, true)).toBe('1000+');
   });
 });
 

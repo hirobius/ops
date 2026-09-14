@@ -327,6 +327,51 @@ export function ralphDispatchErrorMessage(body: unknown): string {
   return 'Run Ralph failed — could not reach the server. Check your connection and try again.';
 }
 
+// ─── Status counts (ops#159) ─────────────────────────────────────────────────
+
+/**
+ * Mirrors `DEFAULT_LIMIT` in api/tasks.ts — the default row cap `GET
+ * /api/tasks` applies (PostgREST itself also caps at 1000/request). Can't
+ * import the server module client-side, so the value is duplicated here; if
+ * the server limit ever changes, update both.
+ */
+export const TASKS_REQUEST_LIMIT = 1000;
+
+export type StatusCounts = {
+  open: number;
+  blocked: number;
+  done: number;
+  all: number;
+  /** True once the loaded set hits TASKS_REQUEST_LIMIT — counts are a floor, not a total. */
+  clipped: boolean;
+};
+
+/**
+ * Per-status counts over the FULL loaded set (not the current source/category
+ * filter) so the status control reads as a global inventory regardless of
+ * what else the operator has filtered by. `done` gets its own count instead
+ * of inflating an undifferentiated total (ops#159).
+ */
+export function countByStatus(tasks: Task[]): StatusCounts {
+  const counts: StatusCounts = {
+    open: 0,
+    blocked: 0,
+    done: 0,
+    all: tasks.length,
+    clipped: tasks.length >= TASKS_REQUEST_LIMIT,
+  };
+  for (const t of tasks) counts[t.status] += 1;
+  return counts;
+}
+
+/** Text for the clip-warning title-attr, shared by every place a clipped count renders. */
+export const CLIP_WARNING = 'row limit reached — counts are a floor, not a total';
+
+/** Renders a count as `n+` once the loaded set is clipped, else the bare number. */
+export function formatCount(n: number, clipped: boolean): string {
+  return clipped ? `${n}+` : `${n}`;
+}
+
 /** Render-time "x ago" freshness stamp (same idiom as the page's other formatters). */
 export function relTimeNow(iso: string | null): string {
   if (!iso) return '';
