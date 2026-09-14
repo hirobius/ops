@@ -1026,3 +1026,41 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Files: docs/ai/rules/JSDOC_CONTEXT.md (new),
   src/app/pages/ops/useServicesStatus.ts.
 - Branch: ralph/issue-72-jsdoc-context-convention. PR #254.
+
+## Issue #30 — polish: integrate Discord into the current ops workflow
+- Epic (4 scope checkboxes); decomposed per CLAUDE.md Dispatched-task
+  discipline rather than attempted wholesale.
+- Did checkbox 1 only: repoint `!status`/`!backlog`/`!recent` (+ `!next`,
+  which shares the same now-dead parseBacklog() helper and would have
+  been left dangling otherwise) in scripts/discord-bot.mjs off the
+  retired BACKLOG.md (gone since ops#52, 2026-07-09 — these commands had
+  silently degraded to empty output ever since) onto the same live
+  GitHub Issues feed /ops/tasks renders.
+- Reused existing prod code directly rather than adding a new HTTP hop:
+  lib/github/issues.mjs's makeGitHubPort().listOpenIssues() (fleet-wide,
+  same shape /ops/tasks uses) and lib/projects/index.mjs's listProjects()
+  (Vercel fleet deploy state, added to !status). Both are plain .mjs run
+  fine from a Node script outside Vercel's runtime -- no OPS_AGENT_KEY /
+  HTTP round-trip needed, since the bot already runs in this repo's
+  process with GITHUB_TOKEN/VERCEL_TOKEN in its own env.
+- Old category (portfolio/concrete/hds) + status (ready/blocked/parked/
+  idea) model replaced with repo + label (ralph-ready/blocked/
+  ralph-parked/needs-adrian/p0-p3) model, matching how issues are
+  actually labeled in this fleet.
+- Fails loud: GITHUB_TOKEN unset -> explicit error naming the var + the
+  fix (add to .env.local), not a silent empty-result degrade like the
+  BACKLOG.md path had.
+- Checkboxes 2 (`!dispatch`) and 4 (kill-switch + nothing-silent) filed
+  as follow-ups: #256, #257. Checkbox 3 (fold into #15's always-on host)
+  stays tracked on #15 itself (still open, needs-human) -- not
+  re-filed.
+- Verified: bash ralph/gate.sh -> typecheck + 676 tests + lint all green;
+  node --check scripts/discord-bot.mjs syntax OK.
+- Reverted an incidental docs/guardrails/registry.json lastFiringAt-only
+  diff produced by running the gate locally (same noise pattern as prior
+  entries) -- not part of this change.
+- Files: scripts/discord-bot.mjs.
+- Branch: ralph/issue-30-discord-bot-live-issues. PR #255.
+- Next iteration for #30 (if picked up again): none needed -- #256/#257
+  are now the actionable remainders, and #30 itself can close once its
+  own checkbox 1 is merged (the rest lives on the split issues + #15).
