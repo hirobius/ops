@@ -11,15 +11,21 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
 
 ## Now (what is true today)
 
-- **🧭 Frontier-engineering doctrine + retro harvest (2026-09-14, ops#274, branch
-  `claude/hirobius-frontier-engineering-v6duri`).** `docs/ai/FRONTIER-DOCTRINE.md`
-  is how we do this; `docs/specs/` holds one spec file per epic. The session's
-  finding: **we have the machinery and mis-aim it** — 15 dead-code PRs merged on
-  2026-09-14 while #185 (`p0`, leads → site) sat 64 days unqueued. Walked every
-  Ralph park/blocked/attempt-failed comment across 281 issues: 13 rules seeded
-  into `docs/ai/learned-rules.jsonl` (5 promoted to `CLAUDE.md` §4), 9 harness
-  defects filed (#302–#305). Shipped: #304's comment-matcher fix, #305's
-  closure reconciler, #292's steering budget.
+- **🎯 Revenue path moving again (2026-09-14).** **#185 shipped** (PR #301) — the
+  Leads board now dispatches `render` and surfaces the paste-ready
+  `client.config.ts` + deploy commands. It had sat `p0` and **unqueued for 64
+  days**; labelling it `ralph-ready` shipped it in under two hours. **#186 is in
+  flight** (PR #308, gate green + AI approved) — **single-flight means it stalls
+  the whole loop until merged.** #187 marked the retired Duda path deprecated;
+  removal is #309. Spec: `docs/specs/leads-to-site.md`.
+- **🧭 Frontier-engineering doctrine (ops#274, branch
+  `claude/hirobius-frontier-engineering-v6duri`, unmerged).**
+  `docs/ai/FRONTIER-DOCTRINE.md` + `docs/specs/`. Finding: **we have the machinery
+  and mis-aim it.** Retro harvest of 281 issues → 13 rules in
+  `docs/ai/learned-rules.jsonl` (5 promoted to `CLAUDE.md` §4), 9 harness defects
+  (#302–#305). Shipped on the branch: #304, #305 (ops-local half), #292 (steering
+  budget, 135KB → 24KB). **#292/#304/#305 were de-queued** — built here, unmerged;
+  leaving them `ralph-ready` would have had the loop rebuild them.
 - **PRODUCTION is LIVE** — `hirobius-ops` deploys from `main`; `/ops` password gate
   active (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET`); Supabase wired; DS consumed
   from public npm `@hirobius/design-system`. Vercel is on **Pro**; preview
