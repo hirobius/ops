@@ -1,0 +1,5 @@
+// TODO: replace with real-passing-example for check-steering-budget
+// STUB — this file needs real passing content.
+//
+// The passing case is the current repo state: 24.0KB against a 25.0KB budget.
+// See violating.example.txt for why this is a stub and what covers the logic.

@@ -1,0 +1,12 @@
+// TODO: replace with real-violating-example for check-steering-budget
+// STUB — this file needs real violating content.
+//
+// The violating case is a steering-budget.json whose listed files exceed
+// maxTotalBytes. It was exercised for real during ops#292: the gate reported
+// 135.1KB against a 25.0KB budget and named docs/ai/HANDOFF.md (120.8KB) as the
+// largest contributor, which is what drove the trim.
+//
+// Decision logic is covered by 8 unit tests in tests/api/steering-budget.test.ts
+// (under / exactly at / one byte over budget, largest-contributor naming,
+// missing manifest entry, empty set). Promoting this stub to a real fixture
+// needs FIXTURE_FILE support in the gate, like check-guardrail-drift has.

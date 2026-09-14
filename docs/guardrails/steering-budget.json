@@ -1,0 +1,9 @@
+{
+  "$comment": "The always-on agent context budget (ops#292, docs/ai/FRONTIER-DOCTRINE.md §4). Every file listed here is loaded by every agent in every session before it reads a line of code. Adding a file here, or raising maxTotalBytes, is a deliberate decision about what every future session pays for — not a formality. Everything else in docs/ai/ is on-demand: referenced by name from CLAUDE.md §1 and loaded only when the task calls for it.",
+  "maxTotalBytes": 25600,
+  "files": [
+    "CLAUDE.md",
+    "docs/ai/HANDOFF.md",
+    "docs/ai/NORTH_STAR.md"
+  ]
+}

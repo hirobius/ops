@@ -41,6 +41,12 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 - **Focus contract:** `docs/ai/NORTH_STAR.md` — if a request materially expands scope beyond it (infrastructure that doesn't ship a paying client site sooner), flag the drift in one sentence, then do what Adrian decides. Sessions never edit that file.
 - **Delivery architecture + pipeline gap-map (lead → site → outreach → invoice):** `docs/ARCHITECTURE.md` (canonical) ⇄ `docs/pipeline-walkthrough.html` (visual, published as an Artifact). **Keep the two in lockstep** — any change to pipeline state updates BOTH in the same commit.
 - **Guardrail registry:** `docs/guardrails/registry.json` — every `scripts/check-*.mjs` / `audit-*.mjs` gate with its `firingChannel`; `validate-guardrail-registry` keeps registry ↔ scripts consistent.
+- **On-demand context (NOT loaded by default — read when the task calls for it):**
+  `docs/ai/AGENT_GUIDELINES.md` (dispatching) · `docs/ai/PROMPT_TEMPLATES.md` (writing
+  prompts) · `docs/specs/<epic>.md` (working an epic) · `docs/ai/DONE-LOG.md` (shipped
+  history) · `docs/ai/REPO-PROCEDURES.md` (repo runbooks) · `docs/ai/FRONTIER-DOCTRINE.md`
+  (how we work). The always-on set is capped by `scripts/check-steering-budget.mjs` —
+  add to `docs/guardrails/steering-budget.json` only deliberately (ops#292).
 - **Context awareness:** look for local `CLAUDE.md` files in subdirectories for overriding rules before editing.
 - **Plan & PR artifacts (convention, #4):** for a substantial implementation plan, write it as a self-contained **HTML file** (real tables, mockups, data-flow, key code snippets) reviewable in a browser — not a markdown wall (template gallery: `anthropics/html-effectiveness`). For a large diff, produce an **artifact walkthrough** (the diff, reasoning per change, what was tested). Small changes stay inline.
 
@@ -91,25 +97,21 @@ Applies to any agent working a dispatched `@claude` task — and to any session 
 
 Dispatched `@claude` issues carry these invocations in their body (`lib/tasks/actions.mjs`), so fleet work runs them by default; interactive sessions follow this table.
 
-## 3. SUB-AGENT DISPATCH RULES
+## 3. Sub-agent dispatch
 
-- **Pick the cheapest model that can do the job.** `sonnet` is the default for source-code work and is **required for any task involving deletions** (file removals, dead-code pruning, dependency removal). `opus` only for cross-cutting architectural reasoning, ambiguous scope, or subtle validator logic — use sparingly.
-- **Decision rule:** if the task asks "what's idiomatic in THIS codebase?" (picking a primitive, a token path, a framework import), that's `sonnet`.
-- **Effort:** default to minimum; reserve high-effort for opus-class reasoning.
-- **Worktree isolation:** use `isolation: "worktree"` for any pod where two agents could touch the same file.
-- **One unit per agent**, fresh context — lower token cost, cleaner diffs, no cross-unit bleed.
-- **Concurrency across sessions:** branch-per-session (each session on its own `claude/*` branch); never two sessions on one branch — conflicts then surface at merge, never as silent overwrites.
-- **Lean prompts:** write "Follow CLAUDE.md dispatch rules" rather than repeating them; reference specs by path; no large file excerpts; one sentence per note.
-- **Justify** the model + effort choice in each Agent call's description, one line.
+Canonical detail: **`docs/ai/AGENT_GUIDELINES.md`** §1–3 (model matrix, effort,
+pod sizing, worktree isolation, the bulk-lint:fix incident). Load it when you are
+actually dispatching. The three rules that must not be rediscovered:
 
-### NEVER bulk-lint:fix (Pod N incident, 2026-05-01)
-
-`pnpm lint:fix` over the whole codebase has introduced syntax errors by merging unrelated code blocks. **Rule:** lint:fix is per-rule with verification:
-
-- Scope it: `pnpm exec eslint src --fix --rule '{"<rule-name>": "error"}'`.
-- Run `pnpm typecheck && pnpm exec vite build` after EACH rule pass; STOP and report on failure.
-- If a single rule's fix touches more than 50 files, STOP and ask Adrian.
-- Safe to auto-fix: `@typescript-eslint/no-unused-vars`, `prefer-const`, `no-var`, `quotes`, `semi`, `eol-last`, `comma-dangle`. NEVER auto-fix `react-hooks/exhaustive-deps` or anything that rewrites code blocks rather than tweaking declarations.
+- **Cheapest model that can do the job.** `sonnet` is the default for source work
+  and is **required for anything involving deletions**. `opus` only for
+  cross-cutting architecture or subtle validator logic.
+- **NEVER `pnpm lint:fix` across the codebase** (Pod N incident, 2026-05-01 — it
+  merged unrelated code blocks into syntax errors). Per-rule only:
+  `pnpm exec eslint src --fix --rule '{"<rule>": "error"}'`, then
+  `pnpm typecheck && pnpm exec vite build` after EACH rule. >50 files touched by
+  one rule → stop and ask.
+- **Branch-per-session** (`claude/*`); never two sessions on one branch.
 
 ---
 
