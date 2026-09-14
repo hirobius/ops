@@ -1513,3 +1513,56 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Files: scripts/correlation.mjs (deleted), scripts/INDEX.json,
   scripts/INDEX.md.
 - Branch: ralph/issue-68-prune-dead-scripts. PR: #286.
+
+## Issue #140 — delete RunsPanel (FleetTimeline supersedes) + strip ApprovalCard's dead orchestration-era props
+- Re-queue comment on the issue (2026-09-14) added a carry-forward requirement:
+  #109 (merged, PR #280) shipped a `tokens` field on run-log rows + a tokens
+  badge on RunsPanel.tsx after the issue was filed — porting that to
+  FleetTimeline BEFORE deleting RunsPanel was required so the tokens UI isn't
+  silently lost. Added `tokens?: string` to FleetTimeline's RunLogRow +
+  folded `${tokens} tok` into fromRunLog's detail line (same format RunsPanel
+  used), confirmed via read that FleetTimeline lacked it before this change.
+- Deleted RunsPanel.tsx + its `<Section label="Runs">` mount in
+  AgenticOSPage.tsx (import + JSX + page-flow doc comment); removed its
+  stale entry from docs/guardrails/baselines/check-dom-node-budgets.json;
+  fixed the now-inaccurate "Runs panel" doc mentions in docs/ARCHITECTURE.md,
+  docs/pipeline-walkthrough.html (kept in lockstep, both same commit), and a
+  stale `import.meta.glob`-idiom comment pointer in lib/ops/run-log.mjs.
+- Found a prior unmerged attempt on this exact issue (commit 179e231 on
+  origin/claude/issue-140-20260712-1848, dispatched 2026-07-12): reviewed its
+  approval-card.tsx diff as reference — it's the correct shape (strip
+  sprint/numeric-priority/approval/showGrill/onGrill/ApprovalState, add
+  `due`, render priority as a tone-colored Badge mirroring
+  taskMeta.ts::priorityTone) — but did NOT reuse its RunsPanel/doc diffs
+  as-is: main has since merged ops#157 (2026-07-13), which fully deleted
+  Approvals.tsx/ApprovalDetail.tsx/useApprovalsInbox.ts (the approvals inbox
+  UI), leaving ApprovalCard genuinely consumerless — so the old branch's
+  "update useApprovalsInbox's mapping" step is now moot (file doesn't exist),
+  and its doc-diff hunks referenced "admin/approvals (live)" text #157 had
+  already rewritten. Re-derived doc/RunsPanel edits fresh against current
+  main instead of reusing that stale branch.
+- ApprovalCard: removed `ApprovalState` type, `sprint`, numeric `priority`,
+  `approval`, `onGrill`/`showGrill` prop + the always-hardcoded Grill button;
+  added `due?: string | null`; `priority` retyped to the real tasks-store
+  union (`'high'|'med'|'low'|null`), rendered as a tone-colored Badge
+  (`priorityTone` helper mirrors taskMeta.ts's, not imported — component
+  lives in src/app/components, taskMeta.ts is a page-local module).
+- New src/app/components/approval-card.test.tsx (createRoot + act, no RTL
+  installed, matches the repo's existing no-RTL component-test convention):
+  priority pill renders from unit.priority, due pill renders, priority pill
+  omitted when absent, grill button never renders.
+- Grep-verified zero remaining references to RunsPanel/showGrill/onGrill/
+  ApprovalState/sprint outside historical HANDOFF.md/status.json log lines
+  (frozen history, not live docs — left untouched, consistent with how prior
+  iterations in this file have treated that convention).
+- Could not run `pnpm test:layout` — no Playwright browser binary in this
+  sandbox (`chromium_headless_shell-1208` missing, no `/opt/pw-browsers`),
+  same environment gap noted repeatedly elsewhere in this log; not a code
+  issue, ralph-gate CI has real browsers.
+- Gate green: typecheck + 737 tests (incl. 4 new) + lint. Branch:
+  ralph/issue-140-delete-runspanel-strip-approvalcard.
+- Files: src/app/pages/ops/agentic-os/{RunsPanel.tsx (deleted),
+  FleetTimeline.tsx, AgenticOSPage.tsx}, src/app/components/
+  {approval-card.tsx, approval-card.test.tsx (new)}, lib/ops/run-log.mjs,
+  docs/{ARCHITECTURE.md, pipeline-walkthrough.html,
+  guardrails/baselines/check-dom-node-budgets.json}.

@@ -13,11 +13,9 @@
  *   - docs/ops/alert-log.jsonl  deploy-ERROR / newly-blocked alerts from
  *                                scripts/deploy-alert.mjs (#11)
  *
- * Same build-time `import.meta.glob` + `parseJsonlLines` idiom RunsPanel.tsx
- * already uses for run-log.jsonl: no Supabase migration, no new `api/*.ts`
- * route, hot-reloads on file edit. This panel is the superset — RunsPanel
- * stays mounted too (finer-grained run detail), FleetTimeline is the
- * cross-source glance.
+ * Build-time `import.meta.glob` + `parseJsonlLines` idiom: no Supabase
+ * migration, no new `api/*.ts` route, hot-reloads on file edit. This is the
+ * single activity surface on `/ops` (superseded RunsPanel.tsx, ops#140).
  */
 
 import type { CSSProperties } from 'react';
@@ -35,6 +33,7 @@ interface RunLogRow {
   task?: string;
   model?: string;
   tier?: string;
+  tokens?: string;
   session_url?: string;
 }
 
@@ -98,7 +97,9 @@ function fromRunLog(rows: RunLogRow[]): TimelineEntry[] {
     kind: r.outcome,
     actor: r.actor,
     title: r.summary,
-    detail: [r.task, r.model].filter(Boolean).join(' · ') || undefined,
+    detail:
+      [r.task, r.model, r.tokens ? `${r.tokens} tok` : undefined].filter(Boolean).join(' · ') ||
+      undefined,
   }));
 }
 
@@ -177,8 +178,7 @@ export function FleetTimeline({ limit = 20 }: { limit?: number }) {
   if (rows.length === 0) {
     return (
       <p style={s.empty}>
-        No fleet activity yet — post one with{' '}
-        <code style={s.code}>node scripts/notify.mjs</code>.
+        No fleet activity yet — post one with <code style={s.code}>node scripts/notify.mjs</code>.
       </p>
     );
   }

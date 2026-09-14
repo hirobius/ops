@@ -36,16 +36,17 @@ outreach engine.
 
 ### Cross-cutting: the command center (`/ops`) — 🟢 live
 
-Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home
-(+ Runs panel). The pre-Ralph `/admin/approvals` inbox + its `queue`/`unqueue`
+Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home.
+The pre-Ralph `/admin/approvals` inbox + its `queue`/`unqueue`
 lifecycle were retired 2026-07-13 (ops#157) — merge governance now runs
 entirely through ralph-gate's `ralph-auto`/`ralph-approved` labels (the dead
 `localhost:3005/orchestration/*` bridge is fully retired). Auth:
 `OPS_GATE_PASSWORD`+`OPS_SESSION_SECRET` (gate), `OPS_AGENT_KEY` (machine auth,
 #25). Fleet: `/ops/projects` + `scripts/deploy-alert.mjs` (#11). Task machinery:
 `tasks` table + GitHub-issue importer (#25) + dispatch (opens an issue @-mentioning
-Claude). Run-log: `docs/ops/run-log.jsonl` + Runs panel (#8 half). Gaps: autonomy
-dial, tier→model dispatch UI polish (#13).
+Claude). Run-log: `docs/ops/run-log.jsonl` + the Fleet timeline (#8 half; RunsPanel
+retired 2026-09-14, ops#140 — FleetTimeline is the single activity surface). Gaps:
+autonomy dial, tier→model dispatch UI polish (#13).
 
 ### Active env vars (pipeline) vs. dead weight
 
