@@ -31,11 +31,14 @@ on:
     types: [labeled]
   push:
     branches: [main] # chain: a merged Ralph PR grabs the next ralph-ready issue
-  # schedule: DISABLED 2026-07-16 — the hourly idle watchdog moved to the local
-  #   runner (ops#214) to stop spending GitHub Actions minutes. workflow_dispatch
-  #   stays as the manual escape hatch. Re-enable this block to revert to
-  #   CI-driven Ralph.
-  #   - cron: "11 * * * *" # idle watchdog (staggered minute; site-engine/hds use others)
+  schedule:
+    # Idle-watchdog BACKSTOP, every 6h (staggered minute 11). Re-armed 2026-09-12
+    # as a low-frequency safety net BEHIND the local runner (ralph/loop.sh): the
+    # local runner drives supervised bursts; this catches a chain left wedged
+    # while that runner is off. Hourly was retired 2026-07-16 for cost — 6h keeps
+    # Actions minutes AND Claude usage negligible (most ticks no-op via the
+    # single-flight guard). Comment this block out to hand fully back to local.
+    - cron: "11 */6 * * *"
 
 concurrency:
   group: ralph-${{ github.repository }}
