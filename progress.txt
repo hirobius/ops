@@ -1602,3 +1602,26 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Gate green: typecheck + 733 tests + lint. Branch:
   ralph/issue-284-delete-orphan-primitive-contracts.
 - Files: tests/primitive-contracts/ (11 files, deleted), vitest.config.ts.
+
+## Issue #283 — strip dead library-publishing fields from package.json
+- Fast-follow to #242/#248: package.json still had module/types/exports/
+  DS-specific sideEffects/files inherited from the design-system scaffolding,
+  all pointing at paths that don't exist in this repo (dist/, src/index.ts,
+  src/app/design-system/).
+- Confirmed no self-resolution before deleting: grepped src/api/scripts for
+  `@hirobius/ops` imports (only descriptive strings/comments, no real
+  imports); grepped vite.config.*/tsconfig*.json for the removed paths (only
+  hit was tsconfig.api-extractor.json, a separately-orphaned config not
+  wired into any script/gate/CI — flagged as a fast-follow, not touched here,
+  per "one logical change" scope).
+- `"private": true` was already present — no change needed there.
+- Removed: module, types, exports, sideEffects, files. Kept type/private/
+  version/engines/packageManager/scripts/deps.
+- Gate green: typecheck + typecheck:api + vite build (real bundling proof) +
+  733 tests + lint.
+- Files: package.json (30 lines removed, nothing else).
+- Branch: ralph/issue-283-strip-pkg-lib-fields. PR #290.
+- Next: tsconfig.api-extractor.json + api-extractor.json are orphaned
+  (reference src/index.ts, src/app/design-system/** which don't exist,
+  @microsoft/api-extractor devDep unused by any script) — worth its own
+  small issue if this project ever wants a fully clean package graph.
