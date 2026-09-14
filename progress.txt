@@ -1064,3 +1064,38 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Next iteration for #30 (if picked up again): none needed -- #256/#257
   are now the actionable remainders, and #30 itself can close once its
   own checkbox 1 is merged (the rest lives on the split issues + #15).
+
+## Issue #123 — exempt gated /ops route from Lighthouse SEO budget (#54 follow-up)
+- .lighthouserc.json's flat assert.assertions applied categories:seo (min
+  0.79) to every collected URL including the password-gated /ops dashboard,
+  which fails deterministically (0.63) -- a login-gated internal route has
+  no meta-description/crawlability surface to score.
+- Restructured assert.assertions -> assert.assertMatrix: entry 1 (no
+  matchingUrlPattern, applies to every URL) keeps categories:performance/
+  accessibility/best-practices + LCP/CLS/TBT/FCP budgets unchanged on every
+  route incl. /ops; entry 2 (matchingUrlPattern excluding /ops) keeps the
+  unchanged 0.79 SEO floor on the public marketing routes (/, /atlas,
+  /portfolio).
+- Did NOT reuse the stale draft on origin/claude/issue-123-20260712-1847
+  (earlier abandoned attempt, no PR ever opened) as-is: it re-added
+  http://localhost/hds to the collect URL list, which #253 (2026-09-14,
+  landed after that draft) deliberately removed as dead content (/hds
+  redirects to /ops). Wrote assertMatrix fresh off current main instead.
+- matchingUrlPattern must tolerate the port lhci's local server binds
+  (finalUrl is e.g. http://localhost:45277/ops, not http://localhost/ops)
+  -- pattern is ^http://localhost(:\d+)?/(?!ops$).*$ optional port group.
+  The stale draft's pattern lacked this and would have silently matched
+  zero URLs (silently dropping the SEO floor for public routes too, not
+  just /ops) -- caught by actually running collect+assert against a real
+  build rather than only hand-checking JSON shape.
+- Verified end-to-end (not just DoD's literal command, also the collect
+  step it depends on): pnpm build && pnpm exec lhci collect
+  --config=.lighthouserc.json && pnpm exec lhci assert
+  --config=.lighthouserc.json -> "Checking assertions against 4 URL(s), 12
+  total run(s)" / "All results processed!" (previously failed on /ops at
+  0.63 vs 0.79). --includePassedAssertions confirms categories.seo passes
+  for exactly 3 URLs (/, /atlas, /portfolio), none for /ops -- confirms
+  exclusion is real, not merely non-failing.
+- bash ralph/gate.sh green: typecheck + 676 tests + lint.
+- Files: .lighthouserc.json.
+- Branch: ralph/issue-123-ops-seo-budget-exemption.
