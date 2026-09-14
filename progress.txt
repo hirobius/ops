@@ -1357,3 +1357,15 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   bash ralph/gate.sh green (typecheck + 697 tests + lint).
 - Files: src/app/pages/InfoPageWrapper.tsx.
 - Part of #239 (clears the final ops CI red on ci.yml "Full checks").
+
+#245 — remove dangling `pnpm check:contrast` from self-heal.mjs STATIC_CHECKS (fast-follow to #175)
+- scripts/self-heal.mjs: removed the `ContrastAudit` / `pnpm check:contrast` entry from
+  STATIC_CHECKS (script was already deleted in #175, so this entry was dead and would
+  ENOENT on any non-smoke `pnpm heal` run).
+- Repo-wide grep for `check:contrast`/`audit-tiers` confirms no other live references
+  (package.json has no such script either); remaining hits are docs/archive/log mentions,
+  excluded per the issue's DoD.
+- Verified: `pnpm heal:smoke` runs clean (installed missing chromium-headless-shell binary
+  first, unrelated env gap); `bash ralph/gate.sh` green (typecheck + 697 tests + lint).
+- Files: scripts/self-heal.mjs.
+- Part of #239.
