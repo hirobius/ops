@@ -617,6 +617,19 @@
       "scope": "full-tree"
     },
     {
+      "id": "harvest-park-signals",
+      "description": "Reads the fleet's Ralph park trail (ralph-attempt-failed, the park comment, ralph-blocked) via GitHub Search, pairs each park/blocked signal with the next human comment as its recovery, and appends the raw pair to docs/ai/learned-rules.jsonl (source: park-harvest). No distillation — promote-learned-rule.mjs is the HITL step. Dry-run by default; --apply persists. Manual channel only (network required). ops#298.",
+      "severity": "warn",
+      "gateScript": "scripts/harvest-park-signals.mjs",
+      "fixturePath": null,
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual",
+      "supportsJson": true
+    },
+    {
       "id": "reconcile-ralph-closures",
       "description": "Finds issues whose Ralph work merged but which never auto-closed (GitHub's closing-keyword linkage silently not firing), plus merged PR bodies that wrap the closing reference in markdown so it cannot link. Dry-run by default; --apply closes them. Manual channel only (network required). ops#305.",
       "severity": "warn",

@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 132,
+  "totalScripts": 141,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,11 +41,11 @@
     }
   },
   "categoryCounts": {
-    "other": 65,
+    "other": 71,
     "audit": 16,
     "build": 1,
-    "gate": 30,
-    "generate": 11,
+    "gate": 32,
+    "generate": 12,
     "sync": 3,
     "test": 2,
     "validate": 3,
@@ -491,6 +491,17 @@
       }
     },
     {
+      "name": "check-parked-triggers.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "check-parked-triggers — evaluate the re-entry triggers in docs/ai/PARKED.md.",
+      "pnpm": ["parked:check"],
+      "gate": {
+        "channel": "pnpm-meta",
+        "severity": "warn"
+      }
+    },
+    {
       "name": "check-reduced-motion.mjs",
       "category": "gate",
       "prefix": "check",
@@ -576,6 +587,17 @@
       "gate": {
         "channel": "manual",
         "severity": "warn"
+      }
+    },
+    {
+      "name": "check-steering-budget.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Every file in docs/guardrails/steering-budget.json is loaded by every agent in every session before it reads a line of code. On 2026-09-14 that set measured",
+      "pnpm": [],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "error"
       }
     },
     {
@@ -700,6 +722,14 @@
       "gate": null
     },
     {
+      "name": "export-call-list.mjs",
+      "category": "other",
+      "prefix": "export",
+      "purpose": "Read-only. Never writes to Supabase; logging an outcome is scripts/log-call.mjs.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "fleet-dispatch.mjs",
       "category": "other",
       "prefix": "fleet",
@@ -737,6 +767,14 @@
       "prefix": "generate",
       "purpose": "Generates public/component-changelogs.json by cross-referencing each component slug in src/app/data/component-api.json with git log history.",
       "pnpm": ["docs:changelogs"],
+      "gate": null
+    },
+    {
+      "name": "generate-lead-site.mjs",
+      "category": "generate",
+      "prefix": "generate",
+      "purpose": "The metered path (`api/lead-action.ts` action 'generate' → lib/agent) bills ANTHROPIC_API_KEY tokens per lead. This path doesn't call the API at all: a",
+      "pnpm": [],
       "gate": null
     },
     {
@@ -815,6 +853,17 @@
       "gate": null
     },
     {
+      "name": "harvest-park-signals.mjs",
+      "category": "other",
+      "prefix": "harvest",
+      "purpose": "`docs/ai/learned-rules.jsonl` went dark for four months because its writer's only caller (`hermes-unit.mjs runPostMortem()`) was deleted with the orchestration retirement. The park trail it needs never went away",
+      "pnpm": [],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
       "name": "headless-scan.browser.js",
       "category": "other",
       "prefix": "headless",
@@ -847,6 +896,14 @@
       "gate": null
     },
     {
+      "name": "log-call.mjs",
+      "category": "other",
+      "prefix": "log",
+      "purpose": "Without this, 200 calls produce anecdotes. With it they produce a funnel you can divide: dials -> reached -> interested -> booked.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "log-run.mjs",
       "category": "other",
       "prefix": "log",
@@ -861,6 +918,17 @@
       "purpose": "meeting transcript, append them to docs/ai/proposed-units.jsonl.",
       "pnpm": [],
       "gate": null
+    },
+    {
+      "name": "metric-north-star-share.mjs",
+      "category": "other",
+      "prefix": "metric",
+      "purpose": "North-star share metric (ops#293, decided in the ops#274 frontier-engineering session). Over a rolling window (default 14 days), the share of merged PRs",
+      "pnpm": ["metric:north-star-share"],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
     },
     {
       "name": "notify.mjs",
@@ -930,7 +998,7 @@
       "name": "promote-learned-rule.mjs",
       "category": "other",
       "prefix": "promote",
-      "purpose": "Interactive walker over docs/ai/learned-rules.jsonl. For each unprommoted entry (no `promotedAt` field), prompts Adrian to promote it to a real registry entry in docs/guardrails/registry.json. The actual flip from",
+      "purpose": "Interactive walker over docs/ai/learned-rules.jsonl. For each unpromoted entry (no `promotedAt` field), prompts Adrian to promote it to a real registry entry in docs/guardrails/registry.json. The actual flip from",
       "pnpm": ["guardrail:learned-rules", "guardrail:promote-rule"],
       "gate": null
     },
@@ -991,6 +1059,17 @@
       "gate": null
     },
     {
+      "name": "reconcile-ralph-closures.mjs",
+      "category": "other",
+      "prefix": "reconcile",
+      "purpose": "The problem: a Ralph PR merges with `Closes #N` in its body, GitHub's closing-keyword linkage silently doesn't fire, and the issue stays open and `ralph-ready`. The loop re-claims it, the agent correctly reports \"already",
+      "pnpm": [],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
       "name": "record-health.mjs",
       "category": "other",
       "prefix": "record",
@@ -1004,6 +1083,14 @@
       "prefix": "refresh",
       "purpose": "Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and computes per-gate `lastFiringAt` / `lastViolationAt` stats.",
       "pnpm": ["guardrail:firing-stats", "guardrail:firing-stats:bake"],
+      "gate": null
+    },
+    {
+      "name": "rescore-leads.mjs",
+      "category": "other",
+      "prefix": "rescore",
+      "purpose": "for leads already in Supabase, from columns we already hold.",
+      "pnpm": [],
       "gate": null
     },
     {

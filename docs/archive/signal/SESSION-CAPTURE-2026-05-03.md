@@ -97,6 +97,7 @@ node scripts/check-font-files.mjs
 ### `validators/` directory (separate subsystem from `scripts/check-*.mjs`)
 
 19 files. The "validators" appear to be a different concept than the "checks". Need to read at least:
+
 - `validators/index.mjs`
 - `validators/canon-rules.mjs` (this is the source of canon rule codes used in `12g-7-validator-fixtures`)
 - `validators/swiss-canon.mjs` (13KB heavyweight)
@@ -194,7 +195,15 @@ backlog-15-orphan-circular-dom-budgets
 ### Pod-runs.jsonl sample lines (schema visible)
 
 ```json
-{"ts":"2026-05-03T04:16:23.830Z","sessionId":"hermes:12i-quality-eslint-burndown","model":"hermes3:latest","totalTokens":0,"durationMs":33141,"unitsCompleted":0,"notes":"validation failed: "}
+{
+  "ts": "2026-05-03T04:16:23.830Z",
+  "sessionId": "hermes:12i-quality-eslint-burndown",
+  "model": "hermes3:latest",
+  "totalTokens": 0,
+  "durationMs": 33141,
+  "unitsCompleted": 0,
+  "notes": "validation failed: "
+}
 ```
 
 **Schema**: `{ts, sessionId, model, totalTokens, durationMs, unitsCompleted, notes}`. **Drift signal**: `totalTokens: 0` is suspicious — either hermes3:latest doesn't report tokens or the writer doesn't capture them. `notes` field truncated. **FIX-019** in benchmarks section refers to this.
@@ -202,7 +211,12 @@ backlog-15-orphan-circular-dom-budgets
 ### `.claude/scheduled_tasks.lock` content
 
 ```json
-{"sessionId":"3bab4577-3c7a-4c77-abeb-fd558a091b6b","pid":836725,"procStart":"9917873","acquiredAt":1777700753311}
+{
+  "sessionId": "3bab4577-3c7a-4c77-abeb-fd558a091b6b",
+  "pid": 836725,
+  "procStart": "9917873",
+  "acquiredAt": 1777700753311
+}
 ```
 
 Lock acquired but pid 836725 may not even be alive. Stale-lock cleanup not visible.
@@ -216,6 +230,7 @@ Lock acquired but pid 836725 may not even be alive. Stale-lock cleanup not visib
 ### Memory files I haven't yet read in detail
 
 All 31 of them, except MEMORY.md (the index). The index summarizes them but doesn't preserve full content. Each file is ~1-3KB markdown. Need to walk all to find:
+
 - Stale entries (mentions of in-flight work that's now done)
 - Contradictions with SIGNAL.md
 - Content that should back-port to SIGNAL.md as canonical
@@ -240,29 +255,29 @@ All 31 of them, except MEMORY.md (the index). The index summarizes them but does
 
 These are the FIX-NNN IDs I assigned in the industry-benchmarks + drift-debt + current-gaps sections. Each needs the full template fill.
 
-| ID | Topic | Severity (rough) | Files involved (initial guess) |
-|---|---|---|---|
-| FIX-001 | DORA Four Keys not measured | High | `telemetry/`, new script `scripts/dora-metrics.mjs`, ops dashboard widget |
-| FIX-002 | SPACE framework: satisfaction not tracked | Medium | `docs/signal/SIGNAL.md` personal-sustainability section, optional NPS-style prompt |
-| FIX-003 | Branch coverage 24% (industry ~70%) | High | `vitest.config.ts`, `tests/coverage-summary.json`, individual test files in `src/**/*.test.ts` |
-| FIX-004 | Tech-debt ratio not measured | Medium | `scripts/audit-debt.mjs` (new), feeds SIGNAL.md tech-debt-ledger |
-| FIX-005 | `// @ts-ignore` count not tracked | Medium | grep-based audit script; SIGNAL.md tech-debt-ledger |
-| FIX-006 | OWASP Top 10 partial coverage; no SAST/DAST | Medium | `.github/workflows/security.yml` (new), eslint-plugin-security, possibly SonarCloud or Snyk |
-| FIX-007 | SLSA L1 only; no SBOM | Medium | `.github/workflows/sbom.yml` (new); npm audit output ingestion |
-| FIX-008 | A11y conformance level not published | Medium | `.github/workflows/a11y.yml` (already exists — read), `docs/security/a11y-conformance.md` (new) |
-| FIX-009 | `prefers-reduced-motion` audit | Medium | `validators/motion-perf.mjs` (already exists), audit pass; src/app/styles/* |
-| FIX-010 | Core Web Vitals per route not published | Medium | `.github/workflows/perf.yml` (already exists — read), output to `docs/signal/cwv-per-route.md` |
-| FIX-011 | Single-browser test coverage | Medium | `playwright.config.ts`, add firefox + webkit projects |
-| FIX-012 | Diataxis-balanced docs | Medium | `docs/`, new `docs/tutorials/`, `docs/explanation/` directories |
-| FIX-013 | Reflexion: no closed-loop reflection capture | Medium | `scripts/hermes-unit.mjs` ("post-mortem learned rule" log line — destination needed); new `docs/signal/learned-rules.jsonl` |
-| FIX-014 | LangSmith-style observability missing | Medium | `telemetry/pod-runs.jsonl` extend; new dashboard widget |
-| FIX-015 | Win-rate not benchmarked vs published evals | Low | New `docs/signal/agent-eval-results.md` |
-| FIX-016 | Cycle time not aggregated | Medium | `scripts/aggregate-cycle-time.mjs` (new); reads orchestration.json claim/done timestamps |
-| FIX-017 | No SUS/NPS/HEART for users | Low (today), High when client portal ships | New `clients/*/feedback.md`; possibly Plausible analytics |
-| FIX-018 | No observability stack | Medium-High pre-launch | Sentry SDK install, OTel SDK install, env var setup |
-| FIX-019 | pod-runs.jsonl schema drift (totalTokens always 0 for hermes3) | Medium | `telemetry/pod-runs.mjs` (writer), `scripts/hermes-unit.mjs` (caller) |
-| FIX-020 | Worktree-stranding manual recovery | High (operational) | `scripts/worktree-auto-merge.mjs` (new), `.claude/worktrees/`, polling loop or filesystem watch |
-| FIX-021 | Denied unit reasons not captured in agentNotes | Low | `scripts/validate-orchestration.mjs` extend to require denial reason field |
+| ID      | Topic                                                          | Severity (rough)                           | Files involved (initial guess)                                                                                              |
+| ------- | -------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| FIX-001 | DORA Four Keys not measured                                    | High                                       | `telemetry/`, new script `scripts/dora-metrics.mjs`, ops dashboard widget                                                   |
+| FIX-002 | SPACE framework: satisfaction not tracked                      | Medium                                     | `docs/signal/SIGNAL.md` personal-sustainability section, optional NPS-style prompt                                          |
+| FIX-003 | Branch coverage 24% (industry ~70%)                            | High                                       | `vitest.config.ts`, `tests/coverage-summary.json`, individual test files in `src/**/*.test.ts`                              |
+| FIX-004 | Tech-debt ratio not measured                                   | Medium                                     | `scripts/audit-debt.mjs` (new), feeds SIGNAL.md tech-debt-ledger                                                            |
+| FIX-005 | `// @ts-ignore` count not tracked                              | Medium                                     | grep-based audit script; SIGNAL.md tech-debt-ledger                                                                         |
+| FIX-006 | OWASP Top 10 partial coverage; no SAST/DAST                    | Medium                                     | `.github/workflows/security.yml` (new), eslint-plugin-security, possibly SonarCloud or Snyk                                 |
+| FIX-007 | SLSA L1 only; no SBOM                                          | Medium                                     | `.github/workflows/sbom.yml` (new); npm audit output ingestion                                                              |
+| FIX-008 | A11y conformance level not published                           | Medium                                     | `.github/workflows/a11y.yml` (already exists — read), `docs/security/a11y-conformance.md` (new)                             |
+| FIX-009 | `prefers-reduced-motion` audit                                 | Medium                                     | `validators/motion-perf.mjs` (already exists), audit pass; src/app/styles/\*                                                |
+| FIX-010 | Core Web Vitals per route not published                        | Medium                                     | `.github/workflows/perf.yml` (already exists — read), output to `docs/signal/cwv-per-route.md`                              |
+| FIX-011 | Single-browser test coverage                                   | Medium                                     | `playwright.config.ts`, add firefox + webkit projects                                                                       |
+| FIX-012 | Diataxis-balanced docs                                         | Medium                                     | `docs/`, new `docs/tutorials/`, `docs/explanation/` directories                                                             |
+| FIX-013 | Reflexion: no closed-loop reflection capture                   | Medium                                     | `scripts/hermes-unit.mjs` ("post-mortem learned rule" log line — destination needed); new `docs/signal/learned-rules.jsonl` |
+| FIX-014 | LangSmith-style observability missing                          | Medium                                     | `telemetry/pod-runs.jsonl` extend; new dashboard widget                                                                     |
+| FIX-015 | Win-rate not benchmarked vs published evals                    | Low                                        | New `docs/signal/agent-eval-results.md`                                                                                     |
+| FIX-016 | Cycle time not aggregated                                      | Medium                                     | `scripts/aggregate-cycle-time.mjs` (new); reads orchestration.json claim/done timestamps                                    |
+| FIX-017 | No SUS/NPS/HEART for users                                     | Low (today), High when client portal ships | New `clients/*/feedback.md`; possibly Plausible analytics                                                                   |
+| FIX-018 | No observability stack                                         | Medium-High pre-launch                     | Sentry SDK install, OTel SDK install, env var setup                                                                         |
+| FIX-019 | pod-runs.jsonl schema drift (totalTokens always 0 for hermes3) | Medium                                     | `telemetry/pod-runs.mjs` (writer), `scripts/hermes-unit.mjs` (caller)                                                       |
+| FIX-020 | Worktree-stranding manual recovery                             | High (operational)                         | `scripts/worktree-auto-merge.mjs` (new), `.claude/worktrees/`, polling loop or filesystem watch                             |
+| FIX-021 | Denied unit reasons not captured in agentNotes                 | Low                                        | `scripts/validate-orchestration.mjs` extend to require denial reason field                                                  |
 
 **Total FIX seeds: 21.** All need full population in SIGNAL.md FIX registry.
 
@@ -340,4 +355,4 @@ For posterity in case the meta-thinking needs revival:
 
 ---
 
-*This file is itself signal. If you're reading this from a fresh session, start with `docs/signal/SIGNAL.md` for the canonical doc, then this file for in-flight conversation context.*
+_This file is itself signal. If you're reading this from a fresh session, start with `docs/signal/SIGNAL.md` for the canonical doc, then this file for in-flight conversation context._

@@ -1,4 +1,3 @@
-
 ## 2026-05-06T06:05:02Z — heal-loop restarted hermes-unit
 
 Process matching `hermes-unit-pulse.sh` was not running. Restarted via heal-loop.

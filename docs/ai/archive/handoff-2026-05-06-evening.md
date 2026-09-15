@@ -10,22 +10,22 @@
 
 ## Current strength score (snapshot)
 
-| Dim | Score | Notes |
-|---|---|---|
-| A1 Registration Coverage | 100/100 | |
-| A2 Wiring Honesty | 96/100 | |
-| **A3 Fixture Proof-of-Firing** | 25/100 | was 0 at session start; +25 from Wave 1 + Wave 2 fixtures |
-| **A4 Strict Gating** | 79/100 | was 34 at session start; +45 from soft-gate promotion (37 gates flipped) |
-| A5 Hardening Cluster Completeness | 100/100 | |
-| A6 Debt Closure Ratio | 88/100 | |
-| B1 DORA Metrics | (not wired) | hardest — defer until prod |
-| B2 OWASP SAMM | 88/100 | |
-| **B3 WCAG 2.1 AA** | (not wired) | **next dispatch** |
-| B4 Web Vitals | (not wired) | |
-| B5 TS Strict Mode | 59/100 | |
-| B6 OSV / npm Audit | (not wired) | |
-| B7 CHAOSS Docs Coverage | 89/100 | |
-| **B8 Test Coverage** | (not wired) | **next dispatch** |
+| Dim                               | Score       | Notes                                                                    |
+| --------------------------------- | ----------- | ------------------------------------------------------------------------ |
+| A1 Registration Coverage          | 100/100     |                                                                          |
+| A2 Wiring Honesty                 | 96/100      |                                                                          |
+| **A3 Fixture Proof-of-Firing**    | 25/100      | was 0 at session start; +25 from Wave 1 + Wave 2 fixtures                |
+| **A4 Strict Gating**              | 79/100      | was 34 at session start; +45 from soft-gate promotion (37 gates flipped) |
+| A5 Hardening Cluster Completeness | 100/100     |                                                                          |
+| A6 Debt Closure Ratio             | 88/100      |                                                                          |
+| B1 DORA Metrics                   | (not wired) | hardest — defer until prod                                               |
+| B2 OWASP SAMM                     | 88/100      |                                                                          |
+| **B3 WCAG 2.1 AA**                | (not wired) | **next dispatch**                                                        |
+| B4 Web Vitals                     | (not wired) |                                                                          |
+| B5 TS Strict Mode                 | 59/100      |                                                                          |
+| B6 OSV / npm Audit                | (not wired) |                                                                          |
+| B7 CHAOSS Docs Coverage           | 89/100      |                                                                          |
+| **B8 Test Coverage**              | (not wired) | **next dispatch**                                                        |
 
 Composite: A=81/100, B=79/100.
 
@@ -33,18 +33,19 @@ Composite: A=81/100, B=79/100.
 
 All 8 migration commits landed on `fix/ui-pipeline`. Total: ~1,647 LOC killed, 11 gates retired, registry 76 → 65. Final state per the agent:
 
-| # | Migration | LOC | Tool | Channel |
-|---|---|---|---|---|
-| 1 | check-aria-labels + check-image-loading + check-semantic-html | 611 | eslint-plugin-jsx-a11y | pre-commit via ESLint |
-| 2 | check-tailwind-arbitrary + check-tailwind-colors | 234 | eslint-plugin-tailwindcss | pre-commit via ESLint |
-| 3 | check-format-staged | 95 | lint-staged | pre-commit hook |
-| 4 | check-knip-ratchet | 121 | `knip --max-issues 60` | pre-commit registry |
-| 5 | check-lockfile-integrity | 82 | `pnpm install --frozen-lockfile` | pre-commit hook |
-| 6 | check-type-coverage-ratchet | 99 + baseline | `type-coverage --at-least 99.9` | ci-pr workflow |
-| 7 | check-mojibake | 166 | editorconfig-checker | pre-commit hook |
-| 8 | check-perf-budget | 239 + 2 fixtures | size-limit (already wired in CI) | ci-pr workflow |
+| #   | Migration                                                     | LOC              | Tool                             | Channel               |
+| --- | ------------------------------------------------------------- | ---------------- | -------------------------------- | --------------------- |
+| 1   | check-aria-labels + check-image-loading + check-semantic-html | 611              | eslint-plugin-jsx-a11y           | pre-commit via ESLint |
+| 2   | check-tailwind-arbitrary + check-tailwind-colors              | 234              | eslint-plugin-tailwindcss        | pre-commit via ESLint |
+| 3   | check-format-staged                                           | 95               | lint-staged                      | pre-commit hook       |
+| 4   | check-knip-ratchet                                            | 121              | `knip --max-issues 60`           | pre-commit registry   |
+| 5   | check-lockfile-integrity                                      | 82               | `pnpm install --frozen-lockfile` | pre-commit hook       |
+| 6   | check-type-coverage-ratchet                                   | 99 + baseline    | `type-coverage --at-least 99.9`  | ci-pr workflow        |
+| 7   | check-mojibake                                                | 166              | editorconfig-checker             | pre-commit hook       |
+| 8   | check-perf-budget                                             | 239 + 2 fixtures | size-limit (already wired in CI) | ci-pr workflow        |
 
 Verifications all green:
+
 - `pnpm typecheck` ✓
 - `validate-guardrail-registry` ✓ (62 validators)
 - `check-validator-wiring` ✓ (65 gates wired as declared)
@@ -55,11 +56,13 @@ Only 2 pre-existing cached `validate-fixture-proof-of-firing` failures remain (`
 ## What this session shipped
 
 **Architectural insights captured:**
+
 - `docs/signal/SIGNAL.md` §Lossy/expensive pitfalls — bespoke gate sprawl loss tracked (~4,650 LOC recoverable)
 - `docs/signal/SIGNAL.md` FIX-032 — industry-tool-first checklist
 - Memory: `~/.claude/projects/-home-adrian-projects-adrian-milsap/memory/feedback_industry_tool_first.md` — durable across sessions
 
 **Commits (recent, in fix/ui-pipeline order — newest first):**
+
 - `937c6dfa` — SIGNAL.md loss tracking + FIX-032
 - `569ec623` — first migration commit (jsx-a11y; 3 gates retired)
 - `75458728` — Style Dictionary migration plan + POC (verdict: worth doing, not urgent)

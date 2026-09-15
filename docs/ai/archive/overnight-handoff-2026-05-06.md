@@ -22,6 +22,7 @@ The blocker was: `audit-batch-deliverables` checked `status==='done'` but agents
 Fix: `--pre-mark-done` flag accepts `claimed` status and the still-set claim metadata. Agents pass it. Path-existence checks demote to warn-only in pre-mark-done mode (so `13z-3` deleting `docs/archive/` doesn't fail the gate).
 
 Plus dashboard accuracy:
+
 - `lanes.ts` foundation regex now includes `13y` and `13z`
 - `AgenticOSPage` auto-refreshes every 30s + manual refresh button + page-load timestamp
 - `KpiCards` Active sub shows agent names, not unit IDs
@@ -43,6 +44,7 @@ If heal-loop is dead: `bash scripts/agent-heal-loop.sh > /tmp/heal-loop.out 2>&1
 **Symptom: heal log shows "5 rapid crashes"**
 
 Pulse paused that agent for 30 min. Look at the heal-log entry — root cause is one of:
+
 - Ollama not running → `ollama serve`
 - Moonshot rate limit → wait, or pause kimi via `pkill -f kimi-agent-pulse`
 - Pre-commit gate failing every commit → check `docs/guardrails/firing-log.jsonl`
@@ -50,6 +52,7 @@ Pulse paused that agent for 30 min. Look at the heal-log entry — root cause is
 **Symptom: claims stuck in `claimed` state**
 
 Two possibilities:
+
 1. Agent is genuinely working — let it run (qwen2.5-coder takes 3-8 min/unit).
 2. Agent died mid-claim, claim is orphaned. Watchdog reverts after 4h.
 
@@ -76,7 +79,7 @@ pkill -f 'pulse|heal-loop|swarm-watchdog'
 
 ## What to expect by morning
 
-Burndown order: 13z cluster (7 units) → 13y-0 → 13y-1 through 13y-21 (22 units). Hermes also broadly grabbing 12q-* units (it doesn't honor `safeForUnattended` flag — that's a known bug; not blocking, just over-eager).
+Burndown order: 13z cluster (7 units) → 13y-0 → 13y-1 through 13y-21 (22 units). Hermes also broadly grabbing 12q-\* units (it doesn't honor `safeForUnattended` flag — that's a known bug; not blocking, just over-eager).
 
 Best case: all 13z + most 13y land. ~25 commits, ~$5-12 spend, ~600 fewer findings tomorrow.
 
@@ -108,12 +111,12 @@ If 13z-done > 0 by morning: gate fix worked. If 13z-done = 0 and claimed = 0: qu
 
 Adrian typed `go` ~13:51 PDT, immediately after the handoff commit. 4 commits landed in the cleanup pass:
 
-| Commit | What |
-|---|---|
+| Commit     | What                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `c1353c41` | **Silent wedge fix** — `check-registry` was failing on every commit since `84498f98` (a colocated `HdsTocContext.test.tsx` was being treated as a page). Skip `.test.tsx` in the page collector. Pre-commit gates were running; this one specific gate kept exiting 1, blocking nothing visible because firing-log only records, doesn't gate — but it would fail any agent's pre-commit hook proper. |
-| `699443ae` | **6 zombie hitl units → done** — 13y-2, 13y-3, 13y-8, 13y-14, 13y-16, 13y-18 already passed their deterministic gates. Kimi was looping `max iterations` on already-shipped work it didn't see. Cleared `hitl` / `_kimiQuarantined` / `_kimiAttempts` / `_kimiLastAbort`. |
-| `de0efc93` | **13y-9** — 2 stale `docs/archive/` refs in OPERATING_MAP.md + SYSTEMS_REGISTRY.md (rot from 13z-3 archive cleanup). Spec also pointed at `scripts/check-doc-references.mjs` which doesn't exist; corrected to `check-link-integrity --doc-refs-only`. |
-| `fb62c049` | **13y-10 + 13y-19 → done** — same validator-consolidation rot pattern. Both `check-route-links.mjs` and `check-external-links.mjs` were folded into `check-link-integrity.mjs` (with `--route-links-only` / `--external` flags). |
+| `699443ae` | **6 zombie hitl units → done** — 13y-2, 13y-3, 13y-8, 13y-14, 13y-16, 13y-18 already passed their deterministic gates. Kimi was looping `max iterations` on already-shipped work it didn't see. Cleared `hitl` / `_kimiQuarantined` / `_kimiAttempts` / `_kimiLastAbort`.                                                                                                                             |
+| `de0efc93` | **13y-9** — 2 stale `docs/archive/` refs in OPERATING_MAP.md + SYSTEMS_REGISTRY.md (rot from 13z-3 archive cleanup). Spec also pointed at `scripts/check-doc-references.mjs` which doesn't exist; corrected to `check-link-integrity --doc-refs-only`.                                                                                                                                                |
+| `fb62c049` | **13y-10 + 13y-19 → done** — same validator-consolidation rot pattern. Both `check-route-links.mjs` and `check-external-links.mjs` were folded into `check-link-integrity.mjs` (with `--route-links-only` / `--external` flags).                                                                                                                                                                      |
 
 ### Why kimi mass-quarantined overnight
 
@@ -129,12 +132,14 @@ Token-budget aborts were a real third cause for some 13y units (e.g. `13y-1-tena
 Quick-lookup so the next session can skip re-derivation:
 
 **Group A — bad validator path, needs investigation (4 units):**
+
 - `13y-1-tenant-css-tokenize` → `scripts/check-css-values.mjs` missing. Closest existing gates: `check-tenant-tokens.mjs` (already in cmd), `check-css-integrity.mjs`. May need a new gate or just rely on `check-tenant-tokens` + manual `check-hardcoded-colors` exclude.
 - `13y-15-sketches-inline-styles` → `scripts/check-inline-styles.mjs` missing. Likely an ESLint rule replaced it; check `pnpm check:inline-styles` if the script entry exists or the rule is wired into `check:fast`.
 - `13y-17-component-docs-burndown` → `scripts/check-component-docs.mjs` missing. Likely folded into `audit-component-integrity.mjs --api`.
 - `13y-20-public-api-decision` → `scripts/check-public-api.mjs` missing. No obvious replacement; may need decision from Adrian on whether the unit is even still in scope.
 
 **Group B — real mechanical work (5 units):**
+
 - `13y-4-sandbox-heading-outline` — add heading structure to SandboxPage; gate `pnpm lint --max-warnings=2`.
 - `13y-6-token-descriptions-fill` — fill 29 missing token descriptions; gate `check-token-descriptions --no-missing`.
 - `13y-11-ops-atlas-token-discipline` — burn down ops/atlas raw transitions/border-radii/tier-bypass/grids; gate triple `audit-pages && check-tier-bypass && check-unresponsive-grids`.
@@ -142,12 +147,14 @@ Quick-lookup so the next session can skip re-derivation:
 - `13y-13-tw-arbitrary-admin-arch` — burn down tailwind-arbitrary in ApprovalDetail + ArchitectureSnapshotPage.
 
 **Group C — strategic / Adrian-context (4 units):**
+
 - `12u-cc-repo-bootstrap` — first multi-tenant pilot consumer repo. Adrian needs to bootstrap.
 - `13s-10-grc-career-planning` — explicitly HITL T4, requires `/grill-me` session.
 - `12q-figma-system-drift` — `pnpm figma:audit`. Validator runs but unit work needs spot-check.
 - `12q-inline-styles-burndown` — overlaps Group A 13y-15.
 
 **Group D — defer (1 unit):**
+
 - `12q-figma-master-shadcn-fidelity` — validator passes but it's a `pipeline + snapshot --update`, not a violation gate. Spec describes ~6-12h of token-resolution-at-build rewrite. Validator green ≠ work done; left hitl.
 
 ### Operational state at session end

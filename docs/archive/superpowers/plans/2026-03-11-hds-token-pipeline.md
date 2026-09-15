@@ -15,101 +15,107 @@
 ## Migration reference tables
 
 ### Space mapping (old → new)
-| Old | New JS | CSS var | px |
-|---|---|---|---|
-| `hds.space.px1` | `hds.primitive.space.px` | `--hds-primitive-space-px` | 1 |
-| `hds.space.px2` | `hds.primitive.space['0-5']` | `--hds-primitive-space-0-5` | 2 |
-| `hds.space.px4` | `hds.primitive.space[1]` | `--hds-primitive-space-1` | 4 |
-| `hds.space.px6` | `hds.primitive.space['1-5']` | `--hds-primitive-space-1-5` | 6 |
-| `hds.space.px8` | `hds.primitive.space[2]` | `--hds-primitive-space-2` | 8 |
-| `hds.space.px10` | `hds.primitive.space['2-5']` | `--hds-primitive-space-2-5` | 10 |
-| `hds.space.px12` | `hds.primitive.space[3]` | `--hds-primitive-space-3` | 12 |
-| `hds.space.px16` | `hds.primitive.space[4]` | `--hds-primitive-space-4` | 16 |
-| `hds.space.px20` | `hds.primitive.space[5]` | `--hds-primitive-space-5` | 20 |
-| `hds.space.px24` | `hds.primitive.space[6]` | `--hds-primitive-space-6` | 24 |
-| `hds.space.px32` | `hds.primitive.space[8]` | `--hds-primitive-space-8` | 32 |
-| `hds.space.px40` | `hds.primitive.space[10]` | `--hds-primitive-space-10` | 40 |
-| `hds.space.px48` | `hds.primitive.space[12]` | `--hds-primitive-space-12` | 48 |
+
+| Old              | New JS                       | CSS var                     | px  |
+| ---------------- | ---------------------------- | --------------------------- | --- |
+| `hds.space.px1`  | `hds.primitive.space.px`     | `--hds-primitive-space-px`  | 1   |
+| `hds.space.px2`  | `hds.primitive.space['0-5']` | `--hds-primitive-space-0-5` | 2   |
+| `hds.space.px4`  | `hds.primitive.space[1]`     | `--hds-primitive-space-1`   | 4   |
+| `hds.space.px6`  | `hds.primitive.space['1-5']` | `--hds-primitive-space-1-5` | 6   |
+| `hds.space.px8`  | `hds.primitive.space[2]`     | `--hds-primitive-space-2`   | 8   |
+| `hds.space.px10` | `hds.primitive.space['2-5']` | `--hds-primitive-space-2-5` | 10  |
+| `hds.space.px12` | `hds.primitive.space[3]`     | `--hds-primitive-space-3`   | 12  |
+| `hds.space.px16` | `hds.primitive.space[4]`     | `--hds-primitive-space-4`   | 16  |
+| `hds.space.px20` | `hds.primitive.space[5]`     | `--hds-primitive-space-5`   | 20  |
+| `hds.space.px24` | `hds.primitive.space[6]`     | `--hds-primitive-space-6`   | 24  |
+| `hds.space.px32` | `hds.primitive.space[8]`     | `--hds-primitive-space-8`   | 32  |
+| `hds.space.px40` | `hds.primitive.space[10]`    | `--hds-primitive-space-10`  | 40  |
+| `hds.space.px48` | `hds.primitive.space[12]`    | `--hds-primitive-space-12`  | 48  |
 
 > **Note:** Space tokens in `src/tokens.ts` are CSS var strings (e.g. `'var(--hds-primitive-space-4)'`). These work directly in React `style` props.
 
 ### Color mapping (old → new)
-| Old | New (CSS var or JS path) |
-|---|---|
-| `hds.color.brand` | `hds.primitive.color.blue[500]` |
-| `hds.color.brandPressed` | `hds.primitive.color.blue[600]` |
-| `hds.color.white` | `hds.primitive.color.neutral.white` |
-| `hds.color.surface.page[th]` | `var(--hds-semantic-color-bg-primary)` |
-| `hds.color.surface.raised[th]` | `var(--hds-semantic-color-bg-secondary)` |
-| `hds.color.surface.overlay[th]` | `var(--hds-semantic-color-bg-tertiary)` |
-| `hds.color.surface.raised[th]` | `var(--semantic-color-surface-raised)` |
-| `hds.accent.hover` | `var(--semantic-accent-hover)` |
+
+| Old                               | New (CSS var or JS path)                                           |
+| --------------------------------- | ------------------------------------------------------------------ |
+| `hds.color.brand`                 | `hds.primitive.color.blue[500]`                                    |
+| `hds.color.brandPressed`          | `hds.primitive.color.blue[600]`                                    |
+| `hds.color.white`                 | `hds.primitive.color.neutral.white`                                |
+| `hds.color.surface.page[th]`      | `var(--hds-semantic-color-bg-primary)`                             |
+| `hds.color.surface.raised[th]`    | `var(--hds-semantic-color-bg-secondary)`                           |
+| `hds.color.surface.overlay[th]`   | `var(--hds-semantic-color-bg-tertiary)`                            |
+| `hds.color.surface.raised[th]`    | `var(--semantic-color-surface-raised)`                             |
+| `hds.accent.hover`                | `var(--semantic-accent-hover)`                                     |
 | `hds.color.surface.thumbnail[th]` | `hds.primitive.color.neutral[400]` (light) / `neutral[600]` (dark) |
-| `ct(isDark).bg` | `var(--hds-semantic-color-bg-primary)` |
-| `ct(isDark).text` | `var(--hds-semantic-color-content-primary)` |
-| `ct(isDark).dim` | `var(--hds-semantic-color-content-secondary)` |
-| `ct(isDark).subtle` | `var(--hds-semantic-color-content-tertiary)` |
-| `ct(isDark).fill` | `var(--hds-semantic-color-bg-tertiary)` |
-| `ct(isDark).border` | `var(--hds-semantic-color-border-default)` |
-| `ct(isDark).rule` | `var(--hds-semantic-color-border-default)` |
-| `ct(isDark).accent` | `var(--hds-primitive-color-blue-500)` |
-| `ct(isDark).success` | `var(--hds-semantic-color-feedback-success)` |
-| `ct(isDark).warning` | `var(--hds-semantic-color-feedback-warning)` |
-| `ct(isDark).danger` | `var(--hds-semantic-color-feedback-error)` |
+| `ct(isDark).bg`                   | `var(--hds-semantic-color-bg-primary)`                             |
+| `ct(isDark).text`                 | `var(--hds-semantic-color-content-primary)`                        |
+| `ct(isDark).dim`                  | `var(--hds-semantic-color-content-secondary)`                      |
+| `ct(isDark).subtle`               | `var(--hds-semantic-color-content-tertiary)`                       |
+| `ct(isDark).fill`                 | `var(--hds-semantic-color-bg-tertiary)`                            |
+| `ct(isDark).border`               | `var(--hds-semantic-color-border-default)`                         |
+| `ct(isDark).rule`                 | `var(--hds-semantic-color-border-default)`                         |
+| `ct(isDark).accent`               | `var(--hds-primitive-color-blue-500)`                              |
+| `ct(isDark).success`              | `var(--hds-semantic-color-feedback-success)`                       |
+| `ct(isDark).warning`              | `var(--hds-semantic-color-feedback-warning)`                       |
+| `ct(isDark).danger`               | `var(--hds-semantic-color-feedback-error)`                         |
 
 > **Note:** When a color is used in a React `style` prop or Framer Motion `animate` prop, CSS var strings work directly in modern browsers. Use `var(--hds-semantic-color-*)` strings rather than the JS path for colors that are theme-dependent.
 
 ### Typography mapping (old → new)
-| Old `hds.typeStyles.*` | New `hds.semantic.typography.*` |
-|---|---|
-| `display` | `displayLarge` |
-| `displaySm` | `displaySmall` |
-| `body` | `bodyLarge` |
-| `caption` | `labelSmall` |
-| `label` | `labelMedium` |
-| `sectionLabel` | `labelMedium` (+ `textTransform: 'uppercase'` inline) |
-| `navLabel` | `labelSmall` (+ `textTransform: 'uppercase'` inline) |
-| `projectTitle` | `titleMedium` |
-| `prose` | `bodyLarge` |
-| `metricValue` | `displaySmall` |
+
+| Old `hds.typeStyles.*` | New `hds.semantic.typography.*`                       |
+| ---------------------- | ----------------------------------------------------- |
+| `display`              | `displayLarge`                                        |
+| `displaySm`            | `displaySmall`                                        |
+| `body`                 | `bodyLarge`                                           |
+| `caption`              | `labelSmall`                                          |
+| `label`                | `labelMedium`                                         |
+| `sectionLabel`         | `labelMedium` (+ `textTransform: 'uppercase'` inline) |
+| `navLabel`             | `labelSmall` (+ `textTransform: 'uppercase'` inline)  |
+| `projectTitle`         | `titleMedium`                                         |
+| `prose`                | `bodyLarge`                                           |
+| `metricValue`          | `displaySmall`                                        |
 
 > **Note:** `hds.semantic.typography.*` values are objects with CSS var strings for all 5 properties. They spread directly into `style` props: `style={{ ...hds.semantic.typography.labelSmall }}`. The `textTransform: 'uppercase'` on old `sectionLabel`/`navLabel` must be added inline when spreading — it is not part of the typescale.
 
 ### Duration + easing (old → new)
-| Old | New (for CSS) | New (for Motion) |
-|---|---|---|
-| `hds.duration.fast` (0.12s) | `hds.primitive.duration.fast` = CSS var | `hds.motion.duration.fast` = 0.15 |
-| `hds.duration.standard` (0.2s) | `hds.primitive.duration.normal` | `hds.motion.duration.normal` = 0.3 |
-| `hds.duration.moderate` (0.3s) | `hds.primitive.duration.slow` | `hds.motion.duration.slow` = 0.5 |
-| `hds.duration.elaborate` (0.5s) | `hds.primitive.duration.elaborate` | `hds.motion.duration.elaborate` = 0.6 |
-| `hds.duration.spin` (3s) | `hds.primitive.duration.spin` | `hds.motion.duration.spin` = 0.8 |
+
+| Old                             | New (for CSS)                                  | New (for Motion)                                    |
+| ------------------------------- | ---------------------------------------------- | --------------------------------------------------- |
+| `hds.duration.fast` (0.12s)     | `hds.primitive.duration.fast` = CSS var        | `hds.motion.duration.fast` = 0.15                   |
+| `hds.duration.standard` (0.2s)  | `hds.primitive.duration.normal`                | `hds.motion.duration.normal` = 0.3                  |
+| `hds.duration.moderate` (0.3s)  | `hds.primitive.duration.slow`                  | `hds.motion.duration.slow` = 0.5                    |
+| `hds.duration.elaborate` (0.5s) | `hds.primitive.duration.elaborate`             | `hds.motion.duration.elaborate` = 0.6               |
+| `hds.duration.spin` (3s)        | `hds.primitive.duration.spin`                  | `hds.motion.duration.spin` = 0.8                    |
 | `hds.easing.expressive` (array) | `hds.primitive.easing.expressive` = CSS string | `hds.motion.easing.expressive` = [0.34,1.56,0.64,1] |
-| `hds.easing.standard` (array) | `hds.primitive.easing['ease-in-out']` | `hds.motion.easing.standard` = [0.4,0,0.2,1] |
+| `hds.easing.standard` (array)   | `hds.primitive.easing['ease-in-out']`          | `hds.motion.easing.standard` = [0.4,0,0.2,1]        |
 
 > **The `hds.motion` namespace** exists only in `src/tokens.ts` — it holds raw numbers/arrays specifically for Framer Motion `transition` props.
 
 ### Layout mapping (old → new)
-| Old | New |
-|---|---|
-| `hds.layout.pageGutterH` | `hds.semantic.layout['page-gutter-h']` |
+
+| Old                        | New                                      |
+| -------------------------- | ---------------------------------------- |
+| `hds.layout.pageGutterH`   | `hds.semantic.layout['page-gutter-h']`   |
 | `hds.layout.mobileGutterH` | `hds.semantic.layout['mobile-gutter-h']` |
-| `hds.layout.sectionPad` | `hds.semantic.layout['section-pad']` |
-| `hds.layout.sectionPadSm` | `hds.semantic.layout['section-pad-sm']` |
-| `hds.layout.stripPadTop` | `hds.semantic.layout['strip-pad-top']` |
-| `hds.layout.toolbarPadV` | `hds.semantic.layout['toolbar-pad-v']` |
+| `hds.layout.sectionPad`    | `hds.semantic.layout['section-pad']`     |
+| `hds.layout.sectionPadSm`  | `hds.semantic.layout['section-pad-sm']`  |
+| `hds.layout.stripPadTop`   | `hds.semantic.layout['strip-pad-top']`   |
+| `hds.layout.toolbarPadV`   | `hds.semantic.layout['toolbar-pad-v']`   |
 | `hds.layout.mobilePageBot` | `hds.semantic.layout['mobile-page-bot']` |
 | `hds.layout.mobileSectTop` | `hds.semantic.layout['mobile-sect-top']` |
-| `hds.layout.panelGap` | `hds.semantic.layout['panel-gap']` |
-| `hds.layout.panelGapMob` | `hds.semantic.layout['panel-gap-mob']` |
+| `hds.layout.panelGap`      | `hds.semantic.layout['panel-gap']`       |
+| `hds.layout.panelGapMob`   | `hds.semantic.layout['panel-gap-mob']`   |
 
 ### Icon sizes (old → new)
-| Old | New | Raw px |
-|---|---|---|
-| `hds.iconSize.sm` | `hds.iconSize.sm` | 12 |
-| `hds.iconSize.base` | `hds.iconSize.base` | 14 |
-| `hds.iconSize.md` | `hds.iconSize.md` | 16 |
-| `hds.iconSize.lg` | `hds.iconSize.lg` | 20 |
-| `hds.iconSize.xl` | `hds.iconSize.xl` | 24 |
+
+| Old                 | New                 | Raw px |
+| ------------------- | ------------------- | ------ |
+| `hds.iconSize.sm`   | `hds.iconSize.sm`   | 12     |
+| `hds.iconSize.base` | `hds.iconSize.base` | 14     |
+| `hds.iconSize.md`   | `hds.iconSize.md`   | 16     |
+| `hds.iconSize.lg`   | `hds.iconSize.lg`   | 20     |
+| `hds.iconSize.xl`   | `hds.iconSize.xl`   | 24     |
 
 > **Note:** Icon sizes are raw pixel **numbers** in `src/tokens.ts` (not CSS var strings) because Lucide React's `size` prop takes a number. The `hds.iconSize.*` namespace is a top-level shortcut in the generated `tokens.ts` — it is NOT nested under `hds.primitive`. The path does not change from the old system.
 
@@ -120,6 +126,7 @@
 ### Task 1: Create `hirobius.tokens.json`
 
 **Files:**
+
 - Create: `hirobius.tokens.json`
 
 - [ ] **Step 1: Create the token file**
@@ -129,6 +136,7 @@ Create `hirobius.tokens.json` at the repo root. Start from the full token file i
 1. Change `primitive.font.family.primary.$value` from `["General Sans", ...]` to `["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"]`
 
 2. Add `primitive.space['2-5']` for 10px (needed for spacing migration). Include explicit `$type` in case the group-level type is not inherited:
+
 ```json
 "2-5": { "$type": "dimension", "$value": { "value": 10, "unit": "px" } }
 ```
@@ -194,12 +202,14 @@ Create `hirobius.tokens.json` at the repo root. Start from the full token file i
 > Each of these groups is an additive insertion as a sibling of `primitive.easing` (i.e. inside `primitive` but not nested under `color`, `space`, etc.). Add them one at a time, verifying valid JSON after each.
 
 5. Add `primitive.duration.elaborate` and `primitive.duration.spin` after `primitive.duration.slower`:
+
 ```json
 "elaborate": { "$value": { "value": 600, "unit": "ms" } },
 "spin":      { "$value": { "value": 800, "unit": "ms" } }
 ```
 
 6. Add `primitive.easing.expressive` after `primitive.easing.ease-in-out`:
+
 ```json
 "expressive": { "$value": [0.34, 1.56, 0.64, 1], "$description": "Spring/overshoot curve — used by BulgeCard and entrance animations" }
 ```
@@ -224,6 +234,7 @@ Create `hirobius.tokens.json` at the repo root. Start from the full token file i
 ```
 
 8. Add `semantic.color.feedback` (after `semantic.color.icon`).
+
 ```json
 "feedback": {
   "success": {
@@ -250,6 +261,7 @@ Create `hirobius.tokens.json` at the repo root. Start from the full token file i
 ```
 
 9. Add `semantic.shadow.card` after `semantic.shadow.lg`:
+
 ```json
 "card": {
   "$value": [
@@ -260,6 +272,7 @@ Create `hirobius.tokens.json` at the repo root. Start from the full token file i
 ```
 
 10. Add `semantic.layout` (after `semantic.transition`):
+
 ```json
 "layout": {
   "page-gutter-h":    { "$type": "dimension", "$value": "clamp(1rem, 4vw, 4rem)" },
@@ -278,6 +291,7 @@ Create `hirobius.tokens.json` at the repo root. Start from the full token file i
 ```
 
 11. Add `semantic.animation` (after `semantic.layout`):
+
 ```json
 "animation": {
   "appear":   { "$type": "transition", "$value": { "duration": "{primitive.duration.fast}",      "delay": "{primitive.duration.instant}", "timingFunction": "{primitive.easing.expressive}" } },
@@ -294,6 +308,7 @@ Create `hirobius.tokens.json` at the repo root. Start from the full token file i
 cd /c/Users/Adrian/Desktop/adrian-milsap
 node -e "JSON.parse(require('fs').readFileSync('hirobius.tokens.json','utf8')); console.log('valid')"
 ```
+
 Expected: `valid`
 
 - [ ] **Step 3: Commit**
@@ -308,6 +323,7 @@ git commit -m "feat: add W3C DTCG 2025.10 token source file"
 ### Task 2: Create `scripts/build-tokens.ts`
 
 **Files:**
+
 - Create: `scripts/build-tokens.ts`
 
 - [ ] **Step 1: Install tsx if not present**
@@ -316,7 +332,9 @@ git commit -m "feat: add W3C DTCG 2025.10 token source file"
 cd /c/Users/Adrian/Desktop/adrian-milsap
 cat package.json | grep tsx
 ```
+
 If `tsx` is not listed as a devDependency, run:
+
 ```bash
 pnpm add -D tsx
 ```
@@ -340,18 +358,18 @@ import { resolve, dirname } from 'path';
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface TokenNode {
-  $type?:       string;
-  $value?:      unknown;
+  $type?: string;
+  $value?: unknown;
   $description?: string;
   $extensions?: { 'com.hirobius.modes'?: { light?: unknown; dark?: unknown } };
   [key: string]: unknown;
 }
 
 interface FlatToken {
-  path:  string[];   // e.g. ['primitive','color','blue','500']
-  type:  string;
+  path: string[]; // e.g. ['primitive','color','blue','500']
+  type: string;
   value: unknown;
-  dark?: unknown;    // resolved dark-mode value (from $extensions.modes.dark)
+  dark?: unknown; // resolved dark-mode value (from $extensions.modes.dark)
 }
 
 // ── Token walker ──────────────────────────────────────────────────────────────
@@ -360,7 +378,7 @@ function walkTokens(
   node: TokenNode,
   path: string[],
   inheritedType: string,
-  out: FlatToken[]
+  out: FlatToken[],
 ): void {
   const type = (node.$type as string) ?? inheritedType;
 
@@ -370,7 +388,7 @@ function walkTokens(
       path,
       type,
       value: modes?.light ?? node.$value,
-      dark:  modes?.dark,
+      dark: modes?.dark,
     });
     return;
   }
@@ -409,12 +427,12 @@ function resolveValue(val: unknown, root: TokenNode, seen = new Set<string>()): 
     }
     return val;
   }
-  if (Array.isArray(val)) return val.map(v => resolveValue(v, root, new Set(seen)));
+  if (Array.isArray(val)) return val.map((v) => resolveValue(v, root, new Set(seen)));
   if (val !== null && typeof val === 'object') {
     // Use a fresh Set copy per property so sibling references to the same token
     // don't trigger false circular-reference errors.
     return Object.fromEntries(
-      Object.entries(val as object).map(([k, v]) => [k, resolveValue(v, root, new Set(seen))])
+      Object.entries(val as object).map(([k, v]) => [k, resolveValue(v, root, new Set(seen))]),
     );
   }
   return val;
@@ -425,7 +443,7 @@ function resolveValue(val: unknown, root: TokenNode, seen = new Set<string>()): 
 function colorToCss(v: unknown): string {
   if (typeof v === 'string') return v;
   const c = v as { colorSpace: string; components: number[]; alpha?: number; hex?: string };
-  const [r, g, b] = c.components.map(x => Math.round(x * 255));
+  const [r, g, b] = c.components.map((x) => Math.round(x * 255));
   return c.alpha !== undefined && c.alpha < 1
     ? `rgb(${r} ${g} ${b} / ${c.alpha})`
     : `rgb(${r} ${g} ${b})`;
@@ -439,23 +457,29 @@ function dimensionToCss(v: unknown): string {
 
 function shadowToCss(v: unknown): string {
   const layers = Array.isArray(v) ? v : [v];
-  return layers.map((l: unknown) => {
-    const s = l as {
-      color: unknown; offsetX: unknown; offsetY: unknown;
-      blur: unknown; spread: unknown; inset?: boolean;
-    };
-    const col = colorToCss(s.color);
-    const x   = dimensionToCss(s.offsetX);
-    const y   = dimensionToCss(s.offsetY);
-    const b   = dimensionToCss(s.blur);
-    const sp  = dimensionToCss(s.spread);
-    return `${s.inset ? 'inset ' : ''}${x} ${y} ${b} ${sp} ${col}`;
-  }).join(', ');
+  return layers
+    .map((l: unknown) => {
+      const s = l as {
+        color: unknown;
+        offsetX: unknown;
+        offsetY: unknown;
+        blur: unknown;
+        spread: unknown;
+        inset?: boolean;
+      };
+      const col = colorToCss(s.color);
+      const x = dimensionToCss(s.offsetX);
+      const y = dimensionToCss(s.offsetY);
+      const b = dimensionToCss(s.blur);
+      const sp = dimensionToCss(s.spread);
+      return `${s.inset ? 'inset ' : ''}${x} ${y} ${b} ${sp} ${col}`;
+    })
+    .join(', ');
 }
 
 function fontFamilyToCss(v: unknown): string {
   const arr = v as string[];
-  return arr.map(f => f.includes(' ') ? `"${f}"` : f).join(', ');
+  return arr.map((f) => (f.includes(' ') ? `"${f}"` : f)).join(', ');
 }
 
 function cubicBezierToCss(v: unknown): string {
@@ -477,33 +501,42 @@ function transitionToCss(v: unknown): string {
 
 function toCssValue(type: string, val: unknown): string {
   switch (type) {
-    case 'color':       return colorToCss(val);
-    case 'dimension':   return dimensionToCss(val);
-    case 'fontFamily':  return fontFamilyToCss(val);
-    case 'fontWeight':  return String(val);
-    case 'number':      return String(val);
-    case 'duration':    return dimensionToCss(val);
-    case 'cubicBezier': return cubicBezierToCss(val);
-    case 'shadow':      return shadowToCss(val);
-    case 'transition':  return transitionToCss(val);
-    case 'typography':  return ''; // composites expanded separately via expandTypography — never reaches toCssValue
-    default:            return String(val);
+    case 'color':
+      return colorToCss(val);
+    case 'dimension':
+      return dimensionToCss(val);
+    case 'fontFamily':
+      return fontFamilyToCss(val);
+    case 'fontWeight':
+      return String(val);
+    case 'number':
+      return String(val);
+    case 'duration':
+      return dimensionToCss(val);
+    case 'cubicBezier':
+      return cubicBezierToCss(val);
+    case 'shadow':
+      return shadowToCss(val);
+    case 'transition':
+      return transitionToCss(val);
+    case 'typography':
+      return ''; // composites expanded separately via expandTypography — never reaches toCssValue
+    default:
+      return String(val);
   }
 }
 
 // ── CSS var name from path ────────────────────────────────────────────────────
 
 function toVarName(path: string[]): string {
-  return '--hds-' + path
-    .map(s => s.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase())
-    .join('-');
+  return '--hds-' + path.map((s) => s.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()).join('-');
 }
 
 // ── Typography composite expander ─────────────────────────────────────────────
 
 type TypographyValue = {
   fontFamily?: unknown;
-  fontSize?:   unknown;
+  fontSize?: unknown;
   fontWeight?: unknown;
   letterSpacing?: unknown;
   lineHeight?: unknown;
@@ -516,14 +549,17 @@ function toLineHeightCss(v: unknown): string {
   return dimensionToCss(v);
 }
 
-function expandTypography(path: string[], val: TypographyValue): Array<{ name: string; value: string }> {
+function expandTypography(
+  path: string[],
+  val: TypographyValue,
+): Array<{ name: string; value: string }> {
   const base = toVarName(path);
   return [
-    { name: `${base}-font-family`,    value: toCssValue('fontFamily', val.fontFamily) },
-    { name: `${base}-font-size`,      value: dimensionToCss(val.fontSize) },
-    { name: `${base}-font-weight`,    value: String(val.fontWeight) },
+    { name: `${base}-font-family`, value: toCssValue('fontFamily', val.fontFamily) },
+    { name: `${base}-font-size`, value: dimensionToCss(val.fontSize) },
+    { name: `${base}-font-weight`, value: String(val.fontWeight) },
     { name: `${base}-letter-spacing`, value: dimensionToCss(val.letterSpacing) },
-    { name: `${base}-line-height`,    value: toLineHeightCss(val.lineHeight) },
+    { name: `${base}-line-height`, value: toLineHeightCss(val.lineHeight) },
   ];
 }
 
@@ -554,25 +590,25 @@ function toCssValuePreservingRef(type: string, raw: unknown, root: TokenNode): s
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 const root = JSON.parse(
-  readFileSync(resolve(process.cwd(), 'hirobius.tokens.json'), 'utf-8')
+  readFileSync(resolve(process.cwd(), 'hirobius.tokens.json'), 'utf-8'),
 ) as TokenNode;
 
 const tokens: FlatToken[] = [];
 walkTokens(root, [], '', tokens);
 
 // Resolve all values
-const resolved = tokens.map(t => ({
+const resolved = tokens.map((t) => ({
   ...t,
   resolvedValue: resolveValue(t.value, root),
-  resolvedDark:  t.dark !== undefined ? resolveValue(t.dark, root) : undefined,
+  resolvedDark: t.dark !== undefined ? resolveValue(t.dark, root) : undefined,
 }));
 
 // ── CSS generation ────────────────────────────────────────────────────────────
 
-const primitiveVars:  string[] = [];
-const semanticVars:   string[] = [];
-const componentVars:  string[] = [];
-const darkOverrides:  string[] = [];
+const primitiveVars: string[] = [];
+const semanticVars: string[] = [];
+const componentVars: string[] = [];
+const darkOverrides: string[] = [];
 
 for (const t of resolved) {
   const tier = t.path[0];
@@ -581,7 +617,7 @@ for (const t of resolved) {
   if (t.type === 'typography') {
     const tv = t.resolvedValue as TypographyValue;
     const props = expandTypography(t.path, tv);
-    const lines = props.map(p => `  ${p.name}: ${p.value};`).join('\n');
+    const lines = props.map((p) => `  ${p.name}: ${p.value};`).join('\n');
     if (tier === 'primitive') primitiveVars.push(lines);
     else if (tier === 'semantic') semanticVars.push(lines);
     continue;
@@ -595,8 +631,8 @@ for (const t of resolved) {
 
   // Semantic/component — preserve var() reference chain
   const cssVal = toCssValuePreservingRef(t.type, t.value, root);
-  if (tier === 'semantic')   semanticVars.push(`  ${varName}: ${cssVal};`);
-  if (tier === 'component')  componentVars.push(`  ${varName}: ${cssVal};`);
+  if (tier === 'semantic') semanticVars.push(`  ${varName}: ${cssVal};`);
+  if (tier === 'component') componentVars.push(`  ${varName}: ${cssVal};`);
 
   // Dark mode override
   if (t.resolvedDark !== undefined) {
@@ -842,7 +878,7 @@ function serializeTsNode(node: TsNode | string, indent: number): string {
 }
 
 function buildTsObject(tokens: typeof resolved, tier: string): string {
-  const tree = buildTsTree(tokens.filter(t => t.path[0] === tier));
+  const tree = buildTsTree(tokens.filter((t) => t.path[0] === tier));
   const tierNode = (tree[tier] ?? {}) as TsNode;
   return serializeTsNode(tierNode, 1);
 }
@@ -923,6 +959,7 @@ git commit -m "feat: add W3C DTCG token build script"
 ### Task 3: Run build, verify output, wire CSS
 
 **Files:**
+
 - Modify: `package.json`
 - Modify: `src/styles/index.css`
 - Creates (generated): `src/styles/tokens.css`, `src/tokens.ts`
@@ -945,6 +982,7 @@ pnpm tokens
 ```
 
 Expected output:
+
 ```
 ✓ src/styles/tokens.css
 ✓ src/tokens.ts
@@ -999,12 +1037,12 @@ Open `index.html` and add an inline script in `<head>` **before** the React bund
 
 ```html
 <script>
-  (function() {
+  (function () {
     try {
       var t = localStorage.getItem('theme') || localStorage.getItem('hds-theme');
       if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', t);
-    } catch(e) {}
+    } catch (e) {}
   })();
 </script>
 ```
@@ -1027,6 +1065,7 @@ git commit -m "feat: wire generated token CSS into app, add dark variant, flash 
 ### Task 4: Simplify `ThemeContext.tsx`
 
 **Files:**
+
 - Modify: `src/app/context/ThemeContext.tsx`
 
 - [ ] **Step 1: Replace ThemeContext**
@@ -1037,7 +1076,7 @@ Replace the entire file with:
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 
 interface ThemeCtx {
-  isDark:     boolean;
+  isDark: boolean;
   toggleDark: () => void;
 }
 
@@ -1056,18 +1095,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [isDark, setIsDark] = useState(getInitialDark);
 
   useEffect(() => {
-    try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch {}
+    try {
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    } catch {}
     // data-theme only — .dark class removed (no longer needed without shadcn)
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
-  const toggleDark = useCallback(() => setIsDark(d => !d), []);
+  const toggleDark = useCallback(() => setIsDark((d) => !d), []);
 
-  return (
-    <ThemeContext.Provider value={{ isDark, toggleDark }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ isDark, toggleDark }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {
@@ -1095,6 +1132,7 @@ git commit -m "refactor: simplify ThemeContext to data-theme only, migrate local
 ### Task 5: Delete old files + shadcn UI components
 
 **Files:**
+
 - Delete: `src/app/design-system/tokens.ts`
 - Delete: `src/app/design-system/theme.ts`
 - Delete: `src/styles/theme.css`
@@ -1138,6 +1176,7 @@ git commit -m "chore: delete old HDS tokens, theme.ts (ct()), shadcn UI componen
 ## Chunk 3: Core component migration
 
 > **Migration pattern for every file:**
+>
 > 1. Replace `import hds from '../design-system/tokens'` → `import { hds } from '../../tokens'` (adjust relative path)
 > 2. Replace `import { ct } from '../design-system/theme'` → remove entirely
 > 3. Replace `ct(isDark).*` → CSS var strings (see color mapping table above)
@@ -1148,6 +1187,7 @@ git commit -m "chore: delete old HDS tokens, theme.ts (ct()), shadcn UI componen
 ### Task 6: Migrate `BulgeCard.tsx`, `NavBar.tsx`, `Root.tsx`
 
 **Files:**
+
 - Modify: `src/app/components/BulgeCard.tsx`
 - Modify: `src/app/components/NavBar.tsx`
 - Modify: `src/app/pages/Root.tsx`
@@ -1155,9 +1195,11 @@ git commit -m "chore: delete old HDS tokens, theme.ts (ct()), shadcn UI componen
 - [ ] **Step 1: Migrate `BulgeCard.tsx`**
 
 `BulgeCard.tsx` uses only `hds.color.brand` (line 21). Apply:
+
 - Import: `import { hds } from '../../tokens';`
 - `const BRAND_BLUE = hds.primitive.color.blue[500];`
   Note: this is a CSS var string `'var(--hds-primitive-color-blue-500)'`. For canvas drawing (WebGL/SVG fill), you need the resolved hex. Add a comment and use the raw hex directly for the canvas context, or resolve via `getComputedStyle`:
+
   ```ts
   // Brand blue for canvas — use raw hex since canvas can't resolve CSS vars
   const BRAND_BLUE = '#1e2fff';
@@ -1166,6 +1208,7 @@ git commit -m "chore: delete old HDS tokens, theme.ts (ct()), shadcn UI componen
 - [ ] **Step 2: Migrate `NavBar.tsx`**
 
 Key changes (all surface/layout/space values):
+
 ```tsx
 import { hds } from '../../tokens';
 // Remove: import hds from '../design-system/tokens';
@@ -1189,7 +1232,7 @@ import { hds } from '../tokens';
 
 // hds.color.surface.page[th]  →  use CSS class instead of inline style
 // Replace the injected <style> with a className approach, or use:
-background: 'var(--hds-semantic-color-bg-primary)'
+background: 'var(--hds-semantic-color-bg-primary)';
 
 // hds.fontFamily  →  remove (now set by @layer base in tokens.css)
 ```
@@ -1212,6 +1255,7 @@ git commit -m "refactor: migrate BulgeCard, NavBar, Root to new HDS token system
 ### Task 7: Migrate `WorkGallery.tsx` + `WorkGalleryGrid.tsx`
 
 **Files:**
+
 - Modify: `src/app/components/WorkGallery.tsx`
 - Modify: `src/app/components/WorkGalleryGrid.tsx`
 
@@ -1220,13 +1264,12 @@ These are the most token-heavy components. Apply the full mapping tables.
 - [ ] **Step 1: Migrate `WorkGalleryGrid.tsx`**
 
 Key changes:
+
 ```tsx
 import { hds } from '../../tokens';
 
 // hds.color.surface.thumbnail[isDark ? 'dark' : 'light']  →
-const thumbnailColor = isDark
-  ? hds.primitive.color.neutral[600]
-  : hds.primitive.color.neutral[400];
+const thumbnailColor = isDark ? hds.primitive.color.neutral[600] : hds.primitive.color.neutral[400];
 
 // hds.layout.pageGutterH  →  hds.semantic.layout['page-gutter-h']
 // hds.space.px16           →  hds.primitive.space[4]
@@ -1243,6 +1286,7 @@ const thumbnailColor = isDark
 - [ ] **Step 2: Migrate `WorkGallery.tsx`**
 
 High-volume migration. Apply same patterns:
+
 - All `hds.space.*` → new space tokens
 - All `hds.layout.*` → `hds.semantic.layout[...]`
 - All `hds.typeStyles.*` → `hds.semantic.typography.*` (see typography mapping table)
@@ -1268,6 +1312,7 @@ git commit -m "refactor: migrate WorkGallery, WorkGalleryGrid to new HDS token s
 ### Task 8: Migrate remaining components
 
 **Files:**
+
 - Modify: `src/app/components/HdsButton.tsx`
 - Modify: `src/app/components/ExpandTooltip.tsx`
 - Modify: `src/app/components/InfoPage.tsx`
@@ -1277,6 +1322,7 @@ git commit -m "refactor: migrate WorkGallery, WorkGalleryGrid to new HDS token s
 - [ ] **Step 1: Migrate `HdsButton.tsx`**
 
 Key changes:
+
 ```tsx
 import { hds } from '../../tokens';
 // Remove ct() — colors via CSS vars
@@ -1370,6 +1416,7 @@ git commit -m "refactor: migrate HdsButton, ExpandTooltip, InfoPage, AssetImg, L
 These files are documentation components for the old token system. They must be updated to document the new system.
 
 **Files:**
+
 - Modify: `src/app/components/DocSections.tsx`
 - Modify: `src/app/components/HDSDocPanels.tsx`
 
@@ -1389,28 +1436,42 @@ import { hds } from '../../tokens';
 Update the `MOTION_DEMOS` array to use `hds.motion.duration.*` values (raw seconds for Motion).
 
 Update the typography specimen array to use new typescale names:
+
 ```tsx
 const TYPE_SPECIMENS = [
-  { name: 'label-small',  specimen: 'ACCESSIBILITY',            style: hds.semantic.typography.labelSmall },
-  { name: 'label-medium', specimen: 'Motion · React · meta',    style: hds.semantic.typography.labelMedium },
-  { name: 'title-medium', specimen: 'HIROBIUS DESIGN',          style: hds.semantic.typography.titleMedium },
-  { name: 'body-large',   specimen: 'Project description copy', style: hds.semantic.typography.bodyLarge },
-  { name: 'display-small',specimen: '12M+',                     style: hds.semantic.typography.displaySmall },
-  { name: 'label-small',  specimen: 'WORK',                     style: { ...hds.semantic.typography.labelSmall, textTransform: 'uppercase' as const } },
+  { name: 'label-small', specimen: 'ACCESSIBILITY', style: hds.semantic.typography.labelSmall },
+  {
+    name: 'label-medium',
+    specimen: 'Motion · React · meta',
+    style: hds.semantic.typography.labelMedium,
+  },
+  { name: 'title-medium', specimen: 'HIROBIUS DESIGN', style: hds.semantic.typography.titleMedium },
+  {
+    name: 'body-large',
+    specimen: 'Project description copy',
+    style: hds.semantic.typography.bodyLarge,
+  },
+  { name: 'display-small', specimen: '12M+', style: hds.semantic.typography.displaySmall },
+  {
+    name: 'label-small',
+    specimen: 'WORK',
+    style: { ...hds.semantic.typography.labelSmall, textTransform: 'uppercase' as const },
+  },
 ];
 ```
 
 Update `ACCENT_STEPS`, `SURFACE_TIERS`, `FEEDBACK_COLORS` exports to pull from the new token system:
+
 ```tsx
 // Old: Object.entries(hds.color.accent)
 // New: pull directly from semantic token CSS vars (display as table, not computed from JS)
-export const ACCENT_STEPS = [50,100,200,300,400,500,600,700,800,900].map(n => ({
+export const ACCENT_STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((n) => ({
   step: n,
   cssVar: `--hds-primitive-color-blue-${n}`,
   value: `var(--hds-primitive-color-blue-${n})`,
 }));
 
-export const FEEDBACK_COLORS = ['success','warning','error','info'].map(name => ({
+export const FEEDBACK_COLORS = ['success', 'warning', 'error', 'info'].map((name) => ({
   name,
   cssVar: `--hds-semantic-color-feedback-${name}`,
   value: `var(--hds-semantic-color-feedback-${name})`,
@@ -1451,6 +1512,7 @@ git commit -m "refactor: update HDSDoc components to document new W3C token syst
 ### Task 10: Migrate `hds/*` page components
 
 **Files:**
+
 - Modify: `src/app/pages/hds/HDSLayout.tsx`
 - Modify: `src/app/pages/hds/OverviewPage.tsx`
 - Modify: `src/app/pages/hds/ArchitecturePage.tsx`
@@ -1475,6 +1537,7 @@ import { hds } from '../../../tokens';
 - [ ] **Step 2: Migrate `ArchitecturePage.tsx`**
 
 Update the architecture description text to reference the new system:
+
 - Old: "Three-tier token hierarchy: primitives in tokens.ts, runtime theme in ct(isDark), and CSS custom properties in theme.css"
 - New: "Three-tier token hierarchy: primitives → semantics → components, all defined in hirobius.tokens.json, compiled to tokens.css and tokens.ts by scripts/build-tokens.ts"
 
@@ -1493,15 +1556,17 @@ Update to display the 14-style MD3 typescale. Replace `TYPE_PRESETS` with the ne
 Apply mapping tables. Update any hardcoded doc strings that reference old token paths or CSS var names.
 
 For `MotionPage.tsx`, update easing references:
+
 ```tsx
 const EASING_PRESETS = {
   expressive: hds.motion.easing.expressive,
-  standard:   hds.motion.easing.easeInOut,
+  standard: hds.motion.easing.easeInOut,
 };
 const maxDur = hds.motion.duration.spin;
 ```
 
 For `GuidancePage.tsx`, update the do/don't rules to reference new token paths:
+
 - Old: "Import ct() from design-system/theme..."
 - New: "Use CSS vars directly — `var(--hds-semantic-color-*)` — or import `{ hds }` from `src/tokens.ts` for typed constants"
 
@@ -1527,13 +1592,14 @@ git commit -m "refactor: migrate all HDS doc pages to new W3C token system"
 ### Task 11: Write `DEVELOPMENT.md`
 
 **Files:**
+
 - Create: `DEVELOPMENT.md`
 
 - [ ] **Step 1: Create the file**
 
 Create `DEVELOPMENT.md` at the repo root:
 
-```markdown
+````markdown
 # Development Guide
 
 ## Prerequisites
@@ -1555,17 +1621,18 @@ pnpm install
 # 3. Run dev server (compiles tokens first, then starts Vite)
 pnpm dev
 ```
+````
 
 Open [http://localhost:5173](http://localhost:5173).
 
 ## Scripts
 
-| Command | What it does |
-|---|---|
-| `pnpm dev` | Compile tokens → start Vite dev server |
-| `pnpm build` | Compile tokens → TypeScript check → Vite production build |
-| `pnpm tokens` | Compile tokens only (run after editing `hirobius.tokens.json`) |
-| `pnpm preview` | Preview the production build locally |
+| Command        | What it does                                                   |
+| -------------- | -------------------------------------------------------------- |
+| `pnpm dev`     | Compile tokens → start Vite dev server                         |
+| `pnpm build`   | Compile tokens → TypeScript check → Vite production build      |
+| `pnpm tokens`  | Compile tokens only (run after editing `hirobius.tokens.json`) |
+| `pnpm preview` | Preview the production build locally                           |
 
 ## Token pipeline
 
@@ -1577,16 +1644,17 @@ The design system uses a **W3C DTCG 2025.10-compliant** three-tier token archite
 
 ### Tiers
 
-| Tier | JSON key | CSS prefix | JS path | Purpose |
-|---|---|---|---|---|
-| Primitive | `primitive` | `--hds-primitive-*` | `hds.primitive.*` | Raw values — never apply to UI directly |
-| Semantic | `semantic` | `--hds-semantic-*` | `hds.semantic.*` | Purpose-driven aliases — this is where theming happens |
-| Component | `component` | `--hds-component-*` | `hds.component.*` | Scoped to specific UI elements |
+| Tier      | JSON key    | CSS prefix          | JS path           | Purpose                                                |
+| --------- | ----------- | ------------------- | ----------------- | ------------------------------------------------------ |
+| Primitive | `primitive` | `--hds-primitive-*` | `hds.primitive.*` | Raw values — never apply to UI directly                |
+| Semantic  | `semantic`  | `--hds-semantic-*`  | `hds.semantic.*`  | Purpose-driven aliases — this is where theming happens |
+| Component | `component` | `--hds-component-*` | `hds.component.*` | Scoped to specific UI elements                         |
 
 ### Adding a token
 
 1. Open `hirobius.tokens.json`
 2. Add the token under the appropriate tier, following the DTCG format:
+
    ```json
    // Color (W3C DTCG 2025.10 format)
    "my-token": {
@@ -1606,6 +1674,7 @@ The design system uses a **W3C DTCG 2025.10-compliant** three-tier token archite
      "$value": "{primitive.color.blue.500}"
    }
    ```
+
 3. For tokens with dark mode variants, add `$extensions`:
    ```json
    "$extensions": {
@@ -1620,16 +1689,19 @@ The design system uses a **W3C DTCG 2025.10-compliant** three-tier token archite
 ### Using tokens in components
 
 **Tailwind utilities (preferred for layout/color):**
+
 ```tsx
 <div className="bg-bg-primary text-text-primary border-border-default">
 ```
 
 **CSS vars in inline styles (for dynamic values):**
+
 ```tsx
 <div style={{ background: 'var(--hds-semantic-color-bg-secondary)' }}>
 ```
 
 **TypeScript constants (for programmatic access):**
+
 ```tsx
 import { hds } from '@/tokens';
 
@@ -1687,30 +1759,31 @@ scripts/
 
 14-style MD3-structured typescale, all values on the 4px grid. Use `hds.semantic.typography.*` for inline styles or the Tailwind text utilities.
 
-| Style | Size | Weight | Use case |
-|---|---|---|---|
-| `displayLarge` | 60px | 400 | Hero text |
-| `displayMedium` | 48px | 400 | Large feature sections |
-| `displaySmall` | 36px | 400 | Section openers, metrics |
-| `headlineLarge` | 32px | 400 | Page headers |
-| `headlineMedium` | 28px | 400 | Section headers |
-| `headlineSmall` | 24px | 400 | Sub-section headers |
-| `titleLarge` | 22px | 500 | Card titles |
-| `titleMedium` | 16px | 500 | Panel headers, nav |
-| `titleSmall` | 14px | 500 | Compact titles |
-| `bodyLarge` | 16px | 400 | Prose, descriptions |
-| `bodyMedium` | 14px | 400 | Secondary copy |
-| `labelLarge` | 14px | 500 | UI labels |
-| `labelMedium` | 12px | 500 | Captions, metadata |
-| `labelSmall` | 11px | 500 | Tags, nav items |
-```
+| Style            | Size | Weight | Use case                 |
+| ---------------- | ---- | ------ | ------------------------ |
+| `displayLarge`   | 60px | 400    | Hero text                |
+| `displayMedium`  | 48px | 400    | Large feature sections   |
+| `displaySmall`   | 36px | 400    | Section openers, metrics |
+| `headlineLarge`  | 32px | 400    | Page headers             |
+| `headlineMedium` | 28px | 400    | Section headers          |
+| `headlineSmall`  | 24px | 400    | Sub-section headers      |
+| `titleLarge`     | 22px | 500    | Card titles              |
+| `titleMedium`    | 16px | 500    | Panel headers, nav       |
+| `titleSmall`     | 14px | 500    | Compact titles           |
+| `bodyLarge`      | 16px | 400    | Prose, descriptions      |
+| `bodyMedium`     | 14px | 400    | Secondary copy           |
+| `labelLarge`     | 14px | 500    | UI labels                |
+| `labelMedium`    | 12px | 500    | Captions, metadata       |
+| `labelSmall`     | 11px | 500    | Tags, nav items          |
+
+````
 
 - [ ] **Step 2: Update `README.md` to point to DEVELOPMENT.md**
 
 Add to the top of `README.md`:
 ```markdown
 > **Getting started?** See [DEVELOPMENT.md](./DEVELOPMENT.md) for local setup, the token pipeline, and component conventions.
-```
+````
 
 - [ ] **Step 3: Commit**
 
@@ -1739,6 +1812,7 @@ pnpm dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173). Verify:
+
 - Site loads without blank screen or console errors
 - Dark mode toggle works (data-theme attribute switches on `<html>`)
 - Colors update correctly on theme switch (no hardcoded values remaining)
@@ -1770,10 +1844,9 @@ Check the Vercel dashboard or wait for the deploy URL. Confirm the live site loa
 
 ## Summary of all files changed
 
-| Action | Files |
-|---|---|
-| **Created** | `hirobius.tokens.json`, `scripts/build-tokens.ts`, `src/styles/tokens.css` (generated), `src/tokens.ts` (generated), `DEVELOPMENT.md` |
-| **Modified** | `package.json`, `src/styles/index.css`, `src/app/context/ThemeContext.tsx`, `README.md` |
+| Action       | Files                                                                                                                                                                                                                                  |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Created**  | `hirobius.tokens.json`, `scripts/build-tokens.ts`, `src/styles/tokens.css` (generated), `src/tokens.ts` (generated), `DEVELOPMENT.md`                                                                                                  |
+| **Modified** | `package.json`, `src/styles/index.css`, `src/app/context/ThemeContext.tsx`, `README.md`                                                                                                                                                |
 | **Migrated** | `BulgeCard.tsx`, `NavBar.tsx`, `Root.tsx`, `WorkGallery.tsx`, `WorkGalleryGrid.tsx`, `HdsButton.tsx`, `ExpandTooltip.tsx`, `InfoPage.tsx`, `AssetImg.tsx`, `Lightbox.tsx`, `DocSections.tsx`, `HDSDocPanels.tsx`, 8× `hds/*.tsx` pages |
-| **Deleted** | `src/app/design-system/tokens.ts`, `src/app/design-system/theme.ts`, `src/styles/theme.css`, `src/app/components/ui/` (48 files) |
-
+| **Deleted**  | `src/app/design-system/tokens.ts`, `src/app/design-system/theme.ts`, `src/styles/theme.css`, `src/app/components/ui/` (48 files)                                                                                                       |

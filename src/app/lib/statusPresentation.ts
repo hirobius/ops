@@ -85,7 +85,10 @@ export function statusTone(status: string | undefined): BadgeTone {
 }
 
 /** Human label for a status — operator wording by default, client wording on request. */
-export function statusLabel(status: string | undefined, audience: StatusAudience = 'operator'): string {
+export function statusLabel(
+  status: string | undefined,
+  audience: StatusAudience = 'operator',
+): string {
   const table = audience === 'client' ? CLIENT_LABEL : OPERATOR_LABEL;
   return table[status ?? ''] ?? status ?? '—';
 }

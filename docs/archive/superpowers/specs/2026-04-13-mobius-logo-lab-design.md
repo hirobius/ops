@@ -1,4 +1,5 @@
 # Möbius Logo Lab — Design Spec
+
 **Date:** 2026-04-13
 **Status:** Approved
 **Scope:** Vibe Sketchbook — `/vibe-sketchbook/logo-lab`
@@ -18,6 +19,7 @@ A production-quality 3D Möbius logo component built with react-three-fiber, dri
 Preset transitions are communicated through geometry changes: tube radius, twist count, segment count, vertex deformation. Post-processing (bloom, chromatic aberration, noise, vignette) is atmosphere — it gives the canvas physical texture and cinematic weight, but it never carries the narrative.
 
 Practical ceilings:
+
 - `bloomIntensity` max: **0.5** across all presets
 - `chromaticAberration` max: **0.003** — barely perceptible, lens-quality only
 - `noiseOpacity`: **0.02–0.04** constant across all presets (film grain, not effect)
@@ -35,19 +37,20 @@ The R3F canvas lives **inside the Vibe Sketchbook only** for this phase. It does
 
 ## New Dependencies
 
-| Package | Purpose |
-|---|---|
-| `@react-three/fiber` | Declarative Three.js renderer |
-| `@react-three/drei` | OrbitControls, MeshTransmissionMaterial, Environment |
-| `@react-three/postprocessing` | Bloom, ChromaticAberration, Noise, Vignette |
-| `leva` | Dev-time parameter panel (sketchbook only) |
-| `zustand` | Global uniform store |
+| Package                       | Purpose                                              |
+| ----------------------------- | ---------------------------------------------------- |
+| `@react-three/fiber`          | Declarative Three.js renderer                        |
+| `@react-three/drei`           | OrbitControls, MeshTransmissionMaterial, Environment |
+| `@react-three/postprocessing` | Bloom, ChromaticAberration, Noise, Vignette          |
+| `leva`                        | Dev-time parameter panel (sketchbook only)           |
+| `zustand`                     | Global uniform store                                 |
 
 ---
 
 ## File Plan
 
 ### New files
+
 ```
 src/app/stores/mobiusStore.ts            ← zustand store + presets + reset action
 src/app/components/MobiusLogo.tsx     ← production R3F Canvas + scene + effects
@@ -56,14 +59,17 @@ src/app/pages/sketches/LogoLabSketch.tsx ← Leva panel wrapper (sketchbook only
 ```
 
 ### Modified files
+
 ```
 src/app/routes.tsx                       ← add logo-lab route under vibe-sketchbook
 ```
 
 ### Dependency direction
+
 ```
 LogoLabSketch → MobiusLogo → MobiusScene → mobiusStore
 ```
+
 Leva never touches `MobiusLogo` or `MobiusScene` directly. The store is the only interface.
 
 ---
@@ -73,58 +79,72 @@ Leva never touches `MobiusLogo` or `MobiusScene` directly. The store is the only
 ### Uniform groups
 
 **Geometry** (drives TubeGeometry reconstruction via `useMemo`)
+
 ```ts
-tubeRadius: number        // fatness of the tube — range [0.01, 0.20]
-pathRadius: number        // radius of the ring — range [0.4, 2.0]
-twistCount: number        // half-twists (1 = classic Möbius) — range [1, 4]
-tubularSegments: number   // smoothness along path — range [64, 512]
-radialSegments: number    // smoothness of cross-section — range [4, 24]
+tubeRadius: number; // fatness of the tube — range [0.01, 0.20]
+pathRadius: number; // radius of the ring — range [0.4, 2.0]
+twistCount: number; // half-twists (1 = classic Möbius) — range [1, 4]
+tubularSegments: number; // smoothness along path — range [64, 512]
+radialSegments: number; // smoothness of cross-section — range [4, 24]
 ```
 
 **Material** (updates in place each frame)
+
 ```ts
-wireframe: boolean
-transmission: number      // 0 = opaque, 1 = fully glass
-roughness: number
-thickness: number         // glass refraction depth
-metalness: number
-color: string             // initialized from --semantic-color-accent-primary CSS var
+wireframe: boolean;
+transmission: number; // 0 = opaque, 1 = fully glass
+roughness: number;
+thickness: number; // glass refraction depth
+metalness: number;
+color: string; // initialized from --semantic-color-accent-primary CSS var
 ```
 
 **Post-processing** (EffectComposer pass intensities)
+
 ```ts
-bloomIntensity: number
-bloomThreshold: number
-chromaticAberration: number
-noiseOpacity: number
-vignetteIntensity: number
+bloomIntensity: number;
+bloomThreshold: number;
+chromaticAberration: number;
+noiseOpacity: number;
+vignetteIntensity: number;
 ```
 
 **Transform / animation**
+
 ```ts
-scale: number
-rotationSpeed: number     // idle spin — radians/sec
-pulseEnabled: boolean     // data pulse animation (tokens preset)
-pulseFrequency: number
-mouseInfluence: number    // magnetic pull strength [0, 1]
+scale: number;
+rotationSpeed: number; // idle spin — radians/sec
+pulseEnabled: boolean; // data pulse animation (tokens preset)
+pulseFrequency: number;
+mouseInfluence: number; // magnetic pull strength [0, 1]
 ```
 
 **System**
+
 ```ts
-performanceTier: 'high' | 'medium' | 'low'   // auto-detected at mount, Leva-overridable
-reducedMotion: boolean                         // mirrors prefers-reduced-motion media query
-activePreset: 'home' | 'tokens' | 'foundations' | 'components' | 'content' | 'sketchbook' | 'glitch' | 'lab'
+performanceTier: 'high' | 'medium' | 'low'; // auto-detected at mount, Leva-overridable
+reducedMotion: boolean; // mirrors prefers-reduced-motion media query
+activePreset: 'home' |
+  'tokens' |
+  'foundations' |
+  'components' |
+  'content' |
+  'sketchbook' |
+  'glitch' |
+  'lab';
 ```
 
 **Additional uniforms** for geometry deformation effects:
+
 ```ts
-uWaveAmplitude: number    // how much the tube pinches at compression points [0, 0.8]
-uWaveFrequency: number    // how many compression nodes travel the path simultaneously
-uWaveSpeed: number        // rate the wave travels the path [0, 4.0]
-uGlitchIntensity: number  // random vertex displacement for glitch state [0, 1]
+uWaveAmplitude: number; // how much the tube pinches at compression points [0, 0.8]
+uWaveFrequency: number; // how many compression nodes travel the path simultaneously
+uWaveSpeed: number; // rate the wave travels the path [0, 4.0]
+uGlitchIntensity: number; // random vertex displacement for glitch state [0, 1]
 ```
 
 ### Actions
+
 ```ts
 setUniforms(partial: Partial<MobiusUniforms>): void
 setPreset(preset: PresetKey): void
@@ -135,22 +155,23 @@ reset(): void   // spreads MOBIUS_DEFAULTS back onto state
 
 #### Core three (route-targeted, dialed in via lab)
 
-| Preset | Visual concept | Key values |
-|---|---|---|
-| `home` | Full, smooth, glass — resting state of the form | tubeRadius 0.14, twistCount 1, tubularSegments 256, transmission 0.9, rotationSpeed 0.25, bloomIntensity 0.4 |
-| `tokens` | **Compression Wave** — geometry pulses, data moves through topology | tubeRadius 0.05, twistCount 1, uWaveAmplitude 0.7, uWaveFrequency 3, uWaveSpeed 1.8, wireframe false, bloomIntensity 0.3 |
-| `foundations` | Angular, structural — low segment count exposes the mesh | tubeRadius 0.09, twistCount 1, radialSegments 6, tubularSegments 80, metalness 0.85, roughness 0.15, bloomIntensity 0.25 |
+| Preset        | Visual concept                                                      | Key values                                                                                                               |
+| ------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `home`        | Full, smooth, glass — resting state of the form                     | tubeRadius 0.14, twistCount 1, tubularSegments 256, transmission 0.9, rotationSpeed 0.25, bloomIntensity 0.4             |
+| `tokens`      | **Compression Wave** — geometry pulses, data moves through topology | tubeRadius 0.05, twistCount 1, uWaveAmplitude 0.7, uWaveFrequency 3, uWaveSpeed 1.8, wireframe false, bloomIntensity 0.3 |
+| `foundations` | Angular, structural — low segment count exposes the mesh            | tubeRadius 0.09, twistCount 1, radialSegments 6, tubularSegments 80, metalness 0.85, roughness 0.15, bloomIntensity 0.25 |
 
 #### Shell presets (defined now, consumed when logo promotes to HDSLayout)
 
-| Preset | Visual concept | Key values |
-|---|---|---|
-| `components` | Attentive, interactive — slightly tighter form, mouse-responsive | tubeRadius 0.10, twistCount 1, transmission 0.75, mouseInfluence 0.85, rotationSpeed 0.4 |
-| `content` | Receding — smaller, slower, ambient background presence | tubeRadius 0.06, twistCount 1, scale 0.65, transmission 0.6, rotationSpeed 0.12, bloomIntensity 0.2 |
-| `sketchbook` | Full expressiveness — Leva in control, no constraints | Store is not overridden; whatever Leva currently holds |
-| `glitch` | Broken topology — vertex displacement tears the surface | tubeRadius 0.09, uGlitchIntensity 0.6, rotationSpeed 6.0, radialSegments 5, chromaticAberration 0.004, bloomIntensity 0.5 |
+| Preset       | Visual concept                                                   | Key values                                                                                                                |
+| ------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `components` | Attentive, interactive — slightly tighter form, mouse-responsive | tubeRadius 0.10, twistCount 1, transmission 0.75, mouseInfluence 0.85, rotationSpeed 0.4                                  |
+| `content`    | Receding — smaller, slower, ambient background presence          | tubeRadius 0.06, twistCount 1, scale 0.65, transmission 0.6, rotationSpeed 0.12, bloomIntensity 0.2                       |
+| `sketchbook` | Full expressiveness — Leva in control, no constraints            | Store is not overridden; whatever Leva currently holds                                                                    |
+| `glitch`     | Broken topology — vertex displacement tears the surface          | tubeRadius 0.09, uGlitchIntensity 0.6, rotationSpeed 6.0, radialSegments 5, chromaticAberration 0.004, bloomIntensity 0.5 |
 
 #### Lab
+
 `lab` — store is not reset on switch; Leva controls everything.
 
 ---
@@ -189,6 +210,7 @@ The goal is geometry-as-data. The tube remains readable; the surface itself carr
 - **Effect**: the shape breaks. Not a light show — the mesh itself looks wrong.
 
 ### `MOBIUS_DEFAULTS`
+
 Single exported constant. `reset()` spreads this back onto state. Mirrors the `home` preset.
 
 ---
@@ -217,22 +239,26 @@ Smooth transitions between geometry states: `useFrame` lerps `current` parameter
 Three material modes, switched by `activePreset` and store flags:
 
 **Glass** (default — `home`, `foundations`, `components`, `content`)
+
 - `MeshPhysicalMaterial` with `transmission`, `roughness`, `thickness`, `metalness` driven by store
 - `envMapIntensity` from `<Environment preset="city" />` (drei) — baked lighting, no per-frame cost
 - `wireframe` flag available as a mode override
 
 **Luminous Thread** (`tokens`)
+
 - Custom `ShaderMaterial` (or `onBeforeCompile` hook on `MeshStandardMaterial`)
 - Injects `uTracePosition` and `uTraceIntensity` uniforms into fragment shader emissive output
 - Baseline emissive `+ spike at trace position` = traveling glow effect
 
 **Matcap** (Leva-selectable in lab, optional shell override)
+
 - `MeshMatcapMaterial` from drei + a dark studio/neon matcap texture
 - Bakes complex lighting into a single texture sample — zero lighting setup cost
 - Makes the glass look "expensive" on low-end hardware where `MeshPhysicalMaterial` transmission is disabled
 - Texture file: `public/assets/matcaps/studio-dark.png` (to be sourced)
 
 Performance tier override:
+
 - **High**: `MeshPhysicalMaterial` with full transmission (or ShaderMaterial for tokens preset)
 - **Medium**: `MeshPhysicalMaterial`, transmission disabled; matcap fallback available
 - **Low**: `MeshMatcapMaterial` — single texture sample, no environment map, no transmission
@@ -251,6 +277,7 @@ Performance tier override:
 ```
 
 Performance tier override:
+
 - **High**: all four passes active
 - **Medium**: Bloom only
 - **Low**: no post-processing
@@ -262,6 +289,7 @@ Performance tier override:
 ## Mouse Influence
 
 `useFrame` reads a `mouseRef` (updated via `canvas onMouseMove`). Each frame:
+
 1. Compute normalized cursor position relative to canvas center `[-1, 1]`
 2. Apply damped lerp: `current += (target - current) * 0.08`
 3. Add scaled offset to `mesh.position.x/y` and `mesh.rotation.x/y`
@@ -282,6 +310,7 @@ Within the sketchbook page, a `useEffect` listens to the page scroll container's
 Store initializes `reducedMotion` from `window.matchMedia('(prefers-reduced-motion: reduce)').matches`. A `MediaQueryList` listener keeps it in sync if the user toggles system preferences mid-session.
 
 When `reducedMotion: true`:
+
 - Lerp duration → near-instant (effectively snaps)
 - `rotationSpeed` → 0
 - `pulseEnabled` → false
@@ -293,6 +322,7 @@ When `reducedMotion: true`:
 ## Performance Auto-Detection
 
 At mount, `MobiusLogo` checks `navigator.hardwareConcurrency`. Sets initial `performanceTier`:
+
 - `>= 8` → `'high'`
 - `4–7` → `'medium'`
 - `< 4` → `'low'`
@@ -306,10 +336,12 @@ Leva panel exposes manual override. Override persists in the store for the sessi
 Lerp speed reads from the computed CSS var `--semantic-motion-duration-moderate` at mount:
 
 ```ts
-const duration = parseFloat(
-  getComputedStyle(document.documentElement)
-    .getPropertyValue('--semantic-motion-duration-moderate')
-) || 0.35;
+const duration =
+  parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue(
+      '--semantic-motion-duration-moderate',
+    ),
+  ) || 0.35;
 
 const lerpFactor = 1 - Math.exp(-deltaTime / duration);
 ```

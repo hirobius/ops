@@ -51,20 +51,20 @@ After migration, `orchestration.json` is a historical record of the autonomous-b
 
 New section order (top → bottom):
 
-| # | Component | Change |
-|---|---|---|
-| 1 | PageHeader | unchanged |
-| 2 | SurfacesRail | add "Build" → `/ops/build`, "Knowledge" → `/ops/knowledge` |
-| 3 | StrengthFooter | **moved from bottom** |
-| 4 | StatusBanner | unchanged |
-| 5 | KpiCards | unchanged |
-| 6 | Disclosure: Services | **moved up** from bottom |
-| 7 | Disclosure: Skills | **moved up** from bottom |
-| 8 | Disclosure: Inbox | **moved up** from bottom |
-| 9 | Disclosure: Trace | **moved up** from bottom |
-| 10 | Section: Routes | unchanged (stays expanded) |
-| 11 | Disclosure: Clients | **was Section → now Disclosure** (collapsed by default) |
-| 12 | Disclosure: Gates | **was Section → now Disclosure** (collapsed by default) |
+| #   | Component            | Change                                                     |
+| --- | -------------------- | ---------------------------------------------------------- |
+| 1   | PageHeader           | unchanged                                                  |
+| 2   | SurfacesRail         | add "Build" → `/ops/build`, "Knowledge" → `/ops/knowledge` |
+| 3   | StrengthFooter       | **moved from bottom**                                      |
+| 4   | StatusBanner         | unchanged                                                  |
+| 5   | KpiCards             | unchanged                                                  |
+| 6   | Disclosure: Services | **moved up** from bottom                                   |
+| 7   | Disclosure: Skills   | **moved up** from bottom                                   |
+| 8   | Disclosure: Inbox    | **moved up** from bottom                                   |
+| 9   | Disclosure: Trace    | **moved up** from bottom                                   |
+| 10  | Section: Routes      | unchanged (stays expanded)                                 |
+| 11  | Disclosure: Clients  | **was Section → now Disclosure** (collapsed by default)    |
+| 12  | Disclosure: Gates    | **was Section → now Disclosure** (collapsed by default)    |
 
 Removed: Lanes section, Knowledge section.
 

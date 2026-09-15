@@ -12,21 +12,22 @@
 
 ## File Map
 
-| Action | File | What changes |
-|---|---|---|
-| Modify | `src/app/pages/ops/agentic-os/SurfacesRail.tsx` | Add Build + Knowledge tiles |
-| Create | `src/app/pages/ops/KnowledgePage.tsx` | New hub page — three pillar tiles |
-| Modify | `src/app/routes.tsx` | Add `/ops/knowledge` route |
+| Action | File                                             | What changes                                                       |
+| ------ | ------------------------------------------------ | ------------------------------------------------------------------ |
+| Modify | `src/app/pages/ops/agentic-os/SurfacesRail.tsx`  | Add Build + Knowledge tiles                                        |
+| Create | `src/app/pages/ops/KnowledgePage.tsx`            | New hub page — three pillar tiles                                  |
+| Modify | `src/app/routes.tsx`                             | Add `/ops/knowledge` route                                         |
 | Modify | `src/app/pages/ops/agentic-os/AgenticOSPage.tsx` | Reorder sections, drop Lanes + Knowledge, collapse Clients + Gates |
-| Delete | `src/app/pages/ops/agentic-os/LanesGrid.tsx` | Orphaned — no longer imported |
-| Delete | `src/app/pages/ops/agentic-os/lanes.ts` | Orphaned — only used by LanesGrid |
-| Create | `scripts/migrate-orchestration-to-hermes.mjs` | Migration script |
+| Delete | `src/app/pages/ops/agentic-os/LanesGrid.tsx`     | Orphaned — no longer imported                                      |
+| Delete | `src/app/pages/ops/agentic-os/lanes.ts`          | Orphaned — only used by LanesGrid                                  |
+| Create | `scripts/migrate-orchestration-to-hermes.mjs`    | Migration script                                                   |
 
 ---
 
 ## Task 1: Add Build + Knowledge tiles to SurfacesRail
 
 **Files:**
+
 - Modify: `src/app/pages/ops/agentic-os/SurfacesRail.tsx`
 
 - [ ] **Step 1: Replace the TILES array**
@@ -35,11 +36,15 @@ Open `src/app/pages/ops/agentic-os/SurfacesRail.tsx`. Replace lines 23–27 (the
 
 ```tsx
 const TILES: readonly SurfaceTile[] = [
-  { to: '/ops/atlas',     label: 'Atlas',     description: 'Components · tokens · pipeline · strength' },
-  { to: '/ops/kanban',    label: 'Kanban',    description: 'Live unit board — claim, track, ship' },
-  { to: '/ops/build',     label: 'Build',     description: 'Pipeline stats · cost burn · agent audit' },
+  { to: '/ops/atlas', label: 'Atlas', description: 'Components · tokens · pipeline · strength' },
+  { to: '/ops/kanban', label: 'Kanban', description: 'Live unit board — claim, track, ship' },
+  { to: '/ops/build', label: 'Build', description: 'Pipeline stats · cost burn · agent audit' },
   { to: '/ops/knowledge', label: 'Knowledge', description: 'Build · Grow · Run — ops pillar hub' },
-  { to: '/ops/staging',   label: 'Staging',   description: 'Specimen catalog — filter, promote to HDS' },
+  {
+    to: '/ops/staging',
+    label: 'Staging',
+    description: 'Specimen catalog — filter, promote to HDS',
+  },
 ] as const;
 ```
 
@@ -65,6 +70,7 @@ git commit -m "feat(ops): add Build + Knowledge tiles to SurfacesRail"
 ## Task 2: Create KnowledgePage and add route
 
 **Files:**
+
 - Create: `src/app/pages/ops/KnowledgePage.tsx`
 - Modify: `src/app/routes.tsx`
 
@@ -84,18 +90,18 @@ import hds from '../../design-system/tokens';
 
 const PILLARS = [
   {
-    to:          '/ops/build',
-    label:       'Build',
+    to: '/ops/build',
+    label: 'Build',
     description: 'Autonomous-build pipeline · cost burn · agent audit',
   },
   {
-    to:          '/ops/clients',
-    label:       'Grow',
+    to: '/ops/clients',
+    label: 'Grow',
     description: 'Client pipeline · retainers · prospects',
   },
   {
-    to:          '/ops/atlas',
-    label:       'Run',
+    to: '/ops/atlas',
+    label: 'Run',
     description: 'Guardrail registry · routes · component inventory',
   },
 ] as const;
@@ -112,7 +118,11 @@ export default function KnowledgePage() {
                 <span style={s.label}>{p.label}</span>
                 <span style={s.desc}>{p.description}</span>
               </div>
-              <ArrowRight size={14} color="var(--semantic-color-content-secondary)" aria-hidden="true" />
+              <ArrowRight
+                size={14}
+                color="var(--semantic-color-content-secondary)"
+                aria-hidden="true"
+              />
             </Link>
           ))}
         </nav>
@@ -123,32 +133,32 @@ export default function KnowledgePage() {
 
 const s = {
   root: {
-    display:       'flex',
+    display: 'flex',
     flexDirection: 'column' as const,
-    gap:           hds.space.px24,
+    gap: hds.space.px24,
   },
   grid: {
-    display:             'grid',
+    display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-    gap:                 hds.space.px12,
+    gap: hds.space.px12,
   },
   tile: {
-    display:        'flex',
-    alignItems:     'center',
+    display: 'flex',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    gap:            hds.space.px16,
-    padding:        `${hds.space.px12} ${hds.space.px16}`,
-    background:     'var(--semantic-color-surface-raised)',
-    borderRadius:   hds.borderRadius[8],
+    gap: hds.space.px16,
+    padding: `${hds.space.px12} ${hds.space.px16}`,
+    background: 'var(--semantic-color-surface-raised)',
+    borderRadius: hds.borderRadius[8],
     textDecoration: 'none' as const,
-    color:          'inherit',
-    minWidth:       0,
+    color: 'inherit',
+    minWidth: 0,
   },
   text: {
-    display:       'flex',
+    display: 'flex',
     flexDirection: 'column' as const,
-    gap:           hds.space.px2,
-    minWidth:      0,
+    gap: hds.space.px2,
+    minWidth: 0,
   },
   label: {
     ...hds.typeStyles.body,
@@ -156,11 +166,11 @@ const s = {
   },
   desc: {
     ...hds.typeStyles.ui,
-    fontSize:     hds.fontSize.xs,
-    color:        'var(--semantic-color-content-secondary)',
-    overflow:     'hidden',
+    fontSize: hds.fontSize.xs,
+    color: 'var(--semantic-color-content-secondary)',
+    overflow: 'hidden',
     textOverflow: 'ellipsis',
-    whiteSpace:   'nowrap' as const,
+    whiteSpace: 'nowrap' as const,
   },
 } satisfies Record<string, CSSProperties>;
 ```
@@ -207,9 +217,11 @@ git commit -m "feat(ops): add /ops/knowledge hub page with Build/Grow/Run tiles"
 ## Task 3: Rearrange AgenticOSPage
 
 **Files:**
+
 - Modify: `src/app/pages/ops/agentic-os/AgenticOSPage.tsx`
 
 The goal is to:
+
 - Remove the Lanes and Knowledge sections (and their imports)
 - Move StrengthFooter up (directly after KpiCards)
 - Move Services / Skills / Inbox / Trace Disclosures up (before Routes)
@@ -221,8 +233,8 @@ In `AgenticOSPage.tsx`, delete these two import lines (lines 39 and 46 approxima
 
 ```tsx
 // DELETE these two lines:
-import KnowledgeTab   from '../atlas/knowledge-tab';
-import { LanesGrid }       from './LanesGrid';
+import KnowledgeTab from '../atlas/knowledge-tab';
+import { LanesGrid } from './LanesGrid';
 ```
 
 - [ ] **Step 2: Replace the entire return block**
@@ -230,50 +242,57 @@ import { LanesGrid }       from './LanesGrid';
 Replace everything from `return (` through the closing `)` of the component with:
 
 ```tsx
-  return (
-    <Page>
-      <div style={s.root}>
-        <PageHeader title="Agentic OS" />
+return (
+  <Page>
+    <div style={s.root}>
+      <PageHeader title="Agentic OS" />
 
-        <SurfacesRail />
+      <SurfacesRail />
 
-        <StrengthFooter snapshot={strength} />
+      <StrengthFooter snapshot={strength} />
 
-        <StatusBanner triage={triage} />
+      <StatusBanner triage={triage} />
 
-        <KpiCards triage={triage} units={UNITS} />
+      <KpiCards triage={triage} units={UNITS} />
 
-        <Disclosure id="agentic-os.services" label="Services" hint="local dev daemons">
-          <ServicesBar />
-        </Disclosure>
+      <Disclosure id="agentic-os.services" label="Services" hint="local dev daemons">
+        <ServicesBar />
+      </Disclosure>
 
-        <Disclosure id="agentic-os.skills" label="Skills" hint="whitelisted scripts">
-          <SkillsBar />
-        </Disclosure>
+      <Disclosure id="agentic-os.skills" label="Skills" hint="whitelisted scripts">
+        <SkillsBar />
+      </Disclosure>
 
-        <Disclosure id="agentic-os.inbox" label="Inbox" hint={`${proposals.length} proposed · not yet approved`}>
-          <ProposedUnitsRail entries={PROPOSED_UNITS} />
-        </Disclosure>
+      <Disclosure
+        id="agentic-os.inbox"
+        label="Inbox"
+        hint={`${proposals.length} proposed · not yet approved`}
+      >
+        <ProposedUnitsRail entries={PROPOSED_UNITS} />
+      </Disclosure>
 
-        <Disclosure id="agentic-os.trace" label="Trace" hint={`last ${events.length} events`}>
-          <TraceTable events={events} />
-        </Disclosure>
+      <Disclosure id="agentic-os.trace" label="Trace" hint={`last ${events.length} events`}>
+        <TraceTable events={events} />
+      </Disclosure>
 
-        <Section label="Routes" hint="all /app routes — clickable">
-          <RoutesTree />
-        </Section>
+      <Section label="Routes" hint="all /app routes — clickable">
+        <RoutesTree />
+      </Section>
 
-        <Disclosure id="agentic-os.clients" label="Clients" hint="active retainers + prospects">
-          <ClientsTab />
-        </Disclosure>
+      <Disclosure id="agentic-os.clients" label="Clients" hint="active retainers + prospects">
+        <ClientsTab />
+      </Disclosure>
 
-        <Disclosure id="agentic-os.gates" label="Gates" hint="guardrail registry — severity, fixture, owner">
-          <ValidatorsTab />
-        </Disclosure>
-
-      </div>
-    </Page>
-  );
+      <Disclosure
+        id="agentic-os.gates"
+        label="Gates"
+        hint="guardrail registry — severity, fixture, owner"
+      >
+        <ValidatorsTab />
+      </Disclosure>
+    </div>
+  </Page>
+);
 ```
 
 - [ ] **Step 3: Run typecheck**
@@ -304,6 +323,7 @@ git commit -m "feat(ops): rearrange AgenticOSPage — strength top, collapse cli
 ## Task 4: Delete orphaned files
 
 **Files:**
+
 - Delete: `src/app/pages/ops/agentic-os/LanesGrid.tsx`
 - Delete: `src/app/pages/ops/agentic-os/lanes.ts`
 
@@ -334,6 +354,7 @@ git commit -m "chore(ops): delete orphaned LanesGrid + lanes — replaced by Kan
 ## Task 5: Migration script
 
 **Files:**
+
 - Create: `scripts/migrate-orchestration-to-hermes.mjs`
 
 This script pushes the 39 outstanding orchestration units (`approved`, `parked`, `needs-grilling`) into Hermes as real Kanban tasks. Dry-run by default; `--execute` to live-fire.
@@ -363,22 +384,20 @@ Create `scripts/migrate-orchestration-to-hermes.mjs`:
  */
 
 import { readFileSync } from 'node:fs';
-import { execSync }     from 'node:child_process';
+import { execSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
-const ROOT       = join(dirname(__filename), '..');
-const EXECUTE    = process.argv.includes('--execute');
+const ROOT = join(dirname(__filename), '..');
+const EXECUTE = process.argv.includes('--execute');
 
-const orchestration = JSON.parse(
-  readFileSync(join(ROOT, 'docs/ai/orchestration.json'), 'utf8'),
-);
+const orchestration = JSON.parse(readFileSync(join(ROOT, 'docs/ai/orchestration.json'), 'utf8'));
 const units = orchestration.units;
 
 const STATUS_MAP = {
-  'approved':       'ready',
-  'parked':         'todo',
+  approved: 'ready',
+  parked: 'todo',
   'needs-grilling': 'triage',
 };
 
@@ -392,12 +411,12 @@ const results = [];
 
 for (const unit of targets) {
   const hermesStatus = STATUS_MAP[unit.status];
-  const title        = (unit.name ?? unit.title ?? unit.id).trim();
+  const title = (unit.name ?? unit.title ?? unit.id).trim();
 
   // Build body — store unit ID so the UI can cross-reference if needed later.
   const bodyParts = [`Orch-Unit: ${unit.id}`];
-  if (unit.description)         bodyParts.push('', unit.description);
-  if (unit.validationCmd)       bodyParts.push('', `Validation: ${unit.validationCmd}`);
+  if (unit.description) bodyParts.push('', unit.description);
+  if (unit.validationCmd) bodyParts.push('', `Validation: ${unit.validationCmd}`);
   if (unit.agentNotes?.length) {
     bodyParts.push('', 'Agent notes:');
     for (const note of unit.agentNotes) bodyParts.push(`- ${note}`);
@@ -439,7 +458,9 @@ for (const unit of targets) {
     try {
       execSync(`hermes kanban move ${taskId} ${hermesStatus}`, { cwd: ROOT, encoding: 'utf8' });
     } catch (err) {
-      console.warn(`  ⚠ created ${taskId} but move to ${hermesStatus} failed: ${err.stderr ?? err.message}`);
+      console.warn(
+        `  ⚠ created ${taskId} but move to ${hermesStatus} failed: ${err.stderr ?? err.message}`,
+      );
     }
   }
 
@@ -452,7 +473,7 @@ if (!EXECUTE) {
   console.log(`Dry-run complete. Run with --execute to create ${targets.length} tasks in Hermes.`);
   console.log('Requires: hermes CLI on PATH + kanban plugin running locally (default port 7717).');
 } else {
-  const ok  = results.filter((r) => r.taskId).length;
+  const ok = results.filter((r) => r.taskId).length;
   const err = results.filter((r) => r.error).length;
   console.log(`Done. ${ok} created, ${err} failed.`);
   if (ok > 0) {
@@ -475,6 +496,7 @@ node scripts/migrate-orchestration-to-hermes.mjs
 ```
 
 Expected output: prints 39 lines like:
+
 ```
   [dry-run] approved         → ready   HDSLayout architectural split: ...
   [dry-run] parked           → todo    Enforce strict TypeScript polymorphism ...
@@ -496,9 +518,11 @@ git commit -m "feat(ops): migration script — push outstanding orchestration un
 ## Running the live migration
 
 > **Only run this when Hermes is running locally.** Verify first:
+>
 > ```bash
 > curl -s http://localhost:7717/api/hermes/board?tenant=hds | head -c 100
 > ```
+>
 > Should return JSON. If not, start Hermes before proceeding.
 
 ```bash

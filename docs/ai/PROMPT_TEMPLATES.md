@@ -529,13 +529,13 @@ Begin.
 
 ## Quick reference
 
-| Template | Model | Commits? | Primary output |
-|---|---|---|---|
-| `research-and-report` | sonnet / haiku | No | Bulleted report |
-| `deletion-class` | sonnet (required) | Yes | Deleted files |
-| `additive` | haiku | Yes | Added/scrubbed files |
-| `architectural-opus` | opus | Yes | Code + decision doc |
-| `plan-only-report` | sonnet / opus | Yes (ADR file only) | ADR at `docs/architecture/` |
-| `autonomous-burndown` | per-unit (auto) | Yes (loop) | Drained queue + ledger entries |
+| Template              | Model             | Commits?            | Primary output                 |
+| --------------------- | ----------------- | ------------------- | ------------------------------ |
+| `research-and-report` | sonnet / haiku    | No                  | Bulleted report                |
+| `deletion-class`      | sonnet (required) | Yes                 | Deleted files                  |
+| `additive`            | haiku             | Yes                 | Added/scrubbed files           |
+| `architectural-opus`  | opus              | Yes                 | Code + decision doc            |
+| `plan-only-report`    | sonnet / opus     | Yes (ADR file only) | ADR at `docs/architecture/`    |
+| `autonomous-burndown` | per-unit (auto)   | Yes (loop)          | Drained queue + ledger entries |
 
 All 6 templates embed: universal preamble · pre-commit gates · `git reset --hard fix/ui-pipeline` first action · no-bulk-lint:fix rule (AGENT_GUIDELINES.md §3) · commit format · no-push rule.

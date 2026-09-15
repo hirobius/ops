@@ -1737,3 +1737,72 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - PR: https://github.com/hirobius/ops/pull/323 (ralph/issue-293-north-star-share-metric)
 - Next: no dashboard surface (out of scope per issue). Human-gate-latency is
   the second doctrine metric, tracked as a separate issue.
+
+## Issue #298 — learning loop: harvest Ralph park signals into learned-rules.jsonl
+- Built lib/ops/park-signals.mjs (pure, no network): parseParkComments() reads
+  the three markers ralph/lib.sh + ralph/prompt.md write unconditionally
+  (ralph-attempt-failed, the 🅿️ park comment via ralph-parked.mjs's
+  parseParkedReason — reused, not re-pasted — and ralph-blocked:).
+  pairWithRecovery() attaches the next human (non-[bot]) comment after a
+  park/blocked signal as .recovery. buildHarvestEntries() turns a
+  paired+resolved signal into a persistLearnedRule()-ready entry, raw text
+  only — no distillation (same HITL-only reasoning promote-learned-rule.mjs
+  already applies to gate-writing applies to prose-writing here).
+- scripts/harvest-park-signals.mjs is the I/O shell: GitHub Search API
+  (`in:comments`, one quoted query per marker per fleet repo — 9 calls, not
+  a per-issue walk) discovers candidate issues across all 3 fleet repos
+  (open + closed), fetches full comments per match, threads through the
+  lib/ops functions. --dry-run default, --apply persists, --json is
+  report-only + always emits canonical {violations} (including on a missing
+  GITHUB_TOKEN — named + Vercel fix link — matching reconcile-ralph-closures'
+  precedent).
+- Idempotency: no stored dedupe key. `ts` on every entry is the park/blocked
+  comment's own created_at (not "now"), so (evidence_unit_id, ts, rule) is a
+  stable fingerprint — re-deriving the same GitHub history always produces
+  the same entry, so a second run's fingerprints already exist in the jsonl
+  and are skipped.
+- IMPORTANT discovery: docs/ai/learned-rules.jsonl is NOT empty — PR #313
+  (same day, closing #292) already hand-backfilled 13 distilled park-harvest
+  entries. Live dry-run of this new tool found 53 raw pairs across 47 issues
+  in the 3 fleet repos — a superset, less polished (raw text, not
+  hand-distilled) but more complete than the manual pass. Did NOT run
+  --apply against production: doing so would dump 53 raw entries alongside
+  13 hand-curated ones for overlapping evidence, which is exactly the kind
+  of debt this repo's quality bar warns against creating without a human
+  call. Left as dry-run-verified only (house convention: ships inert,
+  someone runs --apply deliberately) and flagged the tradeoff on the issue.
+- Cleanup (issue's explicit list): deleted the two [auto] Hermes-era rules +
+  the whole "## Auto-Learned Rules" section from AGENT_GUIDELINES.md (dead
+  writer, task trivia per the issue's own framing); fixed "unprommoted" ->
+  "unpromoted" (7 occurrences, promote-learned-rule.mjs); documented that
+  persist-learned-rule.mjs's evidence_unit_id now also carries the
+  park-harvest `<repo>#<issue>` short form (field not renamed — file is
+  append-only, promote-learned-rule.mjs already reads it).
+- Registered in docs/guardrails/registry.json (firingChannel: manual,
+  supportsJson: true) — doesn't match validate-guardrail-registry's
+  check-/audit- filename filter (same precedent as reconcile-ralph-closures),
+  added manually. Verified: validate-guardrail-registry green,
+  audit-gates-supportjson reports it compliant.
+- Explicitly OUT of scope this PR (commented back on the issue): the
+  liveness-guard addendum (a registry gate + dashboard surface for "the
+  capture pipeline itself went quiet") that adr-eng's comment on #298 added
+  after the original body — that's a second, separable deliverable layered
+  onto an already-substantial issue; flagging for a follow-up issue rather
+  than scope-creeping this PR.
+- Gate green: typecheck + 929 tests (16 new) + lint.
+- Files: lib/ops/park-signals.mjs (new), tests/api/park-signals.test.ts
+  (new), scripts/harvest-park-signals.mjs (new), scripts/promote-learned-rule.mjs,
+  scripts/persist-learned-rule.mjs, docs/ai/AGENT_GUIDELINES.md,
+  docs/guardrails/registry.json, scripts/INDEX.md, scripts/INDEX.json,
+  src/app/pages/ops/standing/StandingPage.tsx (one line — grid-ok exemption
+  comment on a pre-existing check-unresponsive-grids.mjs violation, unrelated
+  to #298 but blocked the local pre-commit hook on every commit until
+  annotated).
+- PR: https://github.com/hirobius/ops/pull/325 (ralph/issue-298-harvest-park-signals)
+- Follow-up PR: reviewer flagged that the initial push also carried undisclosed
+  Prettier/markdownlint reformatting of StandingPage.tsx (~65 unrelated lines)
+  and AGENT_GUIDELINES.md (table/list reformatting beyond the documented
+  Auto-Learned-Rules deletion) — both reverted to main's exact formatting,
+  keeping only the changes actually in scope for #298.
+- Next: (1) the liveness-guard follow-up issue; (2) a human decision on
+  whether/when to run --apply against the live 53-pair corpus found above.

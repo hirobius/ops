@@ -14,6 +14,7 @@ The OPS dashboard already surfaces internal repo scripts via `SkillsBar`. There 
 ## Goal
 
 Add a collapsed **Plugins** `Disclosure` section to `AgenticOSPage` that:
+
 - Lists all installed Claude Code skills, grouped by plugin
 - Shows each skill's name and description
 - On click, reveals the terminal command to invoke it (`claude /skill-name`)
@@ -29,6 +30,7 @@ Add a collapsed **Plugins** `Disclosure` section to `AgenticOSPage` that:
 Added to `scripts/skill-runner-middleware.mjs`.
 
 **Logic:**
+
 1. Read `~/.claude/plugins/installed_plugins.json`
 2. For each plugin entry, resolve the `installPath`
 3. Walk `installPath/skills/` for subdirectories (each = one skill)
@@ -36,6 +38,7 @@ Added to `scripts/skill-runner-middleware.mjs`.
 5. Return structured JSON
 
 **Response shape:**
+
 ```json
 {
   "plugins": [
@@ -62,6 +65,7 @@ Added to `scripts/skill-runner-middleware.mjs`.
 ### 2. New types + fetch — `cc-plugins.ts`
 
 Mirrors `skills.ts` pattern:
+
 - `CcPlugin`, `CcSkill` types
 - `fetchCcPlugins(): Promise<CcPlugin[]>` wraps `GET /api/cc-plugins`
 
@@ -76,10 +80,12 @@ Mirrors `skills.ts` pattern:
 - Empty state: "No Claude Code plugins installed" if `plugins` is empty
 
 **Tile panel content:**
+
 ```
 claude /brainstorming
 [Copy]
 ```
+
 Plus the skill's description below.
 
 ### 4. `AgenticOSPage.tsx` change
@@ -98,11 +104,11 @@ Hint is static `"Claude Code skills"` — no async count needed for a collapsed 
 
 ## Files touched
 
-| File | Change |
-|---|---|
-| `scripts/skill-runner-middleware.mjs` | Add `GET /api/cc-plugins` route |
-| `src/app/pages/ops/agentic-os/cc-plugins.ts` | New — types + fetch wrapper |
-| `src/app/pages/ops/agentic-os/PluginsBar.tsx` | New — component |
+| File                                             | Change                          |
+| ------------------------------------------------ | ------------------------------- |
+| `scripts/skill-runner-middleware.mjs`            | Add `GET /api/cc-plugins` route |
+| `src/app/pages/ops/agentic-os/cc-plugins.ts`     | New — types + fetch wrapper     |
+| `src/app/pages/ops/agentic-os/PluginsBar.tsx`    | New — component                 |
 | `src/app/pages/ops/agentic-os/AgenticOSPage.tsx` | Add Plugins Disclosure + import |
 
 ---
@@ -110,9 +116,11 @@ Hint is static `"Claude Code skills"` — no async count needed for a collapsed 
 ## design-extract note
 
 `design-extract` is not currently installed. Install with:
+
 ```
 npx skills add Manavarya09/design-extract
 ```
+
 It will appear in the Plugins panel automatically on next page load — no code changes required.
 
 ---

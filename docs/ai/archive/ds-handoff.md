@@ -1,14 +1,14 @@
 # Design-System Repo Handoff → `hirobius/hirobius-design-system`
 
-> **Target repo:** `hirobius/hirobius-design-system` — *"standalone, publishable
-> component library + token system + docs site"* (default branch `main`, public).
+> **Target repo:** `hirobius/hirobius-design-system` — _"standalone, publishable
+> component library + token system + docs site"_ (default branch `main`, public).
 > This is the published `@hirobius/design-system` package + its docs site.
 >
 > **Scope of this handoff:** ONLY tasks that build **in the DS repo**. The repo was
-> split *after* these tasks were frozen (2026-05-11): the HDS primitives, the doc
+> split _after_ these tasks were frozen (2026-05-11): the HDS primitives, the doc
 > shell (HDSLayout), and the `/hds` doc surface were extracted out of `hirobius/ops`
-> into this DS repo. `hirobius/ops` is now just a *consumer* (`package.json`:
-> *"Consumes @hirobius/design-system for UI"*).
+> into this DS repo. `hirobius/ops` is now just a _consumer_ (`package.json`:
+> _"Consumes @hirobius/design-system for UI"_).
 >
 > Everything else from the old DS backlog was deliberately **excluded** — see
 > "What was left out" at the bottom. This is a short list on purpose.
@@ -49,11 +49,12 @@ and PR #1 CI goes green.
 in `hirobius/ops` surfaces the three `token.tsx` errors pointing at the dead
 `./lab/tokenUtils` import. Confirm the import still exists at DS `main` HEAD before cutting.
 
-**Validation:** `tsc --noEmit` clean in ops after `pnpm install` of `0.5.1`.  ·  **Depends on:** none
+**Validation:** `tsc --noEmit` clean in ops after `pnpm install` of `0.5.1`. · **Depends on:** none
 
 ---
 
 ## Task 1 — `12q-semantic-page-headings` (small; good warm-up)
+
 status `parked` · approval `approved` · tier `T1` · priority `3`
 
 check:semantic reports 2 pages with no detectable heading structure. Add a single
@@ -67,6 +68,7 @@ still need an accessible heading outline.
 (ops `/hds/*` is now just a redirect stub).
 
 **Agent notes (from archive):**
+
 - Source of audit: `docs/ai/scan-logs/2026-05-03/check_semantic.log` (in ops; the audit that flagged it).
 - Files (old ops paths — re-locate in DS repo): `src/app/components/InfoPage.tsx`, `src/app/pages/hds/SandboxPage.tsx`.
 - Use `Text variant="h1"` or `hds.typeStyles.h1` for the page title.
@@ -75,11 +77,12 @@ still need an accessible heading outline.
   So the gate itself may be broken independent of headings — triage `check:semantic`
   first, don't assume a red is your edit.
 
-**Validation:** `pnpm check:semantic`  ·  **Depends on:** none
+**Validation:** `pnpm check:semantic` · **Depends on:** none
 
 ---
 
 ## Task 2 — `12i-bloat-hdslayout-architectural-split` (OPUS-CLASS; not mechanical)
+
 status `approved` · approval `approved` · priority `1`
 
 OPUS-CLASS architectural decision. After all the focused bloat extracts land,
@@ -93,9 +96,10 @@ behavior; visual regression must be **byte-identical**. The kind of split that e
 or wastes the next 6 months of velocity.
 
 **Why it's a DS-repo task now:** HDSLayout left ops — `routes.tsx:46` in ops:
-*"The design-system doc shell (HDSLayout) now lives in the standalone DS site."*
+_"The design-system doc shell (HDSLayout) now lives in the standalone DS site."_
 
 **Agent notes (from archive):**
+
 - **DO NOT execute mechanically — this needs an architectural session with Adrian first.**
 - Output first: a `docs/architecture/HDSLayout-split-plan.md` with the 5-module
   proposal, the dependency graph, the migration sequence, the blast-radius for each
@@ -108,13 +112,14 @@ or wastes the next 6 months of velocity.
   changed semantics — investigate before committing.
 
 **⚠ Two move-related caveats:**
+
 1. **5 unmet prerequisites.** `dependsOn`: `12i-bloat-hdslayout-dead-code`,
    `-health-rail-extract`, `-inline-css`, `-hds-nav-dedup`, `12i-bloat-isdark-prop-drilling`.
    Their status **after the repo move is unknown** — verify which are already done in
    the DS repo. The HDSLayout LoC may already differ from the 1918 snapshot.
 2. Needs `pnpm test:visual` wired in the DS repo (the byte-identical gate).
 
-**Validation:** `pnpm typecheck && pnpm test:visual && pnpm test:layout`  ·  **Depends on:** the five `12i-bloat-hdslayout-*` extracts above
+**Validation:** `pnpm typecheck && pnpm test:visual && pnpm test:layout` · **Depends on:** the five `12i-bloat-hdslayout-*` extracts above
 
 ---
 
@@ -128,7 +133,7 @@ couple redeclare the StatusTile tone). Export the union as a named type from the
 consumers import it instead of copying it. Surfaced while consolidating the ops
 status-badge logic (ops candidate #7, commit on `claude/relaxed-ramanujan-vvhqf8`).
 
-**Validation:** `import type { BadgeTone } from '@hirobius/design-system'` resolves in ops.  ·  **Depends on:** none
+**Validation:** `import type { BadgeTone } from '@hirobius/design-system'` resolves in ops. · **Depends on:** none
 
 ---
 
@@ -136,7 +141,7 @@ status-badge logic (ops candidate #7, commit on `claude/relaxed-ramanujan-vvhqf8
 
 You scoped this to **DS-repo-only**, so these were intentionally dropped:
 
-**Builds in `hirobius/ops`, not the DS repo** (the DS *authoring* machinery stayed
+**Builds in `hirobius/ops`, not the DS repo** (the DS _authoring_ machinery stayed
 in ops — Figma plugin, `hirobius.tokens.json` + `build-tokens.mjs`, `hds-manifest.json`,
 `pipeline/figma-masters-batch.mjs`, audit scripts — all confirmed present in ops):
 `12q-figma-system-drift`, `13y-21-figma-export-refresh`,
@@ -147,14 +152,15 @@ which now lives in the DS package — cross-repo), `t_0472231f` (/lab staging),
 `12v-token-system-modes` (parked).
 
 **Obsolete / superseded by the extraction itself:**
-`atlas-absorb-hds-docs` (wanted to pull `/hds` docs *into* `/ops/atlas`; the split did
-the **opposite** — pushed them *out* to this DS repo), and
+`atlas-absorb-hds-docs` (wanted to pull `/hds` docs _into_ `/ops/atlas`; the split did
+the **opposite** — pushed them _out_ to this DS repo), and
 `12n-api-monorepo-workspace-split` (the DS extraction already accomplished its core).
 
 > Want the ~9 ops-side DS-adjacent tasks as a **separate** handoff for the ops agent?
 > Say so and I'll generate it from bucket ③.
 
 ---
+
 _2 archived tasks + the `0.5.1` fix. Routed by confirmed-departure from `hirobius/ops`;
 not yet verified inside `hirobius/hirobius-design-system` (out of session scope).
 Re-confirm there before executing._

@@ -1,4 +1,5 @@
 # HDS Token Pipeline — Design Spec
+
 **Date:** 2026-03-11
 **Status:** Approved
 
@@ -16,10 +17,10 @@ Single source of truth at the repo root. Fully W3C DTCG 2025.10 compliant.
 
 ### Naming convention
 
-| Tier | Key | CSS prefix | JS path |
-|---|---|---|---|
+| Tier      | Key         | CSS prefix          | JS path           |
+| --------- | ----------- | ------------------- | ----------------- |
 | Primitive | `primitive` | `--hds-primitive-*` | `hds.primitive.*` |
-| Semantic | `semantic` | `--hds-semantic-*` | `hds.semantic.*` |
+| Semantic  | `semantic`  | `--hds-semantic-*`  | `hds.semantic.*`  |
 | Component | `component` | `--hds-component-*` | `hds.component.*` |
 
 ### Primitive tier
@@ -76,22 +77,22 @@ via `$extensions.com.hirobius.modes`, referencing primitive feedback color steps
 
 **`semantic.typography`** — 14-style MD3-structured typescale, all on 4px grid, Atkinson Hyperlegible Next throughout:
 
-| Style | Size | Weight | Tracking | Line height |
-|---|---|---|---|---|
-| Display Large | 60px | 400 | -0.25px | 64px |
-| Display Medium | 48px | 400 | 0 | 56px |
-| Display Small | 36px | 400 | 0 | 44px |
-| Headline Large | 32px | 400 | 0 | 40px |
-| Headline Medium | 28px | 400 | 0 | 36px |
-| Headline Small | 24px | 400 | 0 | 32px |
-| Title Large | 22px | 500 | 0 | 28px |
-| Title Medium | 16px | 500 | 0.15px | 24px |
-| Title Small | 14px | 500 | 0.1px | 20px |
-| Body Large | 16px | 400 | 0.5px | 24px |
-| Body Medium | 14px | 400 | 0.25px | 20px |
-| Label Large | 14px | 500 | 0.1px | 20px |
-| Label Medium | 12px | 500 | 0.5px | 16px |
-| Label Small | 11px | 500 | 0.5px | 16px |
+| Style           | Size | Weight | Tracking | Line height |
+| --------------- | ---- | ------ | -------- | ----------- |
+| Display Large   | 60px | 400    | -0.25px  | 64px        |
+| Display Medium  | 48px | 400    | 0        | 56px        |
+| Display Small   | 36px | 400    | 0        | 44px        |
+| Headline Large  | 32px | 400    | 0        | 40px        |
+| Headline Medium | 28px | 400    | 0        | 36px        |
+| Headline Small  | 24px | 400    | 0        | 32px        |
+| Title Large     | 22px | 500    | 0        | 28px        |
+| Title Medium    | 16px | 500    | 0.15px   | 24px        |
+| Title Small     | 14px | 500    | 0.1px    | 20px        |
+| Body Large      | 16px | 400    | 0.5px    | 24px        |
+| Body Medium     | 14px | 400    | 0.25px   | 20px        |
+| Label Large     | 14px | 500    | 0.1px    | 20px        |
+| Label Medium    | 12px | 500    | 0.5px    | 16px        |
+| Label Small     | 11px | 500    | 0.5px    | 16px        |
 
 **`semantic.transition`** — `color`(300ms), `fast`(150ms), `slow`(500ms).
 
@@ -126,26 +127,26 @@ Node/TypeScript script (run via `tsx`). Steps:
 1. Read `hirobius.tokens.json`
 2. Recursively resolve `{path.to.token}` references — handle chained refs, error on circular
 3. Convert resolved values to CSS strings using the type resolution rules below
-3a. For tokens with `$extensions.com.hirobius.modes`: emit the `light` resolved value under
-    `:root` and the `dark` resolved value under `[data-theme="dark"]`. For tokens without this
-    extension, emit once under `:root`.
+   3a. For tokens with `$extensions.com.hirobius.modes`: emit the `light` resolved value under
+   `:root` and the `dark` resolved value under `[data-theme="dark"]`. For tokens without this
+   extension, emit once under `:root`.
 4. Emit `src/styles/tokens.css`
 5. Emit `src/tokens.ts`
 
 #### Type resolution rules
 
-| DTCG `$type` | Raw `$value` shape | CSS output |
-|---|---|---|
-| `color` | `{ colorSpace, components: [r,g,b], alpha? }` | `rgb(R G B)` or `rgb(R G B / A)` — multiply components by 255, round |
-| `dimension` | `{ value, unit }` | `"${value}${unit}"` e.g. `"4px"`, `"1rem"` |
-| `fontFamily` | `string[]` | Comma-separated, multi-word names quoted: `"Atkinson Hyperlegible Next", sans-serif` |
-| `fontWeight` | `number` | Numeric string: `"500"` |
-| `number` | `number` | Numeric string: `"3"` |
-| `duration` | `{ value, unit }` | `"${value}${unit}"` e.g. `"300ms"` |
-| `cubicBezier` | `[x1, y1, x2, y2]` | `cubic-bezier(x1, y1, x2, y2)` |
-| `shadow` | object or array of objects | `offsetX offsetY blur spread color` per layer, joined with `, ` |
-| `typography` | composite object | Expand to individual CSS properties — never shorthand |
-| `transition` | `{ duration, delay, timingFunction }` | `"duration delay timingFunction"` |
+| DTCG `$type`  | Raw `$value` shape                            | CSS output                                                                           |
+| ------------- | --------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `color`       | `{ colorSpace, components: [r,g,b], alpha? }` | `rgb(R G B)` or `rgb(R G B / A)` — multiply components by 255, round                 |
+| `dimension`   | `{ value, unit }`                             | `"${value}${unit}"` e.g. `"4px"`, `"1rem"`                                           |
+| `fontFamily`  | `string[]`                                    | Comma-separated, multi-word names quoted: `"Atkinson Hyperlegible Next", sans-serif` |
+| `fontWeight`  | `number`                                      | Numeric string: `"500"`                                                              |
+| `number`      | `number`                                      | Numeric string: `"3"`                                                                |
+| `duration`    | `{ value, unit }`                             | `"${value}${unit}"` e.g. `"300ms"`                                                   |
+| `cubicBezier` | `[x1, y1, x2, y2]`                            | `cubic-bezier(x1, y1, x2, y2)`                                                       |
+| `shadow`      | object or array of objects                    | `offsetX offsetY blur spread color` per layer, joined with `, `                      |
+| `typography`  | composite object                              | Expand to individual CSS properties — never shorthand                                |
+| `transition`  | `{ duration, delay, timingFunction }`         | `"duration delay timingFunction"`                                                    |
 
 **Compound key naming:** Token key paths are camelCase in TypeScript but kebab-case in CSS.
 The build script applies a camelCase-to-kebab transform at every path segment:
@@ -265,6 +266,7 @@ export const hds = {
 ### Dark mode strategy
 
 Theming is pure CSS — no React re-renders on theme switch. The cascade:
+
 ```
 [data-theme="dark"] overrides --hds-semantic-* vars
   → component vars (--hds-component-*) reference semantics via var()
@@ -278,22 +280,22 @@ Theming is pure CSS — no React re-renders on theme switch. The cascade:
 
 ### Deletions
 
-| Path | Reason |
-|---|---|
-| `src/app/design-system/tokens.ts` | Replaced by generated `src/tokens.ts` (note: output path intentionally moves to `src/` root, not back into `design-system/`) |
-| `src/app/design-system/theme.ts` | `ct()` made obsolete by CSS var theming |
-| `src/app/components/ui/` (50+ files) | Full shadcn/Radix removal — clean slate |
-| `src/styles/theme.css` | Replaced by generated `src/styles/tokens.css` |
+| Path                                 | Reason                                                                                                                       |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `src/app/design-system/tokens.ts`    | Replaced by generated `src/tokens.ts` (note: output path intentionally moves to `src/` root, not back into `design-system/`) |
+| `src/app/design-system/theme.ts`     | `ct()` made obsolete by CSS var theming                                                                                      |
+| `src/app/components/ui/` (50+ files) | Full shadcn/Radix removal — clean slate                                                                                      |
+| `src/styles/theme.css`               | Replaced by generated `src/styles/tokens.css`                                                                                |
 
 ### Updates
 
-| File | Change |
-|---|---|
-| `src/styles/index.css` | Import `tokens.css` instead of `theme.css` |
-| `src/app/context/ThemeContext.tsx` | Simplify — `data-theme` only |
-| All components using `hds.*` | Migrate to `hds.*` from new `src/tokens.ts` |
+| File                                | Change                                              |
+| ----------------------------------- | --------------------------------------------------- |
+| `src/styles/index.css`              | Import `tokens.css` instead of `theme.css`          |
+| `src/app/context/ThemeContext.tsx`  | Simplify — `data-theme` only                        |
+| All components using `hds.*`        | Migrate to `hds.*` from new `src/tokens.ts`         |
 | All components using `ct(isDark).*` | Replace with `var(--hds-semantic-color-*)` directly |
-| `package.json` | Add `tokens` script, prepend to `dev` + `build` |
+| `package.json`                      | Add `tokens` script, prepend to `dev` + `build`     |
 
 ### Component migration pattern
 
