@@ -554,6 +554,19 @@
       "supportsJson": true
     },
     {
+      "id": "check-steering-budget",
+      "description": "Caps the always-on agent context listed in docs/guardrails/steering-budget.json. Every file there is loaded by every agent in every session before it reads code; on 2026-09-14 that set was ~189KB/~47k tokens, HANDOFF.md alone 119KB against its own 'keep it one page' instruction. Fix a violation by moving history to an on-demand file, not by raising the budget. ops#292.",
+      "severity": "error",
+      "gateScript": "scripts/check-steering-budget.mjs",
+      "fixturePath": null,
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "pre-commit",
+      "supportsJson": true
+    },
+    {
       "id": "check-tier-bypass",
       "description": "Enforces the primitive -> semantic -> component aliasing hierarchy in source files. Direct use of var(--primitive-*) in component and page files bypasses the semantic tier.",
       "severity": "warn",
