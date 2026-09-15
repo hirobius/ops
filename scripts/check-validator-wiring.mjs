@@ -49,6 +49,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { hashPrecommit } from './lib/precommit-canonical.mjs';
+import { stripYamlComments } from './lib/yaml-comments.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REGISTRY = path.join(ROOT, 'docs/guardrails/registry.json');
@@ -75,7 +76,13 @@ function listGhActions() {
   if (!fs.existsSync(GH_DIR)) return '';
   return fs.readdirSync(GH_DIR)
     .filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'))
-    .map((f) => readSafe(path.join(GH_DIR, f)))
+    // Comments are stripped before matching: this content is substring-searched
+    // for gate script names, and a *prose mention* of one is not wiring. ops#262
+    // — a comment in quality.yml naming `audit-sbom` was read as a live
+    // invocation, and the resulting WIRING_DRIFT blocked every commit in the
+    // repo. The .husky path already did this via parseHookLines; this closes the
+    // GitHub Actions gap. See scripts/lib/yaml-comments.mjs and ops#304.
+    .map((f) => stripYamlComments(readSafe(path.join(GH_DIR, f))))
     .join('\n');
 }
 
