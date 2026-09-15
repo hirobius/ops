@@ -85,11 +85,10 @@ not read it to get oriented.
   active (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET`); Supabase wired; DS consumed
   from public npm `@hirobius/design-system`. Vercel is on **Pro**; preview
   Deployment Protection is off (the `/ops` gate still covers it).
-- **The autonomous loop works and is under-aimed.** `ralph-gate` is the **sole
-  required check** on `main` — other CI jobs are informational, so
-  `mergeable_state: unstable` is still mergeable. Single-flight (one `ralph/*` PR
-  at a time), auto-merge on `ralph-auto`, 6h idle-watchdog cron on. **Keep the
-  ready pool non-empty and biased to the revenue path** (doctrine §8).
+- **The loop works and is under-aimed.** `ralph-gate` is the **sole required
+  check** — other CI jobs are informational, so `mergeable_state: unstable` is
+  still mergeable. Single-flight (one `ralph/*` PR at a time), auto-merge on
+  `ralph-auto`, 6h watchdog on. **Keep the ready pool biased to revenue.**
 - **#190 is blocked on Adrian's go** for Outscraper details-API spend.
 - **Compliance gates SCALED outreach** (#35 → #38 → #27 before #9); one call or
   one manual email is not gated. Outscraper spend stays ON HOLD pending a go.
@@ -103,26 +102,22 @@ not read it to get oriented.
 ## Adrian's open actions (his court — one-time, not blocked on a session)
 
 - **Set `PAGESPEED_API_KEY` in Vercel — highest-leverage unblock open.** Free,
-  ~2 min. Anonymous PageSpeed returns 429 (shared quota gone), so
-  `audit-sites.mjs` cannot run, so 223 leads have no true opening line and stay
-  out of email eligibility. Enable the API
+  ~2 min. Anonymous PageSpeed 429s, so `audit-sites.mjs` cannot run and 223 leads
+  have no true opening line. Enable
   (https://console.cloud.google.com/apis/library/pagespeedonline.googleapis.com),
-  create a key (https://console.cloud.google.com/apis/credentials), paste as
-  `PAGESPEED_API_KEY` at
+  create a key (https://console.cloud.google.com/apis/credentials), paste at
   https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables
-  Then: `node scripts/audit-sites.mjs --presence custom --write`.
-- **Decide hds 0.14.0 (hds#199, reopened).** The release path is armed but has
-  **zero fuel**: `.changeset/` holds only `README.md` + `config.json`, so no
-  "Version Packages" PR can ever open, and `NPM_TOKEN` is still unverified (the
-  green run never reached the publish step). Cutting 0.14.0 means the breaking
-  `Hds*`→unprefixed renames and a coordinated ops migration across ~41 files.
-  An agent must NOT write the changeset unilaterally.
+  Then `node scripts/audit-sites.mjs --presence custom --write`.
+- **Decide hds 0.14.0 (hds#199, reopened).** Release path armed but **zero
+  fuel**: `.changeset/` has no entries, so no "Version Packages" PR can open, and
+  `NPM_TOKEN` is unverified. Cutting it means the breaking `Hds*`→unprefixed
+  renames plus an ops migration across ~41 files. No agent writes the changeset.
 - **Run the lilac-insure onboarding prompt** → stands up the client repo to fleet
   spec + files its tasks (the "New client-work repo procedure" below is the prompt).
 - **File the Alert Figma-drift issue** in the DS repo (not ops): tone-colored
   title + border, danger→`circle-alert`; Figma node 33:34.
-- **Run the ops-history PII scrub** — `git filter-repo` runbook (dry-run-verified)
-  in `docs/ai/REPO-PROCEDURES.md`. ops is private, so this is hygiene not urgency.
+- **Run the ops-history PII scrub** — runbook in `docs/ai/REPO-PROCEDURES.md`.
+  ops is private, so hygiene not urgency.
 - **Set `PORTAL_HMAC_SECRET` in Vercel (#28)** — server-only (NOT `VITE_`-),
   Prod + Preview. **Paste the SAME value `VITE_PORTAL_HMAC_SECRET` holds** so
   existing `/c/:slug?token=…` links keep verifying; then redeploy and delete the
@@ -159,34 +154,36 @@ not read it to get oriented.
 
 ## Parked / known warts
 
-- **`public/hds-manifest.json` churn**: container builds rebake it (sometimes
-  INVALID). Standing order: `git checkout --` it on sight; never commit regens.
-- **Vercel deploy parity + the ESM extension trap:** see `docs/ai/REPO-PROCEDURES.md`.
-- **Vercel is on Pro** — the Hobby 12-function cap no longer binds, but keep
-  consolidating `api/*.ts`; cold starts still favour fewer functions.
-- `docs/ai/OPERATOR_BRIEF.md` + night-shift loop + `orchestration.json` are
-  RETIRED — do not execute them.
+- **`public/hds-manifest.json` churn**: builds rebake it (sometimes INVALID).
+  `git checkout --` it on sight; never commit regens.
+- **Vercel:** on Pro (the 12-function cap no longer binds, but fewer is still
+  better). Deploy parity + the ESM extension trap: `docs/ai/REPO-PROCEDURES.md`.
+- `OPERATOR_BRIEF.md`, the night-shift loop and `orchestration.json` are RETIRED.
 
 ## Decisions (dated, newest first)
 
-> Shipped history: `docs/ai/DONE-LOG.md` · repo runbooks: `docs/ai/REPO-PROCEDURES.md`.
-
 - **2026-09-15 — the call channel is not the email channel.** Email needs an
-  address and a `lead_score`; calls need neither and repeat. Two sessions built
-  overlapping call tooling the same day and both numbered a migration `0012`;
-  reconciled in #326 (renumber + drop the duplicated columns), deferring to
-  #324. **Lesson: branch-per-session prevents overwrites, not duplicated work —
-  sequence sessions on one pipeline.**
+  address and a `lead_score`; calls need neither and repeat. Notes are a table
+  (`lead_notes`), never a column — a column loses the conversation.
 - **2026-09-14 — Frontier-engineering doctrine adopted (ops#274).** Spec per
   epic, path-allowlist auto-merge, enforced steering budget. Kiro's productivity
   metrics **rejected**. Rationale: `docs/ai/FRONTIER-DOCTRINE.md`.
-
-> Older decisions: `docs/ai/DONE-LOG.md`.
 
 ## Fleet directives (broadcast board — a dated line here reaches every repo)
 
 - 2026-07-02: Track work as GitHub Issues; keep root `status.json` fresh at
   session end; cross-repo asks route through the ops hub, never repo→repo.
+- **2026-09-15: One session at a time per subsystem.** Three collisions in one
+  day — migration `0012` numbered twice, two call tools built in parallel, and a
+  docs consolidation broken by a merge — all traced to two sessions working the
+  leads/docs surface at once. Branch-per-session prevents overwrites, not
+  duplicated work. **Before starting: read this file, then `gh pr list` and
+  `git log origin/main -5`.** If another session is mid-flight on your
+  subsystem, pick different work or wait.
+- **2026-09-15: After your PR squash-merges, your branch is dead.** Squash
+  rewrites history, so the branch is no longer an ancestor of `main`. Start the
+  next unit with `git fetch origin main && git checkout -B <branch> origin/main`
+  — never keep committing to a merged branch.
 
 ## Standing rules (never violate)
 
