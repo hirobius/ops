@@ -1,0 +1,52 @@
+name: Work
+description: Something to build, fix or remove. Must have a real Definition of Done.
+labels: ['backlog']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before filing:** an issue should hold work with a *current* reason to act.
+        If the reason lies in the future, it belongs in `docs/ai/PARKED.md` with a
+        trigger — not here. If it's a question rather than a task, use the
+        **Decision** template so it gets a default and a date.
+
+  - type: dropdown
+    id: north_star
+    attributes:
+      label: Does this get a paying client site shipped sooner?
+      description: "The scope test from docs/ai/NORTH_STAR.md. Answering `no` doesn't block filing — but it does mean this competes with work that says yes."
+      options:
+        - 'Yes — directly on the lead → site → outreach → invoice path'
+        - 'Indirectly — removes a proven, recurring bottleneck'
+        - 'No — infrastructure or polish'
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: "What's wrong today, with evidence. Cite file:line or a command's output — not a description of how it feels."
+      placeholder: 'Verified on origin/main at <sha>: …'
+    validations:
+      required: true
+
+  - type: textarea
+    id: dod
+    attributes:
+      label: Definition of Done
+      description: "A `- [ ]` checklist. This is load-bearing: ralph/next.sh parks any issue without one. Each item must be checkable by someone who didn't write it."
+      value: |
+        - [ ] 
+        - [ ] `bash ralph/gate.sh` green
+    validations:
+      required: true
+
+  - type: textarea
+    id: verified
+    attributes:
+      label: Verified not already done
+      description: 'State how you checked. The 2026-09-14 sweep found 8 of 11 issues were already shipped or obsolete — this field exists to stop that recurring.'
+      placeholder: 'closed_by_pull_requests empty; `git show origin/main:path | grep …` returns nothing; no prior park comment or decision on the issue.'
+    validations:
+      required: true
