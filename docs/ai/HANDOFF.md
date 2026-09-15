@@ -13,6 +13,7 @@ open one only when the task in hand calls for it.
 
 | File                   | Open it when                                                                                       |
 | ---------------------- | -------------------------------------------------------------------------------------------------- |
+| `SESSION-BOARD.md`     | Another session may be running. Claim your subsystem there first.                                  |
 | `NORTH_STAR.md`        | A request might be scope drift. Adrian owns it; sessions never edit it.                            |
 | `PARKED.md`            | Something is deliberately not being worked on, or a tripwire may have fired (`pnpm parked:check`). |
 | `FRONTIER-DOCTRINE.md` | You are deciding _how_ to work — specs, gates, metrics.                                            |
@@ -173,13 +174,13 @@ not read it to get oriented.
 
 - 2026-07-02: Track work as GitHub Issues; keep root `status.json` fresh at
   session end; cross-repo asks route through the ops hub, never repo→repo.
-- **2026-09-15: One session at a time per subsystem.** Three collisions in one
-  day — migration `0012` numbered twice, two call tools built in parallel, and a
-  docs consolidation broken by a merge — all traced to two sessions working the
-  leads/docs surface at once. Branch-per-session prevents overwrites, not
-  duplicated work. **Before starting: read this file, then `gh pr list` and
-  `git log origin/main -5`.** If another session is mid-flight on your
-  subsystem, pick different work or wait.
+- **2026-09-15: Claim your subsystem in `SESSION-BOARD.md` before you start**,
+  and pre-flight with `gh pr list` + `git log origin/main -5`. Branch-per-session
+  prevents overwrites, not duplicated work — three collisions in one day proved
+  it.
+- **2026-09-15: Before merging to main, check for an in-flight `ralph/*` PR and
+  re-base it after.** Single-flight means a merge that strands the loop's PR
+  halts the queue — that is what stalled #325.
 - **2026-09-15: After your PR squash-merges, your branch is dead.** Squash
   rewrites history, so the branch is no longer an ancestor of `main`. Start the
   next unit with `git fetch origin main && git checkout -B <branch> origin/main`
