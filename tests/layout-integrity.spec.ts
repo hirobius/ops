@@ -46,6 +46,7 @@ const ALL_ROUTES = [
   '/ops/leads',
   '/ops/digest',
   '/ops/standing',
+  '/ops/pitch',
   '/ops/issues',
   '/ops/tasks',
   '/ops/projects',

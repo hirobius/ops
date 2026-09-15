@@ -14,6 +14,7 @@ const ClientBrandAuditPage = lazy(() => import('./pages/ops/ClientBrandAuditPage
 const LeadsPage = lazy(() => import('./pages/ops/leads/LeadsPage'));
 const DigestPage = lazy(() => import('./pages/ops/digest/DigestPage'));
 const StandingPage = lazy(() => import('./pages/ops/standing/StandingPage'));
+const PitchPage = lazy(() => import('./pages/ops/pitch/PitchPage'));
 
 // ── Client portal — public token-gated route at /c/:slug ─────────────────────
 const ClientPortalPage = lazy(() => import('./pages/portal/ClientPortalPage'));
@@ -75,6 +76,7 @@ export const router = createBrowserRouter([
           { path: 'digest', element: <LazyHDS Page={DigestPage} /> },
           { path: 'projects', element: <Navigate to="/ops/standing" replace /> },
           { path: 'standing', element: <LazyHDS Page={StandingPage} /> },
+          { path: 'pitch', element: <LazyHDS Page={PitchPage} /> },
           // /ops/issues retired 2026-07-09 (#52): consolidated into /ops/tasks —
           // the importer already pulls the same cross-repo issue feed, and the
           // multi-select "Copy refs" action moved onto the tasks board.

@@ -33,6 +33,11 @@ const TILES: readonly SurfaceTile[] = [
     description: 'Newsletter intel, pre-triaged with an ops angle',
   },
   {
+    to: '/ops/pitch',
+    label: 'Pitch',
+    description: 'The call sheet — businesses with a site built and ready to show',
+  },
+  {
     to: '/ops/standing',
     label: 'Standing',
     description: 'The whole board — chain, blocked, in flight, queue, backlog, deploys',

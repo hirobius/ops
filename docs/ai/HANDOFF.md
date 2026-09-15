@@ -11,22 +11,21 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
 
 ## Now (what is true today)
 
-- **🪟 `/ops/standing` is the ONLY fleet surface (2026-09-15).** Six sections:
-  the derived chain, waiting-on-you, in flight, the queue, backlog, and deploys.
-  `/ops/tasks` and `/ops/projects` are gone — both redirect here. Tasks was a
-  Supabase mirror holding **249 rows, 100% GitHub, zero native** — it added a
-  staleness class and a manual Import button and no data. Projects' question was
-  real and is now the Deploys section.
-  **Actions bypass the mirror on purpose:** `queue_on` / `queue_off` /
-  `ralph_requeue` write labels straight to GitHub via `labelIssueDirect`, because
-  Standing lists repos the importer never touched and a mirror-backed action
-  would 404 on exactly those. Queue-from-backlog is the direct fix for the
-  ops#274 finding — #185 sat 64 days because nobody applied one label.
-- **🗑️ The `/ops` Fleet timeline and the recap mandate are retired.** Its three
-  JSONL feeds stopped being written in July; the panel was faithfully rendering
-  two-month-old rows. **Third dead capture loop found this session** — the decay
-  rule is not theoretical. Full note in `DONE-LOG.md`.
+- **📞 `/ops/pitch` — the call sheet (2026-09-15).** A partner can work the list
+  on a phone: `tel:` link, the site in one tap, one-tap stage moves, and a note
+  log per lead. Only pitchable leads appear (`preview_url` present,
+  `do_not_contact` false) and both gates re-check on every write, so a queue
+  left open cannot contact someone who opted out since. **Marking a lead
+  pitched stamps `contacted_at` + `contact_channel` — the #321 evidence.**
+  Migration **0012 must be applied before the page works**. Stages reuse
+  0007's `outreach_status` vocabulary. Deliberately not a CRM.
 
+- **🪟 `/ops/standing` is the ONLY fleet surface.** Chain, waiting-on-you, in
+  flight, queue, backlog, deploys. `/ops/tasks` + `/ops/projects` redirect here.
+  Actions (`queue_on`/`queue_off`/`ralph_requeue`) write labels straight to
+  GitHub via `labelIssueDirect`, bypassing the Supabase mirror on purpose —
+  Standing lists repos the importer never touched. Queue-from-backlog is the
+  direct fix for ops#274's routing finding.
 - **🎯 Revenue path: #185, #186, #188, #191, #196 all shipped and MERGED**
   (2026-09-15, PRs #301/#308/#311). The Leads board dispatches `render` and
   surfaces a paste-ready `client.config.ts`; the agent now gets real hours,
