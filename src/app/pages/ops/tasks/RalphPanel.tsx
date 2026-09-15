@@ -23,56 +23,16 @@ import { Badge, Button } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import type { ComponentProps, CSSProperties } from 'react';
 import { usePoll } from '../../../lib/usePoll';
+import {
+  fetchRalphStatus,
+  shortRepo,
+  type RalphStatus,
+  type RalphRepoRuns,
+} from '../ralphStatus';
 import { relTimeNow } from './taskMeta';
 import type { TaskAction, TaskActionResult } from './types';
 
 type BadgeTone = NonNullable<ComponentProps<typeof Badge>['tone']>;
-
-interface RalphRun {
-  number: number;
-  status: string;
-  conclusion: string | null;
-  title: string;
-  url: string;
-  started_at: string;
-}
-interface RalphRepoRuns {
-  repo: string;
-  runs: RalphRun[];
-  error?: string;
-}
-interface RalphQueueItem {
-  repo: string;
-  number: number;
-  title: string;
-  url: string;
-  prio: string | null;
-  wip: boolean;
-}
-interface RalphParkedItem {
-  repo: string;
-  number: number;
-  title: string;
-  url: string;
-  label: 'ralph-parked' | 'needs-adrian';
-  reason: string | null;
-  hint: string | null;
-}
-interface RalphPrItem {
-  repo: string;
-  number: number;
-  url: string;
-  title: string;
-  wedged: boolean;
-  wedgeReason: string | null;
-}
-interface RalphStatus {
-  runs: RalphRepoRuns[];
-  queue: RalphQueueItem[];
-  parked: RalphParkedItem[];
-  prs: RalphPrItem[];
-  errors: { repo: string; error: string }[];
-}
 
 export interface RalphPanelProps {
   /** Re-queue is a board mutation, so it goes through the shared action seam (ops#136). */
@@ -85,10 +45,6 @@ const POLL_MS = 45_000;
 const QUEUE_SHOWN = 8;
 const PARKED_SHOWN = 8;
 const PRS_SHOWN = 8;
-
-function shortRepo(full: string): string {
-  return full.slice(full.indexOf('/') + 1);
-}
 
 /** Truncates a connector-failure message for the header badge; the full text rides the `title` tooltip. */
 function shortError(message: string): string {
@@ -118,18 +74,7 @@ function runChip(entry: RalphRepoRuns): { tone: BadgeTone; label: string; url?: 
 
 export function RalphPanel({ act, onNotify }: RalphPanelProps) {
   const { data, error, isOffline, isInitialLoading, refetch } = usePoll<RalphStatus>(
-    async (signal) => {
-      const res = await fetch('/api/tasks?ralph=1', { signal });
-      const body = await res.json().catch(() => null);
-      if (!res.ok) {
-        const message =
-          body && typeof body === 'object' && typeof body.error === 'string'
-            ? body.error
-            : `HTTP ${res.status}`;
-        throw new Error(message);
-      }
-      return body as RalphStatus;
-    },
+    fetchRalphStatus,
     { intervalMs: POLL_MS, offlineIntervalMs: POLL_MS * 2, requestTimeoutMs: 15_000 },
   );
 

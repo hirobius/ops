@@ -5,9 +5,21 @@ center. Component-level ADRs live under `docs/architecture/`; this file holds th
 agency-wide contracts and the lead → site delivery pipeline.
 
 > **⇄ Keep in lockstep with `docs/pipeline-walkthrough.html`** (the visual
-> version, published as an Artifact). This markdown is canonical — every session
-> reads it. When the pipeline state changes, update BOTH files in the same commit
-> so the readme and the walkthrough never drift.
+> version, published as an Artifact). This markdown is canonical for the
+> *narrative* — why a stage is where it is, what the moving parts are.
+>
+> **It is NOT canonical for whether a stage works.** `/ops/standing` answers that
+> from the `leads` table: one row count per stage (`lib/supabase/leads.mjs`
+> `leadFunnel`), with the state, the break and the biggest leak all derived in
+> `lib/chain/evidence.mjs`. A stage reads `proven` only when real leads got
+> through it — shipped code never promotes it, and nobody hand-edits a verdict.
+>
+> This replaced a hand-maintained status table on 2026-09-15 because that table
+> had drifted in both directions at once: it called migration 0007 unapplied
+> (its columns were live), said generation had never run on a real lead (three
+> configs existed), and named publish as the break (two sites were deployed —
+> the first stage nothing has ever reached is outreach). Prefer the live counts
+> over any status legend in this file; where they disagree, this file is wrong.
 
 ---
 
