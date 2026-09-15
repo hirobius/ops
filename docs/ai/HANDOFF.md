@@ -1,15 +1,56 @@
-# HANDOFF — the living session-to-session state
+# HANDOFF — the one document
 
-> **Contract.** This is the single universal handoff. Any session (any device,
-> any agent) that gets a short prompt — "continue", "status", "pick up", "go" —
-> reads THIS file first and acts from it. Any session that does real work
-> **updates this file before ending** (edit in place; keep it one page; move
-> finished things to the log line at the bottom). Adrian never copy-pastes
-> context again — he types one word.
+> **Point the next agent here. Nothing else.** A session given "continue",
+> "status" or "go" reads this and acts from **Next**; a session that does real
+> work updates it before ending. "Put it in the handoff" means this file.
 
-_Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
+_Last updated: 2026-09-15._
+
+## The map (what else exists, and when to open it)
+
+Everything below is **on-demand**. You do not need any of it to start work —
+open one only when the task in hand calls for it.
+
+| File | Open it when |
+|---|---|
+| `NORTH_STAR.md` | A request might be scope drift. Adrian owns it; sessions never edit it. |
+| `PARKED.md` | Something is deliberately not being worked on, or a tripwire may have fired (`pnpm parked:check`). |
+| `FRONTIER-DOCTRINE.md` | You are deciding *how* to work — specs, gates, metrics. |
+| `AGENT_GUIDELINES.md` | You are dispatching sub-agents. |
+| `PROMPT_TEMPLATES.md` | You are writing a prompt for one. |
+| `REPO-PROCEDURES.md` | You need a runbook (trigger phrases, release steps). |
+| `DONE-LOG.md` | You need shipped history, or "was this already done?" |
+| `BURNDOWN-GAMEPLAN.md` | You want open issues clustered with a plan. |
+| `learned-rules.jsonl` | Walking the unpromoted rules (`pnpm guardrail:learned-rules`). |
+| `../ARCHITECTURE.md` | The pipeline's narrative. **Not** its status — that's `/ops/standing`. |
+
+**Live state is not in a document.** For whether a pipeline stage actually
+works, read `/ops/standing`; it derives every verdict from `leads` row counts.
+For who to call next, read `/ops/pitch`. A doc that restates either will drift.
+
+`docs/ai/archive/` holds superseded material. It is history, not context — do
+not read it to get oriented.
 
 ## Now (what is true today)
+
+- **📦 Session 2026-09-15 shipped 8 PRs and left 0 open.** `#308` lead fields ·
+  `#311` palette/layout/imagery · `#312` guardrails #304/#305 · `#313` doctrine +
+  steering budget · `#320` /ops/standing · `#324` consolidation + /ops/pitch ·
+  `#323` north-star metric. Started the night with 4 open PRs and zero merges to
+  `main`; that inversion was the point.
+- **📞 `/ops/pitch` is live and migration 0012 IS applied** (verified: both
+  columns, `lead_notes`, RLS, 3 indexes). A partner can work the list from a
+  phone. Marking a lead pitched stamps `contacted_at` + `contact_channel` — the
+  evidence #321 needs.
+- **📉 north-star share reads 9.1%** (4/44 merged PRs touched the revenue path
+  over 14d) against a 20% starting target. Run `pnpm metric:north-star-share`.
+  The target is uncalibrated — retune with `--target` once a few windows exist.
+- **🧹 `docs/ai/` went 31 files → 16.** Twelve superseded or orphaned docs moved
+  to `docs/ai/archive/` (four separate May handoffs, two OPERATOR_BRIEFs, the
+  dead agent-heal-log, board-comb, ds-handoff, AI_ORCHESTRATION, MODEL_TIERS,
+  MULTI_AGENT_OVERNIGHT, checks-hooks inventory, ARCHITECTURE_SCRUB). Live
+  pointers repaired. **`docs/` still holds 166 markdown files overall** — the
+  sprawl outside `docs/ai/` is untouched and is its own job.
 
 - **📞 `/ops/pitch` — the call sheet (2026-09-15).** A partner can work the list
   on a phone: `tel:` link, the site in one tap, one-tap stage moves, and a note
@@ -26,16 +67,8 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
   GitHub via `labelIssueDirect`, bypassing the Supabase mirror on purpose —
   Standing lists repos the importer never touched. Queue-from-backlog is the
   direct fix for ops#274's routing finding.
-- **🎯 Revenue path: #185, #186, #188, #191, #196 all shipped and MERGED**
-  (2026-09-15, PRs #301/#308/#311). The Leads board dispatches `render` and
-  surfaces a paste-ready `client.config.ts`; the agent now gets real hours,
-  address, photos and a contrast-checked palette. #187 marked the Duda path
-  dead; #309 removes it. Spec: `docs/specs/leads-to-site.md`.
-- **🧭 Frontier-engineering doctrine MERGED** (#313, ops#274).
-  `docs/ai/FRONTIER-DOCTRINE.md` + `docs/specs/` + the 25KB steering budget gate.
-  Finding that still steers: **we have the machinery and mis-aim it.** 13 rules
-  in `learned-rules.jsonl`, 5 promoted to `CLAUDE.md` §4.
-
+- **🎯 Revenue path is merged, unrun.** The generator takes real hours, address,
+  photos and a contrast-checked palette. Spec: `docs/specs/leads-to-site.md`.
 - **PRODUCTION is LIVE** — `hirobius-ops` deploys from `main`; `/ops` password gate
   active (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET`); Supabase wired; DS consumed
   from public npm `@hirobius/design-system`. Vercel is on **Pro**; preview
@@ -59,11 +92,6 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
   wrapper; generation runs enrich → generate → judge; `lib/render` emits the
   paste-ready `client.config.ts` + deploy commands. Publishing stays a deliberate
   human action (it is the billing event).
-- **Where to look:** `docs/ai/BURNDOWN-GAMEPLAN.md` (the clustered plan for every
-  open issue) · `docs/ARCHITECTURE.md` ⇄ `docs/pipeline-walkthrough.html` (keep in
-  lockstep) · `docs/ai/DONE-LOG.md` (shipped history) ·
-  `docs/ai/REPO-PROCEDURES.md` (repo runbooks).
-
 ## Adrian's open actions (his court — one-time, not blocked on a session)
 
 - **Run the lilac-insure onboarding prompt** → stands up the client repo to fleet

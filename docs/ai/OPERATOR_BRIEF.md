@@ -19,7 +19,7 @@ report, a targeted change), do that instead.
 > `scripts/orchestration-watcher.mjs` daemon is running and writes
 > `docs/ai/ready-queue.json`; consult it each iteration for the top
 > eligible unit. Canonical loop spec:
-> `docs/ai/MULTI_AGENT_OVERNIGHT.md` §3 + `docs/ai/PROMPT_TEMPLATES.md`
+> `docs/ai/archive/MULTI_AGENT_OVERNIGHT.md` §3 + `docs/ai/PROMPT_TEMPLATES.md`
 > Template 6 (autonomous-burndown). Any agent or sub-agent dispatched in
 > this window is expected to chain units autonomously — do not write a
 > per-unit status report; only report on session end / stop-condition /
@@ -123,7 +123,7 @@ re-explain things that are already done."
 
 The rest of this document is context — §1 system description, §2 start
 checklist, §5 decision rules, §7 safety rules. Historical sprint logs
-have been archived to `docs/ai/OPERATOR_BRIEF_ARCHIVE.md`.
+have been archived to `docs/ai/archive/OPERATOR_BRIEF_ARCHIVE.md`.
 
 ---
 

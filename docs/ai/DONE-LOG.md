@@ -7,6 +7,35 @@
 > Append here when a session ships something; HANDOFF keeps only the most recent
 > Done-log line.
 
+## Moved out of CLAUDE.md 2026-09-15 — the burndown snapshot
+
+> A dated blockquote is a snapshot, not a standing rule. Its still-durable
+> facts (ralph-gate is the sole required check; auto-merge + single-flight;
+> the workflows-scope boundary; parking is recoverable) live in CLAUDE.md §4
+> and HANDOFF. The rest is here.
+
+> **Current state (2026-09-14 burndown session) — read `docs/ai/BURNDOWN-GAMEPLAN.md`
+> for the full picture (all open issues clustered, the phased plan, and the
+> needs-adrian decisions).** Durable facts to carry forward:
+>
+> - **ops CI is green.** `ralph-gate` is the **sole required check** on `main`; the
+>   other CI jobs (Lighthouse, "Quality gates", the "Typecheck…Playwright (desktop)"
+>   job) are informational — a PR at `mergeable_state: unstable` is still mergeable.
+>   Don't be alarmed by red _non-required_ checks.
+> - **Auto-merge is the proven default:** `ralph-auto` + `ralph-ready` + a green
+>   `ralph-gate` → self-merge; the 6h idle-watchdog cron is ON (PR #232).
+>   **Single-flight** = one `ralph/*` PR at a time, so a supervised/unmerged PR stalls
+>   the whole loop — merge or close it promptly, and **verify merge state via the API,
+>   never assume "it merged"** (a 4h idle happened when a merge tap didn't complete).
+> - **`.github/workflows/*` edits can't be pushed by the bot (no `workflows` scope).**
+>   Route CI/workflow changes through an **adr-eng PR via the GitHub connector** — the
+>   sanctioned, human-directed exception to §0's "no agent push", not a Ralph task.
+> - **Parking is recoverable:** a missing `- [ ]` DoD checklist, a cross-repo scope, or
+>   2 failed attempts park an issue (drops `ralph-ready`). Recover by fixing the cause
+>   and re-adding `ralph-ready`; don't mass-tag (churn causes parking).
+> - Vercel is on **Pro**; preview Deployment Protection is **off** (the `/ops` password
+>   gate still protects it). Frontier-engineering deep-dive is queued as **#274**.
+
 ## Retired 2026-09-15 — the run-log recap mandate and the /ops Fleet timeline
 
 CLAUDE.md §2.5 required every session to post a one-line recap via
