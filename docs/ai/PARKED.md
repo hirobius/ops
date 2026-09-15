@@ -113,6 +113,55 @@ premises in six of the issues examined.
 - **what already works:** `digest_items` store, `api/digest.ts` + `api/digest-action.ts`, dismiss/restore with a collapsible stash on `DigestPage`.
 - **design preserved in #77:** the two-step Analyze→Approve recommendation (vs draft-immediately), and the reused seams (`lib/agent/llm.mjs`, `lib/github/issues.mjs::createIssue`, the 12-Vercel-function ceiling).
 
+### Lead-scoring axes 2-5 (intent, ability to pay, reachability, disqualifiers)
+
+- **origin:** the 2026-09-15 qualification tune (commit `a3f698e`). Axis 1 (presence
+  opportunity) shipped; these four are the deliberate remainder. Adrian's call:
+  reweight and ship outreach first, add axes once reply data exists to tune against.
+- **trigger:** `event: the first real outreach batch has produced reply/bounce data (outreach_status populated on >= 50 leads)`
+- **why parked:** every one of these is a guess until a single email has been
+  answered. Tuning a five-axis scorer with zero conversion data optimises a model
+  against an imagined customer. One axis, one send, then measure.
+
+**Axis 2 — intent (is something happening NOW?).** Need is static; buying is
+event-driven. Cheapest signals, best first:
+
+| Signal                              | Source                                       | Cost | Reads as                           |
+| ----------------------------------- | -------------------------------------------- | ---- | ---------------------------------- |
+| Domain registered, nothing deployed | RDAP                                         | free | decided to have a site, stalled    |
+| Site 4xx/5xx or expired TLS         | `scripts/lib/site-audit.mjs` (already built) | free | urgent, and they paid once already |
+| Domain expiring < 90 days           | RDAP                                         | free | a renewal decision moment          |
+| First review < 6 months old         | Outscraper (already paid for)                | free | new business, budget allocated     |
+| Running Google Ads                  | Ads Transparency Center                      | free | has an acquisition budget          |
+
+**Axis 3 — ability to pay.** Nothing models this today, and it is probably the
+largest single miss. A roofer or dentist ($5–20k jobs) can pay for a site; a nail
+salon ($40 tickets) cannot, however badly they need one. `category` is already on
+the row, so a static trade → value-tier table is nearly free. Supporting signals:
+Google price level ($–$$$$), multi-location, years in business (age of first review).
+
+**Axis 4 — reachability.** Blocks conversion and, worse, threatens the sending
+domain. A role address (`info@`, `contact@`) converts far worse than a named one,
+and unverified scraped addresses bounce. **Sustained bounce rates above ~3% get a
+cold-email sending domain throttled or blacklisted**, which is not a scoring
+problem so much as an existential one for the channel. MX/catch-all validation
+before the first large batch; `owner_name` presence gates a personalised greeting
+(`lib/outreach/map.mjs` already refuses to fabricate one).
+
+**Axis 5 — disqualifiers.** The scorer can currently only ADD points; the sole
+negative is `CLOSED_PERMANENTLY`. Hard excludes worth encoding:
+
+- **Franchise / chain** — corporate owns the website. The franchisee cannot buy one.
+- **Site rebuilt within ~12 months** (current copyright year + modern stack) — they
+  just bought; they will not buy again.
+- **Regulated trades** (medical → HIPAA, legal → bar advertising rules) — real
+  compliance surface on a generated site.
+- **Footer credits an agency** — already has a vendor relationship.
+
+**Re-entry rule:** file ONE axis with a real DoD, cheapest first (Axis 4's bounce
+protection is the one with a deadline, since it must precede volume). Never file
+the umbrella.
+
 ### Dashboard command-center / skill-bar backlog (19 items)
 
 - **origin:** ops#62 (closed 2026-09-15); ops#227 remains open as the single surviving dashboard epic
