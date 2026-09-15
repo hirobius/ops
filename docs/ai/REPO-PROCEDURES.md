@@ -118,3 +118,30 @@ requires an explicit per-item yes from Adrian (standing rule).
   fires on preset-select alone. Outscraper spend is still ON HOLD pending the
   bad-site thesis validation (see Done-log 2026-07-07) — get an explicit go
   from Adrian before clicking "Confirm run".
+
+## Vercel deploy parity (moved out of HANDOFF 2026-09-15 for the steering budget)
+
+**Vercel build ≠ local `vite build`.** Vercel type-checks every `api/*.ts`
+serverless function; `vite build` does not, so a green local build can still fail
+on Vercel. If you touch `api/` types, run **`pnpm typecheck:api` (exit 0
+required)** — it uses `tsconfig.api-check.json`, the real compiler options over
+`api/**`. Do NOT use the old `tsc --types node api/*.ts` form: dropping the
+project config yields false `noImplicitAny`/TS7016 noise on the `.mjs` imports.
+
+**`typecheck:api` does NOT catch extensionless-import runtime crashes.** The
+deploy is ESM (`"type": "module"`), so every relative import in `api/*.ts` MUST
+carry an explicit extension — `.mjs` for lib JS, `.js` for a compiled `.ts`
+handler. Node's ESM loader will not guess. An extensionless
+`'../lib/api/handler'` type-checks green and then 500s at runtime with
+`ERR_MODULE_NOT_FOUND`; the whole `/ops` board hung on exactly this until
+2026-07-02. Explicit extensions only.
+
+## `.github/PULL_REQUEST_TEMPLATE.md` is the old HDS one
+
+Four of the six gates it demands were deleted from ops
+(`check-manifest-drift`, `check-binding-drift`, `check-source-canon`,
+`validate-manifest`), and it asks for a `docs/ai/orchestration.json` unit-id that
+ops does not use. Every PR author either pastes output for scripts that do not
+exist or silently ticks boxes that do not apply. Deliberately not filed as an
+issue — the open-issue count is itself part of the problem. Fix it in passing on
+any PR that already touches `.github/`.
