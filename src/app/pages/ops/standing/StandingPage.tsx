@@ -29,10 +29,10 @@ import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from '../PageHeader';
 import { usePoll } from '../../../lib/usePoll';
 import {
-  fetchRalphStatus,
+  fetchFleetStatus,
   shortRepo,
-  type RalphStatus,
-  type RalphParkedItem,
+  type FleetStatus,
+  type FleetIssue,
 } from '../ralphStatus';
 import { CHAIN, chainSummary, type ChainLink, type LinkState } from './chain';
 
@@ -55,22 +55,14 @@ const STATE_WORD: Record<LinkState, string> = {
 
 const SUMMARY = chainSummary(CHAIN);
 
-/** needs-adrian is a decision only Adrian can make; ralph-parked the loop can retry. */
-function decisionsFirst(parked: readonly RalphParkedItem[]): RalphParkedItem[] {
-  return [...parked].sort((a, b) => {
-    if (a.label === b.label) return a.number - b.number;
-    return a.label === 'needs-adrian' ? -1 : 1;
-  });
-}
-
 export default function StandingPage() {
-  const { data, error } = usePoll<RalphStatus>(fetchRalphStatus, {
+  const { data, error } = usePoll<FleetStatus>(fetchFleetStatus, {
     intervalMs: POLL_MS,
     offlineIntervalMs: POLL_MS * 3,
-    requestTimeoutMs: 15_000,
+    requestTimeoutMs: 20_000,
   });
 
-  const parked = decisionsFirst(data?.parked ?? []);
+  const blocked = data?.blocked ?? [];
   const prs = data?.prs ?? [];
   const queue = data?.queue ?? [];
   const needsToken = error?.includes('GITHUB_TOKEN') ?? false;
@@ -84,6 +76,8 @@ export default function StandingPage() {
         title="Standing"
         lede="Where the chain breaks, what is blocked on you, and what the loop is doing."
       />
+
+      <Coverage data={data} error={error} needsToken={needsToken} />
 
       {/* ── 1. The chain ─────────────────────────────────────────────────── */}
       <Section
@@ -116,51 +110,53 @@ export default function StandingPage() {
       {/* ── 2. Waiting on you ────────────────────────────────────────────── */}
       <Section
         title="Waiting on you"
-        count={laneCount(needsToken, error, loaded, parked.length, ['blocked on you', 'blocked on you'])}
+        count={laneCount(needsToken, error, loaded, blocked.length, ['blocked on you', 'blocked on you'])}
       >
         <Lane
           needsToken={needsToken}
           error={error}
           loaded={loaded}
-          empty={parked.length === 0}
+          empty={blocked.length === 0}
           emptyCopy="Nothing is waiting on a decision. Rare — enjoy it."
         >
           <ul style={s.list}>
-            {parked.slice(0, SHOWN).map((p) => (
-              <li key={`${p.repo}#${p.number}`} style={s.row}>
-                <a href={p.url} target="_blank" rel="noreferrer" style={s.rowLink}>
-                  <span style={s.num}>#{p.number}</span>
-                  <span style={s.title}>{p.title}</span>
+            {blocked.slice(0, SHOWN).map((b: FleetIssue) => (
+              <li key={`${b.repo}#${b.number}`} style={s.row}>
+                <a href={b.url} target="_blank" rel="noreferrer" style={s.rowLink}>
+                  <span style={s.num}>#{b.number}</span>
+                  <span style={s.title}>{b.title}</span>
                 </a>
                 <div style={s.metaRow}>
-                  <Badge tone={p.label === 'ralph-parked' ? 'danger' : 'warning'}>
-                    {p.label}
-                  </Badge>
+                  {b.label ? (
+                    <Badge tone={b.label === 'ralph-parked' ? 'danger' : 'warning'}>
+                      {b.label}
+                    </Badge>
+                  ) : null}
                   <span style={s.meta}>
-                    {shortRepo(p.repo)}
-                    {p.hint ? ` · ${p.hint}` : p.reason ? ` · ${p.reason}` : ''}
+                    {shortRepo(b.repo)}
+                    {b.prio ? ` · ${b.prio}` : ''}
                   </span>
                 </div>
               </li>
             ))}
           </ul>
         </Lane>
-        {parked.length > SHOWN ? (
-          <p style={s.more}>+{parked.length - SHOWN} more on the tasks board</p>
+        {blocked.length > SHOWN ? (
+          <p style={s.more}>+{blocked.length - SHOWN} more on the tasks board</p>
         ) : null}
       </Section>
 
       {/* ── 3. In flight ─────────────────────────────────────────────────── */}
       <Section
         title="In flight"
-        count={laneCount(needsToken, error, loaded, prs.length, ['open Ralph PR', 'open Ralph PRs'])}
+        count={laneCount(needsToken, error, loaded, prs.length, ['open PR', 'open PRs'])}
       >
         <Lane
           needsToken={needsToken}
           error={error}
           loaded={loaded}
           empty={prs.length === 0}
-          emptyCopy="No Ralph PR is open — under single-flight that means the loop is free to claim the next issue."
+          emptyCopy="No PR is open anywhere in the fleet."
         >
           <ul style={s.list}>
             {prs.slice(0, SHOWN).map((pr) => (
@@ -170,21 +166,25 @@ export default function StandingPage() {
                   <span style={s.title}>{pr.title}</span>
                 </a>
                 <div style={s.metaRow}>
-                  {pr.wedged ? (
-                    <Badge tone="danger" title={pr.wedgeReason ?? 'wedged'}>
-                      wedged
-                    </Badge>
-                  ) : null}
-                  <span style={s.meta}>
-                    {shortRepo(pr.repo)}
-                    {pr.wedged && pr.wedgeReason ? ` · ${pr.wedgeReason}` : ''}
-                  </span>
+                  {pr.draft ? <Badge tone="neutral">draft</Badge> : null}
+                  <span style={s.meta}>{shortRepo(pr.repo)}</span>
                 </div>
               </li>
             ))}
           </ul>
         </Lane>
+        {prs.length > SHOWN ? (
+          <p style={s.more}>
+            +{prs.length - SHOWN} more open across the fleet, least recently touched
+          </p>
+        ) : null}
       </Section>
+
+      {data?.errors.length ? (
+        <p style={s.notice}>
+          {data.errors.map((e) => `${e.repo}: ${e.error}`).join(' · ')}
+        </p>
+      ) : null}
 
       {/* ── 4. Queued ────────────────────────────────────────────────────── */}
       <Section
@@ -311,6 +311,37 @@ function ChainRow({ link, isBreak }: { link: ChainLink; isBreak: boolean }) {
  * a loading-first ladder shows "Reading the fleet…" for ~2 minutes over a hard
  * failure. Silence is the one thing this page must never do.
  */
+/**
+ * What this page is actually watching. Worth a line of its own: the repo set is
+ * discovered from the token's issue feed, so it grows on its own when a repo is
+ * added — and the only way to TELL that it did is to print what came back.
+ * A hardcoded list that silently went stale is the failure this replaces.
+ */
+function Coverage({
+  data,
+  error,
+  needsToken,
+}: {
+  data: FleetStatus | null;
+  error: string | null;
+  needsToken: boolean;
+}) {
+  if (needsToken || (error && !data)) return null;
+  if (!data) return <p style={s.coverage}>Discovering repos…</p>;
+
+  const { repos, owners, counts } = data;
+  return (
+    <p style={s.coverage}>
+      Watching <strong style={s.strong}>{counts.repos}</strong>{' '}
+      {counts.repos === 1 ? 'repo' : 'repos'}
+      {owners.length ? ` across ${owners.join(' + ')}` : ''} ·{' '}
+      <strong style={s.strong}>{counts.openIssues}</strong> open{' '}
+      {counts.openIssues === 1 ? 'issue' : 'issues'}
+      <span style={s.coverageRepos}>{repos.map(shortRepo).join(' · ')}</span>
+    </p>
+  );
+}
+
 function Lane({
   needsToken,
   error,
@@ -398,6 +429,19 @@ const s = {
     whiteSpace: 'nowrap' as const,
   },
 
+  coverage: {
+    ...hds.typeStyles.caption,
+    margin: 0,
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    gap: `0 ${hds.space.px6}`,
+    color: 'var(--semantic-color-content-secondary)',
+  },
+  coverageRepos: {
+    ...hds.typeStyles.mono,
+    flexBasis: '100%',
+    color: 'var(--semantic-color-content-tertiary)',
+  },
   lede: {
     ...hds.typeStyles.body,
     margin: 0,

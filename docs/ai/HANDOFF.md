@@ -11,16 +11,15 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
 
 ## Now (what is true today)
 
-- **🪟 `/ops/standing` — the one-screen fleet read (2026-09-15).** New route, HDS
-  tokens, phone-first. Section 1 is the revenue chain from
-  `src/app/pages/ops/standing/chain.ts` (editorial, no fetch, now the THIRD
-  lockstep rendering of the ARCHITECTURE gap-map). Sections 2–4 are live off
-  `GET /api/tasks?ralph=1` — no new Vercel function (at the 12 cap). Built
-  because Adrian was "running blind": GitHub Projects v2 has no API for views or
-  fields, so a board could not be scripted, and the one he set up still needs
-  manual views (#315). Shipped alongside: `ralphStatus.ts` now owns the endpoint
-  contract for both this page and RalphPanel, and its fetcher REJECTS a 200 that
-  is not the fleet payload — previously that parsed to `null` and rendered as
+- **🪟 `/ops/standing` — the one-screen fleet read (2026-09-15).** Revenue chain
+  (from `standing/chain.ts`, now the THIRD lockstep rendering of the
+  ARCHITECTURE gap-map) + three live lanes off `GET /api/tasks?fleet=1`. **Repo
+  set is DISCOVERED, not configured** — `listOpenIssues()` spans every repo the
+  token sees across `hirobius` + `adr-eng`, so a new repo appears on its own;
+  `?ralph=1`'s hardcoded FLEET_REPOS stays for the Tasks panel's wedge badges.
+  One PR search covers all owners, so cost is flat in repo count. No new Vercel
+  function (at the 12 cap); `?fleet=1` has a dev mirror, `?ralph=1` does not.
+  Fail-loud: a 200 that isn't the payload now rejects instead of rendering as
   "nothing is waiting on you".
 
 - **🎯 Revenue path moving again (2026-09-14).** **#185 shipped** (PR #301) — the
@@ -158,13 +157,6 @@ requires an explicit per-item yes from Adrian (standing rule).
   Kiro's productivity metrics (commit volume, "4.5× lift") **rejected** — we
   instrument north-star share and human-gate latency instead. Full rationale:
   `docs/ai/FRONTIER-DOCTRINE.md`.
-
-- 2026-07-11 (evening, Adrian): **feature freeze LIFTED** — the fleet burns
-  everything tagged ralph-ready regardless of feature/bug class (everything
-  carries ralph-auto per the same-day standing decision). #44 stays parked
-  until the first manual Monroe preview ship (unmet dependency). The 66
-  legacy BACKLOG.md-era board rows were soft-deleted with a provenance note —
-  GitHub issues are now the board's sole task source, literally.
 
 > Older decisions: `docs/ai/DONE-LOG.md`.
 

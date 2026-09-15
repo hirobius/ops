@@ -49,6 +49,7 @@ import {
 import { listTasks, upsertTasks, listGithubTaskKeys, retireTasks } from '../lib/supabase/tasks.mjs';
 import { mapIssuesToTasks } from '../lib/tasks/import-issues.mjs';
 import { orderRalphQueue } from '../lib/tasks/ralph-queue.mjs';
+import { buildFleetStatus } from '../lib/tasks/fleet-status.mjs';
 import { reconcileGithubTasks, reconcileGuard } from '../lib/tasks/reconcile-github-tasks.mjs';
 import { parseParkedReason, hasDodMarker } from '../lib/tasks/ralph-parked.mjs';
 import { classifyWedged } from '../lib/tasks/ralph-wedge.mjs';
@@ -62,6 +63,7 @@ const FLEET_REPOS = ['hirobius/ops', 'hirobius/hds', 'hirobius/site-engine'];
 
 export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Promise<HandlerResult> {
   if (pick(req.query['ralph']) === '1') return ralphStatusHandler();
+  if (pick(req.query['fleet']) === '1') return fleetStatusHandler();
 
   const limit = clampLimit(pick(req.query['limit']));
   const includeDeleted = pick(req.query['include_deleted']) === '1';
@@ -112,6 +114,21 @@ export async function ralphStatusHandler(): Promise<HandlerResult> {
   } catch (err) {
     return { status: 502, body: { error: messageOf(err), code: 'GITHUB_RALPH_STATUS_FAILED' } };
   }
+}
+
+/**
+ * GET /api/tasks?fleet=1 — the fleet-wide read behind /ops/standing.
+ *
+ * Thin wrapper: the implementation is lib/tasks/fleet-status.mjs so that the
+ * dev middleware (scripts/tasks-middleware.mjs) serves the identical payload
+ * from the identical code — unlike `?ralph=1`, which has no dev mirror and can
+ * therefore only be exercised in production.
+ */
+export async function fleetStatusHandler(
+  deps: { github?: ReturnType<typeof makeGitHubPort> } = {},
+): Promise<HandlerResult> {
+  const gh = deps.github !== undefined ? deps.github : makeGitHubPort();
+  return (await buildFleetStatus(gh)) as HandlerResult;
 }
 
 /**

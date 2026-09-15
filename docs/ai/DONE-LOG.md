@@ -7,6 +7,19 @@
 > Append here when a session ships something; HANDOFF keeps only the most recent
 > Done-log line.
 
+## Decisions moved out of HANDOFF (steering budget, ops#292)
+
+> Retired from `docs/ai/HANDOFF.md` on 2026-09-15 — settled, no longer
+> steering any session. Kept here verbatim.
+
+- 2026-07-11 (evening, Adrian): **feature freeze LIFTED** — the fleet burns
+  everything tagged ralph-ready regardless of feature/bug class (everything
+  carries ralph-auto per the same-day standing decision). #44 stays parked
+  until the first manual Monroe preview ship (unmet dependency). The 66
+  legacy BACKLOG.md-era board rows were soft-deleted with a provenance note —
+  GitHub issues are now the board's sole task source, literally.
+
+
 ## Superseded `Now` section (as of 2026-09-14, before the ops#292 trim)
 
 Kept verbatim. Most of it described PRs merged in July; one bullet still asserted

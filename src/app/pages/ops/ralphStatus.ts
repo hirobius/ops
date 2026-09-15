@@ -106,7 +106,74 @@ function isRalphStatus(v: unknown): v is RalphStatus {
   );
 }
 
-/** `hirobius/ops` → `ops`. The owner is constant across the fleet panel. */
+/* ── the fleet-wide read: GET /api/tasks?fleet=1 ──────────────────────────── */
+
+export interface FleetIssue {
+  repo: string;
+  number: number;
+  title: string;
+  url: string;
+  /** The label that put it in this lane: a blocking label, or 'ralph-parked'. */
+  label: string | null;
+  prio: string | null;
+}
+
+export interface FleetPr {
+  repo: string;
+  number: number;
+  url: string;
+  title: string;
+  draft: boolean;
+  updatedAt: string;
+  labels: string[];
+}
+
+export interface FleetStatus {
+  /** Owners actually scanned — derived from the issues, never configured. */
+  owners: string[];
+  /** Repos that appeared in the sweep. This IS the fleet. */
+  repos: string[];
+  blocked: FleetIssue[];
+  queue: { repo: string; number: number; title: string; url: string; prio: string | null; wip: boolean }[];
+  prs: FleetPr[];
+  errors: { repo: string; error: string }[];
+  counts: { openIssues: number; repos: number };
+}
+
+/**
+ * The Standing page's read. Same fail-loud contract as the Ralph panel's: a
+ * 200 that is not this payload is a hard error, never four empty lanes.
+ */
+export async function fetchFleetStatus(signal: AbortSignal): Promise<FleetStatus> {
+  const res = await fetch('/api/tasks?fleet=1', { signal });
+  const body: unknown = await res.json().catch(() => null);
+  if (!res.ok) {
+    const message =
+      isRecord(body) && typeof body['error'] === 'string'
+        ? (body['error'] as string)
+        : `HTTP ${res.status}`;
+    throw new Error(message);
+  }
+  if (!isFleetStatus(body)) {
+    throw new Error(
+      'GET /api/tasks?fleet=1 returned 200 with a body that is not the fleet ' +
+        'payload — the serverless function did not handle this request.',
+    );
+  }
+  return body;
+}
+
+function isFleetStatus(v: unknown): v is FleetStatus {
+  return (
+    isRecord(v) &&
+    Array.isArray(v['repos']) &&
+    Array.isArray(v['blocked']) &&
+    Array.isArray(v['queue']) &&
+    Array.isArray(v['prs'])
+  );
+}
+
+/** `hirobius/ops` → `ops`. Owners are shown once, in the coverage line. */
 export function shortRepo(full: string): string {
   return full.slice(full.indexOf('/') + 1);
 }

@@ -34,7 +34,7 @@
     "src/app/pages/ops/leads/RenderHandoffPanel.test.tsx": 2,
     "src/app/pages/ops/leads/RenderHandoffPanel.tsx": 6,
     "src/app/pages/ops/projects/ProjectsPage.tsx": 21,
-    "src/app/pages/ops/standing/StandingPage.tsx": 59,
+    "src/app/pages/ops/standing/StandingPage.tsx": 67,
     "src/app/pages/ops/tasks/RalphPanel.tsx": 42,
     "src/app/pages/ops/tasks/TaskActionsMenu.tsx": 19,
     "src/app/pages/ops/tasks/TaskRow.tsx": 21,

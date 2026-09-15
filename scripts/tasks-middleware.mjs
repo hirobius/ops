@@ -4,7 +4,12 @@
  * vite.config.mjs with apply:'serve' so it never ships to prod.
  *
  *   GET  /api/tasks         ?include_deleted=1   → { tasks }
+ *   GET  /api/tasks?fleet=1                      → the /ops/standing read
  *   POST /api/task-action   { key, action, actor? } → { ok, ... }
+
+ * `?fleet=1` shares lib/tasks/fleet-status.mjs with the Vercel function, so the
+ * Standing page is developable locally — `?ralph=1` has no dev mirror, which is
+ * why its panel can only be exercised in production.
  *
  * Needs SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY in process.env (vite.config
  * copies them from .env.local). Dispatch also needs GITHUB_TOKEN.
@@ -14,6 +19,7 @@ import { getServiceClient } from '../lib/supabase/server.mjs';
 import { listTasks } from '../lib/supabase/tasks.mjs';
 import { applyTaskAction } from '../lib/tasks/actions.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
+import { buildFleetStatus } from '../lib/tasks/fleet-status.mjs';
 
 const MAX_LIMIT = 2000;
 
@@ -46,6 +52,14 @@ export function createTasksMiddleware() {
       if (req.method !== 'GET') return next();
       try {
         const url = new URL(req.url, 'http://localhost');
+
+        if (url.searchParams.get('fleet') === '1') {
+          // Needs only GITHUB_TOKEN — no Supabase, so the Standing page comes
+          // up in dev even without database credentials.
+          const { status, body } = await buildFleetStatus(makeGitHubPort());
+          return sendJson(res, status, body);
+        }
+
         const includeDeleted = url.searchParams.get('include_deleted') === '1';
         const rawLimit = Number(url.searchParams.get('limit'));
         const limit = Number.isFinite(rawLimit)
