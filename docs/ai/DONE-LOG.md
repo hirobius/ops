@@ -7,6 +7,32 @@
 > Append here when a session ships something; HANDOFF keeps only the most recent
 > Done-log line.
 
+## Retired 2026-09-15 — the run-log recap mandate and the /ops Fleet timeline
+
+CLAUDE.md §2.5 required every session to post a one-line recap via
+`scripts/log-run.mjs`, which the `/ops` Fleet timeline rendered from three
+committed JSONL feeds at build time.
+
+All three feeds stopped being written in July: `run-log.jsonl` on 2026-07-12
+(28 entries, ever), `events.jsonl` on 2026-07-08 (3 entries), `alert-log.jsonl`
+likewise. The panel was faithfully rendering two-month-old rows — the renderer
+was never the problem.
+
+Two causes, both worth remembering:
+
+1. **The mandate was ignored.** A rule every session skipped for two months is
+   not a rule, and a capture loop attached to a human remembering to run a
+   command is the decay pattern the doctrine names. This is the third such loop
+   found dead in one session, after `learned-rules.jsonl` and
+   `agent-heal-log.md`.
+2. **Failure was silent.** `log-run.mjs` treated an unknown flag as a help
+   request, and help exits 0 — so a caller that got the syntax wrong (a bare
+   positional summary, the natural mistake) was told it had succeeded. Fixed to
+   exit 1, but only after the panel was already gone.
+
+`/ops/standing` replaces it and cannot decay the same way: it reads GitHub and
+Supabase live on every poll, and nothing has to be appended by hand.
+
 ## Decisions moved out of HANDOFF (steering budget, ops#292)
 
 > Retired from `docs/ai/HANDOFF.md` on 2026-09-15 — settled, no longer
@@ -19,7 +45,6 @@
   legacy BACKLOG.md-era board rows were soft-deleted with a provenance note —
   GitHub issues are now the board's sole task source, literally.
 
-
 ## Superseded `Now` section (as of 2026-09-14, before the ops#292 trim)
 
 Kept verbatim. Most of it described PRs merged in July; one bullet still asserted
@@ -31,7 +56,7 @@ argument for the budget gate in one example.
 
 - **🔎 RETRO PARK HARVEST (2026-09-14, ops#274, same branch).** Walked every Ralph park / `ralph-blocked` / `ralph-attempt-failed` comment across **281 ops issues** (5 sharded sonnet agents). **30 findings: 13 durable rules, 9 distinct harness defects, 8 discarded as task trivia.** `docs/ai/learned-rules.jsonl` seeded — `pnpm guardrail:learned-rules` reports 13/13 unpromoted, the first real corpus since the Hermes retirement. 5 rules promoted into `CLAUDE.md` §4 (a park is not proof the work is stuck · read comment history before re-queuing · a missing-binary gate failure can be a red herring · `startup_failure` with 0 jobs = caller/reusable skew · diff a deletion issue's premise against `main`), plus the workflows-scope boundary. Harness defects filed: **#302** (re-selection while its own PR is open; +stale-PR wedge) · **#303** (attempt accounting — a deliberate stop is indistinguishable from a crash; blocked→park not sticking; park comment contradicting the agent) · **#304** (a `warn`-severity finding hard-fails pre-commit and can brick every commit repo-wide) · **#305** (`Closes #N` silently not firing → the loop re-claims finished work; #156 did it 12+ times in 12 hours). **Every one of these was self-reported by the loop and unread until today** — the argument for #298 in one line.
 
-- **🧭 FRONTIER-ENGINEERING DOCTRINE (2026-09-14, ops#274, branch `claude/hirobius-frontier-engineering-v6duri`).** Strategy session mapping Kiro/AWS's "frontier engineering" against our setup. **The finding: we have the machinery and mis-aim it.** On 2026-09-14 the loop merged 15 PRs of dead-code cleanup while **#185 (`p0`, leads → site render) sat 64 days unqueued** — not parked, not blocked, just never labelled `ralph-ready`, despite carrying a better spec than Kiro's triad produces. Our gap is **queue routing**, not spec quality. New: `docs/ai/FRONTIER-DOCTRINE.md` (the doctrine) + `docs/specs/` (epic specs, with `leads-to-site.md` written as the first real one). Decisions taken: **one spec file per epic** (`docs/specs/<slug>.md`) for epics >3 issues or touching client output/PII/money — first adopted as Kiro's three-file triad, collapsed the same day before anything merged, because this repo rots documents and the triad's value is concentrated in its rejected-alternatives step · **path-allowlist auto-merge** replacing the per-issue `ralph-auto` tag (#238) · **steering budget ~25 KB always-on with an enforcing registry gate** (today it is ~189 KB / ~47k tokens, of which this file is 119 KB against its own "keep it one page" contract). #185 + #186 queued `ralph-ready` (supervised, not `ralph-auto`). Follow-ups filed: #292 steering diet · #293 north-star-share metric · #294 spec-freshness gate · #295 `needs-human` split · #296 DoD-draft-instead-of-park · #297 human-gate latency · #298 learning-loop harvest · #300 promote-to-steering. **Learning loop:** `learned-rules.jsonl` is 0 bytes not because it was never used but because its writer's only caller (`hermes-unit.mjs runPostMortem()`) was deleted with the orchestration retirement — the persist→promote pipeline is intact and verified working. The park trail is already written to GitHub on every failure (`ralph-attempt-failed` / `🅿️ Ralph parked` / `ralph-blocked:`), so #298 is a **reader**, ops-local and retroactive, not the shared-engine change first assumed. Hermes distilled junk rules because it ran post-mortem on task *completion*; trigger on **failure** instead.
+- **🧭 FRONTIER-ENGINEERING DOCTRINE (2026-09-14, ops#274, branch `claude/hirobius-frontier-engineering-v6duri`).** Strategy session mapping Kiro/AWS's "frontier engineering" against our setup. **The finding: we have the machinery and mis-aim it.** On 2026-09-14 the loop merged 15 PRs of dead-code cleanup while **#185 (`p0`, leads → site render) sat 64 days unqueued** — not parked, not blocked, just never labelled `ralph-ready`, despite carrying a better spec than Kiro's triad produces. Our gap is **queue routing**, not spec quality. New: `docs/ai/FRONTIER-DOCTRINE.md` (the doctrine) + `docs/specs/` (epic specs, with `leads-to-site.md` written as the first real one). Decisions taken: **one spec file per epic** (`docs/specs/<slug>.md`) for epics >3 issues or touching client output/PII/money — first adopted as Kiro's three-file triad, collapsed the same day before anything merged, because this repo rots documents and the triad's value is concentrated in its rejected-alternatives step · **path-allowlist auto-merge** replacing the per-issue `ralph-auto` tag (#238) · **steering budget ~25 KB always-on with an enforcing registry gate** (today it is ~189 KB / ~47k tokens, of which this file is 119 KB against its own "keep it one page" contract). #185 + #186 queued `ralph-ready` (supervised, not `ralph-auto`). Follow-ups filed: #292 steering diet · #293 north-star-share metric · #294 spec-freshness gate · #295 `needs-human` split · #296 DoD-draft-instead-of-park · #297 human-gate latency · #298 learning-loop harvest · #300 promote-to-steering. **Learning loop:** `learned-rules.jsonl` is 0 bytes not because it was never used but because its writer's only caller (`hermes-unit.mjs runPostMortem()`) was deleted with the orchestration retirement — the persist→promote pipeline is intact and verified working. The park trail is already written to GitHub on every failure (`ralph-attempt-failed` / `🅿️ Ralph parked` / `ralph-blocked:`), so #298 is a **reader**, ops-local and retroactive, not the shared-engine change first assumed. Hermes distilled junk rules because it ran post-mortem on task _completion_; trigger on **failure** instead.
 
 - **📥 Ralph parked inbox — reasons, one-tap re-queue, wedge flag (ops#141, PR open on `ralph/issue-141-parked-inbox`).** Extends the #112 RalphPanel with two new lanes: **Parked** — every open `ralph-parked`/`needs-adrian` issue across the fleet repos, with the reason excerpted from its latest 🅿️ park comment (`ralph-parked` rows get a one-tap Re-queue button — removes `ralph-parked`, adds `ralph-ready`, the documented un-park gesture; `needs-adrian` rows get a DoD-checklist hint instead, since `next.sh`'s intake filter would just re-park a DoD-less body). **Open Ralph PRs** — every open PR on a `ralph/*` branch, badged `wedged` per the same failed/stale-gate classification `ralph/lib.sh`'s `classify_wedged()` uses. See the Last-updated line for the full file list + verification.
 - **▶️ "Run Ralph" per-task dispatch (ops#113, PR open on `ralph/issue-113-run-ralph-dispatch`).** One-tap "Run Ralph" button on each `github:*` task row on `/ops/tasks` fires that issue's Ralph run immediately via a new `ralph_dispatch` task-action → `dispatchWorkflow` GitHub port method (`lib/github/issues.mjs`) → `ralph.yml`'s `workflow_dispatch`, explicit issue override jumps the loop's single-flight/priority queue. Click → confirm → optimistic "Ralph queued" chip; failures surface via a new page-scoped `useToast` (the board's first toast — DoD requires no silent failure) naming the exact missing permission on a 401/403/404. Built on a prior claude/issue-113-20260712-1847 session's code (drafted but never opened as a PR, never run through typecheck/test/lint there); this iteration merged it onto a `ralph/*` branch, ratcheted the DOM-node budget for `TaskRow.tsx`/`TasksPage.tsx` (19/33→21/35), and ran the full gate green (typecheck · 611 unit tests · lint). **NEEDS ADRIAN:** the ops `GITHUB_TOKEN` is scoped Issues read/write only — add "Actions: write" at [github.com/settings/personal-access-tokens](https://github.com/settings/personal-access-tokens) and update the value in [Vercel → Environment Variables](https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables) (Production + Preview), then redeploy — until then every click 502s with a message naming this exact fix.
@@ -204,8 +229,6 @@ argument for the budget gate in one example.
 - **Decision record**: `docs/ARCHITECTURE.md` (2026-06-30 reversal — Astro is
   production, Duda retired). Execution plan: `docs/operations/ops-astro-cutover-plan.md`.
 
-
-
 ## Superseded `Next` queue (as of 2026-09-14, before the ops#292 trim)
 
 Kept verbatim; several entries pointed at PRs merged in July.
@@ -305,8 +328,6 @@ Kept verbatim; several entries pointed at PRs merged in July.
    (item 4). Until then the clients engine is FROZEN (no edits) so copies
    can't diverge.
 
-
-
 ## Older decisions (moved from HANDOFF 2026-09-14, ops#292)
 
 - 2026-07-11 (Adrian, cockpit session): **everything ralph-auto** — batch
@@ -338,8 +359,6 @@ Kept verbatim; several entries pointed at PRs merged in July.
   skill created (`claude-config/skills/delegation-interview/`) — run with
   "run the delegation interview".
 
-
-
 ## Retired `Adrian's open actions` items (moved from HANDOFF 2026-09-14, ops#292)
 
 The first two are recorded as done elsewhere — Supabase is wired (HANDOFF `Now`) and Vercel is on Pro
@@ -357,7 +376,6 @@ do not need to sit in always-on context. Kept verbatim in case any is still want
 - **Confirm the 2 `.ps1` scripts** (bridge-wsl2-port, setup-cron-windows) are safe
   to delete — the Tier-2 scrub held them (possible personal tooling).
 
-
 ## Retired `Parked / known warts` entries (2026-09-14, ops#292)
 
 Both were stale AND wrong in always-on context. `pnpm typecheck` runs clean (verified three times on
@@ -373,7 +391,6 @@ Hobby 12-function cap no longer binds. Kept verbatim for the record.
   Adding endpoints (importer, outreach, alerts — #8/#9/#11) will re-hit the cap;
   the durable fix is **Vercel Pro** (raises the limit + concurrency). Until then,
   consolidate rather than add new `api/*.ts` files.
-
 
 ## Per-session detail (formerly HANDOFF's `_Last updated:` header)
 

@@ -50,7 +50,10 @@ Notes:
   - --outcome do-not-call ALSO sets do_not_contact, so the lead is suppressed on
     every channel, not just the phone.
   - --outcome callback requires --callback <iso>; the lead is then hidden from the
-    queue until that time.
+    queue until that time. It writes next_action_at, the same column #324's
+    /ops/pitch queue reads, so the two surfaces never disagree.
+  - --notes appends to the lead_notes table (a log), not a column on the lead.
+    Set CALL_AUTHOR to attribute the note to a person.
 `);
 }
 
@@ -133,8 +136,7 @@ async function main() {
     contact_channel: 'call',
     contacted_at: new Date().toISOString(),
   };
-  if (o.notes) patch.call_notes = o.notes;
-  if (o.callback) patch.callback_at = new Date(o.callback).toISOString();
+  if (o.callback) patch.next_action_at = new Date(o.callback).toISOString();
   if (o.outcome === 'do-not-call') {
     patch.do_not_contact = true;
     patch.suppression_reason = 'verbal do-not-call';
@@ -143,9 +145,25 @@ async function main() {
   const { error } = await sb.from('leads').update(patch).eq('id', o.id);
   if (error) throw new Error(`Supabase write failed: ${error.message || error}`);
 
+  // Notes go to #324's lead_notes TABLE, not a column on the lead. A single
+  // overwritten text field loses the history of a conversation, which is exactly
+  // what a second person picking up the call needs to read.
+  if (o.notes) {
+    const { error: nerr } = await sb.from('lead_notes').insert({
+      lead_id: o.id,
+      author: process.env.CALL_AUTHOR || 'call-log',
+      body: `[${o.outcome}] ${o.notes}`,
+    });
+    if (nerr) {
+      console.error(`  WARNING: outcome saved but note failed: ${nerr.message || nerr}`);
+      process.exitCode = 1;
+    }
+  }
+
   console.log(`${existing.name}: ${o.outcome} (attempt ${patch.call_attempts})`);
   if (patch.do_not_contact) console.log('  suppressed on ALL channels, not just phone.');
-  if (patch.callback_at) console.log(`  hidden from the queue until ${patch.callback_at}`);
+  if (patch.next_action_at) console.log(`  hidden from the queue until ${patch.next_action_at}`);
+  if (o.notes) console.log('  note appended to lead_notes.');
 }
 
 main().catch((e) => {

@@ -66,7 +66,7 @@ async function fetchLeads(sb, city) {
     let q = sb
       .from('leads')
       .select(
-        'id,name,phone,city,region,category,website,review_count,rating,site_presence,site_issues,site_mobile_friendly,site_https,operational,do_not_contact,suppression_reason,call_attempts,call_outcome,callback_at,last_call_at',
+        'id,name,phone,city,region,category,website,review_count,rating,site_presence,site_issues,site_mobile_friendly,site_https,operational,do_not_contact,suppression_reason,call_attempts,call_outcome,next_action_at,last_call_at',
       )
       .order('id', { ascending: true })
       .range(from, from + PAGE - 1);

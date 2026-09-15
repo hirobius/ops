@@ -39,10 +39,21 @@ import {
   publishLeadSite,
   renderLeadSite,
 } from '../lib/leads/pipeline.mjs';
+import { addPitchNote, assignPitch, setPitchStage } from '../lib/leads/pitch-actions.mjs';
 
 // 'build' and 'publish' are deprecated dead code — see the header. They stay in
 // the union only so the retired handlers keep type-checking until the removal PR.
-const ACTIONS = ['generate', 'build', 'publish', 'render'] as const;
+const ACTIONS = [
+  'generate',
+  'build',
+  'publish',
+  'render',
+  // Pitch queue (0012) — folded in here rather than a new function, because
+  // the deployment is at the 12-function cap.
+  'pitch_stage',
+  'pitch_note',
+  'pitch_assign',
+] as const;
 type LeadAction = (typeof ACTIONS)[number];
 
 function isLeadAction(value: unknown): value is LeadAction {
@@ -54,7 +65,17 @@ export async function leadActionHandler(
   req: VercelRequest,
 ): Promise<HandlerResult> {
   const body = req.body as
-    | { leadId?: unknown; action?: unknown; previewUrl?: unknown }
+    | {
+        leadId?: unknown;
+        action?: unknown;
+        previewUrl?: unknown;
+        stage?: unknown;
+        channel?: unknown;
+        note?: unknown;
+        author?: unknown;
+        assignee?: unknown;
+        nextActionAt?: unknown;
+      }
     | undefined;
 
   const leadId = typeof body?.leadId === 'string' ? body.leadId.trim() : '';
@@ -76,13 +97,27 @@ export async function leadActionHandler(
     case 'publish':
       return publishLeadSite(sb, leadId);
     case 'render': {
-      const previewUrl =
-        typeof body?.previewUrl === 'string' ? body.previewUrl.trim() : '';
+      const previewUrl = typeof body?.previewUrl === 'string' ? body.previewUrl.trim() : '';
       if (previewUrl && !/^https?:\/\//.test(previewUrl)) {
         return { status: 400, body: { error: 'previewUrl must be an http(s) URL' } };
       }
       return renderLeadSite(sb, leadId, previewUrl ? { previewUrl } : {});
     }
+    case 'pitch_stage':
+      return setPitchStage(sb, leadId, {
+        stage: typeof body?.stage === 'string' ? body.stage : '',
+        channel: typeof body?.channel === 'string' ? body.channel : '',
+      });
+    case 'pitch_note':
+      return addPitchNote(sb, leadId, {
+        author: typeof body?.author === 'string' ? body.author : '',
+        body: typeof body?.note === 'string' ? body.note : '',
+      });
+    case 'pitch_assign':
+      return assignPitch(sb, leadId, {
+        assignee: typeof body?.assignee === 'string' ? body.assignee : '',
+        nextActionAt: body?.nextActionAt as string | null | undefined,
+      });
   }
 }
 

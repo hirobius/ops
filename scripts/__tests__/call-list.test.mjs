@@ -78,17 +78,17 @@ describe('callEligibility', () => {
   describe('callbacks are commitments', () => {
     const now = new Date('2026-09-15T12:00:00Z');
     it('suppresses a lead until its callback time', () => {
-      const r = callEligibility(lead({ callback_at: '2026-09-16T09:00:00Z' }), now);
+      const r = callEligibility(lead({ next_action_at: '2026-09-16T09:00:00Z' }), now);
       expect(r.eligible).toBe(false);
       expect(r.reason).toContain('callback scheduled');
     });
     it('releases it once the callback time has passed', () => {
-      expect(callEligibility(lead({ callback_at: '2026-09-15T09:00:00Z' }), now).eligible).toBe(
+      expect(callEligibility(lead({ next_action_at: '2026-09-15T09:00:00Z' }), now).eligible).toBe(
         true,
       );
     });
     it('ignores an unparseable callback rather than suppressing forever', () => {
-      expect(callEligibility(lead({ callback_at: 'not-a-date' }), now).eligible).toBe(true);
+      expect(callEligibility(lead({ next_action_at: 'not-a-date' }), now).eligible).toBe(true);
     });
   });
 });
