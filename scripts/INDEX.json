@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 133,
+  "totalScripts": 132,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,7 +41,7 @@
     }
   },
   "categoryCounts": {
-    "other": 66,
+    "other": 65,
     "audit": 16,
     "build": 1,
     "gate": 30,
@@ -1164,14 +1164,6 @@
       "prefix": "threads",
       "purpose": "Dev-only HTTP middleware that surfaces \"open work threads\" to the /ops/kanban page so it can correlate Hermes tasks with Adrian's git worktrees and active Claude Code sessions.",
       "pnpm": [],
-      "gate": null
-    },
-    {
-      "name": "ui-lint.mjs",
-      "category": "other",
-      "prefix": "ui",
-      "purpose": "p6-2: thin CLI wrapper around GET http://localhost:3005/lint. Asks the bridge to run the validator suite over its current in-memory selection and prints findings. Exits non-zero when findings are non-empty so it",
-      "pnpm": ["ui:lint"],
       "gate": null
     },
     {

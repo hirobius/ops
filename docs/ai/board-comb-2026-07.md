@@ -62,7 +62,7 @@ launch screenshots, missing-asset 404s, focus-ring polish). Belong to parked rep
 `dashbd-*` skill bundles (sales/self/client/creator-meta/input-shell/wire-input),
 auto-research, visual-ingest drag-drop, token-impact-trace, approved-triage-tool,
 task-pillar-classification, atlas-absorb-hds-docs, figma-plugin-planning-docs-save,
-kimi-notify-tighten, and the like. Feature expansion — park until freeze lifts.
+and the like. Feature expansion — park until freeze lifts.
 
 ### ⑥ Security lane (2)
 
