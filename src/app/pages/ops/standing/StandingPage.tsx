@@ -48,6 +48,8 @@ import { deriveChain } from '../../../../../lib/chain/evidence.mjs';
 
 const POLL_MS = 60_000;
 const SHOWN = 8;
+/** Backlog is the long tail — show more of it than the action lanes. */
+const BACKLOG_SHOWN = 25;
 
 /**
  * Four states, and every one of them is derived — `proven` means rows actually
@@ -98,6 +100,7 @@ export default function StandingPage() {
   const blocked = data?.blocked ?? [];
   const prs = data?.prs ?? [];
   const queue = data?.queue ?? [];
+  const backlog = data?.backlog ?? [];
   const needsToken = error?.includes('GITHUB_TOKEN') ?? false;
   /** A real payload has arrived — not merely "a request finished". */
   const loaded = data !== null;
@@ -257,6 +260,48 @@ export default function StandingPage() {
         <p style={s.footnote}>
           Selector order mirrors <code style={s.code}>ralph/next.sh</code> exactly — this is
           the order the loop will actually take them in.
+        </p>
+      </Section>
+
+      {/* ── 5. The rest of the board ─────────────────────────────────────── */}
+      <Section
+        title="Backlog"
+        count={laneCount(needsToken, error, loaded, backlog.length, ['issue', 'issues'])}
+      >
+        <Lane
+          needsToken={needsToken}
+          error={error}
+          loaded={loaded}
+          empty={backlog.length === 0}
+          emptyCopy="Nothing else open. Every issue is blocked, parked or queued."
+        >
+          <ul style={s.list}>
+            {backlog.slice(0, BACKLOG_SHOWN).map((b: FleetIssue) => (
+              <li key={`${b.repo}#${b.number}`} style={s.row}>
+                <a href={b.url} target="_blank" rel="noreferrer" style={s.rowLink}>
+                  <span style={s.num}>#{b.number}</span>
+                  <span style={s.title}>{b.title}</span>
+                </a>
+                <div style={s.metaRow}>
+                  <span style={s.meta}>
+                    {shortRepo(b.repo)}
+                    {b.prio ? ` · ${b.prio}` : ''}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Lane>
+        {backlog.length > BACKLOG_SHOWN ? (
+          <p style={s.more}>
+            +{backlog.length - BACKLOG_SHOWN} more · every one is on{' '}
+            <a href="/ops/tasks" style={s.issueRef}>the tasks board</a>
+          </p>
+        ) : null}
+        <p style={s.footnote}>
+          Live from GitHub, every repo the token can see. Nothing to press, nothing to
+          sync — unlike the tasks board, which mirrors into Supabase and is only as
+          fresh as the last Import.
         </p>
       </Section>
     </div>

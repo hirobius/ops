@@ -139,6 +139,10 @@ export interface FleetStatus {
   repos: string[];
   blocked: FleetIssue[];
   queue: { repo: string; number: number; title: string; url: string; prio: string | null; wip: boolean }[];
+  /** Everything not blocked, parked or queued. The rest of the board. */
+  backlog: FleetIssue[];
+  /** Every open issue the sweep saw — blocked + queue + backlog. */
+  total: number;
   prs: FleetPr[];
   errors: { repo: string; error: string }[];
   counts: { openIssues: number; repos: number };
@@ -173,6 +177,7 @@ function isFleetStatus(v: unknown): v is FleetStatus {
     Array.isArray(v['repos']) &&
     Array.isArray(v['blocked']) &&
     Array.isArray(v['queue']) &&
+    Array.isArray(v['backlog']) &&
     Array.isArray(v['prs'])
   );
 }

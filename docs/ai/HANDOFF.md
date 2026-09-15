@@ -11,17 +11,15 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
 
 ## Now (what is true today)
 
-- **🪟 `/ops/standing` — the fleet read, all of it derived (2026-09-15).**
-  Repos are DISCOVERED (`listOpenIssues()` spans every repo the token sees across
-  `hirobius` + `adr-eng`; one PR search covers all owners, so cost is flat in repo
-  count). The chain is derived too: `leadFunnel` counts the `leads` table per
-  stage and `lib/chain/evidence.mjs` computes state, the break and the biggest
-  leak. **A stage reads `proven` only when real leads got through it.**
-  Live funnel: 263 sourced → 249 scored → 39 qualified → 3 generated → 2
-  published → 0 contacted. **The break is outreach, not publish** — two sites
-  ARE deployed. The hand-written table this replaced was wrong on three counts
-  (see ARCHITECTURE's note). `?ralph=1` keeps its hardcoded repos for the Tasks
-  panel. No new Vercel function.
+- **🪟 `/ops/standing` is the whole board, live (2026-09-15).** Five sections:
+  the derived chain, waiting-on-you, in-flight PRs, the ready queue, and now
+  **Backlog** — every remaining open issue across every repo the token sees.
+  Nothing to press. `/ops/tasks` keeps its Supabase mirror and its actions
+  (dispatch, re-queue), but it is no longer the only way to see everything.
+- **🗑️ The `/ops` Fleet timeline and the recap mandate are retired.** Its three
+  JSONL feeds stopped being written in July; the panel was faithfully rendering
+  two-month-old rows. **Third dead capture loop found this session** — the decay
+  rule is not theoretical. Full note in `DONE-LOG.md`.
 
 - **🎯 Revenue path: #185, #186, #188, #191, #196 all shipped and MERGED**
   (2026-09-15, PRs #301/#308/#311). The Leads board dispatches `render` and

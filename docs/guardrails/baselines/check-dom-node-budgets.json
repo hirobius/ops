@@ -15,8 +15,7 @@
     "src/app/pages/ops/ClientsIndexPage.tsx": 41,
     "src/app/pages/ops/Disclosure.tsx": 8,
     "src/app/pages/ops/PageHeader.tsx": 8,
-    "src/app/pages/ops/agentic-os/AgenticOSPage.tsx": 27,
-    "src/app/pages/ops/agentic-os/FleetTimeline.tsx": 19,
+    "src/app/pages/ops/agentic-os/AgenticOSPage.tsx": 25,
     "src/app/pages/ops/agentic-os/PluginsBar.tsx": 19,
     "src/app/pages/ops/agentic-os/ResearchBar.tsx": 31,
     "src/app/pages/ops/agentic-os/ServicesBar.tsx": 9,
@@ -34,7 +33,7 @@
     "src/app/pages/ops/leads/RenderHandoffPanel.test.tsx": 2,
     "src/app/pages/ops/leads/RenderHandoffPanel.tsx": 6,
     "src/app/pages/ops/projects/ProjectsPage.tsx": 21,
-    "src/app/pages/ops/standing/StandingPage.tsx": 69,
+    "src/app/pages/ops/standing/StandingPage.tsx": 81,
     "src/app/pages/ops/tasks/RalphPanel.tsx": 42,
     "src/app/pages/ops/tasks/TaskActionsMenu.tsx": 19,
     "src/app/pages/ops/tasks/TaskRow.tsx": 21,
@@ -42,6 +41,6 @@
     "src/app/pages/portal/ClientPortalPage.tsx": 54,
     "src/app/routes.tsx": 27
   },
-  "updatedAt": "2026-09-15T04:31:50.168Z",
-  "sha": "174d82c"
+  "updatedAt": "2026-09-15T07:00:19.176Z",
+  "sha": "5f0d703"
 }

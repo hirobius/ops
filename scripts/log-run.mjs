@@ -67,8 +67,11 @@ function parseArgs(argv) {
         o.help = true;
         break;
       default:
+        // NOT `help = true`: that path exits 0, so a malformed call reported
+        // success and the recap silently vanished. A bare positional summary
+        // (the natural mistake) hit exactly this.
         console.error(`Unknown flag: ${arg}`);
-        o.help = true;
+        o.invalid = true;
     }
   }
   return o;
@@ -92,6 +95,10 @@ function main() {
   if (args.help) {
     printHelp();
     process.exit(0);
+  }
+  if (args.invalid) {
+    printHelp();
+    process.exit(1);
   }
 
   const missing = ['actor', 'outcome', 'summary'].filter((f) => !args[f]);

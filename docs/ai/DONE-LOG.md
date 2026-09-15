@@ -7,6 +7,32 @@
 > Append here when a session ships something; HANDOFF keeps only the most recent
 > Done-log line.
 
+## Retired 2026-09-15 — the run-log recap mandate and the /ops Fleet timeline
+
+CLAUDE.md §2.5 required every session to post a one-line recap via
+`scripts/log-run.mjs`, which the `/ops` Fleet timeline rendered from three
+committed JSONL feeds at build time.
+
+All three feeds stopped being written in July: `run-log.jsonl` on 2026-07-12
+(28 entries, ever), `events.jsonl` on 2026-07-08 (3 entries), `alert-log.jsonl`
+likewise. The panel was faithfully rendering two-month-old rows — the renderer
+was never the problem.
+
+Two causes, both worth remembering:
+
+1. **The mandate was ignored.** A rule every session skipped for two months is
+   not a rule, and a capture loop attached to a human remembering to run a
+   command is the decay pattern the doctrine names. This is the third such loop
+   found dead in one session, after `learned-rules.jsonl` and
+   `agent-heal-log.md`.
+2. **Failure was silent.** `log-run.mjs` treated an unknown flag as a help
+   request, and help exits 0 — so a caller that got the syntax wrong (a bare
+   positional summary, the natural mistake) was told it had succeeded. Fixed to
+   exit 1, but only after the panel was already gone.
+
+`/ops/standing` replaces it and cannot decay the same way: it reads GitHub and
+Supabase live on every poll, and nothing has to be appended by hand.
+
 ## Decisions moved out of HANDOFF (steering budget, ops#292)
 
 > Retired from `docs/ai/HANDOFF.md` on 2026-09-15 — settled, no longer

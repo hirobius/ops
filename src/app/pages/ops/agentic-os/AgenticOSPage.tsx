@@ -9,11 +9,10 @@
  * Surface flow (top → bottom):
  *   1. PageHeader        locked-down chrome (Clash anchor + divider)
  *   2. SurfacesRail      inline jump-tiles to sibling /ops surfaces
- *   3. Fleet             live activity feed (FleetTimeline)
- *   4. Routes            (atlas import) — interactive route tree
- *   5. Clients           (atlas import) — registry card grid
- *   6. Gates             (atlas import) — guardrail validators table
- *   7. Skills / New skill / Plugins / Research (collapsed disclosures)
+ *   3. Routes            (atlas import) — interactive route tree
+ *   4. Clients           (atlas import) — registry card grid
+ *   5. Gates             (atlas import) — guardrail validators table
+ *   6. Skills / New skill / Plugins / Research (collapsed disclosures)
  *
  * @category Internal
  * @tier utility
@@ -30,7 +29,6 @@ import { Disclosure } from '../Disclosure';
 import RoutesTree from '../atlas/routes-tree';
 import ClientsTab from '../atlas/clients-tab';
 import ValidatorsTab from '../atlas/validators-tab';
-import { FleetTimeline } from './FleetTimeline';
 import { SurfacesRail } from './SurfacesRail';
 import { SkillsBar } from './SkillsBar';
 import { SkillCreatorForm } from './SkillCreatorForm';
@@ -46,10 +44,6 @@ export default function AgenticOSPage() {
         <PageHeader breadcrumbs={[{ label: 'Ops' }]} title="Ops" />
 
         <SurfacesRail />
-
-        <Section label="Fleet" hint="run-log + events + alerts, merged — newest 20">
-          <FleetTimeline />
-        </Section>
 
         <Disclosure id="agentic-os.services" label="Services" hint="local dev daemons">
           <ServicesBar />

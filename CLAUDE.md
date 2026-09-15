@@ -70,7 +70,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 2. **AUTO-VALIDATE:** If UI/Layout is affected, autonomously run `pnpm typecheck` and `pnpm test:layout` after your changes, before your final response.
 3. **SELF-HEAL:** If tests fail, read the output, fix the error, and re-run until green — don't ask for help.
 4. **FINALIZATION:** Only report a task complete when tests are 100% green.
-5. **RECAP (#8):** Autonomous sub-agents/sessions post a one-line recap on completion via `node scripts/log-run.mjs` (or `appendRun` from `lib/ops/run-log.mjs`) — nothing runs silent. The `/ops` Runs panel renders the most recent entries.
+5. **RECAP:** retired 2026-09-15 — `/ops/standing` reads GitHub live instead. Details in `docs/ai/DONE-LOG.md`.
 6. **BROWSER-VERIFY:** UI-touching sessions should verify changes via the Playwright MCP browser when available (Chromium preinstalled at `/opt/pw-browsers` in remote sessions).
 
 ### Working-with-Adrian conventions (standing prefs, 2026-07-06)
