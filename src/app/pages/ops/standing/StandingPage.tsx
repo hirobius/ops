@@ -38,12 +38,7 @@ import { Badge } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from '../PageHeader';
 import { usePoll } from '../../../lib/usePoll';
-import {
-  fetchFleetStatus,
-  shortRepo,
-  type FleetStatus,
-  type FleetIssue,
-} from '../ralphStatus';
+import { fetchFleetStatus, shortRepo, type FleetStatus, type FleetIssue } from '../ralphStatus';
 import { deriveChain } from '../../../../../lib/chain/evidence.mjs';
 
 const POLL_MS = 60_000;
@@ -116,14 +111,11 @@ export default function StandingPage() {
       <Coverage data={data} error={error} needsToken={needsToken} />
 
       {/* ── 1. The chain ─────────────────────────────────────────────────── */}
-      <Section
-        title="The chain"
-        count={`${chain.reachedEnd} paid`}
-      >
+      <Section title="The chain" count={`${chain.reachedEnd} paid`}>
         <p style={s.lede}>
-          Eight stages from a sourced lead to a paid site. Every figure below is a
-          row count from the leads table — nothing here is an estimate, and a stage
-          counts as proven only when real leads got through it.
+          Eight stages from a sourced lead to a paid site. Every figure below is a row count from
+          the leads table — nothing here is an estimate, and a stage counts as proven only when real
+          leads got through it.
         </p>
 
         <ol style={s.chain}>
@@ -141,8 +133,8 @@ export default function StandingPage() {
           <p style={s.notice}>
             Steepest surviving drop: <strong style={s.strong}>{chain.biggestDrop.from.name}</strong>{' '}
             → <strong style={s.strong}>{chain.biggestDrop.to.name}</strong> keeps{' '}
-            {Math.round(chain.biggestDrop.kept * 100)}% ({chain.biggestDrop.lost} lost). That is
-            the leak; the break above is where flow stops entirely.
+            {Math.round(chain.biggestDrop.kept * 100)}% ({chain.biggestDrop.lost} lost). That is the
+            leak; the break above is where flow stops entirely.
           </p>
         ) : null}
       </Section>
@@ -150,7 +142,10 @@ export default function StandingPage() {
       {/* ── 2. Waiting on you ────────────────────────────────────────────── */}
       <Section
         title="Waiting on you"
-        count={laneCount(needsToken, error, loaded, blocked.length, ['blocked on you', 'blocked on you'])}
+        count={laneCount(needsToken, error, loaded, blocked.length, [
+          'blocked on you',
+          'blocked on you',
+        ])}
       >
         <Lane
           needsToken={needsToken}
@@ -221,15 +216,16 @@ export default function StandingPage() {
       </Section>
 
       {data?.errors.length ? (
-        <p style={s.notice}>
-          {data.errors.map((e) => `${e.repo}: ${e.error}`).join(' · ')}
-        </p>
+        <p style={s.notice}>{data.errors.map((e) => `${e.repo}: ${e.error}`).join(' · ')}</p>
       ) : null}
 
       {/* ── 4. Queued ────────────────────────────────────────────────────── */}
       <Section
         title="Queued for the loop"
-        count={laneCount(needsToken, error, loaded, queue.length, ['ralph-ready issue', 'ralph-ready issues'])}
+        count={laneCount(needsToken, error, loaded, queue.length, [
+          'ralph-ready issue',
+          'ralph-ready issues',
+        ])}
       >
         <Lane
           needsToken={needsToken}
@@ -255,8 +251,8 @@ export default function StandingPage() {
           </div>
         </Lane>
         <p style={s.footnote}>
-          Selector order mirrors <code style={s.code}>ralph/next.sh</code> exactly — this is
-          the order the loop will actually take them in.
+          Selector order mirrors <code style={s.code}>ralph/next.sh</code> exactly — this is the
+          order the loop will actually take them in.
         </p>
       </Section>
     </div>
@@ -285,15 +281,7 @@ function Section({
   );
 }
 
-function ChainRow({
-  link,
-  total,
-  isBreak,
-}: {
-  link: ChainLink;
-  total: number;
-  isBreak: boolean;
-}) {
+function ChainRow({ link, total, isBreak }: { link: ChainLink; total: number; isBreak: boolean }) {
   const color = STATE_COLOR[link.state];
   return (
     <li style={s.link}>
@@ -332,7 +320,9 @@ function ChainRow({
                 <code style={s.code}>{k}</code>
               </span>
             ))}
-            {link.missingEnv.length === 1 ? ' — not set on the server.' : ' — neither is set on the server.'}
+            {link.missingEnv.length === 1
+              ? ' — not set on the server.'
+              : ' — neither is set on the server.'}
           </p>
         ) : null}
         {link.issues.length ? (
@@ -352,8 +342,9 @@ function ChainRow({
         ) : null}
         {isBreak ? (
           <p style={s.breakCall}>
-            Nothing has ever reached this stage, though {link.n > 1 ? 'the one before it' : 'the funnel'} has
-            rows. This is where the chain stops — computed, not asserted.
+            Nothing has ever reached this stage, though{' '}
+            {link.n > 1 ? 'the one before it' : 'the funnel'} has rows. This is where the chain
+            stops — computed, not asserted.
           </p>
         ) : null}
       </div>
@@ -518,7 +509,9 @@ const s = {
   },
   link: {
     display: 'grid',
-    gridTemplateColumns: '28px 1fr',
+    // The dot must stay 28px at every width; minmax(0, 1fr) lets the content
+    // column shrink rather than overflow, so this never scrolls horizontally.
+    gridTemplateColumns: '28px minmax(0, 1fr)', // grid-ok: timeline rail + content
     columnGap: hds.space.px12,
   },
   linkRail: {
