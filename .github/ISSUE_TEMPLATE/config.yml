@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Future thought, someday-item, or a trigger-gated idea
+    url: https://github.com/hirobius/ops/blob/main/docs/ai/PARKED.md
+    about: 'Not every idea is an issue. If its reason to act lies in the future, add it to PARKED.md with a trigger — scripts/check-parked-triggers.mjs surfaces it when the condition fires.'
+  - name: Discussion or framing, with no deliverable
+    url: https://github.com/hirobius/ops/blob/main/docs/ai/NORTH_STAR.md
+    about: "A thinking prompt isn't a task. Read the scope test, then file the concrete change it produces — not the discussion."

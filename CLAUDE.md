@@ -10,6 +10,15 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 - **NEVER read, write, create, or delete `.env*` files.** Keys are set by the human only. If a task needs a new key, document it in a comment in the script and stop — do not touch `.env.local`.
 - **NEVER git push.** Local commits only.
 - **NEVER run `pnpm check:release` or deploy commands.**
+- **Issue intake is gated.** An issue holds work with a _current_ reason to act.
+  Before filing, verify it isn't already done (`closed_by_pull_requests`, the code
+  on `main`, AND prior comments for park reasons or Adrian decisions — the
+  2026-09-14 sweep found 8 of 11 already shipped or obsolete). Use the **Work**
+  template (needs a real `- [ ]` DoD, or `ralph/next.sh` parks it on sight) or the
+  **Decision** template (needs a default + a date, so silence resolves instead of
+  blocking). If the reason to act lies in the **future**, it is not an issue —
+  add it to `docs/ai/PARKED.md` with a trigger; `pnpm parked:check` surfaces it
+  when the condition fires. A discussion with no deliverable is not an issue.
 - **`/ops` is gated in production** by a server-side password: `api/ops-login.ts` checks `OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` and sets an httpOnly session cookie. Adrian sets those in the Vercel dashboard env (Production + Preview scopes). `pnpm dev` bypasses the gate. Claude must never read or write `.env*` files.
 
 ---
@@ -19,10 +28,11 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 > **Current state (2026-09-14 burndown session) — read `docs/ai/BURNDOWN-GAMEPLAN.md`
 > for the full picture (all open issues clustered, the phased plan, and the
 > needs-adrian decisions).** Durable facts to carry forward:
+>
 > - **ops CI is green.** `ralph-gate` is the **sole required check** on `main`; the
 >   other CI jobs (Lighthouse, "Quality gates", the "Typecheck…Playwright (desktop)"
 >   job) are informational — a PR at `mergeable_state: unstable` is still mergeable.
->   Don't be alarmed by red *non-required* checks.
+>   Don't be alarmed by red _non-required_ checks.
 > - **Auto-merge is the proven default:** `ralph-auto` + `ralph-ready` + a green
 >   `ralph-gate` → self-merge; the 6h idle-watchdog cron is ON (PR #232).
 >   **Single-flight** = one `ralph/*` PR at a time, so a supervised/unmerged PR stalls
