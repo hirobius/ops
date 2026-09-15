@@ -4,10 +4,16 @@ Org source of truth for cross-cutting delivery decisions in the ops command
 center. Component-level ADRs live under `docs/architecture/`; this file holds the
 agency-wide contracts and the lead → site delivery pipeline.
 
-> **⇄ Keep in lockstep with `docs/pipeline-walkthrough.html`** (the visual
-> version, published as an Artifact). This markdown is canonical — every session
-> reads it. When the pipeline state changes, update BOTH files in the same commit
-> so the readme and the walkthrough never drift.
+> **⇄ Keep in lockstep with two renderings of the gap-map below:**
+> `docs/pipeline-walkthrough.html` (the visual version, published as an Artifact)
+> and `src/app/pages/ops/standing/chain.ts` (the machine-readable one that feeds
+> `/ops/standing`). This markdown is canonical — every session reads it. When the
+> pipeline state changes, update ALL THREE in the same commit so the doc, the
+> walkthrough and the dashboard never drift.
+>
+> The renderings are deliberately lossy in different directions: the walkthrough
+> carries the narrative, `chain.ts` carries only the per-stage state, percentage
+> and the issues that move it. Neither is canonical; both follow this table.
 
 ---
 

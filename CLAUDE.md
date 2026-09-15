@@ -39,7 +39,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 
 - **Current state / what's next:** `docs/ai/HANDOFF.md` — start here on any short or open-ended prompt ("continue", "go", "status") and act from its Next queue.
 - **Focus contract:** `docs/ai/NORTH_STAR.md` — if a request materially expands scope beyond it (infrastructure that doesn't ship a paying client site sooner), flag the drift in one sentence, then do what Adrian decides. Sessions never edit that file.
-- **Delivery architecture + pipeline gap-map (lead → site → outreach → invoice):** `docs/ARCHITECTURE.md` (canonical) ⇄ `docs/pipeline-walkthrough.html` (visual, published as an Artifact). **Keep the two in lockstep** — any change to pipeline state updates BOTH in the same commit.
+- **Delivery architecture + pipeline gap-map (lead → site → outreach → invoice):** `docs/ARCHITECTURE.md` (canonical) ⇄ `docs/pipeline-walkthrough.html` (visual Artifact) ⇄ `src/app/pages/ops/standing/chain.ts` (feeds `/ops/standing`). **Keep all three in lockstep** — any change to pipeline state updates ALL of them in the same commit.
 - **Guardrail registry:** `docs/guardrails/registry.json` — every `scripts/check-*.mjs` / `audit-*.mjs` gate with its `firingChannel`; `validate-guardrail-registry` keeps registry ↔ scripts consistent.
 - **On-demand context (NOT loaded by default — read when the task calls for it):**
   `docs/ai/AGENT_GUIDELINES.md` (dispatching) · `docs/ai/PROMPT_TEMPLATES.md` (writing

@@ -11,6 +11,18 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
 
 ## Now (what is true today)
 
+- **🪟 `/ops/standing` — the one-screen fleet read (2026-09-15).** New route, HDS
+  tokens, phone-first. Section 1 is the revenue chain from
+  `src/app/pages/ops/standing/chain.ts` (editorial, no fetch, now the THIRD
+  lockstep rendering of the ARCHITECTURE gap-map). Sections 2–4 are live off
+  `GET /api/tasks?ralph=1` — no new Vercel function (at the 12 cap). Built
+  because Adrian was "running blind": GitHub Projects v2 has no API for views or
+  fields, so a board could not be scripted, and the one he set up still needs
+  manual views (#315). Shipped alongside: `ralphStatus.ts` now owns the endpoint
+  contract for both this page and RalphPanel, and its fetcher REJECTS a 200 that
+  is not the fleet payload — previously that parsed to `null` and rendered as
+  "nothing is waiting on you".
+
 - **🎯 Revenue path moving again (2026-09-14).** **#185 shipped** (PR #301) — the
   Leads board now dispatches `render` and surfaces the paste-ready
   `client.config.ts` + deploy commands. It had sat `p0` and **unqueued for 64

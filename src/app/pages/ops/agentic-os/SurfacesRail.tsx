@@ -42,6 +42,11 @@ const TILES: readonly SurfaceTile[] = [
     label: 'Projects',
     description: 'Live fleet — deploy state across every Vercel project',
   },
+  {
+    to: '/ops/standing',
+    label: 'Standing',
+    description: 'Where the revenue chain breaks · what is blocked on you',
+  },
 ] as const;
 
 export function SurfacesRail() {
