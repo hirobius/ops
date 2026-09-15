@@ -1794,5 +1794,6 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   (new), scripts/harvest-park-signals.mjs (new), scripts/promote-learned-rule.mjs,
   scripts/persist-learned-rule.mjs, docs/ai/AGENT_GUIDELINES.md,
   docs/guardrails/registry.json, scripts/INDEX.md, scripts/INDEX.json.
+- PR: https://github.com/hirobius/ops/pull/325 (ralph/issue-298-harvest-park-signals)
 - Next: (1) the liveness-guard follow-up issue; (2) a human decision on
   whether/when to run --apply against the live 53-pair corpus found above.
