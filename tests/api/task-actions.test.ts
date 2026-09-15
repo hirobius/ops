@@ -1106,9 +1106,9 @@ describe('applyTaskAction — queue_on / queue_off (mirror-free, /ops/standing)'
   it('400s on a non-github key rather than falling back to a lookup', async () => {
     const { sb } = makeSb();
     const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
-    expect(
-      await applyTaskAction(sb, { key: 't1', action: 'queue_on' }, { github }),
-    ).toMatchObject({ status: 400 });
+    expect(await applyTaskAction(sb, { key: 't1', action: 'queue_on' }, { github })).toMatchObject({
+      status: 400,
+    });
   });
 
   it('adds ralph-ready for a repo the mirror has never imported', async () => {

@@ -134,7 +134,10 @@ describe('orderPitchQueue', () => {
   });
 
   it('does not mutate its input', () => {
-    const input = [{ name: 'B', lead_score: 1 }, { name: 'A', lead_score: 2 }];
+    const input = [
+      { name: 'B', lead_score: 1 },
+      { name: 'A', lead_score: 2 },
+    ];
     orderPitchQueue(input);
     expect(input.map((l) => l.name)).toEqual(['B', 'A']);
   });

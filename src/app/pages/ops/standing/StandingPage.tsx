@@ -168,14 +168,11 @@ export default function StandingPage() {
       ) : null}
 
       {/* ── 1. The chain ─────────────────────────────────────────────────── */}
-      <Section
-        title="The chain"
-        count={`${chain.reachedEnd} paid`}
-      >
+      <Section title="The chain" count={`${chain.reachedEnd} paid`}>
         <p style={s.lede}>
-          Eight stages from a sourced lead to a paid site. Every figure below is a
-          row count from the leads table — nothing here is an estimate, and a stage
-          counts as proven only when real leads got through it.
+          Eight stages from a sourced lead to a paid site. Every figure below is a row count from
+          the leads table — nothing here is an estimate, and a stage counts as proven only when real
+          leads got through it.
         </p>
 
         <ol style={s.chain}>
@@ -193,8 +190,8 @@ export default function StandingPage() {
           <p style={s.notice}>
             Steepest surviving drop: <strong style={s.strong}>{chain.biggestDrop.from.name}</strong>{' '}
             → <strong style={s.strong}>{chain.biggestDrop.to.name}</strong> keeps{' '}
-            {Math.round(chain.biggestDrop.kept * 100)}% ({chain.biggestDrop.lost} lost). That is
-            the leak; the break above is where flow stops entirely.
+            {Math.round(chain.biggestDrop.kept * 100)}% ({chain.biggestDrop.lost} lost). That is the
+            leak; the break above is where flow stops entirely.
           </p>
         ) : null}
       </Section>
@@ -202,7 +199,10 @@ export default function StandingPage() {
       {/* ── 2. Waiting on you ────────────────────────────────────────────── */}
       <Section
         title="Waiting on you"
-        count={laneCount(needsToken, error, loaded, blocked.length, ['blocked on you', 'blocked on you'])}
+        count={laneCount(needsToken, error, loaded, blocked.length, [
+          'blocked on you',
+          'blocked on you',
+        ])}
       >
         <Lane
           needsToken={needsToken}
@@ -214,7 +214,13 @@ export default function StandingPage() {
           <ul style={s.list}>
             {blocked.slice(0, SHOWN).map((b: FleetIssue) => (
               <li key={`${b.repo}#${b.number}`} style={s.row}>
-                <a href={b.url} target="_blank" rel="noreferrer" style={s.rowLink}>
+                <a
+                  href={b.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hds-focus"
+                  style={s.rowLink}
+                >
                   <span style={s.num}>#{b.number}</span>
                   <span style={s.title}>{b.title}</span>
                 </a>
@@ -243,9 +249,7 @@ export default function StandingPage() {
             ))}
           </ul>
         </Lane>
-        {blocked.length > SHOWN ? (
-          <p style={s.more}>+{blocked.length - SHOWN} more</p>
-        ) : null}
+        {blocked.length > SHOWN ? <p style={s.more}>+{blocked.length - SHOWN} more</p> : null}
       </Section>
 
       {/* ── 3. In flight ─────────────────────────────────────────────────── */}
@@ -263,7 +267,13 @@ export default function StandingPage() {
           <ul style={s.list}>
             {prs.slice(0, SHOWN).map((pr) => (
               <li key={`${pr.repo}#${pr.number}`} style={s.row}>
-                <a href={pr.url} target="_blank" rel="noreferrer" style={s.rowLink}>
+                <a
+                  href={pr.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hds-focus"
+                  style={s.rowLink}
+                >
                   <span style={s.num}>#{pr.number}</span>
                   <span style={s.title}>{pr.title}</span>
                 </a>
@@ -283,10 +293,7 @@ export default function StandingPage() {
       </Section>
 
       {/* ── Deploys ──────────────────────────────────────────────────────── */}
-      <Section
-        title="Deploys"
-        count={deployCount(deploys.error, deploys.data)}
-      >
+      <Section title="Deploys" count={deployCount(deploys.error, deploys.data)}>
         {deploys.error && !deploys.data ? (
           <p style={s.notice}>Couldn’t reach /api/projects — {deploys.error}</p>
         ) : !deploys.data ? (
@@ -314,6 +321,7 @@ export default function StandingPage() {
                         href={`https://${d.url}`}
                         target="_blank"
                         rel="noreferrer"
+                        className="hds-focus"
                         style={s.issueRef}
                       >
                         open
@@ -328,15 +336,16 @@ export default function StandingPage() {
       </Section>
 
       {data?.errors.length ? (
-        <p style={s.notice}>
-          {data.errors.map((e) => `${e.repo}: ${e.error}`).join(' · ')}
-        </p>
+        <p style={s.notice}>{data.errors.map((e) => `${e.repo}: ${e.error}`).join(' · ')}</p>
       ) : null}
 
       {/* ── 4. Queued ────────────────────────────────────────────────────── */}
       <Section
         title="Queued for the loop"
-        count={laneCount(needsToken, error, loaded, queue.length, ['ralph-ready issue', 'ralph-ready issues'])}
+        count={laneCount(needsToken, error, loaded, queue.length, [
+          'ralph-ready issue',
+          'ralph-ready issues',
+        ])}
       >
         <Lane
           needsToken={needsToken}
@@ -352,6 +361,7 @@ export default function StandingPage() {
                 href={q.url}
                 target="_blank"
                 rel="noreferrer"
+                className="hds-focus"
                 style={s.chip}
                 title={q.title}
               >
@@ -362,8 +372,8 @@ export default function StandingPage() {
           </div>
         </Lane>
         <p style={s.footnote}>
-          Selector order mirrors <code style={s.code}>ralph/next.sh</code> exactly — this is
-          the order the loop will actually take them in.
+          Selector order mirrors <code style={s.code}>ralph/next.sh</code> exactly — this is the
+          order the loop will actually take them in.
         </p>
       </Section>
 
@@ -382,7 +392,13 @@ export default function StandingPage() {
           <ul style={s.list}>
             {backlog.slice(0, BACKLOG_SHOWN).map((b: FleetIssue) => (
               <li key={`${b.repo}#${b.number}`} style={s.row}>
-                <a href={b.url} target="_blank" rel="noreferrer" style={s.rowLink}>
+                <a
+                  href={b.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hds-focus"
+                  style={s.rowLink}
+                >
                   <span style={s.num}>#{b.number}</span>
                   <span style={s.title}>{b.title}</span>
                 </a>
@@ -405,14 +421,11 @@ export default function StandingPage() {
           </ul>
         </Lane>
         {backlog.length > BACKLOG_SHOWN ? (
-          <p style={s.more}>
-            +{backlog.length - BACKLOG_SHOWN} more, lower priority
-          </p>
+          <p style={s.more}>+{backlog.length - BACKLOG_SHOWN} more, lower priority</p>
         ) : null}
         <p style={s.footnote}>
-          Live from GitHub, every repo the token can see. Queue writes the label
-          straight to the issue — no mirror, so it works on repos the importer never
-          touched.
+          Live from GitHub, every repo the token can see. Queue writes the label straight to the
+          issue — no mirror, so it works on repos the importer never touched.
         </p>
       </Section>
     </div>
@@ -441,15 +454,7 @@ function Section({
   );
 }
 
-function ChainRow({
-  link,
-  total,
-  isBreak,
-}: {
-  link: ChainLink;
-  total: number;
-  isBreak: boolean;
-}) {
+function ChainRow({ link, total, isBreak }: { link: ChainLink; total: number; isBreak: boolean }) {
   const color = STATE_COLOR[link.state];
   return (
     <li style={s.link}>
@@ -488,7 +493,9 @@ function ChainRow({
                 <code style={s.code}>{k}</code>
               </span>
             ))}
-            {link.missingEnv.length === 1 ? ' — not set on the server.' : ' — neither is set on the server.'}
+            {link.missingEnv.length === 1
+              ? ' — not set on the server.'
+              : ' — neither is set on the server.'}
           </p>
         ) : null}
         {link.issues.length ? (
@@ -499,6 +506,7 @@ function ChainRow({
                 href={`https://github.com/hirobius/ops/issues/${n}`}
                 target="_blank"
                 rel="noreferrer"
+                className="hds-focus"
                 style={s.issueRef}
               >
                 #{n}
@@ -508,8 +516,9 @@ function ChainRow({
         ) : null}
         {isBreak ? (
           <p style={s.breakCall}>
-            Nothing has ever reached this stage, though {link.n > 1 ? 'the one before it' : 'the funnel'} has
-            rows. This is where the chain stops — computed, not asserted.
+            Nothing has ever reached this stage, though{' '}
+            {link.n > 1 ? 'the one before it' : 'the funnel'} has rows. This is where the chain
+            stops — computed, not asserted.
           </p>
         ) : null}
       </div>
@@ -690,7 +699,9 @@ const s = {
   },
   link: {
     display: 'grid',
-    gridTemplateColumns: '28px 1fr',
+    // The dot must stay 28px at every width; minmax(0, 1fr) lets the content
+    // column shrink rather than overflow, so this never scrolls horizontally.
+    gridTemplateColumns: '28px minmax(0, 1fr)', // grid-ok: timeline rail + content
     columnGap: hds.space.px12,
   },
   linkRail: {

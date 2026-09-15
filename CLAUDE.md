@@ -108,7 +108,7 @@ in ops (ops#274 session; full corpus in `docs/ai/learned-rules.jsonl`, walk it w
 change what a session does; the rest stay in the JSONL until promoted.
 
 - **A park is not proof the work is stuck.** `iteration ended without a pushed
-  branch` is frequently loop *infrastructure* (bot-actor push rejection, a
+branch` is frequently loop _infrastructure_ (bot-actor push rejection, a
   permission wall, a sensitive-file edit block) or a deliberate ask-don't-guess
   stop — not a failure of the issue. Read the agent's own comment before believing
   the verdict.
