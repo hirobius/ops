@@ -10,7 +10,10 @@
 
 - **The autonomous machine works now.** `ralph-auto` + `ralph-ready` issues self-merge on a
   green `ralph-gate`; the 6h idle-watchdog (PR #232) auto-restarts a wedged chain; CI is green.
-  **The ~22 `ralph-auto` issues drain themselves over time — no action needed on them.**
+  **The ~22 `ralph-auto` issues are merge-pre-approved, but `ralph-auto` alone does NOT
+  queue them — `ralph-ready` is what the selector reads.** When the `ralph-ready` set empties,
+  the loop goes idle (guard step succeeds, every later step skipped) and stays idle until
+  something re-labels. Keep 3-5 `ralph-auto` issues carrying `ralph-ready` at all times.
 - **The real constraints are human gates, not agent capacity.** What's left that matters is
   sequencing: revenue path → compliance-before-outreach → core product → platform epics.
 - **This doc = recommendations + a phased plan for all 72**, so you (or a new session) can execute
@@ -19,7 +22,7 @@
 ### How to read the queue at a glance
 | Bucket | Count | Who acts | Meaning |
 |---|---|---|---|
-| `ralph-auto` | ~22 | nobody | drains hands-off; just let the loop run |
+| `ralph-auto` | ~22 | **you/a session** | pre-approved to self-merge, but only moves while also tagged `ralph-ready` |
 | `needs-human` | 18 | **you** | compliance / secrets / outreach / strategic epics |
 | `needs-adrian` | 6 | **you** | decisions (mostly dispositioned below) |
 | untagged | ~26 | triage | real work not yet queued — recs below |
@@ -34,6 +37,27 @@
   Quality gates, etc.) are informational — a PR at `mergeable_state: unstable` is still mergeable.
 - **Single-flight:** one `ralph/*` PR at a time. Merging any PR to `main` chain-triggers the loop
   to grab the next `ralph-ready` issue. The 6h cron is the backstop if the chain stalls.
+- **A park does NOT chain-trigger the loop.** Only a *merge* to `main` hops the chain. When an
+  iteration ends in a park (or in "queue empty"), nothing re-dispatches — the loop sits idle until
+  something re-labels an issue (the `issues` event wakes `ralph.yml`) or the 6h watchdog fires.
+  Observed twice on 2026-09-14: idle 15:54→16:29 after the queue emptied, and 16:36→17:14 after
+  #63 parked. **Feeding the queue is therefore also how you restart the loop.**
+- **Before queueing anything, check it hasn't already shipped.** Read the issue's
+  `closed_by_pull_requests` (and spot-check `main`) first. Several board-era issues are done but
+  never auto-closed — the "Closes #N" auto-close raced the next claim. Queueing one burns an
+  iteration and parks it via the PR-history guard. #156 (shipped in #162) and #103 (shipped in
+  #192) both did exactly this on 2026-09-14; both are now closed.
+- **A large slice of the `ralph-auto` pool is already shipped but never closed.** On 2026-09-14 a
+  verification sweep closed 8 in one cycle (#3 #78 #103 #108 #113 #156 #158, plus cross-repo #63) —
+  most had a merged PR the auto-close raced. **Sweep before you queue:** check
+  `closed_by_pull_requests`, then confirm against `main` (`git show origin/main:<file> | grep ...`).
+  Closing a done issue is worth as much burndown as building a new one, and costs one API call
+  instead of a whole iteration.
+- **Two shapes that always park — never tag them `ralph-ready` as-is:**
+  (a) an issue whose deliverable is a file under `.github/workflows/` (the bot has no `workflows`
+  scope — #90; split the logic into a `scripts/*.mjs` Ralph *can* write, or route the `.yml`
+  through an adr-eng PR); (b) an issue whose DoD is "reviewed/accepted by Adrian" (#71) or that
+  has no `- [ ]`/DoD section at all (#5, #51).
 - **Parking causes (all recoverable):** missing a `- [ ]` DoD checklist in the body; 2 failed
   attempts; `ralph-blocked` (cross-repo, or a real human decision); a prior PR merged but the issue
   didn't auto-close. **Recovery: fix the cause, re-add `ralph-ready`.**
@@ -89,7 +113,7 @@ decompose into `ralph-auto` slices rather than one mega-PR.
 
 ### F. Chores / bugs — safe to queue as `ralph-auto` (drain the frontier)
 Well-scoped, low-risk. Promote in small batches (add a DoD checklist first to avoid parking):
-- **#187** (Duda dead code) · **#219** (kimi drain-notify false positives) · **#221** (a11y headings on Info/Sandbox)
+- **#187** (Duda dead code) · **#221** (a11y headings on the /info page)
 - **#226** (triage the 7 investigate-broken gates — some already resolved tonight, re-assess) · **#68** · **#103**
 - **#104** (DOM-node budget guard — needs a ratchet-vs-fixed decision first; light human call)
 - **#256 / #257** (discord `!dispatch` + kill-switch — follow-ups to #30, already delivered #255)
@@ -154,8 +178,10 @@ the compliance gate (Phase 2) before any outreach.
 
 **This session or a new one:**
 1. Read this doc + `docs/ai/HANDOFF.md` + the fleet `status.json`.
-2. Check the loop: `ralph-auto` issues merging? Any newly `ralph-parked`? Recover parks (fix cause →
-   re-add `ralph-ready`); close obsolete/cross-repo/duplicate.
+2. **Check the ready queue first — this is the #1 failure mode.** `gh issue list --label ralph-ready
+   --state open`: if it returns nothing, the loop is idle (not "draining"), and no merge will wake it.
+   Re-label 3-5 `ralph-auto` issues that already carry a DoD checklist. Then: any newly
+   `ralph-parked`? Recover parks (fix cause → re-add `ralph-ready`); close obsolete/cross-repo/duplicate.
 3. To make progress: promote 3–5 cluster-F chores to `ralph-auto` (with DoD checklists), or advance
    the current phase.
 4. Workflow-file edits → manual PR as adr-eng. Everything else → let Ralph do it.

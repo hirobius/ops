@@ -191,8 +191,7 @@ export default function PitchPage() {
         <p style={s.summary}>
           <strong style={s.strong}>{summary.toPitch}</strong> to pitch ·{' '}
           <strong style={s.strong}>{summary.inPlay}</strong> in play ·{' '}
-          <strong style={s.strong}>{summary.won}</strong> won ·{' '}
-          {summary.closed} closed
+          <strong style={s.strong}>{summary.won}</strong> won · {summary.closed} closed
         </p>
       ) : null}
 
@@ -240,9 +239,7 @@ export default function PitchPage() {
               <li key={lead.id} style={s.card}>
                 <div style={s.cardTop}>
                   <span style={s.name}>{lead.name ?? 'Unnamed business'}</span>
-                  <Badge tone={STAGE_TONE[stage] ?? 'neutral'}>
-                    {STAGE_LABEL[stage] ?? stage}
-                  </Badge>
+                  <Badge tone={STAGE_TONE[stage] ?? 'neutral'}>{STAGE_LABEL[stage] ?? stage}</Badge>
                 </div>
 
                 <div style={s.meta}>
@@ -258,7 +255,7 @@ export default function PitchPage() {
 
                 <div style={s.actions}>
                   {lead.phone ? (
-                    <a href={`tel:${lead.phone}`} style={s.callBtn}>
+                    <a href={`tel:${lead.phone}`} className="hds-focus" style={s.callBtn}>
                       Call {lead.phone}
                     </a>
                   ) : (
@@ -269,6 +266,7 @@ export default function PitchPage() {
                       href={lead.preview_url}
                       target="_blank"
                       rel="noreferrer"
+                      className="hds-focus"
                       style={s.siteBtn}
                     >
                       Their site
@@ -380,9 +378,7 @@ export default function PitchPage() {
                     rows={2}
                     placeholder="What was said…"
                     value={drafts[lead.id] ?? ''}
-                    onChange={(e) =>
-                      setDrafts((d) => ({ ...d, [lead.id]: e.target.value }))
-                    }
+                    onChange={(e) => setDrafts((d) => ({ ...d, [lead.id]: e.target.value }))}
                   />
                   <Button
                     size="sm"

@@ -126,7 +126,6 @@
     "parked:check": "node scripts/check-parked-triggers.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "typecheck:api": "tsc --noEmit -p tsconfig.api-check.json",
-    "ui:lint": "node scripts/ui-lint.mjs",
     "visual-ingest": "node scripts/visual-ingest.mjs",
     "watch:guardrails": "nodemon --watch CLAUDE.md --watch .cursorrules --watch eslint.config.js --watch .github/workflows -e md,json,js,yml,yaml --exec \"node scripts/audit-guardrails.js\""
   },

@@ -4,7 +4,7 @@
 > Regenerate with `pnpm scripts:index`. Deterministic (no timestamps), so it
 > only changes when scripts do.
 
-**133 scripts** across 9 categories.
+**132 scripts** across 9 categories.
 
 ## Prefix taxonomy
 
@@ -130,7 +130,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `test-phase1.mjs`            | (no header description)                                                                                     | `test:phase1`  | —     |
 | `test-prompt-regression.mjs` | Regression suite for LLM prompt outputs. Walks fixtures/llm-prompts/<slug>/ directories. Each must contain: | `test:prompts` | —     |
 
-## other (66)
+## other (65)
 
 | Script                           | Purpose                                                                                                                                                                                                                  | pnpm                                                                      | Fires |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ----- |
@@ -193,7 +193,6 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `telegram-bot.mjs`               | Telegram adapter for the Hirobius HQ auto-assigner. Mirrors scripts/discord-bot.mjs message routing — same backend, different transport. Both can run side-by-side; both write to the same                               | `telegram`                                                                | —     |
 | `telemetry-report.mjs`           | Reads telemetry/events.jsonl and prints a generation-health summary: total generations, success / exhausted breakdown, success rate retry-exhaustion rate (over rolling 24 h, production-tagged)                         | `telemetry:report`                                                        | —     |
 | `threads-middleware.mjs`         | Dev-only HTTP middleware that surfaces "open work threads" to the /ops/kanban page so it can correlate Hermes tasks with Adrian's git worktrees and active Claude Code sessions.                                         | —                                                                         | —     |
-| `ui-lint.mjs`                    | p6-2: thin CLI wrapper around GET http://localhost:3005/lint. Asks the bridge to run the validator suite over its current in-memory selection and prints findings. Exits non-zero when findings are non-empty so it      | `ui:lint`                                                                 | —     |
 | `update-journal.mjs`             | Appends a systems-ledger entry to docs/SYSTEMS-LOG.md using the latest token audit report and health history snapshot.                                                                                                   | `health-log`                                                              | —     |
 | `update-precommit-hash.mjs`      | Recompute the canonical SHA-256 of .husky/pre-commit and write it to docs/guardrails/registry.json as `precommitStructureHash`.                                                                                          | —                                                                         | —     |
 | `video-clone.mjs`                | (no header description)                                                                                                                                                                                                  | —                                                                         | —     |

@@ -7,18 +7,38 @@
 > finished things to the log line at the bottom). Adrian never copy-pastes
 > context again — he types one word.
 
-_Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
+_Last updated: 2026-09-15 — full shipped history in `docs/ai/DONE-LOG.md`._
 
 ## Now (what is true today)
 
-- **📞 `/ops/pitch` — the call sheet (2026-09-15).** A partner can work the list
-  on a phone: `tel:` link, the site in one tap, one-tap stage moves, and a note
-  log per lead. Only pitchable leads appear (`preview_url` present,
-  `do_not_contact` false) and both gates re-check on every write, so a queue
-  left open cannot contact someone who opted out since. **Marking a lead
-  pitched stamps `contacted_at` + `contact_channel` — the #321 evidence.**
-  Migration **0012 must be applied before the page works**. Stages reuse
-  0007's `outreach_status` vocabulary. Deliberately not a CRM.
+- **☎️ THE EMAIL CHANNEL CANNOT RUN. 1 lead of 263 has an email address.**
+  Not 39 — that was `lead_score` qualification, which never checked for an
+  address. Google Business Profile has **no email field**, so no Maps scraper
+  (Outscraper, Apify, SerpApi, BrightData) returns one; every tool claiming to
+  is secretly crawling the business's own site. The enrichment tier (Hunter,
+  Apollo, Clay) is built from corporate-domain crawls and covers a 3-person
+  plumber badly — vendors say so themselves. **This is a segment problem, not a
+  tooling problem.** The realistic fix is crawling the 223 known websites for
+  `mailto:` ourselves. **Phone is the only channel that can run today: 260 leads
+  have one.**
+
+- **📞 First-contact stack — PR #326 (open, `ralph-gate` green).** `--rehearse`
+  mode on `push-outreach.mjs` (real provider, real merge data, every recipient
+  rewritten to you, capped at 3) behind the single choke point
+  `lib/outreach/guard.mjs`; the scorer reweight; `rescore-leads.mjs`; and the
+  call channel (`export-call-list.mjs`, `log-call.mjs`, migrations 0013/0014).
+  **Two bugs it fixed are worth remembering:** a custom-domain lead could never
+  be qualified (ceiling 4+30+10+15 = **59** vs a threshold of **60**), which
+  silently orphaned the whole redesign play; and the weighting ranked the
+  _hardest_ sells highest — a Wix site is a **proven buyer**, a decade with no
+  site is a revealed preference.
+
+- **📞 `/ops/pitch` — the phone call sheet (#324).** Only pitchable leads appear
+  (`preview_url` present, `do_not_contact` false); both gates re-check on every
+  write, so a queue left open cannot contact someone who opted out since.
+  Marking pitched stamps `contacted_at` + `contact_channel` (#321 evidence).
+  Stages reuse 0007's `outreach_status`. Notes live in the `lead_notes` table,
+  never a column. Not a CRM.
 
 - **🪟 `/ops/standing` is the ONLY fleet surface.** Chain, waiting-on-you, in
   flight, queue, backlog, deploys. `/ops/tasks` + `/ops/projects` redirect here.
@@ -26,15 +46,11 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
   GitHub via `labelIssueDirect`, bypassing the Supabase mirror on purpose —
   Standing lists repos the importer never touched. Queue-from-backlog is the
   direct fix for ops#274's routing finding.
-- **🎯 Revenue path: #185, #186, #188, #191, #196 all shipped and MERGED**
-  (2026-09-15, PRs #301/#308/#311). The Leads board dispatches `render` and
-  surfaces a paste-ready `client.config.ts`; the agent now gets real hours,
-  address, photos and a contrast-checked palette. #187 marked the Duda path
-  dead; #309 removes it. Spec: `docs/specs/leads-to-site.md`.
-- **🧭 Frontier-engineering doctrine MERGED** (#313, ops#274).
-  `docs/ai/FRONTIER-DOCTRINE.md` + `docs/specs/` + the 25KB steering budget gate.
-  Finding that still steers: **we have the machinery and mis-aim it.** 13 rules
-  in `learned-rules.jsonl`, 5 promoted to `CLAUDE.md` §4.
+- **🎯 Revenue path #185/#186/#188/#191/#196 and the frontier doctrine (#313)
+  all shipped 2026-09-15.** Leads dispatches `render` with a paste-ready
+  `client.config.ts`; #309 removes the dead Duda path. Spec:
+  `docs/specs/leads-to-site.md`. Doctrine finding that still steers: **we have
+  the machinery and mis-aim it** (`docs/ai/FRONTIER-DOCTRINE.md`).
 
 - **PRODUCTION is LIVE** — `hirobius-ops` deploys from `main`; `/ops` password gate
   active (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET`); Supabase wired; DS consumed
@@ -49,16 +65,14 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
   `ralph-ready` and **supervised — not `ralph-auto`** (client-facing output,
   fabrication bans apply). #190 is blocked on Adrian's go for Outscraper
   details-API spend. Spec: `docs/specs/leads-to-site.md`.
-- **Compliance gates outreach.** #35 → #38 → #27 are a hard prerequisite for #9.
-  No scaled cold email before they land. Outscraper spend stays ON HOLD pending
-  an explicit go.
+- **Compliance gates SCALED outreach** (#35 → #38 → #27 before #9); one call or
+  one manual email is not gated. Outscraper spend stays ON HOLD pending a go.
 - **`.github/workflows/*` cannot be pushed by the bot** (no `workflows` scope).
   Route CI/workflow changes through an adr-eng PR — never a Ralph task. Four
   issues (#90/#240/#241/#243) each burned attempts rediscovering this.
-- **Engine wired, lead keys not fully exercised.** lead-gen is an Outscraper
-  wrapper; generation runs enrich → generate → judge; `lib/render` emits the
-  paste-ready `client.config.ts` + deploy commands. Publishing stays a deliberate
-  human action (it is the billing event).
+- **Engine wired.** lead-gen wraps Outscraper; generation runs
+  enrich → generate → judge; `lib/render` emits `client.config.ts` + deploy
+  commands. Publishing stays a human action — it is the billing event.
 - **Where to look:** `docs/ai/BURNDOWN-GAMEPLAN.md` (the clustered plan for every
   open issue) · `docs/ARCHITECTURE.md` ⇄ `docs/pipeline-walkthrough.html` (keep in
   lockstep) · `docs/ai/DONE-LOG.md` (shipped history) ·
@@ -66,20 +80,31 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
 
 ## Adrian's open actions (his court — one-time, not blocked on a session)
 
+- **Set `PAGESPEED_API_KEY` in Vercel — highest-leverage unblock open.** Free,
+  ~2 min. Anonymous PageSpeed returns 429 (shared quota gone), so
+  `audit-sites.mjs` cannot run, so 223 leads have no true opening line and stay
+  out of email eligibility. Enable the API
+  (https://console.cloud.google.com/apis/library/pagespeedonline.googleapis.com),
+  create a key (https://console.cloud.google.com/apis/credentials), paste as
+  `PAGESPEED_API_KEY` at
+  https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables
+  Then: `node scripts/audit-sites.mjs --presence custom --write`.
+- **Decide hds 0.14.0 (hds#199, reopened).** The release path is armed but has
+  **zero fuel**: `.changeset/` holds only `README.md` + `config.json`, so no
+  "Version Packages" PR can ever open, and `NPM_TOKEN` is still unverified (the
+  green run never reached the publish step). Cutting 0.14.0 means the breaking
+  `Hds*`→unprefixed renames and a coordinated ops migration across ~41 files.
+  An agent must NOT write the changeset unilaterally.
 - **Run the lilac-insure onboarding prompt** → stands up the client repo to fleet
   spec + files its tasks (the "New client-work repo procedure" below is the prompt).
-- **File the Alert Figma-drift issue** in `hirobius/hirobius-design-system` (a
-  ready prompt was handed over): tone-colored title + border, danger→`circle-alert`;
-  Figma node 33:34. Alert lives in the DS repo, not ops — that's where it lands.
+- **File the Alert Figma-drift issue** in the DS repo (not ops): tone-colored
+  title + border, danger→`circle-alert`; Figma node 33:34.
 - **Run the ops-history PII scrub** — `git filter-repo` runbook (dry-run-verified)
-  removes `clients/{lilac-insure,prospect-001,the-ranch-foundation}` +
-  `docs/ai/routing-log.jsonl` from all history, then force-push. ops is private → hygiene.
-- **Set `PORTAL_HMAC_SECRET` in Vercel (#28)** — server-only (NOT `VITE_`-prefixed),
-  Production + Preview scopes. **Paste the SAME value the current
-  `VITE_PORTAL_HMAC_SECRET` holds** so existing `/c/:slug?token=…` links keep
-  verifying. Link: https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables
-  Then redeploy the branch; once verified, the old `VITE_PORTAL_HMAC_SECRET` can be
-  deleted (nothing reads it — its only effect was leaking the secret into the bundle).
+  in `docs/ai/REPO-PROCEDURES.md`. ops is private, so this is hygiene not urgency.
+- **Set `PORTAL_HMAC_SECRET` in Vercel (#28)** — server-only (NOT `VITE_`-),
+  Prod + Preview. **Paste the SAME value `VITE_PORTAL_HMAC_SECRET` holds** so
+  existing `/c/:slug?token=…` links keep verifying; then redeploy and delete the
+  old `VITE_` one (nothing reads it; it only leaked the secret into the bundle).
 
 ## Next (ordered queue)
 
@@ -90,55 +115,33 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
 > `0 contacted`. The failure mode is not capacity — it is that sessions keep
 > opening work instead of landing it. **Land before you build.**
 
-1. **Merge what is left.** #308, #311, #312, #313 landed 2026-09-15. Remaining:
-   **#320** (`/ops/standing`) and **#316** (intake gate, from another session —
-   needs a read before it is merged or closed). The rule stands: land before you
-   build.
-2. **Contact one lead.** `0 contacted` is the computed break in the chain, and
-   it has been zero since the table existed. Everything upstream is proven:
-   263 sourced, 39 qualified, 3 generated, 2 published. Compliance gates the
-   *scaled* send (#35 → #38 → #27 → #9); **one manual email to one qualified
-   lead is not gated by any of that** and is the only act that moves the funnel
-   past its break.
+1. **Merge #326, then make calls.** #316/#320/#323/#324 all landed 2026-09-15;
+   #326 is the last one open. Then:
+   `node scripts/export-call-list.mjs --limit 100 > calls.csv` — 261 eligible,
+   100 queued, 38 with a real opening line. Log every dial, including
+   no-answers: `node scripts/log-call.mjs --id <id> --outcome <outcome>`,
+   funnel via `--funnel`. **Outcomes are a closed vocabulary on purpose — 200
+   calls logged as free text are anecdotes, not data.**
+2. **Contact one lead.** `0 contacted` is the computed break and has been zero
+   since the table existed. Compliance gates the _scaled_ send
+   (#35 → #38 → #27 → #9); **one call, or one manual email, is not gated by any
+   of that.** B2B calls to business numbers sit largely outside the national DNC
+   registry — but WA (most of this list) needs all-party consent to record.
 3. **Adrian's calls, unblocking real work:** #200 (Stripe — there is no way to
    take money today) · #306 (curate gate severity) · #303 / #302 / #296 / #238
    (one shared `hirobius/ralph` engine release, not four).
 4. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
-5. **Guardrail follow-through:** `node scripts/reconcile-ralph-closures.mjs
-   --apply` once with a real `GITHUB_TOKEN` — likely closes several stale issues
-   immediately. Then walk the 8 unpromoted rules (wants #300 first).
+5. **Guardrail follow-through:** `reconcile-ralph-closures.mjs --apply` once with
+   a real `GITHUB_TOKEN`; then walk the unpromoted rules (wants #300 first).
 6. **Cutover Part B remainder** — gated on the clients Astro factory being live.
 
 ## Parked / known warts
 
-- **`.github/PULL_REQUEST_TEMPLATE.md` is the old HDS one.** Four of the six
-  gates it demands were deleted from ops (`check-manifest-drift`,
-  `check-binding-drift`, `check-source-canon`, `validate-manifest`), and it asks
-  for a `docs/ai/orchestration.json` unit-id that ops does not use. Every PR
-  author either pastes output for scripts that do not exist or silently ticks
-  boxes that do not apply. Not filed as an issue on purpose — the open-issue
-  count is itself part of the problem; fix it in passing on any PR that touches
-  `.github/`.
-
 - **`public/hds-manifest.json` churn**: container builds rebake it (sometimes
-  INVALID — drops required fields). Standing order: `git checkout --` it on
-  sight; do NOT commit regens. Real fix waits on the HDS import rework.
-- **Vercel build ≠ local `vite build`.** Vercel type-checks every `api/*.ts`
-  serverless function; `vite build` does not. So a green local build can still
-  fail on Vercel. If you touch api/ types, run **`pnpm typecheck:api`
-  (EXIT 0 required)** — it uses `tsconfig.api-check.json` (the real compiler
-  options over `api/**`), the correct deploy-parity gate. (Do NOT use the old
-  `tsc --types node api/*.ts` form — dropping the project config yields false
-  `noImplicitAny`/TS7016 noise on the `.mjs` imports.) **But `typecheck:api`
-  does NOT catch extensionless-relative-import runtime crashes:** the deploy is
-  ESM (`"type":"module"`), so every relative import in `api/*.ts` MUST carry an
-  explicit extension (`.mjs` for lib JS, `.js` for the compiled `.ts` handler) —
-  Node's ESM loader won't guess. An extensionless `'../lib/api/handler'`
-  type-checks green but 500s at runtime with `ERR_MODULE_NOT_FOUND` (the whole
-  /ops board hung on this until 2026-07-02). Explicit extensions only.
-- **Vercel is on Pro.** The old Hobby 12-function cap no longer binds, but keep
-  consolidating `api/*.ts` (the 4 lead routes live behind one `api/lead-action.ts`
-  dispatcher) — concurrency and cold starts still favour fewer functions.
+  INVALID). Standing order: `git checkout --` it on sight; never commit regens.
+- **Vercel deploy parity + the ESM extension trap:** see `docs/ai/REPO-PROCEDURES.md`.
+- **Vercel is on Pro** — the Hobby 12-function cap no longer binds, but keep
+  consolidating `api/*.ts`; cold starts still favour fewer functions.
 - `docs/ai/OPERATOR_BRIEF.md` + night-shift loop + `orchestration.json` are
   RETIRED — do not execute them.
 
@@ -146,20 +149,19 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
 
 > Shipped history: `docs/ai/DONE-LOG.md` · repo runbooks: `docs/ai/REPO-PROCEDURES.md`.
 
-- **2026-09-14 — Frontier-engineering doctrine adopted (ops#274).**
-  One spec file per epic (`docs/specs/<slug>.md`), path-allowlist auto-merge over the
-  per-issue `ralph-auto` tag, and an enforced budget on always-loaded steering.
-  Kiro's productivity metrics (commit volume, "4.5× lift") **rejected** — we
-  instrument north-star share and human-gate latency instead. Full rationale:
-  `docs/ai/FRONTIER-DOCTRINE.md`.
+- **2026-09-15 — the call channel is not the email channel.** Email needs an
+  address and a `lead_score`; calls need neither and repeat. Two sessions built
+  overlapping call tooling the same day and both numbered a migration `0012`;
+  reconciled in #326 (renumber + drop the duplicated columns), deferring to
+  #324. **Lesson: branch-per-session prevents overwrites, not duplicated work —
+  sequence sessions on one pipeline.**
+- **2026-09-14 — Frontier-engineering doctrine adopted (ops#274).** Spec per
+  epic, path-allowlist auto-merge, enforced steering budget. Kiro's productivity
+  metrics **rejected**. Rationale: `docs/ai/FRONTIER-DOCTRINE.md`.
 
 > Older decisions: `docs/ai/DONE-LOG.md`.
 
-## Fleet directives (broadcast board — write here to reach every repo)
-
-Every fleet repo's CLAUDE.md pointer instructs its sessions to read this file
-before cross-project decisions — so a dated line here IS a fleet-wide
-broadcast. Keep each directive one line; prune when obsolete.
+## Fleet directives (broadcast board — a dated line here reaches every repo)
 
 - 2026-07-02: Track work as GitHub Issues; keep root `status.json` fresh at
   session end; cross-repo asks route through the ops hub, never repo→repo.
@@ -169,4 +171,3 @@ broadcast. Keep each directive one line; prune when obsolete.
 Keys are set by Adrian only (never read/write `.env*`). Never `git push` to
 main; feature branch only. Never run deploys or `pnpm check:release`. Update
 this file before ending a work session.
-

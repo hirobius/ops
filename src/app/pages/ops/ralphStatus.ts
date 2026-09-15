@@ -138,7 +138,14 @@ export interface FleetStatus {
   /** Repos that appeared in the sweep. This IS the fleet. */
   repos: string[];
   blocked: FleetIssue[];
-  queue: { repo: string; number: number; title: string; url: string; prio: string | null; wip: boolean }[];
+  queue: {
+    repo: string;
+    number: number;
+    title: string;
+    url: string;
+    prio: string | null;
+    wip: boolean;
+  }[];
   /** Everything not blocked, parked or queued. The rest of the board. */
   backlog: FleetIssue[];
   /** Every open issue the sweep saw — blocked + queue + backlog. */
@@ -219,9 +226,7 @@ export async function fetchDeploys(signal: AbortSignal): Promise<DeployProject[]
     throw new Error(message);
   }
   if (!isRecord(body) || !Array.isArray(body['projects'])) {
-    throw new Error(
-      'GET /api/projects returned 200 with a body that is not the projects payload.',
-    );
+    throw new Error('GET /api/projects returned 200 with a body that is not the projects payload.');
   }
   return body['projects'] as DeployProject[];
 }
