@@ -1,0 +1,59 @@
+name: Decision
+description: A choice that needs a human. Carries a default so silence resolves it.
+labels: ['needs-adrian']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Every decision issue must carry a default.** The measured constraint on
+        this project is decision throughput, not build capacity — so an open
+        question with no default is a block, and blocks accumulate. With a default
+        and a date, silence becomes a decision instead.
+
+        Only genuinely irreversible choices — money, legal exposure, PII, anything
+        outward-facing — should block on a real answer. Say so below if this is one.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: The question
+      description: One sentence. If it needs a paragraph, it's probably two decisions.
+    validations:
+      required: true
+
+  - type: textarea
+    id: options
+    attributes:
+      label: Options and trade-offs
+      value: |
+        **A.** 
+        **B.**
+    validations:
+      required: true
+
+  - type: input
+    id: default
+    attributes:
+      label: Default if nobody answers
+      description: 'The option that happens automatically. Pick the reversible one.'
+      placeholder: "A — it's reversible and matches existing precedent in <file>"
+    validations:
+      required: true
+
+  - type: input
+    id: decide_by
+    attributes:
+      label: Decide by (YYYY-MM-DD)
+      description: "After this date the default applies and the issue closes. Keep it short — a decision that can wait a month probably isn't needed."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: blocking
+    attributes:
+      label: Must this block on a real answer?
+      options:
+        - "No — apply the default if I don't respond"
+        - 'Yes — irreversible (money, legal, PII, outward-facing); do not default'
+    validations:
+      required: true
