@@ -668,6 +668,19 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "pnpm-meta"
+    },
+    {
+      "id": "metric-north-star-share",
+      "description": "Over a rolling window (default 14 days), the share of merged PRs whose diff touches the revenue path (lib/agent, lib/leads, lib/lead-gen, lib/render, lib/outreach, api/lead-action.ts, the ops leads UI). Network required (GitHub Search + REST API) — manual channel only, same as audit-deps. Emits a violation when the share is below target, so ralph/metric.sh can drive off it.",
+      "severity": "warn",
+      "gateScript": "scripts/metric-north-star-share.mjs",
+      "fixturePath": null,
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual",
+      "supportsJson": true
     }
   ]
 }

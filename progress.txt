@@ -1701,3 +1701,39 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   tests/agent/generate.test.ts (new).
 - Next: #190 (blocked on Adrian's go — Outscraper details spend) is what
   actually populates photos[]/logo_url with real data; #188/#191 build on this.
+
+---
+2026-09-15 — Issue #293: metric: north-star share (% merged PRs touching revenue path)
+- Built scripts/metric-north-star-share.mjs: over a rolling window (default
+  14d), computes share of merged PRs whose diff touches the revenue path.
+- REVENUE_PATH_PREFIXES exported as the one reviewable definition (lib/agent/,
+  lib/leads/, lib/lead-gen/, lib/render/, lib/outreach/, api/lead-action.ts,
+  src/app/pages/ops/leads/) — reused by #238's auto-merge allowlist when that
+  lands, not duplicated. No billing-surface path exists yet in the repo, so
+  the issue's parenthetical "(billing surfaces)" note was left out (nothing
+  concrete to point at).
+- Decision: the issue references a target-vs-share gating ("a share below
+  target = one violation") but never states the numeric target — no
+  FRONTIER-DOCTRINE.md exists in this repo (only on unmerged branches) to
+  pull it from. Picked DEFAULT_TARGET_SHARE = 0.2 (20%) as a documented,
+  adjustable starting instrument threshold (--target flag), not calibrated
+  policy — commented inline that Adrian can retune it. Violations are
+  warn-severity and never fail the script's own exit code (matches "no
+  dashboard surface yet, a number on stdout is the deliverable").
+- Fetches merged PRs via GitHub Search API (is:pr is:merged merged:>=date)
+  then each PR's files via REST, paginated. fetchImpl is injectable so tests
+  stub the API client — no network in tests, per DoD. Fails loud (names
+  GITHUB_TOKEN + Vercel fix link) when the token is missing/expired.
+- Registered in docs/guardrails/registry.json (firingChannel: manual,
+  supportsJson: true) + pnpm alias metric:north-star-share. Does NOT match
+  validate-guardrail-registry's check-/audit- filename filter, so added
+  manually rather than via --update.
+- Verified live against hirobius/ops: 4/44 merged PRs (9.1%) touched the
+  revenue path over the last 14 days.
+- Gate green: typecheck + 756 tests (17 new) + lint. Registry validated.
+- Files: scripts/metric-north-star-share.mjs,
+  scripts/__tests__/metric-north-star-share.test.mjs (new),
+  docs/guardrails/registry.json, package.json.
+- PR: https://github.com/hirobius/ops/pull/323 (ralph/issue-293-north-star-share-metric)
+- Next: no dashboard surface (out of scope per issue). Human-gate-latency is
+  the second doctrine metric, tracked as a separate issue.

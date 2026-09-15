@@ -91,6 +91,7 @@
     "lint": "eslint src scripts tests",
     "lint:fix": "eslint src scripts tests --fix",
     "manifest:generate": "node scripts/generate-script-index.mjs",
+    "metric:north-star-share": "node scripts/metric-north-star-share.mjs",
     "scripts:index": "node scripts/generate-script-index.mjs",
     "perf:budget": "node -e \"require('fs').readdirSync('.lighthouseci').filter(f=>f.startsWith('lhr-')).forEach(f=>require('fs').unlinkSync('.lighthouseci/'+f))\" 2>/dev/null; lhci collect --config=.lighthouserc.json && lhci assert --config=.lighthouserc.json; find . -maxdepth 1 -type d -name 'C:*' -exec rm -rf {} + 2>/dev/null; true",
     "prebuild": "node scripts/ensure-ops-data.mjs",
