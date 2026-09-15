@@ -25,22 +25,46 @@
  *   --help
  */
 
+import { scoreProspect } from './lib/outscraper-normalize.mjs';
+import { QUALIFIED_LEAD_SCORE } from './lib/prospect-to-lead.mjs';
 import { scoreSiteFromPageSpeed } from './lib/site-audit.mjs';
 
 const PSI = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
 
 function parseArgs(argv) {
-  const o = { limit: 50, presence: 'custom', concurrency: 5, write: false, json: false, help: false };
+  const o = {
+    limit: 50,
+    presence: 'custom',
+    concurrency: 5,
+    write: false,
+    json: false,
+    help: false,
+  };
   for (let i = 0; i < argv.length; i++) {
     const next = () => argv[++i];
     switch (argv[i]) {
-      case '--limit': o.limit = Number(next()); break;
-      case '--presence': o.presence = next(); break;
-      case '--concurrency': o.concurrency = Number(next()); break;
-      case '--write': o.write = true; break;
-      case '--json': o.json = true; break;
-      case '--help': case '-h': o.help = true; break;
-      default: console.error(`Unknown flag: ${argv[i]}`); o.help = true;
+      case '--limit':
+        o.limit = Number(next());
+        break;
+      case '--presence':
+        o.presence = next();
+        break;
+      case '--concurrency':
+        o.concurrency = Number(next());
+        break;
+      case '--write':
+        o.write = true;
+        break;
+      case '--json':
+        o.json = true;
+        break;
+      case '--help':
+      case '-h':
+        o.help = true;
+        break;
+      default:
+        console.error(`Unknown flag: ${argv[i]}`);
+        o.help = true;
     }
   }
   return o;
@@ -50,10 +74,12 @@ async function fetchPageSpeed(url, key) {
   const u = new URL(PSI);
   u.searchParams.set('url', url);
   u.searchParams.set('strategy', 'mobile');
-  for (const c of ['performance', 'seo', 'accessibility', 'best-practices']) u.searchParams.append('category', c);
+  for (const c of ['performance', 'seo', 'accessibility', 'best-practices'])
+    u.searchParams.append('category', c);
   if (key) u.searchParams.set('key', key);
   const res = await fetch(u, { signal: AbortSignal.timeout(60000) });
-  if (res.status === 429) throw new Error('PSI 429 — rate limited; set PAGESPEED_API_KEY (free) or lower --concurrency');
+  if (res.status === 429)
+    throw new Error('PSI 429 — rate limited; set PAGESPEED_API_KEY (free) or lower --concurrency');
   if (!res.ok) throw new Error(`PSI ${res.status}`);
   return res.json();
 }
@@ -74,37 +100,59 @@ async function pool(items, n, worker) {
 }
 
 function histogram(scores) {
-  const buckets = [[80, 100], [60, 79], [40, 59], [20, 39], [0, 19]];
-  return buckets.map(([lo, hi]) => {
-    const n = scores.filter((s) => s >= lo && s <= hi).length;
-    return `  ${String(lo).padStart(2)}–${String(hi).padStart(3)} redesign-need : ${'█'.repeat(Math.round(n / Math.max(1, scores.length) * 30))} ${n}`;
-  }).join('\n');
+  const buckets = [
+    [80, 100],
+    [60, 79],
+    [40, 59],
+    [20, 39],
+    [0, 19],
+  ];
+  return buckets
+    .map(([lo, hi]) => {
+      const n = scores.filter((s) => s >= lo && s <= hi).length;
+      return `  ${String(lo).padStart(2)}–${String(hi).padStart(3)} redesign-need : ${'█'.repeat(Math.round((n / Math.max(1, scores.length)) * 30))} ${n}`;
+    })
+    .join('\n');
 }
 
 async function main() {
   const o = parseArgs(process.argv.slice(2));
-  if (o.help) { console.log('See header. Needs PAGESPEED_API_KEY + Supabase env; run with NODE_USE_ENV_PROXY=1.'); process.exit(0); }
+  if (o.help) {
+    console.log(
+      'See header. Needs PAGESPEED_API_KEY + Supabase env; run with NODE_USE_ENV_PROXY=1.',
+    );
+    process.exit(0);
+  }
   const key = process.env.PAGESPEED_API_KEY;
   if (!key) {
     console.error(
       'PAGESPEED_API_KEY is not set — the anonymous PageSpeed endpoint 429s immediately.\n' +
-      'Create a free key: https://console.cloud.google.com/apis/credentials (enable "PageSpeed Insights API"),\n' +
-      'then set PAGESPEED_API_KEY on this environment. (Agents never read/write .env* — set it yourself.)\n' +
-      'Continuing anonymously will likely rate-limit; pass --concurrency 1 to try a tiny sample.',
+        'Create a free key: https://console.cloud.google.com/apis/credentials (enable "PageSpeed Insights API"),\n' +
+        'then set PAGESPEED_API_KEY on this environment. (Agents never read/write .env* — set it yourself.)\n' +
+        'Continuing anonymously will likely rate-limit; pass --concurrency 1 to try a tiny sample.',
     );
   }
 
   const { getServiceClient } = await import('../lib/supabase/server.mjs');
   const sb = await getServiceClient();
-  let q = sb.from('leads').select('id,name,website,city,region,review_count,lead_score,site_presence').not('website', 'is', null);
+  let q = sb
+    .from('leads')
+    .select(
+      'id,name,website,city,region,review_count,lead_score,site_presence,operational,owner_verified',
+    )
+    .not('website', 'is', null);
   if (o.presence === 'custom') q = q.eq('site_presence', 'custom');
   else if (o.presence === 'builder') q = q.eq('site_presence', 'builder');
   else q = q.neq('site_presence', 'none');
   q = q.limit(o.limit);
   const { data, error } = await q;
-  if (error) { console.error('Supabase read failed:', error.message || error); process.exit(1); }
+  if (error) {
+    console.error('Supabase read failed:', error.message || error);
+    process.exit(1);
+  }
   const leads = data || [];
-  if (!o.json) console.log(`Auditing ${leads.length} lead site(s) via PageSpeed (presence=${o.presence})…\n`);
+  if (!o.json)
+    console.log(`Auditing ${leads.length} lead site(s) via PageSpeed (presence=${o.presence})…\n`);
 
   let errors = 0;
   const results = await pool(leads, o.concurrency, async (lead) => {
@@ -126,7 +174,14 @@ async function main() {
   if (o.write) {
     let wrote = 0;
     for (const r of scored) {
-      const { error: uerr } = await sb.from('leads').update({
+      // Recompute lead_score in the SAME write. For a custom-domain lead the
+      // audit is the missing input to its own score (see presenceOpportunityPoints
+      // in outscraper-normalize.mjs): unaudited, it sits at the bare base and is
+      // deliberately excluded from outreach. Writing site_quality_score without
+      // rescoring would leave it excluded forever — the audit would run, cost
+      // PageSpeed quota, and change nothing about who gets contacted. That is
+      // exactly the disconnect the 2026-09-15 reweight was fixing.
+      const patch = {
         site_quality_score: r.siteQualityScore,
         site_pagespeed_mobile: r.mobilePerf,
         site_seo_score: r.seoScore,
@@ -134,28 +189,71 @@ async function main() {
         site_https: r.https,
         site_issues: r.issues,
         site_audited_at: new Date().toISOString(),
-      }).eq('id', r.lead.id);
+      };
+      patch.lead_score = scoreProspect({
+        sitePresence: r.lead.site_presence,
+        reviews: r.lead.review_count,
+        // Both columns are nullable; the normalizer's own defaults are "operating"
+        // and "not verified", so mirror those rather than inventing new ones.
+        operational: r.lead.operational !== false,
+        ownerVerified: r.lead.owner_verified === true,
+        siteQualityScore: r.siteQualityScore,
+      });
+      patch.qualified = patch.lead_score >= QUALIFIED_LEAD_SCORE;
+      const { error: uerr } = await sb.from('leads').update(patch).eq('id', r.lead.id);
       if (!uerr) wrote++;
     }
-    if (!o.json) console.log(`Wrote site-quality to ${wrote} row(s).\n`);
+    if (!o.json) console.log(`Wrote site-quality + rescored lead_score on ${wrote} row(s).\n`);
   }
 
   if (o.json) {
-    console.log(JSON.stringify({ audited: leads.length, scored: scored.length, errors, avgRedesignNeed: avg, results: results.map((r) => ({ name: r.lead.name, website: r.lead.website, city: r.lead.city, reviews: r.lead.review_count, siteQualityScore: r.siteQualityScore, mobilePerf: r.mobilePerf, seoScore: r.seoScore, mobileFriendly: r.mobileFriendly, issues: r.issues })) }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          audited: leads.length,
+          scored: scored.length,
+          errors,
+          avgRedesignNeed: avg,
+          results: results.map((r) => ({
+            name: r.lead.name,
+            website: r.lead.website,
+            city: r.lead.city,
+            reviews: r.lead.review_count,
+            siteQualityScore: r.siteQualityScore,
+            mobilePerf: r.mobilePerf,
+            seoScore: r.seoScore,
+            mobileFriendly: r.mobileFriendly,
+            issues: r.issues,
+          })),
+        },
+        null,
+        2,
+      ),
+    );
     return;
   }
 
-  console.log(`Scored ${scored.length}/${leads.length} (errors: ${errors}). Avg redesign-need: ${avg}/100. Not mobile-friendly: ${badMobile}/${scored.length}.\n`);
+  console.log(
+    `Scored ${scored.length}/${leads.length} (errors: ${errors}). Avg redesign-need: ${avg}/100. Not mobile-friendly: ${badMobile}/${scored.length}.\n`,
+  );
   console.log('Redesign-need distribution:');
   console.log(histogram(scores));
   console.log('\nTop redesign targets (bad site × established business = has money, needs help):');
   scored
     .filter((r) => r.lead.review_count >= 15) // established enough to afford + care
-    .sort((a, b) => (b.siteQualityScore - a.siteQualityScore) || (b.lead.review_count - a.lead.review_count))
+    .sort(
+      (a, b) =>
+        b.siteQualityScore - a.siteQualityScore || b.lead.review_count - a.lead.review_count,
+    )
     .slice(0, 25)
-    .forEach((r) => console.log(
-      `  [${String(r.siteQualityScore).padStart(3)}] ${r.lead.name} · ${r.lead.review_count}rv · ${r.lead.city} · perf ${r.mobilePerf ?? '?'} seo ${r.seoScore ?? '?'}${r.mobileFriendly ? '' : ' · NOT mobile-friendly'}  → ${r.issues.slice(0, 2).join('; ')}`,
-    ));
+    .forEach((r) =>
+      console.log(
+        `  [${String(r.siteQualityScore).padStart(3)}] ${r.lead.name} · ${r.lead.review_count}rv · ${r.lead.city} · perf ${r.mobilePerf ?? '?'} seo ${r.seoScore ?? '?'}${r.mobileFriendly ? '' : ' · NOT mobile-friendly'}  → ${r.issues.slice(0, 2).join('; ')}`,
+      ),
+    );
 }
 
-main().catch((e) => { console.error(e?.stack || String(e)); process.exit(1); });
+main().catch((e) => {
+  console.error(e?.stack || String(e));
+  process.exit(1);
+});
