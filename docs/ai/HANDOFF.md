@@ -23,64 +23,16 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
   (see ARCHITECTURE's note). `?ralph=1` keeps its hardcoded repos for the Tasks
   panel. No new Vercel function.
 
-- **🎯 Revenue path moving again (2026-09-14).** **#185 shipped** (PR #301) — the
-  Leads board now dispatches `render` and surfaces the paste-ready
-  `client.config.ts` + deploy commands. It had sat `p0` and **unqueued for 64
-  days**; labelling it `ralph-ready` shipped it in under two hours. **#186 is in
-  flight** (PR #308, gate green + AI approved) — **single-flight means it stalls
-  the whole loop until merged.** #187 marked the retired Duda path deprecated;
-  removal is #309. Spec: `docs/specs/leads-to-site.md`.
-- **🧭 Frontier-engineering doctrine (ops#274, branch
-  `claude/hirobius-frontier-engineering-v6duri`, unmerged).**
-  `docs/ai/FRONTIER-DOCTRINE.md` + `docs/specs/`. Finding: **we have the machinery
-  and mis-aim it.** Retro harvest of 281 issues → 13 rules in
-  `docs/ai/learned-rules.jsonl` (5 promoted to `CLAUDE.md` §4), 9 harness defects
-  (#302–#305). Shipped on the branch: #304, #305 (ops-local half), #292 (steering
-  budget, 135KB → 24KB). **#292/#304/#305 were de-queued** — built here, unmerged;
-  leaving them `ralph-ready` would have had the loop rebuild them.
-- **PRODUCTION is LIVE** — `hirobius-ops` deploys from `main`; `/ops` password gate
-  active (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET`); Supabase wired; DS consumed
-  from public npm `@hirobius/design-system`. Vercel is on **Pro**; preview
-  Deployment Protection is off (the `/ops` gate still covers it).
-- **The autonomous loop works and is under-aimed.** `ralph-gate` is the **sole
-  required check** on `main` — other CI jobs are informational, so
-  `mergeable_state: unstable` is still mergeable. Single-flight (one `ralph/*` PR
-  at a time), auto-merge on `ralph-auto`, 6h idle-watchdog cron on. **Keep the
-  ready pool non-empty and biased to the revenue path** (doctrine §8).
-- **Revenue path is the priority and is now queued.** #185 (`p0`) + #186 are
-  `ralph-ready` and **supervised — not `ralph-auto`** (client-facing output,
-  fabrication bans apply). #190 is blocked on Adrian's go for Outscraper
-  details-API spend. Spec: `docs/specs/leads-to-site.md`.
-- **Compliance gates outreach.** #35 → #38 → #27 are a hard prerequisite for #9.
-  No scaled cold email before they land. Outscraper spend stays ON HOLD pending
-  an explicit go.
-- **`.github/workflows/*` cannot be pushed by the bot** (no `workflows` scope).
-  Route CI/workflow changes through an adr-eng PR — never a Ralph task. Four
-  issues (#90/#240/#241/#243) each burned attempts rediscovering this.
-- **Engine wired, lead keys not fully exercised.** lead-gen is an Outscraper
-  wrapper; generation runs enrich → generate → judge; `lib/render` emits the
-  paste-ready `client.config.ts` + deploy commands. Publishing stays a deliberate
-  human action (it is the billing event).
-- **Where to look:** `docs/ai/BURNDOWN-GAMEPLAN.md` (the clustered plan for every
-  open issue) · `docs/ARCHITECTURE.md` ⇄ `docs/pipeline-walkthrough.html` (keep in
-  lockstep) · `docs/ai/DONE-LOG.md` (shipped history) ·
-  `docs/ai/REPO-PROCEDURES.md` (repo runbooks).
+- **🎯 Revenue path: #185, #186, #188, #191, #196 all shipped and MERGED**
+  (2026-09-15, PRs #301/#308/#311). The Leads board dispatches `render` and
+  surfaces a paste-ready `client.config.ts`; the agent now gets real hours,
+  address, photos and a contrast-checked palette. #187 marked the Duda path
+  dead; #309 removes it. Spec: `docs/specs/leads-to-site.md`.
+- **🧭 Frontier-engineering doctrine MERGED** (#313, ops#274).
+  `docs/ai/FRONTIER-DOCTRINE.md` + `docs/specs/` + the 25KB steering budget gate.
+  Finding that still steers: **we have the machinery and mis-aim it.** 13 rules
+  in `learned-rules.jsonl`, 5 promoted to `CLAUDE.md` §4.
 
-- **🎯 Revenue path moving again (2026-09-14).** **#185 shipped** (PR #301) — the
-  Leads board now dispatches `render` and surfaces the paste-ready
-  `client.config.ts` + deploy commands. It had sat `p0` and **unqueued for 64
-  days**; labelling it `ralph-ready` shipped it in under two hours. **#186 is in
-  flight** (PR #308, gate green + AI approved) — **single-flight means it stalls
-  the whole loop until merged.** #187 marked the retired Duda path deprecated;
-  removal is #309. Spec: `docs/specs/leads-to-site.md`.
-- **🧭 Frontier-engineering doctrine (ops#274, branch
-  `claude/hirobius-frontier-engineering-v6duri`, unmerged).**
-  `docs/ai/FRONTIER-DOCTRINE.md` + `docs/specs/`. Finding: **we have the machinery
-  and mis-aim it.** Retro harvest of 281 issues → 13 rules in
-  `docs/ai/learned-rules.jsonl` (5 promoted to `CLAUDE.md` §4), 9 harness defects
-  (#302–#305). Shipped on the branch: #304, #305 (ops-local half), #292 (steering
-  budget, 135KB → 24KB). **#292/#304/#305 were de-queued** — built here, unmerged;
-  leaving them `ralph-ready` would have had the loop rebuild them.
 - **PRODUCTION is LIVE** — `hirobius-ops` deploys from `main`; `/ops` password gate
   active (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET`); Supabase wired; DS consumed
   from public npm `@hirobius/design-system`. Vercel is on **Pro**; preview
