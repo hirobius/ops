@@ -11,18 +11,21 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
 
 ## Now (what is true today)
 
-- **🪟 `/ops/standing` — the fleet read, all of it derived (2026-09-15).**
-  Repos are DISCOVERED (`listOpenIssues()` spans every repo the token sees across
-  `hirobius` + `adr-eng`; one PR search covers all owners, so cost is flat in repo
-  count). The chain is derived too: `leadFunnel` counts the `leads` table per
-  stage and `lib/chain/evidence.mjs` computes state, the break and the biggest
-  leak. **A stage reads `proven` only when real leads got through it.**
-  Live funnel: 263 sourced → 249 scored → 39 qualified → 3 generated → 2
-  published → 0 contacted. **The break is outreach, not publish** — two sites
-  ARE deployed. The hand-written table this replaced was wrong on three counts
-  (see ARCHITECTURE's note). `?ralph=1` keeps its hardcoded repos for the Tasks
-  panel. No new Vercel function.
+- **📞 `/ops/pitch` — the call sheet (2026-09-15).** A partner can work the list
+  on a phone: `tel:` link, the site in one tap, one-tap stage moves, and a note
+  log per lead. Only pitchable leads appear (`preview_url` present,
+  `do_not_contact` false) and both gates re-check on every write, so a queue
+  left open cannot contact someone who opted out since. **Marking a lead
+  pitched stamps `contacted_at` + `contact_channel` — the #321 evidence.**
+  Migration **0012 must be applied before the page works**. Stages reuse
+  0007's `outreach_status` vocabulary. Deliberately not a CRM.
 
+- **🪟 `/ops/standing` is the ONLY fleet surface.** Chain, waiting-on-you, in
+  flight, queue, backlog, deploys. `/ops/tasks` + `/ops/projects` redirect here.
+  Actions (`queue_on`/`queue_off`/`ralph_requeue`) write labels straight to
+  GitHub via `labelIssueDirect`, bypassing the Supabase mirror on purpose —
+  Standing lists repos the importer never touched. Queue-from-backlog is the
+  direct fix for ops#274's routing finding.
 - **🎯 Revenue path: #185, #186, #188, #191, #196 all shipped and MERGED**
   (2026-09-15, PRs #301/#308/#311). The Leads board dispatches `render` and
   surfaces a paste-ready `client.config.ts`; the agent now gets real hours,

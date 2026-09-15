@@ -121,9 +121,31 @@ describe('sortFleetLanes', () => {
     expect(sortFleetLanes(fleet).queue.map((q: { number: number }) => q.number)).toEqual([12, 309]);
   });
 
-  it('leaves ordinary backlog out of every lane', () => {
-    const { blocked, queue } = sortFleetLanes(fleet);
-    expect([...blocked, ...queue].map((i: { number: number }) => i.number)).not.toContain(99);
+  // The page is the whole board. An issue with no lane label used to vanish
+  // from Standing entirely and was only reachable via /ops/tasks, whose mirror
+  // is as fresh as the last manual Import.
+  it('puts unlabelled issues in backlog rather than dropping them', () => {
+    const { blocked, queue, backlog, total } = sortFleetLanes(fleet);
+    expect(backlog.map((i: { number: number }) => i.number)).toEqual([99]);
+    expect(blocked.length + queue.length + backlog.length).toBe(total);
+  });
+
+  it('accounts for every issue exactly once across the lanes', () => {
+    const { blocked, queue, backlog } = sortFleetLanes(fleet);
+    const seen = [...blocked, ...queue, ...backlog].map((i: { number: number }) => i.number);
+    expect(new Set(seen).size).toBe(seen.length);
+    expect(seen.sort((a: number, b: number) => a - b)).toEqual([7, 12, 99, 200, 306, 309]);
+  });
+
+  it('orders backlog by priority then number, like the other lanes', () => {
+    const mixed = [
+      issue({ number: 50, labels: ['backlog', 'p3'] }),
+      issue({ number: 20, labels: ['backlog', 'p1'] }),
+      issue({ number: 10, labels: ['backlog', 'p3'] }),
+    ];
+    expect(sortFleetLanes(mixed).backlog.map((i: { number: number }) => i.number)).toEqual([
+      20, 10, 50,
+    ]);
   });
 
   it('discovers every repo that appeared, across owners, sorted', () => {
@@ -135,7 +157,13 @@ describe('sortFleetLanes', () => {
   });
 
   it('returns empty lanes for an empty sweep rather than throwing', () => {
-    expect(sortFleetLanes([])).toEqual({ blocked: [], queue: [], repos: [] });
+    expect(sortFleetLanes([])).toEqual({
+      blocked: [],
+      queue: [],
+      backlog: [],
+      repos: [],
+      total: 0,
+    });
   });
 
   it('tolerates a non-array input', () => {

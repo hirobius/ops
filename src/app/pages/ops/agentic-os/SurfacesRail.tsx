@@ -28,24 +28,19 @@ const TILES: readonly SurfaceTile[] = [
     description: 'Pull local businesses · generate sites · track outreach',
   },
   {
-    to: '/ops/tasks',
-    label: 'Tasks',
-    description: 'One board — tracker, backlog, clients + GitHub issues',
-  },
-  {
     to: '/ops/digest',
     label: 'Digest',
     description: 'Newsletter intel, pre-triaged with an ops angle',
   },
   {
-    to: '/ops/projects',
-    label: 'Projects',
-    description: 'Live fleet — deploy state across every Vercel project',
+    to: '/ops/pitch',
+    label: 'Pitch',
+    description: 'The call sheet — businesses with a site built and ready to show',
   },
   {
     to: '/ops/standing',
     label: 'Standing',
-    description: 'Where the revenue chain breaks · what is blocked on you',
+    description: 'The whole board — chain, blocked, in flight, queue, backlog, deploys',
   },
 ] as const;
 

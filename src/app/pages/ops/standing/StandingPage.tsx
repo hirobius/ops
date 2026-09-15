@@ -33,21 +33,28 @@
  * matters.
  */
 
+import { useCallback, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { Badge } from '@hirobius/design-system';
+import { Badge, Button } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from '../PageHeader';
 import { usePoll } from '../../../lib/usePoll';
 import {
+  actOnIssue,
+  fetchDeploys,
   fetchFleetStatus,
   shortRepo,
+  type DeployProject,
   type FleetStatus,
   type FleetIssue,
+  type StandingAction,
 } from '../ralphStatus';
 import { deriveChain } from '../../../../../lib/chain/evidence.mjs';
 
 const POLL_MS = 60_000;
 const SHOWN = 8;
+/** Backlog is the long tail — show more of it than the action lanes. */
+const BACKLOG_SHOWN = 25;
 
 /**
  * Four states, and every one of them is derived — `proven` means rows actually
@@ -98,12 +105,51 @@ export default function StandingPage() {
   const blocked = data?.blocked ?? [];
   const prs = data?.prs ?? [];
   const queue = data?.queue ?? [];
+  const backlog = data?.backlog ?? [];
   const needsToken = error?.includes('GITHUB_TOKEN') ?? false;
   /** A real payload has arrived — not merely "a request finished". */
   const loaded = data !== null;
   // Every verdict below is computed from the lead-table counts and which env
   // vars are set. Nothing about the pipeline's state is authored anywhere.
   const chain: Chain = deriveChain({ funnel: data?.funnel ?? {}, env: data?.env ?? {} });
+
+  // Deploy state is a separate endpoint and a separate failure mode: Vercel
+  // being unreachable must not blank the issue lanes, and vice versa.
+  const deploys = usePoll<DeployProject[]>(fetchDeploys, {
+    intervalMs: POLL_MS * 2,
+    offlineIntervalMs: POLL_MS * 6,
+    requestTimeoutMs: 15_000,
+  });
+
+  const [busy, setBusy] = useState<ReadonlySet<string>>(new Set());
+  const [note, setNote] = useState<{ text: string; ok: boolean } | null>(null);
+
+  const act = useCallback(
+    async (repo: string, number: number, action: StandingAction, label: string) => {
+      const id = `${repo}#${number}`;
+      setBusy((prev) => new Set(prev).add(id));
+      const result = await actOnIssue(repo, number, action);
+      setBusy((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      // Never silent either way: the lane only re-reads on the next poll, so
+      // without this the tap looks like it did nothing for up to a minute.
+      if (result.ok) {
+        setNote({
+          text: `${label} — ${shortRepo(repo)}#${number}. Refreshes on the next poll.`,
+          ok: true,
+        });
+      } else {
+        setNote({
+          text: `${shortRepo(repo)}#${number}: ${result.error ?? 'action failed'}`,
+          ok: false,
+        });
+      }
+    },
+    [],
+  );
 
   return (
     <div style={s.page}>
@@ -114,6 +160,12 @@ export default function StandingPage() {
       />
 
       <Coverage data={data} error={error} needsToken={needsToken} />
+
+      {note ? (
+        <p style={note.ok ? s.noteOk : s.noteBad} role="status">
+          {note.text}
+        </p>
+      ) : null}
 
       {/* ── 1. The chain ─────────────────────────────────────────────────── */}
       <Section
@@ -176,13 +228,23 @@ export default function StandingPage() {
                     {shortRepo(b.repo)}
                     {b.prio ? ` · ${b.prio}` : ''}
                   </span>
+                  {b.label === 'ralph-parked' ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={busy.has(`${b.repo}#${b.number}`)}
+                      onClick={() => act(b.repo, b.number, 'ralph_requeue', 'Re-queued')}
+                    >
+                      {busy.has(`${b.repo}#${b.number}`) ? 're-queueing…' : 'Re-queue'}
+                    </Button>
+                  ) : null}
                 </div>
               </li>
             ))}
           </ul>
         </Lane>
         {blocked.length > SHOWN ? (
-          <p style={s.more}>+{blocked.length - SHOWN} more on the tasks board</p>
+          <p style={s.more}>+{blocked.length - SHOWN} more</p>
         ) : null}
       </Section>
 
@@ -218,6 +280,51 @@ export default function StandingPage() {
             +{prs.length - SHOWN} more open across the fleet, least recently touched
           </p>
         ) : null}
+      </Section>
+
+      {/* ── Deploys ──────────────────────────────────────────────────────── */}
+      <Section
+        title="Deploys"
+        count={deployCount(deploys.error, deploys.data)}
+      >
+        {deploys.error && !deploys.data ? (
+          <p style={s.notice}>Couldn’t reach /api/projects — {deploys.error}</p>
+        ) : !deploys.data ? (
+          <p style={s.notice}>Reading Vercel…</p>
+        ) : deploys.data.length === 0 ? (
+          <p style={s.notice}>No Vercel projects visible to this token.</p>
+        ) : (
+          <ul style={s.list}>
+            {deploys.data.slice(0, SHOWN).map((proj) => {
+              const d = proj.latestDeployment;
+              const tone = deployTone(d?.state);
+              return (
+                <li key={proj.id} style={s.row}>
+                  <div style={s.rowLink}>
+                    <span style={{ ...s.num, color: tone }}>●</span>
+                    <span style={s.title}>{proj.name}</span>
+                  </div>
+                  <div style={s.metaRow}>
+                    <span style={s.meta}>
+                      {d?.state ?? 'never deployed'}
+                      {d?.target ? ` · ${d.target}` : ''}
+                    </span>
+                    {d?.url ? (
+                      <a
+                        href={`https://${d.url}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={s.issueRef}
+                      >
+                        open
+                      </a>
+                    ) : null}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </Section>
 
       {data?.errors.length ? (
@@ -257,6 +364,55 @@ export default function StandingPage() {
         <p style={s.footnote}>
           Selector order mirrors <code style={s.code}>ralph/next.sh</code> exactly — this is
           the order the loop will actually take them in.
+        </p>
+      </Section>
+
+      {/* ── 5. The rest of the board ─────────────────────────────────────── */}
+      <Section
+        title="Backlog"
+        count={laneCount(needsToken, error, loaded, backlog.length, ['issue', 'issues'])}
+      >
+        <Lane
+          needsToken={needsToken}
+          error={error}
+          loaded={loaded}
+          empty={backlog.length === 0}
+          emptyCopy="Nothing else open. Every issue is blocked, parked or queued."
+        >
+          <ul style={s.list}>
+            {backlog.slice(0, BACKLOG_SHOWN).map((b: FleetIssue) => (
+              <li key={`${b.repo}#${b.number}`} style={s.row}>
+                <a href={b.url} target="_blank" rel="noreferrer" style={s.rowLink}>
+                  <span style={s.num}>#{b.number}</span>
+                  <span style={s.title}>{b.title}</span>
+                </a>
+                <div style={s.metaRow}>
+                  <span style={s.meta}>
+                    {shortRepo(b.repo)}
+                    {b.prio ? ` · ${b.prio}` : ''}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={busy.has(`${b.repo}#${b.number}`)}
+                    onClick={() => act(b.repo, b.number, 'queue_on', 'Queued')}
+                  >
+                    {busy.has(`${b.repo}#${b.number}`) ? 'queueing…' : 'Queue'}
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Lane>
+        {backlog.length > BACKLOG_SHOWN ? (
+          <p style={s.more}>
+            +{backlog.length - BACKLOG_SHOWN} more, lower priority
+          </p>
+        ) : null}
+        <p style={s.footnote}>
+          Live from GitHub, every repo the token can see. Queue writes the label
+          straight to the issue — no mirror, so it works on repos the importer never
+          touched.
         </p>
       </Section>
     </div>
@@ -449,6 +605,22 @@ function laneCount(
   if (error && !loaded) return 'unreachable';
   if (!loaded) return '…';
   return `${n} ${n === 1 ? noun[0] : noun[1]}`;
+}
+
+/** READY is green, ERROR red, anything mid-flight amber. */
+function deployTone(state: string | undefined): string {
+  if (state === 'READY') return 'var(--semantic-color-feedback-success)';
+  if (state === 'ERROR' || state === 'CANCELED') return 'var(--semantic-color-feedback-error)';
+  if (!state) return 'var(--semantic-color-content-tertiary)';
+  return 'var(--semantic-color-feedback-warning)';
+}
+
+function deployCount(error: string | null, data: DeployProject[] | null): string {
+  if (error && !data) return 'unreachable';
+  if (!data) return '…';
+  const bad = data.filter((p) => p.latestDeployment?.state === 'ERROR').length;
+  if (bad > 0) return `${bad} failing`;
+  return `${data.length} ${data.length === 1 ? 'project' : 'projects'}`;
 }
 
 /* ── styles ─────────────────────────────────────────────────────────────── */
@@ -667,6 +839,24 @@ const s = {
     whiteSpace: 'nowrap' as const,
   },
 
+  noteOk: {
+    ...hds.typeStyles.bodySmall,
+    margin: 0,
+    padding: hds.space.px8,
+    borderRadius: hds.borderRadius.sm,
+    borderLeft: '3px solid var(--semantic-color-feedback-success)',
+    background: 'var(--semantic-color-surface-raised)',
+    color: 'var(--semantic-color-content-primary)',
+  },
+  noteBad: {
+    ...hds.typeStyles.bodySmall,
+    margin: 0,
+    padding: hds.space.px8,
+    borderRadius: hds.borderRadius.sm,
+    borderLeft: '3px solid var(--semantic-color-feedback-error)',
+    background: 'var(--semantic-color-surface-raised)',
+    color: 'var(--semantic-color-content-primary)',
+  },
   notice: {
     ...hds.typeStyles.bodySmall,
     margin: 0,
