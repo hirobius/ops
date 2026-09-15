@@ -1,44 +1,76 @@
-# HANDOFF — the living session-to-session state
+# HANDOFF — the one document
 
-> **Contract.** This is the single universal handoff. Any session (any device,
-> any agent) that gets a short prompt — "continue", "status", "pick up", "go" —
-> reads THIS file first and acts from it. Any session that does real work
-> **updates this file before ending** (edit in place; keep it one page; move
-> finished things to the log line at the bottom). Adrian never copy-pastes
-> context again — he types one word.
+> **Point the next agent here. Nothing else.** A session given "continue",
+> "status" or "go" reads this and acts from **Next**; a session that does real
+> work updates it before ending. "Put it in the handoff" means this file.
 
-_Last updated: 2026-09-15 — full shipped history in `docs/ai/DONE-LOG.md`._
+_Last updated: 2026-09-15._
+
+## The map (what else exists, and when to open it)
+
+Everything below is **on-demand**. You do not need any of it to start work —
+open one only when the task in hand calls for it.
+
+| File                   | Open it when                                                                                       |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| `NORTH_STAR.md`        | A request might be scope drift. Adrian owns it; sessions never edit it.                            |
+| `PARKED.md`            | Something is deliberately not being worked on, or a tripwire may have fired (`pnpm parked:check`). |
+| `FRONTIER-DOCTRINE.md` | You are deciding _how_ to work — specs, gates, metrics.                                            |
+| `AGENT_GUIDELINES.md`  | You are dispatching sub-agents.                                                                    |
+| `PROMPT_TEMPLATES.md`  | You are writing a prompt for one.                                                                  |
+| `REPO-PROCEDURES.md`   | You need a runbook (trigger phrases, release steps).                                               |
+| `DONE-LOG.md`          | You need shipped history, or "was this already done?"                                              |
+| `../DECISIONS.md`      | You need to know **why** — the four decision records and which is which.                           |
+| `BURNDOWN-GAMEPLAN.md` | You want open issues clustered with a plan.                                                        |
+| `learned-rules.jsonl`  | Walking the unpromoted rules (`pnpm guardrail:learned-rules`).                                     |
+| `../ARCHITECTURE.md`   | The pipeline's narrative. **Not** its status — that's `/ops/standing`.                             |
+
+**Live state is not in a document.** For whether a pipeline stage actually
+works, read `/ops/standing`; it derives every verdict from `leads` row counts.
+For who to call next, read `/ops/pitch`. A doc that restates either will drift.
+
+`docs/ai/archive/` holds superseded material. It is history, not context — do
+not read it to get oriented.
 
 ## Now (what is true today)
 
 - **☎️ THE EMAIL CHANNEL CANNOT RUN. 1 lead of 263 has an email address.**
   Not 39 — that was `lead_score` qualification, which never checked for an
   address. Google Business Profile has **no email field**, so no Maps scraper
-  (Outscraper, Apify, SerpApi, BrightData) returns one; every tool claiming to
-  is secretly crawling the business's own site. The enrichment tier (Hunter,
-  Apollo, Clay) is built from corporate-domain crawls and covers a 3-person
-  plumber badly — vendors say so themselves. **This is a segment problem, not a
-  tooling problem.** The realistic fix is crawling the 223 known websites for
-  `mailto:` ourselves. **Phone is the only channel that can run today: 260 leads
-  have one.**
+  (Outscraper, Apify, SerpApi, BrightData) returns one. The enrichment tier
+  (Hunter, Apollo, Clay) is built from corporate-domain crawls and covers a
+  3-person plumber badly. **Segment problem, not tooling.** Realistic fix:
+  crawl the 223 known websites for `mailto:` ourselves. **Phone is the only
+  live channel — 260 leads have one.**
 
-- **📞 First-contact stack — PR #326 (open, `ralph-gate` green).** `--rehearse`
-  mode on `push-outreach.mjs` (real provider, real merge data, every recipient
-  rewritten to you, capped at 3) behind the single choke point
-  `lib/outreach/guard.mjs`; the scorer reweight; `rescore-leads.mjs`; and the
-  call channel (`export-call-list.mjs`, `log-call.mjs`, migrations 0013/0014).
-  **Two bugs it fixed are worth remembering:** a custom-domain lead could never
-  be qualified (ceiling 4+30+10+15 = **59** vs a threshold of **60**), which
-  silently orphaned the whole redesign play; and the weighting ranked the
-  _hardest_ sells highest — a Wix site is a **proven buyer**, a decade with no
-  site is a revealed preference.
+- **📞 First-contact stack shipped (#326).** `--rehearse` on
+  `push-outreach.mjs` (real provider, real merge data, recipients rewritten to
+  you, capped at 3) behind the one choke point `lib/outreach/guard.mjs`; the
+  scorer reweight; `rescore-leads.mjs`; the call channel
+  (`export-call-list.mjs`, `log-call.mjs`, migrations 0013/0014).
+  **Two bugs worth remembering:** a custom-domain lead could never be qualified
+  (ceiling 4+30+10+15 = **59** vs threshold **60**), silently orphaning the
+  redesign play; and the weighting ranked the _hardest_ sells highest — a Wix
+  site is a **proven buyer**, a decade with no site is a revealed preference.
+
+- **📦 2026-09-15 shipped 9 PRs and left the loop clean** (roll-call in
+  `DONE-LOG.md`). It started the night with 4 open PRs and zero merges to
+  `main`; that inversion was the point. **Land before you build.**
+- **📞 `/ops/pitch` is live; migrations 0012/0013/0014 applied** (verified: both
+  columns, `lead_notes`, RLS, 3 indexes). A partner can work the list from a
+  phone. Marking a lead pitched stamps `contacted_at` + `contact_channel` — the
+  evidence #321 needs.
+- **📉 north-star share: run `pnpm metric:north-star-share`.** The 20% target
+  is uncalibrated — retune with `--target` once a few windows exist.
+- **🧹 Docs consolidated** — `docs/ai/` 31 → 16, `docs/` 146 → 122 live. Nothing
+  deleted; superseded material is in `docs/archive/`. `docs/DECISIONS.md` indexes
+  the four decision records (cite full paths — two unrelated ones read as "ADR 2").
 
 - **📞 `/ops/pitch` — the phone call sheet (#324).** Only pitchable leads appear
   (`preview_url` present, `do_not_contact` false); both gates re-check on every
-  write, so a queue left open cannot contact someone who opted out since.
-  Marking pitched stamps `contacted_at` + `contact_channel` (#321 evidence).
-  Stages reuse 0007's `outreach_status`. Notes live in the `lead_notes` table,
-  never a column. Not a CRM.
+  write. Marking pitched stamps `contacted_at` + `contact_channel` (#321
+  evidence). Stages reuse 0007's `outreach_status`. Notes live in the
+  `lead_notes` TABLE, never a column. Not a CRM.
 
 - **🪟 `/ops/standing` is the ONLY fleet surface.** Chain, waiting-on-you, in
   flight, queue, backlog, deploys. `/ops/tasks` + `/ops/projects` redirect here.
@@ -46,12 +78,9 @@ _Last updated: 2026-09-15 — full shipped history in `docs/ai/DONE-LOG.md`._
   GitHub via `labelIssueDirect`, bypassing the Supabase mirror on purpose —
   Standing lists repos the importer never touched. Queue-from-backlog is the
   direct fix for ops#274's routing finding.
-- **🎯 Revenue path #185/#186/#188/#191/#196 and the frontier doctrine (#313)
-  all shipped 2026-09-15.** Leads dispatches `render` with a paste-ready
-  `client.config.ts`; #309 removes the dead Duda path. Spec:
-  `docs/specs/leads-to-site.md`. Doctrine finding that still steers: **we have
-  the machinery and mis-aim it** (`docs/ai/FRONTIER-DOCTRINE.md`).
-
+- **🎯 Revenue path is merged, unrun.** The generator takes real hours, address,
+  photos and a contrast-checked palette. Spec: `docs/specs/leads-to-site.md`.
+  Doctrine finding that still steers: **we have the machinery and mis-aim it.**
 - **PRODUCTION is LIVE** — `hirobius-ops` deploys from `main`; `/ops` password gate
   active (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET`); Supabase wired; DS consumed
   from public npm `@hirobius/design-system`. Vercel is on **Pro**; preview
@@ -61,10 +90,7 @@ _Last updated: 2026-09-15 — full shipped history in `docs/ai/DONE-LOG.md`._
   `mergeable_state: unstable` is still mergeable. Single-flight (one `ralph/*` PR
   at a time), auto-merge on `ralph-auto`, 6h idle-watchdog cron on. **Keep the
   ready pool non-empty and biased to the revenue path** (doctrine §8).
-- **Revenue path is the priority and is now queued.** #185 (`p0`) + #186 are
-  `ralph-ready` and **supervised — not `ralph-auto`** (client-facing output,
-  fabrication bans apply). #190 is blocked on Adrian's go for Outscraper
-  details-API spend. Spec: `docs/specs/leads-to-site.md`.
+- **#190 is blocked on Adrian's go** for Outscraper details-API spend.
 - **Compliance gates SCALED outreach** (#35 → #38 → #27 before #9); one call or
   one manual email is not gated. Outscraper spend stays ON HOLD pending a go.
 - **`.github/workflows/*` cannot be pushed by the bot** (no `workflows` scope).
@@ -73,10 +99,6 @@ _Last updated: 2026-09-15 — full shipped history in `docs/ai/DONE-LOG.md`._
 - **Engine wired.** lead-gen wraps Outscraper; generation runs
   enrich → generate → judge; `lib/render` emits `client.config.ts` + deploy
   commands. Publishing stays a human action — it is the billing event.
-- **Where to look:** `docs/ai/BURNDOWN-GAMEPLAN.md` (the clustered plan for every
-  open issue) · `docs/ARCHITECTURE.md` ⇄ `docs/pipeline-walkthrough.html` (keep in
-  lockstep) · `docs/ai/DONE-LOG.md` (shipped history) ·
-  `docs/ai/REPO-PROCEDURES.md` (repo runbooks).
 
 ## Adrian's open actions (his court — one-time, not blocked on a session)
 

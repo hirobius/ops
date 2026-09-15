@@ -25,38 +25,13 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 
 ## 1. What to read first
 
-> **Current state (2026-09-14 burndown session) — read `docs/ai/BURNDOWN-GAMEPLAN.md`
-> for the full picture (all open issues clustered, the phased plan, and the
-> needs-adrian decisions).** Durable facts to carry forward:
->
-> - **ops CI is green.** `ralph-gate` is the **sole required check** on `main`; the
->   other CI jobs (Lighthouse, "Quality gates", the "Typecheck…Playwright (desktop)"
->   job) are informational — a PR at `mergeable_state: unstable` is still mergeable.
->   Don't be alarmed by red _non-required_ checks.
-> - **Auto-merge is the proven default:** `ralph-auto` + `ralph-ready` + a green
->   `ralph-gate` → self-merge; the 6h idle-watchdog cron is ON (PR #232).
->   **Single-flight** = one `ralph/*` PR at a time, so a supervised/unmerged PR stalls
->   the whole loop — merge or close it promptly, and **verify merge state via the API,
->   never assume "it merged"** (a 4h idle happened when a merge tap didn't complete).
-> - **`.github/workflows/*` edits can't be pushed by the bot (no `workflows` scope).**
->   Route CI/workflow changes through an **adr-eng PR via the GitHub connector** — the
->   sanctioned, human-directed exception to §0's "no agent push", not a Ralph task.
-> - **Parking is recoverable:** a missing `- [ ]` DoD checklist, a cross-repo scope, or
->   2 failed attempts park an issue (drops `ralph-ready`). Recover by fixing the cause
->   and re-adding `ralph-ready`; don't mass-tag (churn causes parking).
-> - Vercel is on **Pro**; preview Deployment Protection is **off** (the `/ops` password
->   gate still protects it). Frontier-engineering deep-dive is queued as **#274**.
-
 - **Current state / what's next:** `docs/ai/HANDOFF.md` — start here on any short or open-ended prompt ("continue", "go", "status") and act from its Next queue.
 - **Focus contract:** `docs/ai/NORTH_STAR.md` — if a request materially expands scope beyond it (infrastructure that doesn't ship a paying client site sooner), flag the drift in one sentence, then do what Adrian decides. Sessions never edit that file.
 - **Delivery architecture (lead → site → outreach → invoice):** `docs/ARCHITECTURE.md` (canonical for the narrative) ⇄ `docs/pipeline-walkthrough.html` (visual Artifact) — keep the two in lockstep. **For whether a stage actually works, read `/ops/standing`, not a doc:** it derives every verdict from live `leads` row counts (`leadFunnel` → `lib/chain/evidence.mjs`). Never hand-write pipeline status.
 - **Guardrail registry:** `docs/guardrails/registry.json` — every `scripts/check-*.mjs` / `audit-*.mjs` gate with its `firingChannel`; `validate-guardrail-registry` keeps registry ↔ scripts consistent.
-- **On-demand context (NOT loaded by default — read when the task calls for it):**
-  `docs/ai/AGENT_GUIDELINES.md` (dispatching) · `docs/ai/PROMPT_TEMPLATES.md` (writing
-  prompts) · `docs/specs/README.md` (working an epic) · `docs/ai/DONE-LOG.md` (shipped
-  history) · `docs/ai/REPO-PROCEDURES.md` (repo runbooks) · `docs/ai/FRONTIER-DOCTRINE.md`
-  (how we work). The always-on set is capped by `scripts/check-steering-budget.mjs` —
-  add to `docs/guardrails/steering-budget.json` only deliberately (ops#292).
+- **Everything else is on-demand and mapped in HANDOFF's "The map" table** —
+  don't duplicate that list here. The always-on set is capped by
+  `scripts/check-steering-budget.mjs` (ops#292).
 - **Context awareness:** look for local `CLAUDE.md` files in subdirectories for overriding rules before editing.
 - **Plan & PR artifacts (convention, #4):** for a substantial implementation plan, write it as a self-contained **HTML file** (real tables, mockups, data-flow, key code snippets) reviewable in a browser — not a markdown wall (template gallery: `anthropics/html-effectiveness`). For a large diff, produce an **artifact walkthrough** (the diff, reasoning per change, what was tested). Small changes stay inline.
 

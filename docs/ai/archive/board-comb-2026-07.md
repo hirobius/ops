@@ -98,15 +98,15 @@ key `backlog:*`, not `github:*`, so the dedup pass skipped them.
 
 Reconciliation (each row → what already tracks it):
 
-| Board row | Already tracked by | Board action |
-| --- | --- | --- |
-| `discord-bot-runtime-bugs` | **#25 — CLOSED/completed** (fixed in `e8843a6`; `bug`) | closed as dedup; `dispatch_url`→#25 |
-| `dispatchstate-queued-deadend` | **#26 — CLOSED/completed** (fixed in `e8843a6`; `bug`) | closed as dedup; `dispatch_url`→#26 |
-| `security-portal-server-auth` | #28 — CLOSED/completed | closed as dedup; `dispatch_url`→#28 |
-| `client-facing-portal-route` | done — `ClientPortalPage` + route ship | closed as already-delivered |
-| `ops-production-go-live` | done — ops is in PRODUCTION (deploys from `main`) | closed as superseded |
-| `ops-lead-pipeline-go-live` | superseded — lead-gen has since progressed | closed as superseded |
-| `security-history-rewrite` | **#27 — OPEN** (verbatim PII git-history purge) | closed on board (dedup); work stays live on #27 |
+| Board row                      | Already tracked by                                     | Board action                                    |
+| ------------------------------ | ------------------------------------------------------ | ----------------------------------------------- |
+| `discord-bot-runtime-bugs`     | **#25 — CLOSED/completed** (fixed in `e8843a6`; `bug`) | closed as dedup; `dispatch_url`→#25             |
+| `dispatchstate-queued-deadend` | **#26 — CLOSED/completed** (fixed in `e8843a6`; `bug`) | closed as dedup; `dispatch_url`→#26             |
+| `security-portal-server-auth`  | #28 — CLOSED/completed                                 | closed as dedup; `dispatch_url`→#28             |
+| `client-facing-portal-route`   | done — `ClientPortalPage` + route ship                 | closed as already-delivered                     |
+| `ops-production-go-live`       | done — ops is in PRODUCTION (deploys from `main`)      | closed as superseded                            |
+| `ops-lead-pipeline-go-live`    | superseded — lead-gen has since progressed             | closed as superseded                            |
+| `security-history-rewrite`     | **#27 — OPEN** (verbatim PII git-history purge)        | closed on board (dedup); work stays live on #27 |
 
 Code confirms #25/#26 are genuinely resolved: no `getOrchSummary` /
 `get_orchestration` tool in `scripts/discord-bot.mjs`, no `dispatchState:"queued"`

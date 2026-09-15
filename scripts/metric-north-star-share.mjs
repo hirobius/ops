@@ -52,6 +52,9 @@ export const REVENUE_PATH_PREFIXES = [
   'lib/outreach/',
   'api/lead-action.ts',
   'src/app/pages/ops/leads/',
+  // Added 2026-09-15 with /ops/pitch: the call sheet is where a built site
+  // becomes a conversation, which is as revenue-path as the generator.
+  'src/app/pages/ops/pitch/',
 ];
 
 /** Starting instrument threshold — see module header. */

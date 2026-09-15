@@ -35,6 +35,10 @@ describe('isRevenuePathFile', () => {
     expect(isRevenuePathFile('lib/leadsboard/foo.mjs')).toBe(false); // not a real prefix match
   });
 
+  it('counts the pitch call sheet — where a built site becomes a conversation', () => {
+    expect(isRevenuePathFile('src/app/pages/ops/pitch/PitchPage.tsx')).toBe(true);
+  });
+
   it('does not match unrelated paths', () => {
     expect(isRevenuePathFile('src/app/pages/ops/tasks/TasksPage.tsx')).toBe(false);
     expect(isRevenuePathFile('scripts/audit-deps.mjs')).toBe(false);
@@ -55,6 +59,7 @@ describe('isRevenuePathFile', () => {
         'lib/outreach/',
         'api/lead-action.ts',
         'src/app/pages/ops/leads/',
+        'src/app/pages/ops/pitch/',
       ]),
     );
   });
