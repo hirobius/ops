@@ -93,3 +93,28 @@ Onboard this repo into the Hirobius fleet. It's a NEW, private client-work repo 
 Guardrails: branch + push; merge to the default branch (status.json must land there for the dashboard). Do NOT commit raw internal planning files (tasks.json, retainer.json, notes.md, brand-audit.json, stack.json) — gitignore them; the issues are the tracker. Never touch .env* or secrets.
 ```
 
+---
+
+<!-- Moved out of docs/ai/HANDOFF.md 2026-09-15: a runbook, not live state,
+     and the always-on steering set was over its 25KB budget (ops#292). -->
+
+## Trigger phrases (manual, one-click/one-phrase — NO cron, #12)
+
+Y6 delegation-interview mechanism: nothing runs on a schedule; these are the
+documented manual triggers instead. Converting any of these to a cron job
+requires an explicit per-item yes from Adrian (standing rule).
+
+- **"scrub my newsletters"** — digest refresh. Any Claude session, said verbatim,
+  executes end-to-end: Gmail read → distill → commit JSON to `src/app/digests/`
+  → then run `node scripts/seed-digest-items.mjs --apply` to import the new
+  file into the `digest_items` store (ops#78 P1 — `/ops/digest` now reads the
+  store, not the JSON glob directly; the seed is idempotent, keyed on
+  `item_key`, so re-running it is always safe). No board button yet (waits on
+  `OPS_AGENT_KEY`); run it by saying the phrase in a session.
+- **Lead sweeps** — no phrase; use the board instead. `/ops/leads` has a
+  saved-sweep selector (`LeadSweepPanel.tsx`) — pick a preset, review the
+  previewed niche×metro pairs + record estimate, then "Run selected" (explicit
+  confirm, hard cap, sequential `/api/pull-leads` calls). Spend-safe: nothing
+  fires on preset-select alone. Outscraper spend is still ON HOLD pending the
+  bad-site thesis validation (see Done-log 2026-07-07) — get an explicit go
+  from Adrian before clicking "Confirm run".

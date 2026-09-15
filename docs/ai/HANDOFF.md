@@ -66,27 +66,6 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
   lockstep) · `docs/ai/DONE-LOG.md` (shipped history) ·
   `docs/ai/REPO-PROCEDURES.md` (repo runbooks).
 
-## Trigger phrases (manual, one-click/one-phrase — NO cron, #12)
-
-Y6 delegation-interview mechanism: nothing runs on a schedule; these are the
-documented manual triggers instead. Converting any of these to a cron job
-requires an explicit per-item yes from Adrian (standing rule).
-
-- **"scrub my newsletters"** — digest refresh. Any Claude session, said verbatim,
-  executes end-to-end: Gmail read → distill → commit JSON to `src/app/digests/`
-  → then run `node scripts/seed-digest-items.mjs --apply` to import the new
-  file into the `digest_items` store (ops#78 P1 — `/ops/digest` now reads the
-  store, not the JSON glob directly; the seed is idempotent, keyed on
-  `item_key`, so re-running it is always safe). No board button yet (waits on
-  `OPS_AGENT_KEY`); run it by saying the phrase in a session.
-- **Lead sweeps** — no phrase; use the board instead. `/ops/leads` has a
-  saved-sweep selector (`LeadSweepPanel.tsx`) — pick a preset, review the
-  previewed niche×metro pairs + record estimate, then "Run selected" (explicit
-  confirm, hard cap, sequential `/api/pull-leads` calls). Spend-safe: nothing
-  fires on preset-select alone. Outscraper spend is still ON HOLD pending the
-  bad-site thesis validation (see Done-log 2026-07-07) — get an explicit go
-  from Adrian before clicking "Confirm run".
-
 ## Adrian's open actions (his court — one-time, not blocked on a session)
 
 - **Run the lilac-insure onboarding prompt** → stands up the client repo to fleet
@@ -108,23 +87,44 @@ requires an explicit per-item yes from Adrian (standing rule).
 
 > Detailed per-issue recommendations for everything open: `docs/ai/BURNDOWN-GAMEPLAN.md`.
 
-1. **Revenue path — #185 (`p0`) → #186.** Both `ralph-ready`, supervised. Review
-   the diffs before merge; do not add `ralph-auto`. Spec: `docs/specs/leads-to-site.md`.
-2. **Adrian's calls, unblocking real work:** #190 (Outscraper details-API spend +
-   endpoint) · #306 (curate gate severity — 16 judgement calls) · #303 / #302 /
-   #296 / #238 (one shared `hirobius/ralph` engine release, not four).
-3. **Guardrail follow-through:** run
-   `node scripts/reconcile-ralph-closures.mjs --apply` once with a real
-   `GITHUB_TOKEN` — likely closes several stale issues immediately (#3, #205,
-   #210, #282 are candidates). Then walk the 8 unpromoted rules with
-   `pnpm guardrail:promote-rule` (wants #300's steering destination first).
-4. **Compliance before outreach:** #35 → #38 → #27, then #9. Hard gate.
-5. **First real run:** pull leads (Access Tech) → generate → eyeball → render →
-   publish. This is the north star; everything above either unblocks it or waits.
+> **Read this before starting anything.** On 2026-09-15 the open-PR count reached
+> six while `main` moved zero times, and the lead funnel still reads
+> `0 contacted`. The failure mode is not capacity — it is that sessions keep
+> opening work instead of landing it. **Land before you build.**
+
+1. **MERGE THE BACKLOG OF OPEN PRs. Nothing else starts until this is done.**
+   In order, because #320 carries the other three's commits and its diff
+   collapses once they land: **#311** (revenue path) → **#312** (guardrails
+   #304/#305) → **#313** (doctrine + steering budget) → **#320**
+   (`/ops/standing`). Separately: **#308** is an open `ralph/*` PR and
+   single-flight means **the loop picks up nothing while it sits** — merge or
+   close it first of all. **#316** came from another session (intake gate) and
+   needs a read before it is merged or closed.
+2. **Contact one lead.** `0 contacted` is the computed break in the chain, and
+   it has been zero since the table existed. Everything upstream is proven:
+   263 sourced, 39 qualified, 3 generated, 2 published. Compliance gates the
+   *scaled* send (#35 → #38 → #27 → #9); **one manual email to one qualified
+   lead is not gated by any of that** and is the only act that moves the funnel
+   past its break.
+3. **Adrian's calls, unblocking real work:** #200 (Stripe — there is no way to
+   take money today) · #306 (curate gate severity) · #303 / #302 / #296 / #238
+   (one shared `hirobius/ralph` engine release, not four).
+4. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
+5. **Guardrail follow-through:** `node scripts/reconcile-ralph-closures.mjs
+   --apply` once with a real `GITHUB_TOKEN` — likely closes several stale issues
+   immediately. Then walk the 8 unpromoted rules (wants #300 first).
 6. **Cutover Part B remainder** — gated on the clients Astro factory being live.
-   `hirobius/clients#10` tracks that repo's cleanup.
 
 ## Parked / known warts
+
+- **`.github/PULL_REQUEST_TEMPLATE.md` is the old HDS one.** Four of the six
+  gates it demands were deleted from ops (`check-manifest-drift`,
+  `check-binding-drift`, `check-source-canon`, `validate-manifest`), and it asks
+  for a `docs/ai/orchestration.json` unit-id that ops does not use. Every PR
+  author either pastes output for scripts that do not exist or silently ticks
+  boxes that do not apply. Not filed as an issue on purpose — the open-issue
+  count is itself part of the problem; fix it in passing on any PR that touches
+  `.github/`.
 
 - **`public/hds-manifest.json` churn**: container builds rebake it (sometimes
   INVALID — drops required fields). Standing order: `git checkout --` it on
