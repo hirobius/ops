@@ -43,11 +43,12 @@ premises in six of the issues examined.
 > instead of drifting. `date:` triggers here fire automatically via
 > `pnpm parked:check`; the betting table (#319) reads that as a standing item.
 
-### Ship tripwire — one lead, one preview_url, one email
+### Ship tripwire — one lead, one preview_url, one contact
 
 - **origin:** ops#321 (OPEN — this one blocks, it does not default)
 - **trigger:** `date: 2026-10-15`
-- **condition:** a row in `leads` with `preview_url` non-null and `status = 'rendered'`, whose URL actually loads, produced through the pipeline, and one email containing it sent.
+- **condition:** a row in `leads` with `preview_url` non-null and `status = 'rendered'`, whose URL actually loads, produced through the pipeline, and that lead **contacted** about it — `contacted_at` set and `contact_channel` recording how.
+- **why not "email":** amended 2026-09-15. Of 39 qualified leads, **1 has an email and 38 have a phone**; the two that already carry a `preview_url` are phone-only. Requiring email would have failed this tripwire for reasons unrelated to the strategy it tests, and getting emails at all means #190 (Outscraper spend) — a purchasing decision. Any channel that reaches a human counts; a phone call tests the demand hypothesis identically.
 - **if it fires:** the factory-first sequencing is falsified. Pre-committed action — stop all infrastructure work for one cycle and close the gap manually, hand-building a site if necessary. A hand-built site tests the demand hypothesis identically.
 - **if it still can't ship after that cycle:** the § Pivot paths below become live.
 
