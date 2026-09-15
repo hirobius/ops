@@ -6,9 +6,20 @@
  * The one-screen answer to "where do things actually stand", built for a phone
  * on the way somewhere. Three questions, in the order they matter:
  *
- *   1. Where does the revenue chain break?  — `chain.ts`, editorial, no fetch.
- *   2. What is blocked on Adrian?           — live, GET /api/tasks?ralph=1.
- *   3. What is the loop doing right now?    — same read: open PRs + queue.
+ *   1. Where does the revenue chain break?
+ *   2. What is blocked on Adrian?
+ *   3. What is the loop doing right now?
+ *
+ * All four sections come from ONE read, GET /api/tasks?fleet=1, and every
+ * verdict on it is derived rather than authored:
+ *
+ *   - The chain is `leads` row counts per stage; `lib/chain/evidence.mjs` turns
+ *     those plus env-var PRESENCE into each stage's state, the break (the first
+ *     stage nothing reached) and the biggest leak. A stage reads `proven` only
+ *     when real leads got through — shipped code never promotes one.
+ *   - The three live lanes come from `listOpenIssues()`, GitHub's
+ *     authenticated-identity feed, so the repo set is DISCOVERED: a repo joins
+ *     this view by existing, across every owner the token can see.
  *
  * Deliberately NOT a task board. /ops/tasks is where work gets moved; this page
  * is read-only and exists so the fleet can be understood without operating it.
@@ -16,11 +27,10 @@
  * capability — #185 sat p0 and unqueued for 64 days, then shipped in two hours
  * once it was labelled (ops#274).
  *
- * The chain never polls; the three live lanes share the Ralph fleet read, which
- * goes straight to GitHub rather than the Supabase task mirror, so nothing here
- * can be stale in the way the mirror can. Pre-token the endpoint 503s and the
- * page renders the named env hint — the chain still renders, because it does
- * not depend on the fetch.
+ * Nothing here can go stale the way a hand-maintained status table does; the
+ * one it replaced had drifted on three separate facts at once. Every lane
+ * reports an error BEFORE any loading copy — see <Lane> for why that order
+ * matters.
  */
 
 import type { CSSProperties, ReactNode } from 'react';
