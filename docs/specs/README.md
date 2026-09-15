@@ -48,5 +48,5 @@ for a one-file fix is pure overhead.
 
 ## Not here
 
-`docs/superpowers/specs/` is **archive** (a 2026-03→05 skill convention). No new
+`docs/archive/superpowers/specs/` is **archive** (a 2026-03→05 skill convention). No new
 files there.

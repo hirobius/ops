@@ -20,6 +20,7 @@ open one only when the task in hand calls for it.
 | `PROMPT_TEMPLATES.md` | You are writing a prompt for one. |
 | `REPO-PROCEDURES.md` | You need a runbook (trigger phrases, release steps). |
 | `DONE-LOG.md` | You need shipped history, or "was this already done?" |
+| `../DECISIONS.md` | You need to know **why** — the four decision records and which is which. |
 | `BURNDOWN-GAMEPLAN.md` | You want open issues clustered with a plan. |
 | `learned-rules.jsonl` | Walking the unpromoted rules (`pnpm guardrail:learned-rules`). |
 | `../ARCHITECTURE.md` | The pipeline's narrative. **Not** its status — that's `/ops/standing`. |
@@ -45,12 +46,13 @@ not read it to get oriented.
 - **📉 north-star share reads 9.1%** (4/44 merged PRs touched the revenue path
   over 14d) against a 20% starting target. Run `pnpm metric:north-star-share`.
   The target is uncalibrated — retune with `--target` once a few windows exist.
-- **🧹 `docs/ai/` went 31 files → 16.** Twelve superseded or orphaned docs moved
-  to `docs/ai/archive/` (four separate May handoffs, two OPERATOR_BRIEFs, the
-  dead agent-heal-log, board-comb, ds-handoff, AI_ORCHESTRATION, MODEL_TIERS,
-  MULTI_AGENT_OVERNIGHT, checks-hooks inventory, ARCHITECTURE_SCRUB). Live
-  pointers repaired. **`docs/` still holds 166 markdown files overall** — the
-  sprawl outside `docs/ai/` is untouched and is its own job.
+- **🧹 Docs consolidated.** `docs/ai/` 31 → 16; `docs/` overall 146 → 122 live,
+  46 archived. Gone to `docs/archive/`: `superpowers/` (17 already-shipped
+  plans), `signal/`, and six dated snapshots. **Nothing deleted** except a
+  Windows `Zone.Identifier` artifact. `docs/DECISIONS.md` is the new index over
+  the four decision records — and flags that `docs/adr/002` and
+  `docs/architecture/ADR-0002` are unrelated decisions that both read as "ADR 2",
+  so always cite the full path.
 
 - **📞 `/ops/pitch` — the call sheet (2026-09-15).** A partner can work the list
   on a phone: `tel:` link, the site in one tap, one-tap stage moves, and a note

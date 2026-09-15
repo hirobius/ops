@@ -70,7 +70,7 @@ issue → Ralph path unchanged. A spec for a one-file fix is pure overhead.
 **Anti-rot rules** — the known failure mode of this repo is documents outliving
 their truth (`HANDOFF.md` is 119 KB against its own "keep it one page" contract;
 `learned-rules.jsonl` is 0 bytes because its writer was deleted with Hermes;
-`docs/superpowers/specs/` stopped in May). So:
+`docs/archive/superpowers/specs/` stopped in May). So:
 
 1. Every spec carries `Status:` (`draft` / `active` / `shipped` / `abandoned`)
    and `Last verified:` at the top.
@@ -83,7 +83,7 @@ their truth (`HANDOFF.md` is 119 KB against its own "keep it one page" contract;
    channel) flagging `active` specs whose issues are all closed, or whose
    `Last verified` is >60 days old. Filed as an issue; not built in the
    strategy session.
-5. `docs/superpowers/specs/` is **archive** — no new files there.
+5. `docs/archive/superpowers/specs/` is **archive** — no new files there.
 
 **What a spec does NOT do.** It does not gate the queue. An epic's slices get
 queued the moment they're written (§3); the spec is context for the agent, not
