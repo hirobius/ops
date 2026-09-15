@@ -36,6 +36,62 @@ premises in six of the issues examined.
 
 ---
 
+## Tripwires — dated, falsifiable, pre-committed
+
+> A tripwire is not work. It is **one measurable condition, one date, and an action
+> decided in advance**. It exists so a strategic question gets answered on a date
+> instead of drifting. `date:` triggers here fire automatically via
+> `pnpm parked:check`; the betting table (#319) reads that as a standing item.
+
+### Ship tripwire — one lead, one preview_url, one email
+
+- **origin:** ops#321 (OPEN — this one blocks, it does not default)
+- **trigger:** `date: 2026-10-15`
+- **condition:** a row in `leads` with `preview_url` non-null and `status = 'rendered'`, whose URL actually loads, produced through the pipeline, and one email containing it sent.
+- **if it fires:** the factory-first sequencing is falsified. Pre-committed action — stop all infrastructure work for one cycle and close the gap manually, hand-building a site if necessary. A hand-built site tests the demand hypothesis identically.
+- **if it still can't ship after that cycle:** the § Pivot paths below become live.
+
+---
+
+## Pivot paths — only if the ship tripwire fails
+
+> Captured 2026-09-15 so the decision isn't invented under pressure. **None of these
+> is a reason to abandon the agency now** — the business hypothesis is untested, not
+> disproven. They exist because a plan made calmly beats one made in a panic.
+>
+> The asymmetry that motivates them: **inbound exists for design-system expertise
+> (Adrian has been approached about DS roles); zero inbound exists for generated SMB
+> sites.** That is the clearest external market signal available.
+
+### Fractional design-system engineering
+
+- **trigger:** `event: the ship tripwire (#321) fires and a manual cycle still produces no sale`
+- **the asset:** HDS — 133 public components (Radix + cva), 361 DTCG tokens, 112 Storybook stories, 34 Figma Code Connect mappings, a multi-tenant token overlay schema, token governance + migration docs, ADRs, published to public npm.
+- **why it's the strongest path:** most candidates show a component library; this shows a _governed pipeline_. Highest expected value, fastest cash, near-zero build.
+- **cheap test available now, no trigger needed:** merge hds#204 so the portfolio repo stops announcing it is stalled, and reply to the existing role approaches purely to learn what they value.
+
+### Publish the guardrail proof-of-firing idea
+
+- **trigger:** `event: an afternoon is free, or the ship tripwire fires`
+- **the asset:** `validate-fixture-proof-of-firing` — every gate ships a violating fixture and a passing one, and is run against both. 49 gates registered under a firing-channel taxonomy.
+- **why:** "how do you know your CI gates actually catch anything" is a real unsolved problem, and this is a genuinely novel answer. Currently invisible, buried in ops.
+- **shape:** one blog post first. If it lands, an OSS library. Not a product.
+
+### Ralph as OSS → consulting pull-through
+
+- **trigger:** `event: the ship tripwire fires, or the guardrail post lands well`
+- **the asset:** `hirobius/Ralph` — autonomous issue→PR→merge loop vendored across 3 repos, with ralph-gate, single-flight, claim refs, a parking taxonomy and an idle watchdog.
+- **why not a product:** Devin, OpenHands, Cursor agents, Claude Code all compete directly. A solo entrant sells nothing there.
+- **why publish anyway:** the differentiator is the **governance**, not the loop — everyone building agent fleets hits exactly those walls. Revenue is indirect, via reputation.
+
+### Writing / teaching the fleet experience
+
+- **trigger:** `event: any of the above is in motion`
+- **the asset:** SIGNAL.md, the decision ledgers, `progress.txt`, the 2026-09 retro findings.
+- **why:** "I ran an autonomous agent fleet for six months, here is what actually broke" is valuable and almost nobody can write it honestly. Slow burn; feeds the paths above.
+
+---
+
 ## Compliance / legal
 
 ### Vanta — SOC 2 / continuous compliance monitoring
