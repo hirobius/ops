@@ -44,11 +44,11 @@ const ALL_ROUTES = [
   // ── Ops ─────────────────────────────────────────────────────────────────────
   '/ops',
   '/ops/leads',
-  '/ops/tasks',
   '/ops/digest',
-  '/ops/projects',
   '/ops/standing',
   '/ops/issues',
+  '/ops/tasks',
+  '/ops/projects',
   '/ops/clients',
   '/ops/clients/lilac-insure',
   '/ops/clients/lilac-insure/report',

@@ -11,11 +11,17 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
 
 ## Now (what is true today)
 
-- **🪟 `/ops/standing` is the whole board, live (2026-09-15).** Five sections:
-  the derived chain, waiting-on-you, in-flight PRs, the ready queue, and now
-  **Backlog** — every remaining open issue across every repo the token sees.
-  Nothing to press. `/ops/tasks` keeps its Supabase mirror and its actions
-  (dispatch, re-queue), but it is no longer the only way to see everything.
+- **🪟 `/ops/standing` is the ONLY fleet surface (2026-09-15).** Six sections:
+  the derived chain, waiting-on-you, in flight, the queue, backlog, and deploys.
+  `/ops/tasks` and `/ops/projects` are gone — both redirect here. Tasks was a
+  Supabase mirror holding **249 rows, 100% GitHub, zero native** — it added a
+  staleness class and a manual Import button and no data. Projects' question was
+  real and is now the Deploys section.
+  **Actions bypass the mirror on purpose:** `queue_on` / `queue_off` /
+  `ralph_requeue` write labels straight to GitHub via `labelIssueDirect`, because
+  Standing lists repos the importer never touched and a mirror-backed action
+  would 404 on exactly those. Queue-from-backlog is the direct fix for the
+  ops#274 finding — #185 sat 64 days because nobody applied one label.
 - **🗑️ The `/ops` Fleet timeline and the recap mandate are retired.** Its three
   JSONL feeds stopped being written in July; the panel was faithfully rendering
   two-month-old rows. **Third dead capture loop found this session** — the decay

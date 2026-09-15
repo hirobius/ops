@@ -1084,3 +1084,124 @@ describe('applyTaskAction — ralph_requeue (injected GitHub port, ops#141)', ()
     expect((result.body as { code: string }).code).toBe('GITHUB_TOKEN_REJECTED');
   });
 });
+
+describe('applyTaskAction — queue_on / queue_off (mirror-free, /ops/standing)', () => {
+  /**
+   * The point of these two: /ops/standing lists issues straight from GitHub's
+   * identity feed, which spans repos the importer has never touched. A
+   * mirror-backed action would 404 on exactly the issues Standing newly
+   * surfaced, so these must never consult Supabase.
+   */
+  it('503s when no port is configured (no GITHUB_TOKEN)', async () => {
+    const { sb } = makeSb();
+    expect(
+      await applyTaskAction(
+        sb,
+        { key: 'github:hirobius/ops#185', action: 'queue_on' },
+        { github: null },
+      ),
+    ).toMatchObject({ status: 503, body: { code: 'ENV_MISSING_GITHUB_TOKEN' } });
+  });
+
+  it('400s on a non-github key rather than falling back to a lookup', async () => {
+    const { sb } = makeSb();
+    const github = { addLabel: async () => ({}), removeLabel: async () => ({}) };
+    expect(
+      await applyTaskAction(sb, { key: 't1', action: 'queue_on' }, { github }),
+    ).toMatchObject({ status: 400 });
+  });
+
+  it('adds ralph-ready for a repo the mirror has never imported', async () => {
+    const { sb } = makeSb();
+    const calls: Array<{ op: string; issueUrl: string; label: string }> = [];
+    const github = {
+      addLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push({ op: 'add', ...i });
+        return {};
+      },
+      removeLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push({ op: 'remove', ...i });
+        return {};
+      },
+    };
+    // adr-eng is outside FLEET_REPOS and has no mirror rows at all.
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:adr-eng/adrian-milsap#22', action: 'queue_on' },
+      { github },
+    );
+    expect(result.status).toBe(200);
+    expect(calls).toEqual([
+      {
+        op: 'add',
+        issueUrl: 'https://github.com/adr-eng/adrian-milsap/issues/22',
+        label: 'ralph-ready',
+      },
+    ]);
+  });
+
+  it('removes ralph-ready on queue_off', async () => {
+    const { sb } = makeSb();
+    const calls: Array<{ op: string; issueUrl: string; label: string }> = [];
+    const github = {
+      addLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push({ op: 'add', ...i });
+        return {};
+      },
+      removeLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push({ op: 'remove', ...i });
+        return {};
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/lilac#3', action: 'queue_off' },
+      { github },
+    );
+    expect(result.status).toBe(200);
+    expect(calls).toEqual([
+      {
+        op: 'remove',
+        issueUrl: 'https://github.com/hirobius/lilac/issues/3',
+        label: 'ralph-ready',
+      },
+    ]);
+  });
+
+  it('surfaces a port failure as a named error, never a silent no-op', async () => {
+    const { sb } = makeSb();
+    const github = {
+      addLabel: async () => {
+        throw new Error('network unreachable');
+      },
+      removeLabel: async () => ({}),
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#185', action: 'queue_on' },
+      { github },
+    );
+    expect(result.status).toBeGreaterThanOrEqual(500);
+    expect((result.body as { code?: string }).code).toBe('GITHUB_LABEL_FAILED');
+  });
+
+  // A rejected token is a different problem from a failed label write, and the
+  // message has to say so — Adrian's standing rule is that a secret-backed
+  // failure names the variable and the fix.
+  it('distinguishes a rejected token from a generic label failure', async () => {
+    const { sb } = makeSb();
+    const github = {
+      addLabel: async () => {
+        throw new Error('GitHub returned 403. GITHUB_TOKEN is expired, revoked, or missing…');
+      },
+      removeLabel: async () => ({}),
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#185', action: 'queue_on' },
+      { github },
+    );
+    expect((result.body as { code?: string }).code).toBe('GITHUB_TOKEN_REJECTED');
+    expect((result.body as { error: string }).error).toMatch(/GITHUB_TOKEN/);
+  });
+});

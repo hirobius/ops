@@ -186,3 +186,85 @@ function isFleetStatus(v: unknown): v is FleetStatus {
 export function shortRepo(full: string): string {
   return full.slice(full.indexOf('/') + 1);
 }
+
+/* ── deploy state: GET /api/projects ─────────────────────────────────────── */
+
+export interface DeployProject {
+  id: string;
+  name: string;
+  latestDeployment: {
+    state: string;
+    url: string | null;
+    createdAt: number | null;
+    target: string | null;
+  } | null;
+}
+
+/**
+ * Deploy state per Vercel project. Folded onto Standing so "where do things
+ * stand" is one page rather than three: issues answer what the work is, this
+ * answers whether what shipped is actually up.
+ *
+ * Same fail-loud contract as the fleet read — a 200 that is not the payload is
+ * an error, never an empty list that reads as "no projects".
+ */
+export async function fetchDeploys(signal: AbortSignal): Promise<DeployProject[]> {
+  const res = await fetch('/api/projects', { signal });
+  const body: unknown = await res.json().catch(() => null);
+  if (!res.ok) {
+    const message =
+      isRecord(body) && typeof body['error'] === 'string'
+        ? (body['error'] as string)
+        : `HTTP ${res.status}`;
+    throw new Error(message);
+  }
+  if (!isRecord(body) || !Array.isArray(body['projects'])) {
+    throw new Error(
+      'GET /api/projects returned 200 with a body that is not the projects payload.',
+    );
+  }
+  return body['projects'] as DeployProject[];
+}
+
+/* ── acting on an issue, straight to GitHub ──────────────────────────────── */
+
+export type StandingAction = 'queue_on' | 'queue_off' | 'ralph_requeue';
+
+/** `error` is present exactly when `ok` is false. */
+export interface ActionResult {
+  ok: boolean;
+  error?: string;
+}
+
+/**
+ * One-tap issue actions. The key is built from repo + number rather than looked
+ * up, because these deliberately bypass the Supabase mirror — Standing lists
+ * repos the importer has never touched, and a mirror-backed action would fail
+ * on exactly those (lib/tasks/actions.mjs::labelIssueDirect).
+ */
+export async function actOnIssue(
+  repo: string,
+  number: number,
+  action: StandingAction,
+): Promise<ActionResult> {
+  try {
+    const res = await fetch('/api/task-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: `github:${repo}#${number}`, action, actor: 'standing' }),
+    });
+    const body: unknown = await res.json().catch(() => null);
+    if (!res.ok) {
+      return {
+        ok: false,
+        error:
+          isRecord(body) && typeof body['error'] === 'string'
+            ? (body['error'] as string)
+            : `HTTP ${res.status}`,
+      };
+    }
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}

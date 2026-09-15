@@ -12,9 +12,7 @@ const ClientDashboardPage = lazy(() => import('./pages/ops/ClientDashboardPage')
 const ClientReportPage = lazy(() => import('./pages/ops/ClientReportPage'));
 const ClientBrandAuditPage = lazy(() => import('./pages/ops/ClientBrandAuditPage'));
 const LeadsPage = lazy(() => import('./pages/ops/leads/LeadsPage'));
-const TasksPage = lazy(() => import('./pages/ops/tasks/TasksPage'));
 const DigestPage = lazy(() => import('./pages/ops/digest/DigestPage'));
-const ProjectsPage = lazy(() => import('./pages/ops/projects/ProjectsPage'));
 const StandingPage = lazy(() => import('./pages/ops/standing/StandingPage'));
 
 // ── Client portal — public token-gated route at /c/:slug ─────────────────────
@@ -68,14 +66,19 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <LazyHDS Page={AgenticOSPage} /> },
           { path: 'leads', element: <LazyHDS Page={LeadsPage} /> },
-          { path: 'tasks', element: <LazyHDS Page={TasksPage} /> },
+          // /ops/tasks + /ops/projects retired 2026-09-15 into /ops/standing.
+          // Tasks was a Supabase mirror of GitHub holding zero rows GitHub did
+          // not already have, so it added a staleness class and a manual Import
+          // button and no data. Projects answered a real question and now does
+          // so as Standing's Deploys section.
+          { path: 'tasks', element: <Navigate to="/ops/standing" replace /> },
           { path: 'digest', element: <LazyHDS Page={DigestPage} /> },
-          { path: 'projects', element: <LazyHDS Page={ProjectsPage} /> },
+          { path: 'projects', element: <Navigate to="/ops/standing" replace /> },
           { path: 'standing', element: <LazyHDS Page={StandingPage} /> },
           // /ops/issues retired 2026-07-09 (#52): consolidated into /ops/tasks —
           // the importer already pulls the same cross-repo issue feed, and the
           // multi-select "Copy refs" action moved onto the tasks board.
-          { path: 'issues', element: <Navigate to="/ops/tasks" replace /> },
+          { path: 'issues', element: <Navigate to="/ops/standing" replace /> },
           { path: 'clients', element: <LazyHDS Page={ClientsIndexPage} /> },
           { path: 'clients/:slug', element: <LazyHDS Page={ClientDashboardPage} /> },
           { path: 'clients/:slug/report', element: <LazyHDS Page={ClientReportPage} /> },
