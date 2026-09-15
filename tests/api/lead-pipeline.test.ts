@@ -10,6 +10,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../../lib/agent/index.mjs', () => ({ runPipeline: vi.fn() }));
 vi.mock('../../lib/duda/index.mjs', () => ({ buildSite: vi.fn(), publishSite: vi.fn() }));
+// Stock-photo fill (ops#196) runs inside generateLeadSite for any lead without
+// photos. Mocked to "no key" so these cases stay hermetic: unmocked, the result
+// would depend on whether PEXELS_API_KEY happens to be set in the environment,
+// and a machine that has it set would make a live network call from a unit test.
+// The class is declared INSIDE the factory: vi.mock is hoisted above top-level
+// declarations, so a class defined outside is not yet initialized when it runs.
+vi.mock('../../lib/photos/pexels.mjs', () => {
+  class MissingPexelsKeyError extends Error {}
+  return {
+    searchStockPhotos: vi.fn().mockRejectedValue(new MissingPexelsKeyError('no key in tests')),
+    tradeQuery: () => 'stub query',
+    MissingPexelsKeyError,
+  };
+});
 
 import { runPipeline } from '../../lib/agent/index.mjs';
 import { buildSite, publishSite } from '../../lib/duda/index.mjs';
@@ -92,7 +106,14 @@ describe('generateLeadSite', () => {
     vi.mocked(runPipeline).mockResolvedValueOnce(PIPELINE_RESULT);
     const { sb, updates } = makeSb({ lead: LEAD });
     const result = await generateLeadSite(sb, 'lead-1');
-    expect(result).toEqual({ status: 200, body: { ok: true, score: 4.5, pass: true } });
+    // photosNote is part of the contract since ops#196: this LEAD has no photos
+    // and the mocked Pexels reports no key, so generation proceeds with
+    // placeholder imagery AND says why. Asserted exactly rather than loosened to
+    // toMatchObject, so an unexpected extra field still fails the test.
+    expect(result).toEqual({
+      status: 200,
+      body: { ok: true, score: 4.5, pass: true, photosNote: 'no key in tests' },
+    });
     expect(updates[0]).toEqual({ status: 'generating' });
     // judge 1–5 is persisted on the board's 0–100 scale (×20).
     expect(updates[1]).toMatchObject({ status: 'scored', eval_score: 90 });

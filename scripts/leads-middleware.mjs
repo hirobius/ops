@@ -12,8 +12,8 @@
  *   POST /api/pull-leads     { niche, metro, count? }        → { inserted }
  *   POST /api/lead-action    { leadId, action, previewUrl? } → per-action result
  *     action 'generate' → { ok, score, pass }
- *     action 'build'    → { ok, preview_url }
- *     action 'publish'  → { ok, live_url }
+ *     action 'build'    → { ok, preview_url }   [DEPRECATED — retired Duda path, ops#187]
+ *     action 'publish'  → { ok, live_url }      [DEPRECATED — retired Duda path, ops#187]
  *     action 'render'   → { ok, rendered, slug, preset, configFile, commands }
  *   GET  /api/leads          ?limit=<n>                      → { leads }
  *
