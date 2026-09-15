@@ -368,7 +368,7 @@ proposed decision.
 ## Template 6: autonomous-burndown
 
 **Self-pacing loop that drains the orchestration queue. Use this for overnight
-multi-window dispatch.** Pairs with `docs/ai/MULTI_AGENT_OVERNIGHT.md` (full
+multi-window dispatch.** Pairs with `docs/ai/archive/MULTI_AGENT_OVERNIGHT.md` (full
 protocol) and `scripts/orchestration-watcher.mjs` (must be running before
 agents dispatch).
 
@@ -409,7 +409,7 @@ Session id: {{session-id}}   # e.g. session:fresh-2026-05-02-w5-a3
 
 CONTEXT:
 You are one of N parallel Claude agents draining the orchestration queue
-overnight. The full protocol lives in docs/ai/MULTI_AGENT_OVERNIGHT.md —
+overnight. The full protocol lives in docs/ai/archive/MULTI_AGENT_OVERNIGHT.md —
 read it once if you have not. Coordination is via docs/ai/ready-queue.json,
 maintained by scripts/orchestration-watcher.mjs (assume it is running).
 
@@ -529,13 +529,13 @@ Begin.
 
 ## Quick reference
 
-| Template | Model | Commits? | Primary output |
-|---|---|---|---|
-| `research-and-report` | sonnet / haiku | No | Bulleted report |
-| `deletion-class` | sonnet (required) | Yes | Deleted files |
-| `additive` | haiku | Yes | Added/scrubbed files |
-| `architectural-opus` | opus | Yes | Code + decision doc |
-| `plan-only-report` | sonnet / opus | Yes (ADR file only) | ADR at `docs/architecture/` |
-| `autonomous-burndown` | per-unit (auto) | Yes (loop) | Drained queue + ledger entries |
+| Template              | Model             | Commits?            | Primary output                 |
+| --------------------- | ----------------- | ------------------- | ------------------------------ |
+| `research-and-report` | sonnet / haiku    | No                  | Bulleted report                |
+| `deletion-class`      | sonnet (required) | Yes                 | Deleted files                  |
+| `additive`            | haiku             | Yes                 | Added/scrubbed files           |
+| `architectural-opus`  | opus              | Yes                 | Code + decision doc            |
+| `plan-only-report`    | sonnet / opus     | Yes (ADR file only) | ADR at `docs/architecture/`    |
+| `autonomous-burndown` | per-unit (auto)   | Yes (loop)          | Drained queue + ledger entries |
 
 All 6 templates embed: universal preamble · pre-commit gates · `git reset --hard fix/ui-pipeline` first action · no-bulk-lint:fix rule (AGENT_GUIDELINES.md §3) · commit format · no-push rule.

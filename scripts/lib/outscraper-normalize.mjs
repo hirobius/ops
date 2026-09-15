@@ -52,8 +52,44 @@ const BUILDER_HOSTS = [
 ];
 
 // Scoring weights. For an OPERATING business the levers sum to a 0–100 ceiling:
-// web-weakness (45) + social-proof (30) + operational (15) + owner-verified (10).
-const WEB_WEAKNESS = { none: 45, 'social-only': 34, builder: 20, custom: 4 };
+// presence-opportunity (45) + social-proof (30) + operational (15) + owner-verified (10).
+//
+// PRESENCE_OPPORTUNITY answers "how good a prospect does their current web
+// presence make them?" — which is NOT the same question as "how bad is their
+// web presence?", and the difference is the whole point of the 2026-09-15
+// reweight.
+//
+// The original weighting (none: 45, social-only: 34, builder: 20, custom: 4)
+// ranked need alone, and so ranked the HARDEST sells highest. A business
+// operating for years with no website has had every chance to buy one and has
+// revealed a preference. A business on Wix or Squarespace pays for a website
+// every single month — proven buyer, existing budget line, and switching costs
+// they already accepted once.
+//
+// It also had a provable defect: the `custom` ceiling was
+// 4 + 30 + 10 + 15 = 59 against a QUALIFIED_LEAD_SCORE of 60, so a business
+// with its own domain could NEVER be marked qualified — not with 1,000 reviews,
+// not with 100,000. That silently orphaned the entire redesign play: migration
+// 0006_site_quality.sql, scripts/audit-sites.mjs and every PageSpeed audit fed a
+// column that could not influence who got contacted.
+//
+// The fix: `custom` is no longer a flat penalty. Its opportunity is a function
+// of how bad the site actually is, read from site_quality_score (0–100, INVERSE
+// — higher means worse). An unaudited custom site keeps the low base and stays
+// out of outreach, which is the honest default: we do not know, so we do not
+// email.
+const PRESENCE_OPPORTUNITY = {
+  none: 30, // real need, but an unproven buyer — keep in the pool, rank below
+  'social-only': 34, // needs one AND demonstrably cares about being findable
+  builder: 45, // PROVEN BUYER: already pays monthly for exactly this
+  custom: 4, // base only — see CUSTOM_QUALITY_MAX below
+};
+
+// How much a custom-domain site's opportunity can grow with how bad it is.
+// PRESENCE_OPPORTUNITY.custom (4) + 41 = 45, matching the `builder` ceiling:
+// a truly terrible custom site is as good a prospect as a Wix site, and for the
+// same reason — they have already paid for a website once.
+const CUSTOM_QUALITY_MAX = 41;
 const SOCIAL_PROOF_MAX = 30;
 const OPERATIONAL_POINTS = 15;
 const OWNER_VERIFIED_POINTS = 10;
@@ -117,13 +153,44 @@ export function isOperational(businessStatus) {
  * Compute the 0–100 lead score from the derived signals. Pure arithmetic over
  * the four levers so a reader can see exactly why a prospect ranks where it does.
  */
-export function scoreProspect({ sitePresence, reviews, operational, ownerVerified }) {
-  const web = WEB_WEAKNESS[sitePresence] ?? WEB_WEAKNESS.custom;
+export function scoreProspect({
+  sitePresence,
+  reviews,
+  operational,
+  ownerVerified,
+  siteQualityScore,
+}) {
+  const presence = presenceOpportunityPoints(sitePresence, siteQualityScore);
   const social = socialProofPoints(reviews);
   const owner = ownerVerified ? OWNER_VERIFIED_POINTS : 0;
-  const base = web + social + owner; // 0..85
+  const base = presence + social + owner; // 0..85
   if (!operational) return Math.round(base * NON_OPERATIONAL_FACTOR);
   return base + OPERATIONAL_POINTS; // 0..100
+}
+
+/**
+ * Presence -> 0..45 opportunity points.
+ *
+ * `custom` is the only presence type whose score depends on a second input: a
+ * custom domain tells us they bought a website, not whether it is any good.
+ * siteQualityScore (supabase/migrations/0006, written by scripts/audit-sites.mjs)
+ * is 0–100 INVERSE — higher means a worse site means a better redesign prospect.
+ *
+ * A null/undefined quality score means "not audited yet", which scores the bare
+ * base and keeps them out of outreach until someone actually looks. Audit first,
+ * then email — never the other way round.
+ *
+ * @param {string} sitePresence
+ * @param {number|null|undefined} siteQualityScore
+ * @returns {number}
+ */
+export function presenceOpportunityPoints(sitePresence, siteQualityScore) {
+  const base = PRESENCE_OPPORTUNITY[sitePresence] ?? PRESENCE_OPPORTUNITY.custom;
+  if (sitePresence !== 'custom') return base;
+  const q = Number(siteQualityScore);
+  if (!Number.isFinite(q)) return base; // unaudited — we don't know, so we don't email
+  const clamped = Math.min(100, Math.max(0, q));
+  return base + Math.round((clamped / 100) * CUSTOM_QUALITY_MAX);
 }
 
 // ── buildability scoring ─────────────────────────────────────────────────────
@@ -248,7 +315,10 @@ export function normalizePlace(place = {}) {
   const photos = mainPhoto ? [mainPhoto] : []; // search-v3 gives one photo + a count
   const subtypesRaw = pick(place, 'subtypes', 'type', 'category');
   const types = subtypesRaw
-    ? String(subtypesRaw).split(',').map((s) => s.trim()).filter(Boolean)
+    ? String(subtypesRaw)
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
     : [];
   const orderLinks = Array.isArray(place.order_links) ? place.order_links.filter(Boolean) : [];
   const cta = String(pick(place, 'booking_appointment_link') ?? '').trim() || (orderLinks[0] ?? '');
@@ -359,15 +429,14 @@ export function normalizeResponse(data) {
   const prospects = places
     .filter((p) => p && (p.name || p.place_id || p.google_id))
     .map(normalizePlace);
-  return dedupeProspects(prospects).sort(
-    (a, b) => b.signals.leadScore - a.signals.leadScore,
-  );
+  return dedupeProspects(prospects).sort((a, b) => b.signals.leadScore - a.signals.leadScore);
 }
 
 export const _internal = {
   SOCIAL_HOSTS,
   BUILDER_HOSTS,
-  WEB_WEAKNESS,
+  PRESENCE_OPPORTUNITY,
+  CUSTOM_QUALITY_MAX,
   SOCIAL_PROOF_MIN_REVIEWS,
   BUILD_WEIGHTS,
 };

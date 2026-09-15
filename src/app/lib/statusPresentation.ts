@@ -12,7 +12,7 @@
  * Roadmap), so merging them would change how those screens render. Left as-is.
  *
  * `BadgeTone` mirrors the design system's Badge `tone` prop. The DS doesn't export
- * that union yet (~12 ops files redeclare it by hand) — see docs/ai/ds-handoff.md;
+ * that union yet (~12 ops files redeclare it by hand) — see docs/ai/archive/ds-handoff.md;
  * once the DS exports it, import it from there and drop this local copy.
  */
 export type BadgeTone = 'neutral' | 'info' | 'success' | 'danger' | 'warning';
@@ -85,7 +85,10 @@ export function statusTone(status: string | undefined): BadgeTone {
 }
 
 /** Human label for a status — operator wording by default, client wording on request. */
-export function statusLabel(status: string | undefined, audience: StatusAudience = 'operator'): string {
+export function statusLabel(
+  status: string | undefined,
+  audience: StatusAudience = 'operator',
+): string {
   const table = audience === 'client' ? CLIENT_LABEL : OPERATOR_LABEL;
   return table[status ?? ''] ?? status ?? '—';
 }

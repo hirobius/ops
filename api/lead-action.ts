@@ -97,8 +97,7 @@ export async function leadActionHandler(
     case 'publish':
       return publishLeadSite(sb, leadId);
     case 'render': {
-      const previewUrl =
-        typeof body?.previewUrl === 'string' ? body.previewUrl.trim() : '';
+      const previewUrl = typeof body?.previewUrl === 'string' ? body.previewUrl.trim() : '';
       if (previewUrl && !/^https?:\/\//.test(previewUrl)) {
         return { status: 400, body: { error: 'previewUrl must be an http(s) URL' } };
       }

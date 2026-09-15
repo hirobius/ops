@@ -1,6 +1,6 @@
 # Hirobius frontier-engineering doctrine
 
-> How *we* do frontier engineering. Decided in the 2026-09-14 strategy session
+> How _we_ do frontier engineering. Decided in the 2026-09-14 strategy session
 > (ops#274), against Kiro/AWS's "frontier engineering" framing.
 > Owner: Adrian. Sessions follow it; they don't quietly amend it.
 
@@ -11,22 +11,22 @@ gates. What we lack is **direction discipline**: on 2026-09-14 the loop merged 1
 PRs of dead-code cleanup while the `p0` that makes money (#185, leads → site
 render) sat 64 days untouched, immaculately specified and simply never queued.
 So our doctrine puts its weight on **routing and boundaries**, not on ceremony.
-Specs are mandatory for epics; the *queue rule* is what makes them matter.
+Specs are mandatory for epics; the _queue rule_ is what makes them matter.
 
 ## 1. What we took from Kiro, and what we rejected
 
 Kiro's frontier-engineering pillars, scored honestly against us:
 
-| Kiro principle | Us | Verdict |
-|---|---|---|
-| Spec-driven development (requirements → design → tasks) | Issues-as-specs, no design step | **Adopt the design step, not the file count** (§2) |
-| Agent steering files | `CLAUDE.md` + `docs/ai/*` + guardrail registry | **Have it — and it's obese** (§4) |
-| Expand autonomous surface area | Ralph loop, single-flight, auto-merge | **Have it — mis-aimed** (§3) |
-| Trust the boundaries, not the agent | Gate + registry + labels | **Have it; upgrade labels → boundaries** (§5) |
-| Execution is cheap, direction is everything | — | **Our actual gap** (§3) |
-| Treat code as disposable | We preserve everything | **Adopt, for ops only** (§6) |
-| Continuously tune your setup | `learned-rules.jsonl` is 0 bytes | **Adopt** (§4) |
-| Multi-surface, same agent | CLI + web + remote, all Claude | Have it |
+| Kiro principle                                          | Us                                             | Verdict                                            |
+| ------------------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
+| Spec-driven development (requirements → design → tasks) | Issues-as-specs, no design step                | **Adopt the design step, not the file count** (§2) |
+| Agent steering files                                    | `CLAUDE.md` + `docs/ai/*` + guardrail registry | **Have it — and it's obese** (§4)                  |
+| Expand autonomous surface area                          | Ralph loop, single-flight, auto-merge          | **Have it — mis-aimed** (§3)                       |
+| Trust the boundaries, not the agent                     | Gate + registry + labels                       | **Have it; upgrade labels → boundaries** (§5)      |
+| Execution is cheap, direction is everything             | —                                              | **Our actual gap** (§3)                            |
+| Treat code as disposable                                | We preserve everything                         | **Adopt, for ops only** (§6)                       |
+| Continuously tune your setup                            | `learned-rules.jsonl` is 0 bytes               | **Adopt** (§4)                                     |
+| Multi-surface, same agent                               | CLI + web + remote, all Claude                 | Have it                                            |
 
 **Rejected outright: Kiro's productivity metrics.** "556 commits vs 96" and
 "median 4.5× lift" are volume measures. We would have scored superbly on both on
@@ -42,20 +42,20 @@ aim just accelerates entropy cleanup.
 
 **Decided: one file per epic.** (First decided as Kiro's full three-file triad,
 then collapsed the same day — see the change log. What was load-bearing in the
-triad was the *design step*, not the file count.)
+triad was the _design step_, not the file count.)
 
 Location: **`docs/specs/<epic-slug>.md`** in the repo that owns the code, with
 these sections:
 
-| Section | What it carries |
-|---|---|
-| Outcome | What's true when this ships, in business terms + the north-star test |
-| Acceptance criteria | The checklist, out-of-scope, and the invariants that hold throughout |
-| Current state | What exists today, with `file:line` references |
-| Target shape | Seams, data flow, contracts |
+| Section                   | What it carries                                                        |
+| ------------------------- | ---------------------------------------------------------------------- |
+| Outcome                   | What's true when this ships, in business terms + the north-star test   |
+| Acceptance criteria       | The checklist, out-of-scope, and the invariants that hold throughout   |
+| Current state             | What exists today, with `file:line` references                         |
+| Target shape              | Seams, data flow, contracts                                            |
 | **Alternatives rejected** | **The reason this document exists** — the step we historically skipped |
-| Risks | What could go wrong, and what catches it |
-| Tasks | Dependency-ordered slices, one issue / one PR each, with queue posture |
+| Risks                     | What could go wrong, and what catches it                               |
+| Tasks                     | Dependency-ordered slices, one issue / one PR each, with queue posture |
 
 Cross-repo epics live in **ops** with links out. `docs/specs/_template.md` is the
 skeleton.
@@ -70,7 +70,7 @@ issue → Ralph path unchanged. A spec for a one-file fix is pure overhead.
 **Anti-rot rules** — the known failure mode of this repo is documents outliving
 their truth (`HANDOFF.md` is 119 KB against its own "keep it one page" contract;
 `learned-rules.jsonl` is 0 bytes because its writer was deleted with Hermes;
-`docs/superpowers/specs/` stopped in May). So:
+`docs/archive/superpowers/specs/` stopped in May). So:
 
 1. Every spec carries `Status:` (`draft` / `active` / `shipped` / `abandoned`)
    and `Last verified:` at the top.
@@ -83,7 +83,7 @@ their truth (`HANDOFF.md` is 119 KB against its own "keep it one page" contract;
    channel) flagging `active` specs whose issues are all closed, or whose
    `Last verified` is >60 days old. Filed as an issue; not built in the
    strategy session.
-5. `docs/superpowers/specs/` is **archive** — no new files there.
+5. `docs/archive/superpowers/specs/` is **archive** — no new files there.
 
 **What a spec does NOT do.** It does not gate the queue. An epic's slices get
 queued the moment they're written (§3); the spec is context for the agent, not
@@ -103,13 +103,13 @@ Therefore:
   same gesture that files it. Leaving it unlabelled is a decision that must be
   stated on the issue ("not queued because X"), never a default.
 - **North-star share is checked, not assumed** (§7). A rolling window with zero
-  revenue-path merges is a red flag on the *queue*, not on the loop.
+  revenue-path merges is a red flag on the _queue_, not on the loop.
 - **The loop starving is a routing alarm, not an idle state.** As of
   2026-09-14, 1 of 57 open ops issues carried `ralph-ready`. When the ready pool
   drops below ~3, the next session's first job is to refill it from the
   north-star path — not from cluster-F chores.
 - **A parked issue is a context gap, not a rejection.** Where the loop parks for
-  a missing DoD checklist, the fix is to have it *draft* the checklist for a
+  a missing DoD checklist, the fix is to have it _draft_ the checklist for a
   thumbs-up, not to bounce the issue back to the human queue. (Follow-up issue.)
 
 ## 4. Steering: a budget, enforced
@@ -131,7 +131,7 @@ The rule:
   writing prompts, specs when working their epic).
 - **Enforced by a registry gate**, so it cannot silently regrow — which is
   exactly how it reached 119 KB. Advisory first, blocking once clean.
-- `status.json`'s `headline` is a *headline*. Its history belongs in the log
+- `status.json`'s `headline` is a _headline_. Its history belongs in the log
   file, not in a single 6,000-word string that every agent loads.
 
 **Continuous tuning.** `docs/ai/learned-rules.jsonl` is 0 bytes — not because we
@@ -147,7 +147,7 @@ comment on every failure (`ralph-attempt-failed`, `🅿️ Ralph parked this iss
 the model's own `ralph-blocked:`). The fix is therefore a **reader**, harvesting
 those pairs retroactively (#298), not an engine change. The highest-value signal
 is the **pair**: the loop's verdict plus the human's recovery comment saying what
-actually broke. And note *why* Hermes produced junk rules — it ran its post-mortem
+actually broke. And note _why_ Hermes produced junk rules — it ran its post-mortem
 on task **completion**, so it distilled task trivia. Trigger on **failure**.
 Sessions that hit a context gap the steering should have prevented append one line.
 
@@ -166,7 +166,7 @@ So:
    living inside a process dies with that process and leaves the artifact on disk
    looking fine.
 2. **Every capture pipeline ships a liveness check.** A gate that fails when the
-   pipeline produced nothing in N days *while the source events did occur*. The
+   pipeline produced nothing in N days _while the source events did occur_. The
    second clause is load-bearing: a gate that fires during a genuinely quiet
    period gets ignored within a week.
 3. **Surface the count where a human already passes.** A store that fills
@@ -186,14 +186,14 @@ and the difference only shows up months later.
 - Secrets: agents never read or write `.env*`.
 - History rewrites / force-push on shared branches.
 
-These are *boundaries*, not preferences. They hold regardless of how good agent
+These are _boundaries_, not preferences. They hold regardless of how good agent
 context gets, because their failure mode is unrecoverable (a fabricated detail on
 a client's live site, a real send, a leaked key).
 
-**Friction, replaceable with a boundary** — per Kiro's *trust the boundaries, not
-the agent*:
+**Friction, replaceable with a boundary** — per Kiro's _trust the boundaries, not
+the agent_:
 
-- **Per-issue `ralph-auto` → path allowlist** (ops#238). *Decided 2026-09-14:*
+- **Per-issue `ralph-auto` → path allowlist** (ops#238). _Decided 2026-09-14:_
   auto-merge becomes the default posture; manual approval is required only for
   paths touching generation, client PII, or billing. A label you always apply is
   approval theatre; a path rule cannot be forgotten. Implementation note: this is
