@@ -214,7 +214,13 @@ export default function StandingPage() {
           <ul style={s.list}>
             {blocked.slice(0, SHOWN).map((b: FleetIssue) => (
               <li key={`${b.repo}#${b.number}`} style={s.row}>
-                <a href={b.url} target="_blank" rel="noreferrer" style={s.rowLink}>
+                <a
+                  href={b.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hds-focus"
+                  style={s.rowLink}
+                >
                   <span style={s.num}>#{b.number}</span>
                   <span style={s.title}>{b.title}</span>
                 </a>
@@ -261,7 +267,13 @@ export default function StandingPage() {
           <ul style={s.list}>
             {prs.slice(0, SHOWN).map((pr) => (
               <li key={`${pr.repo}#${pr.number}`} style={s.row}>
-                <a href={pr.url} target="_blank" rel="noreferrer" style={s.rowLink}>
+                <a
+                  href={pr.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hds-focus"
+                  style={s.rowLink}
+                >
                   <span style={s.num}>#{pr.number}</span>
                   <span style={s.title}>{pr.title}</span>
                 </a>
@@ -309,6 +321,7 @@ export default function StandingPage() {
                         href={`https://${d.url}`}
                         target="_blank"
                         rel="noreferrer"
+                        className="hds-focus"
                         style={s.issueRef}
                       >
                         open
@@ -348,6 +361,7 @@ export default function StandingPage() {
                 href={q.url}
                 target="_blank"
                 rel="noreferrer"
+                className="hds-focus"
                 style={s.chip}
                 title={q.title}
               >
@@ -378,7 +392,13 @@ export default function StandingPage() {
           <ul style={s.list}>
             {backlog.slice(0, BACKLOG_SHOWN).map((b: FleetIssue) => (
               <li key={`${b.repo}#${b.number}`} style={s.row}>
-                <a href={b.url} target="_blank" rel="noreferrer" style={s.rowLink}>
+                <a
+                  href={b.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hds-focus"
+                  style={s.rowLink}
+                >
                   <span style={s.num}>#{b.number}</span>
                   <span style={s.title}>{b.title}</span>
                 </a>
@@ -486,6 +506,7 @@ function ChainRow({ link, total, isBreak }: { link: ChainLink; total: number; is
                 href={`https://github.com/hirobius/ops/issues/${n}`}
                 target="_blank"
                 rel="noreferrer"
+                className="hds-focus"
                 style={s.issueRef}
               >
                 #{n}

@@ -53,7 +53,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 - **Guardrail registry:** `docs/guardrails/registry.json` — every `scripts/check-*.mjs` / `audit-*.mjs` gate with its `firingChannel`; `validate-guardrail-registry` keeps registry ↔ scripts consistent.
 - **On-demand context (NOT loaded by default — read when the task calls for it):**
   `docs/ai/AGENT_GUIDELINES.md` (dispatching) · `docs/ai/PROMPT_TEMPLATES.md` (writing
-  prompts) · `docs/specs/<epic>.md` (working an epic) · `docs/ai/DONE-LOG.md` (shipped
+  prompts) · `docs/specs/README.md` (working an epic) · `docs/ai/DONE-LOG.md` (shipped
   history) · `docs/ai/REPO-PROCEDURES.md` (repo runbooks) · `docs/ai/FRONTIER-DOCTRINE.md`
   (how we work). The always-on set is capped by `scripts/check-steering-budget.mjs` —
   add to `docs/guardrails/steering-budget.json` only deliberately (ops#292).

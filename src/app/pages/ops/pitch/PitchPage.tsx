@@ -255,14 +255,20 @@ export default function PitchPage() {
 
                 <div style={s.actions}>
                   {lead.phone ? (
-                    <a href={`tel:${lead.phone}`} style={s.callBtn}>
+                    <a href={`tel:${lead.phone}`} className="hds-focus" style={s.callBtn}>
                       Call {lead.phone}
                     </a>
                   ) : (
                     <span style={s.noPhone}>no phone on file</span>
                   )}
                   {lead.preview_url ? (
-                    <a href={lead.preview_url} target="_blank" rel="noreferrer" style={s.siteBtn}>
+                    <a
+                      href={lead.preview_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hds-focus"
+                      style={s.siteBtn}
+                    >
                       Their site
                     </a>
                   ) : null}
