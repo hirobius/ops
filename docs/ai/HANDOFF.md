@@ -11,16 +11,17 @@ _Last updated: 2026-09-14 — full shipped history in `docs/ai/DONE-LOG.md`._
 
 ## Now (what is true today)
 
-- **🪟 `/ops/standing` — the one-screen fleet read (2026-09-15).** Revenue chain
-  (from `standing/chain.ts`, now the THIRD lockstep rendering of the
-  ARCHITECTURE gap-map) + three live lanes off `GET /api/tasks?fleet=1`. **Repo
-  set is DISCOVERED, not configured** — `listOpenIssues()` spans every repo the
-  token sees across `hirobius` + `adr-eng`, so a new repo appears on its own;
-  `?ralph=1`'s hardcoded FLEET_REPOS stays for the Tasks panel's wedge badges.
-  One PR search covers all owners, so cost is flat in repo count. No new Vercel
-  function (at the 12 cap); `?fleet=1` has a dev mirror, `?ralph=1` does not.
-  Fail-loud: a 200 that isn't the payload now rejects instead of rendering as
-  "nothing is waiting on you".
+- **🪟 `/ops/standing` — the fleet read, all of it derived (2026-09-15).**
+  Repos are DISCOVERED (`listOpenIssues()` spans every repo the token sees across
+  `hirobius` + `adr-eng`; one PR search covers all owners, so cost is flat in repo
+  count). The chain is derived too: `leadFunnel` counts the `leads` table per
+  stage and `lib/chain/evidence.mjs` computes state, the break and the biggest
+  leak. **A stage reads `proven` only when real leads got through it.**
+  Live funnel: 263 sourced → 249 scored → 39 qualified → 3 generated → 2
+  published → 0 contacted. **The break is outreach, not publish** — two sites
+  ARE deployed. The hand-written table this replaced was wrong on three counts
+  (see ARCHITECTURE's note). `?ralph=1` keeps its hardcoded repos for the Tasks
+  panel. No new Vercel function.
 
 - **🎯 Revenue path moving again (2026-09-14).** **#185 shipped** (PR #301) — the
   Leads board now dispatches `render` and surfaces the paste-ready

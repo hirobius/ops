@@ -34,26 +34,49 @@ import {
   type FleetStatus,
   type FleetIssue,
 } from '../ralphStatus';
-import { CHAIN, chainSummary, type ChainLink, type LinkState } from './chain';
+import { deriveChain } from '../../../../../lib/chain/evidence.mjs';
 
 const POLL_MS = 60_000;
 const SHOWN = 8;
 
+/**
+ * Four states, and every one of them is derived — `proven` means rows actually
+ * got through, not that the code looks finished.
+ */
+type LinkState = 'proven' | 'ready' | 'blocked' | 'unknown';
+
 const STATE_COLOR: Record<LinkState, string> = {
-  live: 'var(--semantic-color-feedback-success)',
-  partial: 'var(--semantic-color-feedback-warning)',
-  cut: 'var(--semantic-color-feedback-error)',
-  absent: 'var(--semantic-color-content-tertiary)',
+  proven: 'var(--semantic-color-feedback-success)',
+  ready: 'var(--semantic-color-content-tertiary)',
+  blocked: 'var(--semantic-color-feedback-warning)',
+  unknown: 'var(--semantic-color-content-disabled)',
 };
 
 const STATE_WORD: Record<LinkState, string> = {
-  live: 'live',
-  partial: 'held back',
-  cut: 'severed',
-  absent: 'not built',
+  proven: 'proven',
+  ready: 'untried',
+  blocked: 'blocked',
+  unknown: 'not measurable',
 };
 
-const SUMMARY = chainSummary(CHAIN);
+interface ChainLink {
+  n: number;
+  name: string;
+  metric: string;
+  unit: string;
+  note: string;
+  issues: number[];
+  count: number | null;
+  missingEnv: string[];
+  state: LinkState;
+}
+
+interface Chain {
+  links: ChainLink[];
+  firstBreak: ChainLink | null;
+  biggestDrop: { from: ChainLink; to: ChainLink; kept: number; lost: number } | null;
+  reachedEnd: number;
+}
 
 export default function StandingPage() {
   const { data, error } = usePoll<FleetStatus>(fetchFleetStatus, {
@@ -68,6 +91,9 @@ export default function StandingPage() {
   const needsToken = error?.includes('GITHUB_TOKEN') ?? false;
   /** A real payload has arrived — not merely "a request finished". */
   const loaded = data !== null;
+  // Every verdict below is computed from the lead-table counts and which env
+  // vars are set. Nothing about the pipeline's state is authored anywhere.
+  const chain: Chain = deriveChain({ funnel: data?.funnel ?? {}, env: data?.env ?? {} });
 
   return (
     <div style={s.page}>
@@ -82,29 +108,33 @@ export default function StandingPage() {
       {/* ── 1. The chain ─────────────────────────────────────────────────── */}
       <Section
         title="The chain"
-        count={`${SUMMARY.throughput}% reaches the far end`}
+        count={`${chain.reachedEnd} paid`}
       >
         <p style={s.lede}>
-          Eight links turn a lead into a paid site. They average{' '}
-          <strong style={s.strong}>{SUMMARY.averageBuilt}% built</strong> — a flattering
-          number, because a chain is its weakest link.
-          {SUMMARY.firstBreak ? (
-            <>
-              {' '}
-              It parts at{' '}
-              <strong style={s.strong}>
-                ({SUMMARY.firstBreak.n}) {SUMMARY.firstBreak.name}
-              </strong>
-              , and nothing downstream has ever carried a real lead.
-            </>
-          ) : null}
+          Eight stages from a sourced lead to a paid site. Every figure below is a
+          row count from the leads table — nothing here is an estimate, and a stage
+          counts as proven only when real leads got through it.
         </p>
 
         <ol style={s.chain}>
-          {CHAIN.map((l) => (
-            <ChainRow key={l.n} link={l} isBreak={l.n === SUMMARY.firstBreak?.n} />
+          {chain.links.map((l) => (
+            <ChainRow
+              key={l.n}
+              link={l}
+              total={chain.links.length}
+              isBreak={l.n === chain.firstBreak?.n}
+            />
           ))}
         </ol>
+
+        {chain.biggestDrop ? (
+          <p style={s.notice}>
+            Steepest surviving drop: <strong style={s.strong}>{chain.biggestDrop.from.name}</strong>{' '}
+            → <strong style={s.strong}>{chain.biggestDrop.to.name}</strong> keeps{' '}
+            {Math.round(chain.biggestDrop.kept * 100)}% ({chain.biggestDrop.lost} lost). That is
+            the leak; the break above is where flow stops entirely.
+          </p>
+        ) : null}
       </Section>
 
       {/* ── 2. Waiting on you ────────────────────────────────────────────── */}
@@ -245,19 +275,25 @@ function Section({
   );
 }
 
-function ChainRow({ link, isBreak }: { link: ChainLink; isBreak: boolean }) {
+function ChainRow({
+  link,
+  total,
+  isBreak,
+}: {
+  link: ChainLink;
+  total: number;
+  isBreak: boolean;
+}) {
   const color = STATE_COLOR[link.state];
   return (
     <li style={s.link}>
       <div style={s.linkRail}>
         <span style={{ ...s.linkDot, borderColor: color, color }}>{link.n}</span>
-        {link.n < CHAIN.length ? (
+        {link.n < total ? (
           <span
             style={{
               ...s.linkSpine,
-              ...(isBreak
-                ? { background: 'none', borderLeft: `2px dashed ${color}` }
-                : null),
+              ...(isBreak ? { background: 'none', borderLeft: `2px dashed ${color}` } : null),
             }}
             aria-hidden="true"
           />
@@ -267,17 +303,29 @@ function ChainRow({ link, isBreak }: { link: ChainLink; isBreak: boolean }) {
       <div style={s.linkBody}>
         <div style={s.linkTop}>
           <span style={s.linkName}>{link.name}</span>
-          <span style={{ ...s.linkPct, color }}>{link.built}%</span>
-        </div>
-        <div style={s.bar}>
-          <span style={{ ...s.barFill, width: `${link.built}%`, background: color }} />
+          <span style={{ ...s.linkPct, color }}>
+            {link.count === null ? '—' : link.count.toLocaleString()}
+          </span>
         </div>
         <p style={s.linkNote}>
           <span style={{ ...s.linkState, color }}>{STATE_WORD[link.state]}</span>
+          {link.count !== null ? ` · ${link.unit}` : ''}
           {' — '}
           {link.note}
         </p>
-        {link.issues.length > 0 ? (
+        {link.missingEnv.length ? (
+          <p style={s.linkNote}>
+            Needs{' '}
+            {link.missingEnv.map((k, i) => (
+              <span key={k}>
+                {i > 0 ? ' and ' : ''}
+                <code style={s.code}>{k}</code>
+              </span>
+            ))}
+            {link.missingEnv.length === 1 ? ' — not set on the server.' : ' — neither is set on the server.'}
+          </p>
+        ) : null}
+        {link.issues.length ? (
           <div style={s.linkIssues}>
             {link.issues.map((n) => (
               <a
@@ -294,8 +342,8 @@ function ChainRow({ link, isBreak }: { link: ChainLink; isBreak: boolean }) {
         ) : null}
         {isBreak ? (
           <p style={s.breakCall}>
-            Everything downstream is built and idle, waiting on a preview URL that cannot
-            exist yet. This is the only fix that changes the business.
+            Nothing has ever reached this stage, though {link.n > 1 ? 'the one before it' : 'the funnel'} has
+            rows. This is where the chain stops — computed, not asserted.
           </p>
         ) : null}
       </div>
@@ -303,14 +351,6 @@ function ChainRow({ link, isBreak }: { link: ChainLink; isBreak: boolean }) {
   );
 }
 
-/**
- * One live lane's body. The branch ORDER is the point: an error is reported the
- * moment one exists, BEFORE any loading copy. `usePoll` keeps
- * `isInitialLoading` true while a fetch keeps failing (it is `data === null &&
- * !isOffline`, and `isOffline` only trips after three consecutive failures), so
- * a loading-first ladder shows "Reading the fleet…" for ~2 minutes over a hard
- * failure. Silence is the one thing this page must never do.
- */
 /**
  * What this page is actually watching. Worth a line of its own: the repo set is
  * discovered from the token's issue feed, so it grows on its own when a repo is
@@ -342,6 +382,14 @@ function Coverage({
   );
 }
 
+/**
+ * One live lane's body. The branch ORDER is the point: an error is reported the
+ * moment one exists, BEFORE any loading copy. `usePoll` keeps
+ * `isInitialLoading` true while a fetch keeps failing (it is `data === null &&
+ * !isOffline`, and `isOffline` only trips after three consecutive failures), so
+ * a loading-first ladder shows "Reading the fleet…" for ~2 minutes over a hard
+ * failure. Silence is the one thing this page must never do.
+ */
 function Lane({
   needsToken,
   error,

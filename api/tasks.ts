@@ -63,7 +63,7 @@ const FLEET_REPOS = ['hirobius/ops', 'hirobius/hds', 'hirobius/site-engine'];
 
 export async function tasksHandler(sb: SupabaseClient, req: VercelRequest): Promise<HandlerResult> {
   if (pick(req.query['ralph']) === '1') return ralphStatusHandler();
-  if (pick(req.query['fleet']) === '1') return fleetStatusHandler();
+  if (pick(req.query['fleet']) === '1') return fleetStatusHandler({ sb });
 
   const limit = clampLimit(pick(req.query['limit']));
   const includeDeleted = pick(req.query['include_deleted']) === '1';
@@ -125,10 +125,13 @@ export async function ralphStatusHandler(): Promise<HandlerResult> {
  * therefore only be exercised in production.
  */
 export async function fleetStatusHandler(
-  deps: { github?: ReturnType<typeof makeGitHubPort> } = {},
+  deps: {
+    github?: ReturnType<typeof makeGitHubPort>;
+    sb?: SupabaseClient | null;
+  } = {},
 ): Promise<HandlerResult> {
   const gh = deps.github !== undefined ? deps.github : makeGitHubPort();
-  return (await buildFleetStatus(gh)) as HandlerResult;
+  return (await buildFleetStatus(gh, { sb: deps.sb ?? null })) as HandlerResult;
 }
 
 /**

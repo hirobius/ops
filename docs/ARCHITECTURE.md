@@ -4,16 +4,22 @@ Org source of truth for cross-cutting delivery decisions in the ops command
 center. Component-level ADRs live under `docs/architecture/`; this file holds the
 agency-wide contracts and the lead → site delivery pipeline.
 
-> **⇄ Keep in lockstep with two renderings of the gap-map below:**
-> `docs/pipeline-walkthrough.html` (the visual version, published as an Artifact)
-> and `src/app/pages/ops/standing/chain.ts` (the machine-readable one that feeds
-> `/ops/standing`). This markdown is canonical — every session reads it. When the
-> pipeline state changes, update ALL THREE in the same commit so the doc, the
-> walkthrough and the dashboard never drift.
+> **⇄ Keep in lockstep with `docs/pipeline-walkthrough.html`** (the visual
+> version, published as an Artifact). This markdown is canonical for the
+> *narrative* — why a stage is where it is, what the moving parts are.
 >
-> The renderings are deliberately lossy in different directions: the walkthrough
-> carries the narrative, `chain.ts` carries only the per-stage state, percentage
-> and the issues that move it. Neither is canonical; both follow this table.
+> **It is NOT canonical for whether a stage works.** `/ops/standing` answers that
+> from the `leads` table: one row count per stage (`lib/supabase/leads.mjs`
+> `leadFunnel`), with the state, the break and the biggest leak all derived in
+> `lib/chain/evidence.mjs`. A stage reads `proven` only when real leads got
+> through it — shipped code never promotes it, and nobody hand-edits a verdict.
+>
+> This replaced a hand-maintained status table on 2026-09-15 because that table
+> had drifted in both directions at once: it called migration 0007 unapplied
+> (its columns were live), said generation had never run on a real lead (three
+> configs existed), and named publish as the break (two sites were deployed —
+> the first stage nothing has ever reached is outreach). Prefer the live counts
+> over any status legend in this file; where they disagree, this file is wrong.
 
 ---
 
