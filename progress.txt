@@ -1940,3 +1940,65 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   script's description text is out of sync with current JSDoc) — worth its
   own issue if anyone wants scripts/generate-script-index.mjs's output
   trusted again, but out of scope here.
+
+## ops#347 — check-production-health.mjs (script half of #318)
+- Built scripts/check-production-health.mjs: asserts /ops's live data path,
+  not just a 200. Two checks: (1) GET {OPS_BASE_URL}/api/tasks as a headless
+  agent (OPS_AGENT_KEY, lib/ops-auth.mjs) — fails on the known-failing shape
+  (200 + { tasks: [] }) when rows are expected, not merely non-200; (2) where
+  SUPABASE_ACCESS_TOKEN is set, reads the Supabase Management API project
+  status directly and distinguishes INACTIVE/COMING_UP/RESTORING/healthy,
+  each with its own actionable message + resume link. Notifies via the
+  existing lib/ops/notify.mjs -> DISCORD_WEBHOOK_URL seam on any failure; no
+  new alert path.
+- Decision: required OPS_BASE_URL has no hardcoded default. Found no verified
+  production domain anywhere in the repo (docs only ever reference the
+  Vercel project name "hirobius-ops", never a literal URL, and
+  docs/operations/deploy-unblock.md flags the domain as still undecided) —
+  guessing one risks either masking real failures or spamming false
+  "unreachable" alerts forever, so it fails loud instead (CLAUDE.md: never
+  guess URLs). Same reasoning for OPS_AGENT_KEY: lib/ops-auth.mjs already
+  documents it as the machine-auth path for exactly this kind of headless
+  script, so used that instead of inventing an /api/ops-login cookie dance.
+  SUPABASE_ACCESS_TOKEN is optional/soft-fail ("skipped", not a violation)
+  since check 1 already covers the data path — check 2 is the richer "why".
+- Decision: missing required env is checked BEFORE any network call and
+  exits fast with the canonical `{ violations }` JSON shape (via
+  scripts/lib/gate-output.mjs) — same pattern as reconcile-ralph-closures.mjs
+  — so audit-gates-supportjson's generic spawn-every-gate sweep (no env set)
+  gets valid JSON in well under its 30s timeout instead of attempting real
+  fetches.
+- Registered in docs/guardrails/registry.json, supportsJson: true. Added stub
+  fixtures/check-production-health/{violating,passing}.example.json
+  (validate-fixture-proof-of-firing.mjs requires a fixture dir for every
+  non-manual-channel gate regardless of the registry's fixturePath field).
+- Deviation from the issue's literal DoD text, caught by the gate itself: the
+  DoD line says `firingChannel: "ci-scheduled"`, but I registered it as
+  `"manual"` instead. check-validator-wiring.mjs (a pre-commit gate — not run
+  by ralph/gate.sh, so this only surfaced at `git commit`) hard-fails any gate
+  declaring `ci-scheduled` unless an actual `.github/workflows/*` file invokes
+  it — exactly the file this issue's own scope says not to touch (that caller
+  is parent #318, a human PR). Declaring `ci-scheduled` today would BE the
+  "aspirational guardrail" anti-pattern check-validator-wiring exists to catch
+  (its own docstring cites the 2026-05-04 audit-typography-overrides incident:
+  registered + claimed-wired, never actually fired). `manual` is the honest
+  state of the world right now — script runs standalone, testable, registered
+  — documented in the registry description to flip to `ci-scheduled` once
+  #318's cron caller lands. Left this note instead of a blocked-stop since the
+  functional deliverable is complete and correct; only the registry metadata
+  needed to match reality over the issue text.
+- Files: scripts/check-production-health.mjs (new),
+  scripts/__tests__/check-production-health.test.mjs (new, 20 tests, all
+  network mocked via injected fetchImpl — no real network in tests),
+  fixtures/check-production-health/{violating,passing}.example.json (new),
+  docs/guardrails/registry.json.
+- Deliberately NOT included: scripts/INDEX.{json,md} regen — pulls in ~4
+  unrelated pre-existing scripts' drift beyond this one (same finding as
+  #329/#355's session), out of scope here. No .github/workflows/* touched
+  (that's parent #318, human PR) — the OUT-OF-SCOPE line held.
+- Gate green: typecheck + 1120 tests (20 new) + lint. All 3 meta-validators
+  green (validate-guardrail-registry, check-validator-wiring,
+  validate-fixture-proof-of-firing).
+- Next: flip firingChannel to "ci-scheduled" in the same PR that lands
+  parent #318's `.github/workflows/*` cron caller — everything else in this
+  slice's DoD is fully covered.
