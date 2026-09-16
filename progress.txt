@@ -1806,3 +1806,39 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   keeping only the changes actually in scope for #298.
 - Next: (1) the liveness-guard follow-up issue; (2) a human decision on
   whether/when to run --apply against the live 53-pair corpus found above.
+
+## ops#294 — check-spec-freshness guardrail (2026-09-16)
+- Built scripts/check-spec-freshness.mjs: anti-rot gate for docs/specs/*.md
+  (FRONTIER-DOCTRINE.md §2 rule 4). Flags missing/unparseable Status:/Last
+  verified: headers, an active spec >60 days stale, an active spec whose
+  referenced issues are all closed ("should be shipped"), and a referenced
+  issue number that doesn't exist in the stated repo. shipped/abandoned
+  specs are exempt from every check (doctrine rule 5).
+- Decision: the issue's "What to build" describes the old
+  docs/specs/<epic>/{requirements,design,tasks}.md triad. docs/specs/README.md
+  and doctrine §2 itself say that was collapsed the same day it was decided —
+  real convention is one file, docs/specs/<epic-slug>.md, with an Issues:
+  header line + a ## Tasks section standing in for tasks.md. Built the gate
+  against the shape that actually exists on main, not the issue's stale
+  premise — flagged the adaptation explicitly in the PR body and issue
+  comment rather than guessing silently.
+- Network (GitHub REST, issue state) isolated behind an injectable
+  fetchIssueStates({ fetchImpl }) — same pattern as metric-north-star-share.mjs
+  (ops#293) — so all 23 unit tests run with zero network calls.
+  Missing/expired GITHUB_TOKEN fails loud with the variable name + Vercel env
+  link + token-creation link, same convention as reconcile-ralph-closures.mjs.
+- Registered in docs/guardrails/registry.json (severity: warn, firingChannel:
+  manual, supportsJson: true, fixturePath: fixtures/check-spec-freshness).
+  5 named fixtures (fresh-active, stale-active, all-issues-closed-active,
+  shipped, missing-header) — exempt from validate-fixture-proof-of-firing's
+  passing/violating pair requirement since it's a manual-channel gate, but
+  used directly by the unit tests.
+- Verified: validate-guardrail-registry green (48 validators); 
+  audit-gates-supportjson reports check-spec-freshness compliant; live run
+  against docs/specs/leads-to-site.md with a real GITHUB_TOKEN came back
+  clean. Gate green: typecheck + 1025 tests (23 new) + lint.
+- Files: scripts/check-spec-freshness.mjs (new),
+  scripts/__tests__/check-spec-freshness.test.mjs (new),
+  fixtures/check-spec-freshness/*.example.md (5 new), docs/guardrails/registry.json.
+- PR: https://github.com/hirobius/ops/pull/334 (ralph/issue-294-check-spec-freshness)
+- Next: none — smallest complete slice, no follow-up filed.
