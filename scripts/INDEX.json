@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 141,
+  "totalScripts": 146,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,10 +41,10 @@
     }
   },
   "categoryCounts": {
-    "other": 71,
+    "other": 74,
     "audit": 16,
     "build": 1,
-    "gate": 33,
+    "gate": 35,
     "generate": 11,
     "sync": 3,
     "test": 2,
@@ -513,6 +513,17 @@
       }
     },
     {
+      "name": "check-production-health.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "just a 200 (ops#347, script half of #318).",
+      "pnpm": [],
+      "gate": {
+        "channel": "manual",
+        "severity": "error"
+      }
+    },
+    {
       "name": "check-reduced-motion.mjs",
       "category": "gate",
       "prefix": "check",
@@ -546,14 +557,14 @@
       }
     },
     {
-      "name": "check-route-smoke.mjs",
+      "name": "check-schema-drift.mjs",
       "category": "gate",
       "prefix": "check",
-      "purpose": "(no header description)",
-      "pnpm": ["check:release", "check:route-smoke"],
+      "purpose": "offer everything site-engine ships.",
+      "pnpm": [],
       "gate": {
-        "channel": "pnpm-meta",
-        "severity": "warn"
+        "channel": "pre-commit",
+        "severity": "error"
       }
     },
     {
@@ -594,6 +605,17 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "committed baseline JSON is older than any of its source files. The intent: catch baselines that should have been regenerated after a source change but weren't.",
+      "pnpm": [],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-spec-freshness.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Anti-rot gate for `docs/specs/<epic-slug>.md` (ops#294, decided in the ops#274 frontier-engineering session — `docs/ai/FRONTIER-DOCTRINE.md` §2, anti-rot rule 4). The doctrine's known failure mode is documents outliving",
       "pnpm": [],
       "gate": {
         "channel": "manual",
@@ -666,6 +688,14 @@
       "prefix": "convert",
       "purpose": "(no header description)",
       "pnpm": ["assets:convert"],
+      "gate": null
+    },
+    {
+      "name": "crawl-lead-emails.mjs",
+      "category": "other",
+      "prefix": "crawl",
+      "purpose": "1 lead of 263 has an email. Google Business Profile has no email field, so no Maps scraper returns one and the B2B enrichment tier covers 3-person trades",
+      "pnpm": [],
       "gate": null
     },
     {
@@ -923,6 +953,17 @@
       "gate": null
     },
     {
+      "name": "metric-human-gate-latency.mjs",
+      "category": "other",
+      "prefix": "metric",
+      "purpose": "Human-gate latency metric (ops#297, decided in the ops#274 frontier-engineering session, `docs/ai/FRONTIER-DOCTRINE.md` §7 — the second of the two adopted metrics; the first is #293,",
+      "pnpm": [],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
       "name": "metric-north-star-share.mjs",
       "category": "other",
       "prefix": "metric",
@@ -1001,7 +1042,7 @@
       "name": "promote-learned-rule.mjs",
       "category": "other",
       "prefix": "promote",
-      "purpose": "Interactive walker over docs/ai/learned-rules.jsonl. For each unpromoted entry (no `promotedAt` field), prompts Adrian to promote it to a real registry entry in docs/guardrails/registry.json. The actual flip from",
+      "purpose": "Interactive walker over docs/ai/learned-rules.jsonl. For each unpromoted entry (no `promotedAt` field), prompts Adrian to promote it to one of two destinations:",
       "pnpm": ["guardrail:learned-rules", "guardrail:promote-rule"],
       "gate": null
     },
@@ -1062,6 +1103,14 @@
       "gate": null
     },
     {
+      "name": "ralph-watchdog.mjs",
+      "category": "other",
+      "prefix": "ralph",
+      "purpose": "file is the I/O half: gather facts from GitHub, ask the rule what to do, and (with --apply) do the mechanical part of it. Same split as check-branch-ancestry / branch-ancestry.mjs.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "reconcile-ralph-closures.mjs",
       "category": "other",
       "prefix": "reconcile",
@@ -1084,7 +1133,7 @@
       "name": "refresh-firing-stats.mjs",
       "category": "other",
       "prefix": "refresh",
-      "purpose": "Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and computes per-gate `lastFiringAt` / `lastViolationAt` stats.",
+      "purpose": "Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and computes per-gate `lastFiringAt` / `lastViolationAt` stats via scripts/lib/firing-stats.mjs.",
       "pnpm": ["guardrail:firing-stats"],
       "gate": null
     },

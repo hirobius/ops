@@ -437,17 +437,6 @@
       "firingChannel": "pre-commit"
     },
     {
-      "id": "check-route-smoke",
-      "description": "Runtime route smoke test for key portfolio and HDS routes. Uses the built app plus vite preview so route validation goes beyond static strings.",
-      "severity": "warn",
-      "gateScript": "scripts/check-route-smoke.mjs",
-      "fixturePath": "fixtures/check-route-smoke",
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "pnpm-meta",
-      "wiringTodo": "should be ci-pr or ci-scheduled — not yet wired into a workflow that actually triggers it"
-    },
-    {
       "id": "check-secrets",
       "description": "Pre-commit secrets scanner wrapping the gitleaks binary. Registers gitleaks in the guardrail registry so it shows up in audits and fixture-proof runs.",
       "severity": "error",

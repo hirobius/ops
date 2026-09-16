@@ -28,7 +28,6 @@ Use it to answer:
 | `pnpm check:assets`       | Validate asset manifest coverage and alt metadata                                                   | Add or fix `public/assets/manifest.json` entries before populating visuals       |
 | `pnpm check:security`     | Run the local security and dependency baseline lane                                                 | Remove risky files, secrets, CDN drift, or unsafe injection patterns             |
 | `pnpm check:attributions` | Validate attribution registry IDs and manifest source links                                         | Fix `ATTRIBUTIONS.md` or manifest source IDs                                     |
-| `pnpm check:route-smoke`  | Browser-smoke key built routes through Vite preview                                                 | Repair runtime route regressions before release                                  |
 | `pnpm check:exemptions`   | Validate and summarize all repo escape hatches                                                      | Tighten weak exemptions or remove stale ones                                     |
 | `pnpm tokens`             | Build token outputs and handoff artifacts                                                           | Review downstream token outputs                                                  |
 | `pnpm tokens:verify`      | Verify token pipeline integrity                                                                     | Fix token or compiler issues before proceeding                                   |
@@ -98,10 +97,9 @@ It currently runs these:
 
 It currently adds:
 
-| Script                  | Protects against                               | Follow-on action on failure                                |
-| ----------------------- | ---------------------------------------------- | ---------------------------------------------------------- |
-| `build`                 | broken production bundle                       | repair build/runtime issues before shipping                |
-| `check-route-smoke.mjs` | routes that compile but fail in a real browser | fix live route rendering or runtime navigation regressions |
+| Script  | Protects against         | Follow-on action on failure                 |
+| ------- | ------------------------ | ------------------------------------------- |
+| `build` | broken production bundle | repair build/runtime issues before shipping |
 
 ## Triggers
 

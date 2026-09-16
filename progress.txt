@@ -2248,3 +2248,28 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   1192 tests, lint). PR: https://github.com/hirobius/ops/pull/368
 - Notes for next iteration: none — slice is complete per DoD. Deploy-side
   callback (clients#12/#15) is a different repo and out of scope here.
+
+## Issue #357 — chore: delete dead check-route-smoke.mjs gate (2026-09-16)
+- Decision: option (a) delete. The gate's DEFAULT_ROUTES (/, /vibe-sketchbook,
+  /hds, /hds/case-studies/hirobius, /microsoft-design-systems, /visuals,
+  /portfolio/draft) are pre-split portfolio-repo routes; none exist in this
+  app's src/app/routes.tsx (/hds/* is a bare redirect, rest 404 via
+  NotFoundPage). check-route-coverage.mjs + tests/layout-integrity.spec.ts
+  already cover this app's real routes, so the gate wasn't closing a gap —
+  confirmed no test/script depended on it beyond its own registrations.
+- Removed: scripts/check-route-smoke.mjs, fixtures/check-route-smoke/,
+  its docs/guardrails/registry.json entry (id: check-route-smoke), its
+  package.json check:route-smoke script + its call from check:release,
+  its REPLACEMENT_TABLE entry in scripts/audit-gate-replaceability.mjs
+  (dead reference — defaults to genuinely-custom for unlisted gates, so
+  nothing crashes without it), and its two rows in SYSTEMS_REGISTRY.md.
+  Regenerated scripts/INDEX.md/INDEX.json via generate-script-index.mjs.
+- DoD box 2 (validate-fixture-proof-of-firing stub flag) is moot — the
+  gate no longer exists to flag.
+- Files changed: scripts/check-route-smoke.mjs (deleted),
+  fixtures/check-route-smoke/* (deleted), docs/guardrails/registry.json,
+  package.json, SYSTEMS_REGISTRY.md, scripts/audit-gate-replaceability.mjs,
+  scripts/INDEX.md, scripts/INDEX.json.
+- Branch: ralph/issue-357-delete-check-route-smoke. Gate green (typecheck,
+  97 files / 1192 tests, lint). PR: (see issue comment)
+- Notes for next iteration: none — slice is complete per DoD.
