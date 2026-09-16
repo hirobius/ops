@@ -18,7 +18,9 @@ const ALL_ENV: Record<string, boolean> = Object.fromEntries(
 
 /** Funnel counts by position, 1-based, for readability. */
 function funnelOf(counts: (number | null)[]) {
-  return Object.fromEntries(STAGES.map((s: { metric: string }, i: number) => [s.metric, counts[i]]));
+  return Object.fromEntries(
+    STAGES.map((s: { metric: string }, i: number) => [s.metric, counts[i]]),
+  );
 }
 
 /** The live shape on 2026-09-15, straight from the leads table. */

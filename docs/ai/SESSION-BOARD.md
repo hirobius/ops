@@ -58,14 +58,14 @@ Claim before you start. Release when you stop, including when you stop
 unfinished. A stale claim is worse than no claim, because the next session
 believes it.
 
-| Subsystem                                                          | Held by                 | Since      | State                                                                                                                       |
-| ------------------------------------------------------------------ | ----------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `lib/outreach/`, `lib/leads/`, lead scripts                        | ops burndown            | 2026-09-15 | active — email crawler next                                                                                                 |
-| `docs/guardrails/`, `registry.json`                                | _(nobody)_              | —          | **FREE — #329 + #330 open, unclaimed, not started**                                                                          |
-| `lib/chain/`, `lib/supabase/leads.mjs`                             | _(nobody)_              | —          | **FREE — #322 done (#345)**                                                                                                 |
-| `docs/ai/`, `CLAUDE.md`                                            | _(nobody)_              | —          | **FREE — session closed out 2026-09-16; budget 24.9KB of 25.0KB**                                                           |
-| `lilac` repo (3e: no `main` branch)                                | —                       | —          | **DONE 2026-09-16 — `main` created, default set**                                                                           |
-| `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)** |
+| Subsystem                                                          | Held by                 | Since      | State                                                                                                                                                                                                            |
+| ------------------------------------------------------------------ | ----------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/outreach/`, `lib/leads/`, lead scripts                        | ops burndown            | 2026-09-15 | **released 2026-09-16 — crawler built + unit-tested (#346), but THIS ENVIRONMENT BLOCKS EGRESS (403 on CONNECT to any host), so it has never fetched a trades site. Needs an environment with outbound access.** |
+| `docs/guardrails/`, `registry.json`                                | _(nobody)_              | —          | **FREE — #336 merged (#335 closed). #329 + #330 still open and unclaimed**                                                                                                                                       |
+| `lib/chain/`, `lib/supabase/leads.mjs`                             | _(nobody)_              | —          | **FREE — #322 done (#345)**                                                                                                                                                                                      |
+| `docs/ai/`, `CLAUDE.md`                                            | _(nobody)_              | —          | **FREE — session closed out 2026-09-16; budget 24.9KB of 25.0KB**                                                                                                                                                |
+| `lilac` repo (3e: no `main` branch)                                | —                       | —          | **DONE 2026-09-16 — `main` created, default set**                                                                                                                                                                |
+| `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)**                                                                                      |
 
 ## Messages — newest first
 
@@ -85,7 +85,7 @@ server-side, cached (1h success / 1min failure), 2xx **and** 3xx count as live.
 The rule worth carrying: **a URL we could not check is `unchecked`, never
 `dead`.** The likeliest reason a probe fails is our own egress, not the site —
 #322 was filed from a container that cannot reach `vercel.app` at all. `count`
-deliberately stays the *stored* figure, because the funnel's nesting invariant
+deliberately stays the _stored_ figure, because the funnel's nesting invariant
 depends on it; the note carries the truth instead.
 
 **#329 and #330 are FREE and I did not start them** — both still open,

@@ -98,7 +98,7 @@ contacted` with jump links to `/ops/leads` + `/ops/pitch`, so the tier upstream
   - **The rule to carry: a URL we could not check is `unchecked`, never `dead`.**
     The likeliest reason a probe fails is our own egress — #322 was filed from a
     container that cannot reach `vercel.app` at all.
-  - `count` deliberately stays the *stored* figure: the funnel's nesting
+  - `count` deliberately stays the _stored_ figure: the funnel's nesting
     invariant depends on it. The note carries the truth instead.
   - `publishedUrls` is a sibling of `leadFunnel`, not part of it — the funnel is
     nine cheap COUNTs and must stay that way.
