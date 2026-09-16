@@ -152,3 +152,59 @@ describe('STAGES', () => {
     }
   });
 });
+
+describe('deriveChain — stage 5 liveness note (ops#322)', () => {
+  const funnel = { sourced: 10, scored: 10, qualified: 5, generated: 3, published: 2 };
+
+  it('says nothing about liveness when no probe ran', () => {
+    const link = deriveChain({ funnel, env: {} }).links.find((l) => l.metric === 'published');
+    expect(link?.note).not.toMatch(/Stored vs live/);
+    expect(link?.liveness).toBeNull();
+  });
+
+  it('reports how many of the stored URLs answered', () => {
+    const link = deriveChain({
+      funnel,
+      env: {},
+      liveness: { stored: 2, live: 2, dead: 0, unchecked: 0 },
+    }).links.find((l) => l.metric === 'published');
+    expect(link?.note).toMatch(/2\/2 answered/);
+  });
+
+  // The failure this issue exists to prevent: a stage reading `proven` off a
+  // dead link. The count stays 2 — the funnel nesting depends on it — but the
+  // note has to say so out loud.
+  it('surfaces a dead URL without changing the stored count', () => {
+    const link = deriveChain({
+      funnel,
+      env: {},
+      liveness: { stored: 2, live: 1, dead: 1, unchecked: 0 },
+    }).links.find((l) => l.metric === 'published');
+    expect(link?.count).toBe(2);
+    expect(link?.note).toMatch(/1\/2 answered/);
+    expect(link?.note).toMatch(/1 did not/);
+  });
+
+  // "We could not check" must never read as "it is down".
+  it('reports unchecked separately from dead', () => {
+    const link = deriveChain({
+      funnel,
+      env: {},
+      liveness: { stored: 2, live: 0, dead: 0, unchecked: 2 },
+    }).links.find((l) => l.metric === 'published');
+    expect(link?.note).toMatch(/2 unchecked/);
+    expect(link?.note).not.toMatch(/did not/);
+  });
+
+  it('leaves the other seven stages untouched', () => {
+    const links = deriveChain({
+      funnel,
+      env: {},
+      liveness: { stored: 2, live: 1, dead: 1, unchecked: 0 },
+    }).links.filter((l) => l.metric !== 'published');
+    for (const l of links) {
+      expect(l.note).not.toMatch(/Stored vs live/);
+      expect(l).not.toHaveProperty('liveness');
+    }
+  });
+});

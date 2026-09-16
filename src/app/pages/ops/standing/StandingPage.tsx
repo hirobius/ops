@@ -111,7 +111,11 @@ export default function StandingPage() {
   const loaded = data !== null;
   // Every verdict below is computed from the lead-table counts and which env
   // vars are set. Nothing about the pipeline's state is authored anywhere.
-  const chain: Chain = deriveChain({ funnel: data?.funnel ?? {}, env: data?.env ?? {} });
+  const chain: Chain = deriveChain({
+    funnel: data?.funnel ?? {},
+    env: data?.env ?? {},
+    liveness: data?.liveness ?? null,
+  });
 
   // Deploy state is a separate endpoint and a separate failure mode: Vercel
   // being unreachable must not blank the issue lanes, and vice versa.

@@ -131,6 +131,11 @@ export interface FleetPr {
 export interface FleetStatus {
   /** Lead-table counts per chain stage; null where a stage is not measurable. */
   funnel: Record<string, number | null>;
+  /**
+   * Stage-5 liveness (ops#322), or null when no probe ran. Null is NOT a zeroed
+   * summary: "we did not ask" and "nothing is up" are different claims.
+   */
+  liveness: { stored: number; live: number; dead: number; unchecked: number } | null;
   /** Which chain env vars are SET. Presence only — no value ever leaves the server. */
   env: Record<string, boolean>;
   /** Owners actually scanned — derived from the issues, never configured. */

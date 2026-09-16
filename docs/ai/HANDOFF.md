@@ -63,7 +63,9 @@ not read it to get oriented.
 - **🪟 `/ops/standing` is the ONLY fleet surface.** Chain, waiting-on-you, in
   flight, queue, backlog, deploys. `/ops/tasks` + `/ops/projects` redirect here.
   Its actions write labels straight to GitHub, bypassing the Supabase mirror on
-  purpose — Standing lists repos the importer never touched.
+  purpose — Standing lists repos the importer never touched. Stage 5 now reports
+  **stored vs live** `preview_url`s (#322); a URL that could not be reached reads
+  `unchecked`, never `dead` — the usual cause is our egress, not the site.
 - **🎯 Revenue path is merged, unrun.** The generator takes real hours, address,
   photos and a contrast-checked palette. Spec: `docs/specs/leads-to-site.md`.
   Doctrine finding that still steers: **we have the machinery and mis-aim it.**
@@ -124,13 +126,10 @@ not read it to get oriented.
 3. **Adrian's calls:** #200 (Stripe — no way to take money today) · #306 (curate
    gate severity on _provable_ firing, not firing history) · #303/#302/#296/#238
    (one shared `hirobius/ralph` engine release, not four).
-4. **#307 — delete or retarget the 8 dead specs** keeping `main` permanently
-   red (they target `/hds/*` routes and a CommandPalette that ops does not
-   have). Normalised red is how a real failure gets through.
-5. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
-6. **Website email crawler** — 223 leads have a site, 1 has an address. Claimed
+4. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
+5. **Website email crawler** — 223 leads have a site, 1 has an address. Claimed
    on the board by the ops burndown session; check before touching.
-7. **Cutover Part B remainder** — gated on the clients Astro factory being live.
+6. **Cutover Part B remainder** — gated on the clients Astro factory being live.
 
 ## Parked / known warts
 
