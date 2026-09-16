@@ -29,8 +29,9 @@ Deployed on Vercel; `main` is production.
   `lib/render` (hand-off to the `hirobius/clients` Astro factory). State in
   Supabase (`lib/leads`, `lib/supabase`).
 - **`/ops/clients` — client CRM.** `clients/<slug>/*.json` rendered as client
-  dashboards / reports / brand audits, plus a public token-gated portal at
-  `/c/:slug`.
+  dashboards / reports / brand audits. (Public client portals moved to
+  `hirobius/portal-kit`; the old in-ops `/c/:slug` portal now serves a "moved"
+  notice.)
 - **`/ops/projects`, `/ops/digest`, `/ops` index** — fleet views. Merge
   governance runs through ralph-gate's `ralph-auto`/`ralph-approved` labels on
   the linked PR (the pre-Ralph `/admin/approvals` inbox was retired, ops#157).
@@ -48,7 +49,6 @@ Set by a human in the Vercel dashboard (Production scope) — never committed.
 | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Supabase service client              | tasks + leads boards |
 | `GITHUB_TOKEN` (+ optional `GITHUB_REPO`)   | open dispatch issues (Issues: write) | the Dispatch loop    |
 | `OUTSCRAPER_API_KEY`                        | Places sourcing                      | live lead pulls      |
-| `VITE_PORTAL_HMAC_SECRET`                   | `/c/:slug` portal token              | client portal        |
 
 The Supabase↔Vercel integration may inject `NEXT_PUBLIC_SUPABASE_URL` instead of
 `SUPABASE_URL`; the server accepts either. Schema lives in

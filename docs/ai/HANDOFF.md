@@ -106,10 +106,10 @@ not read it to get oriented.
   title + border, danger→`circle-alert`; Figma node 33:34.
 - **Run the ops-history PII scrub** — runbook in `docs/ai/REPO-PROCEDURES.md`.
   ops is private, so hygiene not urgency.
-- **Set `PORTAL_HMAC_SECRET` in Vercel (#28)** — server-only (NOT `VITE_`-),
-  Prod + Preview. **Paste the SAME value `VITE_PORTAL_HMAC_SECRET` holds** so
-  existing `/c/:slug?token=…` links keep verifying; then redeploy and delete the
-  old `VITE_` one (nothing reads it; it only leaked the secret into the bundle).
+- **Remove `PORTAL_HMAC_SECRET` + `VITE_PORTAL_HMAC_SECRET` from Vercel** — the
+  in-ops `/c/:slug` portal was retired (portals live in `hirobius/portal-kit`),
+  so nothing reads either var. `/c/:slug` now serves a "moved" notice; old
+  `?token=…` links land there gracefully instead of 404ing.
 
 ## Next (ordered queue)
 
