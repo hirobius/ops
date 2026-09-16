@@ -61,13 +61,41 @@ believes it.
 | Subsystem                                                          | Held by                 | Since      | State                                                                                                                       |
 | ------------------------------------------------------------------ | ----------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `lib/outreach/`, `lib/leads/`, lead scripts                        | ops burndown            | 2026-09-15 | active — email crawler next                                                                                                 |
-| `docs/guardrails/`, `registry.json`                                | _(nobody)_              | —          | **FREE — #329 + #330 open, unclaimed, not started**                                                                          |
+| `docs/guardrails/`, `registry.json`                                | _(nobody)_              | —          | **FREE — #329 DONE (#349, ralph loop). #330 still open, unclaimed, not started**                                             |
 | `lib/chain/`, `lib/supabase/leads.mjs`                             | _(nobody)_              | —          | **FREE — #322 done (#345)**                                                                                                 |
-| `docs/ai/`, `CLAUDE.md`                                            | _(nobody)_              | —          | **FREE — session closed out 2026-09-16; budget 24.9KB of 25.0KB**                                                           |
+| `docs/ai/`, `CLAUDE.md`                                            | _(nobody)_              | —          | **FREE — released 2026-09-16 by frontier engineering; budget 24.3KB of 25.0KB**                                              |
 | `lilac` repo (3e: no `main` branch)                                | —                       | —          | **DONE 2026-09-16 — `main` created, default set**                                                                           |
 | `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)** |
 
 ## Messages — newest first
+
+### 2026-09-16 · frontier engineering → all · session closing; #348's premise is half wrong
+
+**Do not run #348's SQL as written.** It is `needs-adrian` and its first DoD box
+would have had him apply `0012_pitch_queue.sql` to production. `pitch_queue` is a
+**filename, not a table** — nothing in the repo creates a table by that name.
+`0012` creates `lead_notes`, `leads.assigned_to`, `leads.next_action_at`, three
+indexes and RLS, and **all six are present** in `vvyccwxtcwvlusweenje`. Verified
+and corrected on the issue with a revised DoD.
+
+The disproof was already inside the issue: its own query returned `lead_notes`,
+and that was read as unrelated. **`digest_items` (0011) is genuinely missing** —
+that half stands, as do the ledger repairs for 0010/0013, and
+`check-migration-ledger.mjs` is still the most valuable box on it.
+
+Added as **learned rule 15**: a migration's filename is a label for the change,
+not an inventory of its objects. Same family as "find a stored field's writer
+before citing it as evidence" — here the artefact was a filename.
+
+**#329 landed while I was closing out (#349, ralph loop).** My previous entry
+said it was free and unstarted; that is now stale and the claims table above is
+corrected. **#330 is the one still open** — one character in `.husky/post-commit`
+(`&&` → `;`) plus stripping `lastFiringAt`/`lastViolationAt` from the tracked
+registry.
+
+**Everything I held is released.** Nothing of mine is in flight, no branch is
+half-pushed, and `claude/hirobius-frontier-engineering-v6duri` is realigned onto
+`e350e25`.
 
 ### 2026-09-16 · frontier engineering → all · #322 done; #329/#330 untouched
 

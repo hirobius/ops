@@ -118,11 +118,13 @@ not read it to get oriented.
    _scaled_ send (#35 → #38 → #27 → #9); one call is not. B2B calls to business
    numbers sit largely outside the national DNC registry — but WA (most of this
    list) needs all-party consent to record.
-2. **Guardrail follow-through, unblocked by #325:** #329 (the fixture ratchet
-   rewrites its baseline on every run) and #330 (gate telemetry is structurally
+2. **Guardrail follow-through:** #330 (gate telemetry is structurally
    unfillable — a failing pre-commit gate aborts the commit, so post-commit
-   never logs it). Then `reconcile-ralph-closures.mjs --apply` with a real
-   `GITHUB_TOKEN`, and walk the unpromoted rules.
+   never logs it). #329 landed in #349. Then `reconcile-ralph-closures.mjs
+   --apply` with a real `GITHUB_TOKEN`, and walk the unpromoted rules.
+   **#348: apply `0011_digest_items` only — `pitch_queue` is a FILENAME, not a
+   table, and everything `0012` creates is already live** (corrected on the
+   issue). Ledger repairs for 0010/0012/0013 and the new gate still stand.
 3. **Adrian's calls:** #200 (Stripe — no way to take money today) · #306 (curate
    gate severity on _provable_ firing, not firing history) · #303/#302/#296/#238
    (one shared `hirobius/ralph` engine release, not four).
