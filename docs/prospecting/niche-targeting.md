@@ -68,9 +68,46 @@ reachable): **Fencing/decks → Tree services → Septic/excavation → Pressure
    objections (saturation, gatekeepers, cycle length) still stand and are now
    priced in rather than used to rule the tier out.
 
-## The high-ticket tier (added 2026-09-16)
+## Home market first — Spokane + North Idaho (added 2026-09-16)
 
-A **second thesis**, not a correction of the first. The shortlist above optimises
+**The nearest lead is the cheapest lead.** Same time zone, a drivable meeting, a
+local referral graph, and — for forestry mulching / land clearing — an existing
+portfolio piece in the exact niche, which converts far better than any copy.
+
+Until 2026-09-16 the preset matrix **could not scrape this market**: `WA_METROS`
+carried Spokane as two areas and no Idaho at all, so Coeur d'Alene, Post Falls,
+Hayden, Rathdrum and Sandpoint were unreachable. `INLAND_NW_METROS` plus the
+`forestry-mulching-inw` and `home-market-inw` presets fix that.
+
+Realistic budgets for this segment (2026): **$1,800–$5,000** for a contractor
+site — driven by quote forms, service-area pages and galleries — plus **$100–$400/mo**
+maintenance. That is the recurring line, and it is a smaller, faster sale than the
+high-ticket tier's $8k–15k. Both are real; they are not the same business.
+
+### Lead sources our pipeline does NOT have a seam for
+
+Outscraper reads Google Maps, so it can only see businesses that already have a
+listing with reviews. Three channels sit outside that entirely, and the first is
+the one with the sharpest edge:
+
+| Source                          | Why it beats Maps scraping                                                                                                                                                                                                                                | Where                                                                                              |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **New business registrations**  | A business registered last month has no website, no incumbent agency, and nobody else pitching it. It also has **no Maps reviews**, so our review-weighted scorer would rank it last if it could see it at all — this needs its own intake, not a preset. | WA CCFS (date-filtered, CSV export) · Idaho SOSBiz (filing-date range)                             |
+| **New contractor licences**     | Same signal, filtered to trades. WA law requires the registration number in all advertising, including online.                                                                                                                                            | WA L&I verify · Idaho DOPL                                                                         |
+| **Public-sector solicitations** | Inbound, budgeted, and recurring once registered.                                                                                                                                                                                                         | WA WEBS (email alerts on web-design commodity codes) · City of Spokane purchasing · Spokane County |
+
+**Caveat on WA DOR Business Lookup:** it is per-record only and DOR is legally
+barred from releasing lists for commercial purposes. Use it to verify a specific
+prospect, never to pull leads. CCFS and SOSBiz are the date-filterable sources.
+
+**Veteran-owned certification** (WDVA, free) is a credibility badge _and_ a
+channel: WA agencies carry a Governor's-office goal of 5% of purchasing with
+veteran/servicemember-owned businesses. Pairs with WEBS registration.
+
+## The high-ticket tier (added 2026-09-16) — the EXPANSION play, sequenced second
+
+A **second thesis**, not a correction of the first, and explicitly **not the
+near-term pipeline**. Run it once the home market below is producing. The shortlist above optimises
 for the **cheapest close**: low website penetration means the pitch is "you have
 no site", the product is one templated page, and the owner answers his own phone.
 This tier optimises for **client budget** instead.
