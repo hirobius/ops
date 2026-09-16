@@ -129,4 +129,5 @@ branch` is frequently loop _infrastructure_ (bot-actor push rejection, a
 **Never queue an issue whose DoD requires editing `.github/workflows/*`** — the
 bot's token lacks the `workflows` scope. Split it: the workflow file goes to a
 human/adr-eng PR, the rest becomes a script-or-registry issue Ralph can push.
-ops#90, #240, #241 and #243 each did the full work and then died at the push.
+Four issues each did the full work and then died at the push. **`.husky/` is NOT
+`.github/workflows/`** — hooks carry no scope restriction and Ralph can push them.
