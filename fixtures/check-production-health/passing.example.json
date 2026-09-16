@@ -1,1 +1,13 @@
-{ "__stub": true, "__todo": "replace with real-passing-example for check-production-health" }
+{
+  "_comment": "Healthy: the data path returns real rows and the project is ACTIVE_HEALTHY. Rows are what proves liveness — the status code alone never did.",
+  "tasks": {
+    "status": 200,
+    "body": {
+      "tasks": [
+        { "id": "t_1", "status": "open" },
+        { "id": "t_2", "status": "done" }
+      ]
+    }
+  },
+  "supabaseStatus": "ACTIVE_HEALTHY"
+}
