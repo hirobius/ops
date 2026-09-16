@@ -24,7 +24,12 @@ import { Link } from 'react-router';
 
 import { Page, Stack, Card, Badge, Stat } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
+import { usePoll } from '../../lib/usePoll';
 import { PageHeader } from './PageHeader';
+// Reuse Standing's fleet fetch so the funnel is DERIVED from live leads row
+// counts, never hand-written. (It's the heavier /api/tasks?fleet=1 read; a light
+// /api/leads?funnel=1 mode would be a cheaper follow-up if this page gets hot.)
+import { fetchFleetStatus, type FleetStatus } from './ralphStatus';
 
 import type { ClientFiles } from './clientTypes';
 import { CLIENT_REGISTRY } from './clientRegistry';
@@ -131,6 +136,10 @@ export default function ClientsIndexPage() {
           lede={`Active retainers, prospects & sample builds — ${CLIENTS.length} active, ${PROSPECTS.length} prospect, ${DEMOS.length} demos.`}
         />
 
+        {/* Lead funnel — the tier upstream of clients (Supabase leads), so the
+            whole picture (leads → prospects → clients) reads in one place. */}
+        <LeadFunnelStrip />
+
         {/* Active clients */}
         <section>
           <div style={s.sectionHead}>
@@ -227,6 +236,48 @@ function ServiceTags({ services }: { services: string[] }) {
         </Badge>
       ))}
     </div>
+  );
+}
+
+function fmtCount(v: number | null | undefined): string {
+  return v == null ? '—' : String(v);
+}
+
+// Live lead funnel — Supabase row counts via the shared fleet read, so the tier
+// upstream of clients is visible in one place. Derived, never hand-written.
+function LeadFunnelStrip() {
+  const { data } = usePoll<FleetStatus>(fetchFleetStatus, { intervalMs: 60000 });
+  const f = data?.funnel ?? {};
+  const steps: { label: string; value: number | null | undefined; href: string }[] = [
+    { label: 'Sourced', value: f['sourced'], href: '/ops/leads' },
+    { label: 'Qualified', value: f['qualified'], href: '/ops/leads' },
+    { label: 'Pitch-ready', value: f['published'], href: '/ops/pitch' },
+    { label: 'Contacted', value: f['contacted'], href: '/ops/pitch' },
+  ];
+  return (
+    <section>
+      <div style={s.sectionHead}>
+        <h2 style={s.sectionTitle}>Lead funnel</h2>
+        <Link to="/ops/standing" style={s.addLink}>
+          Full board →
+        </Link>
+      </div>
+      <div style={s.funnelRow}>
+        {steps.map((st, i) => (
+          <React.Fragment key={st.label}>
+            <Link to={st.href} className="hds-focus" style={s.funnelStep}>
+              <span style={s.funnelValue}>{fmtCount(st.value)}</span>
+              <span style={s.funnelLabel}>{st.label}</span>
+            </Link>
+            {i < steps.length - 1 ? (
+              <span aria-hidden="true" style={s.funnelArrow}>
+                →
+              </span>
+            ) : null}
+          </React.Fragment>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -395,6 +446,37 @@ const s = {
     textDecoration: 'none' as const,
   },
   titleLink: { color: 'inherit', textDecoration: 'none' as const },
+
+  funnelRow: {
+    display: 'flex',
+    alignItems: 'stretch',
+    gap: hds.space.px8,
+    flexWrap: 'wrap' as const,
+  },
+  funnelStep: {
+    flex: '1 1 120px',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: hds.space.px4,
+    padding: `${hds.space.px12} ${hds.space.px16}`,
+    background: 'var(--semantic-color-surface-raised)',
+    borderRadius: hds.borderRadius[8],
+    textDecoration: 'none' as const,
+    color: 'inherit',
+    minWidth: 0,
+  },
+  funnelValue: {
+    ...hds.typeStyles.h2,
+    margin: 0,
+    color: 'var(--semantic-color-content-primary)',
+    fontVariantNumeric: 'tabular-nums' as const,
+  },
+  funnelLabel: {
+    ...hds.typeStyles.ui,
+    fontSize: hds.fontSize.xs,
+    color: 'var(--semantic-color-content-secondary)',
+  },
+  funnelArrow: { alignSelf: 'center' as const, color: 'var(--semantic-color-content-secondary)' },
 
   clientGrid: {
     display: 'grid',
