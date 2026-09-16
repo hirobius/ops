@@ -15,12 +15,12 @@ The repo remains canonical. Figma is a workspace and sync target.
 
 Use the right Figma path for the job:
 
-| Tooling                                  | Best for                                                               | Mode notes                                               |
-| ---------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------- |
-| Official Figma MCP / Code Connect        | Quick component-level code generation from specific links              | Read-oriented bridge for code scaffolding                |
-| Figma Console MCP Remote                 | Read-only inspection, screenshots, variables, and project-wide context | Good for lightweight exploration and auditing            |
-| Figma Console MCP Cloud                  | Browser-based AI clients that need write access through the relay      | Good for design-first workflows without local Node setup |
-| Figma Console MCP Local / Desktop Bridge | Full read/write control, console monitoring, and deeper automation     | Best for full-fidelity sync and plugin-aware workflows   |
+| Tooling | Best for | Mode notes |
+|---|---|---|
+| Official Figma MCP / Code Connect | Quick component-level code generation from specific links | Read-oriented bridge for code scaffolding |
+| Figma Console MCP Remote | Read-only inspection, screenshots, variables, and project-wide context | Good for lightweight exploration and auditing |
+| Figma Console MCP Cloud | Browser-based AI clients that need write access through the relay | Good for design-first workflows without local Node setup |
+| Figma Console MCP Local / Desktop Bridge | Full read/write control, console monitoring, and deeper automation | Best for full-fidelity sync and plugin-aware workflows |
 
 ## Workflow Lanes
 
@@ -70,3 +70,4 @@ Outputs:
 - `DESIGN.md` stays lean.
 - `DESIGN-HANDOFF.md` stays verbose.
 - `hirobius.tokens.json` remains the source of truth for visual values.
+

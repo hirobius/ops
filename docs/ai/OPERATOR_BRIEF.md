@@ -45,9 +45,9 @@ report, a targeted change), do that instead.
 3. **Claim before work** (concurrency control — mandatory).
    Before any code edits, commit a 1-line standalone change to
    `orchestration.json` setting `status: "claimed"`, `claimedBy: "<agentId
-or session label>"`, `claimedAt: "<ISO-8601-now>"` for each unit you
+   or session label>"`, `claimedAt: "<ISO-8601-now>"` for each unit you
    intend to execute. Commit message: `chore(orch): claim <unit-id> for
-<agentId>` (or `claim N units for <agentId>` for a batch). This is the
+   <agentId>` (or `claim N units for <agentId>` for a batch). This is the
    FIRST commit after `git reset --hard <branch>` — it lets parallel peers
    skip the unit when they scan eligibility. Skipping this step is how
    parallel pods produce collision commits on the same orchestration lines.
@@ -71,7 +71,6 @@ or session label>"`, `claimedAt: "<ISO-8601-now>"` for each unit you
      `claimedBy`/`claimedAt`, document the blocker in `agentNotes`.
 
 5. **Pre-commit gate (all four MUST exit 0 before any commit):**
-
    ```
    node scripts/run-validator-tests.mjs
    node scripts/test-retry-loop.mjs
@@ -102,7 +101,6 @@ or session label>"`, `claimedAt: "<ISO-8601-now>"` for each unit you
    structure and patching your unit's status, then continue).
 
 **Stop conditions** (return to Adrian for a decision):
-
 - A `validationCmd` fails twice with different error messages.
 - A change would modify a schema already consumed by a `done` unit.
 - The user's intent is genuinely ambiguous after re-reading the request twice.
@@ -110,7 +108,6 @@ or session label>"`, `claimedAt: "<ISO-8601-now>"` for each unit you
   (push, force-push, PR comment, schema delete, etc.).
 
 **Hard rules:**
-
 - **Never** run `pnpm check:release` (10+ minutes, not part of any unit gate).
 - **Never** open units in the `backlog` phase without explicit instruction.
 - **Never** push to remote without explicit instruction.
@@ -130,16 +127,17 @@ have been archived to `docs/ai/archive/OPERATOR_BRIEF_ARCHIVE.md`.
 
 ---
 
+
 ## 1. What this build is
 
 A proprietary, mostly-zero-dependency DesignOps engine that uses a
 local LLM (Hermes3 via Ollama) to generate Figma UI from natural-
 language prompts. Three processes:
 
-CLI (scripts/generate-to-figma.mjs)
-→ LLM (hermes3 at localhost:11434)
-→ Bridge (scripts/hds-bridge.mjs at localhost:3005)
-→ Figma Plugin (figma-agent-plugin/code.js)
+  CLI (scripts/generate-to-figma.mjs)
+    → LLM (hermes3 at localhost:11434)
+    → Bridge (scripts/hds-bridge.mjs at localhost:3005)
+    → Figma Plugin (figma-agent-plugin/code.js)
 
 The plugin draws the result on canvas. A validator suite (the
 "AST Gatekeeper") checks LLM output against the manifest before
@@ -160,6 +158,7 @@ the bridge accepts commands.
    - docs/ai/rules/FIGMA_BRIDGE.md
    - docs/ai/rules/MANIFEST_SYNC.md
 6. Run `git log --oneline -5` to confirm build state.
+
 
 ## 5. Decision rules (the "house style")
 
@@ -192,6 +191,7 @@ deviate without an explicit reason logged in
    `grep -rn "<keyword>"`. The codebase often already has what
    you'd otherwise build.
 
+
 ## 7. Non-negotiable safety rules
 
 - **Never modify files in `/mnt/skills/`, `/mnt/transcripts/`, or
@@ -204,6 +204,7 @@ deviate without an explicit reason logged in
   takes 10+ minutes.
 - **Never enable a feature flag without running the unit's
   validationCmd first.**
+
 
 ## 9. Self-check before any commit
 
@@ -226,4 +227,3 @@ All four MUST exit 0. If any fail, fix before committing.
   request twice.
 
 In all other cases, proceed autonomously and report what you did.
-```

@@ -12,20 +12,19 @@
 
 ## File Map
 
-| File                                             | Action     | Responsibility                                                                      |
-| ------------------------------------------------ | ---------- | ----------------------------------------------------------------------------------- |
-| `scripts/cc-plugins-middleware.mjs`              | **Create** | `GET /api/cc-plugins` — reads skill dirs, parses SKILL.md frontmatter, returns JSON |
-| `vite.config.mjs`                                | **Modify** | Mount `createCcPluginsMiddleware` at `/api/cc-plugins`                              |
-| `src/app/pages/ops/agentic-os/cc-plugins.ts`     | **Create** | `CcSkill` type + `fetchCcSkills()` wrapper                                          |
-| `src/app/pages/ops/agentic-os/PluginsBar.tsx`    | **Create** | Renders skill tiles grouped by source; copy-to-clipboard on click                   |
-| `src/app/pages/ops/agentic-os/AgenticOSPage.tsx` | **Modify** | Add `Plugins` Disclosure + `PluginsBar` import                                      |
+| File | Action | Responsibility |
+|---|---|---|
+| `scripts/cc-plugins-middleware.mjs` | **Create** | `GET /api/cc-plugins` — reads skill dirs, parses SKILL.md frontmatter, returns JSON |
+| `vite.config.mjs` | **Modify** | Mount `createCcPluginsMiddleware` at `/api/cc-plugins` |
+| `src/app/pages/ops/agentic-os/cc-plugins.ts` | **Create** | `CcSkill` type + `fetchCcSkills()` wrapper |
+| `src/app/pages/ops/agentic-os/PluginsBar.tsx` | **Create** | Renders skill tiles grouped by source; copy-to-clipboard on click |
+| `src/app/pages/ops/agentic-os/AgenticOSPage.tsx` | **Modify** | Add `Plugins` Disclosure + `PluginsBar` import |
 
 ---
 
 ## Task 1: `cc-plugins-middleware.mjs` — skill directory reader
 
 **Files:**
-
 - Create: `scripts/cc-plugins-middleware.mjs`
 
 - [ ] **Step 1: Create the file**
@@ -43,8 +42,8 @@
  */
 
 import { readFileSync, readdirSync } from 'node:fs';
-import { join, resolve } from 'node:path';
-import { homedir } from 'node:os';
+import { join, resolve }             from 'node:path';
+import { homedir }                   from 'node:os';
 
 /**
  * Parse the YAML-ish frontmatter block from a SKILL.md file.
@@ -61,8 +60,8 @@ function parseFrontmatter(content) {
   for (const line of match[1].split('\n')) {
     const colonIdx = line.indexOf(':');
     if (colonIdx === -1) continue;
-    const key = line.slice(0, colonIdx).trim();
-    let value = line.slice(colonIdx + 1).trim();
+    const key   = line.slice(0, colonIdx).trim();
+    let   value = line.slice(colonIdx + 1).trim();
     if (
       (value.startsWith('"') && value.endsWith('"')) ||
       (value.startsWith("'") && value.endsWith("'"))
@@ -85,17 +84,17 @@ function parseFrontmatter(content) {
 function readSkillsDir(dir, source) {
   try {
     const entries = readdirSync(dir, { withFileTypes: true });
-    const skills = [];
+    const skills  = [];
     for (const entry of entries) {
       if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
       try {
         const content = readFileSync(join(dir, entry.name, 'SKILL.md'), 'utf8');
-        const fm = parseFrontmatter(content);
-        const name = fm.name ?? entry.name;
+        const fm      = parseFrontmatter(content);
+        const name    = fm.name ?? entry.name;
         skills.push({
           name,
           description: fm.description ?? '',
-          invocation: `claude /${name}`,
+          invocation:  `claude /${name}`,
           source,
         });
       } catch {
@@ -123,14 +122,14 @@ export function createCcPluginsMiddleware({ cwd }) {
     const url = new URL(req.url, 'http://localhost');
     if (url.pathname !== '/') return next();
 
-    const globalDir = join(homedir(), '.claude', 'skills');
+    const globalDir  = join(homedir(), '.claude', 'skills');
     const projectDir = join(resolve(cwd), '.claude', 'skills');
 
     const projectSkills = readSkillsDir(projectDir, 'project');
-    const globalSkills = readSkillsDir(globalDir, 'global');
+    const globalSkills  = readSkillsDir(globalDir,  'global');
 
     // Project skills take precedence; dedup by name
-    const seen = new Set();
+    const seen   = new Set();
     const skills = [];
     for (const skill of [...projectSkills, ...globalSkills]) {
       if (!seen.has(skill.name)) {
@@ -147,7 +146,6 @@ export function createCcPluginsMiddleware({ cwd }) {
 - [ ] **Step 2: Verify it parses — quick smoke test**
 
 Run from the project root:
-
 ```bash
 node -e "
 import('./scripts/cc-plugins-middleware.mjs').then(m => {
@@ -174,7 +172,6 @@ git commit -m "feat(ops): cc-plugins middleware — enumerate installed CC skill
 ## Task 2: Mount the middleware in `vite.config.mjs`
 
 **Files:**
-
 - Modify: `vite.config.mjs`
 
 - [ ] **Step 1: Add the import**
@@ -205,7 +202,6 @@ Inside the `plugins: [` array, after the existing `ops-skills-api` plugin block,
 - [ ] **Step 3: Verify the endpoint is live**
 
 Start the dev server (`pnpm dev`) then in a separate terminal:
-
 ```bash
 curl -s http://localhost:5173/api/cc-plugins | node -e "
 const d=[];process.stdin.on('data',c=>d.push(c));
@@ -227,7 +223,6 @@ git commit -m "feat(ops): mount GET /api/cc-plugins in vite dev server"
 ## Task 3: `cc-plugins.ts` — types + fetch wrapper
 
 **Files:**
-
 - Create: `src/app/pages/ops/agentic-os/cc-plugins.ts`
 
 - [ ] **Step 1: Create the file**
@@ -239,10 +234,10 @@ git commit -m "feat(ops): mount GET /api/cc-plugins in vite dev server"
  */
 
 export interface CcSkill {
-  name: string;
+  name:        string;
   description: string;
-  invocation: string;
-  source: 'global' | 'project';
+  invocation:  string;
+  source:      'global' | 'project';
 }
 
 interface CcPluginsResponse {
@@ -251,8 +246,8 @@ interface CcPluginsResponse {
 
 export async function fetchCcSkills(): Promise<CcSkill[]> {
   try {
-    const res = await fetch('/api/cc-plugins');
-    const body = (await res.json()) as CcPluginsResponse;
+    const res  = await fetch('/api/cc-plugins');
+    const body = await res.json() as CcPluginsResponse;
     return body.skills ?? [];
   } catch {
     return [];
@@ -280,7 +275,6 @@ git commit -m "feat(ops): cc-plugins types + fetchCcSkills wrapper"
 ## Task 4: `PluginsBar.tsx` — the component
 
 **Files:**
-
 - Create: `src/app/pages/ops/agentic-os/PluginsBar.tsx`
 
 - [ ] **Step 1: Create the file**
@@ -297,12 +291,12 @@ type Source = 'global' | 'project';
 const SOURCE_ORDER: readonly Source[] = ['project', 'global'];
 const SOURCE_LABEL: Record<Source, string> = {
   project: 'Project',
-  global: 'Global',
+  global:  'Global',
 };
 
 export function PluginsBar() {
-  const [skills, setSkills] = useState<CcSkill[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [skills,   setSkills]   = useState<CcSkill[]>([]);
+  const [loading,  setLoading]  = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
@@ -355,8 +349,8 @@ function SkillTile({
   open,
   onToggle,
 }: {
-  skill: CcSkill;
-  open: boolean;
+  skill:    CcSkill;
+  open:     boolean;
   onToggle: (name: string) => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -393,7 +387,9 @@ function SkillTile({
         </span>
         <span style={s.buttonLabel}>{skill.name}</span>
         <span style={s.buttonHint}>
-          {skill.description.length > 60 ? `${skill.description.slice(0, 60)}…` : skill.description}
+          {skill.description.length > 60
+            ? `${skill.description.slice(0, 60)}…`
+            : skill.description}
         </span>
       </button>
 
@@ -401,7 +397,12 @@ function SkillTile({
         <div style={s.panel}>
           <div style={s.panelCmd}>
             <code style={s.cmdText}>{skill.invocation}</code>
-            <button type="button" onClick={handleCopy} className="hds-focus" style={s.copyBtn}>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="hds-focus"
+              style={s.copyBtn}
+            >
               {copied ? 'copied' : 'copy'}
             </button>
           </div>
@@ -414,122 +415,122 @@ function SkillTile({
 
 const s = {
   root: {
-    display: 'flex',
+    display:       'flex',
     flexDirection: 'column' as const,
-    gap: hds.space.px16,
+    gap:           hds.space.px16,
   },
   muted: {
     fontFamily: hds.monoFamily,
-    fontSize: hds.fontSize.xs,
-    color: 'var(--semantic-color-content-disabled)',
+    fontSize:   hds.fontSize.xs,
+    color:      'var(--semantic-color-content-disabled)',
   },
   groupSection: {
-    display: 'flex',
+    display:       'flex',
     flexDirection: 'column' as const,
-    gap: hds.space.px8,
-    minWidth: 0,
+    gap:           hds.space.px8,
+    minWidth:      0,
   },
   groupHead: {
-    display: 'flex',
+    display:    'flex',
     alignItems: 'baseline',
-    gap: hds.space.px8,
+    gap:        hds.space.px8,
   },
   groupLabel: {
-    fontFamily: hds.monoFamily,
-    fontSize: hds.fontSize.xs,
+    fontFamily:    hds.monoFamily,
+    fontSize:      hds.fontSize.xs,
     textTransform: 'uppercase' as const,
     letterSpacing: '0.08em',
-    color: 'var(--semantic-color-content-secondary)',
+    color:         'var(--semantic-color-content-secondary)',
   },
   groupCount: {
     fontFamily: hds.monoFamily,
-    fontSize: hds.fontSize.xs,
-    color: 'var(--semantic-color-content-disabled)',
+    fontSize:   hds.fontSize.xs,
+    color:      'var(--semantic-color-content-disabled)',
   },
   groupGrid: {
-    display: 'grid',
+    display:             'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-    gap: hds.space.px8,
+    gap:                 hds.space.px8,
   },
   tile: {
-    display: 'flex',
+    display:       'flex',
     flexDirection: 'column' as const,
-    gap: hds.space.px8,
-    minWidth: 0,
+    gap:           hds.space.px8,
+    minWidth:      0,
   },
   button: {
-    display: 'grid',
+    display:             'grid',
     gridTemplateColumns: 'auto minmax(0, 1fr)',
-    gridTemplateRows: 'auto auto',
-    columnGap: hds.space.px8,
-    rowGap: hds.space.px2,
-    padding: `${hds.space.px12} ${hds.space.px12}`,
-    minHeight: '56px',
-    background: 'var(--semantic-color-surface-raised)',
-    color: 'var(--semantic-color-content-primary)',
-    border: '1px solid',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    textAlign: 'left' as const,
-    fontFamily: 'inherit',
+    gridTemplateRows:    'auto auto',
+    columnGap:           hds.space.px8,
+    rowGap:              hds.space.px2,
+    padding:             `${hds.space.px12} ${hds.space.px12}`,
+    minHeight:           '56px',
+    background:          'var(--semantic-color-surface-raised)',
+    color:               'var(--semantic-color-content-primary)',
+    border:              '1px solid',
+    borderRadius:        '8px',
+    cursor:              'pointer',
+    textAlign:           'left' as const,
+    fontFamily:          'inherit',
   },
   buttonIndicator: {
     fontFamily: hds.monoFamily,
-    fontSize: hds.fontSize.lg,
+    fontSize:   hds.fontSize.lg,
     lineHeight: 1,
-    gridRow: '1 / span 2',
-    alignSelf: 'center',
+    gridRow:    '1 / span 2',
+    alignSelf:  'center',
   },
   buttonLabel: {
-    fontSize: hds.fontSize.sm,
-    color: 'var(--semantic-color-content-primary)',
-    overflow: 'hidden',
+    fontSize:     hds.fontSize.sm,
+    color:        'var(--semantic-color-content-primary)',
+    overflow:     'hidden',
     textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap' as const,
+    whiteSpace:   'nowrap' as const,
   },
   buttonHint: {
-    fontSize: hds.fontSize.xs,
-    color: 'var(--semantic-color-content-secondary)',
-    overflow: 'hidden',
+    fontSize:     hds.fontSize.xs,
+    color:        'var(--semantic-color-content-secondary)',
+    overflow:     'hidden',
     textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap' as const,
+    whiteSpace:   'nowrap' as const,
   },
   panel: {
-    border: '1px solid var(--semantic-color-border-default)',
-    borderRadius: '6px',
-    padding: hds.space.px8,
-    background: 'var(--semantic-color-surface-raised)',
-    display: 'flex',
+    border:        '1px solid var(--semantic-color-border-default)',
+    borderRadius:  '6px',
+    padding:       hds.space.px8,
+    background:    'var(--semantic-color-surface-raised)',
+    display:       'flex',
     flexDirection: 'column' as const,
-    gap: hds.space.px8,
-    minWidth: 0,
+    gap:           hds.space.px8,
+    minWidth:      0,
   },
   panelCmd: {
-    display: 'flex',
+    display:    'flex',
     alignItems: 'center',
-    gap: hds.space.px8,
-    flexWrap: 'wrap' as const,
+    gap:        hds.space.px8,
+    flexWrap:   'wrap' as const,
   },
   cmdText: {
     fontFamily: hds.monoFamily,
-    fontSize: hds.fontSize.sm,
-    color: 'var(--semantic-color-content-primary)',
-    flex: 1,
+    fontSize:   hds.fontSize.sm,
+    color:      'var(--semantic-color-content-primary)',
+    flex:       1,
   },
   copyBtn: {
-    fontFamily: hds.monoFamily,
-    fontSize: hds.fontSize.xs,
-    color: 'var(--semantic-color-content-accent)',
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    padding: `${hds.space.px4} ${hds.space.px8}`,
+    fontFamily:   hds.monoFamily,
+    fontSize:     hds.fontSize.xs,
+    color:        'var(--semantic-color-content-accent)',
+    background:   'none',
+    border:       'none',
+    cursor:       'pointer',
+    padding:      `${hds.space.px4} ${hds.space.px8}`,
     borderRadius: '4px',
   },
   panelDesc: {
-    margin: 0,
-    fontSize: hds.fontSize.xs,
-    color: 'var(--semantic-color-content-secondary)',
+    margin:     0,
+    fontSize:   hds.fontSize.xs,
+    color:      'var(--semantic-color-content-secondary)',
     lineHeight: 1.5,
   },
 } satisfies Record<string, CSSProperties>;
@@ -555,7 +556,6 @@ git commit -m "feat(ops): PluginsBar — CC skills list with copy-to-clipboard i
 ## Task 5: Wire `PluginsBar` into `AgenticOSPage`
 
 **Files:**
-
 - Modify: `src/app/pages/ops/agentic-os/AgenticOSPage.tsx`
 
 - [ ] **Step 1: Add the import**
@@ -579,30 +579,20 @@ After the existing `Skills` Disclosure and before the `Inbox` Disclosure:
 The full block context for orientation — you're inserting between these two existing blocks:
 
 ```tsx
-{
-  /* existing */
-}
+{/* existing */}
 <Disclosure id="agentic-os.skills" label="Skills" hint="whitelisted scripts">
   <SkillsBar />
-</Disclosure>;
+</Disclosure>
 
-{
-  /* ADD THIS */
-}
+{/* ADD THIS */}
 <Disclosure id="agentic-os.plugins" label="Plugins" hint="Claude Code skills">
   <PluginsBar />
-</Disclosure>;
+</Disclosure>
 
-{
-  /* existing */
-}
-<Disclosure
-  id="agentic-os.inbox"
-  label="Inbox"
-  hint={`${proposals.length} proposed · not yet approved`}
->
+{/* existing */}
+<Disclosure id="agentic-os.inbox" label="Inbox" hint={`${proposals.length} proposed · not yet approved`}>
   <ProposedUnitsRail entries={PROPOSED_UNITS} />
-</Disclosure>;
+</Disclosure>
 ```
 
 - [ ] **Step 3: Type-check + layout test**
@@ -616,7 +606,6 @@ Expected: 0 errors, all tests green.
 - [ ] **Step 4: Manual browser check**
 
 Open `http://localhost:5173/ops`. Find the "Plugins" Disclosure (collapsed by default). Expand it. Verify:
-
 - "Project" group shows `extract-design`
 - "Global" group shows all ~28 superpowers skills
 - Clicking any tile opens the panel with `claude /skill-name`

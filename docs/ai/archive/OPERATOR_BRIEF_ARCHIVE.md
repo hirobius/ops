@@ -7,39 +7,39 @@
 
 ### Completed phases
 
-Phase 0 ✅ Foundation — repo structure, test harness, telemetry, feature flags
-Phase 1 ✅ Manifest schema — JSON schema, validation script, drift check, 13 enriched components
-Phase 2 ✅ Validator suite — parse-jsx, manifest, token, a11y, orchestrator (16/16 fixtures pass)
-Phase 3 ✅ Retry loop — retry-loop.mjs + format-correction.mjs (5/5 mock tests pass)
-✅ Wired into live path — gatekeeperPath() in generate-to-figma.mjs, retryLoopEnabled=true
-✅ p3-4 Hermes orchestration agent — `pnpm hds:run` reads orchestration.json,
-runs validationCmds, marks done on green; honors stopConditions (commit `53064f7`)
+Phase 0  ✅ Foundation        — repo structure, test harness, telemetry, feature flags
+Phase 1  ✅ Manifest schema   — JSON schema, validation script, drift check, 13 enriched components
+Phase 2  ✅ Validator suite   — parse-jsx, manifest, token, a11y, orchestrator (16/16 fixtures pass)
+Phase 3  ✅ Retry loop        — retry-loop.mjs + format-correction.mjs (5/5 mock tests pass)
+         ✅ Wired into live path — gatekeeperPath() in generate-to-figma.mjs, retryLoopEnabled=true
+         ✅ p3-4 Hermes orchestration agent — `pnpm hds:run` reads orchestration.json,
+            runs validationCmds, marks done on green; honors stopConditions (commit `53064f7`)
 Phase A1 ✅ Manifest schema additions — variantAxes + componentProperties on every spec
 Phase A2 ✅ Cartesian variant generation — pipeline/figma-masters-batch.mjs (80 variants × 13 components)
-Phase A3 ✅ Plugin runtime — addComponentProperty + componentPropertyReferences after combineAsVariants
+Phase A3 ✅ Plugin runtime    — addComponentProperty + componentPropertyReferences after combineAsVariants
 Phase A4 ✅ Tree builder slots — IconLeft/IconRight/Label/Title/Body etc. nodes named for binding
 Phase A5 ✅ End-to-end verified — Step 5 dispatches 80 states, plugin draws 13 component sets, registry indexes 88 entries, pnpm ui:gen resolves to real master instances
 Phase A6 ✅ Visual differentiation — buttonStateTree branches on tuple.variant + tuple.size; Input
-split into vertical Label/Placeholder/Helper/Error slots (commit `ef7c105`)
-Phase 4 ✅ Compiler upgrades:
-✅ p4-1 Compiler regression fixtures — 32 input.jsx → expected.json pairs (now 50 with
-p4-2/3/4/5 additions) under fixtures/compiler/. Wrapper at validators/compiler.mjs.
-✅ p4-2 Expression containers — `{value}` resolved via resolveExpression() (literal types,
-`tokens.X.Y` → token paths, unknown → `{__expr: source}` passthrough). 6 fixtures.
-✅ p4-3 Variant prop → Figma mapping — additive `figmaProperties` field on INSTANCE commands
-using manifest's componentProperties (with invert) + figmaPropertyMapping. Schema-safe;
-`attributes` (React names) unchanged. 4 fixtures + 12 existing fixtures updated additively.
-✅ p4-4 A11y metadata attachment — extractA11yMetadata() reads aria-label/role/description
-attrs and emits an `a11y` field on each command. Manifest-description fallback intentionally
-deferred until p6-1 selection serializer consumes it. 4 fixtures.
-✅ p4-5 Fragments + conditionals — `<>` / `</>` flatten into parent (transparent **fragment**);
-`{cond && <Tag/>}` rewritten to `<Tag data-hds-conditional="true"/>` with cmd.conditional
-flag for fix-mode diffing; ternary / complex expressions discarded. 4 fixtures.
-Phase 7 ⚠️ Partial (productionization):
-✅ p7-1 Manifest CI drift — validate-manifest + check-manifest-drift wired into check:fast,
-check:full, and the new `pretest` hook
-✅ p7-2 Telemetry report — `pnpm telemetry:report` prints all-time stats and threshold-checks
-production retry-exhaustion in a 24h window (matches orchestrator's filter)
+            split into vertical Label/Placeholder/Helper/Error slots (commit `ef7c105`)
+Phase 4  ✅ Compiler upgrades:
+         ✅ p4-1 Compiler regression fixtures — 32 input.jsx → expected.json pairs (now 50 with
+            p4-2/3/4/5 additions) under fixtures/compiler/. Wrapper at validators/compiler.mjs.
+         ✅ p4-2 Expression containers — `{value}` resolved via resolveExpression() (literal types,
+            `tokens.X.Y` → token paths, unknown → `{__expr: source}` passthrough). 6 fixtures.
+         ✅ p4-3 Variant prop → Figma mapping — additive `figmaProperties` field on INSTANCE commands
+            using manifest's componentProperties (with invert) + figmaPropertyMapping. Schema-safe;
+            `attributes` (React names) unchanged. 4 fixtures + 12 existing fixtures updated additively.
+         ✅ p4-4 A11y metadata attachment — extractA11yMetadata() reads aria-label/role/description
+            attrs and emits an `a11y` field on each command. Manifest-description fallback intentionally
+            deferred until p6-1 selection serializer consumes it. 4 fixtures.
+         ✅ p4-5 Fragments + conditionals — `<>` / `</>` flatten into parent (transparent __fragment__);
+            `{cond && <Tag/>}` rewritten to `<Tag data-hds-conditional="true"/>` with cmd.conditional
+            flag for fix-mode diffing; ternary / complex expressions discarded. 4 fixtures.
+Phase 7  ⚠️  Partial (productionization):
+         ✅ p7-1 Manifest CI drift — validate-manifest + check-manifest-drift wired into check:fast,
+            check:full, and the new `pretest` hook
+         ✅ p7-2 Telemetry report — `pnpm telemetry:report` prints all-time stats and threshold-checks
+            production retry-exhaustion in a 24h window (matches orchestrator's filter)
 
 ### What works end-to-end
 
@@ -84,8 +84,7 @@ local hermes3 generation quality, not (primarily) downstream kit-readiness.
 The LLM produced aesthetic slop (bold headings, generic card grids,
 oversized padding, multi-hue text emphasis, gradient surfaces) even when
 structural output was correct. The leverage point: the existing retry-loop
-
-- a Swiss-canon validator that loops violations back through it.
++ a Swiss-canon validator that loops violations back through it.
 
 **Four units, all done:**
 
@@ -108,7 +107,7 @@ structural output was correct. The leverage point: the existing retry-loop
 - ✅ **`8p-3-style-canon-system-prompt`** (`6f42f22`) — 13-line STYLE CANON
   block in scripts/generate-to-figma.mjs:buildSystemPrompt() between
   BINDING RULES and COMPLETE EXAMPLE. Smoke: `pnpm ui:gen "a primary
-button labeled Save"` clean on attempt 1. `pnpm ui:gen "a login form"`
+  button labeled Save"` clean on attempt 1. `pnpm ui:gen "a login form"`
   exhausts on PRE-EXISTING manifest gaps (HdsFrame/Text specs have
   empty props, Input/HdsButton trip a11y when LLM omits label/aria) —
   not a regression.
@@ -117,13 +116,12 @@ button labeled Save"` clean on attempt 1. `pnpm ui:gen "a login form"`
   templates/component-template.tsx, supports --dry-run; (b)
   `scripts/check-component-completeness.mjs` walking
   src/app/components/Hds*.tsx; (c) `scripts/check-source-canon.mjs`
-  walking src/\*\*/*.tsx via shared `validators/canon-rules.mjs`. Both new
+  walking src/**/*.tsx via shared `validators/canon-rules.mjs`. Both new
   gates wired into pretest as `--soft` (warn-only). Today: 39 completeness
   warnings + 61 source-canon warnings (mostly fontWeight: 700 in test/demo
   pages). Promote to hard fail in a follow-up after fixing easy wins.
 
 **Pre-commit gate (all green at landing):**
-
 ```
 node scripts/run-validator-tests.mjs   # 80/80
 node scripts/test-retry-loop.mjs       # 5/5
@@ -139,7 +137,7 @@ node scripts/check-manifest-drift.mjs  # no drift
   compiler accepts (scripts/hds-jsx-compiler.mjs:240) including alias
   spellings (fill/background, stroke/border, layout/layoutMode,
   gap/itemSpacing). Smoke: `pnpm ui:gen "a login form"` and `"a marketing
-hero"` now succeed on attempt 2 (were exhausting at 3). Settings table
+  hero"` now succeed on attempt 2 (were exhausting at 3). Settings table
   still trips but on `UNKNOWN_COMPONENT` for hallucinated `TableHeader`/
   `HdsTh` — separate problem, out of 8p-5 scope.
 - ✅ **`8p-6-source-canon-cleanup-and-promote`** (`5e97c53`) —
@@ -159,7 +157,6 @@ hero"` now succeed on attempt 2 (were exhausting at 3). Settings table
   constraints. Promoted to hard-fail in pretest.
 
 **Pretest pipeline now blocks on (all hard-fail):**
-
 ```
 node scripts/validate-manifest.mjs
 node scripts/check-manifest-drift.mjs
@@ -227,13 +224,13 @@ full reasoning):
 
 **Cluster ordering and gates:**
 
-| Cluster                                 | Phase          | Units | Estimate | Why this order                                                                                                                                                                                                     |
-| --------------------------------------- | -------------- | ----- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **8-V** Manifest-driven master bindings | `8-V-binding`  | 6     | 1.5 wk   | Foundation: kills 40+ inline `_hdsTokenBinding` calls in `pipeline/figma-masters-batch.mjs` by moving them into manifest `slots[]`. Lands first because every later cluster benefits from manifest-driven binding. |
-| **8-X** Tier classification + cleanup   | `8-X-tier`     | 5     | 1 wk     | Adds `tier` field, audits 94 specs (37 are orphans), moves utilities + experiments out of `componentSpecs`. Must land before 8-S so we don't shadcn-refactor entries that turn out to be utilities.                |
-| **8-E** Elevation + role-alias tokens   | `8-E-tokens`   | 3     | 0.5 wk   | Adds `elevation.*` + `shadow.*` semantic tokens, role-alias layer (background/foreground/primary/etc. → existing semantic paths), Tailwind config emitter.                                                         |
-| **8-S** shadcn primitives baseline      | `8-S-shadcn`   | 8     | 1.5 wk   | Reinstall Tailwind v4, install Radix + cva + clsx + tailwind-merge, build spike (8s-3 has STOP CONDITION on Adrian visual ratification), then refactor 4 flagships, then write manifest projection script.         |
-| **8-T** Patterns + templates pass       | `8-T-patterns` | 6     | 1.5 wk   | Light pattern docs format, template galleries, batch-refactor every pattern + template to compose flagship primitives only. Final orphan cleanup + public API lockdown.                                            |
+| Cluster | Phase | Units | Estimate | Why this order |
+|---------|-------|-------|----------|----------------|
+| **8-V** Manifest-driven master bindings | `8-V-binding` | 6 | 1.5 wk | Foundation: kills 40+ inline `_hdsTokenBinding` calls in `pipeline/figma-masters-batch.mjs` by moving them into manifest `slots[]`. Lands first because every later cluster benefits from manifest-driven binding. |
+| **8-X** Tier classification + cleanup | `8-X-tier` | 5 | 1 wk | Adds `tier` field, audits 94 specs (37 are orphans), moves utilities + experiments out of `componentSpecs`. Must land before 8-S so we don't shadcn-refactor entries that turn out to be utilities. |
+| **8-E** Elevation + role-alias tokens | `8-E-tokens` | 3 | 0.5 wk | Adds `elevation.*` + `shadow.*` semantic tokens, role-alias layer (background/foreground/primary/etc. → existing semantic paths), Tailwind config emitter. |
+| **8-S** shadcn primitives baseline | `8-S-shadcn` | 8 | 1.5 wk | Reinstall Tailwind v4, install Radix + cva + clsx + tailwind-merge, build spike (8s-3 has STOP CONDITION on Adrian visual ratification), then refactor 4 flagships, then write manifest projection script. |
+| **8-T** Patterns + templates pass | `8-T-patterns` | 6 | 1.5 wk | Light pattern docs format, template galleries, batch-refactor every pattern + template to compose flagship primitives only. Final orphan cleanup + public API lockdown. |
 
 Total: 28 units, ~6 wk.
 
@@ -358,9 +355,8 @@ manifest slot bindings fails the build.
 
 ```js
 function slotBinding(spec, slotName, overlay = null) {
-  const slot = (spec && Array.isArray(spec.slots) ? spec.slots : []).find(
-    (s) => s && s.name === slotName,
-  );
+  const slot = (spec && Array.isArray(spec.slots) ? spec.slots : [])
+    .find((s) => s && s.name === slotName);
   const base = slot && slot.tokenBinding ? { ...slot.tokenBinding } : {};
   if (overlay) {
     for (const key of Object.keys(overlay)) {
@@ -408,7 +404,6 @@ p6-1 unblocks `/lint`, `/contrast`, fix-mode diffing, and reverse token
 sync — every designer-facing feature in Phase 6.
 
 **What's in place:**
-
 - `figma-agent-plugin/code.js#extractNodeTree` — exists but doesn't
   resolve `componentName` from master component IDs, doesn't translate
   `boundVariables` to token paths, and has no a11y metadata pickup.
@@ -417,7 +412,6 @@ sync — every designer-facing feature in Phase 6.
   mapping (already built into the registry by p3-x / Phase A).
 
 **What's needed (per orchestration.json p6-1):**
-
 - Match each selected node to its master via Figma component ID, emit
   `componentName`, resolve `boundVariables` to token paths, surface
   `a11y` (name/role/description) on serialized nodes.
@@ -564,37 +558,32 @@ spot ASAP, business expansion soon):
    (debugging).
 
 **Then drain Phase-10 sprint-1 in parallel pods** (eco mix):
-
 - Haiku pod: 10a-7 scope-doc + 10t-4-style ADRs follow-ups
 - Sonnet pod: 10a-2 token-audit-clean (drives BACKLOG Foundations
   criterion to zero; deletion-heavy)
-- Sonnet pod: 10d-\* doc-polish chain (1, 2, 3 sequential — doc polish
+- Sonnet pod: 10d-* doc-polish chain (1, 2, 3 sequential — doc polish
   shape may absorb most of these)
 - Sonnet pod: 10o-21 follow-ups, 10o-3 hooks audit, 10o-9 agent-context
   consolidation
 
 **Background actions that can interleave:**
-
 - **Phase 5/6 flag flips** — 10m-4-feature-flag-flip-window. Earliest
   eligibility 2026-05-02 (24h after each unit landed). Flips activate
   the live read-path: selection serializer + /lint + /contrast + reverse
   token sync + fix-mode diff. Phase 6 can build on top (10f-2..6).
 
 **Skip until grilled (status: needs-grilling):**
-
 - `8h-1`, `8h-2`, `8h-3` Phase 8 hardening
 - `10f-13-wat-framework-readability` (WAT acronym undefined)
 - Cluster F agent infra (10g-1..4 / OpenClaw / Hermes learning) — none
   yet drafted in restored backlog; Adrian to grill before drafting.
 
 **Skip until ratified (status: parked):**
-
 - `10n-*` narrative-adoption (8 units) — defer until visual+Figma solid
 - `backlog-4..22` — repo-wide changes; ratify per-item before opening
 - `10p-5-mobile-first-pass` — huge merge surface; defer until visual stable
 
 **Hard rules reminder for next agent dispatch:**
-
 - Eco model selection per CLAUDE.md SUB-AGENT DISPATCH RULES.
 - Worktree isolation for ANY parallel pod touching shared files.
 - Worktree branches drift from HEAD on creation (branched from stale
@@ -602,13 +591,15 @@ spot ASAP, business expansion soon):
   worktree, OR risk merging stale base files. Pod 8's Pod-5-typography
   conflict is the exemplar.
 - After each pod completes, RECONCILE orchestration.json with status:done
-  - completedAt in a single chore commit so the autonomous queue stays
-    current.
+  + completedAt in a single chore commit so the autonomous queue stays
+  current.
 - COMMIT IMMEDIATELY after Node script writes — orchestration.json edits
   uncommitted will be wiped by next worktree reset (this happened in
   the prior session and lost the 86-unit prioritization).
 
 ---
+
+
 
 The cheapest first move is `node scripts/ai-orchestrator.mjs --orchestrate
 --dry-run`. Post-overnight reconciliation 2026-05-01: the active build
@@ -648,3 +639,4 @@ in the playwright config and only allow updates via explicit
 Default recommendation: nothing in queue. Whenever Adrian wants to
 extend, propose **`backlog-3-component-prefix-rename`** as the natural
 next strategic move (HDS → Hydra brand-rename + Hds prefix drop).
+

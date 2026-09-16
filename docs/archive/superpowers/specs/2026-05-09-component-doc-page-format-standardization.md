@@ -58,30 +58,25 @@ export default function <PageName>Page() {
 ## Changes Per Page
 
 ### NavigationPage
-
 - Add `hideDetails`, `hideVariantDeck`, `hideHero` to `CategoryComponentDocs`
 - No configs needed (manifest defaults are sufficient)
 
 ### LayoutPage
-
 - Add `hideDetails`, `hideVariantDeck`, `hideHero` to `CategoryComponentDocs`
 - Add blank line between last import and `export default`
 - No configs needed
 
 ### InputsPage
-
 - Add `hideDetails`, `hideVariantDeck`, `hideHero` to `CategoryComponentDocs`
 - Change `satisfies Record<string, { matrix?: ReactNode }>` → `satisfies Record<string, { matrix?: ReactNode; children?: ReactNode }>`
 
 ### DocUtilitiesPage
-
 - Add JSDoc header (category: Utilities/Branding/Lab; validated against Material Design / Ant Design)
 - Remove three `<section>` wrappers and `TextLockup` headings — render three `CategoryComponentDocs` flat
 - Remove `TextLockup` import from `'../HdsDocPrimitives'`
 - Add `hideDetails`, `hideVariantDeck`, `hideHero` to all three `CategoryComponentDocs`
 
 ### FeedbackPage
-
 - Drop imports: `DocSection`, `HdsComponentDoc` from `'../HdsDocPrimitives'`
 - Add: `import { type ReactNode } from 'react'`
 - Build `configs` object:
@@ -92,7 +87,6 @@ export default function <PageName>Page() {
 - Keep imports: `Badge`, `Callout`, `VariantStrip` (used in configs)
 
 ### DisplayPage
-
 - Drop imports: `DocSection`, `DocSubsection`, `HdsComponentDoc` from `'../HdsDocPrimitives'`
 - Drop import: `InlineLink` (custom Icon description is removed to match Actions format)
 - Add: `import { type ReactNode } from 'react'`

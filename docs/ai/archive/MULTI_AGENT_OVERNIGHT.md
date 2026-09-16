@@ -67,12 +67,12 @@ That is fast enough to keep the queue draining without humans in the loop.
 Every eligible unit gets a tier when the watcher computes the queue. Tier
 controls **model**, **effort**, and **autonomy**.
 
-| Tier                 | Match heuristic                                                                                                                                 | Model    | Effort  | Autonomy                                                                                                                                                                             |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **T1 mechanical**    | scrub / regen / baseline / fixture / emoji / comment / rename file / alias / tag / cron / burndown                                              | `haiku`  | default | execute, no ledger                                                                                                                                                                   |
-| **T2 standard**      | everything else                                                                                                                                 | `sonnet` | default | execute, ledger only if a non-obvious decision was made                                                                                                                              |
-| **T3 architectural** | schema / protocol / validator / projection / batch / cross-cutting / refactor / new gate / new check / new envelope / manifest projection       | `sonnet` | default | execute, **mandatory ledger entry** before commit                                                                                                                                    |
-| **T4 strategic**     | brand / Hydra rename / multi-tenant / deploy / public-API break / business / monetization / pricing / Stripe — OR `status === 'needs-grilling'` | `opus`   | **max** | execute with **mandatory ledger entry**, work the unit to the point where it **unblocks the next downstream unit**, then PUNT remaining scope to Adrian only if absolutely necessary |
+| Tier | Match heuristic | Model | Effort | Autonomy |
+|------|-----------------|-------|--------|----------|
+| **T1 mechanical** | scrub / regen / baseline / fixture / emoji / comment / rename file / alias / tag / cron / burndown | `haiku` | default | execute, no ledger |
+| **T2 standard** | everything else | `sonnet` | default | execute, ledger only if a non-obvious decision was made |
+| **T3 architectural** | schema / protocol / validator / projection / batch / cross-cutting / refactor / new gate / new check / new envelope / manifest projection | `sonnet` | default | execute, **mandatory ledger entry** before commit |
+| **T4 strategic** | brand / Hydra rename / multi-tenant / deploy / public-API break / business / monetization / pricing / Stripe — OR `status === 'needs-grilling'` | `opus` | **max** | execute with **mandatory ledger entry**, work the unit to the point where it **unblocks the next downstream unit**, then PUNT remaining scope to Adrian only if absolutely necessary |
 
 ### What "punt" means for T4
 
@@ -157,7 +157,7 @@ WIP. Rules:
   4h):
   - If the diff matches a unit's clear scope and the unit was `done` recently,
     the WIP is probably leftover from that unit's commit — clean it (`git
-checkout -- <path>` or `git stash drop`).
+    checkout -- <path>` or `git stash drop`).
   - Otherwise add an `[ORPHAN-WIP] <files>` line to your run-log and leave it
     for morning review.
 - **End-of-night invariant**: by morning the worktree should be clean
@@ -192,11 +192,9 @@ The `.husky/pre-commit` hook runs the same cascade. If you bypass with
 **Lint baseline policy**: it is OK to bump `--max-warnings` upward (in
 `.husky/pre-commit`) when an unrelated WIP pushed past the cap and it would
 block your commit. Standalone bump-only commit:
-
 ```
 chore(lint): bump baseline to <N> — wave-1 still in burndown
 ```
-
 Never bump for code YOU added without justification in the commit body.
 
 ---
@@ -249,25 +247,25 @@ Read in this order:
 
 ## 8. Dispatch geometry guidance (current scale)
 
-| Window count | Agents per window | Wall-clock             | Drains roughly              | When to use           |
-| ------------ | ----------------- | ---------------------- | --------------------------- | --------------------- |
-| 1            | 5                 | ~3 hrs                 | 25 units (P1 sprint-2 only) | quick top-up          |
-| 3            | 5                 | ~6 hrs                 | 75 units                    | half-overnight        |
-| **5**        | **5**             | **~8 hrs (overnight)** | **125 units**               | **default overnight** |
-| 7            | 5                 | ~10 hrs                | 175 units                   | full backlog flush    |
+| Window count | Agents per window | Wall-clock | Drains roughly | When to use |
+|--------------|-------------------|------------|----------------|-------------|
+| 1 | 5 | ~3 hrs | 25 units (P1 sprint-2 only) | quick top-up |
+| 3 | 5 | ~6 hrs | 75 units | half-overnight |
+| **5** | **5** | **~8 hrs (overnight)** | **125 units** | **default overnight** |
+| 7 | 5 | ~10 hrs | 175 units | full backlog flush |
 
 Per-agent throughput assumption: 5 units/agent-night (mix of T1+T2+T3 with
 ~10% T4). Tune downward if you see a lot of pre-commit retries or merge churn.
 
 **Window-to-cluster affinity (recommended pinning to reduce file conflicts):**
 
-| Window | Affinity (suggested by file blast radius)                                    |
-| ------ | ---------------------------------------------------------------------------- |
-| w5     | Manifest writes (8-V slots / componentSpecs / token wiring) — serialize here |
-| w6     | Validators + scripts + governance gates (no manifest writes)                 |
-| w7     | Doc pages + `docs/ai/` updates + ledger entries                              |
-| w8     | Component + pattern source (`src/app/components/`)                           |
-| w9     | Mixed P1 / cleanup / debugging                                               |
+| Window | Affinity (suggested by file blast radius) |
+|--------|-------------------------------------------|
+| w5 | Manifest writes (8-V slots / componentSpecs / token wiring) — serialize here |
+| w6 | Validators + scripts + governance gates (no manifest writes) |
+| w7 | Doc pages + `docs/ai/` updates + ledger entries |
+| w8 | Component + pattern source (`src/app/components/`) |
+| w9 | Mixed P1 / cleanup / debugging |
 
 Within a window, the 5 agents pull independent units from the affinity slice.
 Watcher's `fileGroups` field tells you which units share blockedFiles.

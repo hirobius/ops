@@ -30,14 +30,14 @@ cutover inventory.
 
 ## Tier 1 — Live breakage (fix now, low risk) ✅ all verified
 
-| #   | What's broken                                  | Evidence                                                                                                                                                                                             | Fix                                                                                     |
-| --- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| 1   | **Every commit silently fails a hook step**    | `.husky/post-commit:17` nohup-calls `scripts/orchestration-watcher.mjs` — only exists in `_retired-2026-05-06/`; stderr → `/dev/null` hides it                                                       | Remove the dead nohup block                                                             |
-| 2   | **3 `/ops` skill buttons ENOENT when clicked** | `scripts/skill-runner-middleware.mjs:55-62` — `snapshot-orch`, `list-eligible`, `triage-approved` argv point at moved scripts                                                                        | Remove/repoint those SKILLS entries                                                     |
-| 3   | **CI fails on `main`**                         | `.github/workflows/quality.yml:48,55` run `pnpm size-limit` + `pnpm build:lib`; both target `vite.config.lib.ts` + `src/index.ts` which **never existed**                                            | Remove vestigial library config + those CI steps (see Tier 2 dep note)                  |
-| 4   | **`/ops` index shows stale numbers**           | `agentic-os/data.ts:22`, `BuildPage.tsx:29`, `atlas/pipeline-dag.tsx` import `docs/ai/_archive/legacy-task-systems-2026-05-11.json` (frozen 52d) for KpiCards/PillarRail/StatusBanner/DAG            | Repoint at live Kanban hooks (`useKanbanBoard`/`useOpenThreads`) or retire those blocks |
-| 5   | **`SYSTEM_OVERVIEW.md` regenerates lies**      | `generate-strength-report.mjs` (~L1359-1384) emits hardcoded strings ("swarm-watchdog dispatches…", "435+ orchestration units", links retired `OPERATOR_BRIEF`) — refreshed today by `pnpm strength` | Fix the hardcoded template strings                                                      |
-| 6   | **`registry.json` dangling gate**              | `check-unit-overlap` entry (~L754) `gateScript` points at moved `scripts/check-unit-overlap.mjs`; `firingChannel:"manual"` so it doesn't fire, but it's a lie                                        | Repoint or delete the entry + `fixtures/check-unit-overlap/`                            |
+| # | What's broken | Evidence | Fix |
+|---|---|---|---|
+| 1 | **Every commit silently fails a hook step** | `.husky/post-commit:17` nohup-calls `scripts/orchestration-watcher.mjs` — only exists in `_retired-2026-05-06/`; stderr → `/dev/null` hides it | Remove the dead nohup block |
+| 2 | **3 `/ops` skill buttons ENOENT when clicked** | `scripts/skill-runner-middleware.mjs:55-62` — `snapshot-orch`, `list-eligible`, `triage-approved` argv point at moved scripts | Remove/repoint those SKILLS entries |
+| 3 | **CI fails on `main`** | `.github/workflows/quality.yml:48,55` run `pnpm size-limit` + `pnpm build:lib`; both target `vite.config.lib.ts` + `src/index.ts` which **never existed** | Remove vestigial library config + those CI steps (see Tier 2 dep note) |
+| 4 | **`/ops` index shows stale numbers** | `agentic-os/data.ts:22`, `BuildPage.tsx:29`, `atlas/pipeline-dag.tsx` import `docs/ai/_archive/legacy-task-systems-2026-05-11.json` (frozen 52d) for KpiCards/PillarRail/StatusBanner/DAG | Repoint at live Kanban hooks (`useKanbanBoard`/`useOpenThreads`) or retire those blocks |
+| 5 | **`SYSTEM_OVERVIEW.md` regenerates lies** | `generate-strength-report.mjs` (~L1359-1384) emits hardcoded strings ("swarm-watchdog dispatches…", "435+ orchestration units", links retired `OPERATOR_BRIEF`) — refreshed today by `pnpm strength` | Fix the hardcoded template strings |
+| 6 | **`registry.json` dangling gate** | `check-unit-overlap` entry (~L754) `gateScript` points at moved `scripts/check-unit-overlap.mjs`; `firingChannel:"manual"` so it doesn't fire, but it's a lie | Repoint or delete the entry + `fixtures/check-unit-overlap/` |
 
 Secondary: `/api/projects` has **no dev middleware** (unlike leads/tasks), so
 `/ops/projects` can't load data under plain `pnpm dev` — add a mirror or
@@ -51,7 +51,7 @@ document the gap.
 `@react-three/fiber`, `@react-three/postprocessing`, `postprocessing`,
 `fuse.js`, `zustand` — plus the dead `vendor-three` `manualChunks` branch in
 `vite.config.mjs` (references a `HdsMobiusLogo` that doesn't exist). Keep the 4
-radix/cva deps that _look_ unused — they're load-bearing transitive deps of
+radix/cva deps that *look* unused — they're load-bearing transitive deps of
 `@hirobius/design-system`.
 
 **Dead scripts (8):** `a11y-schema-check.mjs`, `gpt-knowledge.mjs` (+ its only
@@ -136,7 +136,6 @@ per-file style gates are effectively OFF across all of `/ops` today. **9 files
 content), `IncubatorPage.tsx`, `atlas/knowledge-tab.tsx`.
 
 **Highest-leverage conversion order (shared chrome first):**
-
 1. `PageHeader.tsx` (104 L, **used by 16/17 routed pages**, zero HDS imports) — single biggest win
 2. `OpsShell.tsx` (74 L, layout for all `/ops/*`) + `Disclosure.tsx` (131 L, shared collapsible)
 3. `SessionInputForm.tsx` (used by 4 surfaces), `agent-tag.tsx`, `phase-header.tsx`

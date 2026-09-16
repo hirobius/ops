@@ -32,7 +32,7 @@ HDSLayout split, the bundle budget, the serverless handler wrappers.
 
 `docs/architecture/README.md` describes the directory as holding design-system
 ADRs. That is inaccurate — the files in it are ops decisions. Left as-is rather
-than silently rewritten, because the README's _conventions_ section (naming,
+than silently rewritten, because the README's *conventions* section (naming,
 numbering, immutability) is correct and worth keeping.
 
 ## 3. `docs/logs/AI_DECISION_LEDGER.md` — self-heal records
@@ -56,18 +56,18 @@ decisions inline; older ones move here.
 
 ## Where a new decision goes
 
-| The decision is about                                      | Write it                                |
-| ---------------------------------------------------------- | --------------------------------------- |
+| The decision is about | Write it |
+|---|---|
 | This repo's architecture, and reversing it would be costly | a new `docs/architecture/ADR-NNNN-*.md` |
-| The design system                                          | the DS repo, not here                   |
-| How we work (process, gates, metrics)                      | `docs/ai/FRONTIER-DOCTRINE.md`          |
-| Something settled in a session                             | `docs/ai/HANDOFF.md` § Decisions        |
-| Something deliberately NOT being done                      | `docs/ai/PARKED.md`, with a trigger     |
+| The design system | the DS repo, not here |
+| How we work (process, gates, metrics) | `docs/ai/FRONTIER-DOCTRINE.md` |
+| Something settled in a session | `docs/ai/HANDOFF.md` § Decisions |
+| Something deliberately NOT being done | `docs/ai/PARKED.md`, with a trigger |
 
 ## What is NOT a decision record
 
 `docs/archive/` holds superseded plans, specs and session captures. They record
-what was _intended_ at a moment, which is not the same as what was decided or
+what was *intended* at a moment, which is not the same as what was decided or
 what shipped. Do not cite them as precedent.
 
 ---

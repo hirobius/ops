@@ -7,15 +7,15 @@ Canonical home for **spec-driven development** artifacts. Contract and rationale
 
 **One file per epic: `docs/specs/<epic-slug>.md`.** Sections, in order:
 
-| Section                   | What it carries                                                          |
-| ------------------------- | ------------------------------------------------------------------------ |
-| Outcome                   | What's true when this ships, in business terms + the north-star test     |
-| Acceptance criteria       | The checklist, plus out-of-scope and the invariants that hold throughout |
-| Current state             | What exists today, with `file:line` references                           |
-| Target shape              | Seams, data flow, contracts                                              |
-| **Alternatives rejected** | **The section the document exists for**                                  |
-| Risks                     | What could go wrong, and what catches it                                 |
-| Tasks                     | Dependency-ordered slices, each one issue / one PR, with queue posture   |
+| Section | What it carries |
+|---|---|
+| Outcome | What's true when this ships, in business terms + the north-star test |
+| Acceptance criteria | The checklist, plus out-of-scope and the invariants that hold throughout |
+| Current state | What exists today, with `file:line` references |
+| Target shape | Seams, data flow, contracts |
+| **Alternatives rejected** | **The section the document exists for** |
+| Risks | What could go wrong, and what catches it |
+| Tasks | Dependency-ordered slices, each one issue / one PR, with queue posture |
 
 `_template.md` is the skeleton. Cross-repo epics live here in **ops** and link out.
 
@@ -27,7 +27,7 @@ rejected-alternatives record we historically skipped — not the file count.
 
 ## When a spec is required
 
-An epic that **spans more than three issues**, _or_ **touches client-facing
+An epic that **spans more than three issues**, *or* **touches client-facing
 output, client PII, or money**.
 
 ## When a spec is forbidden
