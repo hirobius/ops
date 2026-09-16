@@ -25,6 +25,13 @@ describe('isUsableAddress', () => {
     ['hero@sprite.svg', 'another asset'],
     ['a1b2c3d4e5f6a7b8@cdn.io', 'hex localpart — a tracking artifact'],
     ['name@yourdomain.com', 'template placeholder'],
+    [
+      'npm-oidc-no-reply@github.com',
+      'PREFIXED no-reply — found by a real fetch, missed by exact matching',
+    ],
+    ['bounce-noreply@acme.com', 'suffixed noreply'],
+    ['mailer-daemon@acme.com', 'automated sender'],
+    ['postmaster@acme.com', 'automated sender'],
   ])('rejects %s (%s)', (addr) => {
     expect(isUsableAddress(addr)).toBe(false);
   });
