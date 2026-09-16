@@ -46,6 +46,9 @@ export interface ClientMeta {
   figmaFileUrl: ClientFigmaFileUrl;
   serviceModel?: string;
   domains?: string[];
+  /** Services actively provided for this client (free vocabulary; the gallery
+   *  color-maps known ones: marketing, automation, website, design, seo, ads). */
+  services?: string[];
   driveDocId?: string;
   driveFolder?: string;
   missionStatement?: string;
@@ -251,7 +254,7 @@ export interface ClientWorkflowConfig {
 }
 
 export interface ClientWorkflow {
-  id: string;          // folder name, e.g. "lead-intake"
+  id: string; // folder name, e.g. "lead-intake"
   config: ClientWorkflowConfig;
 }
 

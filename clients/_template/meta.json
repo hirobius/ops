@@ -20,6 +20,7 @@
   "status": "prospect",
   "serviceModel": "Hirobius: software vendor — code runs on customer infrastructure, customer remains data controller",
   "domains": [],
+  "services": [],
   "portalUrl": {},
   "figmaFileUrl": {},
   "referredBy": null,
