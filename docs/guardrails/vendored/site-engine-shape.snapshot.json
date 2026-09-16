@@ -1,0 +1,822 @@
+{
+  "note": "Baseline shape of packages/schema, captured at the last known ops/lib/schema re-sync. Regenerate with `pnpm schema:snapshot-ops` immediately after re-syncing ops — never to silence a real, un-synced drift. DRAFT (issue #87, PR pending Adrian's approval): this bump reflects the trust/conversion field PROPOSAL only — ops/lib/schema has NOT actually been re-synced yet. Real ops sync (index.mjs, presets.mjs) is a required follow-up before/at merge, not before this draft's tests can pass.",
+  "clientConfig": {
+    "shape": {
+      "kind": "object",
+      "fields": {
+        "brand": {
+          "shape": {
+            "kind": "object",
+            "fields": {
+              "cssVarOverrides": {
+                "shape": {
+                  "kind": "record",
+                  "of": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": false,
+                    "hasDefault": false
+                  }
+                },
+                "optional": false,
+                "hasDefault": true
+              },
+              "font": {
+                "shape": {
+                  "kind": "enum",
+                  "values": ["geist", "inter", "slab", "system", "work-sans"]
+                },
+                "optional": false,
+                "hasDefault": true
+              },
+              "fontPairing": {
+                "shape": {
+                  "kind": "enum",
+                  "values": ["editorial", "industrial", "modern", "slab", "system"]
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "logo": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "logoAlt": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "motion": {
+                "shape": {
+                  "kind": "enum",
+                  "values": ["none", "rich", "subtle"]
+                },
+                "optional": false,
+                "hasDefault": true
+              },
+              "palettePreset": {
+                "shape": {
+                  "kind": "enum",
+                  "values": ["concrete-fencing", "junk-removal", "landscaping", "pressure-washing"]
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "radius": {
+                "shape": {
+                  "kind": "enum",
+                  "values": ["lg", "md", "none", "sm", "xl"]
+                },
+                "optional": false,
+                "hasDefault": true
+              },
+              "shadow": {
+                "shape": {
+                  "kind": "enum",
+                  "values": ["flat", "hard", "soft"]
+                },
+                "optional": false,
+                "hasDefault": true
+              },
+              "spacingDensity": {
+                "shape": {
+                  "kind": "enum",
+                  "values": ["airy", "comfortable", "compact"]
+                },
+                "optional": false,
+                "hasDefault": true
+              }
+            }
+          },
+          "optional": false,
+          "hasDefault": false
+        },
+        "business": {
+          "shape": {
+            "kind": "object",
+            "fields": {
+              "address": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "bonded": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "boolean"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "email": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "gbpUrl": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "hours": {
+                "shape": {
+                  "kind": "array",
+                  "of": {
+                    "shape": {
+                      "kind": "object",
+                      "fields": {
+                        "days": {
+                          "shape": {
+                            "kind": "primitive",
+                            "type": "string"
+                          },
+                          "optional": false,
+                          "hasDefault": false
+                        },
+                        "hours": {
+                          "shape": {
+                            "kind": "primitive",
+                            "type": "string"
+                          },
+                          "optional": false,
+                          "hasDefault": false
+                        }
+                      }
+                    },
+                    "optional": false,
+                    "hasDefault": false
+                  }
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "insured": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "boolean"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "licenseNumber": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "licensed": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "boolean"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "name": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "phone": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "serviceAreas": {
+                "shape": {
+                  "kind": "array",
+                  "of": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": false,
+                    "hasDefault": false
+                  }
+                },
+                "optional": false,
+                "hasDefault": false
+              }
+            }
+          },
+          "optional": false,
+          "hasDefault": false
+        },
+        "copy": {
+          "shape": {
+            "kind": "object",
+            "fields": {
+              "about": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "ctaLabel": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": true
+              },
+              "heroHeadline": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "heroSub": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": false
+              }
+            }
+          },
+          "optional": false,
+          "hasDefault": false
+        },
+        "form": {
+          "shape": {
+            "kind": "object",
+            "fields": {
+              "accessKey": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "hcaptchaSiteKey": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "provider": {
+                "shape": {
+                  "kind": "literal",
+                  "value": "web3forms"
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "redirectUrl": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              }
+            }
+          },
+          "optional": false,
+          "hasDefault": false
+        },
+        "gallery": {
+          "shape": {
+            "kind": "array",
+            "of": {
+              "shape": {
+                "kind": "object",
+                "fields": {
+                  "alt": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": false,
+                    "hasDefault": false
+                  },
+                  "src": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": false,
+                    "hasDefault": false
+                  }
+                }
+              },
+              "optional": false,
+              "hasDefault": false
+            }
+          },
+          "optional": false,
+          "hasDefault": true
+        },
+        "hero": {
+          "shape": {
+            "kind": "object",
+            "fields": {
+              "image": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "imageAlt": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "videoPoster": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "videoSrc": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              }
+            }
+          },
+          "optional": false,
+          "hasDefault": true
+        },
+        "layout": {
+          "shape": {
+            "kind": "object",
+            "fields": {
+              "sectionOrder": {
+                "shape": {
+                  "kind": "array",
+                  "of": {
+                    "shape": {
+                      "kind": "enum",
+                      "values": ["contact", "gallery", "reviews", "serviceAreaMap", "services"]
+                    },
+                    "optional": false,
+                    "hasDefault": false
+                  }
+                },
+                "optional": false,
+                "hasDefault": true
+              },
+              "sections": {
+                "shape": {
+                  "kind": "object",
+                  "fields": {
+                    "contact": {
+                      "shape": {
+                        "kind": "object",
+                        "fields": {
+                          "variant": {
+                            "shape": {
+                              "kind": "enum",
+                              "values": ["standard"]
+                            },
+                            "optional": false,
+                            "hasDefault": true
+                          }
+                        }
+                      },
+                      "optional": false,
+                      "hasDefault": true
+                    },
+                    "gallery": {
+                      "shape": {
+                        "kind": "object",
+                        "fields": {
+                          "variant": {
+                            "shape": {
+                              "kind": "enum",
+                              "values": ["grid"]
+                            },
+                            "optional": false,
+                            "hasDefault": true
+                          }
+                        }
+                      },
+                      "optional": false,
+                      "hasDefault": true
+                    },
+                    "hero": {
+                      "shape": {
+                        "kind": "object",
+                        "fields": {
+                          "variant": {
+                            "shape": {
+                              "kind": "enum",
+                              "values": ["banner", "classic", "split-card", "video"]
+                            },
+                            "optional": false,
+                            "hasDefault": true
+                          }
+                        }
+                      },
+                      "optional": false,
+                      "hasDefault": true
+                    },
+                    "reviews": {
+                      "shape": {
+                        "kind": "object",
+                        "fields": {
+                          "variant": {
+                            "shape": {
+                              "kind": "enum",
+                              "values": ["cards"]
+                            },
+                            "optional": false,
+                            "hasDefault": true
+                          }
+                        }
+                      },
+                      "optional": false,
+                      "hasDefault": true
+                    },
+                    "serviceAreaMap": {
+                      "shape": {
+                        "kind": "object",
+                        "fields": {
+                          "variant": {
+                            "shape": {
+                              "kind": "enum",
+                              "values": ["standard"]
+                            },
+                            "optional": false,
+                            "hasDefault": true
+                          }
+                        }
+                      },
+                      "optional": false,
+                      "hasDefault": true
+                    },
+                    "services": {
+                      "shape": {
+                        "kind": "object",
+                        "fields": {
+                          "variant": {
+                            "shape": {
+                              "kind": "enum",
+                              "values": ["alternating", "cards", "grid"]
+                            },
+                            "optional": false,
+                            "hasDefault": true
+                          }
+                        }
+                      },
+                      "optional": false,
+                      "hasDefault": true
+                    }
+                  }
+                },
+                "optional": false,
+                "hasDefault": true
+              },
+              "variant": {
+                "shape": {
+                  "kind": "enum",
+                  "values": ["A", "B"]
+                },
+                "optional": false,
+                "hasDefault": true
+              }
+            }
+          },
+          "optional": false,
+          "hasDefault": false
+        },
+        "map": {
+          "shape": {
+            "kind": "object",
+            "fields": {
+              "embedQuery": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "staticImage": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              }
+            }
+          },
+          "optional": false,
+          "hasDefault": true
+        },
+        "reviews": {
+          "shape": {
+            "kind": "array",
+            "of": {
+              "shape": {
+                "kind": "object",
+                "fields": {
+                  "author": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": false,
+                    "hasDefault": false
+                  },
+                  "rating": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "number"
+                    },
+                    "optional": false,
+                    "hasDefault": false
+                  },
+                  "source": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": true,
+                    "hasDefault": false
+                  },
+                  "text": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": false,
+                    "hasDefault": false
+                  }
+                }
+              },
+              "optional": false,
+              "hasDefault": false
+            }
+          },
+          "optional": false,
+          "hasDefault": true
+        },
+        "seo": {
+          "shape": {
+            "kind": "object",
+            "fields": {
+              "city": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "description": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "ogImage": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "region": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "siteUrl": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": false
+              },
+              "title": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": false,
+                "hasDefault": false
+              }
+            }
+          },
+          "optional": false,
+          "hasDefault": false
+        },
+        "services": {
+          "shape": {
+            "kind": "array",
+            "of": {
+              "shape": {
+                "kind": "object",
+                "fields": {
+                  "description": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": false,
+                    "hasDefault": false
+                  },
+                  "icon": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": true,
+                    "hasDefault": false
+                  },
+                  "image": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": true,
+                    "hasDefault": false
+                  },
+                  "imageAlt": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": true,
+                    "hasDefault": false
+                  },
+                  "price": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": true,
+                    "hasDefault": false
+                  },
+                  "title": {
+                    "shape": {
+                      "kind": "primitive",
+                      "type": "string"
+                    },
+                    "optional": false,
+                    "hasDefault": false
+                  }
+                }
+              },
+              "optional": false,
+              "hasDefault": false
+            }
+          },
+          "optional": false,
+          "hasDefault": false
+        },
+        "slug": {
+          "shape": {
+            "kind": "primitive",
+            "type": "string"
+          },
+          "optional": false,
+          "hasDefault": false
+        },
+        "social": {
+          "shape": {
+            "kind": "object",
+            "fields": {
+              "facebook": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "instagram": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "linkedin": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "nextdoor": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "tiktok": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "x": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "yelp": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              },
+              "youtube": {
+                "shape": {
+                  "kind": "primitive",
+                  "type": "string"
+                },
+                "optional": true,
+                "hasDefault": false
+              }
+            }
+          },
+          "optional": true,
+          "hasDefault": false
+        }
+      }
+    },
+    "optional": false,
+    "hasDefault": false
+  },
+  "presets": {
+    "palettePresetIds": ["concrete-fencing", "junk-removal", "landscaping", "pressure-washing"],
+    "fontIds": ["geist", "inter", "slab", "system", "work-sans"],
+    "paletteTokenKeys": [
+      "--brand-accent",
+      "--brand-bg",
+      "--brand-fg",
+      "--brand-muted",
+      "--brand-on-primary",
+      "--brand-primary"
+    ],
+    "fontStackKeys": ["geist", "inter", "slab", "system", "work-sans"]
+  }
+}
