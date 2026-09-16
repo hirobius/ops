@@ -3,7 +3,7 @@
  *
  * Backs the /ops Leads board under `pnpm dev` (Vite). It reuses the EXACT same
  * logic modules as the production Vercel functions — lib/supabase/leads (the
- * repository) and lib/leads/pipeline (the generate/build/publish state machines) —
+ * repository) and lib/leads/pipeline (the generate/render state machines) —
  * so dev and prod genuinely can't drift. Previously this file copy-pasted those
  * state machines (and carried the same stranded-status bug); now it delegates.
  * Wired in vite.config.mjs with `apply: 'serve'` so it never ships to prod.
