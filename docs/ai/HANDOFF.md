@@ -51,6 +51,15 @@ not read it to get oriented.
   the weighting ranked the _hardest_ sells highest. A Wix site is a **proven
   buyer**; a decade with no site is a revealed preference.
 
+- **👆 `/ops/standing` acts, and now says so.** Re-queue was reported dead; it
+  was writing to GitHub correctly and rendering the confirmation ~1500px above
+  the button. **A confirmation has to render where the thumb is** — an
+  invisible success is worse than a dead button, because it teaches the
+  operator the surface lies. Lanes now carry age (open-days, oldest first —
+  `updated_at` is unusable, the loop bumps it), a repo filter, expandable
+  lanes, Unblock + p0 per row, and a "The loop" section that tells a wedged
+  loop from an idle one.
+
 - **📦 Land before you build.** The constraint is opening work, not capacity.
 - **📞 `/ops/pitch` — the phone call sheet; migrations 0012/0013/0014 applied.**
   Only pitchable leads appear (`preview_url` present, `do_not_contact` false);

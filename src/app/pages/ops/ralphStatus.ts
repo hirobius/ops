@@ -116,6 +116,15 @@ export interface FleetIssue {
   /** The label that put it in this lane: a blocking label, or 'ralph-parked'. */
   label: string | null;
   prio: string | null;
+  /**
+   * Whole days since the issue was OPENED, or null when unmeasurable.
+   *
+   * Deliberately not "days since last touched": the loop rewrites labels
+   * constantly and every write bumps `updated_at`, so that clock would bury
+   * exactly the issues automation keeps poking. Null means "cannot say" and
+   * sorts last — never 0, which would read as "arrived today".
+   */
+  ageDays: number | null;
 }
 
 export interface FleetPr {
@@ -126,6 +135,23 @@ export interface FleetPr {
   draft: boolean;
   updatedAt: string;
   labels: string[];
+}
+
+/**
+ * Whether the Ralph loop is turning, per repo it runs in.
+ *
+ * `unknown` is a real answer, not a missing one — a repo whose runs could not
+ * be read has NOT been observed to be quiet, and conflating the two would let a
+ * permission failure render as a healthy idle loop.
+ */
+export interface LoopState {
+  repo: string;
+  state: 'running' | 'failed' | 'idle' | 'unknown';
+  run: { number: number; title: string; url: string } | null;
+  /** Hours since the newest run started; null while one is still running. */
+  quietHours: number | null;
+  conclusion: string | null;
+  error: string | null;
 }
 
 export interface FleetStatus {
@@ -156,6 +182,8 @@ export interface FleetStatus {
   /** Every open issue the sweep saw — blocked + queue + backlog. */
   total: number;
   prs: FleetPr[];
+  /** Per-repo loop state. Empty is legitimate: no repo carries a ralph-* label. */
+  loop: LoopState[];
   errors: { repo: string; error: string }[];
   counts: { openIssues: number; repos: number };
 }
@@ -238,7 +266,12 @@ export async function fetchDeploys(signal: AbortSignal): Promise<DeployProject[]
 
 /* ── acting on an issue, straight to GitHub ──────────────────────────────── */
 
-export type StandingAction = 'queue_on' | 'queue_off' | 'ralph_requeue';
+export type StandingAction =
+  | 'queue_on'
+  | 'queue_off'
+  | 'ralph_requeue'
+  | 'unblock'
+  | 'bump_priority';
 
 /** `error` is present exactly when `ok` is false. */
 export interface ActionResult {
@@ -256,12 +289,20 @@ export async function actOnIssue(
   repo: string,
   number: number,
   action: StandingAction,
+  priority?: string | null,
 ): Promise<ActionResult> {
   try {
     const res = await fetch('/api/task-action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: `github:${repo}#${number}`, action, actor: 'standing' }),
+      body: JSON.stringify({
+        key: `github:${repo}#${number}`,
+        action,
+        actor: 'standing',
+        // Only sent when the action carries one — the route reads `priority`
+        // as undefined-means-absent, and a stray null would clear the label.
+        ...(priority === undefined ? {} : { priority }),
+      }),
     });
     const body: unknown = await res.json().catch(() => null);
     if (!res.ok) {

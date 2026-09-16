@@ -47,6 +47,7 @@ import {
   type DeployProject,
   type FleetStatus,
   type FleetIssue,
+  type LoopState,
   type StandingAction,
 } from '../ralphStatus';
 import { deriveChain } from '../../../../../lib/chain/evidence.mjs';
@@ -102,10 +103,35 @@ export default function StandingPage() {
     requestTimeoutMs: 20_000,
   });
 
-  const blocked = data?.blocked ?? [];
-  const prs = data?.prs ?? [];
-  const queue = data?.queue ?? [];
-  const backlog = data?.backlog ?? [];
+  /**
+   * Which repo the lanes are scoped to, or null for the whole fleet.
+   *
+   * Derived from what the sweep returned, never configured — same rule as the
+   * repo set itself. A filter naming a repo that no longer has open issues
+   * would be a second place to keep in sync, so there isn't one.
+   */
+  const [repoFilter, setRepoFilter] = useState<string | null>(null);
+  /** Lanes the operator has expanded past their truncation, by lane name. */
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  const toggleLane = useCallback((lane: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(lane)) next.add(lane);
+      return next;
+    });
+  }, []);
+
+  const inScope = useCallback(
+    <T extends { repo: string }>(rows: T[]) =>
+      repoFilter ? rows.filter((r) => r.repo === repoFilter) : rows,
+    [repoFilter],
+  );
+
+  const blocked = inScope(data?.blocked ?? []);
+  const prs = inScope(data?.prs ?? []);
+  const queue = inScope(data?.queue ?? []);
+  const backlog = inScope(data?.backlog ?? []);
+  const loop = data?.loop ?? [];
   const needsToken = error?.includes('GITHUB_TOKEN') ?? false;
   /** A real payload has arrived — not merely "a request finished". */
   const loaded = data !== null;
@@ -139,10 +165,16 @@ export default function StandingPage() {
   const [acted, setActed] = useState<ReadonlyMap<string, ActionOutcome>>(new Map());
 
   const act = useCallback(
-    async (repo: string, number: number, action: StandingAction, label: string) => {
+    async (
+      repo: string,
+      number: number,
+      action: StandingAction,
+      label: string,
+      priority?: string | null,
+    ) => {
       const id = `${repo}#${number}`;
       setBusy((prev) => new Set(prev).add(id));
-      const result = await actOnIssue(repo, number, action);
+      const result = await actOnIssue(repo, number, action, priority);
       setBusy((prev) => {
         const next = new Set(prev);
         next.delete(id);
@@ -172,6 +204,8 @@ export default function StandingPage() {
       />
 
       <Coverage data={data} error={error} needsToken={needsToken} />
+
+      <RepoFilter repos={data?.repos ?? []} active={repoFilter} onPick={setRepoFilter} />
 
       {/* ── 1. The chain ─────────────────────────────────────────────────── */}
       <Section title="The chain" count={`${chain.reachedEnd} paid`}>
@@ -218,7 +252,7 @@ export default function StandingPage() {
           emptyCopy="Nothing is waiting on a decision. Rare — enjoy it."
         >
           <ul style={s.list}>
-            {blocked.slice(0, SHOWN).map((b: FleetIssue) => {
+            {(expanded.has('blocked') ? blocked : blocked.slice(0, SHOWN)).map((b: FleetIssue) => {
               const id = `${b.repo}#${b.number}`;
               const outcome = acted.get(id);
               return (
@@ -243,6 +277,7 @@ export default function StandingPage() {
                       {shortRepo(b.repo)}
                       {b.prio ? ` · ${b.prio}` : ''}
                     </span>
+                    <Age days={b.ageDays} />
                     {b.label === 'ralph-parked' ? (
                       <Button
                         size="sm"
@@ -252,7 +287,27 @@ export default function StandingPage() {
                       >
                         {busy.has(id) ? 're-queueing…' : 'Re-queue'}
                       </Button>
-                    ) : null}
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={busy.has(id)}
+                        onClick={() => act(b.repo, b.number, 'unblock', 'Unblocked + queued')}
+                      >
+                        {busy.has(id) ? 'unblocking…' : 'Unblock'}
+                      </Button>
+                    )}
+                    {b.prio === 'p0' ? null : (
+                      <Button
+                        size="sm"
+                        variant="tertiary"
+                        disabled={busy.has(id)}
+                        onClick={() => act(b.repo, b.number, 'bump_priority', 'Now p0', 'p0')}
+                        label={`Raise #${b.number} to p0`}
+                      >
+                        p0
+                      </Button>
+                    )}
                   </div>
                   <RowResult outcome={outcome} />
                 </li>
@@ -260,10 +315,56 @@ export default function StandingPage() {
             })}
           </ul>
         </Lane>
-        {blocked.length > SHOWN ? <p style={s.more}>+{blocked.length - SHOWN} more</p> : null}
+        <MoreToggle
+          lane="blocked"
+          total={blocked.length}
+          shown={SHOWN}
+          expanded={expanded.has('blocked')}
+          onToggle={toggleLane}
+        />
       </Section>
 
-      {/* ── 3. In flight ─────────────────────────────────────────────────── */}
+      {/* ── 3. Is the loop turning ───────────────────────────────────────── */}
+      <Section title="The loop" count={loopCount(loop)}>
+        <Lane
+          needsToken={needsToken}
+          error={error}
+          loaded={loaded}
+          empty={loop.length === 0}
+          emptyCopy="No repo carries a ralph-* label, so there is no loop to watch."
+        >
+          <ul style={s.list}>
+            {loop.map((l: LoopState) => (
+              <li key={l.repo} style={s.row}>
+                <div style={s.metaRow}>
+                  <Badge tone={LOOP_TONE[l.state]}>{l.state}</Badge>
+                  <span style={s.meta}>{shortRepo(l.repo)}</span>
+                  <span style={s.meta}>{loopDetail(l)}</span>
+                </div>
+                {l.run ? (
+                  <a
+                    href={l.run.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hds-focus"
+                    style={s.rowLink}
+                  >
+                    <span style={s.num}>#{l.run.number}</span>
+                    <span style={s.title}>{l.run.title}</span>
+                  </a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </Lane>
+        <p style={s.footnote}>
+          A park does not re-trigger the loop — only a merge to <code style={s.code}>main</code>{' '}
+          hops the chain, with a 6h watchdog behind it. An idle loop with a non-empty queue above is
+          waiting for one of those, not working.
+        </p>
+      </Section>
+
+      {/* ── 4. In flight ─────────────────────────────────────────────────── */}
       <Section
         title="In flight"
         count={laneCount(needsToken, error, loaded, prs.length, ['open PR', 'open PRs'])}
@@ -276,7 +377,7 @@ export default function StandingPage() {
           emptyCopy="No PR is open anywhere in the fleet."
         >
           <ul style={s.list}>
-            {prs.slice(0, SHOWN).map((pr) => (
+            {(expanded.has('prs') ? prs : prs.slice(0, SHOWN)).map((pr) => (
               <li key={`${pr.repo}#${pr.number}`} style={s.row}>
                 <a
                   href={pr.url}
@@ -296,11 +397,13 @@ export default function StandingPage() {
             ))}
           </ul>
         </Lane>
-        {prs.length > SHOWN ? (
-          <p style={s.more}>
-            +{prs.length - SHOWN} more open across the fleet, least recently touched
-          </p>
-        ) : null}
+        <MoreToggle
+          lane="prs"
+          total={prs.length}
+          shown={SHOWN}
+          expanded={expanded.has('prs')}
+          onToggle={toggleLane}
+        />
       </Section>
 
       {/* ── Deploys ──────────────────────────────────────────────────────── */}
@@ -366,7 +469,7 @@ export default function StandingPage() {
           emptyCopy="The ready pool is empty — the loop has nothing to pick up. Label something ralph-ready, biased to the revenue path."
         >
           <div style={s.chips}>
-            {queue.slice(0, 12).map((q) => (
+            {(expanded.has('queue') ? queue : queue.slice(0, 12)).map((q) => (
               <a
                 key={`${q.repo}#${q.number}`}
                 href={q.url}
@@ -382,6 +485,13 @@ export default function StandingPage() {
             ))}
           </div>
         </Lane>
+        <MoreToggle
+          lane="queue"
+          total={queue.length}
+          shown={12}
+          expanded={expanded.has('queue')}
+          onToggle={toggleLane}
+        />
         <p style={s.footnote}>
           Selector order mirrors <code style={s.code}>ralph/next.sh</code> exactly — this is the
           order the loop will actually take them in.
@@ -401,44 +511,62 @@ export default function StandingPage() {
           emptyCopy="Nothing else open. Every issue is blocked, parked or queued."
         >
           <ul style={s.list}>
-            {backlog.slice(0, BACKLOG_SHOWN).map((b: FleetIssue) => {
-              const id = `${b.repo}#${b.number}`;
-              const outcome = acted.get(id);
-              return (
-                <li key={id} style={outcome?.ok ? { ...s.row, ...s.rowActed } : s.row}>
-                  <a
-                    href={b.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hds-focus"
-                    style={s.rowLink}
-                  >
-                    <span style={s.num}>#{b.number}</span>
-                    <span style={s.title}>{b.title}</span>
-                  </a>
-                  <div style={s.metaRow}>
-                    <span style={s.meta}>
-                      {shortRepo(b.repo)}
-                      {b.prio ? ` · ${b.prio}` : ''}
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      disabled={busy.has(id)}
-                      onClick={() => act(b.repo, b.number, 'queue_on', 'Queued')}
+            {(expanded.has('backlog') ? backlog : backlog.slice(0, BACKLOG_SHOWN)).map(
+              (b: FleetIssue) => {
+                const id = `${b.repo}#${b.number}`;
+                const outcome = acted.get(id);
+                return (
+                  <li key={id} style={outcome?.ok ? { ...s.row, ...s.rowActed } : s.row}>
+                    <a
+                      href={b.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hds-focus"
+                      style={s.rowLink}
                     >
-                      {busy.has(id) ? 'queueing…' : 'Queue'}
-                    </Button>
-                  </div>
-                  <RowResult outcome={outcome} />
-                </li>
-              );
-            })}
+                      <span style={s.num}>#{b.number}</span>
+                      <span style={s.title}>{b.title}</span>
+                    </a>
+                    <div style={s.metaRow}>
+                      <span style={s.meta}>
+                        {shortRepo(b.repo)}
+                        {b.prio ? ` · ${b.prio}` : ''}
+                      </span>
+                      <Age days={b.ageDays} />
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={busy.has(id)}
+                        onClick={() => act(b.repo, b.number, 'queue_on', 'Queued')}
+                      >
+                        {busy.has(id) ? 'queueing…' : 'Queue'}
+                      </Button>
+                      {b.prio === 'p0' ? null : (
+                        <Button
+                          size="sm"
+                          variant="tertiary"
+                          disabled={busy.has(id)}
+                          onClick={() => act(b.repo, b.number, 'bump_priority', 'Now p0', 'p0')}
+                          label={`Raise #${b.number} to p0`}
+                        >
+                          p0
+                        </Button>
+                      )}
+                    </div>
+                    <RowResult outcome={outcome} />
+                  </li>
+                );
+              },
+            )}
           </ul>
         </Lane>
-        {backlog.length > BACKLOG_SHOWN ? (
-          <p style={s.more}>+{backlog.length - BACKLOG_SHOWN} more, lower priority</p>
-        ) : null}
+        <MoreToggle
+          lane="backlog"
+          total={backlog.length}
+          shown={BACKLOG_SHOWN}
+          expanded={expanded.has('backlog')}
+          onToggle={toggleLane}
+        />
         <p style={s.footnote}>
           Live from GitHub, every repo the token can see. Queue writes the label straight to the
           issue — no mirror, so it works on repos the importer never touched.
@@ -449,6 +577,117 @@ export default function StandingPage() {
 }
 
 /* ── pieces ─────────────────────────────────────────────────────────────── */
+
+/** Badge tone per loop state — `unknown` is neutral, never a healthy green. */
+const LOOP_TONE = {
+  running: 'success',
+  failed: 'danger',
+  idle: 'neutral',
+  unknown: 'warning',
+} as const;
+
+/** The count beside "The loop": what is wrong, or that nothing is. */
+function loopCount(loop: LoopState[]): string {
+  if (!loop.length) return '';
+  const failed = loop.filter((l) => l.state === 'failed').length;
+  if (failed) return `${failed} failing`;
+  const running = loop.filter((l) => l.state === 'running').length;
+  if (running) return `${running} running`;
+  const unknown = loop.filter((l) => l.state === 'unknown').length;
+  if (unknown === loop.length) return 'unreadable';
+  return 'idle';
+}
+
+/**
+ * The one line under a loop row. An `unknown` row says WHY it is unknown —
+ * CLAUDE.md §4 records a whole iteration lost to reading a startup_failure as
+ * an engine regression when it was a permission wall, so the raw reason is
+ * worth more here than a tidy verdict.
+ */
+function loopDetail(l: LoopState): string {
+  if (l.state === 'running') return 'iteration in progress';
+  if (l.state === 'unknown') return l.error ? `unreadable — ${l.error}` : 'no runs found';
+  const since = l.quietHours === null ? 'unknown age' : `${l.quietHours}h ago`;
+  return l.state === 'failed' ? `${l.conclusion ?? 'failed'} · ${since}` : `last run ${since}`;
+}
+
+/**
+ * How long this has been open. Nothing else on the row carried a clock, which
+ * is how ops#185 sat p0 and unqueued for 64 days without the page ever saying
+ * so. Anything a month old is called out, because that is the threshold where
+ * "still open" stops being normal and starts being the finding.
+ */
+function Age({ days }: { days: number | null }) {
+  if (days === null) return null;
+  return <span style={days >= 30 ? s.ageOld : s.meta}>{days}d</span>;
+}
+
+/**
+ * Scope every lane to one repo. Reads from the sweep's own repo list, so the
+ * chips cannot drift from what is actually being shown.
+ */
+function RepoFilter({
+  repos,
+  active,
+  onPick,
+}: {
+  repos: string[];
+  active: string | null;
+  onPick: (repo: string | null) => void;
+}) {
+  if (repos.length < 2) return null;
+  return (
+    <div style={s.chips}>
+      <button
+        type="button"
+        className="hds-focus"
+        style={active === null ? s.chipOn : s.chipOff}
+        onClick={() => onPick(null)}
+      >
+        All
+      </button>
+      {repos.map((r) => (
+        <button
+          key={r}
+          type="button"
+          className="hds-focus"
+          style={active === r ? s.chipOn : s.chipOff}
+          onClick={() => onPick(r)}
+        >
+          {shortRepo(r)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Reach the rest of a truncated lane.
+ *
+ * It used to be static text — "+35 more" — which on a phone meant 35 issues
+ * existed and could not be got at without leaving for GitHub. A count that
+ * names work you cannot reach is a worse answer than no count.
+ */
+function MoreToggle({
+  lane,
+  total,
+  shown,
+  expanded,
+  onToggle,
+}: {
+  lane: string;
+  total: number;
+  shown: number;
+  expanded: boolean;
+  onToggle: (lane: string) => void;
+}) {
+  if (total <= shown) return null;
+  return (
+    <button type="button" className="hds-focus" style={s.moreButton} onClick={() => onToggle(lane)}>
+      {expanded ? `Show first ${shown}` : `Show all ${total}`}
+    </button>
+  );
+}
 
 /** What one tap did. `text` is the backend's own message when `ok` is false. */
 interface ActionOutcome {
@@ -865,11 +1104,6 @@ const s = {
     ...hds.typeStyles.caption,
     color: 'var(--semantic-color-content-secondary)',
   },
-  more: {
-    ...hds.typeStyles.caption,
-    margin: 0,
-    color: 'var(--semantic-color-content-secondary)',
-  },
 
   /* queue */
   chips: {
@@ -887,6 +1121,38 @@ const s = {
     whiteSpace: 'nowrap' as const,
   },
 
+  ageOld: {
+    ...hds.typeStyles.labelTechnical,
+    color: 'var(--semantic-color-feedback-warning)',
+  },
+  chipOn: {
+    ...hds.typeStyles.labelTechnical,
+    padding: `${hds.space.px4} ${hds.space.px8}`,
+    borderRadius: hds.borderRadius.sm,
+    border: '1px solid var(--semantic-color-border-strong)',
+    background: 'var(--semantic-color-surface-raised)',
+    color: 'var(--semantic-color-content-primary)',
+    cursor: 'pointer',
+  },
+  chipOff: {
+    ...hds.typeStyles.labelTechnical,
+    padding: `${hds.space.px4} ${hds.space.px8}`,
+    borderRadius: hds.borderRadius.sm,
+    border: '1px solid var(--semantic-color-border-default)',
+    background: 'transparent',
+    color: 'var(--semantic-color-content-secondary)',
+    cursor: 'pointer',
+  },
+  moreButton: {
+    ...hds.typeStyles.caption,
+    padding: `${hds.space.px4} ${hds.space.px8}`,
+    borderRadius: hds.borderRadius.sm,
+    border: '1px solid var(--semantic-color-border-default)',
+    background: 'transparent',
+    color: 'var(--semantic-color-content-accent)',
+    cursor: 'pointer',
+    alignSelf: 'flex-start' as const,
+  },
   /* A row that has been acted on recedes, so the eye moves to what is left. */
   rowActed: {
     opacity: 0.55,

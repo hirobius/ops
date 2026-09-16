@@ -1205,3 +1205,123 @@ describe('applyTaskAction — queue_on / queue_off (mirror-free, /ops/standing)'
     expect((result.body as { error: string }).error).toMatch(/GITHUB_TOKEN/);
   });
 });
+
+/* ── Standing's mirror-free unblock + priority bump ───────────────────────── */
+
+/** A port that records every label write, in order. */
+function recordingPort() {
+  const calls: Array<{ op: string; issueUrl: string; label: string }> = [];
+  return {
+    calls,
+    github: {
+      removeLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push({ op: 'remove', ...i });
+        return {};
+      },
+      addLabel: async (i: { issueUrl: string; label: string }) => {
+        calls.push({ op: 'add', ...i });
+        return {};
+      },
+    },
+  };
+}
+
+describe('applyTaskAction — unblock (Standing, mirror-free)', () => {
+  it('503s when no port is configured (no GITHUB_TOKEN)', async () => {
+    const { sb } = makeSb();
+    expect(
+      await applyTaskAction(
+        sb,
+        { key: 'github:hirobius/ops#9', action: 'unblock' },
+        { github: null },
+      ),
+    ).toMatchObject({ status: 503, body: { code: 'ENV_MISSING_GITHUB_TOKEN' } });
+  });
+
+  it('400s on a key that is not a github issue reference', async () => {
+    const { sb } = makeSb();
+    const { github } = recordingPort();
+    expect(await applyTaskAction(sb, { key: 't1', action: 'unblock' }, { github })).toMatchObject({
+      status: 400,
+    });
+  });
+
+  it('clears EVERY blocking label, not just the one the badge showed', async () => {
+    // ops#9 and ops#238 each carry two blocking labels. Removing only the
+    // displayed one leaves the issue in the same lane — another button that
+    // looks like it did nothing.
+    const { sb } = makeSb();
+    const { calls, github } = recordingPort();
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#9', action: 'unblock' },
+      { github },
+    );
+    expect(calls.filter((c) => c.op === 'remove').map((c) => c.label)).toEqual([
+      'needs-adrian',
+      'needs-human',
+      'blocked',
+    ]);
+    expect(calls.at(-1)).toEqual({
+      op: 'add',
+      issueUrl: 'https://github.com/hirobius/ops/issues/9',
+      label: 'ralph-ready',
+    });
+    expect(result.status).toBe(200);
+  });
+
+  it('never needs a Supabase row — Standing lists repos the importer has not touched', async () => {
+    const { sb } = makeSb();
+    const { github } = recordingPort();
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:someone/brand-new#1', action: 'unblock' },
+      { github },
+    );
+    expect(result.status).toBe(200);
+  });
+});
+
+describe('applyTaskAction — bump_priority (Standing, mirror-free)', () => {
+  it('removes every other priority label before adding the requested one', async () => {
+    // Priority labels are mutually exclusive and `ralph/next.sh` ranks on them.
+    // Leaving p2 in place beside a new p0 would make the tap look like it
+    // worked while changing nothing about what the loop picks next.
+    const { sb } = makeSb();
+    const { calls, github } = recordingPort();
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#44', action: 'bump_priority', priority: 'p0' },
+      { github },
+    );
+    expect(calls.filter((c) => c.op === 'remove').map((c) => c.label)).toEqual(['p1', 'p2', 'p3']);
+    expect(calls.at(-1)).toMatchObject({ op: 'add', label: 'p0' });
+    expect(result).toMatchObject({ status: 200, body: { priority: 'p0' } });
+  });
+
+  it('clears the priority entirely on null, adding nothing back', async () => {
+    const { sb } = makeSb();
+    const { calls, github } = recordingPort();
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#44', action: 'bump_priority', priority: null },
+      { github },
+    );
+    expect(calls.every((c) => c.op === 'remove')).toBe(true);
+    expect(calls).toHaveLength(4);
+    expect(result).toMatchObject({ status: 200, body: { priority: null } });
+  });
+
+  it('400s on a priority outside p0–p3 rather than writing a junk label', async () => {
+    const { sb } = makeSb();
+    const { calls, github } = recordingPort();
+    expect(
+      await applyTaskAction(
+        sb,
+        { key: 'github:hirobius/ops#44', action: 'bump_priority', priority: 'urgent' },
+        { github },
+      ),
+    ).toMatchObject({ status: 400 });
+    expect(calls).toHaveLength(0);
+  });
+});
