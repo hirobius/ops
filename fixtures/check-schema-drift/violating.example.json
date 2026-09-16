@@ -1,0 +1,37 @@
+{
+  "_comment": "Violating fixture: a snapshot in which site-engine ships a services variant ops cannot choose. This is the exact shape of the 2026-09-16 drift — site-engine added 'cards' and 'alternating' with built .astro components and refreshed the snapshot, while ops' vendored enum was never re-synced, leaving finished layouts unreachable by the generation agent with every gate green. 'masonry' stands in for that stranded variant so the fixture keeps failing after the real drift was fixed. The gate SHOULD fail on this.",
+  "clientConfig": {
+    "shape": {
+      "kind": "object",
+      "fields": {
+        "layout": {
+          "shape": {
+            "kind": "object",
+            "fields": {
+              "sections": {
+                "shape": {
+                  "kind": "object",
+                  "fields": {
+                    "services": {
+                      "shape": {
+                        "kind": "object",
+                        "fields": {
+                          "variant": {
+                            "shape": {
+                              "kind": "enum",
+                              "values": ["grid", "cards", "alternating", "masonry"]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
