@@ -2221,3 +2221,30 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   self-executes discord.js Client + env checks at import time, nothing
   exported). Manual verification in a live Discord channel wasn't possible
   in this sandbox (no DISCORD_BOT_TOKEN). Rest of #30's scope remains open.
+
+## Issue #44 — leads: record live_url (2026-09-16)
+- Rescoped issue: preview_url stamping already shipped; live_url was read
+  (lib/outreach/map.mjs fallback, already tested) but nothing wrote it.
+  Lifecycle flip to 'published' explicitly declined (billing event stays
+  human) — out of scope by design, not an oversight.
+- Added recordLiveUrl(sb, leadId, { liveUrl }) to lib/leads/pipeline.mjs,
+  same fetch -> 404-guard -> update -> respond shape as renderLeadSite.
+  Writes ONLY live_url.
+- Added 'record_live_url' action to api/lead-action.ts's ACTIONS + switch,
+  URL-validated (http(s)) the same way as the existing 'render' case, same
+  OPS_AGENT_KEY auth seam (no new auth path).
+- Did NOT touch scripts/leads-middleware.mjs (dev Vite mirror) — it already
+  only mirrors 'generate'/'render', not the pitch_* actions either, so this
+  is a pre-existing gap, not something this issue's DoD asked to fix.
+- Tests: tests/api/lead-pipeline.test.ts (recordLiveUrl: 404, success,
+  500-on-write-error) + new tests/api/lead-action.test.ts (dispatcher-level:
+  success, bad-URL 400, missing-URL 400, unknown-lead 404, and the
+  no-side-effects assertion via a mutable-row stub that reads the row back
+  after the write, proving lifecycle/preview_url/contacted_at/pitch fields
+  are untouched).
+- Files changed: lib/leads/pipeline.mjs, api/lead-action.ts,
+  tests/api/lead-pipeline.test.ts, tests/api/lead-action.test.ts (new).
+- Branch: ralph/issue-44-record-live-url. Gate green (typecheck, 97 files /
+  1192 tests, lint). PR: https://github.com/hirobius/ops/pull/368
+- Notes for next iteration: none — slice is complete per DoD. Deploy-side
+  callback (clients#12/#15) is a different repo and out of scope here.
