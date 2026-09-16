@@ -43,7 +43,13 @@ Append to progress.txt (terse, grammar optional):
 - Branch: ralph/issue-<n>-<slug> — EXACTLY this shape; the harness keys
   reconciliation on it, and it makes a racing duplicate push fail loudly.
 - Commit (match this repo's commit style)
-- Open PR with "Closes #<n>" in the body
+- Open PR with a BARE `Closes #<n>` in the body — on its own line, with no
+  markdown emphasis around it and never as part of a list. `Closes **#44**`
+  and `Closes #186 · #187 · #188` both look right and both silently close
+  NOTHING (the second lost three issues in one merge). Repeat the keyword
+  per issue instead. Note this is necessary but NOT sufficient — a clean
+  bare reference has also failed — so the harness verifies the transition
+  after the merge regardless (ops#305).
 - Comment the issue with a 2-line summary
 - Never merge. Never push to main. A human approves merges
   (`ralph-approved` on the PR, or the issue was pre-tagged `ralph-auto`).
