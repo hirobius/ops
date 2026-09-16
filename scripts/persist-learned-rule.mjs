@@ -10,8 +10,14 @@
  *     rule:               "<imperative-verb one-sentence rule>",
  *     rationale:          "<one-sentence why>",
  *     applies_to:         "all" | "T1" | "T2" | "T3",
- *     source:             "hermes-distillation" | "manual" | <other>,
+ *     source:             "hermes-distillation" | "park-harvest" | "manual" | <other>,
  *     evidence_unit_id:   "<unit-id-that-produced-the-failure>",
+ *                         // Hermes-era callers used a Hermes unit id. Since
+ *                         // ops#298 the field also carries the short repo/issue
+ *                         // form `<repo>#<issue>` (e.g. "ops#44") for
+ *                         // source: "park-harvest" entries — same field, not
+ *                         // renamed, because the file is append-only and
+ *                         // promote-learned-rule.mjs already reads it.
  *     ts:                 "<ISO-8601>",
  *     promotedAt?:        "<ISO-8601>",     // set when 13g-13 promote step runs
  *     promotedTo?:        "<registry-entry-id>",  // set after promotion
@@ -88,7 +94,11 @@ export function readLearnedRules() {
       .split('\n')
       .filter(Boolean)
       .map((line) => {
-        try { return JSON.parse(line); } catch { return null; }
+        try {
+          return JSON.parse(line);
+        } catch {
+          return null;
+        }
       })
       .filter(Boolean);
   } catch {
@@ -109,7 +119,7 @@ async function runCli() {
 
   function getFlag(name) {
     const i = argv.indexOf(name);
-    return i === -1 ? null : argv[i + 1] ?? null;
+    return i === -1 ? null : (argv[i + 1] ?? null);
   }
 
   // Two input modes:
@@ -124,29 +134,39 @@ async function runCli() {
       evidence_unit_id: getFlag('--evidence-unit-id'),
     };
     const ok = persistLearnedRule(entry);
-    console.log(ok ? `✓ appended to ${path.relative(ROOT, LEARNED_RULES_PATH)}` : '✗ append failed');
+    console.log(
+      ok ? `✓ appended to ${path.relative(ROOT, LEARNED_RULES_PATH)}` : '✗ append failed',
+    );
     process.exit(ok ? 0 : 1);
   }
 
   if (!process.stdin.isTTY) {
     const buf = await new Promise((resolve, reject) => {
       let acc = '';
-      process.stdin.on('data', (chunk) => { acc += chunk; });
+      process.stdin.on('data', (chunk) => {
+        acc += chunk;
+      });
       process.stdin.on('end', () => resolve(acc));
       process.stdin.on('error', reject);
     });
     let entry;
-    try { entry = JSON.parse(buf); } catch {
+    try {
+      entry = JSON.parse(buf);
+    } catch {
       console.error('persist-learned-rule: stdin is not valid JSON');
       process.exit(1);
     }
     const ok = persistLearnedRule(entry);
-    console.log(ok ? `✓ appended to ${path.relative(ROOT, LEARNED_RULES_PATH)}` : '✗ append failed');
+    console.log(
+      ok ? `✓ appended to ${path.relative(ROOT, LEARNED_RULES_PATH)}` : '✗ append failed',
+    );
     process.exit(ok ? 0 : 1);
   }
 
   console.error('persist-learned-rule: provide --rule + --rationale, or pipe JSON on stdin');
-  console.error('  example: node scripts/persist-learned-rule.mjs --rule "..." --rationale "..." --evidence-unit-id 13g-X');
+  console.error(
+    '  example: node scripts/persist-learned-rule.mjs --rule "..." --rationale "..." --evidence-unit-id 13g-X',
+  );
   process.exit(2);
 }
 

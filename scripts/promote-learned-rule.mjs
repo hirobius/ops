@@ -2,7 +2,7 @@
 /**
  * scripts/promote-learned-rule.mjs
  *
- * Interactive walker over docs/ai/learned-rules.jsonl. For each unprommoted
+ * Interactive walker over docs/ai/learned-rules.jsonl. For each unpromoted
  * entry (no `promotedAt` field), prompts Adrian to promote it to a real
  * registry entry in docs/guardrails/registry.json. The actual flip from
  * learned-rule → registry-entry is HITL by design (per unit 13g-13): a
@@ -55,16 +55,20 @@ if (flagJson) {
 }
 
 if (flagList) {
-  console.log(`learned-rules: ${rules.length} total · ${unpromoted.length} unprommoted · ${promoted.length} promoted`);
+  console.log(
+    `learned-rules: ${rules.length} total · ${unpromoted.length} unpromoted · ${promoted.length} promoted`,
+  );
   console.log(`source: ${path.relative(ROOT, LEARNED_RULES_FILE)}`);
   if (unpromoted.length === 0) {
-    console.log('\n(no unprommoted rules)');
+    console.log('\n(no unpromoted rules)');
   } else {
     console.log('\nUnpromoted rules:');
     unpromoted.forEach((r, i) => {
       console.log(`  ${i + 1}. [${r.evidence_unit_id ?? '?'}] ${r.rule}`);
       console.log(`     rationale: ${r.rationale}`);
-      console.log(`     ts: ${r.ts}    applies_to: ${r.applies_to ?? 'all'}    source: ${r.source ?? 'unknown'}`);
+      console.log(
+        `     ts: ${r.ts}    applies_to: ${r.applies_to ?? 'all'}    source: ${r.source ?? 'unknown'}`,
+      );
     });
   }
   process.exit(0);
@@ -73,19 +77,21 @@ if (flagList) {
 // ── Interactive walk ──────────────────────────────────────────────────────────
 
 if (!input.isTTY) {
-  console.error('promote-learned-rule: interactive mode requires a TTY. Use --list or --json for non-interactive.');
+  console.error(
+    'promote-learned-rule: interactive mode requires a TTY. Use --list or --json for non-interactive.',
+  );
   process.exit(2);
 }
 
 if (unpromoted.length === 0) {
-  console.log('No unprommoted rules. Nothing to do.');
+  console.log('No unpromoted rules. Nothing to do.');
   console.log(`(${rules.length} total in ${path.relative(ROOT, LEARNED_RULES_FILE)})`);
   process.exit(0);
 }
 
 const rl = readline.createInterface({ input, output });
 
-console.log(`promote-learned-rule: ${unpromoted.length} unprommoted rule(s) to walk`);
+console.log(`promote-learned-rule: ${unpromoted.length} unpromoted rule(s) to walk`);
 console.log(`source: ${path.relative(ROOT, LEARNED_RULES_FILE)}`);
 console.log('');
 
@@ -111,7 +117,10 @@ function emitRegistrySkeleton(rule) {
 
 function writeBackJsonl(allRules) {
   const tmp = `${LEARNED_RULES_FILE}.tmp`;
-  fs.writeFileSync(tmp, allRules.map((r) => JSON.stringify(r)).join('\n') + (allRules.length ? '\n' : ''));
+  fs.writeFileSync(
+    tmp,
+    allRules.map((r) => JSON.stringify(r)).join('\n') + (allRules.length ? '\n' : ''),
+  );
   fs.renameSync(tmp, LEARNED_RULES_FILE);
 }
 
@@ -121,12 +130,14 @@ while (i < unpromoted.length) {
   console.log(`[${i + 1}/${unpromoted.length}] ${r.rule}`);
   console.log(`  rationale: ${r.rationale}`);
   console.log(`  evidence:  ${r.evidence_unit_id ?? '(none)'}`);
-  console.log(`  applies_to: ${r.applies_to ?? 'all'}    source: ${r.source ?? 'unknown'}    ts: ${r.ts}`);
+  console.log(
+    `  applies_to: ${r.applies_to ?? 'all'}    source: ${r.source ?? 'unknown'}    ts: ${r.ts}`,
+  );
   console.log('');
   const ans = (await rl.question('[p]romote / [s]kip / [d]rop / [q]uit > ')).trim().toLowerCase();
   if (ans === 'q' || ans === 'quit') break;
   if (ans === 's' || ans === 'skip' || ans === '') {
-    console.log('  → skipped (left unprommoted; will surface again next run)');
+    console.log('  → skipped (left unpromoted; will surface again next run)');
     i += 1;
     continue;
   }
@@ -139,7 +150,8 @@ while (i < unpromoted.length) {
   }
   if (ans === 'p' || ans === 'promote') {
     const { suggestedId, skeleton } = emitRegistrySkeleton(r);
-    const promoteTo = (await rl.question(`  registry-entry id [${suggestedId}] > `)).trim() || suggestedId;
+    const promoteTo =
+      (await rl.question(`  registry-entry id [${suggestedId}] > `)).trim() || suggestedId;
     skeleton.id = promoteTo;
     skeleton.gateScript = `scripts/check-${promoteTo}.mjs`;
     r.promotedAt = new Date().toISOString();
@@ -164,5 +176,7 @@ rl.close();
 writeBackJsonl(rules);
 
 console.log('');
-console.log(`Done: ${promotedThisRun} promoted, ${droppedThisRun} dropped, ${unpromoted.length - i} unprommoted left.`);
+console.log(
+  `Done: ${promotedThisRun} promoted, ${droppedThisRun} dropped, ${unpromoted.length - i} unpromoted left.`,
+);
 console.log('Promotion stamps written to ' + path.relative(ROOT, LEARNED_RULES_FILE));
