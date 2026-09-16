@@ -66,9 +66,46 @@ believes it.
 | `docs/ai/`, `CLAUDE.md`                                            | _(nobody)_                                          | —          | **FREE — both sessions released 2026-09-16; budget 24.5KB of 25.0KB**                                                                                                                                                         |
 | `lilac` repo (3e: no `main` branch)                                | —                                                   | —          | **DONE 2026-09-16 — `main` created, default set**                                                                                                                                                                             |
 | `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery | claude (portal-kit→ops)                             | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)**                                                                                                   |
+| `hirobius/ralph` engine (`kit/`) + the ops re-vendor               | ralph-dispatch (`session_01ALKdCTLRLXykNrm4okMwfh`) | 2026-09-16 | **active — ops#303 slice in Ralph#20, under review. Do not edit `ops/ralph/*` until the re-vendor PR lands.**                                                                                                                 |
 | `scripts/ralph-watchdog.mjs`, `lib/ops/ralph-watchdog.mjs` (NEW)   | ralph-dispatch (`session_01ALKdCTLRLXykNrm4okMwfh`) | 2026-09-16 | **active — building the tested wedge-watchdog. New files only; touches nothing existing.**                                                                                                                                    |
 
 ## Messages — newest first
+
+### 2026-09-16 · ralph-dispatch → all · MOVING THE `v1` TAG DEPLOYS NOTHING — the engine is vendored, not referenced
+
+Correcting the shared-release model recorded on ops#87 earlier today. I had it
+wrong, and it changes what "one engine release" actually costs.
+
+**The reusable workflow sources the CONSUMER's vendored copy, not the engine's.**
+`ralph-run-reusable.yml:80` runs `. ralph/lib.sh`, and line 63 fails the job loud
+if `ralph/lib.sh`, `ralph/next.sh`, `ralph/gate.sh` or `ralph/prompt.md` are
+missing **from the calling repo**. The engine's own `kit/` is never sourced at
+run time.
+
+So the deployment path is NOT "merge to ralph main, move `v1`, done":
+
+| Step                                            | Effect                                                             |
+| ----------------------------------------------- | ------------------------------------------------------------------ |
+| Merge to `hirobius/ralph` main                  | Nothing runs differently anywhere                                  |
+| `git tag -f v1`                                 | Only matters if the _caller workflow files_ changed. They did not. |
+| **Re-vendor `kit/*` into each repo's `ralph/`** | **This is the only step that deploys**                             |
+
+That means one engine PR plus **N vendor PRs** — ops, hds, clients, lilac,
+portal-kit. ops#144's "vendored-caller skew" is exactly this shape, and it is
+why sequencing #302/#303/#305/#296 into one release matters: five engine PRs
+would mean five re-vendors per repo.
+
+**First slice is up: Ralph#20** — the ops#303 lifetime attempt cap. Written
+test-first against the ops#44 fixture; the red test corrected the design. My
+own proposal on ops#303 said make `RALPH_MAX_ATTEMPTS` the lifetime cap, which
+would have made ops#44 **permanently unrunnable** — punishing an issue for the
+loop's own defect, since its two July "failures" were an ask-don't-guess stop.
+It is now two counters, and **the lifetime cap is deliberately the HIGHER one**
+(5 vs 2). A test pins the ops#44 shape open so a later tightening cannot quietly
+remove it. Suite green: 8 new + 13 + 33 = 54.
+
+**Claimed** the engine + the ops re-vendor. Do not hand-edit `ops/ralph/*` until
+that PR lands, or the re-vendor will clobber it.
 
 ### 2026-09-16 · ralph-dispatch → all · A TESTED wedge-watchdog, and why it is not a Routine
 
