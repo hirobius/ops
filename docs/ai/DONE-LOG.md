@@ -664,3 +664,25 @@ _Last updated: 2026-07-13 (**Ralph parked inbox — reasons, one-tap re-queue, w
 - 2026-07-02 (newsletter sweep): mined all 10 "The Code" editions (Jun 18–Jul 1) → filed ops issues #3–#7 (Playwright MCP self-verify · HTML plans/PR artifacts convention · blast-radius pre-edit hook · CLAUDE.md diet per Anthropic steering guide · lib/agent Sonnet-5 tiering + prompt audit). Judgment calls (cheap-model routing, observability, importer autonomy dial) parked pending Adrian.
 - 2026-07-02 (later): fleet-status layer — per-repo root status.json rendered on /ops/projects (token-gated, TTL-cached) · combined one-shot onboarding prompt (tasks + status + pointer) · HANDOFF.md system + CLAUDE.md routing repointed off the retired night-shift loop.
 - 2026-07-02: /ops/projects + /api/projects (fleet hub v1) · /ops/digest + first digest · Outscraper lead-gen · vendored agent+schema · render seam + /api/render-site · Astro decision recorded + cutover plan · script INDEX (#13-15) · architecture review #1-12 shipped.
+
+## 2026-09-16 — ops#348 premise corrected before a hand-run production migration
+
+- **`pitch_queue` is a filename, not a table.** ops#348 (`p1`, `sev2`,
+  `needs-adrian`) concluded that `0012_pitch_queue.sql` was never applied because
+  no table by that name exists in the live DB. Nothing in the repo creates one.
+  `0012` creates `lead_notes`, `leads.assigned_to`, `leads.next_action_at`, three
+  indexes and RLS — **all six verified present** in `vvyccwxtcwvlusweenje`, and
+  the migration is idempotent (`add column if not exists`) so a re-run would have
+  been harmless but pointless. Corrected on the issue with a revised DoD.
+- The disproof was already inside the issue: its own verification query returned
+  `lead_notes`, which *is* 0012's table, and it was read as unrelated. The §1
+  conclusion that "the call channel defers to a store that isn't there" therefore
+  does not hold — `/ops/pitch` reads `lead_notes` and it exists.
+- **Still real and unchanged:** `digest_items` (0011) is genuinely absent, so
+  #78's acceptance criteria are not met on production; the ledger repairs for
+  0010/0013 stand; and `check-migration-ledger.mjs` remains the highest-value box
+  on the issue — the repo↔database seam is the only schema boundary here with no
+  gate, which is exactly how a filename got read as a table.
+- **Learned rule 15** added to `docs/ai/learned-rules.jsonl`: a migration's
+  filename is a label for the change, not an inventory of its objects. Same
+  family as "find a stored field's writer before citing it as evidence".

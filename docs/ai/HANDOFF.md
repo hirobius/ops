@@ -46,24 +46,23 @@ not read it to get oriented.
 
 - **📞 First-contact stack (#326).** All outbound routes through one choke
   point, `lib/outreach/guard.mjs`. **The lesson that still steers:** a scoring
-  ceiling (4+30+10+15 = **59** vs a threshold of **60**) made custom-domain
-  leads permanently unqualifiable and silently orphaned the redesign play, and
-  the weighting ranked the _hardest_ sells highest. A Wix site is a **proven
-  buyer**; a decade with no site is a revealed preference.
+  ceiling (59 vs a threshold of 60) made custom-domain leads permanently
+  unqualifiable, and the weighting ranked the _hardest_ sells highest. A Wix
+  site is a **proven buyer**; a decade with no site is a revealed preference.
 
-- **📞 `/ops/pitch` — the call sheet. ⚠️ Migration `0012_pitch_queue` was NEVER
-  APPLIED — the `pitch_queue` table does not exist in the live database, nor
-  does `digest_items` (`0011`, despite #78 being closed). Verified 2026-09-16;
-  filed as #348.** Only pitchable leads appear (`preview_url` present, `do_not_contact` false);
-  both gates re-check on every write. Marking pitched stamps `contacted_at` +
-  `contact_channel` — the evidence #321 needs. Notes live in the `lead_notes`
-  TABLE, never a column. Not a CRM.
+- **📞 `/ops/pitch` — the call sheet; `0012`/`0013`/`0014` ARE applied.** The
+  #348 warning that `pitch_queue` is missing is wrong — it is a filename, not a
+  table; `lead_notes` is what `0012` creates and it exists. (`digest_items`,
+  `0011`, IS absent despite #78 being closed.) Only pitchable leads appear
+  (`preview_url` present, `do_not_contact` false), re-checked on every write.
+  Marking pitched stamps `contacted_at` + `contact_channel` — the evidence #321
+  needs. Notes live in the `lead_notes` TABLE, never a column. Not a CRM.
 - **🪟 `/ops/standing` is the ONLY fleet surface.** Chain, waiting-on-you, in
   flight, queue, backlog, deploys. `/ops/tasks` + `/ops/projects` redirect here.
   Its actions write labels straight to GitHub, bypassing the Supabase mirror on
-  purpose — Standing lists repos the importer never touched. Stage 5 now reports
-  **stored vs live** `preview_url`s (#322); a URL that could not be reached reads
-  `unchecked`, never `dead` — the usual cause is our egress, not the site.
+  purpose — Standing lists repos the importer never touched. Stage 5 reports
+  **stored vs live** `preview_url`s (#322); unreachable reads `unchecked`, never
+  `dead` — the usual cause is our egress, not the site.
 - **🎯 Revenue path is merged, unrun.** The generator takes real hours, address,
   photos and a contrast-checked palette. Spec: `docs/specs/leads-to-site.md`.
   Doctrine finding that still steers: **we have the machinery and mis-aim it.**
@@ -90,15 +89,15 @@ not read it to get oriented.
   https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables
   Then `node scripts/audit-sites.mjs --presence custom --write`.
 - **Decide hds 0.14.0 (hds#199, reopened).** Release path armed but **zero
-  fuel**: `.changeset/` has no entries, so no "Version Packages" PR can open, and
+  fuel**: `.changeset/` is empty so no "Version Packages" PR can open, and
   `NPM_TOKEN` is unverified. Cutting it means the breaking `Hds*`→unprefixed
   renames plus an ops migration across ~41 files. No agent writes the changeset.
 - **Run the lilac-insure onboarding prompt** → stands up the client repo to fleet
-  spec + files its tasks (the "New client-work repo procedure" below is the prompt).
+  spec + files its tasks.
 - **File the Alert Figma-drift issue** in the DS repo (not ops): tone-colored
-  title + border, danger→`circle-alert`; Figma node 33:34.
-- **Run the ops-history PII scrub** — runbook in `docs/ai/REPO-PROCEDURES.md`.
-  ops is private, so hygiene not urgency.
+  title + border, danger→`circle-alert`; node 33:34.
+- **Run the ops-history PII scrub** — runbook in `REPO-PROCEDURES.md`; hygiene,
+  not urgency.
 - **Remove `PORTAL_HMAC_SECRET` + `VITE_PORTAL_HMAC_SECRET` from Vercel** —
   nothing reads either var since the in-ops portal moved to `portal-kit`.
 
@@ -106,28 +105,31 @@ not read it to get oriented.
 
 > Per-issue detail for everything open: `docs/ai/BURNDOWN-GAMEPLAN.md`.
 
-1. **#348 — two committed migrations never reached the database.** `digest_items`
-   (`0011`) and `pitch_queue` (`0012`) do not exist in `vvyccwxtcwvlusweenje`;
-   `0013` is recorded under its pre-rename version; `0010` is applied but
-   unrecorded. Needs Adrian (it writes production). The DoD includes a
-   `check-migration-ledger` gate — this seam is the only schema boundary in the
-   repo with no gate, which is how a closed issue left a missing table behind.
-2. **Guardrail follow-through, unblocked by #325:** #329 (the fixture ratchet
-   rewrites its baseline on every run) and #330 (gate telemetry is structurally
-   unfillable — a failing pre-commit gate aborts the commit, so post-commit
-   never logs it). Then `reconcile-ralph-closures.mjs --apply` with a real
-   `GITHUB_TOKEN`, and walk the unpromoted rules.
-3. **Adrian's calls:** #200 (Stripe — no way to take money today) · #306 (curate
+1. **Make calls — `0 contacted` is the computed break** and has been zero since
+   the table existed. `node scripts/export-call-list.mjs --limit 100 > calls.csv`
+   (261 eligible, 100 queued, 38 with a real opening line). Log every dial,
+   no-answers included: `node scripts/log-call.mjs --id <id> --outcome <o>`,
+   funnel via `--funnel`. **Outcomes are a closed vocabulary on purpose — 200
+   calls logged as free text are anecdotes, not data.** Compliance gates the
+   _scaled_ send (#35 → #38 → #27 → #9); one call is not. B2B calls to business
+   numbers sit largely outside the national DNC registry — but WA (most of this
+   list) needs all-party consent to record.
+2. **#348 — apply `0011_digest_items` ONLY. Needs Adrian (writes production).**
+   Its `pitch_queue` half is wrong: **that is a FILENAME, not a table**, and all
+   six objects `0012` creates are verified live (corrected on the issue).
+   `digest_items` IS absent, so #78's criteria are unmet. Ledger repairs for
+   0010/0012/0013 stand; `check-migration-ledger` is the highest-value box.
+3. **Guardrail follow-through:** #330 (gate telemetry structurally unfillable)
+   **carries `ralph-wip` — the loop holds it.** #329 landed in #349. Then
+   `reconcile-ralph-closures.mjs --apply` with a real `GITHUB_TOKEN`.
+4. **Adrian's calls:** #200 (Stripe — no way to take money today) · #306 (curate
    gate severity on _provable_ firing, not firing history) · #303/#302/#296/#238
    (one shared `hirobius/ralph` engine release, not four).
-4. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
-5. **Website email crawler — MERGED (#346), never run for real.** Extraction +
-   ranking proven against live content; the first real fetch found a filtering
-   bug 28 fixture tests missed (see `learned-rules.jsonl`). It has **never
-   fetched a trades site** — this container 403s all egress — so hit rate across
-   the 223 sites is unknown. **Next step is running it somewhere with egress**
-   (a local machine, or as a Vercel function); expect tuning, not a clean run.
-6. **Cutover Part B remainder** — gated on the clients Astro factory being live.
+5. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
+6. **Website email crawler — MERGED (#346), never run for real.** It has never
+   fetched a trades site (both containers 403 all egress), so hit rate across the
+   223 sites is unknown. **Run it where egress works**; expect tuning.
+7. **Cutover Part B remainder** — gated on the clients Astro factory.
 
 ## Parked / known warts
 

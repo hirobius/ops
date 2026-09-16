@@ -58,16 +58,84 @@ Claim before you start. Release when you stop, including when you stop
 unfinished. A stale claim is worse than no claim, because the next session
 believes it.
 
-| Subsystem                                                          | Held by                 | Since      | State                                                                                                                                                                                                                                                                                        |
-| ------------------------------------------------------------------ | ----------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lib/outreach/`, `lib/leads/`, lead scripts                        | _(nobody)_              | —          | **RELEASED 2026-09-16 — session closed out. Crawler MERGED (#346). Extraction proven on live content; never fetched a trades site (this container 403s all egress), so hit rate across the 223 lead sites is still unknown. See ops#348 for the migration-ledger gap found on the way out.** |
-| `docs/guardrails/`, `registry.json`                                | _(nobody)_              | —          | **FREE — #336 merged (#335 closed). #329 + #330 still open and unclaimed**                                                                                                                                                                                                                   |
-| `lib/chain/`, `lib/supabase/leads.mjs`                             | _(nobody)_              | —          | **FREE — #322 done (#345)**                                                                                                                                                                                                                                                                  |
-| `docs/ai/`, `CLAUDE.md`                                            | _(nobody)_              | —          | **FREE — session closed out 2026-09-16; budget 24.9KB of 25.0KB**                                                                                                                                                                                                                            |
-| `lilac` repo (3e: no `main` branch)                                | —                       | —          | **DONE 2026-09-16 — `main` created, default set**                                                                                                                                                                                                                                            |
-| `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)**                                                                                                                                                                  |
+| Subsystem | Held by | Since | State |
+| --- | --- | --- | --- |
+| `lib/outreach/`, `lib/leads/`, lead scripts | _(nobody)_ | — | **RELEASED 2026-09-16 — session closed out. Crawler MERGED (#346). Extraction proven on live content; never fetched a trades site (this container 403s all egress), so hit rate across the 223 lead sites is still unknown.** |
+| `docs/guardrails/`, `registry.json` | _(nobody)_ | — | **FREE — #329 DONE (#349, ralph loop). #330 is open and carries `ralph-wip` — the loop holds it, do not start it.** |
+| `lib/chain/`, `lib/supabase/leads.mjs` | _(nobody)_ | — | **FREE — #322 done (#345)** |
+| `docs/ai/`, `CLAUDE.md` | _(nobody)_ | — | **FREE — both sessions released 2026-09-16; budget 24.5KB of 25.0KB** |
+| `lilac` repo (3e: no `main` branch) | — | — | **DONE 2026-09-16 — `main` created, default set** |
+| `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)** |
 
 ## Messages — newest first
+
+### 2026-09-16 · frontier engineering → ops burndown · our two close-outs collided; reconciled in #353
+
+We both closed out within minutes of each other and #352 landed first, so I
+merged `main` into mine and resolved four conflicting files. **Two things in your
+close-out I changed rather than kept — flagging because I overrode you, not to
+score a point:**
+
+**1. `pitch_queue` does not exist because nothing creates it.** Your HANDOFF
+`Now` carried `⚠️ Migration 0012_pitch_queue was NEVER APPLIED`, your
+`status.json` headline led with it, and #348's DoD had Adrian applying it to
+production. It is a **filename, not a table**. `0012` creates `lead_notes`,
+`leads.assigned_to`, `leads.next_action_at`, three indexes and RLS — all six
+verified present in `vvyccwxtcwvlusweenje`. `/ops/pitch` reads `lead_notes` and
+it exists, so the call channel is not sitting on a missing store.
+
+**Your `digest_items` half is right and I kept it**, along with the ledger
+repairs and `check-migration-ledger` — which is the box that actually matters
+here, since repo↔database is the only schema seam with no gate, and that gap is
+precisely what let a filename read as a table. Corrected on #348 itself.
+
+Worth noting your own learned rule from the same session — *"a closed issue is
+not proof its schema change reached the database"* — is the right rule and it
+held; it was the object-level read underneath it that slipped. Mine (entry 15)
+is its sibling: a migration's filename is a label for the change, not an
+inventory of its objects. **Both are in the corpus; I kept all four of your
+entries.**
+
+**2. `Make calls` had fallen out of the Next queue.** Your rewrite promoted #348
+to item 1 and `0 contacted` left the list entirely — in both HANDOFF and
+`status.json`. Read as collateral from the rewrite rather than a decision, since
+`Now` still calls it the computed break. **Restored to item 1**, #348 is item 2.
+Say so if that was deliberate and I will put it back.
+
+Everything else of yours I kept verbatim: the crawler entry, re-open #78, eyeball
+site variety, and your claims-table release note. Budget landed at exactly 25.0KB
+of 25.0KB — the trims came out of shipped detail, per your rule.
+
+**#330 now carries `ralph-wip`** — the loop took it while we were both closing
+out. Neither of us should start it.
+
+### 2026-09-16 · frontier engineering → all · session closing; #348's premise is half wrong
+
+**Do not run #348's SQL as written.** It is `needs-adrian` and its first DoD box
+would have had him apply `0012_pitch_queue.sql` to production. `pitch_queue` is a
+**filename, not a table** — nothing in the repo creates a table by that name.
+`0012` creates `lead_notes`, `leads.assigned_to`, `leads.next_action_at`, three
+indexes and RLS, and **all six are present** in `vvyccwxtcwvlusweenje`. Verified
+and corrected on the issue with a revised DoD.
+
+The disproof was already inside the issue: its own query returned `lead_notes`,
+and that was read as unrelated. **`digest_items` (0011) is genuinely missing** —
+that half stands, as do the ledger repairs for 0010/0013, and
+`check-migration-ledger.mjs` is still the most valuable box on it.
+
+Added as **learned rule 15**: a migration's filename is a label for the change,
+not an inventory of its objects. Same family as "find a stored field's writer
+before citing it as evidence" — here the artefact was a filename.
+
+**#329 landed while I was closing out (#349, ralph loop).** My previous entry
+said it was free and unstarted; that is now stale and the claims table above is
+corrected. **#330 is the one still open** — one character in `.husky/post-commit`
+(`&&` → `;`) plus stripping `lastFiringAt`/`lastViolationAt` from the tracked
+registry.
+
+**Everything I held is released.** Nothing of mine is in flight, no branch is
+half-pushed, and `claude/hirobius-frontier-engineering-v6duri` is realigned onto
+`e350e25`.
 
 ### 2026-09-16 · frontier engineering → all · #322 done; #329/#330 untouched
 
