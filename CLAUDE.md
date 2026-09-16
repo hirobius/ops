@@ -7,7 +7,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 
 ## 0. HARD RULES (no exceptions, apply to all agents including Claude)
 
-- **ANOTHER SESSION MAY BE RUNNING — claim before you touch anything.** Read `docs/ai/SESSION-BOARD.md` first, add your session id to its table, claim the subsystem you are about to work on, and confirm nothing else is in flight on it. Release the claim when you stop, including when you stop unfinished — a stale claim is worse than none. Re-read the board before each significant push. Three collisions on 2026-09-15 (migration `0012` numbered twice and **both applied to the live database**, two call tools built in parallel, a docs PR broken by a merge) all came from skipping this. Branch-per-session prevents overwrites, not duplicated work.
+- **ANOTHER SESSION MAY BE RUNNING — claim before you touch anything.** Read `docs/ai/SESSION-BOARD.md` first, add your session id, claim the subsystem, and confirm nothing else is in flight on it. Release when you stop, including unfinished — a stale claim is worse than none. Re-read the board before each significant push. Three collisions on 2026-09-15 came from skipping this, one of them numbering migration `0012` twice and applying **both to the live database** (detail: DONE-LOG). Branch-per-session prevents overwrites, not duplicated work.
 - **NEVER read, write, create, or delete `.env*` files.** Keys are set by the human only. If a task needs a new key, document it in a comment in the script and stop — do not touch `.env.local`.
 - **NEVER git push.** Local commits only.
 - **NEVER run `pnpm check:release` or deploy commands.**
@@ -20,6 +20,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
   blocking). If the reason to act lies in the **future**, it is not an issue —
   add it to `docs/ai/PARKED.md` with a trigger; `pnpm parked:check` surfaces it
   when the condition fires. A discussion with no deliverable is not an issue.
+- **ACT; DON'T ASK FOR MECHANICAL PERMISSION.** Adrian does not review code. Merge a green PR, move `v1`, attach a repo, close a shipped issue, re-vendor — do them, and log each in a **workback list** (decision + revert). Ask ONLY when the answer changes what gets built: money, legal exposure, vendor choice, product direction, or an unverifiable deletion. **With no reviewer, mechanism replaces deference** — mutation-test every guard (break it, prove a test fails; it caught two hollow tests on 2026-09-16) and keep the watchdog on.
 - **`/ops` is gated in production** by a server-side password: `api/ops-login.ts` checks `OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` and sets an httpOnly session cookie. Adrian sets those in the Vercel dashboard env (Production + Preview scopes). `pnpm dev` bypasses the gate. Claude must never read or write `.env*` files.
 
 ---
@@ -78,9 +79,7 @@ Applies to any agent working a dispatched `@claude` task — and to any session 
 - **Design-touching / new module → `/codebase-design`**; periodic design-debt sweep → `/improve-codebase-architecture`.
 - **Board / issue-lifecycle work → `/triage`.**
 
-**Tracker config for `/to-tickets` + `/triage`**: our tracker is **GitHub Issues in the current repo**; label vocabulary is `backlog` · `bug` · `blocked` · `needs-adrian` · `needs-decision` (Adrian call) · `needs-credential` (key/account setup, no judgement, see #134); `needs-human` retired (ops#295). Dependencies: **sub-issues** for epic→child, **"Depends on #N"** in the body for cross-task prerequisites.
-
-Dispatched `@claude` issues carry these invocations in their body (`lib/tasks/actions.mjs`), so fleet work runs them by default; interactive sessions follow this table.
+**Tracker config** for `/to-tickets` + `/triage` (labels, dependency form): `docs/ai/AGENT_GUIDELINES.md` §4. Dispatched `@claude` issues carry these invocations in their body (`lib/tasks/actions.mjs`); interactive sessions follow the table above.
 
 ## 3. Sub-agent dispatch
 
@@ -91,11 +90,10 @@ actually dispatching. The three rules that must not be rediscovered:
 - **Cheapest model that can do the job.** `sonnet` is the default for source work
   and is **required for anything involving deletions**. `opus` only for
   cross-cutting architecture or subtle validator logic.
-- **NEVER `pnpm lint:fix` across the codebase** (Pod N incident, 2026-05-01 — it
-  merged unrelated code blocks into syntax errors). Per-rule only:
+- **NEVER `pnpm lint:fix` across the codebase** — it merged unrelated code
+  blocks into syntax errors (Pod N, 2026-05-01). Per-rule only:
   `pnpm exec eslint src --fix --rule '{"<rule>": "error"}'`, then
-  `pnpm typecheck && pnpm exec vite build` after EACH rule. >50 files touched by
-  one rule → stop and ask.
+  `pnpm typecheck && pnpm exec vite build` after EACH. >50 files → stop and ask.
 - **Branch-per-session** (`claude/*`); never two sessions on one branch.
 
 ---
@@ -108,10 +106,9 @@ in ops (ops#274 session; full corpus in `docs/ai/learned-rules.jsonl`, walk it w
 change what a session does; the rest stay in the JSONL until promoted.
 
 - **A park is not proof the work is stuck.** `iteration ended without a pushed
-branch` is frequently loop _infrastructure_ (bot-actor push rejection, a
-  permission wall, a sensitive-file edit block) or a deliberate ask-don't-guess
-  stop — not a failure of the issue. Read the agent's own comment before believing
-  the verdict.
+branch` is frequently loop _infrastructure_ or a deliberate ask-don't-guess
+  stop. Read the agent's own comment before believing the verdict. (The engine
+  now infers this — ops#303 — but a pre-2026-09-16 park predates that.)
 - **Before re-queuing a parked/blocked issue, read its comment history.**
   `closed_by_pull_requests` plus the current code is not enough — ops#142 burned a
   full iteration in September rediscovering a blocker written down in July.
@@ -125,8 +122,8 @@ branch` is frequently loop _infrastructure_ (bot-actor push rejection, a
   unrelated PR may have solved the problem differently, leaving the DoD stale —
   stop and ask rather than deleting working code on the issue text's word (ops#122).
 
-**Never queue an issue whose DoD requires editing `.github/workflows/*`** — the
-bot's token lacks the `workflows` scope. Split it: the workflow file goes to a
-human/adr-eng PR, the rest becomes a script-or-registry issue Ralph can push.
-Four issues each did the full work and then died at the push. **`.husky/` is NOT
-`.github/workflows/`** — hooks carry no scope restriction and Ralph can push them.
+**Never queue an issue whose DoD requires editing `.github/workflows/*`** — no
+agent token here carries the `workflows` scope; four issues did the full work
+then died at the push. Split it: the YAML goes to a human PR, the rest becomes a
+script issue (#318 → #347 is the worked example). **`.husky/` is NOT
+`.github/workflows/`** — hooks carry no such restriction.

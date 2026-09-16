@@ -120,12 +120,12 @@ not read it to get oriented.
    six objects `0012` creates are verified live (corrected on the issue).
    `digest_items` IS absent, so #78's criteria are unmet. Ledger repairs for
    0010/0012/0013 stand; `check-migration-ledger` is the highest-value box.
-3. **Guardrail follow-through:** #330 (gate telemetry structurally unfillable)
-   **carries `ralph-wip` — the loop holds it.** #329 landed in #349. Then
-   `reconcile-ralph-closures.mjs --apply` with a real `GITHUB_TOKEN`.
-4. **Adrian's calls:** #200 (Stripe — no way to take money today) · #306 (curate
-   gate severity on _provable_ firing, not firing history) · #303/#302/#296/#238
-   (one shared `hirobius/ralph` engine release, not four).
+3. **Engine release SHIPPED 2026-09-16** — #303 + #305 merged, `v1` moved to
+   `f645031`, re-vendored into ops/hds/site-engine (the only three consumers;
+   lilac and portal-kit don't run the loop, there is no `clients` repo).
+   Remaining: #302, #296, #370. Then `reconcile-ralph-closures.mjs --apply`.
+4. **Adrian's calls** are batched on **#319** (the betting table) — answer them
+   in one sitting rather than one at a time.
 5. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
 6. **Website email crawler — MERGED (#346), never run for real.** It has never
    fetched a trades site (both containers 403 all egress), so hit rate across the

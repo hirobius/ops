@@ -14,11 +14,11 @@ Per Adrian's directive 2026-05-01: **always pick the cheapest model that can do 
 
 ### Model selection matrix
 
-| Model | When to use | When NOT to use |
-|---|---|---|
-| **haiku** | Additive mechanical edits, single-pattern scrubs, file moves, emoji/comment scrubs, registry-summary writing, baseline regen, simple fixture additions, "follow the pattern" work. | **NEVER for deletions.** Never for judgment calls. |
-| **sonnet** (default) | Most unit work: schema extensions, new scripts, bridge endpoints, component refactors, validator additions. **REQUIRED for any task involving deletions** (file removals, dead-code pruning, dep removal, manifest cleanup). | When opus-class architectural reasoning is needed. |
-| **opus** | Cross-cutting architectural reasoning, ambiguous scope needing judgment, novel validator with subtle logic, opus-class units explicitly tagged. | Ordinary unit work. **Use sparingly — most expensive lever.** |
+| Model                | When to use                                                                                                                                                                                                                  | When NOT to use                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **haiku**            | Additive mechanical edits, single-pattern scrubs, file moves, emoji/comment scrubs, registry-summary writing, baseline regen, simple fixture additions, "follow the pattern" work.                                           | **NEVER for deletions.** Never for judgment calls.            |
+| **sonnet** (default) | Most unit work: schema extensions, new scripts, bridge endpoints, component refactors, validator additions. **REQUIRED for any task involving deletions** (file removals, dead-code pruning, dep removal, manifest cleanup). | When opus-class architectural reasoning is needed.            |
+| **opus**             | Cross-cutting architectural reasoning, ambiguous scope needing judgment, novel validator with subtle logic, opus-class units explicitly tagged.                                                                              | Ordinary unit work. **Use sparingly — most expensive lever.** |
 
 ### Effort
 
@@ -104,6 +104,7 @@ Pod N ran `pnpm lint:fix` over the full codebase as a single bulk operation. ESL
 ### The Pod 2 incident
 
 Pod 2's autonomous doc-coherence audit produced **~55% false-positive rate at P0**. Examples:
+
 - Claimed 9 typography tokens were "still live" — they weren't, all 9 truly removed.
 - Claimed `HdsSurface`/`Grid`/`HeadingStack`/`Dialog`/`Text` didn't exist — all 5 exist.
 - Claimed `component.padding` resolves to 12px — it's 24px.
@@ -113,6 +114,7 @@ The pattern: Pod 2 cross-referenced doc text without grounding each claim agains
 ### The rule
 
 Every claim in a unit's `description` or `agentNotes` MUST include a grounding ref:
+
 - `Source of truth: <file:line>` — for code claims.
 - `Validator output: <command>` — for test/build claims.
 - `Commit ref: <hash>` — for historical claims.
@@ -158,6 +160,7 @@ CI (`.github/workflows/quality.yml`) runs:
 ### Promotion path
 
 Each soft / warn-mode gate has a unit to promote it once burndown finishes:
+
 - `lint --max-warnings=0`: `12i-quality-eslint-burndown` (and `12i-quality-eslint-import-x-migration` for plugin compatibility).
 - `check-component-completeness` hard-fail: `12i-quality-component-completeness-burndown`.
 - `knip` hard-fail: `12i-quality-knip-promote-hard-fail`.
@@ -228,6 +231,7 @@ When `status` is anything other than `"claimed"` or `"done"`, `claimedBy` and `c
 A claim is "stale" when `claimedAt` is older than 4 hours and `status` is still `claimed` — usually the agent crashed. Detected by `node scripts/audit-claims.mjs` (separate from the validator on purpose: stale-claim is a runtime/timing condition, not a schema violation, and shouldn't lock the pre-commit hook).
 
 To recover a stale claim:
+
 - **Steal**: a fresh agent overwrites `claimedBy`/`claimedAt` with its own values. Commit message: `chore(orch): steal stale claim on <unit-id> from <prior-agent>`.
 - **Release**: revert to `status: approved`, clear claim fields, document in `agentNotes`.
 
@@ -256,12 +260,12 @@ For files that genuinely can't conform (specimen pages, brand letterforms, error
 
 After Pod 1's reconciliation 2026-05-01 — system uses **4 roles**, not 5 (sticky dropped):
 
-| Surface | Role | Background | Shadow | Border |
-|---|---|---|---|---|
-| Card / panel resting | `flat` | `surface.page` | none | `border.subtle` 1px |
-| Card / panel lifted | `raised` | `surface.raised` | `shadow.subtle` | none |
-| Popover / dropdown / tooltip | `floating` | `surface.raised` | `shadow.floating` | none |
-| Dialog / sheet / modal | `overlay` | `surface.overlay` | `shadow.overlay` | none |
+| Surface                      | Role       | Background        | Shadow            | Border              |
+| ---------------------------- | ---------- | ----------------- | ----------------- | ------------------- |
+| Card / panel resting         | `flat`     | `surface.page`    | none              | `border.subtle` 1px |
+| Card / panel lifted          | `raised`   | `surface.raised`  | `shadow.subtle`   | none                |
+| Popover / dropdown / tooltip | `floating` | `surface.raised`  | `shadow.floating` | none                |
+| Dialog / sheet / modal       | `overlay`  | `surface.overlay` | `shadow.overlay`  | none                |
 
 Cards default to `flat`. Bind via `semantic.elevation.{role}` — never raw `box-shadow` values.
 
@@ -364,6 +368,7 @@ Captured as `12s-infra-pre-merge-squash-protocol`.
 A **fixture** is a frozen input + expected output that the test runs against.
 
 Examples:
+
 - `fixtures/compiler/<case>/input.jsx + expected.json` — LLM compiler regression
 - `fixtures/llm-prompts/<slug>/input.txt + expected.jsx` — prompt regression suite (Pod A3)
 - `tests/visual.spec.ts-snapshots/*.png` — Playwright visual baselines (also fixtures)
@@ -403,10 +408,11 @@ If a sub-agent's commit breaks the build:
 ### When orchestration drift surfaces
 
 `validate-orchestration --soft` (or now hard-fail) reports:
+
 - BAD_APPROVAL → fix to one of `proposed | approved | denied | needs-grilling`.
 - BAD_PRIORITY → fix to integer 1..5.
 - BAD_SPRINT → fix to integer 0..6.
-- MISSING_* → fill in the field.
+- MISSING\_\* → fill in the field.
 
 DO NOT mass-change `approval` to `approved` to bypass validation. Default for unratified work is `proposed`.
 
@@ -421,6 +427,7 @@ Covered: `.env`, `.env.local`, `.env.production`, `.env.test`, `.env.*.local`, a
 **Why:** `.env.local` holds API keys, OAuth tokens, webhook URLs, service credentials. One accidental commit or log line leaks all of them. Blast radius = account-wide.
 
 **What to do instead:**
+
 - If a script needs a new env var: add a comment in the script header documenting it. Human fills it in.
 - Never `cat`, `read`, or log `.env*` contents.
 - Never interpolate env values into output files or committed code.
@@ -480,3 +487,19 @@ The other ~64 scripts in `scripts/check-*` and `validators/*.mjs` are not yet wi
 - `docs/ai/rules/FIGMA_BRIDGE.md` — bridge architecture.
 - `public/llms.txt` — primary AI entry point.
 - `CLAUDE.md` — project root agent instructions.
+
+## 4. Tracker config (for `/to-tickets` and `/triage`)
+
+Moved out of `CLAUDE.md` 2026-09-16 to keep the always-on set inside its budget
+(ops#292) — it is reference the skills ask for, not steering every session needs.
+
+- **Tracker:** GitHub Issues in the current repo.
+- **Label vocabulary:** `backlog` · `bug` · `blocked` · `needs-adrian` ·
+  `needs-decision` (an Adrian judgement call) · `needs-credential` (a key or
+  account, no judgement — see ops#134). `needs-human` is **retired** (ops#295);
+  it conflated the two, so a credential wait looked like a decision wait and
+  neither could be measured. `metric-human-gate-latency` (ops#297) reads these.
+- **Dependencies:** **sub-issues** for epic → child; **"Depends on #N"** in the
+  body for a cross-task prerequisite.
+- **Open decisions batch onto ops#319**, the betting table — one sitting per
+  cycle rather than one question at a time.
