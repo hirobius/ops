@@ -42,6 +42,11 @@ const TILES: readonly SurfaceTile[] = [
     label: 'Standing',
     description: 'The whole board — chain, blocked, in flight, queue, backlog, deploys',
   },
+  {
+    to: '/ops/clients',
+    label: 'Clients',
+    description: 'Active retainers, prospects & sample builds — portals, sites, demos',
+  },
 ] as const;
 
 export function SurfacesRail() {

@@ -8,12 +8,19 @@
  * client-side numbers (blockers, open tasks, retainer total). Services /
  * packages content stays in OpsDashboardPage — different concern.
  *
+ * Each card links out to what the client can actually see: their **Portal**
+ * (`meta.portalUrl.prod`) and their **Live site** (`meta.website`), greyed when
+ * absent so a gap reads at a glance. Service tags (`meta.services`) show what
+ * we're doing for them. A committed "Samples & demos" section (see `demos.ts`)
+ * showcases concept builds that aren't clients.
+ *
  * @category Internal
  * @tier utility
  */
 
 import React from 'react';
 import type { CSSProperties } from 'react';
+import { Link } from 'react-router';
 
 import { Page, Stack, Card, Badge, Stat } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
@@ -21,8 +28,9 @@ import { PageHeader } from './PageHeader';
 
 import type { ClientFiles } from './clientTypes';
 import { CLIENT_REGISTRY } from './clientRegistry';
+import { DEMOS, type DemoBuild } from './demos';
 
-// ── Tone helper ───────────────────────────────────────────────────────────────
+// ── Tone helpers ──────────────────────────────────────────────────────────────
 
 type BadgeTone = 'neutral' | 'info' | 'success' | 'danger' | 'warning';
 
@@ -31,6 +39,26 @@ function phaseStatusTone(s: string): BadgeTone {
   if (s === 'done') return 'success';
   if (s === 'blocked') return 'danger';
   return 'neutral';
+}
+
+/** Color-map for the known service tags; anything else is neutral. */
+function serviceTone(svc: string): BadgeTone {
+  switch (svc.toLowerCase()) {
+    case 'automation':
+      return 'success';
+    case 'marketing':
+    case 'seo':
+      return 'info';
+    case 'ads':
+      return 'warning';
+    default:
+      return 'neutral';
+  }
+}
+
+/** A URL is renderable only if it's a real http(s) link (not a `<<placeholder>>`). */
+function usableUrl(url?: string): string | undefined {
+  return url && /^https?:\/\//.test(url) && !url.includes('<<') ? url : undefined;
 }
 
 // ── Card derivation (kept inline — only ClientsIndexPage consumes it today) ───
@@ -48,6 +76,9 @@ interface ClientCard {
   primaryContact: string;
   status: string;
   estimatedScope?: string;
+  services: string[];
+  portalUrl?: string;
+  website?: string;
 }
 
 function deriveCard(slug: string, { meta, tasks, retainer, checklist }: ClientFiles): ClientCard {
@@ -60,6 +91,7 @@ function deriveCard(slug: string, { meta, tasks, retainer, checklist }: ClientFi
     .filter((i) => i.status === 'blocked');
   const curPhase =
     (tasks?.phases ?? []).find((p) => p.status === 'in-progress') ?? tasks?.phases?.[0];
+  const portal = meta.portalUrl?.prod ?? meta.portalUrl?.staging ?? meta.portalUrl?.draft;
   return {
     slug,
     name: meta.name ?? slug,
@@ -73,10 +105,16 @@ function deriveCard(slug: string, { meta, tasks, retainer, checklist }: ClientFi
     primaryContact: meta.contact?.name ?? '—',
     status: meta.status ?? 'unknown',
     estimatedScope: retainer?.estimatedScope,
+    services: meta.services ?? [],
+    portalUrl: usableUrl(portal),
+    website: usableUrl(meta.website),
   };
 }
 
-const ALL_CARDS = Object.entries(CLIENT_REGISTRY).map(([slug, files]) => deriveCard(slug, files));
+// Skip scaffolding slugs (`_template`) — they aren't real clients.
+const ALL_CARDS = Object.entries(CLIENT_REGISTRY)
+  .filter(([slug]) => !slug.startsWith('_'))
+  .map(([slug, files]) => deriveCard(slug, files));
 const CLIENTS = ALL_CARDS.filter((c) => c.status === 'active');
 const PROSPECTS = ALL_CARDS.filter((c) => c.status === 'prospect');
 
@@ -90,10 +128,10 @@ export default function ClientsIndexPage() {
         <PageHeader
           breadcrumbs={[{ label: 'Ops', href: '/ops' }, { label: 'Clients' }]}
           title="Clients"
-          lede={`Active retainers and prospects — ${CLIENTS.length} active, ${PROSPECTS.length} prospect.`}
+          lede={`Active retainers, prospects & sample builds — ${CLIENTS.length} active, ${PROSPECTS.length} prospect, ${DEMOS.length} demos.`}
         />
 
-        {/* Clients */}
+        {/* Active clients */}
         <section>
           <div style={s.sectionHead}>
             <h2 style={s.sectionTitle}>Active</h2>
@@ -117,6 +155,19 @@ export default function ClientsIndexPage() {
             <div style={s.clientGrid}>
               {PROSPECTS.map((c) => (
                 <ClientRow key={c.slug} client={c} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Samples & demos — committed showcase, not clients (see demos.ts) */}
+        {DEMOS.length > 0 && (
+          <section>
+            <h2 style={s.sectionTitle}>Samples &amp; demos</h2>
+            <p style={s.subtitle}>Concept builds and sample sites — not clients.</p>
+            <div style={s.clientGrid}>
+              {DEMOS.map((d) => (
+                <DemoRow key={d.slug} demo={d} />
               ))}
             </div>
           </section>
@@ -154,16 +205,35 @@ export default function ClientsIndexPage() {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
+/** An external link rendered as a pill, or a greyed "No …" when absent. */
+function LinkSlot({ label, href }: { label: string; href?: string }) {
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noreferrer" className="hds-focus" style={s.linkPill}>
+        {label} ↗
+      </a>
+    );
+  }
+  return <span style={s.linkPillMuted}>No {label.toLowerCase()}</span>;
+}
+
+function ServiceTags({ services }: { services: string[] }) {
+  if (services.length === 0) return null;
+  return (
+    <div style={s.tagRow}>
+      {services.map((sv) => (
+        <Badge key={sv} tone={serviceTone(sv)}>
+          {sv}
+        </Badge>
+      ))}
+    </div>
+  );
+}
+
 function ClientRow({ client: c }: { client: ClientCard }) {
   const isProspect = c.status === 'prospect';
   return (
-    <Card
-      as="a"
-      {...({ href: `/ops/clients/${c.slug}` } as React.HTMLAttributes<HTMLDivElement>)}
-      padding="none"
-      style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
-      tone="neutral"
-    >
+    <Card padding="none" tone="neutral">
       <Card.Header
         metadata={
           <Badge tone={isProspect ? 'info' : phaseStatusTone(c.phaseStatus)}>
@@ -171,12 +241,17 @@ function ClientRow({ client: c }: { client: ClientCard }) {
           </Badge>
         }
       >
-        <Card.Title>{c.name}</Card.Title>
+        <Card.Title>
+          <Link to={`/ops/clients/${c.slug}`} style={s.titleLink}>
+            {c.name}
+          </Link>
+        </Card.Title>
         <Card.Description>
           {c.location} · {c.primaryContact}
         </Card.Description>
       </Card.Header>
       <Card.Body>
+        <ServiceTags services={c.services} />
         <p
           style={{
             ...hds.typeStyles.small,
@@ -188,6 +263,10 @@ function ClientRow({ client: c }: { client: ClientCard }) {
         </p>
       </Card.Body>
       <Card.Footer>
+        <div style={s.linkRow}>
+          <LinkSlot label="Portal" href={c.portalUrl} />
+          <LinkSlot label="Live site" href={c.website} />
+        </div>
         <div
           style={{ display: 'flex', gap: 'var(--semantic-space-layout-normal)', flexWrap: 'wrap' }}
         >
@@ -211,6 +290,36 @@ function ClientRow({ client: c }: { client: ClientCard }) {
               />
             </>
           )}
+        </div>
+      </Card.Footer>
+    </Card>
+  );
+}
+
+function DemoRow({ demo }: { demo: DemoBuild }) {
+  return (
+    <Card padding="none" tone="neutral">
+      <Card.Header metadata={<Badge tone="neutral">demo</Badge>}>
+        <Card.Title>{demo.name}</Card.Title>
+        <Card.Description>{demo.vertical}</Card.Description>
+      </Card.Header>
+      <Card.Body>
+        <ServiceTags services={demo.services ?? []} />
+        {demo.note ? (
+          <p
+            style={{
+              ...hds.typeStyles.small,
+              color: 'var(--semantic-color-content-secondary)',
+              margin: 0,
+            }}
+          >
+            {demo.note}
+          </p>
+        ) : null}
+      </Card.Body>
+      <Card.Footer>
+        <div style={s.linkRow}>
+          <LinkSlot label="Live demo" href={usableUrl(demo.url)} />
         </div>
       </Card.Footer>
     </Card>
@@ -261,7 +370,11 @@ const s = {
     margin: `0 0 ${hds.space.px8}`,
     color: 'var(--semantic-color-content-primary)',
   },
-  subtitle: { ...hds.typeStyles.body, margin: 0, color: 'var(--semantic-color-content-secondary)' },
+  subtitle: {
+    ...hds.typeStyles.body,
+    margin: `0 0 ${hds.semantic.space.component.gap}`,
+    color: 'var(--semantic-color-content-secondary)',
+  },
 
   sectionHead: {
     display: 'flex',
@@ -281,6 +394,7 @@ const s = {
     color: 'var(--semantic-color-content-accent)',
     textDecoration: 'none' as const,
   },
+  titleLink: { color: 'inherit', textDecoration: 'none' as const },
 
   clientGrid: {
     display: 'grid',
@@ -291,6 +405,42 @@ const s = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(min(180px, 100%), 1fr))',
     gap: hds.semantic.space.component.gap,
+  },
+
+  tagRow: {
+    display: 'flex',
+    gap: hds.space.px4,
+    flexWrap: 'wrap' as const,
+    marginBottom: hds.space.px8,
+  },
+  linkRow: {
+    display: 'flex',
+    gap: hds.space.px8,
+    flexWrap: 'wrap' as const,
+    marginBottom: hds.semantic.space.component.gap,
+  },
+  linkPill: {
+    ...hds.typeStyles.ui,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: hds.space.px4,
+    padding: `${hds.space.px4} ${hds.space.px8}`,
+    borderRadius: hds.borderRadius[8],
+    background: 'var(--semantic-color-surface-raised)',
+    color: 'var(--semantic-color-content-accent)',
+    textDecoration: 'none' as const,
+  },
+  linkPillMuted: {
+    ...hds.typeStyles.ui,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: hds.space.px4,
+    padding: `${hds.space.px4} ${hds.space.px8}`,
+    borderRadius: hds.borderRadius[8],
+    background: 'transparent',
+    color: 'var(--semantic-color-content-secondary)',
+    opacity: 0.55,
+    cursor: 'default' as const,
   },
 
   newSlotLabel: {

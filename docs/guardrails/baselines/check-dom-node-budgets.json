@@ -12,7 +12,7 @@
     "src/app/pages/ops/ClientBrandAuditPage.tsx": 41,
     "src/app/pages/ops/ClientDashboardPage.tsx": 128,
     "src/app/pages/ops/ClientReportPage.tsx": 55,
-    "src/app/pages/ops/ClientsIndexPage.tsx": 41,
+    "src/app/pages/ops/ClientsIndexPage.tsx": 66,
     "src/app/pages/ops/Disclosure.tsx": 8,
     "src/app/pages/ops/PageHeader.tsx": 8,
     "src/app/pages/ops/agentic-os/AgenticOSPage.tsx": 25,
@@ -37,6 +37,6 @@
     "src/app/pages/portal/ClientPortalPage.tsx": 54,
     "src/app/routes.tsx": 28
   },
-  "updatedAt": "2026-09-15T07:27:35.381Z",
-  "sha": "909db88"
+  "updatedAt": "2026-09-16T03:29:16.892Z",
+  "sha": "90f1ea3"
 }
