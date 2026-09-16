@@ -2102,3 +2102,35 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Notes for next iteration: `scripts/INDEX.json`/`INDEX.md` are stale
   (drifted before this session) — someone should run
   `node scripts/generate-script-index.mjs` in its own PR.
+
+## ops#300 — learned-rules: steering-doc promotion destination (2026-09-16)
+- Added a second promotion destination to promote-learned-rule.mjs:
+  `[g]ate / [s]teering / [k]skip / [d]rop / [q]uit` (was `[p]romote / [s]kip
+  / [d]rop / [q]uit`). Steering stages a one-line bullet for AGENTS.md /
+  CLAUDE.md / docs/ai/AGENT_GUIDELINES.md, printing destination guidance
+  from FRONTIER-DOCTRINE.md §4 before asking for a target file. Neither
+  destination writes its target directly — same HITL-staging principle the
+  script already held for the registry.
+- `promotedTo` now encodes destination: `registry:<id>` | `steering:<file>`,
+  so --list/--json and the JSONL itself surface where a rule landed, not
+  just that it did. classifyPromotion() treats a bare (pre-#300) value as
+  `legacy` — no existing promoted entries in learned-rules.jsonl to migrate.
+- Extracted staging logic into pure, exported functions
+  (emitRegistrySkeleton, emitSteeringSkeleton, classifyPromotion,
+  summarizeRules, buildListOutput, buildJsonOutput) and guarded the CLI body
+  with isMain() (matching persist-learned-rule.mjs's own pattern) so they're
+  unit-testable with a stubbed rule array — no TTY, no file I/O.
+  readLearnedRules() gained an optional path-override param (default
+  unchanged, so existing callers are untouched); promote-learned-rule.mjs
+  gained --fixture-file for --list/--json subprocess tests.
+- Confirmed (again) that scripts/INDEX.md / INDEX.json are stale (146 vs 141
+  scripts) from unrelated prior work — same finding #297's session left
+  here. Did NOT regenerate: bundling it would blow past "one logical
+  change" for this PR. Someone should run
+  `node scripts/generate-script-index.mjs` in its own PR — third session to
+  note this now.
+- Files changed: scripts/promote-learned-rule.mjs, scripts/persist-learned-rule.mjs,
+  scripts/__tests__/promote-learned-rule.test.mjs (new, 12 tests).
+- Branch: ralph/issue-300-steering-promotion. PR #361. Gate green
+  (typecheck/test/lint, 95 files / 1154 tests, validate-guardrail-registry
+  green).
