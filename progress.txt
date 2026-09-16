@@ -1842,3 +1842,32 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   fixtures/check-spec-freshness/*.example.md (5 new), docs/guardrails/registry.json.
 - PR: https://github.com/hirobius/ops/pull/334 (ralph/issue-294-check-spec-freshness)
 - Next: none — smallest complete slice, no follow-up filed.
+
+## ops#329 — check-fixture-stubs-ratchet dirties a clean tree on every run
+- Root cause: writeStored(current) at line 166 ran unconditionally whenever
+  current <= stored (both "decreased" and "held" cases), unconditionally
+  stamping a fresh updatedAt/sha even when nothing changed. Fixed to write
+  only when delta < 0 (strict decrease); "held" now leaves the stored record
+  byte-identical. Bootstrap path (no baseline yet) is untouched — still
+  writes unconditionally, as intended.
+- Added CHECK_FIXTURE_STUBS_BASELINE_FILE env override for CANONICAL_FILE so
+  tests can point at a disposable temp file and exercise the real write path
+  (not the read-only --fixture-mode dry run, which stays untouched — verified
+  manually with FIXTURE_FILE + --fixture-mode that it still short-circuits
+  writes and both regression/pass branches still work).
+- Unit test drives the real script as a subprocess (matches
+  check-dom-node-budgets.test.mjs pattern) against the live repo's actual
+  current stub count (via bootstrap), then edits the temp baseline to
+  simulate decrease/hold/increase relative to that real value — no mocking
+  of "current", no network. Each run() shells out to
+  validate-fixture-proof-of-firing.mjs (~2s); tests calling it twice needed
+  an explicit 20s per-test timeout past vitest's 5s default under parallel
+  suite load — first pass timed out in the full gate run (isolated file run
+  was fine), fixed by passing timeout as the 3rd `it()` arg.
+- Verified DoD command directly: `git status --porcelain` empty after two
+  consecutive runs on main's real baseline file (previously always dirtied
+  it — confirmed the bug pre-fix, confirmed the fix post-fix).
+- Files: scripts/check-fixture-stubs-ratchet.mjs,
+  scripts/__tests__/check-fixture-stubs-ratchet.test.mjs (new).
+- Gate green: typecheck + 1060 tests (5 new) + lint.
+- Next: none — smallest complete slice (one-gate bug per issue's own note).

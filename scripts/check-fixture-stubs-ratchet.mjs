@@ -10,14 +10,19 @@
  * Rules:
  *   - If current stub count > stored count → exit 1 (regression; a gate gained
  *     a new stub fixture without graduating to a real one).
- *   - If current stub count <= stored count → update the stored count to the new
- *     (lower or equal) value and exit 0 (progress is preserved).
+ *   - If current stub count < stored count → advance the stored watermark to
+ *     the new (lower) value and exit 0 (progress is preserved).
+ *   - If current stub count == stored count → exit 0 and leave the stored
+ *     record untouched. There is nothing to ratchet, so nothing is written —
+ *     re-stamping updatedAt/sha on a held value only dirties the tree and
+ *     misattributes a sha to a commit that didn't change this baseline.
  *
  * This ratchet enforces the "B-class burn-down" contract from
  * docs/guardrails/full-strictness-closure-plan.md: B is theater without a
  * ratchet; this script is the ratchet. (Adrian directive 2026-05-06)
  *
  * Canonical stored file: docs/guardrails/baselines/check-fixture-stubs-count.json
+ * (overridable via CHECK_FIXTURE_STUBS_BASELINE_FILE, for tests only)
  * Shape: { count: number, updatedAt: ISO8601, sha: string }
  *
  * Wired: ci-pr channel (registry.json). Any increase to the stub count fails the PR.
@@ -36,7 +41,12 @@ import { hasJsonFlag, emitResult } from './lib/gate-output.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
-const CANONICAL_FILE = join(ROOT, 'docs', 'guardrails', 'baselines', 'check-fixture-stubs-count.json');
+// Overridable so tests can point at a disposable temp file instead of the
+// tracked baseline (real writes, real repo current count — just an isolated
+// destination). Unset in every non-test invocation.
+const CANONICAL_FILE =
+  process.env.CHECK_FIXTURE_STUBS_BASELINE_FILE ||
+  join(ROOT, 'docs', 'guardrails', 'baselines', 'check-fixture-stubs-count.json');
 
 const jsonMode = hasJsonFlag(process.argv);
 const fixtureMode = process.argv.includes('--fixture-mode') || process.env.HDS_FIXTURE_MODE === '1';
@@ -67,7 +77,9 @@ function getCurrentStubCount() {
     });
     const result = JSON.parse(raw);
     if (typeof result?.summary?.withStubFixtures !== 'number') {
-      throw new Error('validate-fixture-proof-of-firing --json did not return summary.withStubFixtures');
+      throw new Error(
+        'validate-fixture-proof-of-firing --json did not return summary.withStubFixtures',
+      );
     }
     return result.summary.withStubFixtures;
   } catch (err) {
@@ -130,11 +142,14 @@ if (stored === null) {
   writeStored(current);
   const msg = `check-fixture-stubs-ratchet: bootstrapped stored stub count = ${current}`;
   if (!jsonMode) console.log(msg);
-  emitResult({
-    violations: [],
-    summary: { current, stored: current, delta: 0, bootstrapped: true },
-    ok: true,
-  }, jsonMode);
+  emitResult(
+    {
+      violations: [],
+      summary: { current, stored: current, delta: 0, bootstrapped: true },
+      ok: true,
+    },
+    jsonMode,
+  );
   process.exit(0);
 }
 
@@ -152,28 +167,40 @@ if (current > storedCount) {
   };
   if (!jsonMode) {
     process.stderr.write(`\nX check-fixture-stubs-ratchet FAILED\n`);
-    process.stderr.write(`  Fixture stub count grew from ${storedCount} to ${current} (+${delta}).\n`);
-    process.stderr.write(`  Replace stub fixtures with real examples — do NOT add new stubs without graduating existing ones.\n\n`);
+    process.stderr.write(
+      `  Fixture stub count grew from ${storedCount} to ${current} (+${delta}).\n`,
+    );
+    process.stderr.write(
+      `  Replace stub fixtures with real examples — do NOT add new stubs without graduating existing ones.\n\n`,
+    );
   }
-  emitResult({
-    violations: [violation],
-    summary: { current, stored: storedCount, delta },
-    ok: false,
-  }, jsonMode);
+  emitResult(
+    {
+      violations: [violation],
+      summary: { current, stored: storedCount, delta },
+      ok: false,
+    },
+    jsonMode,
+  );
   process.exit(1);
 }
 
-// Count decreased or held: update the stored value (preserves the lower watermark).
-writeStored(current);
+// Count decreased: advance the stored watermark. Held: nothing to ratchet,
+// leave the stored record untouched (no dirty tree for an unchanged value).
+if (delta < 0) writeStored(current);
 
-const msg = delta < 0
-  ? `check-fixture-stubs-ratchet: OK — graduated ${Math.abs(delta)} stub(s) to real fixtures (${storedCount} → ${current})`
-  : `check-fixture-stubs-ratchet: OK — no change (${current} stub fixture(s))`;
+const msg =
+  delta < 0
+    ? `check-fixture-stubs-ratchet: OK — graduated ${Math.abs(delta)} stub(s) to real fixtures (${storedCount} → ${current})`
+    : `check-fixture-stubs-ratchet: OK — no change (${current} stub fixture(s))`;
 
 if (!jsonMode) console.log(msg);
-emitResult({
-  violations: [],
-  summary: { current, stored: storedCount, delta },
-  ok: true,
-}, jsonMode);
+emitResult(
+  {
+    violations: [],
+    summary: { current, stored: storedCount, delta },
+    ok: true,
+  },
+  jsonMode,
+);
 process.exit(0);
