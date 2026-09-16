@@ -13,6 +13,7 @@
  *   !backlog [filter] — open issues digest; filter by repo or label
  *   !next / !today — AI picks top 1-3 ralph-ready issues for today + reasoning
  *   !recent [days] — recently updated GitHub issues (default 7d)
+ *   !dispatch <owner/repo#issue> — fire the Ralph workflow for an existing issue
  *   !shell <cmd> — raw shell passthrough
  *   !log [n] — tail cron log
  *   !provider [name] — show or set AI provider for this channel
@@ -32,6 +33,10 @@
  * /ops/tasks does):
  *   GITHUB_TOKEN=<token with Issues: read scope on the fleet repos>  ← required for these commands
  *   VERCEL_TOKEN=<read-scoped Vercel token>  ← optional, adds fleet deploy state to !status
+ *
+ * !dispatch <owner/repo#issue> additionally needs GITHUB_TOKEN scoped
+ * "Actions: write" on the target repo (the same scope /ops/tasks' "Run Ralph"
+ * board action needs) — distinct from the "Issues: read" scope above.
  *
  * AI provider — Ollama is the local-first default (machine has to be
  * running for /ops/kanban + Hermes anyway; cloud calls cost money). Override
@@ -63,6 +68,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
 import { listProjects } from '../lib/projects/index.mjs';
+import { RALPH_WORKFLOW_FILE } from '../lib/tasks/actions.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -697,6 +703,7 @@ async function cmdHelp(channel) {
       '`!backlog [filter]` — open issues digest. Filter by repo (`ops`…) or label (`ralph-ready`, `blocked`, `ralph-parked`, `needs-adrian`, `p0`-`p3`)',
       '`!next` / `!today` — AI picks top 1-3 `ralph-ready` issues for today, with reasoning',
       '`!recent [days]` — GitHub issues updated in the last N days (default 7)',
+      '`!dispatch <owner/repo#issue>` — fire the Ralph workflow for an existing issue',
       '`!agents` — running Hermes processes + memory',
       '`!log hermes [n]` — tail Hermes log',
       '`!shell <cmd>` — raw shell passthrough',
@@ -1041,6 +1048,52 @@ async function cmdShell(channel, args) {
   }
 }
 
+// ── !dispatch — fire the Ralph workflow for an existing issue (ops#256) ───────
+// Reuses the exact mechanism the /ops/tasks board's "Run Ralph" action uses
+// (lib/tasks/actions.mjs's ralphDispatch → GitHubIssuePort#dispatchWorkflow)
+// rather than reimplementing the workflow_dispatch call here.
+
+/** Parses `<owner>/<repo>#<issue>` into its parts, or null. */
+function parseDispatchRef(input) {
+  const m = /^([^/\s]+)\/([^#\s]+)#(\d+)$/.exec((input || '').trim());
+  if (!m) return null;
+  return { owner: m[1], repo: m[2], number: m[3] };
+}
+
+async function cmdDispatch(channel, args) {
+  const ref = parseDispatchRef(args);
+  if (!ref) {
+    await send(
+      channel,
+      'Usage: `!dispatch <owner/repo#issue>` — e.g. `!dispatch hirobius/ops#256`',
+    );
+    return;
+  }
+  const port = getGithubPort();
+  if (!port) {
+    await send(
+      channel,
+      'GITHUB_TOKEN is not set — add a token with "Actions: write" scope on the fleet repos to .env.local to dispatch Ralph.',
+    );
+    return;
+  }
+  try {
+    const result = await port.dispatchWorkflow({
+      owner: ref.owner,
+      repo: ref.repo,
+      workflow: RALPH_WORKFLOW_FILE,
+      inputs: { issue: ref.number },
+    });
+    const runLine = result?.runUrl ? `\n${result.runUrl}` : '';
+    await send(
+      channel,
+      `🚀 Dispatched Ralph for \`${ref.owner}/${ref.repo}#${ref.number}\`${runLine}`,
+    );
+  } catch (e) {
+    await send(channel, `Error: ${e.message}`);
+  }
+}
+
 // ── Auto-assigner integration ─────────────────────────────────────────────────
 // Non-! messages route to scripts/auto-assigner.mjs first. Exit 0 → reply with
 // routing decision. Exit 2 (not-a-task) → fall through to the NL-AI path so
@@ -1174,6 +1227,9 @@ client.on('messageCreate', async (msg) => {
           return;
         case 'recent':
           await cmdRecent(msg.channel, args);
+          return;
+        case 'dispatch':
+          await cmdDispatch(msg.channel, args);
           return;
         case 'agents':
           await cmdAgents(msg.channel);
