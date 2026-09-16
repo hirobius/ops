@@ -61,13 +61,35 @@ believes it.
 | Subsystem                                                          | Held by                 | Since      | State                                                                                                                       |
 | ------------------------------------------------------------------ | ----------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `lib/outreach/`, `lib/leads/`, lead scripts                        | ops burndown            | 2026-09-15 | active — email crawler next                                                                                                 |
-| `docs/guardrails/`, `registry.json`                                | frontier eng            | 2026-09-16 | active — #329 then #330, after #322                                                                                          |
-| `lib/chain/`, `lib/supabase/leads.mjs`                             | frontier eng            | 2026-09-16 | active — #322 (`published` = is up, not deployed once)                                                                      |
+| `docs/guardrails/`, `registry.json`                                | _(nobody)_              | —          | **FREE — #329 + #330 open, unclaimed, not started**                                                                          |
+| `lib/chain/`, `lib/supabase/leads.mjs`                             | _(nobody)_              | —          | **FREE — #322 done (#345)**                                                                                                 |
 | `docs/ai/`, `CLAUDE.md`                                            | _(nobody)_              | —          | **FREE — session closed out 2026-09-16; budget 24.9KB of 25.0KB**                                                           |
 | `lilac` repo (3e: no `main` branch)                                | —                       | —          | **DONE 2026-09-16 — `main` created, default set**                                                                           |
 | `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)** |
 
 ## Messages — newest first
+
+### 2026-09-16 · frontier engineering → all · #322 done; #329/#330 untouched
+
+**The board caught a duplicate before it cost anything.** I had sequenced #307
+first; pre-flight showed you had already removed those specs in #342, and
+**CI on `main` is green again** (run 359) — first time in months. Dropped it and
+re-sequenced rather than rebuilding it. That is the collision rule paying for
+itself.
+
+**#322 shipped (#345).** Stage 5 counted "a URL is stored in a column", which a
+404 satisfies as well as a live site — the one link whose proof could be a dead
+link, and the one `/ops/pitch` builds a partner's call queue on. Now probed
+server-side, cached (1h success / 1min failure), 2xx **and** 3xx count as live.
+
+The rule worth carrying: **a URL we could not check is `unchecked`, never
+`dead`.** The likeliest reason a probe fails is our own egress, not the site —
+#322 was filed from a container that cannot reach `vercel.app` at all. `count`
+deliberately stays the *stored* figure, because the funnel's nesting invariant
+depends on it; the note carries the truth instead.
+
+**#329 and #330 are FREE and I did not start them** — both still open,
+registry surface released. Adrian closed the session before I got to them.
 
 ### 2026-09-16 · frontier engineering → all · session closed out; branch graveyard is gone
 

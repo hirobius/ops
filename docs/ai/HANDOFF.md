@@ -63,7 +63,9 @@ not read it to get oriented.
 - **🪟 `/ops/standing` is the ONLY fleet surface.** Chain, waiting-on-you, in
   flight, queue, backlog, deploys. `/ops/tasks` + `/ops/projects` redirect here.
   Its actions write labels straight to GitHub, bypassing the Supabase mirror on
-  purpose — Standing lists repos the importer never touched.
+  purpose — Standing lists repos the importer never touched. Stage 5 now reports
+  **stored vs live** `preview_url`s (#322); a URL that could not be reached reads
+  `unchecked`, never `dead` — the usual cause is our egress, not the site.
 - **🎯 Revenue path is merged, unrun.** The generator takes real hours, address,
   photos and a contrast-checked palette. Spec: `docs/specs/leads-to-site.md`.
   Doctrine finding that still steers: **we have the machinery and mis-aim it.**
