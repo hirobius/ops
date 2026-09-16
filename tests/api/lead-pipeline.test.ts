@@ -1,7 +1,7 @@
 // @vitest-environment node
 /**
  * lib/leads/pipeline.mjs — the per-lead site state machines, tested with a stub
- * Supabase client and stubbed agent/duda steps (no HTTP, no DB).
+ * Supabase client and a stubbed agent step (no HTTP, no DB).
  *
  * The headline cases are the BUG FIX: when the result-update returns an error,
  * the row must roll back to its failure state, not stay stranded in-flight.
@@ -9,7 +9,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../../lib/agent/index.mjs', () => ({ runPipeline: vi.fn() }));
-vi.mock('../../lib/duda/index.mjs', () => ({ buildSite: vi.fn(), publishSite: vi.fn() }));
 // Stock-photo fill (ops#196) runs inside generateLeadSite for any lead without
 // photos. Mocked to "no key" so these cases stay hermetic: unmocked, the result
 // would depend on whether PEXELS_API_KEY happens to be set in the environment,
@@ -26,8 +25,7 @@ vi.mock('../../lib/photos/pexels.mjs', () => {
 });
 
 import { runPipeline } from '../../lib/agent/index.mjs';
-import { buildSite, publishSite } from '../../lib/duda/index.mjs';
-import { generateLeadSite, buildLeadSite, publishLeadSite } from '../../lib/leads/pipeline.mjs';
+import { generateLeadSite } from '../../lib/leads/pipeline.mjs';
 
 /**
  * A recording Supabase stub. `select().eq().single()` resolves the fetch;
@@ -49,7 +47,9 @@ function makeSb(opts: {
             eq() {
               return {
                 single: async () =>
-                  lead ? { data: lead, error: fetchError } : { data: null, error: fetchError ?? { message: 'not found' } },
+                  lead
+                    ? { data: lead, error: fetchError }
+                    : { data: null, error: fetchError ?? { message: 'not found' } },
               };
             },
           };
@@ -92,14 +92,15 @@ const PIPELINE_RESULT = {
 
 beforeEach(() => {
   vi.mocked(runPipeline).mockReset();
-  vi.mocked(buildSite).mockReset();
-  vi.mocked(publishSite).mockReset();
 });
 
 describe('generateLeadSite', () => {
   it('404s when the lead is missing', async () => {
     const { sb } = makeSb({ lead: null });
-    expect(await generateLeadSite(sb, 'nope')).toEqual({ status: 404, body: { error: 'lead not found' } });
+    expect(await generateLeadSite(sb, 'nope')).toEqual({
+      status: 404,
+      body: { error: 'lead not found' },
+    });
   });
 
   it('runs and scores on the happy path', async () => {
@@ -130,52 +131,12 @@ describe('generateLeadSite', () => {
   it('BUGFIX: rolls back to sourced when the scored-update itself errors', async () => {
     vi.mocked(runPipeline).mockResolvedValueOnce(PIPELINE_RESULT);
     // 1st update ('generating') ok, 2nd ('scored') errors → must roll back.
-    const { sb, updates } = makeSb({ lead: LEAD, updateErrors: [null, { message: 'write failed' }] });
+    const { sb, updates } = makeSb({
+      lead: LEAD,
+      updateErrors: [null, { message: 'write failed' }],
+    });
     const result = await generateLeadSite(sb, 'lead-1');
     expect(result).toEqual({ status: 500, body: { error: 'write failed' } });
     expect(updates.at(-1)).toEqual({ status: 'sourced' }); // not stranded in 'generating'
-  });
-});
-
-describe('buildLeadSite', () => {
-  it('builds on the happy path', async () => {
-    vi.mocked(buildSite).mockResolvedValueOnce({ external_site_id: 's1', preview_url: 'http://p', editor_url: 'http://e' });
-    const { sb, updates } = makeSb({ lead: LEAD });
-    const result = await buildLeadSite(sb, 'lead-1');
-    expect(result).toEqual({ status: 200, body: { ok: true, preview_url: 'http://p' } });
-    expect(updates[0]).toEqual({ site_status: 'building' });
-    expect(updates[1]).toMatchObject({ site_status: 'built', external_site_id: 's1' });
-  });
-
-  it('BUGFIX: rolls to build_failed when the built-update errors', async () => {
-    vi.mocked(buildSite).mockResolvedValueOnce({ external_site_id: 's1', preview_url: 'http://p', editor_url: 'http://e' });
-    const { sb, updates } = makeSb({ lead: LEAD, updateErrors: [null, { message: 'write failed' }] });
-    const result = await buildLeadSite(sb, 'lead-1');
-    expect(result.status).toBe(500);
-    expect(updates.at(-1)).toEqual({ site_status: 'build_failed' });
-  });
-});
-
-describe('publishLeadSite', () => {
-  it('409s when there is no built site', async () => {
-    const { sb } = makeSb({ lead: { ...LEAD, external_site_id: null } });
-    const result = await publishLeadSite(sb, 'lead-1');
-    expect(result).toMatchObject({ status: 409, body: { code: 'NO_SITE' } });
-  });
-
-  it('publishes on the happy path', async () => {
-    vi.mocked(publishSite).mockResolvedValueOnce({ live_url: 'http://live' });
-    const { sb, updates } = makeSb({ lead: { ...LEAD, external_site_id: 's1' } });
-    const result = await publishLeadSite(sb, 'lead-1');
-    expect(result).toEqual({ status: 200, body: { ok: true, live_url: 'http://live' } });
-    expect(updates[0]).toEqual({ site_status: 'publishing' });
-  });
-
-  it('BUGFIX: rolls to publish_failed when the published-update errors', async () => {
-    vi.mocked(publishSite).mockResolvedValueOnce({ live_url: 'http://live' });
-    const { sb, updates } = makeSb({ lead: { ...LEAD, external_site_id: 's1' }, updateErrors: [null, { message: 'write failed' }] });
-    const result = await publishLeadSite(sb, 'lead-1');
-    expect(result.status).toBe(500);
-    expect(updates.at(-1)).toEqual({ site_status: 'publish_failed' });
   });
 });
