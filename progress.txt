@@ -2167,3 +2167,23 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Notes for next iteration: none — this closes out the mark-then-remove
   pair (#187 + #309). knip flagged no newly-orphaned entries from the
   deletion.
+
+## Issue #256 — discord: !dispatch <owner/repo#issue> command (2026-09-16)
+- Added !dispatch <owner/repo#issue> to scripts/discord-bot.mjs — fires the
+  Ralph workflow_dispatch for an existing issue from Discord, no browser trip.
+- Decision: reused GitHubIssuePort#dispatchWorkflow directly (already
+  imported into discord-bot.mjs via makeGitHubPort/getGithubPort) rather than
+  routing through lib/tasks/actions.mjs's ralphDispatch — that function
+  requires a Supabase task row (getTask by key), but the Discord command
+  syntax already carries owner/repo/issue directly, so there's nothing to
+  look up. Exported RALPH_WORKFLOW_FILE from lib/tasks/actions.mjs so both
+  entry points (board action + Discord command) fire the same workflow
+  filename instead of duplicating the 'ralph.yml' string.
+- Files changed: scripts/discord-bot.mjs, lib/tasks/actions.mjs.
+- Branch: ralph/issue-256-discord-dispatch-command. PR #363. Gate green
+  (typecheck, 95 files / 1149 tests, lint --max-warnings=0).
+- Notes for next iteration: no automated test added (no existing test
+  infra for discord-bot.mjs — it's a standalone bot process, not imported
+  by tests/). Manual verification in a live Discord channel wasn't possible
+  in this sandbox (no DISCORD_BOT_TOKEN/GITHUB_TOKEN with Actions:write).
+  Rest of #30's scope (parent epic) remains open.
