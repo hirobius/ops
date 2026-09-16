@@ -18,7 +18,7 @@ DOC CRUFT CLEARED + PAPER TRAIL INDEXED (2026-09-15): docs/ went 146 live .md ->
 
 ## 2026-09-16 — email crawler built + the migration ledger gap
 
-**PR #346 (open, green, unmerged).** `lib/leads/email-extract.mjs` (pure core) +
+**PR #346 — merged.** `lib/leads/email-extract.mjs` (pure core) +
 `scripts/crawl-lead-emails.mjs` (I/O shell, `--dry-run` default). Never guesses
 an address, never sends — `lib/outreach/guard.mjs` stays the only outbound path.
 Ranking is the hard part, not extraction: a trades footer routinely carries the

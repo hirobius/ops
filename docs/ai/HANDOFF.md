@@ -121,12 +121,12 @@ not read it to get oriented.
    gate severity on _provable_ firing, not firing history) · #303/#302/#296/#238
    (one shared `hirobius/ralph` engine release, not four).
 4. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
-5. **Website email crawler — BUILT, PR #346 open and green, awaiting Adrian.**
-   Extraction + ranking proven against live content; the first real fetch found
-   a filtering bug the 28 fixture tests missed (see `learned-rules.jsonl`). It
-   has **never fetched a trades site** — this container 403s all egress — so the
-   hit rate across the 223 sites is unknown. Merging code that has not done its
-   full job is a real call; the PR argues both sides.
+5. **Website email crawler — MERGED (#346), never run for real.** Extraction +
+   ranking proven against live content; the first real fetch found a filtering
+   bug 28 fixture tests missed (see `learned-rules.jsonl`). It has **never
+   fetched a trades site** — this container 403s all egress — so hit rate across
+   the 223 sites is unknown. **Next step is running it somewhere with egress**
+   (a local machine, or as a Vercel function); expect tuning, not a clean run.
 6. **Cutover Part B remainder** — gated on the clients Astro factory being live.
 
 ## Parked / known warts
