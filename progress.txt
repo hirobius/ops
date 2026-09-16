@@ -2134,3 +2134,36 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Branch: ralph/issue-300-steering-promotion. PR #361. Gate green
   (typecheck/test/lint, 95 files / 1154 tests, validate-guardrail-registry
   green).
+
+## Issue #309 — leads: delete the retired Duda path (2026-09-16)
+- Removal half of the mark-then-remove started in #187 (closed). Duda
+  retired 2026-06-30; nothing in the UI has dispatched 'build'/'publish'
+  since #185/#301 switched the board to 'render'.
+- Deleted lib/duda/index.mjs entirely. Removed buildLeadSite/publishLeadSite
+  from lib/leads/pipeline.mjs (and the duda import). Removed 'build'/'publish'
+  from ACTIONS in api/lead-action.ts and from LEAD_ACTIONS in
+  scripts/leads-middleware.mjs (dev mirror) — dispatcher now only accepts
+  'generate'/'render' plus the pitch_* actions.
+  Also dropped the now-dead DUDA_API_USER/DUDA_API_PASSWORD env passthrough
+  in vite.config.mjs and stale build/publish doc-comment mentions in
+  api/lead-action.ts, scripts/leads-middleware.mjs, LeadsPage.tsx.
+- Checked before deleting: re-grepped buildSite|publishSite|buildLeadSite|
+  publishLeadSite|lib/duda|DUDA_API afterward — only doc/history references
+  remain (ARCHITECTURE.md, pipeline-walkthrough.html, docs/operations/*),
+  which already describe Duda as retired and needed no edits. Confirmed
+  preview_url/live_url + sync-preview-urls.mjs untouched; SiteStatus type
+  (types.ts) left as-is since it's a generic column, not Duda-specific, and
+  the issue only asked to confirm no *consumer* still expects those values
+  from the deleted paths (none do — buildLeadSite/publishLeadSite were the
+  only writers).
+- Removed the matching describe blocks + vi.mock('../../lib/duda/index.mjs')
+  from tests/api/lead-pipeline.test.ts.
+- Files changed: lib/duda/index.mjs (deleted), lib/leads/pipeline.mjs,
+  api/lead-action.ts, scripts/leads-middleware.mjs,
+  src/app/pages/ops/leads/LeadsPage.tsx, tests/api/lead-pipeline.test.ts,
+  vite.config.mjs.
+- Branch: ralph/issue-309-delete-duda-path. PR #362. Gate green
+  (typecheck, 95 files / 1149 tests, lint --max-warnings=0).
+- Notes for next iteration: none — this closes out the mark-then-remove
+  pair (#187 + #309). knip flagged no newly-orphaned entries from the
+  deletion.
