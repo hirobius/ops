@@ -37,8 +37,8 @@ function loadRegistry() {
 function discoverScripts() {
   const files = readdirSync(SCRIPTS_DIR);
   return files
-    .filter(f => /^(check-|audit-).*\.mjs$/.test(f))
-    .map(f => basename(f, '.mjs'))
+    .filter((f) => /^(check-|audit-).*\.mjs$/.test(f))
+    .map((f) => basename(f, '.mjs'))
     .sort();
 }
 
@@ -63,8 +63,8 @@ function extractDescription(scriptName) {
   // Strip * prefixes, collect non-empty lines that aren't the filename
   const lines = jsdocContent
     .split('\n')
-    .map(l => l.replace(/^\s*\*\s?/, '').trim())
-    .filter(l => l.length > 0 && l !== scriptName + '.mjs' && !l.startsWith('@'));
+    .map((l) => l.replace(/^\s*\*\s?/, '').trim())
+    .filter((l) => l.length > 0 && l !== scriptName + '.mjs' && !l.startsWith('@'));
 
   if (lines.length === 0) {
     return `TODO: add description — ${scriptName}.mjs JSDoc block is empty.`;
@@ -72,16 +72,56 @@ function extractDescription(scriptName) {
 
   // Return first meaningful line (first sentence)
   const first = lines[0];
-  return first.length > 0 ? first : `TODO: add description — ${scriptName}.mjs has no description text.`;
+  return first.length > 0
+    ? first
+    : `TODO: add description — ${scriptName}.mjs has no description text.`;
+}
+
+// ── Forbidden telemetry fields (issue #330) ─────────────────────────────────
+//
+// lastFiringAt / lastViolationAt used to live on the tracked registry entry.
+// registry.json is config-only and can't observe a gate firing, so both
+// fields could only ever reflect whenever someone last ran the bake step —
+// read as live telemetry, that's a trap (#330). The real answer lives in the
+// gitignored docs/guardrails/firing-stats.json sidecar. Reject the fields
+// outright so the trap can't come back.
+
+const FORBIDDEN_FIELDS = ['lastFiringAt', 'lastViolationAt'];
+
+function findForbiddenFieldUsage(gates) {
+  const offenders = [];
+  for (const gate of gates) {
+    const found = FORBIDDEN_FIELDS.filter((f) => Object.prototype.hasOwnProperty.call(gate, f));
+    if (found.length > 0) offenders.push({ id: gate.id, fields: found });
+  }
+  return offenders;
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 const registry = loadRegistry();
-const registeredIds = new Set(registry.gates.map(g => g.id));
+
+const forbidden = findForbiddenFieldUsage(registry.gates);
+if (forbidden.length > 0) {
+  console.error(
+    `✗ validate-guardrail-registry — ${forbidden.length} gate(s) carry telemetry fields registry.json no longer accepts:`,
+  );
+  for (const { id, fields } of forbidden) {
+    console.error(`  - ${id}: ${fields.join(', ')}`);
+  }
+  console.error('');
+  console.error('lastFiringAt / lastViolationAt live only in the gitignored');
+  console.error(
+    'docs/guardrails/firing-stats.json sidecar (pnpm guardrail:firing-stats) — see #330.',
+  );
+  console.error('Remove these fields from the offending entries.');
+  process.exit(1);
+}
+
+const registeredIds = new Set(registry.gates.map((g) => g.id));
 const scripts = discoverScripts();
 
-const missing = scripts.filter(id => !registeredIds.has(id));
+const missing = scripts.filter((id) => !registeredIds.has(id));
 
 if (missing.length === 0) {
   console.log(`✓ validate-guardrail-registry — all ${scripts.length} validator(s) are registered.`);
@@ -98,8 +138,6 @@ if (UPDATE_MODE) {
       severity: 'warn',
       gateScript: `scripts/${id}.mjs`,
       fixturePath: null,
-      lastFiringAt: null,
-      lastViolationAt: null,
       owner: 'Adrian',
       source: 'human',
     });
@@ -117,6 +155,8 @@ for (const id of missing) {
   console.error(`  - ${id}  (scripts/${id}.mjs)`);
 }
 console.error('');
-console.error('Fix: run `node scripts/validate-guardrail-registry.mjs --update` to auto-append stubs,');
+console.error(
+  'Fix: run `node scripts/validate-guardrail-registry.mjs --update` to auto-append stubs,',
+);
 console.error('     then fill in the description field for each new entry.');
 process.exit(1);

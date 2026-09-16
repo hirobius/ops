@@ -1085,7 +1085,7 @@
       "category": "other",
       "prefix": "refresh",
       "purpose": "Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and computes per-gate `lastFiringAt` / `lastViolationAt` stats.",
-      "pnpm": ["guardrail:firing-stats", "guardrail:firing-stats:bake"],
+      "pnpm": ["guardrail:firing-stats"],
       "gate": null
     },
     {

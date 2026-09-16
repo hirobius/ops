@@ -1871,3 +1871,72 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   scripts/__tests__/check-fixture-stubs-ratchet.test.mjs (new).
 - Gate green: typecheck + 1060 tests (5 new) + lint.
 - Next: none — smallest complete slice (one-gate bug per issue's own note).
+
+## ops#330 — registry.json can't tell "has this gate ever caught anything"
+- Root causes (both from the issue): (1) lastFiringAt/lastViolationAt on
+  registry.json are config-only, only ever updated by the manual --bake
+  step, and read as live telemetry by two different sessions; (2) a failing
+  pre-commit gate aborts the commit before post-commit's logger ever runs,
+  so lastViolationAt was structurally unfillable. A third bug found by
+  @adr-eng on the issue: post-commit's `&&` between run-gates.mjs and
+  refresh-firing-stats.mjs skipped the stats refresh on exactly the run
+  that logged a violation.
+- Fix: stripped lastFiringAt/lastViolationAt from every registry.json entry
+  (regex line-removal, not JSON.stringify roundtrip — roundtrip unescapes
+  \uXXXX em-dashes and creates 29 lines of unrelated diff noise). One entry
+  (check-schema-drift, last in the array) had the two fields as its last
+  properties with no trailing comma after — the line-removal left a
+  dangling comma, caught by JSON.parse before commit.
+- validate-guardrail-registry.mjs now hard-rejects any gate carrying
+  lastFiringAt/lastViolationAt (new check before the missing-scripts scan);
+  --update stub no longer writes them.
+- Deleted refresh-firing-stats.mjs's --bake path + bakeIntoRegistry() +
+  the guardrail:firing-stats:bake package.json script — decision stated in
+  PR: delete, don't repoint, since the fields it wrote no longer exist.
+  Extracted the pure stats math (parseLog/trimOldEntries/computeStats) into
+  new scripts/lib/firing-stats.mjs so it's unit-testable without touching
+  the filesystem; refresh-firing-stats.mjs is now a thin CLI over it.
+- Capture fix: run-gates.mjs's fail-fast disable was tied to --emit-jsonl
+  alone (comment said "for post-commit"), which meant using --emit-jsonl on
+  the actual pre-commit run would silently disable fail-fast (all 15 gates
+  run on every failed commit, not just the first). Decoupled: new
+  --continue-on-failure flag now owns "keep running after a failure";
+  --emit-jsonl only logs (already happened before the fail-fast exit check,
+  so no change needed there). .husky/pre-commit now passes --emit-jsonl
+  (fail-fast preserved, violation now logged before the commit aborts).
+  .husky/post-commit passes both --continue-on-failure --emit-jsonl (same
+  full-run behavior as before) and `;` instead of `&&` before
+  refresh-firing-stats.mjs. Also updated skill-runner-middleware.mjs's
+  'verify-head' skill (same full-audit intent as post-commit) to add
+  --continue-on-failure.
+- docs/guardrails/SCHEMA.md: removed the two field rows, added a "Source of
+  truth for firing telemetry" section naming firing-log.jsonl (raw) and
+  firing-stats.json (derived, the answer) as the two files that matter —
+  neither is registry.json.
+- Verified manually (not committed): temporary scratch gate entry forced to
+  exit 1, confirmed via `--gate` that its exitCode:1 lands in the jsonl and
+  that computeStats() derives lastViolationAt from it; separately confirmed
+  --emit-jsonl alone still fail-fasts (a scratch "should not run" gate after
+  a real failing gate never executed) while still logging the failure. Both
+  scratch registry entries + scripts reverted before committing.
+- Caught by the real hooks at commit time (not just gate.sh): prettier
+  reformatted run-gates.mjs + validate-guardrail-registry.mjs during
+  lint-staged, invalidating the shared-manifest.json hashes I'd pinned
+  pre-commit — check-guardrail-drift failed at the pre-push hook (this repo
+  is the canonical source for those 2 files). Fixed with a second commit
+  that re-pins after formatting settles — re-pin AFTER staging/formatting,
+  not before, next time a shared-manifest file changes.
+- Files: docs/guardrails/registry.json, docs/guardrails/SCHEMA.md,
+  docs/guardrails/shared-manifest.json, package.json, scripts/INDEX.{json,md}
+  (one line, hand-edited — full regen showed ~450 lines of pre-existing
+  unrelated drift, confirmed via git stash on main with no changes staged),
+  scripts/run-gates.mjs, scripts/refresh-firing-stats.mjs (rewritten),
+  scripts/validate-guardrail-registry.mjs, scripts/skill-runner-middleware.mjs,
+  scripts/lib/firing-stats.mjs (new), scripts/__tests__/firing-stats.test.mjs
+  (new, 9 tests), .husky/pre-commit, .husky/post-commit.
+- Gate green: typecheck + 1068 tests (9 new) + lint. PR #355.
+- Next: none — DoD fully covered in this slice. scripts/INDEX.{json,md} carry
+  ~450 lines of pre-existing generator drift unrelated to this issue (every
+  script's description text is out of sync with current JSDoc) — worth its
+  own issue if anyone wants scripts/generate-script-index.mjs's output
+  trusted again, but out of scope here.

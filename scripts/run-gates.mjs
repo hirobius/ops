@@ -24,10 +24,20 @@
  *                       pre-commit; 4 for ci-pr). pre-commit MUST stay serial.
  *   --gate <id>         Run a single gate by registry id (ignores --channel).
  *   --emit-jsonl <path> Append one JSONL line per gate to <path> with
- *                       {ts, channel, gate, exitCode, durationMs, commitSha}.
- *                       When set, pre-commit fail-fast is disabled so all
- *                       gates run and are logged (used by .husky/post-commit
- *                       to detect --no-verify bypasses post-hoc per 13g-12).
+ *                       {ts, channel, gate, exitCode, durationMs, commitSha},
+ *                       as each gate finishes — including a failing gate,
+ *                       before pre-commit's fail-fast exit (issue #330: a
+ *                       violation must reach the log even when the gate that
+ *                       caught it aborts the commit). Does not by itself
+ *                       change fail-fast; pair with --continue-on-failure to
+ *                       also run every remaining gate.
+ *   --continue-on-failure
+ *                       Disable pre-commit fail-fast so every gate in the
+ *                       channel runs and is logged, even after one fails
+ *                       (used by .husky/post-commit's full unscoped re-run,
+ *                       which detects --no-verify bypasses post-hoc per
+ *                       13g-12 — it needs every gate's result, not just the
+ *                       first failure).
  *   --emit-inventory <path>
  *                       Write a single aggregate JSON inventory to <path> with
  *                       per-gate {id, exitCode, durationMs, supportsJson,
@@ -86,14 +96,23 @@ const gateArg = getFlag('--gate');
 const dryRun = hasFlag('--dry-run');
 const parallelArg = getFlag('--parallel');
 const emitJsonlArg = getFlag('--emit-jsonl');
+const continueOnFailure = hasFlag('--continue-on-failure');
 const emitInventoryArg = getFlag('--emit-inventory');
 const scopeArg = getFlag('--scope');
 const scopeFiles = scopeArg
-  ? scopeArg.split(',').map((s) => s.trim()).filter(Boolean)
+  ? scopeArg
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
   : null;
 
 const VALID_CHANNELS = new Set([
-  'pre-commit', 'pre-push', 'ci-pr', 'ci-scheduled', 'pnpm-meta', 'manual',
+  'pre-commit',
+  'pre-push',
+  'ci-pr',
+  'ci-scheduled',
+  'pnpm-meta',
+  'manual',
 ]);
 
 if (!channelArg && !gateArg) {
@@ -123,14 +142,15 @@ if (emitJsonlArg) {
 
 function appendFiringLog(gate, exitCode, durationMs) {
   if (!emitJsonlArg) return;
-  const line = JSON.stringify({
-    ts: new Date().toISOString(),
-    channel: channelArg ?? null,
-    gate: gate.id,
-    exitCode,
-    durationMs,
-    commitSha,
-  }) + '\n';
+  const line =
+    JSON.stringify({
+      ts: new Date().toISOString(),
+      channel: channelArg ?? null,
+      gate: gate.id,
+      exitCode,
+      durationMs,
+      commitSha,
+    }) + '\n';
   try {
     const target = path.isAbsolute(emitJsonlArg) ? emitJsonlArg : path.join(ROOT, emitJsonlArg);
     fs.mkdirSync(path.dirname(target), { recursive: true });
@@ -180,10 +200,7 @@ function recordInventory(gate, exitCode, durationMs, captured) {
     durationMs,
     supportsJson,
     violations,
-    outputTail: tailLines(
-      [captured?.stdout ?? '', captured?.stderr ?? ''].join('\n'),
-      50,
-    ),
+    outputTail: tailLines([captured?.stdout ?? '', captured?.stderr ?? ''].join('\n'), 50),
   });
 }
 
@@ -222,7 +239,9 @@ function writeInventory() {
 }
 
 if (isPreCommit && concurrency > 1) {
-  console.error('✗ run-gates: --parallel > 1 is not allowed for --channel pre-commit (order matters)');
+  console.error(
+    '✗ run-gates: --parallel > 1 is not allowed for --channel pre-commit (order matters)',
+  );
   process.exit(2);
 }
 
@@ -262,7 +281,9 @@ if (!selection.ok) {
 // --scope skip log prints before any "nothing to do", matching prior order.
 // (Empty channels never reach scope filtering, so skippedByScope is [] there.)
 if (selection.skippedByScope.length > 0) {
-  console.log(`run-gates: --scope skipped ${selection.skippedByScope.length} gate(s) (no glob match): ${selection.skippedByScope.join(', ')}`);
+  console.log(
+    `run-gates: --scope skipped ${selection.skippedByScope.length} gate(s) (no glob match): ${selection.skippedByScope.join(', ')}`,
+  );
 }
 
 if (selection.gates.length === 0) {
@@ -362,8 +383,12 @@ function runGateAsync(gate) {
     if (useCapture) {
       child.stdout.setEncoding('utf8');
       child.stderr.setEncoding('utf8');
-      child.stdout.on('data', (chunk) => { stdoutBuf += chunk; });
-      child.stderr.on('data', (chunk) => { stderrBuf += chunk; });
+      child.stdout.on('data', (chunk) => {
+        stdoutBuf += chunk;
+      });
+      child.stderr.on('data', (chunk) => {
+        stderrBuf += chunk;
+      });
     }
     child.on('close', (code) => {
       const exit = code ?? 1;
@@ -380,7 +405,10 @@ function runGateAsync(gate) {
       console.error(`✗ run-gates: spawn error for gate '${gate.id}': ${err.message}`);
       const durationMs = Math.round(performance.now() - start);
       if (useCapture) {
-        recordInventory(gate, 1, durationMs, { stdout: stdoutBuf, stderr: stderrBuf + `\n${err.message}` });
+        recordInventory(gate, 1, durationMs, {
+          stdout: stdoutBuf,
+          stderr: stderrBuf + `\n${err.message}`,
+        });
       }
       appendFiringLog(gate, 1, durationMs);
       resolve(1);
@@ -406,11 +434,16 @@ if (concurrency <= 1) {
     if (code !== 0) {
       failures.push({ id: gate.id, code });
       // For pre-commit, fail fast on first error to match current behavior —
-      // unless --emit-jsonl is set (post-commit logger needs every gate's
-      // result, even after one fails — see 13g-12-postcommit-verifier) OR
-      // --emit-inventory is set (debt-baseline run needs every gate's result
-      // so the inventory file isn't truncated mid-channel — see 13p-1/13p-2).
-      if (isPreCommit && !emitJsonlArg && !emitInventoryArg) {
+      // unless --continue-on-failure is set (post-commit's logger needs every
+      // gate's result, even after one fails — see 13g-12-postcommit-verifier)
+      // OR --emit-inventory is set (debt-baseline run needs every gate's
+      // result so the inventory file isn't truncated mid-channel — see
+      // 13p-1/13p-2). --emit-jsonl alone does NOT disable fail-fast: the
+      // failing gate's own entry is already appended above (in runGateSync,
+      // before this check), so a blocking pre-commit run can log a violation
+      // and still stop at the first failure (issue #330) instead of paying
+      // for every remaining gate on every failed commit.
+      if (isPreCommit && !continueOnFailure && !emitInventoryArg) {
         console.error(`\n✗ run-gates: gate '${gate.id}' failed (exit ${code})`);
         writeInventory();
         process.exit(1);

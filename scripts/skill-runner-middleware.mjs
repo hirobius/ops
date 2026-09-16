@@ -47,6 +47,7 @@ const SKILLS = {
       'scripts/run-gates.mjs',
       '--channel',
       'pre-commit',
+      '--continue-on-failure',
       '--emit-jsonl',
       'docs/guardrails/firing-log.jsonl',
     ],

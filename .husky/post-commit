@@ -13,7 +13,11 @@ ROOT="$(git rev-parse --show-toplevel)"
 LOG_DIR="$ROOT/docs/guardrails"
 mkdir -p "$LOG_DIR"
 
-nohup sh -c "node \"$ROOT/scripts/run-gates.mjs\" --channel pre-commit --emit-jsonl docs/guardrails/firing-log.jsonl && node \"$ROOT/scripts/refresh-firing-stats.mjs\"" \
+# `;` not `&&` between the two node calls: a non-zero exit from run-gates.mjs
+# IS the violation this whole hook exists to catch, and refresh-firing-stats.mjs
+# must still run so the violation reaches firing-stats.json (issue #330) --
+# `&&` would skip that update on exactly the run that found something.
+nohup sh -c "node \"$ROOT/scripts/run-gates.mjs\" --channel pre-commit --continue-on-failure --emit-jsonl docs/guardrails/firing-log.jsonl; node \"$ROOT/scripts/refresh-firing-stats.mjs\"" \
   >>"$LOG_DIR/firing-log.stderr" 2>&1 </dev/null &
 
 exit 0

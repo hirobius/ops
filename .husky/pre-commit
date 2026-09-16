@@ -34,8 +34,13 @@ echo "Running all pre-commit registry gates (15 gates, declaration order)..."
 # file list as --scope. Gates with a `glob` in registry.json run only when
 # at least one staged path matches; gates with `scope: "full-tree"` (or no
 # scope/glob) always run. See scripts/lib/gate-scope.mjs.
+# --emit-jsonl (without --continue-on-failure): a failing gate's result is
+# still appended to the firing log before this run exits, so a violation
+# that aborts the commit is captured -- not just runs where everything
+# passed (issue #330). Fail-fast is unaffected: the run still stops at the
+# first failing gate.
 SCOPE="$(git diff --cached --name-only | tr '\n' ',')"
-node scripts/run-gates.mjs --channel pre-commit --scope "$SCOPE"
+node scripts/run-gates.mjs --channel pre-commit --scope "$SCOPE" --emit-jsonl docs/guardrails/firing-log.jsonl
 
 echo "Updating pre-commit structure hash..."
 # MUST remain last — updates the structural hash in registry.json so
