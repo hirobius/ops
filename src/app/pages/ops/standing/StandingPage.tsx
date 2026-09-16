@@ -96,7 +96,7 @@ interface Chain {
 }
 
 export default function StandingPage() {
-  const { data, error } = usePoll<FleetStatus>(fetchFleetStatus, {
+  const { data, error, refetch } = usePoll<FleetStatus>(fetchFleetStatus, {
     intervalMs: POLL_MS,
     offlineIntervalMs: POLL_MS * 3,
     requestTimeoutMs: 20_000,
@@ -126,7 +126,17 @@ export default function StandingPage() {
   });
 
   const [busy, setBusy] = useState<ReadonlySet<string>>(new Set());
-  const [note, setNote] = useState<{ text: string; ok: boolean } | null>(null);
+  /**
+   * Per-row action outcomes, keyed `owner/repo#n`.
+   *
+   * This was ONE note rendered at the top of the page. On a phone that is
+   * ~1500px above the button being tapped, so on 2026-09-16 three re-queues
+   * that each returned 200 and each changed the label on GitHub read as "the
+   * button does nothing" — the only broken part was the feedback. An outcome
+   * has to render where the thumb is, or from the operator's seat it does not
+   * exist.
+   */
+  const [acted, setActed] = useState<ReadonlyMap<string, ActionOutcome>>(new Map());
 
   const act = useCallback(
     async (repo: string, number: number, action: StandingAction, label: string) => {
@@ -138,21 +148,19 @@ export default function StandingPage() {
         next.delete(id);
         return next;
       });
-      // Never silent either way: the lane only re-reads on the next poll, so
-      // without this the tap looks like it did nothing for up to a minute.
-      if (result.ok) {
-        setNote({
-          text: `${label} — ${shortRepo(repo)}#${number}. Refreshes on the next poll.`,
-          ok: true,
-        });
-      } else {
-        setNote({
-          text: `${shortRepo(repo)}#${number}: ${result.error ?? 'action failed'}`,
-          ok: false,
-        });
-      }
+      setActed((prev) =>
+        new Map(prev).set(
+          id,
+          result.ok
+            ? { text: `${label} — GitHub updated.`, ok: true }
+            : { text: result.error ?? 'action failed', ok: false },
+        ),
+      );
+      // Pull the change straight back instead of leaving the row sitting in the
+      // wrong lane for up to a full poll interval.
+      if (result.ok) refetch();
     },
-    [],
+    [refetch],
   );
 
   return (
@@ -164,12 +172,6 @@ export default function StandingPage() {
       />
 
       <Coverage data={data} error={error} needsToken={needsToken} />
-
-      {note ? (
-        <p style={note.ok ? s.noteOk : s.noteBad} role="status">
-          {note.text}
-        </p>
-      ) : null}
 
       {/* ── 1. The chain ─────────────────────────────────────────────────── */}
       <Section title="The chain" count={`${chain.reachedEnd} paid`}>
@@ -216,41 +218,46 @@ export default function StandingPage() {
           emptyCopy="Nothing is waiting on a decision. Rare — enjoy it."
         >
           <ul style={s.list}>
-            {blocked.slice(0, SHOWN).map((b: FleetIssue) => (
-              <li key={`${b.repo}#${b.number}`} style={s.row}>
-                <a
-                  href={b.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hds-focus"
-                  style={s.rowLink}
-                >
-                  <span style={s.num}>#{b.number}</span>
-                  <span style={s.title}>{b.title}</span>
-                </a>
-                <div style={s.metaRow}>
-                  {b.label ? (
-                    <Badge tone={b.label === 'ralph-parked' ? 'danger' : 'warning'}>
-                      {b.label}
-                    </Badge>
-                  ) : null}
-                  <span style={s.meta}>
-                    {shortRepo(b.repo)}
-                    {b.prio ? ` · ${b.prio}` : ''}
-                  </span>
-                  {b.label === 'ralph-parked' ? (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      disabled={busy.has(`${b.repo}#${b.number}`)}
-                      onClick={() => act(b.repo, b.number, 'ralph_requeue', 'Re-queued')}
-                    >
-                      {busy.has(`${b.repo}#${b.number}`) ? 're-queueing…' : 'Re-queue'}
-                    </Button>
-                  ) : null}
-                </div>
-              </li>
-            ))}
+            {blocked.slice(0, SHOWN).map((b: FleetIssue) => {
+              const id = `${b.repo}#${b.number}`;
+              const outcome = acted.get(id);
+              return (
+                <li key={id} style={outcome?.ok ? { ...s.row, ...s.rowActed } : s.row}>
+                  <a
+                    href={b.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hds-focus"
+                    style={s.rowLink}
+                  >
+                    <span style={s.num}>#{b.number}</span>
+                    <span style={s.title}>{b.title}</span>
+                  </a>
+                  <div style={s.metaRow}>
+                    {b.label ? (
+                      <Badge tone={b.label === 'ralph-parked' ? 'danger' : 'warning'}>
+                        {b.label}
+                      </Badge>
+                    ) : null}
+                    <span style={s.meta}>
+                      {shortRepo(b.repo)}
+                      {b.prio ? ` · ${b.prio}` : ''}
+                    </span>
+                    {b.label === 'ralph-parked' ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={busy.has(id)}
+                        onClick={() => act(b.repo, b.number, 'ralph_requeue', 'Re-queued')}
+                      >
+                        {busy.has(id) ? 're-queueing…' : 'Re-queue'}
+                      </Button>
+                    ) : null}
+                  </div>
+                  <RowResult outcome={outcome} />
+                </li>
+              );
+            })}
           </ul>
         </Lane>
         {blocked.length > SHOWN ? <p style={s.more}>+{blocked.length - SHOWN} more</p> : null}
@@ -394,34 +401,39 @@ export default function StandingPage() {
           emptyCopy="Nothing else open. Every issue is blocked, parked or queued."
         >
           <ul style={s.list}>
-            {backlog.slice(0, BACKLOG_SHOWN).map((b: FleetIssue) => (
-              <li key={`${b.repo}#${b.number}`} style={s.row}>
-                <a
-                  href={b.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hds-focus"
-                  style={s.rowLink}
-                >
-                  <span style={s.num}>#{b.number}</span>
-                  <span style={s.title}>{b.title}</span>
-                </a>
-                <div style={s.metaRow}>
-                  <span style={s.meta}>
-                    {shortRepo(b.repo)}
-                    {b.prio ? ` · ${b.prio}` : ''}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    disabled={busy.has(`${b.repo}#${b.number}`)}
-                    onClick={() => act(b.repo, b.number, 'queue_on', 'Queued')}
+            {backlog.slice(0, BACKLOG_SHOWN).map((b: FleetIssue) => {
+              const id = `${b.repo}#${b.number}`;
+              const outcome = acted.get(id);
+              return (
+                <li key={id} style={outcome?.ok ? { ...s.row, ...s.rowActed } : s.row}>
+                  <a
+                    href={b.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hds-focus"
+                    style={s.rowLink}
                   >
-                    {busy.has(`${b.repo}#${b.number}`) ? 'queueing…' : 'Queue'}
-                  </Button>
-                </div>
-              </li>
-            ))}
+                    <span style={s.num}>#{b.number}</span>
+                    <span style={s.title}>{b.title}</span>
+                  </a>
+                  <div style={s.metaRow}>
+                    <span style={s.meta}>
+                      {shortRepo(b.repo)}
+                      {b.prio ? ` · ${b.prio}` : ''}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={busy.has(id)}
+                      onClick={() => act(b.repo, b.number, 'queue_on', 'Queued')}
+                    >
+                      {busy.has(id) ? 'queueing…' : 'Queue'}
+                    </Button>
+                  </div>
+                  <RowResult outcome={outcome} />
+                </li>
+              );
+            })}
           </ul>
         </Lane>
         {backlog.length > BACKLOG_SHOWN ? (
@@ -437,6 +449,27 @@ export default function StandingPage() {
 }
 
 /* ── pieces ─────────────────────────────────────────────────────────────── */
+
+/** What one tap did. `text` is the backend's own message when `ok` is false. */
+interface ActionOutcome {
+  text: string;
+  ok: boolean;
+}
+
+/**
+ * The outcome of a one-tap action, rendered INSIDE the row it belongs to.
+ *
+ * `role="status"` so a screen reader announces it; the visible line is what
+ * stops a successful write from looking like a dead button.
+ */
+function RowResult({ outcome }: { outcome: ActionOutcome | undefined }) {
+  if (!outcome) return null;
+  return (
+    <p style={outcome.ok ? s.rowOk : s.rowBad} role="status">
+      {outcome.text}
+    </p>
+  );
+}
 
 function Section({
   title,
@@ -854,23 +887,19 @@ const s = {
     whiteSpace: 'nowrap' as const,
   },
 
-  noteOk: {
-    ...hds.typeStyles.bodySmall,
-    margin: 0,
-    padding: hds.space.px8,
-    borderRadius: hds.borderRadius.sm,
-    borderLeft: '3px solid var(--semantic-color-feedback-success)',
-    background: 'var(--semantic-color-surface-raised)',
-    color: 'var(--semantic-color-content-primary)',
+  /* A row that has been acted on recedes, so the eye moves to what is left. */
+  rowActed: {
+    opacity: 0.55,
   },
-  noteBad: {
-    ...hds.typeStyles.bodySmall,
-    margin: 0,
-    padding: hds.space.px8,
-    borderRadius: hds.borderRadius.sm,
-    borderLeft: '3px solid var(--semantic-color-feedback-error)',
-    background: 'var(--semantic-color-surface-raised)',
-    color: 'var(--semantic-color-content-primary)',
+  rowOk: {
+    ...hds.typeStyles.caption,
+    margin: `${hds.space.px4} 0 0`,
+    color: 'var(--semantic-color-feedback-success)',
+  },
+  rowBad: {
+    ...hds.typeStyles.caption,
+    margin: `${hds.space.px4} 0 0`,
+    color: 'var(--semantic-color-feedback-error)',
   },
   notice: {
     ...hds.typeStyles.bodySmall,

@@ -58,16 +58,51 @@ Claim before you start. Release when you stop, including when you stop
 unfinished. A stale claim is worse than no claim, because the next session
 believes it.
 
-| Subsystem                                                          | Held by                 | Since      | State                                                                                                                       |
-| ------------------------------------------------------------------ | ----------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `lib/outreach/`, `lib/leads/`, lead scripts                        | ops burndown            | 2026-09-15 | active — email crawler next                                                                                                 |
-| `docs/guardrails/`, `registry.json`                                | _(nobody)_              | —          | **FREE — #329 + #330 open, unclaimed, not started**                                                                          |
-| `lib/chain/`, `lib/supabase/leads.mjs`                             | _(nobody)_              | —          | **FREE — #322 done (#345)**                                                                                                 |
-| `docs/ai/`, `CLAUDE.md`                                            | _(nobody)_              | —          | **FREE — session closed out 2026-09-16; budget 24.9KB of 25.0KB**                                                           |
-| `lilac` repo (3e: no `main` branch)                                | —                       | —          | **DONE 2026-09-16 — `main` created, default set**                                                                           |
-| `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)** |
+| Subsystem                                                          | Held by                    | Since      | State                                                                                                                       |
+| ------------------------------------------------------------------ | -------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `lib/outreach/`, `lib/leads/`, lead scripts                        | ops burndown               | 2026-09-15 | active — email crawler next                                                                                                 |
+| `docs/guardrails/`, `registry.json`                                | _(nobody)_                 | —          | **FREE — #329 + #330 open, unclaimed, not started**                                                                         |
+| `lib/chain/`, `lib/supabase/leads.mjs`                             | _(nobody)_                 | —          | **FREE — #322 done (#345)**                                                                                                 |
+| `docs/ai/`, `CLAUDE.md`                                            | _(nobody)_                 | —          | **FREE — session closed out 2026-09-16; budget 24.9KB of 25.0KB**                                                           |
+| `lilac` repo (3e: no `main` branch)                                | —                          | —          | **DONE 2026-09-16 — `main` created, default set**                                                                           |
+| `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery | claude (portal-kit→ops)    | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)** |
+| `StandingPage`, `ralphStatus.ts` (Standing actions)                | ops-dashboard (`0179nG1G`) | 2026-09-16 | **released — inline action feedback pushed on `claude/ops-dashboard-open-issues-slp7tz`**                                   |
 
 ## Messages — newest first
+
+### 2026-09-16 · ops-dashboard → all · Standing's Re-queue was never broken — its feedback was
+
+**Adrian reported "Re-queue does nothing". It does everything.** Vercel runtime
+logs show three `POST /api/task-action` → **200** at 07:03:29/35/38, and ops#44
+went `ralph-parked` → `ralph-ready` at 07:03:38Z. Every write landed. What did
+not exist was any sign of it.
+
+Two causes, both in `StandingPage.tsx`: the outcome rendered as ONE page-level
+`note` at line 168, directly under the header — on a phone that is ~1500px above
+the button in "Waiting on you" — and the row did not leave its lane until the
+next 60s poll. So the operator taps, sees nothing move, and taps again. He tapped
+three times.
+
+**The rule worth carrying: an action's confirmation has to render where the
+thumb is.** A correct write with invisible feedback is indistinguishable from a
+dead button, and it costs more than a dead button, because it teaches the
+operator the surface is broken. Fixed: per-row outcome line keyed `repo#n`, the
+acted row dims, and a successful write calls `usePoll`'s `refetch()` instead of
+waiting out the interval. `noteOk`/`noteBad` are gone.
+
+**A second red herring worth recording.** `pnpm test:layout` failed **15 of 15**,
+including routes this diff does not touch, blaming missing Playwright browsers.
+That is CLAUDE.md §4's red-herring rule exactly. The container ships chromium
+r1194 at `/opt/pw-browsers`; the repo pins Playwright 1.58.2, which wants r1208
+AND the newer layout (`chrome-linux64/`, `chrome-headless-shell-linux64/
+chrome-headless-shell`). Symlinked r1194 into both names — **15/15 green, 27.8s**.
+Session-local; a fresh container needs it again. Do NOT read 15/15 failing here
+as a real regression.
+
+DOM-node budget for `StandingPage.tsx` re-locked 95 → 97 (two `<p>` outcome
+lines). Only that key moved.
+
+`StandingPage` is free again.
 
 ### 2026-09-16 · frontier engineering → all · #322 done; #329/#330 untouched
 
@@ -85,7 +120,7 @@ server-side, cached (1h success / 1min failure), 2xx **and** 3xx count as live.
 The rule worth carrying: **a URL we could not check is `unchecked`, never
 `dead`.** The likeliest reason a probe fails is our own egress, not the site —
 #322 was filed from a container that cannot reach `vercel.app` at all. `count`
-deliberately stays the *stored* figure, because the funnel's nesting invariant
+deliberately stays the _stored_ figure, because the funnel's nesting invariant
 depends on it; the note carries the truth instead.
 
 **#329 and #330 are FREE and I did not start them** — both still open,
