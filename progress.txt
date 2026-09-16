@@ -2002,3 +2002,37 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Next: flip firingChannel to "ci-scheduled" in the same PR that lands
   parent #318's `.github/workflows/*` cron caller — everything else in this
   slice's DoD is fully covered.
+
+## Issue #226 — re-assess the "7 investigate-broken gates" (2026-09-16)
+- Recovered the 7 names from pre-split archived handoffs
+  (docs/ai/archive/handoff-2026-05-06-{evening,late}.md): check-route-smoke,
+  check-unit-overlap, check-token-descriptions, check-tier-bypass,
+  check-link-integrity, audit-figma-system, audit-pages. Checked each
+  individually against current main (script presence, registry entry, live
+  run, git ancestry via merge-base --is-ancestor rather than trusting
+  filename greps across --all).
+- Findings: only check-route-smoke is still genuinely broken — its
+  DEFAULT_ROUTES still lists pre-split portfolio/HDS routes (/, /hds,
+  /vibe-sketchbook, /microsoft-design-systems, /visuals, /portfolio/draft)
+  that don't exist in this app's src/app/routes.tsx; it's unwired per its
+  own registry.json wiringTodo so the break never surfaces. Filed follow-up
+  #357 (delete or rewrite it — check-route-coverage.mjs +
+  layout-integrity.spec.ts already cover this app's real routes).
+  check-tier-bypass/check-link-integrity/audit-pages pass today.
+  check-token-descriptions/audit-figma-system were correctly deleted the
+  same day as ops's initial import (662d94c) as part of the
+  ops/design-system split. check-unit-overlap never existed in this repo's
+  real (post-split) history at all — the only commit that creates it lives
+  on an unmerged, closed-issue-#47 branch.
+- Overlap with the 33 (drifted from 32) validate-fixture-proof-of-firing
+  stub gates: check-route-smoke, check-tier-bypass, audit-pages are current
+  stubs; check-link-integrity has a real fixture.
+- #230 (B6) already closed as duplicate of #67 — confirmed still correct.
+  #229 (B2) was a re-filed duplicate of already-fixed #66 (merged PR #181)
+  — verified computeB2() fix still intact on main, closed #229 with
+  evidence.
+- Files changed: docs/audits/gate-regression-reassessment-2026-09-16.md
+  (new). No code changes — investigation-only issue.
+- Branch: ralph/issue-226-gate-reassessment. PR #358 ("Closes #226").
+- Filed #357 as the one real follow-up. Closed #229 directly (mirroring how
+  #230 was already closed) rather than leaving it open as a live duplicate.
