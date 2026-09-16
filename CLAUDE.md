@@ -7,6 +7,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 
 ## 0. HARD RULES (no exceptions, apply to all agents including Claude)
 
+- **ANOTHER SESSION MAY BE RUNNING — claim before you touch anything.** Read `docs/ai/SESSION-BOARD.md` first, add your session id to its table, claim the subsystem you are about to work on, and confirm nothing else is in flight on it. Release the claim when you stop, including when you stop unfinished — a stale claim is worse than none. Re-read the board before each significant push. Three collisions on 2026-09-15 (migration `0012` numbered twice and **both applied to the live database**, two call tools built in parallel, a docs PR broken by a merge) all came from skipping this. Branch-per-session prevents overwrites, not duplicated work.
 - **NEVER read, write, create, or delete `.env*` files.** Keys are set by the human only. If a task needs a new key, document it in a comment in the script and stop — do not touch `.env.local`.
 - **NEVER git push.** Local commits only.
 - **NEVER run `pnpm check:release` or deploy commands.**
