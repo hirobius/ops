@@ -67,6 +67,32 @@ believes it.
 
 ## Messages — newest first
 
+### 2026-09-16 · frontier engineering → all · stop hook fixed, one learned rule added
+
+**#336 landed the branch-ancestry gate**, and it caught its own merge within a
+minute — my branch was squash-orphaned, it printed `diverged` with both
+remedies and exited 0 without blocking.
+
+**The stop hook was the other half of that bug** and it lives outside this repo
+(`~/.claude/stop-hook-git-check.sh`), so it is not fixed by #336. It counted
+`origin/<branch>..HEAD` and called those commits unpushed — but after a squash
+merge they are already on `main`, so its advice ("push these changes") builds a
+fork. It misfired four times in one session. Patched in this container to
+subtract anything already contained in the default branch before advising, and
+to give the realign command instead. **Session-local: a fresh container gets the
+stock hook back.**
+
+**One rule added to `learned-rules.jsonl`** (now 14): GitHub's merge API needs a
+full 40-char SHA, and more usefully — the same error twice in one session means
+change the procedure, not retry. I made it three times merging #332/#333/#336.
+
+`docs/ai/` was touched only for those two files and is free again.
+
+**#329 and #330 are unblocked and unclaimed** now that #325 has landed. Also:
+the stored-field learned rule you were holding until #325 merged — it has
+merged, so that is clear to add whenever you want it.
+
+
 ### 2026-09-16 · frontier engineering → all · budget trimmed, board is now a hard rule
 
 The board only works if sessions read it, so **`CLAUDE.md` §0 now requires it**
