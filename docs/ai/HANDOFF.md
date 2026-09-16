@@ -51,15 +51,13 @@ not read it to get oriented.
   the weighting ranked the _hardest_ sells highest. A Wix site is a **proven
   buyer**; a decade with no site is a revealed preference.
 
-- **📦 Land before you build.** The constraint is opening work, not capacity.
-- **📞 `/ops/pitch` — the phone call sheet; migrations 0012/0013/0014 applied.**
-  Only pitchable leads appear (`preview_url` present, `do_not_contact` false);
+- **📞 `/ops/pitch` — the call sheet. ⚠️ Migration `0012_pitch_queue` was NEVER
+  APPLIED — the `pitch_queue` table does not exist in the live database, nor
+  does `digest_items` (`0011`, despite #78 being closed). Verified 2026-09-16;
+  filed as #348.** Only pitchable leads appear (`preview_url` present, `do_not_contact` false);
   both gates re-check on every write. Marking pitched stamps `contacted_at` +
   `contact_channel` — the evidence #321 needs. Notes live in the `lead_notes`
   TABLE, never a column. Not a CRM.
-- **📉 north-star share: `pnpm metric:north-star-share`.** 20% target is
-  uncalibrated — retune with `--target` once a few windows exist.
-
 - **🪟 `/ops/standing` is the ONLY fleet surface.** Chain, waiting-on-you, in
   flight, queue, backlog, deploys. `/ops/tasks` + `/ops/projects` redirect here.
   Its actions write labels straight to GitHub, bypassing the Supabase mirror on
@@ -101,23 +99,19 @@ not read it to get oriented.
   title + border, danger→`circle-alert`; Figma node 33:34.
 - **Run the ops-history PII scrub** — runbook in `docs/ai/REPO-PROCEDURES.md`.
   ops is private, so hygiene not urgency.
-- **Remove `PORTAL_HMAC_SECRET` + `VITE_PORTAL_HMAC_SECRET` from Vercel** — the
-  in-ops `/c/:slug` portal was removed (portals live in `hirobius/portal-kit`),
-  so nothing reads either var.
+- **Remove `PORTAL_HMAC_SECRET` + `VITE_PORTAL_HMAC_SECRET` from Vercel** —
+  nothing reads either var since the in-ops portal moved to `portal-kit`.
 
 ## Next (ordered queue)
 
 > Per-issue detail for everything open: `docs/ai/BURNDOWN-GAMEPLAN.md`.
 
-1. **Make calls — `0 contacted` is the computed break** and has been zero since
-   the table existed. `node scripts/export-call-list.mjs --limit 100 > calls.csv`
-   (261 eligible, 100 queued, 38 with a real opening line). Log every dial,
-   no-answers included: `node scripts/log-call.mjs --id <id> --outcome <o>`,
-   funnel via `--funnel`. **Outcomes are a closed vocabulary on purpose — 200
-   calls logged as free text are anecdotes, not data.** Compliance gates the
-   _scaled_ send (#35 → #38 → #27 → #9); one call is not. B2B calls to business
-   numbers sit largely outside the national DNC registry — but WA (most of this
-   list) needs all-party consent to record.
+1. **#348 — two committed migrations never reached the database.** `digest_items`
+   (`0011`) and `pitch_queue` (`0012`) do not exist in `vvyccwxtcwvlusweenje`;
+   `0013` is recorded under its pre-rename version; `0010` is applied but
+   unrecorded. Needs Adrian (it writes production). The DoD includes a
+   `check-migration-ledger` gate — this seam is the only schema boundary in the
+   repo with no gate, which is how a closed issue left a missing table behind.
 2. **Guardrail follow-through, unblocked by #325:** #329 (the fixture ratchet
    rewrites its baseline on every run) and #330 (gate telemetry is structurally
    unfillable — a failing pre-commit gate aborts the commit, so post-commit
@@ -127,8 +121,12 @@ not read it to get oriented.
    gate severity on _provable_ firing, not firing history) · #303/#302/#296/#238
    (one shared `hirobius/ralph` engine release, not four).
 4. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
-5. **Website email crawler** — 223 leads have a site, 1 has an address. Claimed
-   on the board by the ops burndown session; check before touching.
+5. **Website email crawler — BUILT, PR #346 open and green, awaiting Adrian.**
+   Extraction + ranking proven against live content; the first real fetch found
+   a filtering bug the 28 fixture tests missed (see `learned-rules.jsonl`). It
+   has **never fetched a trades site** — this container 403s all egress — so the
+   hit rate across the 223 sites is unknown. Merging code that has not done its
+   full job is a real call; the PR argues both sides.
 6. **Cutover Part B remainder** — gated on the clients Astro factory being live.
 
 ## Parked / known warts
@@ -159,12 +157,21 @@ Older decisions: `docs/ai/DONE-LOG.md`.
   prevents overwrites, not duplicated work — three collisions in one day proved
   it.
 - **2026-09-15: Before merging to main, check for an in-flight `ralph/*` PR and
-  re-base it after.** Single-flight means a merge that strands the loop's PR
-  halts the queue — that is what stalled #325.
-- **2026-09-15: After your PR squash-merges, your branch is dead.** Squash
-  rewrites history, so the branch is no longer an ancestor of `main`. Start the
-  next unit with `git fetch origin main && git checkout -B <branch> origin/main`
-  — never keep committing to a merged branch.
+  re-base it after** — single-flight means stranding it halts the queue (#325).
+- **2026-09-15: After a squash-merge your branch is dead** (no longer an
+  ancestor of `main`). Start the next unit with
+  `git fetch origin main && git checkout -B <branch> origin/main`.
+- **2026-09-16 (Adrian, verbatim): STOP PROMPTING ABOUT CALLS.** "stop with the
+  pressure to dial — I need you to focus on the build." The tooling stays
+  (`export-call-list.mjs`, `log-call.mjs`) and `0 contacted` stays a true
+  metric — but **no session raises dialling or `0 contacted` as a prompt or
+  recommendation.** Answer if asked; never lead with it.
+- **2026-09-16: A closed issue is not proof its migration ran.** Verify the
+  table/column exists in the live project before closing — #78 closed with its
+  table absent (#348).
+- **2026-09-16: Fixture tests do not prove an extractor works.** Run the real
+  path against any reachable live host first (check the proxy's `noProxy`
+  list); 28 fixtures missed what one live fetch caught (#346).
 
 ## Standing rules (never violate)
 
