@@ -2036,3 +2036,33 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
 - Branch: ralph/issue-226-gate-reassessment. PR #358 ("Closes #226").
 - Filed #357 as the one real follow-up. Closed #229 directly (mirroring how
   #230 was already closed) rather than leaving it open as a live duplicate.
+
+## Issue #295 — labels: split needs-human into needs-decision vs needs-credential (2026-09-16)
+- Created `needs-decision` and `needs-credential` labels; re-labeled all 14
+  open `needs-human` issues (drift from the issue's original count of 26 —
+  already dispositioned since filing, expected per the issue's own text).
+  Decision (11): #303, #302, #111, #89, #87, #38, #35, #27, #15, #10, #7 —
+  loop-safety architecture calls, platform epics, compliance/legal
+  judgment, git-history rewrite decision. Credential (3): #33, #32, #9 —
+  secrets rollout, this repo's own secrets adoption, Smartlead API key.
+- Classified against: each issue's own "Why `needs-human`" reasoning where
+  present (#303/#302/#111 explicit), and `docs/ai/BURNDOWN-GAMEPLAN.md` §2
+  clusters (compliance chain C, secrets hygiene D, platform epics E, #7's
+  "an eval + decision" framing in G).
+- Cross-referenced #32/#33/#9 from #134 (new "🔵 Secrets & security
+  hygiene" section + a `needs-credential` query link alongside the
+  existing `needs-adrian` one).
+- Deleted the now-empty `needs-human` label.
+- Decision: CLAUDE.md's new vocabulary text pushed the steering budget
+  217B over `check-steering-budget`'s 25.0KB cap. Trimmed the already-
+  retired "5. RECAP" protocol line (detail already lives in
+  docs/ai/DONE-LOG.md) and tightened wording rather than raising the
+  budget — the guardrail's own doc says raising it is a deliberate PR-level
+  decision, not a byproduct of an unrelated change.
+- Files changed: CLAUDE.md, AGENTS.md (repo). Issue #134 body edited via
+  gh (not a repo file). Label mutations + relabeling done directly via
+  `gh label`/`gh issue edit` — not part of the git diff.
+- Branch: ralph/issue-295-split-needs-human-labels. PR #359 ("Closes
+  #295"). Gate green (typecheck/test/lint + steering-budget + no open
+  needs-human issues, verified before PR).
+- Notes for next iteration: none — DoD fully met, no follow-up filed.
