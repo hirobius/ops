@@ -232,6 +232,19 @@
       "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
+      "id": "check-branch-ancestry",
+      "description": "Warns at commit time when the current branch is no longer based on origin/main. This repo squash-merges, so the instant a PR lands the source branch is unrelated to main in BOTH directions; committing there builds a fork whose PR carries phantom diffs reverting whatever else landed. The stop hook makes it worse by reporting the orphaned pointer as 'unpushed commits' and advising a push. Note the obvious check is INVERTED and wrong: 'merge-base --is-ancestor HEAD origin/main' is false for every healthy in-progress branch. Reads the locally-known origin/main and never fetches. Never blocks — run-gates fails on any non-zero exit regardless of severity (ops#304), so this exits 0 except under --fixture-mode. ops#335.",
+      "severity": "warn",
+      "gateScript": "scripts/check-branch-ancestry.mjs",
+      "fixturePath": "fixtures/check-branch-ancestry",
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "pre-commit",
+      "supportsJson": true
+    },
+    {
       "id": "check-commit-message-task-ref",
       "description": "Validates that commits on feature branches reference an open Hermes Kanban task via 'Refs: <task-id>' line in the commit body. Wired in .husky/commit-msg. Warn-only by default; promote with KANBAN_REF_ENFORCE=error. Skips main/release/*/hotfix/*, [skip-kanban] tag, merge/revert commits. Accepts kanban IDs (t_<hex>) and legacy unit IDs (1[0-9][a-z]-<n>).",
       "severity": "warn",
@@ -672,7 +685,7 @@
     },
     {
       "id": "check-parked-triggers",
-      "description": "Evaluates the re-entry triggers in docs/ai/PARKED.md, the file holding work deliberately kept out of the issue queue. date: and path: triggers fire automatically; issue:/event: triggers surface at the quarterly review. Exits non-zero when an entry is due to re-enter the queue. Read-only \u2014 re-entry stays a deliberate human act. Warn severity: a fired trigger is information, not a defect in the commit.",
+      "description": "Evaluates the re-entry triggers in docs/ai/PARKED.md, the file holding work deliberately kept out of the issue queue. date: and path: triggers fire automatically; issue:/event: triggers surface at the quarterly review. Exits non-zero when an entry is due to re-enter the queue. Read-only — re-entry stays a deliberate human act. Warn severity: a fired trigger is information, not a defect in the commit.",
       "severity": "warn",
       "gateScript": "scripts/check-parked-triggers.mjs",
       "fixturePath": "fixtures/check-parked-triggers",
