@@ -2187,3 +2187,37 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   by tests/). Manual verification in a live Discord channel wasn't possible
   in this sandbox (no DISCORD_BOT_TOKEN/GITHUB_TOKEN with Actions:write).
   Rest of #30's scope (parent epic) remains open.
+
+## Issue #257 — discord: bot kill-switch (!pause) + nothing-silent output guarantee (2026-09-16)
+- Added !pause / !resume to scripts/discord-bot.mjs. Checked before the
+  normal ! dispatch (and before the auto-assigner / NL-AI paths), so !pause
+  really stops the bot acting on anything except !resume itself — process
+  and Discord connection stay up. Global (not per-channel) flag: the bot
+  already gates all senders to OWNER_ID, so there's only ever one operator.
+- Audited every catch{} in the file for silent failure: all command handlers
+  (cmd*) already send an error back to the channel, and the auto-assigner /
+  NL-AI fallback paths in the message handler do too. The one gap was
+  send() itself throwing (channel gone, perms pulled, Discord API down) —
+  no handler covered that. Fixed by extracting the messageCreate body into
+  handleMessage(msg) and wrapping the client.on('messageCreate', ...)
+  callback in a try/catch that DMs the owner (notifyOwnerFallback) as a
+  last resort + always console.error's. Added process-level
+  unhandledRejection/uncaughtException nets for the same reason (escape
+  hatch outside any awaited path); uncaughtException exits 1 so pm2
+  restarts cleanly, matching the existing process.exit(1) pattern for
+  missing env vars.
+  DISCORD_HERMES_CHANNEL_ID / background push (the other half of "nothing
+  silent" per the issue) isn't implemented yet — it's documented in the file
+  header as future (#15), so there's no push path to audit today. Deferred
+  to whenever #15 lands, per the issue's own scope note.
+- Documented the guarantee inline: new "Kill switch" + "Nothing-silent
+  output guarantee" sections in the file's top doc comment, plus updated
+  !help text.
+- Files changed: scripts/discord-bot.mjs.
+- Branch: ralph/issue-257-discord-pause-killswitch. Gate green (typecheck,
+  95 files / 1149 tests, lint --max-warnings=0).
+- Notes for next iteration: no automated test added — same reason as #256,
+  no existing test infra for this file (it's a standalone bot process that
+  self-executes discord.js Client + env checks at import time, nothing
+  exported). Manual verification in a live Discord channel wasn't possible
+  in this sandbox (no DISCORD_BOT_TOKEN). Rest of #30's scope remains open.

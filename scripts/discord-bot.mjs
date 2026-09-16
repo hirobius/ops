@@ -18,10 +18,30 @@
  *   !log [n] — tail cron log
  *   !provider [name] — show or set AI provider for this channel
  *   !local / !cloud — sticky channel switch to Ollama / Anthropic
+ *   !pause / !resume — kill switch: stop/start the bot acting on messages
+ *     (process + Discord connection stay up; see "Kill switch" below)
  *
  * Thread mode:
  *   Reply to bot in a thread → isolated conversation with full context.
  *   New message in main channel → fresh context.
+ *
+ * Kill switch (ops#257):
+ *   !pause  — the bot stops acting on every message except !resume itself.
+ *             Nothing is dropped quietly: each ignored message still gets an
+ *             explicit "paused" reply, so "is it just slow?" never happens.
+ *   !resume — undoes !pause. The only command that still runs while paused.
+ *
+ * Nothing-silent output guarantee (ops#257):
+ *   Every reply path — quick commands, auto-assigner routing, NL-AI chat —
+ *   catches its own errors and sends them back to the channel rather than
+ *   swallowing them (grep this file for `catch` — each one ends in `send()`
+ *   or falls through to a path that does). The one gap that survives that
+ *   pattern is `send()` itself failing (channel deleted, permissions pulled,
+ *   Discord API down): messageCreate's outer handler and the process-level
+ *   unhandledRejection/uncaughtException hooks near the bottom of this file
+ *   catch that case, DM the owner as a fallback, and always console.error so
+ *   a crash still leaves a loud trace for pm2/log tailing instead of just
+ *   going quiet.
  *
  * Required env vars in .env.local:
  *   DISCORD_BOT_TOKEN=<bot token from Discord Dev Portal>
@@ -169,6 +189,12 @@ const contexts = new Map(); // channelId → Array<{role, content}>
 // Per-channel sticky provider override. Set via `!provider <name>` /
 // `!local` / `!cloud`. Falls back to BOT_PROVIDER_DEFAULT when no entry.
 const providerOverrides = new Map(); // channelId → 'ollama' | 'anthropic' | 'openrouter'
+
+// Kill switch (ops#257) — global, not per-channel: Adrian is the only sender
+// this bot ever acts on (OWNER_ID gate in messageCreate), so one flag for the
+// whole process is enough and avoids a paused channel that quietly forgets it
+// is paused after a restart-less redeploy of channel config.
+let paused = false;
 
 function pickProvider(channelId) {
   const override = providerOverrides.get(channelId);
@@ -710,11 +736,36 @@ async function cmdHelp(channel) {
       '`!provider [name]` — show or set AI provider for this channel',
       '`!local` — switch this channel to Ollama (free, local)',
       '`!cloud` — switch this channel to Anthropic (best reasoning)',
+      '`!pause` — kill switch: stop the bot acting on messages (process keeps running)',
+      '`!resume` — undo `!pause`',
       '`!help` — this message',
       '',
       'Start a Discord **thread** for isolated conversation with full context.',
     ].join('\n'),
   );
+}
+
+async function cmdPause(channel) {
+  if (paused) {
+    await send(channel, '⏸ Already paused. Send `!resume` to continue.');
+    return;
+  }
+  paused = true;
+  console.log('[bot] paused by owner');
+  await send(
+    channel,
+    '⏸ **Paused.** Ignoring everything except `!resume`. Process and Discord connection stay up.',
+  );
+}
+
+async function cmdResume(channel) {
+  if (!paused) {
+    await send(channel, '▶️ Already running (not paused).');
+    return;
+  }
+  paused = false;
+  console.log('[bot] resumed by owner');
+  await send(channel, '▶️ **Resumed.** Back to normal.');
 }
 
 async function cmdProvider(channel, channelId, args) {
@@ -1191,7 +1242,21 @@ client.once('ready', () => {
   );
 });
 
-client.on('messageCreate', async (msg) => {
+// Best-effort last resort when a reply can't reach the channel it was meant
+// for (channel deleted, permissions pulled, Discord API down) — see the
+// "Nothing-silent output guarantee" doc comment at the top of this file.
+// Always console.error's too, so a DM failure still leaves a trace in the
+// process log rather than vanishing completely.
+async function notifyOwnerFallback(text) {
+  try {
+    const owner = await client.users.fetch(OWNER_ID);
+    await owner.send(text);
+  } catch (e) {
+    console.error('[bot] owner DM fallback also failed:', e.message);
+  }
+}
+
+async function handleMessage(msg) {
   if (msg.author.bot) return;
   if (msg.author.id !== OWNER_ID) return;
   if (GUILD_ID && msg.guildId && msg.guildId !== GUILD_ID) return;
@@ -1203,6 +1268,26 @@ client.on('messageCreate', async (msg) => {
   const ctxKey = msg.channel.isThread?.() ? msg.channelId : `${msg.channelId}-fresh`;
 
   console.log(`[bot] <${msg.author.username}> ${text.slice(0, 80)}`);
+
+  // Kill switch (ops#257) — checked before everything else, including the
+  // normal `!` dispatch below, so `!pause` really does stop the bot from
+  // acting on anything. `!resume` is the one command that keeps working.
+  const firstToken = text.split(/\s+/)[0].toLowerCase();
+  if (firstToken === '!pause') {
+    await cmdPause(msg.channel);
+    return;
+  }
+  if (firstToken === '!resume') {
+    await cmdResume(msg.channel);
+    return;
+  }
+  if (paused) {
+    await send(
+      msg.channel,
+      '⏸ Paused — send `!resume` to continue. Nothing else is processed while paused.',
+    );
+    return;
+  }
 
   // ! shortcuts — fast, no AI
   if (text.startsWith('!')) {
@@ -1291,6 +1376,34 @@ client.on('messageCreate', async (msg) => {
     console.error('[bot] AI error:', e.message);
     await send(msg.channel, `AI error: ${e.message}`);
   }
+}
+
+client.on('messageCreate', async (msg) => {
+  try {
+    await handleMessage(msg);
+  } catch (e) {
+    // Last resort: every path inside handleMessage() already catches its own
+    // errors and replies in-channel. Reaching here means one of those `send()`
+    // calls itself failed — the channel is gone, permissions were pulled, or
+    // Discord is down. DM the owner instead of letting it vanish silently.
+    console.error('[bot] unhandled error in message handler:', e);
+    await notifyOwnerFallback(`⚠️ Bot hit an error it couldn't report in-channel: ${e.message}`);
+  }
+});
+
+// Process-level nets for anything that escapes an awaited path entirely
+// (see "Nothing-silent output guarantee" at the top of this file).
+process.on('unhandledRejection', (reason) => {
+  console.error('[bot] unhandled rejection:', reason);
+  notifyOwnerFallback(
+    `⚠️ Unhandled rejection in bot process: ${String(reason?.message ?? reason).slice(0, 500)}`,
+  );
+});
+process.on('uncaughtException', (err) => {
+  console.error('[bot] uncaught exception — exiting for pm2 to restart:', err);
+  notifyOwnerFallback(
+    `💥 Bot crashed on an uncaught exception and is restarting: ${err.message}`,
+  ).finally(() => process.exit(1));
 });
 
 client.login(BOT_TOKEN);
