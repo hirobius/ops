@@ -94,8 +94,8 @@ not read it to get oriented.
   renames plus an ops migration across ~41 files. No agent writes the changeset.
 - **Run the lilac-insure onboarding prompt** → stands up the client repo to fleet
   spec + files its tasks.
-- **File the Alert Figma-drift issue** in the DS repo (not ops): tone-colored
-  title + border, danger→`circle-alert`; node 33:34.
+- **Decide `claude/ops-dashboard-open-issues-slp7tz`** — 5 commits, green, on
+  current `main`, no PR. Merge or drop it.
 - **Run the ops-history PII scrub** — runbook in `REPO-PROCEDURES.md`; hygiene,
   not urgency.
 - **Remove `PORTAL_HMAC_SECRET` + `VITE_PORTAL_HMAC_SECRET` from Vercel** —

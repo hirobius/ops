@@ -106,6 +106,44 @@ premises in six of the issues examined.
 
 ## Product / tooling
 
+### `leads.qualified` is a stored flag, not a live comparison
+
+- **origin:** the 2026-09-16 Standing session. `/ops/standing` stage 3 reads
+  `qualified = true` (`lib/supabase/leads.mjs::leadFunnel`), while stages 2, 4 and
+  5 test whether a column got filled. A stored boolean is only as true as its
+  last writer, and the writer here is a batch script (`lib/leads/rescore.mjs` via
+  `scripts/rescore-leads.mjs`), not a trigger — so a scorer change silently
+  leaves the flag behind.
+- **trigger:** `event: the lead scorer's weighting or its >=60 threshold changes without rescore-leads.mjs being run over the whole table`
+- **why parked, not filed:** **checked, and it is currently exact.** 263 total,
+  263 scored, 17 with `qualified IS TRUE`, 17 with `lead_score >= 60`, and ZERO
+  rows disagreeing in either direction. There is no current reason to act, which
+  is the intake bar — filing it would cost triage on every pass while being a
+  no-op.
+- **the check, for whoever picks this up:** compare
+  `count(*) FILTER (WHERE qualified IS TRUE)` against
+  `count(*) FILTER (WHERE lead_score >= 60)` on `leads`; any gap is drift.
+  The fix is either running the rescore or deriving stage 3 from `lead_score`
+  the way every neighbouring stage derives from its column.
+- **the rule it is an instance of:** before citing a stored field as evidence,
+  find its writer and its trigger (`learned-rules.jsonl`, ops burndown session).
+
+### The `?ralph=1` panel and its client are unreferenced
+
+- **origin:** the 2026-09-16 Standing session, found while giving every lane one
+  row shape. `fetchRalphStatus()` in `src/app/pages/ops/ralphStatus.ts` is
+  imported by nothing but its own test; the surface that consumed it was
+  `/ops/tasks`, which has redirected to `/ops/standing` since 2026-09-15.
+  `ralphStatusHandler` in `api/tasks.ts` still backs it.
+- **trigger:** `event: someone proposes a new consumer for /api/tasks?ralph=1, or a dead-code sweep reaches src/app/pages/ops/ralphStatus.ts`
+- **why parked, not deleted:** deletion was not in the session's scope, and
+  CLAUDE.md §4 is explicit that a deletion's premise gets diffed against `main`
+  first — a prior PR may have left a consumer this grep did not see. It also
+  carries a live trap worth keeping visible: `?ralph=1` fans out over a
+  **hardcoded** `FLEET_REPOS` list (`api/tasks.ts:62`), so anyone reviving it
+  inherits a repo set that cannot see a new repo, which is the exact failure
+  `?fleet=1` was built to avoid.
+
 ### Digest → Issue promotion pipeline (P2 analyze, P3 sources, P4 Gmail pull)
 
 - **origin:** ops#77 (epic), #79, #80, #81 — all closed 2026-09-15. P1 (#78) **shipped and stays shipped**.
@@ -173,6 +211,31 @@ the umbrella.
 ---
 
 ## Cross-repo
+
+### DS Alert — Figma drift
+
+- **origin:** carried in HANDOFF's "Adrian's open actions" until 2026-09-16, moved
+  here (not dropped) when the steering budget hit its ceiling. Same class as the
+  entry below: a design-system-repo action that ops cannot file and should not
+  spend always-on bytes on.
+- **the drift:** Alert should have a tone-colored title AND border; `danger` should
+  use `circle-alert`. Figma node 33:34.
+- **trigger:** `event: anyone works in the design-system repo, or hds 0.14.0 is cut (hds#199)`
+
+### DS `Button` ignores its `label` prop whenever children are present
+
+- **origin:** the 2026-09-16 Standing session. `button.d.ts` documents `label` as
+  "the accessible label used when children are not suitable as the name", but the
+  built component emits no `aria-label` at all — verified by reading the rendered
+  DOM, not the source. Every `<Button label="Run the loop on ops#44">run</Button>`
+  in the fleet therefore announces only "run".
+- **trigger:** `event: anyone works in the design-system repo, or a fleet a11y pass runs`
+- **why parked here:** this session's GitHub scope was `hirobius/ops` only, so it
+  could not file in the DS repo. It is not an ops issue — ops already works
+  around it by setting `aria-label` directly on Standing's row controls.
+- **why it matters beyond one page:** the prop reads as doing something. Anyone
+  reaching for it gets silent failure, and the symptom (a screen reader saying
+  "run" 43 times) only shows up in a real assistive pass.
 
 ### Extract the Concrete Creations multi-tenant subsystem
 
