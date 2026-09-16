@@ -4,7 +4,7 @@
 > "status" or "go" reads this and acts from **Next**; a session that does real
 > work updates it before ending. "Put it in the handoff" means this file.
 
-_Last updated: 2026-09-15._
+_Last updated: 2026-09-16._
 
 ## The map (what else exists, and when to open it)
 
@@ -44,41 +44,29 @@ not read it to get oriented.
   crawl the 223 known websites for `mailto:` ourselves. **Phone is the only
   live channel — 260 leads have one.**
 
-- **📞 First-contact stack shipped (#326).** `--rehearse` on
-  `push-outreach.mjs` (real provider, real merge data, recipients rewritten to
-  you, capped at 3) behind the one choke point `lib/outreach/guard.mjs`; the
-  scorer reweight; `rescore-leads.mjs`; the call channel
-  (`export-call-list.mjs`, `log-call.mjs`, migrations 0013/0014).
-  **Two bugs worth remembering:** a custom-domain lead could never be qualified
-  (ceiling 4+30+10+15 = **59** vs threshold **60**), silently orphaning the
-  redesign play; and the weighting ranked the _hardest_ sells highest — a Wix
-  site is a **proven buyer**, a decade with no site is a revealed preference.
+- **📞 First-contact stack (#326).** Everything outbound routes through the one
+  choke point `lib/outreach/guard.mjs`; `--rehearse` on `push-outreach.mjs`;
+  call channel via `export-call-list.mjs` + `log-call.mjs`.
+  **The lesson that still steers:** a scoring ceiling (4+30+10+15 = **59** vs a
+  threshold of **60**) made custom-domain leads permanently unqualifiable and
+  silently orphaned the redesign play; the weighting also ranked the _hardest_
+  sells highest. A Wix site is a **proven buyer**; a decade with no site is a
+  revealed preference.
 
-- **📦 2026-09-15 shipped 9 PRs and left the loop clean** (roll-call in
-  `DONE-LOG.md`). It started the night with 4 open PRs and zero merges to
-  `main`; that inversion was the point. **Land before you build.**
-- **📞 `/ops/pitch` is live; migrations 0012/0013/0014 applied** (verified: both
-  columns, `lead_notes`, RLS, 3 indexes). A partner can work the list from a
-  phone. Marking a lead pitched stamps `contacted_at` + `contact_channel` — the
-  evidence #321 needs.
-- **📉 north-star share: run `pnpm metric:north-star-share`.** The 20% target
-  is uncalibrated — retune with `--target` once a few windows exist.
-- **🧹 Docs consolidated** — `docs/ai/` 31 → 16, `docs/` 146 → 122 live. Nothing
-  deleted; superseded material is in `docs/archive/`. `docs/DECISIONS.md` indexes
-  the four decision records (cite full paths — two unrelated ones read as "ADR 2").
-
-- **📞 `/ops/pitch` — the phone call sheet (#324).** Only pitchable leads appear
-  (`preview_url` present, `do_not_contact` false); both gates re-check on every
-  write. Marking pitched stamps `contacted_at` + `contact_channel` (#321
-  evidence). Stages reuse 0007's `outreach_status`. Notes live in the
-  `lead_notes` TABLE, never a column. Not a CRM.
+- **📦 Land before you build.** The constraint is opening work, not capacity —
+  a night that started with 4 open PRs and zero merges ended with 11 merged.
+- **📞 `/ops/pitch` — the phone call sheet; migrations 0012/0013/0014 applied.**
+  Only pitchable leads appear (`preview_url` present, `do_not_contact` false);
+  both gates re-check on every write. Marking pitched stamps `contacted_at` +
+  `contact_channel` — the evidence #321 needs. Notes live in the `lead_notes`
+  TABLE, never a column. Not a CRM.
+- **📉 north-star share: `pnpm metric:north-star-share`.** 20% target is
+  uncalibrated — retune with `--target` once a few windows exist.
 
 - **🪟 `/ops/standing` is the ONLY fleet surface.** Chain, waiting-on-you, in
   flight, queue, backlog, deploys. `/ops/tasks` + `/ops/projects` redirect here.
-  Actions (`queue_on`/`queue_off`/`ralph_requeue`) write labels straight to
-  GitHub via `labelIssueDirect`, bypassing the Supabase mirror on purpose —
-  Standing lists repos the importer never touched. Queue-from-backlog is the
-  direct fix for ops#274's routing finding.
+  Its actions write labels straight to GitHub, bypassing the Supabase mirror on
+  purpose — Standing lists repos the importer never touched.
 - **🎯 Revenue path is merged, unrun.** The generator takes real hours, address,
   photos and a contrast-checked palette. Spec: `docs/specs/leads-to-site.md`.
   Doctrine finding that still steers: **we have the machinery and mis-aim it.**
@@ -96,9 +84,8 @@ not read it to get oriented.
 - **`.github/workflows/*` cannot be pushed by the bot** (no `workflows` scope).
   Route CI/workflow changes through an adr-eng PR — never a Ralph task. Four
   issues (#90/#240/#241/#243) each burned attempts rediscovering this.
-- **Engine wired.** lead-gen wraps Outscraper; generation runs
-  enrich → generate → judge; `lib/render` emits `client.config.ts` + deploy
-  commands. Publishing stays a human action — it is the billing event.
+- **Publishing stays a human action — it is the billing event.** The engine is
+  wired end to end; its narrative lives in `docs/ARCHITECTURE.md`.
 
 ## Adrian's open actions (his court — one-time, not blocked on a session)
 
@@ -126,31 +113,29 @@ not read it to get oriented.
 
 ## Next (ordered queue)
 
-> Detailed per-issue recommendations for everything open: `docs/ai/BURNDOWN-GAMEPLAN.md`.
+> Per-issue detail for everything open: `docs/ai/BURNDOWN-GAMEPLAN.md`.
 
-> **Read this before starting anything.** On 2026-09-15 the open-PR count reached
-> six while `main` moved zero times, and the lead funnel still reads
-> `0 contacted`. The failure mode is not capacity — it is that sessions keep
-> opening work instead of landing it. **Land before you build.**
-
-1. **Merge #326, then make calls.** #316/#320/#323/#324 all landed 2026-09-15;
-   #326 is the last one open. Then:
-   `node scripts/export-call-list.mjs --limit 100 > calls.csv` — 261 eligible,
-   100 queued, 38 with a real opening line. Log every dial, including
-   no-answers: `node scripts/log-call.mjs --id <id> --outcome <outcome>`,
+1. **Make calls — `0 contacted` is the computed break** and has been zero since
+   the table existed. `node scripts/export-call-list.mjs --limit 100 > calls.csv`
+   (261 eligible, 100 queued, 38 with a real opening line). Log every dial,
+   no-answers included: `node scripts/log-call.mjs --id <id> --outcome <o>`,
    funnel via `--funnel`. **Outcomes are a closed vocabulary on purpose — 200
-   calls logged as free text are anecdotes, not data.**
-2. **Contact one lead.** `0 contacted` is the computed break and has been zero
-   since the table existed. Compliance gates the _scaled_ send
-   (#35 → #38 → #27 → #9); **one call, or one manual email, is not gated by any
-   of that.** B2B calls to business numbers sit largely outside the national DNC
-   registry — but WA (most of this list) needs all-party consent to record.
-3. **Adrian's calls, unblocking real work:** #200 (Stripe — there is no way to
-   take money today) · #306 (curate gate severity) · #303 / #302 / #296 / #238
-   (one shared `hirobius/ralph` engine release, not four).
+   calls logged as free text are anecdotes, not data.** Compliance gates the
+   _scaled_ send (#35 → #38 → #27 → #9); one call is not. B2B calls to business
+   numbers sit largely outside the national DNC registry — but WA (most of this
+   list) needs all-party consent to record.
+2. **Guardrail follow-through, unblocked by #325:** #329 (the fixture ratchet
+   rewrites its baseline on every run) and #330 (gate telemetry is structurally
+   unfillable — a failing pre-commit gate aborts the commit, so post-commit
+   never logs it). Then `reconcile-ralph-closures.mjs --apply` with a real
+   `GITHUB_TOKEN`, and walk the unpromoted rules.
+3. **Adrian's calls:** #200 (Stripe — no way to take money today) · #306 (curate
+   gate severity on _provable_ firing, not firing history) · #303/#302/#296/#238
+   (one shared `hirobius/ralph` engine release, not four) · the 94-branch prune
+   (this session's credential 403s on ref deletion).
 4. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
-5. **Guardrail follow-through:** `reconcile-ralph-closures.mjs --apply` once with
-   a real `GITHUB_TOKEN`; then walk the unpromoted rules (wants #300 first).
+5. **Website email crawler** — 223 leads have a site, 1 has an address. Claimed
+   on the board by the ops burndown session; check before touching.
 6. **Cutover Part B remainder** — gated on the clients Astro factory being live.
 
 ## Parked / known warts
@@ -163,12 +148,14 @@ not read it to get oriented.
 
 ## Decisions (dated, newest first)
 
+- **2026-09-16 — HANDOFF holds state, decisions and directives; PR roll-calls
+  and metric snapshots go to `DONE-LOG.md`.** The 25KB budget is the binding
+  constraint, and shipped-work detail is what crowds it out.
 - **2026-09-15 — the call channel is not the email channel.** Email needs an
   address and a `lead_score`; calls need neither and repeat. Notes are a table
   (`lead_notes`), never a column — a column loses the conversation.
-- **2026-09-14 — Frontier-engineering doctrine adopted (ops#274).** Spec per
-  epic, path-allowlist auto-merge, enforced steering budget. Kiro's productivity
-  metrics **rejected**. Rationale: `docs/ai/FRONTIER-DOCTRINE.md`.
+
+Older decisions: `docs/ai/DONE-LOG.md`.
 
 ## Fleet directives (broadcast board — a dated line here reaches every repo)
 
