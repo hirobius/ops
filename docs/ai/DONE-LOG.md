@@ -79,6 +79,30 @@ contacted` with jump links to `/ops/leads` + `/ops/pitch`, so the tier upstream
 - Validated: typecheck · eslint · route-coverage · `pnpm build` all green;
   DOM-node budget re-locked (41 → 77). Branch `claude/clients-gallery-links`.
 
+## 2026-09-16 — main went green, and the chain stopped over-claiming
+
+- **CI on `main` passed for the first time in months.** #342 removed the 8
+  permanently-red Playwright specs (ops#307) — they targeted `/hds/*` routes and
+  a CommandPalette that no longer exist in ops, and had been masking real
+  failures behind an expected red. Done by another session; the SESSION-BOARD
+  pre-flight caught it before this one rebuilt the same thing.
+- **#322 / #345 — `published` now means "is up", not "was deployed once".**
+  Stage 5 counted `preview_url IS NOT NULL`. Every other stage counts a state
+  transition that actually happened; this one counted a stored string, which a
+  404 satisfies as well as a live site. It is the only link whose proof could be
+  a dead link, and `/ops/pitch` builds a partner call queue on it.
+  - `lib/chain/liveness.mjs`: pure summary + probe with injected fetch. **2xx and
+    3xx are both live** (a preview redirecting to a custom domain is up).
+    Successes cache 1h, failures 1min, so a blip does not freeze into an hour of
+    "we don't know".
+  - **The rule to carry: a URL we could not check is `unchecked`, never `dead`.**
+    The likeliest reason a probe fails is our own egress — #322 was filed from a
+    container that cannot reach `vercel.app` at all.
+  - `count` deliberately stays the _stored_ figure: the funnel's nesting
+    invariant depends on it. The note carries the truth instead.
+  - `publishedUrls` is a sibling of `leadFunnel`, not part of it — the funnel is
+    nine cheap COUNTs and must stay that way.
+
 ## 2026-09-16 — fleet hygiene: the branch graveyard, the board, the ancestry gate
 
 Second half of the overnight run. 20 PRs merged in total, 0 left open.
