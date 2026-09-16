@@ -107,9 +107,8 @@ not read it to get oriented.
 - **Run the ops-history PII scrub** — runbook in `docs/ai/REPO-PROCEDURES.md`.
   ops is private, so hygiene not urgency.
 - **Remove `PORTAL_HMAC_SECRET` + `VITE_PORTAL_HMAC_SECRET` from Vercel** — the
-  in-ops `/c/:slug` portal was retired (portals live in `hirobius/portal-kit`),
-  so nothing reads either var. `/c/:slug` now serves a "moved" notice; old
-  `?token=…` links land there gracefully instead of 404ing.
+  in-ops `/c/:slug` portal was removed (portals live in `hirobius/portal-kit`),
+  so nothing reads either var.
 
 ## Next (ordered queue)
 

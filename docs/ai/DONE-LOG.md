@@ -42,13 +42,11 @@ DOC CRUFT CLEARED + PAPER TRAIL INDEXED (2026-09-15): docs/ went 146 live .md ->
   system, per the architecture decision to make the cleaner surface the foundation.
 - **What went.** Deleted `src/app/pages/portal/ClientPortalPage.tsx` (507 lines),
   `api/portal-verify.ts` (Vercel fn, −1 toward the Hobby cap), `lib/portal-auth.mjs`
-  - its test, and `scripts/generate-portal-token.mjs`. Net −933/+79 across 14 files.
-- **Soft landing, not a 404.** `/c/:slug` now serves a slug-agnostic
-  `PortalRetiredPage` "this portal has moved — contact your point of contact"
-  notice, so any `?token=…` link already handed to a client lands gracefully. It
-  reads no client registry and echoes no slug (same privacy posture the token gate
-  held). _(If a hard 404 or an auto-redirect-to-new-portal is preferred, both are
-  small swaps — flagged in the PR.)_
+  - its test, and `scripts/generate-portal-token.mjs`.
+- **Route removed, not soft-landed.** The first cut kept a `/c/:slug`
+  `PortalRetiredPage` "moved" notice; Adrian confirmed the route was never
+  visited, so the whole route was dropped — unknown `/c/*` paths now fall through
+  to `NotFoundPage`. No client-registry coupling, no leftover portal page.
 - **Env now dead:** `PORTAL_HMAC_SECRET` + `VITE_PORTAL_HMAC_SECRET` are unread —
   safe to remove in Vercel (HANDOFF Adrian-action updated from "set" to "remove").
 - Docs in lockstep: README, ARCHITECTURE row ⑤ + env list, HANDOFF; regenerated

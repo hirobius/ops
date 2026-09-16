@@ -30,8 +30,7 @@ Deployed on Vercel; `main` is production.
   Supabase (`lib/leads`, `lib/supabase`).
 - **`/ops/clients` — client CRM.** `clients/<slug>/*.json` rendered as client
   dashboards / reports / brand audits. (Public client portals moved to
-  `hirobius/portal-kit`; the old in-ops `/c/:slug` portal now serves a "moved"
-  notice.)
+  `hirobius/portal-kit`; the old in-ops `/c/:slug` portal was removed.)
 - **`/ops/projects`, `/ops/digest`, `/ops` index** — fleet views. Merge
   governance runs through ralph-gate's `ralph-auto`/`ralph-approved` labels on
   the linked PR (the pre-Ralph `/admin/approvals` inbox was retired, ops#157).

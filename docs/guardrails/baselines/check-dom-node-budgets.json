@@ -33,9 +33,8 @@
     "src/app/pages/ops/leads/RenderHandoffPanel.tsx": 6,
     "src/app/pages/ops/pitch/PitchPage.tsx": 39,
     "src/app/pages/ops/standing/StandingPage.tsx": 95,
-    "src/app/pages/portal/PortalRetiredPage.tsx": 4,
-    "src/app/routes.tsx": 28
+    "src/app/routes.tsx": 26
   },
-  "updatedAt": "2026-09-16T04:40:24.805Z",
-  "sha": "7b8b943"
+  "updatedAt": "2026-09-16T04:57:59.466Z",
+  "sha": "ebfee00"
 }

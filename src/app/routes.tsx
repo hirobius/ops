@@ -16,13 +16,6 @@ const DigestPage = lazy(() => import('./pages/ops/digest/DigestPage'));
 const StandingPage = lazy(() => import('./pages/ops/standing/StandingPage'));
 const PitchPage = lazy(() => import('./pages/ops/pitch/PitchPage'));
 
-// ── Retired client portal — /c/:slug now serves a "moved" notice ─────────────
-// The in-ops portal (iframe preview + milestones + HMAC token gate) was retired
-// once client portals moved to hirobius/portal-kit (own password-gated
-// deployment per client). The slug-agnostic notice catches old `/c/<slug>?token=`
-// links and points clients at their current portal instead of a bare 404.
-const PortalRetiredPage = lazy(() => import('./pages/portal/PortalRetiredPage'));
-
 // ── Fallback ──────────────────────────────────────────────────────────────────
 function HDSFallback() {
   return <div style={{ flex: 1, minHeight: '60vh' }} />;
@@ -96,10 +89,8 @@ export const router = createBrowserRouter([
       { path: '*', Component: NotFoundPage },
     ],
   },
-  // ── Retired client portal — public, no chrome. Serves a "moved" notice. ──────
-  {
-    path: '/c/:slug',
-    element: <LazyHDS Page={PortalRetiredPage} />,
-    errorElement: <ErrorPage />,
-  },
+  // Client portal retired 2026-09-16 — public client portals live in
+  // hirobius/portal-kit now (own password-gated deployment per client). The old
+  // in-ops /c/:slug route + its HMAC token gate were removed; unknown /c/* paths
+  // fall through to NotFoundPage.
 ]);
