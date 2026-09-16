@@ -567,6 +567,19 @@
       "supportsJson": true
     },
     {
+      "id": "check-spec-freshness",
+      "description": "Anti-rot gate for docs/specs/<epic-slug>.md (ops#294, doctrine §2 rule 4). Flags a spec missing a parseable Status:/Last verified: header, an active spec whose Last verified is >60 days old, an active spec whose referenced issues are all closed (should be shipped), and a referenced issue number that doesn't exist in the stated repo. A shipped/abandoned spec is exempt from every check — history, not instruction. Advisory only. Manual channel only (network required for issue state).",
+      "severity": "warn",
+      "gateScript": "scripts/check-spec-freshness.mjs",
+      "fixturePath": "fixtures/check-spec-freshness",
+      "lastFiringAt": null,
+      "lastViolationAt": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual",
+      "supportsJson": true
+    },
+    {
       "id": "check-steering-budget",
       "description": "Caps the always-on agent context listed in docs/guardrails/steering-budget.json. Every file there is loaded by every agent in every session before it reads code; on 2026-09-14 that set was ~189KB/~47k tokens, HANDOFF.md alone 119KB against its own 'keep it one page' instruction. Fix a violation by moving history to an on-demand file, not by raising the budget. ops#292.",
       "severity": "error",
