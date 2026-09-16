@@ -1,2 +1,0 @@
-// TODO: replace with real-passing-example for check-route-smoke
-// STUB — this file needs real passing content
