@@ -20,11 +20,22 @@ const WA_METROS = [
   {
     region: 'Seattle, WA',
     areas: [
-      'Seattle, WA', 'Bellevue, WA', 'Redmond, WA', 'Kirkland, WA', 'Renton, WA',
-      'Everett, WA', 'Kent, WA', 'Federal Way, WA', 'Shoreline, WA', 'Bothell, WA',
+      'Seattle, WA',
+      'Bellevue, WA',
+      'Redmond, WA',
+      'Kirkland, WA',
+      'Renton, WA',
+      'Everett, WA',
+      'Kent, WA',
+      'Federal Way, WA',
+      'Shoreline, WA',
+      'Bothell, WA',
     ],
   },
-  { region: 'Tacoma, WA', areas: ['Tacoma, WA', 'Lakewood, WA', 'Puyallup, WA', 'University Place, WA'] },
+  {
+    region: 'Tacoma, WA',
+    areas: ['Tacoma, WA', 'Lakewood, WA', 'Puyallup, WA', 'University Place, WA'],
+  },
   { region: 'Spokane, WA', areas: ['Spokane, WA', 'Spokane Valley, WA'] },
   { region: 'Vancouver, WA', areas: ['Vancouver, WA', 'Camas, WA'] },
   { region: 'Olympia, WA', areas: ['Olympia, WA', 'Lacey, WA'] },
@@ -37,7 +48,13 @@ export const PRESETS = {
   //    ticket + reachable by cold outreach (see docs/prospecting/niche-targeting.md).
   'fencing-wa': {
     label: 'Fencing & deck builders — WA metros',
-    keywords: ['fence company', 'fence installation', 'fence contractor', 'deck builder', 'deck contractor'],
+    keywords: [
+      'fence company',
+      'fence installation',
+      'fence contractor',
+      'deck builder',
+      'deck contractor',
+    ],
     metros: WA_METROS,
   },
   'tree-service-wa': {
@@ -47,7 +64,13 @@ export const PRESETS = {
   },
   'septic-wa': {
     label: 'Septic & excavation — WA metros',
-    keywords: ['septic service', 'septic pumping', 'septic installation', 'excavation contractor', 'land clearing'],
+    keywords: [
+      'septic service',
+      'septic pumping',
+      'septic installation',
+      'excavation contractor',
+      'land clearing',
+    ],
     metros: WA_METROS,
   },
   'pressure-washing-wa': {
@@ -57,7 +80,12 @@ export const PRESETS = {
   },
   'concrete-coating-wa': {
     label: 'Concrete / epoxy floor coating — WA metros',
-    keywords: ['epoxy flooring', 'garage floor coating', 'concrete coating', 'concrete resurfacing'],
+    keywords: [
+      'epoxy flooring',
+      'garage floor coating',
+      'concrete coating',
+      'concrete resurfacing',
+    ],
     metros: WA_METROS,
   },
 
@@ -65,7 +93,13 @@ export const PRESETS = {
   //    less-digitized, nobody pitching them; excavation clustered in Run 01. ──
   'excavation-wa': {
     label: 'Excavation / land clearing / grading — WA metros',
-    keywords: ['excavation contractor', 'land clearing', 'grading contractor', 'site prep', 'demolition contractor'],
+    keywords: [
+      'excavation contractor',
+      'land clearing',
+      'grading contractor',
+      'site prep',
+      'demolition contractor',
+    ],
     metros: WA_METROS,
   },
   'welding-wa': {
@@ -75,12 +109,100 @@ export const PRESETS = {
   },
   'well-drilling-wa': {
     label: 'Well drilling / water systems — WA metros',
-    keywords: ['well drilling', 'water well drilling', 'well pump service', 'water well', 'water systems'],
+    keywords: [
+      'well drilling',
+      'water well drilling',
+      'well pump service',
+      'water well',
+      'water systems',
+    ],
     metros: WA_METROS,
   },
   'masonry-wa': {
     label: 'Masonry / hardscaping — WA metros',
     keywords: ['masonry', 'hardscaping', 'retaining walls', 'paver patio', 'stone mason'],
+    metros: WA_METROS,
+  },
+
+  // ── HIGH-TICKET PROFESSIONAL SERVICES (added 2026-09-16) ──────────────────
+  //
+  // A DIFFERENT PLAY from the trades presets above, and deliberately so.
+  // niche-targeting.md's original shortlist optimised for the CHEAPEST CLOSE:
+  // low website penetration, so the pitch is "you have no site" and the product
+  // is one templated page. These niches optimise for CLIENT BUDGET instead —
+  // $4k–$18k builds plus monthly retainers, against ~100% website penetration.
+  //
+  // THE PITCH IS THEREFORE NOT THE SAME PITCH. Nobody here needs a website; they
+  // need a better one, and they will only believe that with evidence. Every lead
+  // in these presets is a `custom` presence, which scores 4 + 30 + 10 + 15 = 59
+  // against QUALIFIED_LEAD_SCORE 60 until scripts/audit-sites.mjs writes a real
+  // site_quality_score. That is not a bug to route around — it is the scorer
+  // refusing to email someone we have not looked at. Audit first, then outreach.
+  //
+  // WHAT THIS COSTS, honestly: these verticals are the most agency-saturated in
+  // local marketing, the decision-maker sits behind an office manager, and the
+  // cycle is weeks not days. The trades presets remain the faster close.
+  'law-wa': {
+    label: 'Contingency & retainer law firms — WA metros (high-ticket)',
+    keywords: [
+      'personal injury lawyer',
+      'car accident attorney',
+      'family law attorney',
+      'divorce lawyer',
+      'criminal defense attorney',
+      'estate planning attorney',
+    ],
+    metros: WA_METROS,
+  },
+  'dental-wa': {
+    label: 'Elective / cosmetic dental — WA metros (high-ticket)',
+    keywords: [
+      'cosmetic dentist',
+      'dental implants',
+      'orthodontist',
+      'invisalign dentist',
+      'periodontist',
+      'oral surgeon',
+    ],
+    metros: WA_METROS,
+  },
+  // Cash-pay and elective specialists: the patient chooses the practice, so the
+  // website is the storefront rather than an insurance formulary entry.
+  'medical-specialist-wa': {
+    label: 'Elective medical specialists — WA metros (high-ticket)',
+    keywords: [
+      'dermatologist',
+      'plastic surgeon',
+      'med spa',
+      'fertility clinic',
+      'vein clinic',
+      'lasik surgeon',
+    ],
+    metros: WA_METROS,
+  },
+  'financial-advisor-wa': {
+    label: 'Financial advisors / wealth management — WA metros (high-ticket)',
+    keywords: [
+      'financial advisor',
+      'wealth management',
+      'retirement planning',
+      'investment advisor',
+      'certified financial planner',
+    ],
+    metros: WA_METROS,
+  },
+  // The one high-ticket niche that sits in BOTH theses: a real trade, an owner
+  // who answers the phone, AND a six-figure job ticket. Screen out the volume
+  // production builders — their sites are corporate and not ours to replace.
+  'custom-home-builder-wa': {
+    label: 'Custom home builders & design-build remodelers — WA metros',
+    keywords: [
+      'custom home builder',
+      'home builder',
+      'design build remodeler',
+      'luxury home builder',
+      'whole home remodel',
+    ],
     metros: WA_METROS,
   },
 
@@ -100,11 +222,22 @@ export const PRESETS = {
       {
         region: 'Seattle, WA',
         areas: [
-          'Seattle, WA', 'Bellevue, WA', 'Redmond, WA', 'Kirkland, WA', 'Renton, WA',
-          'Everett, WA', 'Kent, WA', 'Federal Way, WA', 'Shoreline, WA', 'Bothell, WA',
+          'Seattle, WA',
+          'Bellevue, WA',
+          'Redmond, WA',
+          'Kirkland, WA',
+          'Renton, WA',
+          'Everett, WA',
+          'Kent, WA',
+          'Federal Way, WA',
+          'Shoreline, WA',
+          'Bothell, WA',
         ],
       },
-      { region: 'Tacoma, WA', areas: ['Tacoma, WA', 'Lakewood, WA', 'Puyallup, WA', 'University Place, WA'] },
+      {
+        region: 'Tacoma, WA',
+        areas: ['Tacoma, WA', 'Lakewood, WA', 'Puyallup, WA', 'University Place, WA'],
+      },
       { region: 'Spokane, WA', areas: ['Spokane, WA', 'Spokane Valley, WA'] },
       { region: 'Vancouver, WA', areas: ['Vancouver, WA', 'Camas, WA'] },
       { region: 'Olympia, WA', areas: ['Olympia, WA', 'Lacey, WA'] },
@@ -112,8 +245,14 @@ export const PRESETS = {
       {
         region: 'Portland, OR',
         areas: [
-          'Portland, OR', 'Beaverton, OR', 'Hillsboro, OR', 'Gresham, OR',
-          'Tigard, OR', 'Lake Oswego, OR', 'Oregon City, OR', 'Milwaukie, OR',
+          'Portland, OR',
+          'Beaverton, OR',
+          'Hillsboro, OR',
+          'Gresham, OR',
+          'Tigard, OR',
+          'Lake Oswego, OR',
+          'Oregon City, OR',
+          'Milwaukie, OR',
         ],
       },
       { region: 'Salem, OR', areas: ['Salem, OR', 'Keizer, OR'] },
