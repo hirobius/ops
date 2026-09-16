@@ -623,6 +623,17 @@
       "supportsJson": true
     },
     {
+      "id": "metric-human-gate-latency",
+      "description": "Median days an issue sits gated on Adrian under needs-adrian / needs-decision / needs-credential (ops#297, FRONTIER-DOCTRINE.md §7 metric 2), broken out per label, plus the oldest still-open gated issue. Network required (repo-wide GitHub issue-events feed) — manual channel only, same as metric-north-star-share. Emits a violation when the median is above target, so ralph/metric.sh can drive off it.",
+      "severity": "warn",
+      "gateScript": "scripts/metric-human-gate-latency.mjs",
+      "fixturePath": null,
+      "owner": "Adrian",
+      "source": "agent",
+      "firingChannel": "manual",
+      "supportsJson": true
+    },
+    {
       "id": "check-schema-drift",
       "description": "ops' vendored ClientConfig schema must offer every enum value site-engine ships. site-engine guards its schema against ops-shape.snapshot.json; nothing guarded the snapshot against ops, so shipped variants sat unreachable by the generation agent with every gate green (2026-09-16).",
       "severity": "error",
