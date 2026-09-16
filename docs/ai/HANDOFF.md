@@ -131,12 +131,14 @@ not read it to get oriented.
    `GITHUB_TOKEN`, and walk the unpromoted rules.
 3. **Adrian's calls:** #200 (Stripe — no way to take money today) · #306 (curate
    gate severity on _provable_ firing, not firing history) · #303/#302/#296/#238
-   (one shared `hirobius/ralph` engine release, not four) · the 94-branch prune
-   (this session's credential 403s on ref deletion).
-4. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
-5. **Website email crawler** — 223 leads have a site, 1 has an address. Claimed
+   (one shared `hirobius/ralph` engine release, not four).
+4. **#307 — delete or retarget the 8 dead specs** keeping `main` permanently
+   red (they target `/hds/*` routes and a CommandPalette that ops does not
+   have). Normalised red is how a real failure gets through.
+5. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
+6. **Website email crawler** — 223 leads have a site, 1 has an address. Claimed
    on the board by the ops burndown session; check before touching.
-6. **Cutover Part B remainder** — gated on the clients Astro factory being live.
+7. **Cutover Part B remainder** — gated on the clients Astro factory being live.
 
 ## Parked / known warts
 

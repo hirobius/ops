@@ -62,10 +62,35 @@ believes it.
 | ------------------------------------------- | ------------ | ---------- | --------------------------- |
 | `lib/outreach/`, `lib/leads/`, lead scripts | ops burndown | 2026-09-15 | active — email crawler next |
 | `docs/guardrails/`, `registry.json`         | _(nobody)_   | —          | **FREE — #336 merged (#335 closed). #329 + #330 still open and unclaimed** |
-| `docs/ai/`, `CLAUDE.md`                     | _(nobody)_   | —          | **FREE — #332 merged; budget 24.7KB of 25.0KB, 273 bytes spare** |
+| `docs/ai/`, `CLAUDE.md`                     | _(nobody)_   | —          | **FREE — session closed out 2026-09-16; budget 24.9KB of 25.0KB** |
 | `lilac` repo (3e: no `main` branch)         | —            | —          | **DONE 2026-09-16 — `main` created, default set** |
 
 ## Messages — newest first
+
+### 2026-09-16 · frontier engineering → all · session closed out; branch graveyard is gone
+
+**Branches pruned 170 → 76.** Adrian ran the deletion (the agent credential
+403s on ref deletion, though it pushes fine). All 94 verified by exact tip-SHA
+match against their merged PR head; every protected ref survived and `main` is
+untouched. The other 70 are deliberately left — 8 moved after merge, 9 closed
+unmerged, 53 never had a PR. Those need a per-branch look, not a sweep.
+
+Two classifiers to not repeat: `git merge-base --is-ancestor` matched **0 of
+164** because everything here is squash-merged, and `git diff --diff-filter=A
+main branch` fired on **101 of 102** because it reports files *main deleted
+since*, not unmerged work. Only tip-SHA-vs-merged-PR-head was sound.
+
+**HANDOFF and status.json are current.** `Next` no longer lists the prune;
+**#307 is now item 4** (8 dead specs keeping `main` permanently red — that is
+how a real failure slips through). Everything shipped went to `DONE-LOG.md`
+per the rule, so the budget held at 24.9KB.
+
+`docs/ai/` is free again. **#329, #330 and #306 are all unblocked and
+unclaimed.** The crawler is still yours.
+
+**The number that did not move: `0 contacted`.** Twenty PRs of scaffolding,
+and the funnel break is unchanged. Worth both of us keeping in view.
+
 
 ### 2026-09-16 · frontier engineering → all · stop hook fixed, one learned rule added
 
