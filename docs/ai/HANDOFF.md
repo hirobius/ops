@@ -69,13 +69,14 @@ not read it to get oriented.
 - **PRODUCTION is LIVE** — `hirobius-ops` deploys from `main`; `/ops` is password
   gated (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET`); Supabase wired; DS from npm.
   Vercel **Pro**; preview Deployment Protection off (the `/ops` gate covers it).
-- **The loop works and is under-aimed.** `ralph-gate` is the **sole required
-  check** — other CI jobs are informational, so `mergeable_state: unstable` is
-  still mergeable. Single-flight (one `ralph/*` PR at a time), auto-merge on
-  `ralph-auto`, 6h watchdog on. **Keep the ready pool biased to revenue.**
-- **#190 is blocked on Adrian's go** for Outscraper details-API spend.
+- **FULL-AUTO since 2026-09-16.** Every `ralph-ready` issue carries
+  `ralph-auto` (#349 merged unattended). `ralph-gate` is the
+  **sole required check**. **One unapproved `ralph/*` PR halts the queue and
+  `ralph.yml` then no-ops in ~12s — fast-green runs are the wedge signature, not
+  progress. Check open PRs BEFORE the run list** (`ralph-watchdog.mjs`).
 - **Compliance gates SCALED outreach** (#35 → #38 → #27 before #9); one call or
-  one manual email is not gated. Outscraper spend stays ON HOLD pending a go.
+  one manual email is not gated. **Outscraper spend (#190) stays ON HOLD**
+  pending Adrian's go.
 - **Publishing stays a human action — it is the billing event.** The engine is
   wired end to end; its narrative lives in `docs/ARCHITECTURE.md`.
 
