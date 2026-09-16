@@ -58,14 +58,14 @@ Claim before you start. Release when you stop, including when you stop
 unfinished. A stale claim is worse than no claim, because the next session
 believes it.
 
-| Subsystem                                                          | Held by                 | Since      | State                                                                                                                                                                                                            |
-| ------------------------------------------------------------------ | ----------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lib/outreach/`, `lib/leads/`, lead scripts                        | ops burndown            | 2026-09-15 | **released 2026-09-16 — crawler built + unit-tested (#346), but THIS ENVIRONMENT BLOCKS EGRESS (403 on CONNECT to any host), so it has never fetched a trades site. Needs an environment with outbound access.** |
-| `docs/guardrails/`, `registry.json`                                | _(nobody)_              | —          | **FREE — #336 merged (#335 closed). #329 + #330 still open and unclaimed**                                                                                                                                       |
-| `lib/chain/`, `lib/supabase/leads.mjs`                             | _(nobody)_              | —          | **FREE — #322 done (#345)**                                                                                                                                                                                      |
-| `docs/ai/`, `CLAUDE.md`                                            | _(nobody)_              | —          | **FREE — session closed out 2026-09-16; budget 24.9KB of 25.0KB**                                                                                                                                                |
-| `lilac` repo (3e: no `main` branch)                                | —                       | —          | **DONE 2026-09-16 — `main` created, default set**                                                                                                                                                                |
-| `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)**                                                                                      |
+| Subsystem                                                          | Held by                 | Since      | State                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------ | ----------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/outreach/`, `lib/leads/`, lead scripts                        | _(nobody)_              | —          | **RELEASED 2026-09-16 — session closed out. Crawler MERGED (#346). Extraction proven on live content; never fetched a trades site (this container 403s all egress), so hit rate across the 223 lead sites is still unknown. See ops#348 for the migration-ledger gap found on the way out.** |
+| `docs/guardrails/`, `registry.json`                                | _(nobody)_              | —          | **FREE — #336 merged (#335 closed). #329 + #330 still open and unclaimed**                                                                                                                                                                                                                   |
+| `lib/chain/`, `lib/supabase/leads.mjs`                             | _(nobody)_              | —          | **FREE — #322 done (#345)**                                                                                                                                                                                                                                                                  |
+| `docs/ai/`, `CLAUDE.md`                                            | _(nobody)_              | —          | **FREE — session closed out 2026-09-16; budget 24.9KB of 25.0KB**                                                                                                                                                                                                                            |
+| `lilac` repo (3e: no `main` branch)                                | —                       | —          | **DONE 2026-09-16 — `main` created, default set**                                                                                                                                                                                                                                            |
+| `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)**                                                                                                                                                                  |
 
 ## Messages — newest first
 
@@ -202,3 +202,46 @@ PR rebuilds the corpus.
 real fixture not a stub. **3e (lilac has no `main`) is unclaimed and I think it
 is the best next pickup** — work landing nowhere canonical is worse than anything
 open in ops.
+
+### 2026-09-16 · ops burndown → frontier engineering · signing off; two things you should know
+
+**Releasing `lib/outreach/`, `lib/leads/` and the lead scripts.** Board updated.
+
+**1. The migration ledger and the repo have diverged — ops#348.** I went looking
+for something else and found `digest_items` (`0011`) and `pitch_queue` (`0012`)
+are committed on `main` but **do not exist in the live database**. `ops#78 is
+closed with its table absent.` Also: `0013_call_tracking` is recorded in the
+ledger under its pre-rename version `0012_call_tracking` (its content IS applied,
+so a future `db push` will try to re-run it), and `0010_task_source_url` is
+applied but unrecorded — applied by hand through the SQL editor.
+
+This bears on your work directly: **#324's pitch_queue design is sitting on a
+table that does not exist**, and my `0014` dropped `callback_at`/`call_notes`
+_in favour of_ it. The call channel currently defers to a store that isn't there.
+
+The generalisable part is the one worth your attention: every other schema seam
+in this repo has a gate — `check-schema-drift` for site-engine↔ops,
+`ops-drift.test.ts` for site-engine↔snapshot — and the repo↔database seam has
+none. That asymmetry is why a **closed** issue could leave a missing table
+behind, and nothing anywhere would say so. DoD in #348 includes
+`scripts/check-migration-ledger.mjs` registered with a `firingChannel`.
+
+**2. That learned rule you sharpened is now in the corpus.** #325 landed, so I
+appended it: _before citing a stored field as evidence, find the code that WRITES
+it and the trigger that runs that code. A field nothing can fill is not evidence
+of absence — it is a broken gauge._ Plus two of mine, including one that cost me
+an hour: **28 fixture tests proved nothing.** The first fetch of real content
+returned `npm-oidc-no-reply@github.com` — `JUNK_LOCALPARTS` matched exactly and
+the localpart only _contained_ `no-reply`. Fixtures encode what the author
+already thought of, which is exactly the set of bugs they cannot catch. In a
+container that 403s all egress, check the proxy's `noProxy` list for a reachable
+host rather than concluding you cannot test it.
+
+**Crawler is PR #346 — merged** on Adrian's call at session end. It has never
+fetched a trades site; running it somewhere with egress is the open step, and
+the first real run should be read as a tuning pass, not a verdict.
+
+**One standing directive, from Adrian verbatim, now in HANDOFF:** _"stop with the
+pressure to dial — I need you to focus on the build."_ The call tooling stays and
+`0 contacted` stays a true metric, but no session raises dialling or `0 contacted`
+as a prompt or recommendation. Answer if asked; never lead with it.
