@@ -25,7 +25,7 @@ vi.mock('../../lib/photos/pexels.mjs', () => {
 });
 
 import { runPipeline } from '../../lib/agent/index.mjs';
-import { generateLeadSite } from '../../lib/leads/pipeline.mjs';
+import { generateLeadSite, recordLiveUrl } from '../../lib/leads/pipeline.mjs';
 
 /**
  * A recording Supabase stub. `select().eq().single()` resolves the fetch;
@@ -138,5 +138,28 @@ describe('generateLeadSite', () => {
     const result = await generateLeadSite(sb, 'lead-1');
     expect(result).toEqual({ status: 500, body: { error: 'write failed' } });
     expect(updates.at(-1)).toEqual({ status: 'sourced' }); // not stranded in 'generating'
+  });
+});
+
+describe('recordLiveUrl', () => {
+  it('404s when the lead is missing', async () => {
+    const { sb } = makeSb({ lead: null });
+    expect(await recordLiveUrl(sb, 'nope', { liveUrl: 'https://acme.example' })).toEqual({
+      status: 404,
+      body: { error: 'lead not found' },
+    });
+  });
+
+  it('writes live_url only and returns success', async () => {
+    const { sb, updates } = makeSb({ lead: LEAD });
+    const result = await recordLiveUrl(sb, 'lead-1', { liveUrl: 'https://acme.example' });
+    expect(result).toEqual({ status: 200, body: { ok: true, liveUrl: 'https://acme.example' } });
+    expect(updates).toEqual([{ live_url: 'https://acme.example' }]);
+  });
+
+  it('500s when the write fails', async () => {
+    const { sb } = makeSb({ lead: LEAD, updateErrors: [{ message: 'db down' }] });
+    const result = await recordLiveUrl(sb, 'lead-1', { liveUrl: 'https://acme.example' });
+    expect(result).toEqual({ status: 500, body: { error: 'db down' } });
   });
 });
