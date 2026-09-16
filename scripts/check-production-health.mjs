@@ -295,10 +295,88 @@ export async function runHealthCheck({
   return { violations, checks, notified };
 }
 
+// ── Fixture mode ─────────────────────────────────────────────────────────────
+
+/**
+ * Builds a canned `fetch` from a fixture, so proof-of-firing can exercise the
+ * real decision path with no network and no deployed app.
+ *
+ * WHY THIS EXISTS: this gate's whole point is that a **200 is not health** — a
+ * paused Supabase project returns a clean `{ tasks: [] }`. A stub fixture
+ * cannot demonstrate that; only running the gate against the known-failing
+ * shape can. ops#347's DoD asked for exactly this ("proven by asserting against
+ * the known-failing shape, not assumed"), and the stub left the gate counted
+ * among the 32 that cannot prove they fire.
+ *
+ * Fixture shape:
+ *   { "tasks": { "status": 200, "body": { "tasks": [] } },
+ *     "supabaseStatus": "INACTIVE" }
+ *
+ * `supabaseStatus` is optional; omit it to exercise the skipped path.
+ *
+ * @param {object} fixture
+ * @returns {Function} a fetch-shaped function routing by URL
+ */
+export function makeFixtureFetch(fixture) {
+  return async (url) => {
+    if (String(url).includes('/api/tasks')) {
+      const t = fixture.tasks || {};
+      return {
+        ok: (t.status ?? 200) >= 200 && (t.status ?? 200) < 300,
+        status: t.status ?? 200,
+        json: async () => t.body,
+      };
+    }
+    if (String(url).includes('api.supabase.com')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ status: fixture.supabaseStatus }),
+      };
+    }
+    // Any other call (e.g. the Discord notify seam) is a no-op in fixture mode.
+    return { ok: true, status: 204, json: async () => ({}) };
+  };
+}
+
+async function runFixtureMode(fixturePath, jsonMode) {
+  const { readFile } = await import('node:fs/promises');
+  const fixture = JSON.parse(await readFile(fixturePath, 'utf8'));
+
+  const { violations } = await runHealthCheck({
+    env: {
+      OPS_BASE_URL: 'https://fixture.invalid',
+      OPS_AGENT_KEY: 'fixture',
+      // Only enable the Supabase check when the fixture actually pins a status.
+      ...(fixture.supabaseStatus ? { SUPABASE_ACCESS_TOKEN: 'fixture' } : {}),
+    },
+    fetchImpl: makeFixtureFetch(fixture),
+    // Never reach Discord from a fixture run.
+    notify: async () => null,
+    now: () => '1970-01-01T00:00:00.000Z',
+  });
+
+  if (jsonMode) {
+    emitResult({ violations, ok: violations.length === 0 }, true);
+  } else {
+    for (const v of violations) console.error(`check-production-health: ${v.message}`);
+    if (violations.length === 0) console.log('check-production-health: fixture is healthy ✓');
+  }
+  process.exit(violations.length === 0 ? 0 : 1);
+}
+
 // ── CLI ──────────────────────────────────────────────────────────────────────
 
 async function main() {
   const jsonMode = hasJsonFlag(process.argv);
+
+  // Fixture mode short-circuits before the env gate: proof-of-firing runs in
+  // CI with no OPS_BASE_URL and must exercise behaviour, not configuration.
+  const fixtureMode =
+    process.argv.includes('--fixture-mode') || process.env.HDS_FIXTURE_MODE === '1';
+  if (fixtureMode && process.env.FIXTURE_FILE) {
+    return runFixtureMode(process.env.FIXTURE_FILE, jsonMode);
+  }
 
   const missing = missingEnvViolations(process.env);
   if (missing.length > 0) {
