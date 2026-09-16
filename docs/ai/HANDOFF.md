@@ -44,17 +44,14 @@ not read it to get oriented.
   crawl the 223 known websites for `mailto:` ourselves. **Phone is the only
   live channel — 260 leads have one.**
 
-- **📞 First-contact stack (#326).** Everything outbound routes through the one
-  choke point `lib/outreach/guard.mjs`; `--rehearse` on `push-outreach.mjs`;
-  call channel via `export-call-list.mjs` + `log-call.mjs`.
-  **The lesson that still steers:** a scoring ceiling (4+30+10+15 = **59** vs a
-  threshold of **60**) made custom-domain leads permanently unqualifiable and
-  silently orphaned the redesign play; the weighting also ranked the _hardest_
-  sells highest. A Wix site is a **proven buyer**; a decade with no site is a
-  revealed preference.
+- **📞 First-contact stack (#326).** All outbound routes through one choke
+  point, `lib/outreach/guard.mjs`. **The lesson that still steers:** a scoring
+  ceiling (4+30+10+15 = **59** vs a threshold of **60**) made custom-domain
+  leads permanently unqualifiable and silently orphaned the redesign play, and
+  the weighting ranked the _hardest_ sells highest. A Wix site is a **proven
+  buyer**; a decade with no site is a revealed preference.
 
-- **📦 Land before you build.** The constraint is opening work, not capacity —
-  a night that started with 4 open PRs and zero merges ended with 11 merged.
+- **📦 Land before you build.** The constraint is opening work, not capacity.
 - **📞 `/ops/pitch` — the phone call sheet; migrations 0012/0013/0014 applied.**
   Only pitchable leads appear (`preview_url` present, `do_not_contact` false);
   both gates re-check on every write. Marking pitched stamps `contacted_at` +
@@ -70,10 +67,9 @@ not read it to get oriented.
 - **🎯 Revenue path is merged, unrun.** The generator takes real hours, address,
   photos and a contrast-checked palette. Spec: `docs/specs/leads-to-site.md`.
   Doctrine finding that still steers: **we have the machinery and mis-aim it.**
-- **PRODUCTION is LIVE** — `hirobius-ops` deploys from `main`; `/ops` password gate
-  active (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET`); Supabase wired; DS consumed
-  from public npm `@hirobius/design-system`. Vercel is on **Pro**; preview
-  Deployment Protection is off (the `/ops` gate still covers it).
+- **PRODUCTION is LIVE** — `hirobius-ops` deploys from `main`; `/ops` is password
+  gated (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET`); Supabase wired; DS from npm.
+  Vercel **Pro**; preview Deployment Protection off (the `/ops` gate covers it).
 - **The loop works and is under-aimed.** `ralph-gate` is the **sole required
   check** — other CI jobs are informational, so `mergeable_state: unstable` is
   still mergeable. Single-flight (one `ralph/*` PR at a time), auto-merge on
@@ -81,9 +77,6 @@ not read it to get oriented.
 - **#190 is blocked on Adrian's go** for Outscraper details-API spend.
 - **Compliance gates SCALED outreach** (#35 → #38 → #27 before #9); one call or
   one manual email is not gated. Outscraper spend stays ON HOLD pending a go.
-- **`.github/workflows/*` cannot be pushed by the bot** (no `workflows` scope).
-  Route CI/workflow changes through an adr-eng PR — never a Ralph task. Four
-  issues (#90/#240/#241/#243) each burned attempts rediscovering this.
 - **Publishing stays a human action — it is the billing event.** The engine is
   wired end to end; its narrative lives in `docs/ARCHITECTURE.md`.
 
