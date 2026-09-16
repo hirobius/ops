@@ -1325,3 +1325,74 @@ describe('applyTaskAction — bump_priority (Standing, mirror-free)', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe('applyTaskAction — run_now (Standing, mirror-free)', () => {
+  it('dispatches ralph.yml at the issue straight from the key, with no Supabase row', async () => {
+    const { sb } = makeSb();
+    const calls: unknown[] = [];
+    const github = {
+      dispatchWorkflow: async (i: unknown) => {
+        calls.push(i);
+        return { runUrl: 'https://github.com/hirobius/ops/actions' };
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:someone/brand-new#7', action: 'run_now' },
+      { github },
+    );
+    expect(calls).toEqual([
+      { owner: 'someone', repo: 'brand-new', workflow: 'ralph.yml', inputs: { issue: '7' } },
+    ]);
+    expect(result).toMatchObject({ status: 200, body: { ok: true } });
+  });
+
+  it('names "Actions: write" — a different scope from every other action here', async () => {
+    // A token that labels fine and 404s on dispatch is otherwise baffling.
+    const { sb } = makeSb();
+    const github = {
+      dispatchWorkflow: async () => {
+        throw new Error('HTTP 404');
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#7', action: 'run_now' },
+      { github },
+    );
+    expect(result.status).toBe(502);
+    expect((result.body as { error: string }).error).toContain('Actions: write');
+  });
+
+  it('503s without a port, naming GITHUB_TOKEN', async () => {
+    const { sb } = makeSb();
+    expect(
+      await applyTaskAction(
+        sb,
+        { key: 'github:hirobius/ops#7', action: 'run_now' },
+        { github: null },
+      ),
+    ).toMatchObject({ status: 503, body: { code: 'ENV_MISSING_GITHUB_TOKEN' } });
+  });
+});
+
+describe('applyTaskAction — auto/park toggles (Standing, mirror-free)', () => {
+  it('writes ralph-auto and ralph-parked straight to the issue', async () => {
+    const cases = [
+      ['auto_on_direct', 'add', 'ralph-auto'],
+      ['auto_off_direct', 'remove', 'ralph-auto'],
+      ['park_direct', 'add', 'ralph-parked'],
+    ] as const;
+    for (const [action, op, label] of cases) {
+      const { sb } = makeSb();
+      const { calls, github } = recordingPort();
+      const result = await applyTaskAction(
+        sb,
+        { key: 'github:hirobius/ops#44', action },
+        { github },
+      );
+      expect(result.status).toBe(200);
+      expect(calls).toEqual([{ op, issueUrl: 'https://github.com/hirobius/ops/issues/44', label }]);
+    }
+  });
+});

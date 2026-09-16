@@ -204,7 +204,7 @@ export async function importIssuesHandler(
 
   let issues;
   try {
-    issues = await gh.listOpenIssues();
+    issues = (await gh.listOpenIssues()).issues;
   } catch (err) {
     return { status: 502, body: { error: messageOf(err), code: 'GITHUB_LIST_FAILED' } };
   }

@@ -125,6 +125,25 @@ export interface FleetIssue {
    * sorts last — never 0, which would read as "arrived today".
    */
   ageDays: number | null;
+  /** Days since anything touched it. Context beside `ageDays`, never the sort key. */
+  quietDays: number | null;
+  /** Every label, not just the one that chose the lane. */
+  labels: string[];
+  comments: number;
+  assignee: string | null;
+  /**
+   * Whether the body carries a `- [ ]` checklist.
+   *
+   * `ralph/next.sh` parks a DoD-less issue on sight, so a row without one will
+   * bounce the moment it is queued. Better to see that before tapping Queue
+   * than to spend an iteration discovering it.
+   */
+  hasDod: boolean;
+  /** First readable sentence of the body, markdown stripped. */
+  excerpt: string;
+  queued: boolean;
+  auto: boolean;
+  wip: boolean;
 }
 
 export interface FleetPr {
@@ -169,14 +188,8 @@ export interface FleetStatus {
   /** Repos that appeared in the sweep. This IS the fleet. */
   repos: string[];
   blocked: FleetIssue[];
-  queue: {
-    repo: string;
-    number: number;
-    title: string;
-    url: string;
-    prio: string | null;
-    wip: boolean;
-  }[];
+  /** Same row shape as every other lane — see FleetIssue. Order is the selector's. */
+  queue: FleetIssue[];
   /** Everything not blocked, parked or queued. The rest of the board. */
   backlog: FleetIssue[];
   /** Every open issue the sweep saw — blocked + queue + backlog. */
@@ -184,6 +197,13 @@ export interface FleetStatus {
   prs: FleetPr[];
   /** Per-repo loop state. Empty is legitimate: no repo carries a ralph-* label. */
   loop: LoopState[];
+  /**
+   * The sweep hit its pagination cap and this is NOT the whole board.
+   *
+   * Surfaced rather than logged: a page that claims to show everything has to
+   * be able to say when it does not.
+   */
+  truncated: boolean;
   errors: { repo: string; error: string }[];
   counts: { openIssues: number; repos: number };
 }
@@ -266,12 +286,24 @@ export async function fetchDeploys(signal: AbortSignal): Promise<DeployProject[]
 
 /* ── acting on an issue, straight to GitHub ──────────────────────────────── */
 
+/**
+ * The baseline action set every issue row carries, whichever lane it is in.
+ *
+ * All mirror-free: they address the issue by `github:<owner>/<repo>#<n>` and
+ * write labels straight to GitHub, because Standing lists repos the Supabase
+ * importer has never touched and a mirror-backed action would fail on exactly
+ * those.
+ */
 export type StandingAction =
   | 'queue_on'
   | 'queue_off'
   | 'ralph_requeue'
   | 'unblock'
-  | 'bump_priority';
+  | 'bump_priority'
+  | 'auto_on_direct'
+  | 'auto_off_direct'
+  | 'park_direct'
+  | 'run_now';
 
 /** `error` is present exactly when `ok` is false. */
 export interface ActionResult {

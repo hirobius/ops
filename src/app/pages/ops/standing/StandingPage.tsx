@@ -207,6 +207,8 @@ export default function StandingPage() {
 
       <RepoFilter repos={data?.repos ?? []} active={repoFilter} onPick={setRepoFilter} />
 
+      <TruncationNotice data={data} />
+
       {/* ── 1. The chain ─────────────────────────────────────────────────── */}
       <Section title="The chain" count={`${chain.reachedEnd} paid`}>
         <p style={s.lede}>
@@ -252,67 +254,15 @@ export default function StandingPage() {
           emptyCopy="Nothing is waiting on a decision. Rare — enjoy it."
         >
           <ul style={s.list}>
-            {(expanded.has('blocked') ? blocked : blocked.slice(0, SHOWN)).map((b: FleetIssue) => {
-              const id = `${b.repo}#${b.number}`;
-              const outcome = acted.get(id);
-              return (
-                <li key={id} style={outcome?.ok ? { ...s.row, ...s.rowActed } : s.row}>
-                  <a
-                    href={b.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hds-focus"
-                    style={s.rowLink}
-                  >
-                    <span style={s.num}>#{b.number}</span>
-                    <span style={s.title}>{b.title}</span>
-                  </a>
-                  <div style={s.metaRow}>
-                    {b.label ? (
-                      <Badge tone={b.label === 'ralph-parked' ? 'danger' : 'warning'}>
-                        {b.label}
-                      </Badge>
-                    ) : null}
-                    <span style={s.meta}>
-                      {shortRepo(b.repo)}
-                      {b.prio ? ` · ${b.prio}` : ''}
-                    </span>
-                    <Age days={b.ageDays} />
-                    {b.label === 'ralph-parked' ? (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        disabled={busy.has(id)}
-                        onClick={() => act(b.repo, b.number, 'ralph_requeue', 'Re-queued')}
-                      >
-                        {busy.has(id) ? 're-queueing…' : 'Re-queue'}
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        disabled={busy.has(id)}
-                        onClick={() => act(b.repo, b.number, 'unblock', 'Unblocked + queued')}
-                      >
-                        {busy.has(id) ? 'unblocking…' : 'Unblock'}
-                      </Button>
-                    )}
-                    {b.prio === 'p0' ? null : (
-                      <Button
-                        size="sm"
-                        variant="tertiary"
-                        disabled={busy.has(id)}
-                        onClick={() => act(b.repo, b.number, 'bump_priority', 'Now p0', 'p0')}
-                        label={`Raise #${b.number} to p0`}
-                      >
-                        p0
-                      </Button>
-                    )}
-                  </div>
-                  <RowResult outcome={outcome} />
-                </li>
-              );
-            })}
+            {(expanded.has('blocked') ? blocked : blocked.slice(0, SHOWN)).map((b: FleetIssue) => (
+              <IssueRow
+                key={`${b.repo}#${b.number}`}
+                issue={b}
+                busy={busy}
+                acted={acted}
+                act={act}
+              />
+            ))}
           </ul>
         </Lane>
         <MoreToggle
@@ -453,7 +403,7 @@ export default function StandingPage() {
         <p style={s.notice}>{data.errors.map((e) => `${e.repo}: ${e.error}`).join(' · ')}</p>
       ) : null}
 
-      {/* ── 4. Queued ────────────────────────────────────────────────────── */}
+      {/* ── 5. Queued ────────────────────────────────────────────────────── */}
       <Section
         title="Queued for the loop"
         count={laneCount(needsToken, error, loaded, queue.length, [
@@ -468,27 +418,22 @@ export default function StandingPage() {
           empty={queue.length === 0}
           emptyCopy="The ready pool is empty — the loop has nothing to pick up. Label something ralph-ready, biased to the revenue path."
         >
-          <div style={s.chips}>
-            {(expanded.has('queue') ? queue : queue.slice(0, 12)).map((q) => (
-              <a
+          <ul style={s.list}>
+            {(expanded.has('queue') ? queue : queue.slice(0, SHOWN)).map((q: FleetIssue) => (
+              <IssueRow
                 key={`${q.repo}#${q.number}`}
-                href={q.url}
-                target="_blank"
-                rel="noreferrer"
-                className="hds-focus"
-                style={s.chip}
-                title={q.title}
-              >
-                #{q.number} {q.prio ?? ''}
-                {q.wip ? ' · working' : ''}
-              </a>
+                issue={q}
+                busy={busy}
+                acted={acted}
+                act={act}
+              />
             ))}
-          </div>
+          </ul>
         </Lane>
         <MoreToggle
           lane="queue"
           total={queue.length}
-          shown={12}
+          shown={SHOWN}
           expanded={expanded.has('queue')}
           onToggle={toggleLane}
         />
@@ -498,7 +443,7 @@ export default function StandingPage() {
         </p>
       </Section>
 
-      {/* ── 5. The rest of the board ─────────────────────────────────────── */}
+      {/* ── 6. The rest of the board ─────────────────────────────────────── */}
       <Section
         title="Backlog"
         count={laneCount(needsToken, error, loaded, backlog.length, ['issue', 'issues'])}
@@ -512,51 +457,15 @@ export default function StandingPage() {
         >
           <ul style={s.list}>
             {(expanded.has('backlog') ? backlog : backlog.slice(0, BACKLOG_SHOWN)).map(
-              (b: FleetIssue) => {
-                const id = `${b.repo}#${b.number}`;
-                const outcome = acted.get(id);
-                return (
-                  <li key={id} style={outcome?.ok ? { ...s.row, ...s.rowActed } : s.row}>
-                    <a
-                      href={b.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="hds-focus"
-                      style={s.rowLink}
-                    >
-                      <span style={s.num}>#{b.number}</span>
-                      <span style={s.title}>{b.title}</span>
-                    </a>
-                    <div style={s.metaRow}>
-                      <span style={s.meta}>
-                        {shortRepo(b.repo)}
-                        {b.prio ? ` · ${b.prio}` : ''}
-                      </span>
-                      <Age days={b.ageDays} />
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        disabled={busy.has(id)}
-                        onClick={() => act(b.repo, b.number, 'queue_on', 'Queued')}
-                      >
-                        {busy.has(id) ? 'queueing…' : 'Queue'}
-                      </Button>
-                      {b.prio === 'p0' ? null : (
-                        <Button
-                          size="sm"
-                          variant="tertiary"
-                          disabled={busy.has(id)}
-                          onClick={() => act(b.repo, b.number, 'bump_priority', 'Now p0', 'p0')}
-                          label={`Raise #${b.number} to p0`}
-                        >
-                          p0
-                        </Button>
-                      )}
-                    </div>
-                    <RowResult outcome={outcome} />
-                  </li>
-                );
-              },
+              (b: FleetIssue) => (
+                <IssueRow
+                  key={`${b.repo}#${b.number}`}
+                  issue={b}
+                  busy={busy}
+                  acted={acted}
+                  act={act}
+                />
+              ),
             )}
           </ul>
         </Lane>
@@ -568,8 +477,8 @@ export default function StandingPage() {
           onToggle={toggleLane}
         />
         <p style={s.footnote}>
-          Live from GitHub, every repo the token can see. Queue writes the label straight to the
-          issue — no mirror, so it works on repos the importer never touched.
+          Live from GitHub, every repo the token can see. Actions write the label straight to the
+          issue — no mirror, so they work on repos the importer never touched.
         </p>
       </Section>
     </div>
@@ -577,6 +486,204 @@ export default function StandingPage() {
 }
 
 /* ── pieces ─────────────────────────────────────────────────────────────── */
+
+const PRIORITIES = ['p0', 'p1', 'p2', 'p3'] as const;
+
+/**
+ * One issue, in every lane.
+ *
+ * Every lane rendered its own subset before this: the queue was bare chips with
+ * no metadata and no actions, the backlog had one button, "waiting on you" had
+ * two. The same issue was more readable and more operable depending on which
+ * lane it happened to land in, for no reason an operator could see. One
+ * component means the row is the row.
+ */
+function IssueRow({
+  issue,
+  busy,
+  acted,
+  act,
+}: {
+  issue: FleetIssue;
+  busy: ReadonlySet<string>;
+  acted: ReadonlyMap<string, ActionOutcome>;
+  act: (
+    repo: string,
+    number: number,
+    action: StandingAction,
+    label: string,
+    priority?: string | null,
+  ) => void;
+}) {
+  const id = `${issue.repo}#${issue.number}`;
+  const outcome = acted.get(id);
+  return (
+    <li style={outcome?.ok ? { ...s.row, ...s.rowActed } : s.row}>
+      <a href={issue.url} target="_blank" rel="noreferrer" className="hds-focus" style={s.rowLink}>
+        <span style={s.num}>#{issue.number}</span>
+        <span style={s.title}>{issue.title}</span>
+      </a>
+      {issue.excerpt ? <p style={s.excerpt}>{issue.excerpt}</p> : null}
+      <IssueMeta issue={issue} />
+      <IssueActions id={id} issue={issue} busy={busy} act={act} />
+      <RowResult outcome={outcome} />
+    </li>
+  );
+}
+
+/**
+ * The at-a-glance facts, in the order they change a decision: where it lives,
+ * how urgent it is called, how long it has actually waited, whether anyone is
+ * talking about it, and whether the loop will even accept it.
+ */
+function IssueMeta({ issue }: { issue: FleetIssue }) {
+  return (
+    <div style={s.metaRow}>
+      <span style={s.meta}>{shortRepo(issue.repo)}</span>
+      {issue.prio ? <span style={s.meta}>{issue.prio}</span> : null}
+      <Age days={issue.ageDays} />
+      {issue.quietDays !== null ? (
+        <span style={s.meta} title="Days since anything touched it">
+          quiet {issue.quietDays}d
+        </span>
+      ) : null}
+      {issue.comments > 0 ? (
+        <span style={s.meta} title={`${issue.comments} comments`}>
+          {issue.comments}💬
+        </span>
+      ) : null}
+      {issue.assignee ? <span style={s.meta}>@{issue.assignee}</span> : null}
+      {/* A DoD-less issue is parked on sight by ralph/next.sh. Saying so here
+          costs a word; discovering it costs a whole iteration. */}
+      {issue.hasDod ? null : (
+        <span style={s.warn} title="No `- [ ]` checklist — the loop parks this on sight">
+          no DoD
+        </span>
+      )}
+      {issue.wip ? <Badge tone="info">wip</Badge> : null}
+      {issue.labels
+        .filter((l) => !PRIORITIES.includes(l as (typeof PRIORITIES)[number]))
+        .map((l) => (
+          <span key={l} style={s.labelChip}>
+            {l}
+          </span>
+        ))}
+    </div>
+  );
+}
+
+/**
+ * The baseline every row carries.
+ *
+ * The primary button is whatever this row's state makes it — Re-queue a parked
+ * issue, Unblock a gated one, Queue or Unqueue anything else — so one thumb
+ * position always does the obvious thing. The rest are the toggles the loop
+ * actually reads: `ralph-auto` arms self-merge, priority is what
+ * `ralph/next.sh` ranks on, and Run jumps the queue outright.
+ */
+function IssueActions({
+  id,
+  issue,
+  busy,
+  act,
+}: {
+  id: string;
+  issue: FleetIssue;
+  busy: ReadonlySet<string>;
+  act: (
+    repo: string,
+    number: number,
+    action: StandingAction,
+    label: string,
+    priority?: string | null,
+  ) => void;
+}) {
+  const working = busy.has(id);
+  const go = (action: StandingAction, label: string, priority?: string | null) => () =>
+    act(issue.repo, issue.number, action, label, priority);
+
+  const primary =
+    issue.label === 'ralph-parked'
+      ? { action: 'ralph_requeue' as const, note: 'Re-queued', text: 'Re-queue' }
+      : issue.label
+        ? { action: 'unblock' as const, note: 'Unblocked + queued', text: 'Unblock' }
+        : issue.queued
+          ? { action: 'queue_off' as const, note: 'Removed from the queue', text: 'Unqueue' }
+          : { action: 'queue_on' as const, note: 'Queued', text: 'Queue' };
+
+  return (
+    <div style={s.actions}>
+      <Button
+        size="sm"
+        variant="secondary"
+        disabled={working}
+        onClick={go(primary.action, primary.note)}
+        aria-label={`${primary.text} ${shortRepo(issue.repo)}#${issue.number}`}
+      >
+        {working ? '…' : primary.text}
+      </Button>
+
+      <Button
+        size="sm"
+        variant="tertiary"
+        disabled={working}
+        onClick={
+          issue.auto
+            ? go('auto_off_direct', 'Auto-merge off')
+            : go('auto_on_direct', 'Auto-merge armed')
+        }
+        aria-label={`${issue.auto ? 'Disarm' : 'Arm'} auto-merge on ${shortRepo(issue.repo)}#${issue.number}`}
+      >
+        {issue.auto ? 'auto ✓' : 'auto'}
+      </Button>
+
+      <Button
+        size="sm"
+        variant="tertiary"
+        disabled={working}
+        onClick={go('run_now', 'Dispatched — jumps the queue')}
+        aria-label={`Run the loop on ${shortRepo(issue.repo)}#${issue.number} now — jumps the queue`}
+      >
+        run
+      </Button>
+
+      <div style={s.prioGroup} role="group" aria-label={`Priority for #${issue.number}`}>
+        {PRIORITIES.map((prio) => (
+          <button
+            key={prio}
+            type="button"
+            className="hds-focus"
+            style={issue.prio === prio ? s.prioOn : s.prioOff}
+            disabled={working}
+            aria-pressed={issue.prio === prio}
+            aria-label={`Set ${shortRepo(issue.repo)}#${issue.number} to ${prio}`}
+            onClick={() => act(issue.repo, issue.number, 'bump_priority', `Now ${prio}`, prio)}
+          >
+            {prio}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The page claims to show the whole board. When the sweep hit its cap it does
+ * not, and this is the only thing that says so — the cap used to reach nothing
+ * but `console.warn`.
+ */
+function TruncationNotice({ data }: { data: FleetStatus | null }) {
+  if (!data?.truncated) return null;
+  return (
+    <p style={s.truncated} role="status">
+      <strong style={s.strong}>This is not the whole board.</strong> The sweep hit its pagination
+      cap at {data.counts.openIssues} issues and more are open beyond it. Raise{' '}
+      <code style={s.code}>LIST_ISSUES_MAX_PAGES</code> in{' '}
+      <code style={s.code}>lib/github/issues.mjs</code> — each page is one more sequential request
+      inside the function&rsquo;s time budget, so raise it deliberately.
+    </p>
+  );
+}
 
 /** Badge tone per loop state — `unknown` is neutral, never a healthy green. */
 const LOOP_TONE = {
@@ -1121,6 +1228,62 @@ const s = {
     whiteSpace: 'nowrap' as const,
   },
 
+  excerpt: {
+    ...hds.typeStyles.caption,
+    margin: `${hds.space.px4} 0 0`,
+    color: 'var(--semantic-color-content-secondary)',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical' as const,
+    overflow: 'hidden',
+  },
+  labelChip: {
+    ...hds.typeStyles.caption,
+    padding: `0 ${hds.space.px4}`,
+    borderRadius: hds.borderRadius.sm,
+    border: '1px solid var(--semantic-color-border-default)',
+    color: 'var(--semantic-color-content-tertiary)',
+  },
+  warn: {
+    ...hds.typeStyles.labelTechnical,
+    color: 'var(--semantic-color-feedback-warning)',
+  },
+  actions: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    alignItems: 'center',
+    gap: hds.space.px6,
+    marginTop: hds.space.px6,
+  },
+  prioGroup: {
+    display: 'flex',
+    gap: '1px',
+  },
+  prioOn: {
+    ...hds.typeStyles.labelTechnical,
+    padding: `${hds.space.px4} ${hds.space.px6}`,
+    border: '1px solid var(--semantic-color-border-strong)',
+    background: 'var(--semantic-color-surface-raised)',
+    color: 'var(--semantic-color-content-primary)',
+    cursor: 'pointer',
+  },
+  prioOff: {
+    ...hds.typeStyles.labelTechnical,
+    padding: `${hds.space.px4} ${hds.space.px6}`,
+    border: '1px solid var(--semantic-color-border-default)',
+    background: 'transparent',
+    color: 'var(--semantic-color-content-tertiary)',
+    cursor: 'pointer',
+  },
+  truncated: {
+    ...hds.typeStyles.bodySmall,
+    margin: 0,
+    padding: hds.space.px8,
+    borderRadius: hds.borderRadius.sm,
+    borderLeft: '3px solid var(--semantic-color-feedback-warning)',
+    background: 'var(--semantic-color-surface-raised)',
+    color: 'var(--semantic-color-content-primary)',
+  },
   ageOld: {
     ...hds.typeStyles.labelTechnical,
     color: 'var(--semantic-color-feedback-warning)',

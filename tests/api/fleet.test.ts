@@ -16,6 +16,7 @@ import {
   ralphRepos,
   sortFleetLanes,
   summarizeLoop,
+  toRow,
 } from '../../lib/tasks/fleet.mjs';
 
 function issue(over: Record<string, unknown>) {
@@ -308,5 +309,53 @@ describe('summarizeLoop', () => {
   it('treats no runs at all as unknown, not idle', () => {
     const [l] = summarizeLoop([{ repo: 'o/r', runs: [] }], NOW);
     expect(l.state).toBe('unknown');
+  });
+});
+
+/* ── the shared row shape ────────────────────────────────────────────────── */
+
+describe('toRow', () => {
+  const base = {
+    repo: 'hirobius/ops',
+    number: 44,
+    title: 'Auto-record preview_url',
+    url: 'https://github.com/hirobius/ops/issues/44',
+    labels: ['backlog', 'ralph-ready', 'ralph-auto', 'p2'],
+    created_at: daysAgo(70),
+    updated_at: daysAgo(2),
+    comments: 14,
+    assignee: 'adr-eng',
+    hasDod: true,
+    excerpt: 'Deploying a client site sets preview_url.',
+  };
+
+  it('carries the metadata a row is read by', () => {
+    expect(toRow(base, NOW)).toMatchObject({
+      repo: 'hirobius/ops',
+      number: 44,
+      prio: 'p2',
+      ageDays: 70,
+      quietDays: 2,
+      comments: 14,
+      assignee: 'adr-eng',
+      hasDod: true,
+      queued: true,
+      auto: true,
+      wip: false,
+    });
+  });
+
+  it('exposes the loop toggles as booleans so every lane renders the same controls', () => {
+    // The queue lane used to be bare chips with no actions while the backlog
+    // beside it had buttons — the same issue was more operable depending on
+    // which lane it landed in.
+    const row = toRow({ ...base, labels: ['ralph-wip'] }, NOW);
+    expect(row).toMatchObject({ queued: false, auto: false, wip: true, prio: null });
+  });
+
+  it('defaults the derived fields rather than emitting undefined', () => {
+    const row = toRow({ repo: 'o/r', number: 1, title: 't', url: '#', labels: [] }, NOW);
+    expect(row).toMatchObject({ comments: 0, assignee: null, hasDod: false, excerpt: '' });
+    expect(row.ageDays).toBeNull();
   });
 });

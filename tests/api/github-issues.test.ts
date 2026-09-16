@@ -56,10 +56,12 @@ describe('makeGitHubPort().listOpenIssues — pagination', () => {
       .mockResolvedValueOnce(pageResponse(page2, null));
     vi.stubGlobal('fetch', fetchMock);
 
-    const issues = await makeGitHubPort().listOpenIssues();
+    const { issues, truncated, fetched } = await makeGitHubPort().listOpenIssues();
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(issues.length).toBe(150);
+    expect(fetched).toBe(150);
+    expect(truncated).toBe(false);
     expect(issues[0].number).toBe(1);
     expect(issues.at(-1).number).toBe(150);
   });
@@ -74,12 +76,16 @@ describe('makeGitHubPort().listOpenIssues — pagination', () => {
     vi.stubGlobal('fetch', fetchMock);
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    const issues = await makeGitHubPort().listOpenIssues();
+    const { issues, truncated } = await makeGitHubPort().listOpenIssues();
 
     expect(fetchMock).toHaveBeenCalledTimes(5);
     expect(issues.length).toBe(500);
     expect(warnSpy).toHaveBeenCalledTimes(1);
     expect(warnSpy.mock.calls[0][0]).toContain('pagination cap');
+    // The warning alone was the whole reporting path, and nobody reads a
+    // serverless console. `truncated` is what lets the page admit it is
+    // showing a partial board.
+    expect(truncated).toBe(true);
   });
 
   it('excludes pull requests and normalizes fields on a single page', async () => {
@@ -88,10 +94,42 @@ describe('makeGitHubPort().listOpenIssues — pagination', () => {
       .mockResolvedValue(pageResponse([rawIssue(1), { ...rawIssue(2), pull_request: {} }]));
     vi.stubGlobal('fetch', fetchMock);
 
-    const issues = await makeGitHubPort().listOpenIssues();
+    const { issues } = await makeGitHubPort().listOpenIssues();
 
     expect(issues).toHaveLength(1);
     expect(issues[0]).toMatchObject({ repo: 'hirobius/ops', number: 1 });
+  });
+
+  it('derives the read-at-a-glance metadata and never forwards the body', async () => {
+    const body = '## The gap\n\nSites self-register on deploy, no paste.\n\n## DoD\n- [ ] it works';
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          pageResponse([{ ...rawIssue(1), body, comments: 14, assignee: { login: 'adr-eng' } }]),
+        ),
+    );
+
+    const { issues } = await makeGitHubPort().listOpenIssues();
+
+    expect(issues[0].comments).toBe(14);
+    expect(issues[0].assignee).toBe('adr-eng');
+    expect(issues[0].hasDod).toBe(true);
+    // Markdown syntax carries no meaning at excerpt size — headings and
+    // checkboxes truncated mid-token read as noise.
+    expect(issues[0].excerpt).toBe('The gap Sites self-register on deploy, no paste. DoD it works');
+    // 500 bodies on a 60s poll is megabytes; the derived fields are the point.
+    expect(issues[0]).not.toHaveProperty('body');
+  });
+
+  it('reports hasDod false when the body has no checklist — the loop parks those', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(pageResponse([{ ...rawIssue(1), body: 'Just a paragraph.' }])),
+    );
+    const { issues } = await makeGitHubPort().listOpenIssues();
+    expect(issues[0].hasDod).toBe(false);
   });
 });
 
