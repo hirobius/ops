@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-16T08:55:00Z",
+  "updatedAt": "2026-09-16T09:05:00Z",
   "phase": "live",
   "headline": "ONE MIGRATION NEVER REACHED THE DATABASE — NOT TWO (2026-09-16): the earlier headline said digest_items (0011) AND pitch_queue (0012) were both missing. pitch_queue is a FILENAME, NOT A TABLE — nothing in the repo creates one. 0012 creates lead_notes plus leads.assigned_to, leads.next_action_at, three indexes and RLS, and all six are verified live, so /ops/pitch is NOT reading a store that isn't there. Only 0011 (digest_items) genuinely needs applying; ops#78 is closed with its table absent. ops#348 is corrected on the issue — do not run its SQL as originally written. Also this week: CI on main passed for the first time in months once #342 removed the 8 permanently-red specs (ops#307), and #322 fixed the one chain stage whose proof could be a dead link — published counted a URL STORED in a column, which a 404 satisfies as well as a live site; stage 5 now probes server-side and a URL it could not reach reads unchecked, NEVER dead. Email crawler MERGED (#346) but never run against a real trades site — both containers 403 all egress. Branch graveyard pruned 170 -> 76; the session board is a hard rule in CLAUDE.md §0. THE FUNNEL STILL READS 0 CONTACTED.",
   "next": [
@@ -12,7 +12,7 @@
     "ops#330 — gate telemetry structurally unfillable: a failing pre-commit gate aborts the commit so post-commit never logs it. CARRIES ralph-wip — the loop holds it, do not start it. (ops#329 landed in #349.)",
     "Eyeball site variety across a batch — site-engine#190 is merged and wired, but nobody has looked at N generated sites side by side to confirm they read as different.",
     "ops#306 — curate gate severity on PROVABLE firing (fixture proof), not firing history. 32 of 53 fixtures are still stubs.",
-    "9 lilac orphan branches (all claude/*, disjoint histories, content a subset of main) — need a per-branch look, not a sweep. Same for the 70 leftover ops branches: 8 moved after merge, 9 closed unmerged, 53 never had a PR.",
+    "lilac#51 — 10 claude/* branches audited against lilac's new main. The earlier note here (\"9 orphan branches, disjoint histories, content a subset of main\") was WRONG: 8 are safe to delete (7 contained in main, 1 superseded by #37+#38 — merging it would REVERT work), and 2 hold genuinely unmerged work needing a human: customer-facing lead-ack copy awaiting owner review (lilac#3), and a wholesale index.html rewrite 1112 -> 541 lines that runs against lilac's own 'edit surgically, do not rewrite wholesale' invariant on a live client page (lilac#46). Separately, the 70 leftover ops branches: 8 moved after merge, 9 closed unmerged, 53 never had a PR — per-branch look, not a sweep.",
     "ADRIAN: remove PORTAL_HMAC_SECRET + VITE_PORTAL_HMAC_SECRET from Vercel — nothing reads either var since the in-ops portal moved to portal-kit.",
     "ADRIAN: ops#200 (Stripe) — there is no way to take money today.",
     "ADRIAN: decide hds 0.14.0 (hds#199) — release path armed but zero changesets, NPM_TOKEN unverified. No agent writes the changeset.",

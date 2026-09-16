@@ -1871,3 +1871,353 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   scripts/__tests__/check-fixture-stubs-ratchet.test.mjs (new).
 - Gate green: typecheck + 1060 tests (5 new) + lint.
 - Next: none — smallest complete slice (one-gate bug per issue's own note).
+
+## ops#330 — registry.json can't tell "has this gate ever caught anything"
+- Root causes (both from the issue): (1) lastFiringAt/lastViolationAt on
+  registry.json are config-only, only ever updated by the manual --bake
+  step, and read as live telemetry by two different sessions; (2) a failing
+  pre-commit gate aborts the commit before post-commit's logger ever runs,
+  so lastViolationAt was structurally unfillable. A third bug found by
+  @adr-eng on the issue: post-commit's `&&` between run-gates.mjs and
+  refresh-firing-stats.mjs skipped the stats refresh on exactly the run
+  that logged a violation.
+- Fix: stripped lastFiringAt/lastViolationAt from every registry.json entry
+  (regex line-removal, not JSON.stringify roundtrip — roundtrip unescapes
+  \uXXXX em-dashes and creates 29 lines of unrelated diff noise). One entry
+  (check-schema-drift, last in the array) had the two fields as its last
+  properties with no trailing comma after — the line-removal left a
+  dangling comma, caught by JSON.parse before commit.
+- validate-guardrail-registry.mjs now hard-rejects any gate carrying
+  lastFiringAt/lastViolationAt (new check before the missing-scripts scan);
+  --update stub no longer writes them.
+- Deleted refresh-firing-stats.mjs's --bake path + bakeIntoRegistry() +
+  the guardrail:firing-stats:bake package.json script — decision stated in
+  PR: delete, don't repoint, since the fields it wrote no longer exist.
+  Extracted the pure stats math (parseLog/trimOldEntries/computeStats) into
+  new scripts/lib/firing-stats.mjs so it's unit-testable without touching
+  the filesystem; refresh-firing-stats.mjs is now a thin CLI over it.
+- Capture fix: run-gates.mjs's fail-fast disable was tied to --emit-jsonl
+  alone (comment said "for post-commit"), which meant using --emit-jsonl on
+  the actual pre-commit run would silently disable fail-fast (all 15 gates
+  run on every failed commit, not just the first). Decoupled: new
+  --continue-on-failure flag now owns "keep running after a failure";
+  --emit-jsonl only logs (already happened before the fail-fast exit check,
+  so no change needed there). .husky/pre-commit now passes --emit-jsonl
+  (fail-fast preserved, violation now logged before the commit aborts).
+  .husky/post-commit passes both --continue-on-failure --emit-jsonl (same
+  full-run behavior as before) and `;` instead of `&&` before
+  refresh-firing-stats.mjs. Also updated skill-runner-middleware.mjs's
+  'verify-head' skill (same full-audit intent as post-commit) to add
+  --continue-on-failure.
+- docs/guardrails/SCHEMA.md: removed the two field rows, added a "Source of
+  truth for firing telemetry" section naming firing-log.jsonl (raw) and
+  firing-stats.json (derived, the answer) as the two files that matter —
+  neither is registry.json.
+- Verified manually (not committed): temporary scratch gate entry forced to
+  exit 1, confirmed via `--gate` that its exitCode:1 lands in the jsonl and
+  that computeStats() derives lastViolationAt from it; separately confirmed
+  --emit-jsonl alone still fail-fasts (a scratch "should not run" gate after
+  a real failing gate never executed) while still logging the failure. Both
+  scratch registry entries + scripts reverted before committing.
+- Caught by the real hooks at commit time (not just gate.sh): prettier
+  reformatted run-gates.mjs + validate-guardrail-registry.mjs during
+  lint-staged, invalidating the shared-manifest.json hashes I'd pinned
+  pre-commit — check-guardrail-drift failed at the pre-push hook (this repo
+  is the canonical source for those 2 files). Fixed with a second commit
+  that re-pins after formatting settles — re-pin AFTER staging/formatting,
+  not before, next time a shared-manifest file changes.
+- Files: docs/guardrails/registry.json, docs/guardrails/SCHEMA.md,
+  docs/guardrails/shared-manifest.json, package.json, scripts/INDEX.{json,md}
+  (one line, hand-edited — full regen showed ~450 lines of pre-existing
+  unrelated drift, confirmed via git stash on main with no changes staged),
+  scripts/run-gates.mjs, scripts/refresh-firing-stats.mjs (rewritten),
+  scripts/validate-guardrail-registry.mjs, scripts/skill-runner-middleware.mjs,
+  scripts/lib/firing-stats.mjs (new), scripts/__tests__/firing-stats.test.mjs
+  (new, 9 tests), .husky/pre-commit, .husky/post-commit.
+- Gate green: typecheck + 1068 tests (9 new) + lint. PR #355.
+- Next: none — DoD fully covered in this slice. scripts/INDEX.{json,md} carry
+  ~450 lines of pre-existing generator drift unrelated to this issue (every
+  script's description text is out of sync with current JSDoc) — worth its
+  own issue if anyone wants scripts/generate-script-index.mjs's output
+  trusted again, but out of scope here.
+
+## ops#347 — check-production-health.mjs (script half of #318)
+- Built scripts/check-production-health.mjs: asserts /ops's live data path,
+  not just a 200. Two checks: (1) GET {OPS_BASE_URL}/api/tasks as a headless
+  agent (OPS_AGENT_KEY, lib/ops-auth.mjs) — fails on the known-failing shape
+  (200 + { tasks: [] }) when rows are expected, not merely non-200; (2) where
+  SUPABASE_ACCESS_TOKEN is set, reads the Supabase Management API project
+  status directly and distinguishes INACTIVE/COMING_UP/RESTORING/healthy,
+  each with its own actionable message + resume link. Notifies via the
+  existing lib/ops/notify.mjs -> DISCORD_WEBHOOK_URL seam on any failure; no
+  new alert path.
+- Decision: required OPS_BASE_URL has no hardcoded default. Found no verified
+  production domain anywhere in the repo (docs only ever reference the
+  Vercel project name "hirobius-ops", never a literal URL, and
+  docs/operations/deploy-unblock.md flags the domain as still undecided) —
+  guessing one risks either masking real failures or spamming false
+  "unreachable" alerts forever, so it fails loud instead (CLAUDE.md: never
+  guess URLs). Same reasoning for OPS_AGENT_KEY: lib/ops-auth.mjs already
+  documents it as the machine-auth path for exactly this kind of headless
+  script, so used that instead of inventing an /api/ops-login cookie dance.
+  SUPABASE_ACCESS_TOKEN is optional/soft-fail ("skipped", not a violation)
+  since check 1 already covers the data path — check 2 is the richer "why".
+- Decision: missing required env is checked BEFORE any network call and
+  exits fast with the canonical `{ violations }` JSON shape (via
+  scripts/lib/gate-output.mjs) — same pattern as reconcile-ralph-closures.mjs
+  — so audit-gates-supportjson's generic spawn-every-gate sweep (no env set)
+  gets valid JSON in well under its 30s timeout instead of attempting real
+  fetches.
+- Registered in docs/guardrails/registry.json, supportsJson: true. Added stub
+  fixtures/check-production-health/{violating,passing}.example.json
+  (validate-fixture-proof-of-firing.mjs requires a fixture dir for every
+  non-manual-channel gate regardless of the registry's fixturePath field).
+- Deviation from the issue's literal DoD text, caught by the gate itself: the
+  DoD line says `firingChannel: "ci-scheduled"`, but I registered it as
+  `"manual"` instead. check-validator-wiring.mjs (a pre-commit gate — not run
+  by ralph/gate.sh, so this only surfaced at `git commit`) hard-fails any gate
+  declaring `ci-scheduled` unless an actual `.github/workflows/*` file invokes
+  it — exactly the file this issue's own scope says not to touch (that caller
+  is parent #318, a human PR). Declaring `ci-scheduled` today would BE the
+  "aspirational guardrail" anti-pattern check-validator-wiring exists to catch
+  (its own docstring cites the 2026-05-04 audit-typography-overrides incident:
+  registered + claimed-wired, never actually fired). `manual` is the honest
+  state of the world right now — script runs standalone, testable, registered
+  — documented in the registry description to flip to `ci-scheduled` once
+  #318's cron caller lands. Left this note instead of a blocked-stop since the
+  functional deliverable is complete and correct; only the registry metadata
+  needed to match reality over the issue text.
+- Files: scripts/check-production-health.mjs (new),
+  scripts/__tests__/check-production-health.test.mjs (new, 20 tests, all
+  network mocked via injected fetchImpl — no real network in tests),
+  fixtures/check-production-health/{violating,passing}.example.json (new),
+  docs/guardrails/registry.json.
+- Deliberately NOT included: scripts/INDEX.{json,md} regen — pulls in ~4
+  unrelated pre-existing scripts' drift beyond this one (same finding as
+  #329/#355's session), out of scope here. No .github/workflows/* touched
+  (that's parent #318, human PR) — the OUT-OF-SCOPE line held.
+- Gate green: typecheck + 1120 tests (20 new) + lint. All 3 meta-validators
+  green (validate-guardrail-registry, check-validator-wiring,
+  validate-fixture-proof-of-firing).
+- Next: flip firingChannel to "ci-scheduled" in the same PR that lands
+  parent #318's `.github/workflows/*` cron caller — everything else in this
+  slice's DoD is fully covered.
+
+## Issue #226 — re-assess the "7 investigate-broken gates" (2026-09-16)
+- Recovered the 7 names from pre-split archived handoffs
+  (docs/ai/archive/handoff-2026-05-06-{evening,late}.md): check-route-smoke,
+  check-unit-overlap, check-token-descriptions, check-tier-bypass,
+  check-link-integrity, audit-figma-system, audit-pages. Checked each
+  individually against current main (script presence, registry entry, live
+  run, git ancestry via merge-base --is-ancestor rather than trusting
+  filename greps across --all).
+- Findings: only check-route-smoke is still genuinely broken — its
+  DEFAULT_ROUTES still lists pre-split portfolio/HDS routes (/, /hds,
+  /vibe-sketchbook, /microsoft-design-systems, /visuals, /portfolio/draft)
+  that don't exist in this app's src/app/routes.tsx; it's unwired per its
+  own registry.json wiringTodo so the break never surfaces. Filed follow-up
+  #357 (delete or rewrite it — check-route-coverage.mjs +
+  layout-integrity.spec.ts already cover this app's real routes).
+  check-tier-bypass/check-link-integrity/audit-pages pass today.
+  check-token-descriptions/audit-figma-system were correctly deleted the
+  same day as ops's initial import (662d94c) as part of the
+  ops/design-system split. check-unit-overlap never existed in this repo's
+  real (post-split) history at all — the only commit that creates it lives
+  on an unmerged, closed-issue-#47 branch.
+- Overlap with the 33 (drifted from 32) validate-fixture-proof-of-firing
+  stub gates: check-route-smoke, check-tier-bypass, audit-pages are current
+  stubs; check-link-integrity has a real fixture.
+- #230 (B6) already closed as duplicate of #67 — confirmed still correct.
+  #229 (B2) was a re-filed duplicate of already-fixed #66 (merged PR #181)
+  — verified computeB2() fix still intact on main, closed #229 with
+  evidence.
+- Files changed: docs/audits/gate-regression-reassessment-2026-09-16.md
+  (new). No code changes — investigation-only issue.
+- Branch: ralph/issue-226-gate-reassessment. PR #358 ("Closes #226").
+- Filed #357 as the one real follow-up. Closed #229 directly (mirroring how
+  #230 was already closed) rather than leaving it open as a live duplicate.
+
+## Issue #295 — labels: split needs-human into needs-decision vs needs-credential (2026-09-16)
+- Created `needs-decision` and `needs-credential` labels; re-labeled all 14
+  open `needs-human` issues (drift from the issue's original count of 26 —
+  already dispositioned since filing, expected per the issue's own text).
+  Decision (11): #303, #302, #111, #89, #87, #38, #35, #27, #15, #10, #7 —
+  loop-safety architecture calls, platform epics, compliance/legal
+  judgment, git-history rewrite decision. Credential (3): #33, #32, #9 —
+  secrets rollout, this repo's own secrets adoption, Smartlead API key.
+- Classified against: each issue's own "Why `needs-human`" reasoning where
+  present (#303/#302/#111 explicit), and `docs/ai/BURNDOWN-GAMEPLAN.md` §2
+  clusters (compliance chain C, secrets hygiene D, platform epics E, #7's
+  "an eval + decision" framing in G).
+- Cross-referenced #32/#33/#9 from #134 (new "🔵 Secrets & security
+  hygiene" section + a `needs-credential` query link alongside the
+  existing `needs-adrian` one).
+- Deleted the now-empty `needs-human` label.
+- Decision: CLAUDE.md's new vocabulary text pushed the steering budget
+  217B over `check-steering-budget`'s 25.0KB cap. Trimmed the already-
+  retired "5. RECAP" protocol line (detail already lives in
+  docs/ai/DONE-LOG.md) and tightened wording rather than raising the
+  budget — the guardrail's own doc says raising it is a deliberate PR-level
+  decision, not a byproduct of an unrelated change.
+- Files changed: CLAUDE.md, AGENTS.md (repo). Issue #134 body edited via
+  gh (not a repo file). Label mutations + relabeling done directly via
+  `gh label`/`gh issue edit` — not part of the git diff.
+- Branch: ralph/issue-295-split-needs-human-labels. PR #359 ("Closes
+  #295"). Gate green (typecheck/test/lint + steering-budget + no open
+  needs-human issues, verified before PR).
+- Notes for next iteration: none — DoD fully met, no follow-up filed.
+
+## Issue #297 — metric: human-gate latency (2026-09-16)
+- Built `scripts/metric-human-gate-latency.mjs`: median days an issue sits
+  gated on Adrian under `needs-adrian` / `needs-decision` / `needs-credential`,
+  broken out per label, plus the oldest still-open gated issue. Depended on
+  #295 (the needs-human split) — already merged (#359).
+- Design decision: source of truth is the repo-wide
+  `GET /repos/{owner}/{repo}/issues/events` feed, not per-issue timelines or
+  a label search. A label search only sees an issue's *current* labels, so
+  it would silently miss every already-resolved gate (label removed before
+  close) — the exact case the metric most needs to count. The events feed
+  returns labeled/unlabeled events for every issue in one paginated stream,
+  including resolved gates, at the cost of a bounded 20-page (2000-event)
+  scan (mirrors metric-north-star-share.mjs's MAX_SEARCH_PAGES pattern).
+- Followed metric-north-star-share.mjs's shape exactly: pure functions
+  (buildGateIntervals/median/computeStats/buildViolations/formatHuman)
+  unit-tested with plain fixtures, network fetch behind an injectable
+  `fetchImpl` (no network in tests), canonical `--json` contract via
+  `emitResult`, loud/actionable missing-GITHUB_TOKEN error naming the var
+  and the fix, registry entry with `firingChannel: "manual"`.
+- DEFAULT_TARGET_DAYS = 7 is a starting instrument threshold (like north
+  star's DEFAULT_TARGET_SHARE), not a calibrated policy — Adrian can retune
+  via `--target`.
+- Ran `generate-script-index.mjs` and reverted it: INDEX.json/INDEX.md were
+  already stale from unrelated prior work (490-line diff for a one-file
+  add), and bundling that regen would blow past "one logical change" for
+  this PR. Left as a note, not filed as a separate issue — regenerating the
+  index is a zero-judgment mechanical script, not new information.
+- Files changed: scripts/metric-human-gate-latency.mjs (new),
+  scripts/__tests__/metric-human-gate-latency.test.mjs (new, 20 tests),
+  docs/guardrails/registry.json (+1 entry).
+- Branch: ralph/issue-297-human-gate-latency-metric. Gate green
+  (typecheck/test/lint, 1140+20 tests, validate-guardrail-registry green).
+- Notes for next iteration: `scripts/INDEX.json`/`INDEX.md` are stale
+  (drifted before this session) — someone should run
+  `node scripts/generate-script-index.mjs` in its own PR.
+
+## ops#300 — learned-rules: steering-doc promotion destination (2026-09-16)
+- Added a second promotion destination to promote-learned-rule.mjs:
+  `[g]ate / [s]teering / [k]skip / [d]rop / [q]uit` (was `[p]romote / [s]kip
+  / [d]rop / [q]uit`). Steering stages a one-line bullet for AGENTS.md /
+  CLAUDE.md / docs/ai/AGENT_GUIDELINES.md, printing destination guidance
+  from FRONTIER-DOCTRINE.md §4 before asking for a target file. Neither
+  destination writes its target directly — same HITL-staging principle the
+  script already held for the registry.
+- `promotedTo` now encodes destination: `registry:<id>` | `steering:<file>`,
+  so --list/--json and the JSONL itself surface where a rule landed, not
+  just that it did. classifyPromotion() treats a bare (pre-#300) value as
+  `legacy` — no existing promoted entries in learned-rules.jsonl to migrate.
+- Extracted staging logic into pure, exported functions
+  (emitRegistrySkeleton, emitSteeringSkeleton, classifyPromotion,
+  summarizeRules, buildListOutput, buildJsonOutput) and guarded the CLI body
+  with isMain() (matching persist-learned-rule.mjs's own pattern) so they're
+  unit-testable with a stubbed rule array — no TTY, no file I/O.
+  readLearnedRules() gained an optional path-override param (default
+  unchanged, so existing callers are untouched); promote-learned-rule.mjs
+  gained --fixture-file for --list/--json subprocess tests.
+- Confirmed (again) that scripts/INDEX.md / INDEX.json are stale (146 vs 141
+  scripts) from unrelated prior work — same finding #297's session left
+  here. Did NOT regenerate: bundling it would blow past "one logical
+  change" for this PR. Someone should run
+  `node scripts/generate-script-index.mjs` in its own PR — third session to
+  note this now.
+- Files changed: scripts/promote-learned-rule.mjs, scripts/persist-learned-rule.mjs,
+  scripts/__tests__/promote-learned-rule.test.mjs (new, 12 tests).
+- Branch: ralph/issue-300-steering-promotion. PR #361. Gate green
+  (typecheck/test/lint, 95 files / 1154 tests, validate-guardrail-registry
+  green).
+
+## Issue #309 — leads: delete the retired Duda path (2026-09-16)
+- Removal half of the mark-then-remove started in #187 (closed). Duda
+  retired 2026-06-30; nothing in the UI has dispatched 'build'/'publish'
+  since #185/#301 switched the board to 'render'.
+- Deleted lib/duda/index.mjs entirely. Removed buildLeadSite/publishLeadSite
+  from lib/leads/pipeline.mjs (and the duda import). Removed 'build'/'publish'
+  from ACTIONS in api/lead-action.ts and from LEAD_ACTIONS in
+  scripts/leads-middleware.mjs (dev mirror) — dispatcher now only accepts
+  'generate'/'render' plus the pitch_* actions.
+  Also dropped the now-dead DUDA_API_USER/DUDA_API_PASSWORD env passthrough
+  in vite.config.mjs and stale build/publish doc-comment mentions in
+  api/lead-action.ts, scripts/leads-middleware.mjs, LeadsPage.tsx.
+- Checked before deleting: re-grepped buildSite|publishSite|buildLeadSite|
+  publishLeadSite|lib/duda|DUDA_API afterward — only doc/history references
+  remain (ARCHITECTURE.md, pipeline-walkthrough.html, docs/operations/*),
+  which already describe Duda as retired and needed no edits. Confirmed
+  preview_url/live_url + sync-preview-urls.mjs untouched; SiteStatus type
+  (types.ts) left as-is since it's a generic column, not Duda-specific, and
+  the issue only asked to confirm no *consumer* still expects those values
+  from the deleted paths (none do — buildLeadSite/publishLeadSite were the
+  only writers).
+- Removed the matching describe blocks + vi.mock('../../lib/duda/index.mjs')
+  from tests/api/lead-pipeline.test.ts.
+- Files changed: lib/duda/index.mjs (deleted), lib/leads/pipeline.mjs,
+  api/lead-action.ts, scripts/leads-middleware.mjs,
+  src/app/pages/ops/leads/LeadsPage.tsx, tests/api/lead-pipeline.test.ts,
+  vite.config.mjs.
+- Branch: ralph/issue-309-delete-duda-path. PR #362. Gate green
+  (typecheck, 95 files / 1149 tests, lint --max-warnings=0).
+- Notes for next iteration: none — this closes out the mark-then-remove
+  pair (#187 + #309). knip flagged no newly-orphaned entries from the
+  deletion.
+
+## Issue #256 — discord: !dispatch <owner/repo#issue> command (2026-09-16)
+- Added !dispatch <owner/repo#issue> to scripts/discord-bot.mjs — fires the
+  Ralph workflow_dispatch for an existing issue from Discord, no browser trip.
+- Decision: reused GitHubIssuePort#dispatchWorkflow directly (already
+  imported into discord-bot.mjs via makeGitHubPort/getGithubPort) rather than
+  routing through lib/tasks/actions.mjs's ralphDispatch — that function
+  requires a Supabase task row (getTask by key), but the Discord command
+  syntax already carries owner/repo/issue directly, so there's nothing to
+  look up. Exported RALPH_WORKFLOW_FILE from lib/tasks/actions.mjs so both
+  entry points (board action + Discord command) fire the same workflow
+  filename instead of duplicating the 'ralph.yml' string.
+- Files changed: scripts/discord-bot.mjs, lib/tasks/actions.mjs.
+- Branch: ralph/issue-256-discord-dispatch-command. PR #363. Gate green
+  (typecheck, 95 files / 1149 tests, lint --max-warnings=0).
+- Notes for next iteration: no automated test added (no existing test
+  infra for discord-bot.mjs — it's a standalone bot process, not imported
+  by tests/). Manual verification in a live Discord channel wasn't possible
+  in this sandbox (no DISCORD_BOT_TOKEN/GITHUB_TOKEN with Actions:write).
+  Rest of #30's scope (parent epic) remains open.
+
+## Issue #257 — discord: bot kill-switch (!pause) + nothing-silent output guarantee (2026-09-16)
+- Added !pause / !resume to scripts/discord-bot.mjs. Checked before the
+  normal ! dispatch (and before the auto-assigner / NL-AI paths), so !pause
+  really stops the bot acting on anything except !resume itself — process
+  and Discord connection stay up. Global (not per-channel) flag: the bot
+  already gates all senders to OWNER_ID, so there's only ever one operator.
+- Audited every catch{} in the file for silent failure: all command handlers
+  (cmd*) already send an error back to the channel, and the auto-assigner /
+  NL-AI fallback paths in the message handler do too. The one gap was
+  send() itself throwing (channel gone, perms pulled, Discord API down) —
+  no handler covered that. Fixed by extracting the messageCreate body into
+  handleMessage(msg) and wrapping the client.on('messageCreate', ...)
+  callback in a try/catch that DMs the owner (notifyOwnerFallback) as a
+  last resort + always console.error's. Added process-level
+  unhandledRejection/uncaughtException nets for the same reason (escape
+  hatch outside any awaited path); uncaughtException exits 1 so pm2
+  restarts cleanly, matching the existing process.exit(1) pattern for
+  missing env vars.
+  DISCORD_HERMES_CHANNEL_ID / background push (the other half of "nothing
+  silent" per the issue) isn't implemented yet — it's documented in the file
+  header as future (#15), so there's no push path to audit today. Deferred
+  to whenever #15 lands, per the issue's own scope note.
+- Documented the guarantee inline: new "Kill switch" + "Nothing-silent
+  output guarantee" sections in the file's top doc comment, plus updated
+  !help text.
+- Files changed: scripts/discord-bot.mjs.
+- Branch: ralph/issue-257-discord-pause-killswitch. Gate green (typecheck,
+  95 files / 1149 tests, lint --max-warnings=0).
+- Notes for next iteration: no automated test added — same reason as #256,
+  no existing test infra for this file (it's a standalone bot process that
+  self-executes discord.js Client + env checks at import time, nothing
+  exported). Manual verification in a live Discord channel wasn't possible
+  in this sandbox (no DISCORD_BOT_TOKEN). Rest of #30's scope remains open.

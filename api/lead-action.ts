@@ -11,42 +11,25 @@
  * In dev (`pnpm dev`), the same per-action contracts are served by the Vite
  * middleware in scripts/leads-middleware.mjs (wired in vite.config.mjs).
  *
- * DEPRECATED ACTIONS: 'build' and 'publish' route to the retired Duda path
- * (lib/duda, retired 2026-06-30 — docs/ARCHITECTURE.md) and are dead code
- * scheduled for removal (ops#187). No UI dispatches them since ops#185; the live
- * hand-off is 'render' → renderLeadSite → lib/render. Do not add callers.
- *
- * Request:  { leadId: string, action: 'generate'|'build'|'publish'|'render',
- *             previewUrl?: string }   (previewUrl only used by 'render')
+ * Request:  { leadId: string, action: 'generate'|'render', previewUrl?: string }
+ *           (previewUrl only used by 'render')
  * Success:  the wrapped pipeline result for that action (shape varies):
  *   generate → { ok, score, pass }
- *   build    → { ok, preview_url }
- *   publish  → { ok, live_url }
  *   render   → { ok, rendered, slug, preset, configFile, commands }
  * Error:    { error, code? } with status 400/401/404/405/409/422/500/503
  *
  * Env (set by the human — never in .env by an agent):
- *   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY (generate,
- *   lib/agent), DUDA_API_USER / DUDA_API_PASSWORD (build/publish, lib/duda).
+ *   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY (generate, lib/agent).
  */
 
 import type { VercelRequest } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler.js';
-import {
-  generateLeadSite,
-  buildLeadSite,
-  publishLeadSite,
-  renderLeadSite,
-} from '../lib/leads/pipeline.mjs';
+import { generateLeadSite, renderLeadSite } from '../lib/leads/pipeline.mjs';
 import { addPitchNote, assignPitch, setPitchStage } from '../lib/leads/pitch-actions.mjs';
 
-// 'build' and 'publish' are deprecated dead code — see the header. They stay in
-// the union only so the retired handlers keep type-checking until the removal PR.
 const ACTIONS = [
   'generate',
-  'build',
-  'publish',
   'render',
   // Pitch queue (0012) — folded in here rather than a new function, because
   // the deployment is at the 12-function cap.
@@ -92,10 +75,6 @@ export async function leadActionHandler(
   switch (action) {
     case 'generate':
       return generateLeadSite(sb, leadId);
-    case 'build':
-      return buildLeadSite(sb, leadId);
-    case 'publish':
-      return publishLeadSite(sb, leadId);
     case 'render': {
       const previewUrl = typeof body?.previewUrl === 'string' ? body.previewUrl.trim() : '';
       if (previewUrl && !/^https?:\/\//.test(previewUrl)) {

@@ -20,7 +20,8 @@
  *                         // promote-learned-rule.mjs already reads it.
  *     ts:                 "<ISO-8601>",
  *     promotedAt?:        "<ISO-8601>",     // set when 13g-13 promote step runs
- *     promotedTo?:        "<registry-entry-id>",  // set after promotion
+ *     promotedTo?:        "registry:<id>" | "steering:<file>",  // destination
+ *                         // + target, set after promotion (ops#300)
  *   }
  *
  * Usage as a library:
@@ -83,13 +84,16 @@ export function persistLearnedRule(entry) {
 }
 
 /**
- * Read all entries from docs/ai/learned-rules.jsonl (one JSON line per entry).
+ * Read all entries from a learned-rules JSONL file (one JSON line per entry).
  * Skips malformed lines silently. Returns an array.
+ *
+ * @param {string} [filePath] - defaults to docs/ai/learned-rules.jsonl; callers
+ *   pass an override to point at a stubbed fixture (tests, --fixture-file).
  */
-export function readLearnedRules() {
+export function readLearnedRules(filePath = LEARNED_RULES_PATH) {
   try {
-    if (!fs.existsSync(LEARNED_RULES_PATH)) return [];
-    const raw = fs.readFileSync(LEARNED_RULES_PATH, 'utf8');
+    if (!fs.existsSync(filePath)) return [];
+    const raw = fs.readFileSync(filePath, 'utf8');
     return raw
       .split('\n')
       .filter(Boolean)

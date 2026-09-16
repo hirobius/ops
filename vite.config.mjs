@@ -29,8 +29,6 @@ export default defineConfig(({ mode }) => {
     'SUPABASE_SERVICE_ROLE_KEY',
     'GOOGLE_PLACES_API_KEY',
     'ANTHROPIC_API_KEY',
-    'DUDA_API_USER',
-    'DUDA_API_PASSWORD',
     'GITHUB_TOKEN',
     'GITHUB_REPO',
   ]) {

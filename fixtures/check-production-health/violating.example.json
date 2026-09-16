@@ -1,0 +1,5 @@
+{
+  "_comment": "The 2026-09-14 failure, verbatim: Supabase paused on the free-tier 7-day idle timer, so /api/tasks answered a clean HTTP 200 with an EMPTY task list while the GitHub-backed panels on the same page kept working. The page rendered and looked plausible. A 'does it return 200' check passes this; that is the whole reason this gate exists.",
+  "tasks": { "status": 200, "body": { "tasks": [] } },
+  "supabaseStatus": "INACTIVE"
+}

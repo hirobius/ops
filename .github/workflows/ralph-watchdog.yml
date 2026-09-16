@@ -1,0 +1,28 @@
+name: Ralph Watchdog
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ralph-watchdog-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable && pnpm install --frozen-lockfile
+      - run: node scripts/ralph-watchdog.mjs --apply --json
+        env:
+          GITHUB_TOKEN: ${{ secrets.RALPH_WATCHDOG_TOKEN || secrets.GITHUB_TOKEN }}

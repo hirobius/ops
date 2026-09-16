@@ -1257,8 +1257,12 @@ describe('applyTaskAction — unblock (Standing, mirror-free)', () => {
       { key: 'github:hirobius/ops#9', action: 'unblock' },
       { github },
     );
+    // Walks BLOCKING_LABELS, so the ops#295 split labels are cleared too — this
+    // assertion caught its own staleness when that list grew.
     expect(calls.filter((c) => c.op === 'remove').map((c) => c.label)).toEqual([
       'needs-adrian',
+      'needs-decision',
+      'needs-credential',
       'needs-human',
       'blocked',
     ]);

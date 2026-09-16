@@ -3,7 +3,7 @@
  *
  * Backs the /ops Leads board under `pnpm dev` (Vite). It reuses the EXACT same
  * logic modules as the production Vercel functions — lib/supabase/leads (the
- * repository) and lib/leads/pipeline (the generate/build/publish state machines) —
+ * repository) and lib/leads/pipeline (the generate/render state machines) —
  * so dev and prod genuinely can't drift. Previously this file copy-pasted those
  * state machines (and carried the same stranded-status bug); now it delegates.
  * Wired in vite.config.mjs with `apply: 'serve'` so it never ships to prod.
@@ -12,8 +12,6 @@
  *   POST /api/pull-leads     { niche, metro, count? }        → { inserted }
  *   POST /api/lead-action    { leadId, action, previewUrl? } → per-action result
  *     action 'generate' → { ok, score, pass }
- *     action 'build'    → { ok, preview_url }   [DEPRECATED — retired Duda path, ops#187]
- *     action 'publish'  → { ok, live_url }      [DEPRECATED — retired Duda path, ops#187]
  *     action 'render'   → { ok, rendered, slug, preset, configFile, commands }
  *   GET  /api/leads          ?limit=<n>                      → { leads }
  *
@@ -23,15 +21,10 @@
 
 import { getServiceClient } from '../lib/supabase/server.mjs';
 import { listLeads, upsertLeads } from '../lib/supabase/leads.mjs';
-import {
-  generateLeadSite,
-  buildLeadSite,
-  publishLeadSite,
-  renderLeadSite,
-} from '../lib/leads/pipeline.mjs';
+import { generateLeadSite, renderLeadSite } from '../lib/leads/pipeline.mjs';
 import { pullLeads } from '../lib/lead-gen/index.mjs';
 
-const LEAD_ACTIONS = ['generate', 'build', 'publish', 'render'];
+const LEAD_ACTIONS = ['generate', 'render'];
 
 const MAX_COUNT = 50;
 const DEFAULT_LIMIT = 200;
@@ -110,10 +103,6 @@ export function createLeadsMiddleware() {
         let result;
         if (action === 'generate') {
           result = await generateLeadSite(sb, leadId);
-        } else if (action === 'build') {
-          result = await buildLeadSite(sb, leadId);
-        } else if (action === 'publish') {
-          result = await publishLeadSite(sb, leadId);
         } else {
           const previewUrl = typeof body.previewUrl === 'string' ? body.previewUrl.trim() : '';
           if (previewUrl && !/^https?:\/\//.test(previewUrl)) {
@@ -148,6 +137,5 @@ export function createLeadsMiddleware() {
         return sendJson(res, 500, { error: messageOf(err) });
       }
     },
-
   };
 }

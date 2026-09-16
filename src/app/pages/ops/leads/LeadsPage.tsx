@@ -9,9 +9,8 @@
  *   1. "Pull leads" (niche + metro)  → POST /api/pull-leads  → rows status='sourced'
  *   2. per-lead lifecycle actions    → POST /api/lead-action { leadId, action }
  *        action 'generate' → row status='scored'; 'render' → the paste-ready
- *        client.config.ts + deploy commands (RenderHandoffPanel). The route's
- *        'build'/'publish' actions are the retired Duda path — deprecated dead
- *        code (ops#187), dispatched from nowhere in this UI since ops#185.
+ *        client.config.ts + deploy commands (RenderHandoffPanel). The retired
+ *        Duda 'build'/'publish' actions were removed in ops#309.
  *   3. the board polls GET /api/leads (useLeads) and renders live status
  *
  * Data persists in the Supabase `leads` table. In prod the /api/* routes are

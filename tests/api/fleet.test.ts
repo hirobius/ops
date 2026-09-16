@@ -36,9 +36,30 @@ describe('laneOf', () => {
   });
 
   it('routes each blocking label to the blocked lane', () => {
-    for (const l of ['needs-adrian', 'needs-human', 'blocked']) {
+    for (const l of [
+      'needs-adrian',
+      'needs-decision',
+      'needs-credential',
+      'needs-human',
+      'blocked',
+    ]) {
       expect(laneOf(issue({ labels: [l] }))).toBe('blocked');
     }
+  });
+
+  it('routes the ops#295 split labels, which ops#359 relabelled 14 issues onto', () => {
+    // The regression this locks: ops#359 retired `needs-human` and updated
+    // CLAUDE.md, AGENTS.md and metric-human-gate-latency.mjs — but not
+    // BLOCKING_LABELS. 13 human-gated issues rendered as ordinary backlog, and
+    // the "blocked on you" count the page exists to show was wrong.
+    expect(laneOf(issue({ labels: ['backlog', 'p2', 'needs-decision'] }))).toBe('blocked');
+    expect(laneOf(issue({ labels: ['p2', 'needs-credential'] }))).toBe('blocked');
+  });
+
+  it('keeps needs-human routing — it was retired in ops only, and this sweep is fleet-wide', () => {
+    expect(laneOf(issue({ repo: 'hirobius/site-engine', labels: ['needs-human'] }))).toBe(
+      'blocked',
+    );
   });
 
   it('routes ralph-ready to the queue', () => {
