@@ -2066,3 +2066,39 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   #295"). Gate green (typecheck/test/lint + steering-budget + no open
   needs-human issues, verified before PR).
 - Notes for next iteration: none — DoD fully met, no follow-up filed.
+
+## Issue #297 — metric: human-gate latency (2026-09-16)
+- Built `scripts/metric-human-gate-latency.mjs`: median days an issue sits
+  gated on Adrian under `needs-adrian` / `needs-decision` / `needs-credential`,
+  broken out per label, plus the oldest still-open gated issue. Depended on
+  #295 (the needs-human split) — already merged (#359).
+- Design decision: source of truth is the repo-wide
+  `GET /repos/{owner}/{repo}/issues/events` feed, not per-issue timelines or
+  a label search. A label search only sees an issue's *current* labels, so
+  it would silently miss every already-resolved gate (label removed before
+  close) — the exact case the metric most needs to count. The events feed
+  returns labeled/unlabeled events for every issue in one paginated stream,
+  including resolved gates, at the cost of a bounded 20-page (2000-event)
+  scan (mirrors metric-north-star-share.mjs's MAX_SEARCH_PAGES pattern).
+- Followed metric-north-star-share.mjs's shape exactly: pure functions
+  (buildGateIntervals/median/computeStats/buildViolations/formatHuman)
+  unit-tested with plain fixtures, network fetch behind an injectable
+  `fetchImpl` (no network in tests), canonical `--json` contract via
+  `emitResult`, loud/actionable missing-GITHUB_TOKEN error naming the var
+  and the fix, registry entry with `firingChannel: "manual"`.
+- DEFAULT_TARGET_DAYS = 7 is a starting instrument threshold (like north
+  star's DEFAULT_TARGET_SHARE), not a calibrated policy — Adrian can retune
+  via `--target`.
+- Ran `generate-script-index.mjs` and reverted it: INDEX.json/INDEX.md were
+  already stale from unrelated prior work (490-line diff for a one-file
+  add), and bundling that regen would blow past "one logical change" for
+  this PR. Left as a note, not filed as a separate issue — regenerating the
+  index is a zero-judgment mechanical script, not new information.
+- Files changed: scripts/metric-human-gate-latency.mjs (new),
+  scripts/__tests__/metric-human-gate-latency.test.mjs (new, 20 tests),
+  docs/guardrails/registry.json (+1 entry).
+- Branch: ralph/issue-297-human-gate-latency-metric. Gate green
+  (typecheck/test/lint, 1140+20 tests, validate-guardrail-registry green).
+- Notes for next iteration: `scripts/INDEX.json`/`INDEX.md` are stale
+  (drifted before this session) — someone should run
+  `node scripts/generate-script-index.mjs` in its own PR.
