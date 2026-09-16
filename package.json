@@ -131,11 +131,7 @@
   },
   "dependencies": {
     "@hirobius/design-system": "^0.13.0",
-    "@radix-ui/react-dialog": "^1.1.15",
-    "@radix-ui/react-slot": "^1.2.4",
-    "@radix-ui/react-tabs": "^1.1.13",
     "@supabase/supabase-js": "^2.45.0",
-    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cors": "^2.8.6",
     "express": "^5.2.1",

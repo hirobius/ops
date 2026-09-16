@@ -2,7 +2,6 @@
   "budgets": {
     "src/app/App.tsx": 10,
     "src/app/components/OpsGate.tsx": 9,
-    "src/app/components/agent-tag.tsx": 7,
     "src/app/components/approval-card.test.tsx": 4,
     "src/app/components/approval-card.tsx": 19,
     "src/app/components/phase-header.tsx": 10,
@@ -37,6 +36,6 @@
     "src/app/pages/portal/ClientPortalPage.tsx": 54,
     "src/app/routes.tsx": 28
   },
-  "updatedAt": "2026-09-16T03:50:04.653Z",
-  "sha": "6f6c2a4"
+  "updatedAt": "2026-09-16T04:16:23.707Z",
+  "sha": "8bd9dee"
 }
