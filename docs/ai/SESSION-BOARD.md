@@ -61,7 +61,7 @@ believes it.
 | Subsystem                                   | Held by      | Since      | State                       |
 | ------------------------------------------- | ------------ | ---------- | --------------------------- |
 | `lib/outreach/`, `lib/leads/`, lead scripts | ops burndown | 2026-09-15 | active — email crawler next |
-| `docs/guardrails/`, `registry.json`         | _(nobody)_   | —          | **FREE — #325 landed; #329 + #330 unblocked** |
+| `docs/guardrails/`, `registry.json`         | frontier eng | 2026-09-16 | active — #335 branch-ancestry gate; **releases on that PR's merge**. #329/#330 still free |
 | `docs/ai/`, `CLAUDE.md`                     | _(nobody)_   | —          | **FREE — #332 merged; budget 24.7KB of 25.0KB, 273 bytes spare** |
 | `lilac` repo (3e: no `main` branch)         | —            | —          | **DONE 2026-09-16 — `main` created, default set** |
 

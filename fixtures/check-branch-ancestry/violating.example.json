@@ -1,0 +1,8 @@
+{
+  "_comment": "REAL violating fixture for check-branch-ancestry (ops#335). Reproduces the exact state of claude/hirobius-frontier-engineering-v6duri on 2026-09-16 after PR #333 squash-merged: the branch and origin/main contain each other in NEITHER direction. Committing here builds a fork of main. Not a stub — the gate evaluates this and fires.",
+  "branch": "claude/hirobius-frontier-engineering-v6duri",
+  "detached": false,
+  "mainRefKnown": true,
+  "mainIsAncestorOfHead": false,
+  "headIsAncestorOfMain": false
+}

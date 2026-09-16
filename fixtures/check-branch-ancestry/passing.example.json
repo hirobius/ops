@@ -1,0 +1,8 @@
+{
+  "_comment": "REAL passing fixture for check-branch-ancestry (ops#335). A healthy in-progress branch: origin/main IS contained in HEAD, and HEAD is not yet in main because the work is unpushed. This is the case the naive check `merge-base --is-ancestor HEAD origin/main` gets WRONG — it reads false here and would fire on every feature branch.",
+  "branch": "claude/feature-in-progress",
+  "detached": false,
+  "mainRefKnown": true,
+  "mainIsAncestorOfHead": true,
+  "headIsAncestorOfMain": false
+}
