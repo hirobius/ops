@@ -32,6 +32,27 @@ DOC CRUFT CLEARED + PAPER TRAIL INDEXED (2026-09-15): docs/ went 146 live .md ->
   (used by `utils.ts`), devDeps, and the 24 stale knip-config hints.
 - Validated: typecheck · build · route-coverage green; DOM budget auto-tightened.
 
+## 2026-09-16 — retire the in-ops `/c/:slug` client portal (portals now in portal-kit)
+
+- **Why.** Public client portals moved to `hirobius/portal-kit` — each client
+  gets its own password-gated deployment (e.g. lilac → lilac-insure.vercel.app).
+  The legacy in-ops portal (live-preview iframe + milestones + a `console.log`
+  feedback stub that never graduated) plus its HMAC token gate were dead weight —
+  exactly the class #342 just pruned. Retiring it consolidates on one portal
+  system, per the architecture decision to make the cleaner surface the foundation.
+- **What went.** Deleted `src/app/pages/portal/ClientPortalPage.tsx` (507 lines),
+  `api/portal-verify.ts` (Vercel fn, −1 toward the Hobby cap), `lib/portal-auth.mjs`
+  - its test, and `scripts/generate-portal-token.mjs`.
+- **Route removed, not soft-landed.** The first cut kept a `/c/:slug`
+  `PortalRetiredPage` "moved" notice; Adrian confirmed the route was never
+  visited, so the whole route was dropped — unknown `/c/*` paths now fall through
+  to `NotFoundPage`. No client-registry coupling, no leftover portal page.
+- **Env now dead:** `PORTAL_HMAC_SECRET` + `VITE_PORTAL_HMAC_SECRET` are unread —
+  safe to remove in Vercel (HANDOFF Adrian-action updated from "set" to "remove").
+- Docs in lockstep: README, ARCHITECTURE row ⑤ + env list, HANDOFF; regenerated
+  `scripts/INDEX.*` + `exceptions-audit.md`; DOM budget re-locked. Validated:
+  typecheck · lint (0 warn) · build · route-coverage · all 18 pre-commit gates green.
+
 ## 2026-09-16 — clients gallery: portal/site links, service tags, demos, home card
 
 - **Clients gallery now links out.** `/ops/clients` cards render two slots —

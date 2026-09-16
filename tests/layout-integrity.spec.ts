@@ -55,10 +55,7 @@ const ALL_ROUTES = [
   '/ops/clients/lilac-insure/report',
   '/ops/clients/lilac-insure/brand-audit',
   // ── Ops · temporary (deleted with OpsDashboardPage once harvest is finalized) ──
-
-  // ── Client portal (public, token-gated; visited without ?token= renders the
-  //    "Not authorized" surface — that surface still has to layout-cleanly). ──
-  '/c/lilac-insure',
+  // Client portal retired 2026-09-16 — /c/:slug removed (portals live in portal-kit).
 ] as const;
 
 for (const route of ALL_ROUTES) {

@@ -16,9 +16,6 @@ const DigestPage = lazy(() => import('./pages/ops/digest/DigestPage'));
 const StandingPage = lazy(() => import('./pages/ops/standing/StandingPage'));
 const PitchPage = lazy(() => import('./pages/ops/pitch/PitchPage'));
 
-// ── Client portal — public token-gated route at /c/:slug ─────────────────────
-const ClientPortalPage = lazy(() => import('./pages/portal/ClientPortalPage'));
-
 // ── Fallback ──────────────────────────────────────────────────────────────────
 function HDSFallback() {
   return <div style={{ flex: 1, minHeight: '60vh' }} />;
@@ -92,10 +89,8 @@ export const router = createBrowserRouter([
       { path: '*', Component: NotFoundPage },
     ],
   },
-  // ── Client portal — public, no chrome. Token-gated. ──────────────────────────
-  {
-    path: '/c/:slug',
-    element: <LazyHDS Page={ClientPortalPage} />,
-    errorElement: <ErrorPage />,
-  },
+  // Client portal retired 2026-09-16 — public client portals live in
+  // hirobius/portal-kit now (own password-gated deployment per client). The old
+  // in-ops /c/:slug route + its HMAC token gate were removed; unknown /c/* paths
+  // fall through to NotFoundPage.
 ]);
