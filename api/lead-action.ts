@@ -11,11 +11,13 @@
  * In dev (`pnpm dev`), the same per-action contracts are served by the Vite
  * middleware in scripts/leads-middleware.mjs (wired in vite.config.mjs).
  *
- * Request:  { leadId: string, action: 'generate'|'render', previewUrl?: string }
- *           (previewUrl only used by 'render')
+ * Request:  { leadId: string, action: 'generate'|'render'|...|'record_live_url',
+ *             previewUrl?: string, liveUrl?: string }
+ *           (previewUrl only used by 'render'; liveUrl only used by 'record_live_url')
  * Success:  the wrapped pipeline result for that action (shape varies):
- *   generate → { ok, score, pass }
- *   render   → { ok, rendered, slug, preset, configFile, commands }
+ *   generate         → { ok, score, pass }
+ *   render           → { ok, rendered, slug, preset, configFile, commands }
+ *   record_live_url  → { ok, liveUrl }
  * Error:    { error, code? } with status 400/401/404/405/409/422/500/503
  *
  * Env (set by the human — never in .env by an agent):
@@ -25,7 +27,7 @@
 import type { VercelRequest } from '@vercel/node';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler.js';
-import { generateLeadSite, renderLeadSite } from '../lib/leads/pipeline.mjs';
+import { generateLeadSite, recordLiveUrl, renderLeadSite } from '../lib/leads/pipeline.mjs';
 import { addPitchNote, assignPitch, setPitchStage } from '../lib/leads/pitch-actions.mjs';
 
 const ACTIONS = [
@@ -36,6 +38,9 @@ const ACTIONS = [
   'pitch_stage',
   'pitch_note',
   'pitch_assign',
+  // Prod deploy → live_url only (ops#44). Never flips lifecycle/published —
+  // that stays a deliberate human action (it's the billing event).
+  'record_live_url',
 ] as const;
 type LeadAction = (typeof ACTIONS)[number];
 
@@ -52,6 +57,7 @@ export async function leadActionHandler(
         leadId?: unknown;
         action?: unknown;
         previewUrl?: unknown;
+        liveUrl?: unknown;
         stage?: unknown;
         channel?: unknown;
         note?: unknown;
@@ -97,6 +103,13 @@ export async function leadActionHandler(
         assignee: typeof body?.assignee === 'string' ? body.assignee : '',
         nextActionAt: body?.nextActionAt as string | null | undefined,
       });
+    case 'record_live_url': {
+      const liveUrl = typeof body?.liveUrl === 'string' ? body.liveUrl.trim() : '';
+      if (!/^https?:\/\//.test(liveUrl)) {
+        return { status: 400, body: { error: 'liveUrl must be an http(s) URL' } };
+      }
+      return recordLiveUrl(sb, leadId, { liveUrl });
+    }
   }
 }
 
