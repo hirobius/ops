@@ -43,6 +43,7 @@ jobs:
     timeout-minutes: 5
     env:
       OPS_BASE_URL: ${{ vars.OPS_BASE_URL || 'https://hirobius-ops.vercel.app' }}
+      SECRETS_URL: https://github.com/hirobius/ops/settings/secrets/actions
 
     steps:
       - name: Checkout
@@ -60,7 +61,6 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
-          SECRETS_URL="https://github.com/hirobius/ops/settings/secrets/actions"
           missing=""
           if [ -z "$OPS_AGENT_KEY" ]; then
             echo "::error title=Missing secret OPS_AGENT_KEY::OPS_AGENT_KEY is not set as a repository secret, so the health check cannot authenticate to /api/tasks. Add it with the same value as OPS_AGENT_KEY in Vercel (Production): $SECRETS_URL"
@@ -97,7 +97,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -n "$MISSING" ]; then
-            DETAIL="Missing repository secret(s): $MISSING. Add them at https://github.com/hirobius/ops/settings/secrets/actions (OPS_AGENT_KEY = the same value as in Vercel Production)."
+            DETAIL="Missing repository secret(s): $MISSING. Add them at $SECRETS_URL (OPS_AGENT_KEY = the same value as in Vercel Production)."
           else
             DETAIL="A setup step failed before the health check ran. See the run log: $RUN_URL"
           fi
