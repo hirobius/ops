@@ -47,22 +47,15 @@ jobs:
       - name: Build (catches Vite/asset issues)
         run: pnpm build
 
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Type coverage (≥99.9%)
-        # Replaced bespoke check-type-coverage-ratchet.mjs (99 LOC) with native type-coverage CLI.
-        # Coverage must stay ≥99.9% (101149/101250 baseline, 2026-05-06).
-        run: pnpm exec type-coverage --at-least 99.9
-
-      - name: CI-PR registry gates (ci-pr channel)
-        # Single source of truth: reads docs/guardrails/registry.json --channel ci-pr.
-        # To add/remove a gate from ci-pr, update registry.json firingChannel — do not
-        # add explicit invocations here. Runs with --parallel 4 for speed.
-        run: node scripts/run-gates.mjs --channel ci-pr --parallel 4
-
       - name: Install Playwright (chromium only)
+        # Setup, not a gate: the browser binary the ci-pr layout-tests gate needs.
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Layout tests
-        run: pnpm test:layout
+      - name: CI-PR registry gates (ci-pr channel)
+        # The ONLY way this workflow runs a gate (#241). Single source of truth:
+        # docs/guardrails/registry.json, firingChannel ci-pr — typecheck, type
+        # coverage, and the layout tests are registry gates there, not steps here.
+        # To add/remove a CI check, change the registry, never this file;
+        # scripts/__tests__/quality-workflow.test.mjs fails on a new direct step.
+        # run-gates runs every gate (no fail-fast) and exits 1 if any failed.
+        run: node scripts/run-gates.mjs --channel ci-pr --parallel 4

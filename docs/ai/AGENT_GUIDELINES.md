@@ -151,11 +151,16 @@ CI (`.github/workflows/quality.yml`) runs:
 
 ```
 + pnpm install --frozen-lockfile
-+ pnpm build                               # ADDED 2026-05-01 (Pod X) — catches Vite-only errors
-+ all of the above pre-commit gates
-+ pnpm test:layout
-+ pnpm size-limit                          # ADDED 2026-05-01 (Pod B1, warn-mode)
++ pnpm audit --audit-level high            # advisory only (continue-on-error, #243)
++ pnpm build                               # catches Vite-only errors
++ pnpm exec playwright install chromium    # setup for the layout-tests gate
++ node scripts/run-gates.mjs --channel ci-pr --parallel 4
 ```
+
+Every CI check — typecheck, type coverage, layout tests included — is a
+`ci-pr` gate in `docs/guardrails/registry.json`, never a bespoke workflow step
+(#241; `scripts/__tests__/quality-workflow.test.mjs` enforces it). List them with
+`node scripts/run-gates.mjs --channel ci-pr --dry-run`.
 
 ### Promotion path
 

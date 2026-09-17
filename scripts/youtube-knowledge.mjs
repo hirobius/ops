@@ -13,7 +13,7 @@
  *   node scripts/youtube-knowledge.mjs --limit 20      # cap videos per account
  *
  * Accounts:
- *   adrian.milsap@gmail.com  → .youtube-token-personal.json
+ *   personal Google account  → .youtube-token-personal.json
  *   adrian@hirobius.com      → .youtube-token-work.json
  *
  * Throttling:
@@ -27,8 +27,8 @@ import path from 'path';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
-const ROOT      = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OUT_DIR   = path.join(ROOT, 'data/knowledge/grow/youtube');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const OUT_DIR = path.join(ROOT, 'data/knowledge/grow/youtube');
 const CACHE_FILE = path.join(ROOT, 'data/knowledge/grow/youtube/.processed.json');
 const OAUTH_CLIENT = path.join(ROOT, '.youtube-oauth-client.json');
 
@@ -41,27 +41,43 @@ if (fs.existsSync(envLocal)) {
   }
 }
 
-const argv      = process.argv.slice(2);
-const DRY_RUN   = argv.includes('--dry-run');
-const DIGEST    = argv.includes('--digest');
-const limitIdx  = argv.indexOf('--limit');
-const LIMIT     = limitIdx !== -1 ? parseInt(argv[limitIdx + 1], 10) : 50;
-const acctIdx   = argv.indexOf('--account');
+const argv = process.argv.slice(2);
+const DRY_RUN = argv.includes('--dry-run');
+const DIGEST = argv.includes('--digest');
+const limitIdx = argv.indexOf('--limit');
+const LIMIT = limitIdx !== -1 ? parseInt(argv[limitIdx + 1], 10) : 50;
+const acctIdx = argv.indexOf('--account');
 const ONLY_ACCT = acctIdx !== -1 ? argv[acctIdx + 1] : null; // 'personal' | 'work'
 
 const DIGEST_CACHE = path.join(ROOT, 'data/knowledge/grow/youtube/.digest-sent.json');
 
 const ACCOUNTS = [
-  { label: 'personal', email: 'adrian.milsap@gmail.com', tokenFile: path.join(ROOT, '.youtube-token-personal.json') },
-  { label: 'work',     email: 'adrian@hirobius.com',     tokenFile: path.join(ROOT, '.youtube-token-work.json')     },
+  {
+    label: 'personal',
+    email: 'personal Google account',
+    tokenFile: path.join(ROOT, '.youtube-token-personal.json'),
+  },
+  {
+    label: 'work',
+    email: 'adrian@hirobius.com',
+    tokenFile: path.join(ROOT, '.youtube-token-work.json'),
+  },
 ];
 
 // ── Dependency check ──────────────────────────────────────────────────────────
 
 function checkDeps() {
   const missing = [];
-  try { execSync('node -e "require(\'googleapis\')"', { stdio: 'pipe' }); } catch { missing.push('googleapis'); }
-  try { execSync('node -e "require(\'youtube-transcript\')"', { stdio: 'pipe' }); } catch { missing.push('youtube-transcript'); }
+  try {
+    execSync('node -e "require(\'googleapis\')"', { stdio: 'pipe' });
+  } catch {
+    missing.push('googleapis');
+  }
+  try {
+    execSync('node -e "require(\'youtube-transcript\')"', { stdio: 'pipe' });
+  } catch {
+    missing.push('youtube-transcript');
+  }
   if (missing.length) {
     console.error(`[youtube] Missing deps: ${missing.join(', ')}`);
     console.error(`[youtube] Run: pnpm add -D ${missing.join(' ')}`);
@@ -104,7 +120,9 @@ async function getAuthClient(account) {
   console.log(`\nOpen this URL in your browser:\n${authUrl}\n`);
 
   // Try to open browser automatically
-  try { execSync(`wslview "${authUrl}" 2>/dev/null || xdg-open "${authUrl}" 2>/dev/null || true`); } catch {}
+  try {
+    execSync(`wslview "${authUrl}" 2>/dev/null || xdg-open "${authUrl}" 2>/dev/null || true`);
+  } catch {}
 
   const code = await new Promise((resolve, reject) => {
     const server = createServer((req, res) => {
@@ -113,9 +131,12 @@ async function getAuthClient(account) {
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end('<h2>Authorized! You can close this tab.</h2>');
       server.close();
-      if (code) resolve(code); else reject(new Error('No code in redirect'));
+      if (code) resolve(code);
+      else reject(new Error('No code in redirect'));
     });
-    server.listen(PORT, () => console.log(`[youtube] Waiting for auth on http://localhost:${PORT} ...`));
+    server.listen(PORT, () =>
+      console.log(`[youtube] Waiting for auth on http://localhost:${PORT} ...`),
+    );
     server.on('error', reject);
   });
 
@@ -166,13 +187,18 @@ async function getTranscript(videoId) {
   try {
     const { YoutubeTranscript } = await import('youtube-transcript');
     const segments = await YoutubeTranscript.fetchTranscript(videoId);
-    return segments.map(s => s.text).join(' ').slice(0, 8000); // cap at 8K chars
+    return segments
+      .map((s) => s.text)
+      .join(' ')
+      .slice(0, 8000); // cap at 8K chars
   } catch {
     return null; // no transcript available (live streams, music, etc.)
   }
 }
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
 
 // ── Summarizer + Triage ───────────────────────────────────────────────────────
 //
@@ -212,11 +238,13 @@ Signal guide:
     const HERMES = path.join(process.env.HOME, '.local/bin/hermes');
     const result = execSync(
       `${HERMES} chat -q ${JSON.stringify(prompt)} -Q --yolo -m "qwen2.5-coder:14b-hds" --provider local-ollama`,
-      { cwd: ROOT, encoding: 'utf8', timeout: 60_000, stdio: ['pipe', 'pipe', 'pipe'] }
+      { cwd: ROOT, encoding: 'utf8', timeout: 60_000, stdio: ['pipe', 'pipe', 'pipe'] },
     );
     const jsonMatch = result.match(/\{[\s\S]*\}/);
     if (jsonMatch) return JSON.parse(jsonMatch[0]);
-  } catch { /* fall through */ }
+  } catch {
+    /* fall through */
+  }
 
   return {
     summary: video.description || video.title,
@@ -242,27 +270,35 @@ function postSignalToDiscord(video, summary) {
   if (summary.signal !== 'high') return;
 
   const msg = {
-    embeds: [{
-      title: `${e} ${video.title}`,
-      url: `https://www.youtube.com/watch?v=${video.id}`,
-      description: summary.summary,
-      color: 0xFF4500,
-      fields: [
-        { name: 'Channel', value: video.channel, inline: true },
-        { name: 'Pillar', value: summary.pillar?.toUpperCase() || 'RUN', inline: true },
-        { name: 'Why', value: summary.signal_reason || summary.why_saved, inline: false },
-        { name: 'Takeaways', value: (summary.key_takeaways || []).map(t => `• ${t}`).join('\n') || '—', inline: false },
-      ],
-      footer: { text: `Signal: ${summary.signal?.toUpperCase()} · youtube-knowledge` },
-    }],
+    embeds: [
+      {
+        title: `${e} ${video.title}`,
+        url: `https://www.youtube.com/watch?v=${video.id}`,
+        description: summary.summary,
+        color: 0xff4500,
+        fields: [
+          { name: 'Channel', value: video.channel, inline: true },
+          { name: 'Pillar', value: summary.pillar?.toUpperCase() || 'RUN', inline: true },
+          { name: 'Why', value: summary.signal_reason || summary.why_saved, inline: false },
+          {
+            name: 'Takeaways',
+            value: (summary.key_takeaways || []).map((t) => `• ${t}`).join('\n') || '—',
+            inline: false,
+          },
+        ],
+        footer: { text: `Signal: ${summary.signal?.toUpperCase()} · youtube-knowledge` },
+      },
+    ],
   };
 
   try {
     execSync(
       `curl -s -X POST -H "Content-Type: application/json" -d ${JSON.stringify(JSON.stringify(msg))} "${url}"`,
-      { stdio: 'ignore', timeout: 5000 }
+      { stdio: 'ignore', timeout: 5000 },
     );
-  } catch { /* non-fatal */ }
+  } catch {
+    /* non-fatal */
+  }
 }
 
 // ── Writer ────────────────────────────────────────────────────────────────────
@@ -281,7 +317,7 @@ channel: ${video.channel}
 playlist: ${video.playlist}
 date_saved: ${new Date().toISOString().slice(0, 10)}
 signal: ${signal}
-tags: [${(summary.tags || []).map(t => `"${t}"`).join(', ')}]
+tags: [${(summary.tags || []).map((t) => `"${t}"`).join(', ')}]
 ---
 
 # ${video.title}
@@ -297,7 +333,7 @@ ${summary.summary}
 ${summary.why_saved}
 
 ## Key Takeaways
-${(summary.key_takeaways || []).map(t => `- ${t}`).join('\n') || '- (no transcript available)'}
+${(summary.key_takeaways || []).map((t) => `- ${t}`).join('\n') || '- (no transcript available)'}
 `;
 
   fs.writeFileSync(path.join(dir, `${video.id}.md`), content, 'utf8');
@@ -319,7 +355,10 @@ function saveCache(processed) {
 
 function runWeeklyDigest() {
   const url = process.env.DISCORD_WEBHOOK_URL;
-  if (!url) { console.error('[youtube] DISCORD_WEBHOOK_URL not set'); process.exit(1); }
+  if (!url) {
+    console.error('[youtube] DISCORD_WEBHOOK_URL not set');
+    process.exit(1);
+  }
 
   const sent = fs.existsSync(DIGEST_CACHE)
     ? new Set(JSON.parse(fs.readFileSync(DIGEST_CACHE, 'utf8')))
@@ -330,7 +369,7 @@ function runWeeklyDigest() {
   for (const pillar of ['build', 'grow', 'run']) {
     const dir = path.join(OUT_DIR, pillar);
     if (!fs.existsSync(dir)) continue;
-    for (const file of fs.readdirSync(dir).filter(f => f.endsWith('.md') && f !== 'index.md')) {
+    for (const file of fs.readdirSync(dir).filter((f) => f.endsWith('.md') && f !== 'index.md')) {
       const videoId = file.replace('.md', '');
       if (sent.has(videoId)) continue;
       const content = fs.readFileSync(path.join(dir, file), 'utf8');
@@ -357,8 +396,9 @@ function runWeeklyDigest() {
     return;
   }
 
-  const lines = items.map(i =>
-    `📌 **[${i.title}](${i.url})**\n${i.channel} · ${i.pillar}\n${i.summary ? i.summary.slice(0, 120) + '…' : ''}`
+  const lines = items.map(
+    (i) =>
+      `📌 **[${i.title}](${i.url})**\n${i.channel} · ${i.pillar}\n${i.summary ? i.summary.slice(0, 120) + '…' : ''}`,
   );
 
   const content = `## 📋 Weekly YouTube Intel Digest — ${new Date().toISOString().slice(0, 10)}\n${items.length} medium-signal videos saved this week:\n\n${lines.join('\n\n')}`;
@@ -380,9 +420,11 @@ function runWeeklyDigest() {
     try {
       execSync(
         `curl -s -X POST -H "Content-Type: application/json" -d ${JSON.stringify(JSON.stringify({ content: chunk }))} "${url}"`,
-        { stdio: 'ignore', timeout: 5000 }
+        { stdio: 'ignore', timeout: 5000 },
       );
-    } catch { /* non-fatal */ }
+    } catch {
+      /* non-fatal */
+    }
   }
 
   // Mark all as sent
@@ -394,7 +436,10 @@ function runWeeklyDigest() {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
-  if (DIGEST) { runWeeklyDigest(); return; }
+  if (DIGEST) {
+    runWeeklyDigest();
+    return;
+  }
   checkDeps();
   fs.mkdirSync(OUT_DIR, { recursive: true });
 
@@ -402,9 +447,7 @@ async function main() {
   const { google } = await import('googleapis');
   let totalNew = 0;
 
-  const accountsToRun = ONLY_ACCT
-    ? ACCOUNTS.filter(a => a.label === ONLY_ACCT)
-    : ACCOUNTS;
+  const accountsToRun = ONLY_ACCT ? ACCOUNTS.filter((a) => a.label === ONLY_ACCT) : ACCOUNTS;
 
   if (accountsToRun.length === 0) {
     console.error(`[youtube] Unknown account: ${ONLY_ACCT}. Use 'personal' or 'work'.`);
@@ -427,7 +470,10 @@ async function main() {
     const videos = [];
 
     // Liked Videos (LL) + Watch Later (WL)
-    for (const [id, label] of [['LL', 'liked'], ['WL', 'watch-later']]) {
+    for (const [id, label] of [
+      ['LL', 'liked'],
+      ['WL', 'watch-later'],
+    ]) {
       try {
         const batch = await fetchPlaylist(youtube, id, label);
         console.log(`  ${label}: ${batch.length} videos`);
@@ -437,8 +483,10 @@ async function main() {
       }
     }
 
-    const newVideos = videos.filter(v => !processed.has(v.id));
-    console.log(`  ${newVideos.length} new (${videos.length - newVideos.length} already processed)`);
+    const newVideos = videos.filter((v) => !processed.has(v.id));
+    console.log(
+      `  ${newVideos.length} new (${videos.length - newVideos.length} already processed)`,
+    );
 
     if (DRY_RUN) continue;
 
@@ -457,8 +505,13 @@ async function main() {
 
   if (!DRY_RUN) {
     saveCache(processed);
-    console.log(`\n[youtube] Complete — ${totalNew} new videos processed → data/knowledge/grow/youtube/`);
+    console.log(
+      `\n[youtube] Complete — ${totalNew} new videos processed → data/knowledge/grow/youtube/`,
+    );
   }
 }
 
-main().catch(e => { console.error('[youtube] Fatal:', e.message); process.exit(1); });
+main().catch((e) => {
+  console.error('[youtube] Fatal:', e.message);
+  process.exit(1);
+});

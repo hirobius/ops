@@ -7,6 +7,9 @@
  * network, per the ops#293 DoD.
  */
 
+import { readdirSync, readFileSync } from 'node:fs';
+import { join, dirname, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, it, expect, vi } from 'vitest';
 import {
   REVENUE_PATH_PREFIXES,
@@ -39,6 +42,56 @@ describe('isRevenuePathFile', () => {
     expect(isRevenuePathFile('src/app/pages/ops/pitch/PitchPage.tsx')).toBe(true);
   });
 
+  it('counts outreach sends and the lead store/API — added 2026-09-16 (ops#238 merge boundary)', () => {
+    // One list, two consumers: this set is also the watchdog's supervised-path
+    // boundary, so these gate unattended merges as well as feed the metric.
+    expect(isRevenuePathFile('scripts/push-outreach.mjs')).toBe(true);
+    expect(isRevenuePathFile('lib/supabase/leads.mjs')).toBe(true);
+    expect(isRevenuePathFile('api/leads.ts')).toBe(true);
+    expect(isRevenuePathFile('api/pull-leads.ts')).toBe(true);
+    // Neighbours stay out: only the named files were added, not their dirs.
+    expect(isRevenuePathFile('lib/supabase/server.mjs')).toBe(false);
+    expect(isRevenuePathFile('api/ops-login.ts')).toBe(false);
+  });
+
+  it('counts the lead scripts that crawl, call, purge or build for leads — added 2026-09-16', () => {
+    // Each honours do_not_contact or produces client-facing output. Before
+    // this, a PR dropping the DNC filter from the crawler merged unattended.
+    for (const file of [
+      'scripts/crawl-lead-emails.mjs',
+      'scripts/export-call-list.mjs',
+      'scripts/log-call.mjs',
+      'scripts/purge-stale-leads.mjs',
+      'scripts/generate-lead-site.mjs',
+    ]) {
+      expect(isRevenuePathFile(file)).toBe(true);
+    }
+  });
+
+  it('covers EVERY source that reads or writes do_not_contact — the claim stays true', () => {
+    // Self-maintaining: a new script that touches the suppression flag fails
+    // here until it joins the list (and so the #238 merge boundary). Scope is
+    // runtime source; tests, docs, SQL migrations and INDEX.json are out.
+    const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+    const SKIP_DIRS = new Set(['node_modules', '__tests__', 'dist', '.git']);
+    const found = [];
+    const walk = (dir) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const abs = join(dir, entry.name);
+        if (entry.isDirectory()) {
+          if (!SKIP_DIRS.has(entry.name)) walk(abs);
+        } else if (/\.(mjs|js|ts|tsx)$/.test(entry.name) && !/\.test\./.test(entry.name)) {
+          if (/do_not_contact|doNotContact/.test(readFileSync(abs, 'utf8'))) {
+            found.push(relative(root, abs).split('\\').join('/'));
+          }
+        }
+      }
+    };
+    for (const top of ['api', 'lib', 'scripts', 'src']) walk(join(root, top));
+    expect(found).toContain('scripts/crawl-lead-emails.mjs'); // the walk really ran
+    expect(found.filter((f) => !isRevenuePathFile(f))).toEqual([]);
+  });
+
   it('does not match unrelated paths', () => {
     expect(isRevenuePathFile('src/app/pages/ops/tasks/TasksPage.tsx')).toBe(false);
     expect(isRevenuePathFile('scripts/audit-deps.mjs')).toBe(false);
@@ -60,6 +113,10 @@ describe('isRevenuePathFile', () => {
         'api/lead-action.ts',
         'src/app/pages/ops/leads/',
         'src/app/pages/ops/pitch/',
+        'scripts/push-outreach.mjs',
+        'lib/supabase/leads.mjs',
+        'api/leads.ts',
+        'api/pull-leads.ts',
       ]),
     );
   });

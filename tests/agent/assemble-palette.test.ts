@@ -16,7 +16,7 @@ const LEAD = {
   category: 'landscaping',
   city: 'Austin',
   region: 'TX',
-  phone: '+1-555-0142',
+  phone: '+1-512-555-0142',
   email: 'hi@violetverge.com',
 };
 

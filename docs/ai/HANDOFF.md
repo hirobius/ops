@@ -93,7 +93,7 @@ not read it to get oriented.
   fuel**: `.changeset/` is empty so no "Version Packages" PR can open, and
   `NPM_TOKEN` is unverified. Cutting it means the breaking `Hds*`→unprefixed
   renames plus an ops migration across ~41 files. No agent writes the changeset.
-- **Run the lilac-insure onboarding prompt** → stands up the client repo to fleet
+- **Run the client onboarding prompt** → stands up the client repo to fleet
   spec + files its tasks.
 - **File the Alert Figma-drift issue** in the DS repo (not ops): tone-colored
   title + border, danger→`circle-alert`; node 33:34.

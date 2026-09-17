@@ -25,6 +25,16 @@ automated quality gate in the Hirobius repo.
 | `owner`       | `string`                           | yes      | Responsible party. Default: `"Adrian"`.                                                              |
 | `source`      | `"human" \| "hermes-distillation"` | yes      | `"human"` for hand-authored gates; `"hermes-distillation"` for auto-generated gates.                 |
 
+### Optional: `skipMetaProbe`
+
+`"skipMetaProbe": "<reason>"` keeps a gate out of meta-gates that spawn every
+registered gate to introspect it (`audit-gates-supportjson` runs
+`node <gateScript> --json`). Use it only for gates that drive a full toolchain run
+(tsc, type-coverage, a Playwright build + preview server): a second copy spawned
+mid-run duplicates the work or races the real one. The reason is mandatory — a
+blank string or `true` is ignored and the gate is still probed
+(`selectProbeTargets` in `scripts/lib/guardrail-core.mjs`, ops#241).
+
 ## Adding a new gate
 
 1. Create `scripts/check-<name>.mjs` with a JSDoc block at the top.
@@ -79,6 +89,10 @@ Every gate on a blocking channel had its severity decided, not inherited.
 - Already `error`, kept: `check-licenses`, `check-secrets`,
   `check-steering-budget`, `validate-fixture-proof-of-firing`,
   `validate-orchestration`, `check-schema-drift`.
+- `check-pii` (ops#27, ops#35): denylist-term, private-workspace-link and
+  denylist-file hits must block the commit. Email and phone findings are `warn`
+  inside the script and already exit 0 at its default `--fail-on error`, so
+  `error` blocks only the precise rules.
 - Was "unsure", resolved to `error` by Adrian: `check-exemptions`. It is the
   only check that an exemption marker carries a reason (CLAUDE.md rule 10). The
   `error` gates skip any line holding their marker, whatever follows the colon
@@ -110,10 +124,17 @@ every one of which already blocked a commit before ops#306. Burning the stubs do
 - `check-branch-ancestry` — exits 0 by design (ops#335), so `warn` changes
   nothing.
 
-**`ci-pr`:** `check-fixture-stubs-ratchet` and `check-guardrail-drift` stay
-`error`. `audit-gate-purity` and `audit-gates-supportjson` stay `warn` — both
-exit 0 on findings unless passed `--strict` (run-gates does not), so `warn`
-changes nothing.
+**`ci-pr`:**
+
+- `check-fixture-stubs-ratchet` and `check-guardrail-drift` stay `error`.
+- `check-layout-tests`, `check-type-coverage` and `check-typecheck` are
+  `error`. ops#241 folded the bespoke `quality.yml` steps into run-gates as
+  these gates, and they block exactly as those steps did. `check-layout-tests`
+  runs `pnpm test:layout`, which is what keeps `check-route-coverage` blocking
+  in PR CI.
+- `audit-gate-purity` and `audit-gates-supportjson` stay `warn` — both exit 0
+  on findings unless passed `--strict` (run-gates does not), so `warn` changes
+  nothing.
 
 **`commit-msg`:** `check-commit-message-task-ref` stays `warn`. The hook calls
 it directly, not through run-gates; it is warn-only unless

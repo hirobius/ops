@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import {
   loadRegistry,
   selectGates,
+  selectProbeTargets,
   runGateCaptured,
   gateOutcome,
   runGatesSerial,
@@ -218,6 +219,9 @@ describe('registry severity curation (ops#306)', () => {
       'validate-fixture-proof-of-firing': 'error',
       'validate-orchestration': 'error',
       'check-schema-drift': 'error',
+      // error — denylist terms and private workspace links must block; email and
+      // phone findings are warn inside the script (exit 0 at --fail-on error).
+      'check-pii': 'error',
       // error by Adrian's call — the only check that an exemption marker carries
       // a reason, so a reasonless marker blocks at commit (see SCHEMA.md).
       'check-exemptions': 'error',
@@ -234,6 +238,10 @@ describe('registry severity curation (ops#306)', () => {
     'ci-pr': {
       'check-fixture-stubs-ratchet': 'error',
       'check-guardrail-drift': 'error',
+      // error — the bespoke quality.yml steps folded into run-gates (ops#241).
+      'check-layout-tests': 'error',
+      'check-type-coverage': 'error',
+      'check-typecheck': 'error',
       'audit-gate-purity': 'warn',
       'audit-gates-supportjson': 'warn',
     },
@@ -315,5 +323,57 @@ describe('runGateCaptured', () => {
     const r = runGateCaptured(script, { timeoutMs: 150 });
     expect(r.timedOut).toBe(true);
     expect(r.exitCode).toBe(null);
+  });
+});
+
+describe('selectProbeTargets', () => {
+  // Meta-gates (audit-gates-supportjson) spawn every registered gate. A gate
+  // that drives a full toolchain run opts out with a non-empty reason string.
+  const PROBE_REGISTRY = {
+    gates: [
+      { id: 'plain', firingChannel: 'pre-commit' },
+      { id: 'meta', firingChannel: 'pnpm-meta' },
+      { id: 'self', firingChannel: 'ci-pr' },
+      { id: 'heavy', firingChannel: 'ci-pr', skipMetaProbe: 'drives a full Playwright run' },
+      { id: 'blank-reason', firingChannel: 'ci-pr', skipMetaProbe: '   ' },
+      { id: 'not-a-string', firingChannel: 'manual', skipMetaProbe: true },
+    ],
+  };
+
+  it('keeps probeable gates in declaration order', () => {
+    const r = selectProbeTargets({
+      registry: PROBE_REGISTRY,
+      skipChannels: ['pnpm-meta'],
+      selfId: 'self',
+    });
+    expect(r.targets.map((g) => g.id)).toEqual(['plain', 'blank-reason', 'not-a-string']);
+  });
+
+  it('reports each opted-out gate with its reason', () => {
+    const r = selectProbeTargets({
+      registry: PROBE_REGISTRY,
+      skipChannels: ['pnpm-meta'],
+      selfId: 'self',
+    });
+    expect(r.optedOut).toEqual([{ id: 'heavy', reason: 'drives a full Playwright run' }]);
+  });
+
+  it('does not honour an opt-out without a reason (blank or non-string)', () => {
+    const r = selectProbeTargets({ registry: PROBE_REGISTRY });
+    const ids = r.targets.map((g) => g.id);
+    expect(ids).toContain('blank-reason');
+    expect(ids).toContain('not-a-string');
+    expect(ids).not.toContain('heavy');
+  });
+
+  it('defaults to no channel skips and no self id', () => {
+    const r = selectProbeTargets({ registry: PROBE_REGISTRY });
+    expect(r.targets.map((g) => g.id)).toEqual([
+      'plain',
+      'meta',
+      'self',
+      'blank-reason',
+      'not-a-string',
+    ]);
   });
 });

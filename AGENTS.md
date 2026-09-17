@@ -50,13 +50,17 @@ Rules for any autonomous loop in this repo:
 - The gate (ralph/gate.sh) must pass before any PR. No exceptions.
 - Fight entropy: leave the code better than you found it.
 - No shortcut that creates debt someone else pays for.
-- Merges are HUMAN-approved: `ralph-approved` on the PR, or the issue
-  pre-tagged `ralph-auto` (batch approval). Never merge yourself.
+- Merges follow ops#238: a green `ralph-gate` merges by default, but a diff
+  touching a supervised revenue path (`REVENUE_PATH_PREFIXES` in
+  `scripts/metric-north-star-share.mjs`) needs a human's `ralph-approved` on
+  the PR. Only the watchdog enforces that today — the engine's `ralph-auto`
+  arm has no path check yet (see `ralph/README.md`). Never merge yourself.
 
 Loop mechanics (see `ralph/README.md` for the full contract):
 
 - Labels: `ralph-ready` (queue, human) · `p0`–`p3` (priority, human) ·
-  `ralph-auto`/`ralph-approved` (merge approval, human) · `ralph-wip`
+  `ralph-auto` (engine auto-merge fast-path, human) · `ralph-approved`
+  (merge approval, required on supervised paths, human) · `ralph-wip`
   (claimed, loop) · `ralph-parked`/`needs-adrian` (parked with reason, loop) ·
   `ralph-selfheal-attempted` (gate's one bounded repair, spent). Separately,
   `needs-decision`/`needs-credential` (human queue, human-set, not loop

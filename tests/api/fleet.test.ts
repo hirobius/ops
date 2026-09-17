@@ -78,7 +78,7 @@ describe('priorityOf', () => {
 
 describe('ownersOf', () => {
   it('dedupes and preserves first-seen order', () => {
-    expect(ownersOf(['hirobius/ops', 'adr-eng/access', 'hirobius/lilac'])).toEqual([
+    expect(ownersOf(['hirobius/ops', 'adr-eng/access', 'hirobius/client-site'])).toEqual([
       'hirobius',
       'adr-eng',
     ]);
@@ -106,7 +106,7 @@ describe('sortFleetLanes', () => {
     issue({ repo: 'hirobius/ops', number: 200, labels: ['needs-adrian', 'p1'] }),
     issue({ repo: 'hirobius/ops', number: 306, labels: ['needs-adrian', 'p2'] }),
     issue({ repo: 'adr-eng/access', number: 7, labels: ['ralph-parked'] }),
-    issue({ repo: 'hirobius/lilac', number: 12, labels: ['ralph-ready', 'p0'] }),
+    issue({ repo: 'hirobius/client-site', number: 12, labels: ['ralph-ready', 'p0'] }),
     issue({ repo: 'hirobius/ops', number: 309, labels: ['ralph-ready', 'p2'] }),
     issue({ repo: 'hirobius/ops', number: 99, labels: ['backlog'] }),
   ];
@@ -151,7 +151,7 @@ describe('sortFleetLanes', () => {
   it('discovers every repo that appeared, across owners, sorted', () => {
     expect(sortFleetLanes(fleet).repos).toEqual([
       'adr-eng/access',
-      'hirobius/lilac',
+      'hirobius/client-site',
       'hirobius/ops',
     ]);
   });
@@ -161,8 +161,54 @@ describe('sortFleetLanes', () => {
       blocked: [],
       queue: [],
       backlog: [],
+      sev1: [],
       repos: [],
       total: 0,
+    });
+  });
+
+  // ops#317: a sev1 must not be one line among fifty. `sev1` is a call-out
+  // ACROSS the lanes, not a lane of its own — the issue still sits in whichever
+  // lane its other labels put it in, so the every-issue-exactly-once invariant
+  // above is untouched.
+  describe('sev1 call-out', () => {
+    const withSev = [
+      issue({ repo: 'hirobius/ops', number: 27, title: 'PII', labels: ['sev1', 'needs-decision'] }),
+      issue({ repo: 'hirobius/hds', number: 4, title: 'hds fire', labels: ['sev1', 'p0'] }),
+      issue({ repo: 'hirobius/ops', number: 35, labels: ['sev2', 'needs-adrian'] }),
+      issue({ repo: 'hirobius/ops', number: 99, labels: ['backlog'] }),
+    ];
+
+    it('lists every sev1, ordered by repo then number, whatever lane it sits in', () => {
+      expect(sortFleetLanes(withSev).sev1).toEqual([
+        {
+          repo: 'hirobius/hds',
+          number: 4,
+          title: 'hds fire',
+          url: 'https://github.com/hirobius/ops/issues/1',
+          label: 'sev1',
+          prio: 'p0',
+        },
+        {
+          repo: 'hirobius/ops',
+          number: 27,
+          title: 'PII',
+          url: 'https://github.com/hirobius/ops/issues/1',
+          label: 'sev1',
+          prio: null,
+        },
+      ]);
+    });
+
+    it('leaves a sev1 in its own lane as well', () => {
+      const { backlog, total, blocked, queue } = sortFleetLanes(withSev);
+      expect(backlog.map((i: { number: number }) => i.number)).toEqual([4, 27, 99]);
+      expect(blocked.map((i: { number: number }) => i.number)).toEqual([35]);
+      expect(blocked.length + queue.length + backlog.length).toBe(total);
+    });
+
+    it('is empty when nothing is sev1', () => {
+      expect(sortFleetLanes(fleet).sev1).toEqual([]);
     });
   });
 

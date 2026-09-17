@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchRalphStatus, shortRepo, type RalphStatus } from './ralphStatus';
+import {
+  fetchFleetStatus,
+  fetchRalphStatus,
+  shortRepo,
+  type FleetStatus,
+  type RalphStatus,
+} from './ralphStatus';
 
 const EMPTY_PAYLOAD: RalphStatus = { runs: [], queue: [], parked: [], prs: [], errors: [] };
 
@@ -54,6 +60,38 @@ describe('fetchRalphStatus', () => {
   it('rejects a 200 that is an object but is missing a lane', async () => {
     mockFetch({ ok: true, status: 200, body: { runs: [], queue: [], parked: [] } });
     await expect(fetchRalphStatus(signal)).rejects.toThrow(/not the fleet payload/);
+  });
+});
+
+describe('fetchFleetStatus', () => {
+  const signal = new AbortController().signal;
+  const FLEET: FleetStatus = {
+    funnel: {},
+    liveness: null,
+    env: {},
+    owners: [],
+    repos: [],
+    blocked: [],
+    queue: [],
+    backlog: [],
+    sev1: [],
+    total: 0,
+    prs: [],
+    errors: [],
+    counts: { openIssues: 0, repos: 0 },
+  };
+
+  it('returns the payload when every lane, including sev1, is present', async () => {
+    mockFetch({ ok: true, status: 200, body: FLEET });
+    await expect(fetchFleetStatus(signal)).resolves.toEqual(FLEET);
+  });
+
+  // ops#317: a payload with no sev1 list must not render as "no open sev1".
+  // That is the all-clear reading, and it would be a lie.
+  it('rejects a payload missing the sev1 list rather than reading it as all-clear', async () => {
+    const { sev1: _omit, ...withoutSev1 } = FLEET;
+    mockFetch({ ok: true, status: 200, body: withoutSev1 });
+    await expect(fetchFleetStatus(signal)).rejects.toThrow(/not the fleet payload/);
   });
 });
 

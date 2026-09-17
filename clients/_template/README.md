@@ -16,15 +16,34 @@ manifest registry. Don't rename it.
 
 ## Files
 
-| File | Required? | Edit before launch |
-|------|-----------|-------------------|
-| `meta.json` | yes | identity, contact, scale, status |
-| `tasks.json` | (optional) | starts empty; add phases as you scope |
-| `checklist.json` | (optional) | access / security / payments gates |
-| `retainer.json` | yes if billing | scope, currency, blockers |
-| `goals.json` | (optional) | micro / macro outcomes |
-| `automation-config.json` | yes if shipping automations | mode + recipients + system env keys + LLM provider |
-| `automations/` | (optional) | per-workflow folders, mirror Lilac's pattern |
+| File                     | Required?                   | Edit before launch                                                                                       |
+| ------------------------ | --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `meta.json`              | yes                         | identity, contact, scale, status                                                                         |
+| `tasks.json`             | (optional)                  | starts empty; add phases as you scope                                                                    |
+| `checklist.json`         | (optional)                  | access / security / payments gates                                                                       |
+| `retainer.json`          | yes if billing              | scope, currency, blockers                                                                                |
+| `goals.json`             | (optional)                  | micro / macro outcomes                                                                                   |
+| `automation-config.json` | yes if shipping automations | mode + recipients + system env keys + LLM provider                                                       |
+| `automations/`           | (optional)                  | per-workflow folders, mirror an existing client's pattern                                                |
+| `email-search.json`      | yes if syncing Gmail        | Gmail queries for `scripts/sync-client-emails.mjs` (real mailboxes + names stay in this gitignored copy) |
+
+## Per-machine client config (`clients/local.json`)
+
+Real client names never go in tracked code. The bots and scripts read them from
+`clients/local.json` (gitignored, one per machine):
+
+```json
+{
+  "defaultClient": "<<slug>>",
+  "aliases": { "<<slug>>": ["<<nickname>>", "<<contact first name>>"] },
+  "bookmarkPillarKeywords": { "build/concrete-creations": ["<<client folder keyword>>"] }
+}
+```
+
+- `defaultClient` — Discord/Telegram auto-assigner target when a message has no
+  `[slug]` prefix (`DISCORD_DEFAULT_CLIENT` wins if set).
+- `aliases` — nicknames the Discord NL assistant maps to a slug.
+- `bookmarkPillarKeywords` — client-named bookmark folders for `scripts/parse-bookmarks.mjs`.
 
 ## What's wired automatically
 
@@ -46,5 +65,5 @@ manifest registry. Don't rename it.
 - **Test mode default** — every `automation-config.json` ships with
   `mode: "test"` and a `testRecipient` you control. Promote to production
   per-workflow, never globally.
-- **No secrets in JSON.** Only env-key *names* live here; values stay in
+- **No secrets in JSON.** Only env-key _names_ live here; values stay in
   `.env.local` (which Hirobius does not touch).

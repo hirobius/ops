@@ -42,9 +42,13 @@ function readBaseline(baselineFile) {
 }
 
 // Each run() shells out to validate-fixture-proof-of-firing.mjs against the
-// live repo (~2s); tests that call it twice need headroom past the 5s default,
-// especially under parallel CPU contention in the full suite.
-const SUBPROCESS_TEST_TIMEOUT = 20_000;
+// live repo; tests that call it twice need headroom past the 5s default,
+// especially under parallel CPU contention in the full suite. The validator's
+// cost is NOT fixed: every real (non-stub) fixture adds a gate spawn pair, and
+// graduating stubs to real fixtures is exactly what this ratchet drives — ~4s
+// per run idle on Windows at 20 real fixtures (ops#241), so 20s for two runs
+// timed out under a loaded full suite. Budget for growth, not today's count.
+const SUBPROCESS_TEST_TIMEOUT = 60_000;
 
 describe('check-fixture-stubs-ratchet', () => {
   it(

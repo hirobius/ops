@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 146,
+  "totalScripts": 154,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,10 +41,10 @@
     }
   },
   "categoryCounts": {
-    "other": 74,
+    "other": 77,
     "audit": 16,
     "build": 1,
-    "gate": 35,
+    "gate": 40,
     "generate": 11,
     "sync": 3,
     "test": 2,
@@ -141,7 +141,7 @@
       "name": "audit-gates-supportjson.mjs",
       "category": "audit",
       "prefix": "audit",
-      "purpose": "Meta-gate ratchet for the `--json` rollout (per unit 13p-8). For each registered gate that is NOT in the pnpm-meta channel (skipped for cost), spawn `node <gateScript> --json` with a 30s timeout, capture stdout, and",
+      "purpose": "Meta-gate ratchet for the `--json` rollout (per unit 13p-8). For each registered gate that is NOT in the pnpm-meta channel (skipped for cost) and does not opt out via `skipMetaProbe: \"<reason>\"` (full tsc /…",
       "pnpm": [],
       "gate": {
         "channel": "ci-pr",
@@ -447,6 +447,17 @@
       }
     },
     {
+      "name": "check-layout-tests.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Layout-integrity Playwright suite as a ci-pr registry gate: runs `pnpm run test:layout` (check-route-coverage, then tests/layout-integrity.spec.ts against a `vite build && vite preview` server",
+      "pnpm": [],
+      "gate": {
+        "channel": "ci-pr",
+        "severity": "error"
+      }
+    },
+    {
       "name": "check-licenses.mjs",
       "category": "gate",
       "prefix": "check",
@@ -508,8 +519,19 @@
       "purpose": "check-parked-triggers — evaluate the re-entry triggers in docs/ai/PARKED.md.",
       "pnpm": ["parked:check"],
       "gate": {
-        "channel": "pnpm-meta",
+        "channel": "ci-scheduled",
         "severity": "warn"
+      }
+    },
+    {
+      "name": "check-pii.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Blocks personal data (client names, contact mailboxes, phone numbers, private Google/Microsoft workspace links) from entering git (ops#27, ops#35).",
+      "pnpm": [],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "error"
       }
     },
     {
@@ -590,6 +612,17 @@
       }
     },
     {
+      "name": "check-sev1-visibility.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Lists every open `sev1` issue and exits non-zero while any exists (ops#317).",
+      "pnpm": ["sev1:check"],
+      "gate": {
+        "channel": "pnpm-meta",
+        "severity": "warn"
+      }
+    },
+    {
       "name": "check-skills-lock.mjs",
       "category": "gate",
       "prefix": "check",
@@ -642,6 +675,28 @@
       "gate": {
         "channel": "pnpm-meta",
         "severity": "warn"
+      }
+    },
+    {
+      "name": "check-type-coverage.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Type-coverage floor as a ci-pr registry gate: runs `pnpm run check:type-coverage` (type-coverage --at-least 99.9) and fails when coverage drops below the floor. Replaces the bespoke \"Type coverage\" step in",
+      "pnpm": [],
+      "gate": {
+        "channel": "ci-pr",
+        "severity": "error"
+      }
+    },
+    {
+      "name": "check-typecheck.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Whole-program TypeScript typecheck as a ci-pr registry gate: runs `pnpm run typecheck` (tsc --noEmit -p tsconfig.typecheck.json) and fails on any type error. Replaces the bespoke \"Typecheck\" step in",
+      "pnpm": [],
+      "gate": {
+        "channel": "ci-pr",
+        "severity": "error"
       }
     },
     {
@@ -1015,6 +1070,22 @@
       "gate": null
     },
     {
+      "name": "pii-commit-msg.mjs",
+      "category": "other",
+      "prefix": "pii",
+      "purpose": "Pre-commit sees only staged content, so without this a commit message naming a client passed every local hook and was first caught after the push, in public (ops#27). Runs `scripts/check-pii.mjs --message-file…",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "pii-fetch-github-text.mjs",
+      "category": "other",
+      "prefix": "pii",
+      "purpose": "Writes the issue/PR titles, bodies and comments of a repo that were updated in the last N days to a JSON records file, for `node scripts/check-pii.mjs --records <file>`. Used by",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "prerender.mjs",
       "category": "other",
       "prefix": null,
@@ -1191,6 +1262,14 @@
       "prefix": "scaffold",
       "purpose": "Creates a Swiss-canonical component skeleton from templates/component-template.tsx, plus a manifest stub and a fixture stub under fixtures/swiss-canon/<name>-clean/. The scaffolder makes",
       "pnpm": ["scaffold:component"],
+      "gate": null
+    },
+    {
+      "name": "secret-scan-range.mjs",
+      "category": "other",
+      "prefix": "secret",
+      "purpose": "Works out which commits the CI secret scan (.github/workflows/secret-scan.yml) covers for a GitHub Actions event. The answer is handed to `gitleaks git --log-opts`, which passes it to `git log -p` (ops#32).",
+      "pnpm": [],
       "gate": null
     },
     {

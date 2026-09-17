@@ -1,0 +1,29 @@
+{
+  "_comment": "The same tracker once ops#27 is closed: the sev1 label is still on it, but a closed sev1 is history, not a fire. Open sev2 and sev3 work remains and is correctly NOT reported — sev2 is reviewed weekly, sev3 is normal backlog. The gate must exit 0.",
+  "issues": [
+    {
+      "repo": "hirobius/ops",
+      "number": 27,
+      "title": "security: rewrite git history to purge client PII from the public repo",
+      "url": "https://github.com/hirobius/ops/issues/27",
+      "state": "closed",
+      "labels": ["backlog", "p1", "sev1"]
+    },
+    {
+      "repo": "hirobius/ops",
+      "number": 35,
+      "title": "compliance: prospecting data / PII / CAN-SPAM pass before outreach scales",
+      "url": "https://github.com/hirobius/ops/issues/35",
+      "state": "open",
+      "labels": ["backlog", "p2", "sev2", "needs-decision"]
+    },
+    {
+      "repo": "hirobius/ops",
+      "number": 32,
+      "title": "Adopt secrets standard: ops",
+      "url": "https://github.com/hirobius/ops/issues/32",
+      "state": "open",
+      "labels": ["p2", "sev3", "needs-credential"]
+    }
+  ]
+}
