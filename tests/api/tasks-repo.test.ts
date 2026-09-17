@@ -11,6 +11,7 @@ import {
   updateTask,
   upsertTasks,
   listGithubTaskKeys,
+  listGithubTaskTags,
   retireTasks,
 } from '../../lib/supabase/tasks.mjs';
 
@@ -140,6 +141,19 @@ describe('tasks repository', () => {
     await listGithubTaskKeys(sb);
     expect(calls.table).toBe('tasks');
     expect(calls.select).toBe('key');
+    expect(calls.like).toEqual({ col: 'source', val: 'github:%' });
+    expect(calls.is).toEqual({ col: 'deleted_at', val: null });
+    expect(calls.neq).toEqual({ col: 'status', val: 'done' });
+  });
+
+  it('listGithubTaskTags: scopes to github:* sources, excludes deleted + done, selects tags', async () => {
+    const { sb, calls } = recordingSb({
+      data: [{ key: 'github:hirobius/ops#1', tags: ['needs-adrian'] }],
+      error: null,
+    });
+    await listGithubTaskTags(sb);
+    expect(calls.table).toBe('tasks');
+    expect(calls.select).toBe('key, tags');
     expect(calls.like).toEqual({ col: 'source', val: 'github:%' });
     expect(calls.is).toEqual({ col: 'deleted_at', val: null });
     expect(calls.neq).toEqual({ col: 'status', val: 'done' });
