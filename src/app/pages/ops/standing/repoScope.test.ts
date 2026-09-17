@@ -36,6 +36,17 @@ describe('repoOptions', () => {
     expect(options.map((o) => o.param)).toEqual(['adr-eng/site', 'hirobius/site', 'ops']);
   });
 
+  it('counts names differing only in case as a collision — the param resolves case-insensitively', () => {
+    const options = repoOptions({
+      blocked: [row('adr-eng/site'), row('adr-eng/site'), row('hirobius/Site')],
+      queue: [],
+      backlog: [],
+      prs: [],
+    });
+
+    expect(options.map((o) => o.param)).toEqual(['adr-eng/site', 'hirobius/Site']);
+  });
+
   it('holds nothing when every lane is empty', () => {
     expect(repoOptions({ blocked: [], queue: [], backlog: [], prs: [] })).toEqual([]);
   });
@@ -50,9 +61,10 @@ describe('resolveRepoParam', () => {
   });
 
   it('means every repo when the param is absent or blank', () => {
-    expect(resolveRepoParam(null, options)).toEqual({ selected: null, unknown: null });
-    expect(resolveRepoParam('', options)).toEqual({ selected: null, unknown: null });
-    expect(resolveRepoParam('   ', options)).toEqual({ selected: null, unknown: null });
+    const all = { selected: null, unknown: null, ambiguous: null };
+    expect(resolveRepoParam(null, options)).toEqual(all);
+    expect(resolveRepoParam('', options)).toEqual(all);
+    expect(resolveRepoParam('   ', options)).toEqual(all);
   });
 
   it('selects the repo a short param names', () => {
@@ -63,6 +75,7 @@ describe('resolveRepoParam', () => {
     expect(resolveRepoParam('Hirobius/OPS', options)).toEqual({
       selected: expect.objectContaining({ repo: 'hirobius/ops' }),
       unknown: null,
+      ambiguous: null,
     });
   });
 
@@ -70,11 +83,35 @@ describe('resolveRepoParam', () => {
     expect(resolveRepoParam('portal-kit', options)).toEqual({
       selected: null,
       unknown: 'portal-kit',
+      ambiguous: null,
     });
   });
 
-  it('treats an ambiguous short name as unknown rather than guessing an owner', () => {
-    expect(resolveRepoParam('site', options)).toEqual({ selected: null, unknown: 'site' });
+  it('reports an ambiguous short name with every repo it matches — not as a typo, and never guessing an owner', () => {
+    expect(resolveRepoParam('site', options)).toEqual({
+      selected: null,
+      unknown: null,
+      ambiguous: { given: 'site', repos: ['adr-eng/site', 'hirobius/site'] },
+    });
+  });
+
+  it('keeps each of two case-colliding repos selectable by its full name', () => {
+    const colliding = repoOptions({
+      blocked: [row('adr-eng/site'), row('adr-eng/site'), row('hirobius/Site')],
+      queue: [],
+      backlog: [],
+      prs: [],
+    });
+
+    expect(resolveRepoParam('hirobius/Site', colliding).selected?.repo).toBe('hirobius/Site');
+    expect(resolveRepoParam('adr-eng/site', colliding).selected?.repo).toBe('adr-eng/site');
+    for (const short of ['site', 'Site']) {
+      expect(resolveRepoParam(short, colliding)).toEqual({
+        selected: null,
+        unknown: null,
+        ambiguous: { given: short, repos: ['adr-eng/site', 'hirobius/Site'] },
+      });
+    }
   });
 });
 

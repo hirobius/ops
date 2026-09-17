@@ -8,15 +8,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
-import type { FleetIssue, FleetPr, FleetStatus } from '../ralphStatus';
+import type { FleetIssue, FleetPr, FleetStatus, LoopState } from '../ralphStatus';
 import StandingPage from './StandingPage';
 
+/** `repo` is a short name under hirobius, or a full `owner/repo`. */
 function issue(repo: string, number: number, title: string, extra: Partial<FleetIssue> = {}) {
+  const full = repo.includes('/') ? repo : `hirobius/${repo}`;
   return {
-    repo: `hirobius/${repo}`,
+    repo: full,
     number,
     title,
-    url: `https://github.com/hirobius/${repo}/issues/${number}`,
+    url: `https://github.com/${full}/issues/${number}`,
     label: null,
     prio: null,
     ageDays: 3,
@@ -67,9 +69,22 @@ const FLEET: FleetStatus = {
   counts: { openIssues: 6, repos: 3 },
 };
 
+const loop = (repo: string, extra: Partial<LoopState>): LoopState => ({
+  repo: `hirobius/${repo}`,
+  state: 'idle',
+  run: null,
+  quietHours: 5,
+  conclusion: 'success',
+  error: null,
+  ...extra,
+});
+
+/** What the fleet read returns — FLEET unless a test swaps it. */
+let fleet: FleetStatus = FLEET;
+
 const fetchMock = vi.fn(async (url: string) => {
   const body = url.startsWith('/api/tasks?fleet=1')
-    ? FLEET
+    ? fleet
     : url.startsWith('/api/projects')
       ? { projects: [] }
       : { ok: true };
@@ -77,6 +92,7 @@ const fetchMock = vi.fn(async (url: string) => {
 });
 
 beforeEach(() => {
+  fleet = FLEET;
   fetchMock.mockClear();
   vi.stubGlobal('fetch', fetchMock);
 });
@@ -156,6 +172,119 @@ describe('StandingPage — repo filter', () => {
     expect(screen.getByText('Nothing open in “portal-kit” — showing all repos.')).toBeTruthy();
     expect(within(lane('Waiting on you')).getByText('2 blocked on you')).toBeTruthy();
     expect(chip(/^All repos/).getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('lets All repos clear a dead link, taking the note with it', async () => {
+    const router = await renderAt('/ops/standing?repo=portal-kit');
+
+    fireEvent.click(chip(/^All repos/));
+
+    expect(router.state.location.search).toBe('');
+    expect(screen.queryByText('Nothing open in “portal-kit” — showing all repos.')).toBeNull();
+  });
+
+  it('says a short name is ambiguous — not that nothing is open — when two owners share it', async () => {
+    fleet = {
+      ...FLEET,
+      blocked: [],
+      queue: [],
+      backlog: [
+        issue('hirobius/site', 1, 'Hirobius site'),
+        issue('adr-eng/site', 2, 'Adr-eng site'),
+      ],
+      prs: [],
+    };
+    await renderAt('/ops/standing?repo=site');
+
+    expect(
+      screen.getByText(
+        '“site” matches adr-eng/site and hirobius/site — pick one. Showing all repos.',
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText(/Nothing open in/)).toBeNull();
+    expect(within(lane('Backlog')).getByText('2 issues')).toBeTruthy();
+  });
+
+  it('selects the repo whose chip was tapped when two names differ only in case', async () => {
+    fleet = {
+      ...FLEET,
+      blocked: [],
+      queue: [],
+      backlog: [
+        issue('adr-eng/site', 1, 'Adr-eng site A'),
+        issue('adr-eng/site', 2, 'Adr-eng site B'),
+        issue('hirobius/Site', 3, 'Hirobius Site'),
+      ],
+      prs: [],
+    };
+    const router = await renderAt('/ops/standing');
+
+    fireEvent.click(chip(/^hirobius\/Site 1 open/));
+
+    expect(router.state.location.search).toBe('?repo=hirobius%2FSite');
+    expect(chip(/^hirobius\/Site/).getAttribute('aria-pressed')).toBe('true');
+    const backlog = lane('Backlog');
+    expect(within(backlog).getByText('1 issue')).toBeTruthy();
+    expect(within(backlog).getByText('Hirobius Site')).toBeTruthy();
+    expect(within(backlog).queryByText('Adr-eng site A')).toBeNull();
+  });
+
+  it('scopes the loop to the selected repo, so another repo’s failure does not read as this one’s', async () => {
+    fleet = {
+      ...FLEET,
+      loop: [
+        loop('lilac', {
+          state: 'failed',
+          conclusion: 'failure',
+          run: {
+            number: 99,
+            title: 'Ralph lilac#2',
+            url: 'https://github.com/hirobius/lilac/actions/runs/99',
+          },
+        }),
+        loop('ops', {}),
+      ],
+    };
+    await renderAt('/ops/standing?repo=ops');
+
+    const theLoop = lane('The loop');
+    // The header count and ops's own badge — and nothing failing.
+    expect(within(theLoop).getAllByText('idle')).toHaveLength(2);
+    expect(within(theLoop).queryByText('1 failing')).toBeNull();
+    expect(within(theLoop).queryByText('failed')).toBeNull();
+    expect(within(theLoop).queryByText('Ralph lilac#2')).toBeNull();
+    expect(within(theLoop).getByText('ops')).toBeTruthy();
+  });
+
+  it('shows the whole loop unfiltered, and a scoped empty state for a repo it does not watch', async () => {
+    fleet = {
+      ...FLEET,
+      loop: [
+        loop('lilac', {
+          state: 'failed',
+          conclusion: 'failure',
+          run: {
+            number: 99,
+            title: 'Ralph lilac#2',
+            url: 'https://github.com/hirobius/lilac/actions/runs/99',
+          },
+        }),
+        loop('ops', {}),
+      ],
+    };
+    const router = await renderAt('/ops/standing');
+
+    expect(within(lane('The loop')).getByText('1 failing')).toBeTruthy();
+    expect(within(lane('The loop')).getByText('Ralph lilac#2')).toBeTruthy();
+
+    fireEvent.click(chip(/^job-hunt/));
+
+    expect(router.state.location.search).toBe('?repo=job-hunt');
+    expect(
+      within(lane('The loop')).getByText(
+        'No loop is watched in job-hunt — runs are read only for repos with a ralph-* labelled issue.',
+      ),
+    ).toBeTruthy();
   });
 
   it('leaves the per-row actions working on a filtered lane', async () => {

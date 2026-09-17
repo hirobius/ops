@@ -107,9 +107,11 @@ export default function StandingPage() {
   });
 
   /**
-   * Which repo every issue and PR lane is scoped to — `?repo=`, resolved
-   * against the repos the sweep actually returned (see useRepoScope). The loop
-   * and deploys are not issue lanes and stay fleet-wide.
+   * Which repo the lanes are scoped to — `?repo=`, resolved against the repos
+   * the sweep actually returned (see useRepoScope). Every issue and PR lane AND
+   * the loop follow it: loop state is per repo, and a fleet-wide loop under a
+   * scoped queue would read another repo's failure as this one's. Deploys are
+   * Vercel projects with no repo field, so they alone stay fleet-wide.
    */
   const scope = useRepoScope(data);
   const selectedRepo = scope.selected?.repo ?? null;
@@ -130,7 +132,7 @@ export default function StandingPage() {
   const prs = filterByRepo(data?.prs ?? [], selectedRepo);
   const queue = filterByRepo(data?.queue ?? [], selectedRepo);
   const backlog = filterByRepo(data?.backlog ?? [], selectedRepo);
-  const loop = data?.loop ?? [];
+  const loop = filterByRepo(data?.loop ?? [], selectedRepo);
   const needsToken = error?.includes('GITHUB_TOKEN') ?? false;
   /** A real payload has arrived — not merely "a request finished". */
   const loaded = data !== null;
@@ -209,6 +211,7 @@ export default function StandingPage() {
           options={scope.options}
           selected={selectedRepo}
           unknown={scope.unknown}
+          ambiguous={scope.ambiguous}
           onSelect={scope.select}
         />
       ) : null}
@@ -290,7 +293,11 @@ export default function StandingPage() {
           error={error}
           loaded={loaded}
           empty={loop.length === 0}
-          emptyCopy="No repo carries a ralph-* label, so there is no loop to watch."
+          emptyCopy={scoped(
+            'No repo carries a ralph-* label, so there is no loop to watch.',
+            (name) =>
+              `No loop is watched in ${name} — runs are read only for repos with a ralph-* labelled issue.`,
+          )}
         >
           <ul style={s.list}>
             {loop.map((l: LoopState) => (

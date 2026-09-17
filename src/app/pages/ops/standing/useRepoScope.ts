@@ -13,7 +13,13 @@
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 import type { FleetStatus } from '../ralphStatus';
-import { repoOptions, resolveRepoParam, type RepoOption } from './repoScope';
+import {
+  repoOptions,
+  resolveRepoParam,
+  type RepoAmbiguity,
+  type RepoOption,
+  type RepoResolution,
+} from './repoScope';
 
 const PARAM = 'repo';
 
@@ -23,6 +29,8 @@ export interface RepoScope {
   selected: RepoOption | null;
   /** A `?repo=` value the loaded data does not hold. */
   unknown: string | null;
+  /** A short `?repo=` value that more than one loaded repo answers to. */
+  ambiguous: RepoAmbiguity | null;
   /** Push `?repo=<param>`, or drop the param for null. Other params survive. */
   select: (param: string | null) => void;
 }
@@ -32,8 +40,9 @@ export function useRepoScope(data: FleetStatus | null): RepoScope {
   const raw = params.get(PARAM);
 
   const options = useMemo(() => (data ? repoOptions(data) : []), [data]);
-  const { selected, unknown } = useMemo(
-    () => (data ? resolveRepoParam(raw, options) : { selected: null, unknown: null }),
+  const { selected, unknown, ambiguous } = useMemo<RepoResolution>(
+    () =>
+      data ? resolveRepoParam(raw, options) : { selected: null, unknown: null, ambiguous: null },
     [data, raw, options],
   );
 
@@ -49,5 +58,5 @@ export function useRepoScope(data: FleetStatus | null): RepoScope {
     [setParams],
   );
 
-  return { options, selected, unknown, select };
+  return { options, selected, unknown, ambiguous, select };
 }

@@ -16,7 +16,7 @@ import { useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { Tag } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
-import type { RepoOption } from './repoScope';
+import type { RepoAmbiguity, RepoOption } from './repoScope';
 
 interface RepoFilterProps {
   /** Busiest first — rendered in the order given. */
@@ -25,11 +25,18 @@ interface RepoFilterProps {
   selected: string | null;
   /** A `?repo=` value that matched nothing, so the page fell back to all repos. */
   unknown: string | null;
-  /** Receives the option's `param`, or null for All repos. Never the current choice. */
+  /** A short `?repo=` value several repos share, so the page fell back to all repos. */
+  ambiguous: RepoAmbiguity | null;
+  /**
+   * Receives the option's `param`, or null for All repos. Never the current
+   * choice — but All repos is not "current" while a stray `?repo=` is still in
+   * the URL, even though every repo is showing: tapping it is how the operator
+   * clears that param and its note.
+   */
   onSelect: (param: string | null) => void;
 }
 
-export function RepoFilter({ options, selected, unknown, onSelect }: RepoFilterProps) {
+export function RepoFilter({ options, selected, unknown, ambiguous, onSelect }: RepoFilterProps) {
   const rowRef = useRef<HTMLDivElement>(null);
   const total = options.reduce((sum, o) => sum + o.count, 0);
 
@@ -61,7 +68,7 @@ export function RepoFilter({ options, selected, unknown, onSelect }: RepoFilterP
             count={total}
             detail={`${total} open`}
             active={selected === null}
-            onClick={pick(null, selected === null)}
+            onClick={pick(null, selected === null && unknown === null && ambiguous === null)}
           />
           {options.map((o) => (
             <Chip
@@ -78,6 +85,10 @@ export function RepoFilter({ options, selected, unknown, onSelect }: RepoFilterP
       {unknown !== null ? (
         <p role="status" style={s.note}>
           Nothing open in “{unknown}” — showing all repos.
+        </p>
+      ) : ambiguous !== null ? (
+        <p role="status" style={s.note}>
+          “{ambiguous.given}” matches {sentenceList(ambiguous.repos)} — pick one. Showing all repos.
         </p>
       ) : null}
     </div>
@@ -103,6 +114,13 @@ function Chip({
       <span style={s.count}>{count}</span>
     </Tag>
   );
+}
+
+/** `a`, `a and b`, `a, b and c`. */
+function sentenceList(items: string[]): string {
+  return items.length < 2
+    ? (items[0] ?? '')
+    : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`;
 }
 
 function plural(n: number, noun: string): string {
