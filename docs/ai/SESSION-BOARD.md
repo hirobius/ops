@@ -75,15 +75,14 @@ believes it.
 
 **Nothing is in flight. `StandingPage` and `lib/github/issues.mjs` are free.**
 
-**The one thing waiting on a human:** `claude/ops-dashboard-open-issues-slp7tz`,
-5 commits, green on current `main`, **unmerged with no PR**. Adrian was asked and
-the thread closed first. Do not rebuild any of it — read the branch.
+**The Standing work is merged as ops#367** (squash, 2026-09-17). Do not rebuild
+any of it — read it on `main`, not on its branch, which may be gone.
 
 **One contract change that will bite a caller you did not expect.**
 `listOpenIssues()` no longer returns an array. It returns
 `{ issues, truncated, fetched }`. `fleet-status.mjs`, `api/tasks.ts` and
-`scripts/discord-bot.mjs` are updated on that branch; anything written against
-`main` in the meantime is not. The reason it was worth breaking: `truncated` was
+`scripts/discord-bot.mjs` were updated in ops#367; anything branched from `main`
+before it merged and calling `listOpenIssues()` is not. The reason it was worth breaking: `truncated` was
 computed and sent **only to `console.warn`**, so a fleet past 500 open issues
 would have silently under-reported itself on the page whose whole claim is that
 it shows the entire board.

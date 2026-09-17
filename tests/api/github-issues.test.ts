@@ -636,8 +636,8 @@ describe('makeGitHubPort().getIssue (Standing run guard)', () => {
     vi.unstubAllEnvs();
   });
 
-  it('GETs one issue and returns its state and label names', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
+  function issueFetch(body: string | null) {
+    return vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       headers: { get: () => null },
@@ -645,15 +645,44 @@ describe('makeGitHubPort().getIssue (Standing run guard)', () => {
         number: 44,
         state: 'open',
         labels: [{ name: 'ralph-ready' }, { name: 'p1' }],
-        body: 'not forwarded',
+        body,
       }),
     });
+  }
+
+  it('GETs one issue and returns its state, label names and DoD verdict — never the body', async () => {
+    const fetchMock = issueFetch('not forwarded');
     vi.stubGlobal('fetch', fetchMock);
 
     const issue = await makeGitHubPort()!.getIssue({ owner: 'hirobius', repo: 'ops', number: 44 });
 
     expect(fetchMock.mock.calls[0][0]).toBe('https://api.github.com/repos/hirobius/ops/issues/44');
-    expect(issue).toEqual({ number: 44, state: 'open', labels: ['ralph-ready', 'p1'] });
+    expect(issue).toEqual({
+      number: 44,
+      state: 'open',
+      labels: ['ralph-ready', 'p1'],
+      hasDod: false,
+    });
+  });
+
+  it("derives hasDod with next.sh's own has_dod_marker rule", async () => {
+    // run_now refuses a DoD-less issue because an explicit dispatch skips
+    // next.sh, which would have parked it on sight. The verdict must be the
+    // loop's, so a body the loop accepts is never refused here.
+    for (const [body, want] of [
+      ['## Acceptance\nthe page loads', true],
+      ['- [ ] ship it', true],
+      ['just prose', false],
+      [null, false],
+    ] as const) {
+      vi.stubGlobal('fetch', issueFetch(body));
+      const issue = await makeGitHubPort()!.getIssue({
+        owner: 'hirobius',
+        repo: 'ops',
+        number: 44,
+      });
+      expect(issue.hasDod).toBe(want);
+    }
   });
 
   it('throws an actionable token error on 401/403', async () => {

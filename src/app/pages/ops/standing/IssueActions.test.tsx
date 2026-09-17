@@ -99,6 +99,9 @@ describe('IssueActions', () => {
       'is parked, even with ralph-ready',
       { ...QUEUED, label: 'ralph-parked', labels: ['ralph-parked', 'ralph-ready'] },
     ],
+    // next.sh would park it on sight; a dispatch skips next.sh and would spend
+    // a whole iteration on it instead.
+    ['has no DoD', { ...QUEUED, hasDod: false }],
   ])('does not offer run when the row %s', (_why, issue) => {
     render(issue);
     expect(runButton()).toBeNull();
@@ -111,6 +114,15 @@ describe('IssueActions', () => {
     expect(confirm).toHaveBeenCalledTimes(1);
     expect(confirm.mock.calls[0][0]).toMatch(/ops#44/);
     expect(onAct).not.toHaveBeenCalled();
+  });
+
+  it('says what a dispatch skips — a second Ralph PR can stack, attempt budgets do not apply', () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    render(QUEUED);
+    act(() => runButton()!.click());
+    const question = confirm.mock.calls[0][0] as string;
+    expect(question).toMatch(/second Ralph PR/);
+    expect(question).toMatch(/attempt/);
   });
 
   it('dispatches run_now once confirmed', () => {

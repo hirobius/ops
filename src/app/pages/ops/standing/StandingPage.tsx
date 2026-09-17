@@ -605,10 +605,11 @@ function IssueMeta({ issue }: { issue: FleetIssue }) {
  * `ralph/next.sh` ranks on, and Run jumps the queue outright.
  *
  * Run and arming auto act on the loop, not on a label, so both ask first.
- * Run is offered only on a row in the queue lane that no iteration holds —
- * the rule the server re-checks against a fresh read before it dispatches —
- * and stays disabled once it has fired. Disarming auto stays one tap: taking
- * a risk away should never cost more than adding it.
+ * Run is offered only on a row in the queue lane that no iteration holds and
+ * that carries a DoD — the rule the server re-checks against a fresh read
+ * before it dispatches — and stays disabled once it has fired. A dispatch
+ * skips ralph/next.sh, so its confirm names what that costs. Disarming auto
+ * stays one tap: taking a risk away should never cost more than adding it.
  */
 export function IssueActions({
   id,
@@ -639,9 +640,10 @@ export function IssueActions({
     if (window.confirm(question)) act(issue.repo, issue.number, action, label);
   };
 
-  // In the queue lane (ralph-ready, not parked or gated) and not held by an
-  // iteration: an explicit dispatch steals any claim, so nothing else qualifies.
-  const runnable = issue.queued && !issue.wip && !issue.label;
+  // In the queue lane (ralph-ready, not parked or gated), not held by an
+  // iteration, and with a DoD: an explicit dispatch steals any claim and skips
+  // ralph/next.sh, which would park a DoD-less issue on sight.
+  const runnable = issue.queued && !issue.wip && !issue.label && issue.hasDod;
   const fired = dispatched.has(id);
 
   const primary =
@@ -691,7 +693,9 @@ export function IssueActions({
           variant="tertiary"
           disabled={working || fired}
           onClick={ask(
-            `Run the loop on ${name} now?\n\nThis dispatches ralph.yml at this issue and jumps the queue.`,
+            `Run the loop on ${name} now?\n\nThis dispatches ralph.yml at this issue and jumps ` +
+              'the queue. It skips ralph/next.sh: it may stack a second Ralph PR on one already ' +
+              'open, and the attempt budgets do not apply.',
             'run_now',
             'Dispatched — jumps the queue',
           )}

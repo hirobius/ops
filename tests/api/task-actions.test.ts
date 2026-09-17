@@ -1335,7 +1335,7 @@ describe('applyTaskAction — bump_priority (Standing, mirror-free)', () => {
  * recorded, so a test can assert that NOTHING fired as well as what did.
  */
 function runPort(
-  issue: { state: string; labels: string[] },
+  issue: { state: string; labels: string[]; hasDod?: boolean },
   dispatch: (i: unknown) => Promise<{ runUrl?: string }> = async () => ({
     runUrl: 'https://github.com/someone/brand-new/actions/workflows/ralph.yml',
   }),
@@ -1358,7 +1358,7 @@ function runPort(
   };
 }
 
-const QUEUED = { state: 'open', labels: ['ralph-ready', 'p1'] };
+const QUEUED = { state: 'open', labels: ['ralph-ready', 'p1'], hasDod: true };
 
 describe('applyTaskAction — run_now (Standing, mirror-free)', () => {
   it('dispatches ralph.yml at the issue straight from the key, with no Supabase row', async () => {
@@ -1376,30 +1376,52 @@ describe('applyTaskAction — run_now (Standing, mirror-free)', () => {
     expect(result).toMatchObject({ status: 200, body: { ok: true } });
   });
 
-  // An explicit issue number overrides ralph.yml's single-flight and priority
-  // guard AND steals any claim. So the button is only as safe as the read in
-  // front of it: every case below must 409 with nothing dispatched.
+  // An explicit issue number skips ralph/next.sh entirely — its single-flight
+  // and priority guard, its DoD check, its attempt budgets — AND steals any
+  // claim. So the button is only as safe as the read in front of it: every
+  // case below must 409 with nothing dispatched. Each fixture carries a DoD so
+  // it fails for exactly the reason it names.
   it.each([
-    ['lacks ralph-ready', { state: 'open', labels: ['p1'] }, 'RUN_NOT_QUEUED', /ralph-ready/],
+    [
+      'lacks ralph-ready',
+      { state: 'open', labels: ['p1'], hasDod: true },
+      'RUN_NOT_QUEUED',
+      /ralph-ready/,
+    ],
     [
       'is ralph-parked',
-      { state: 'open', labels: ['ralph-parked', 'ralph-ready'] },
+      { state: 'open', labels: ['ralph-parked', 'ralph-ready'], hasDod: true },
       'RUN_NOT_QUEUED',
       /ralph-parked/,
     ],
     [
       'carries a blocking label',
-      { state: 'open', labels: ['needs-adrian', 'ralph-ready'] },
+      { state: 'open', labels: ['needs-adrian', 'ralph-ready'], hasDod: true },
       'RUN_NOT_QUEUED',
       /needs-adrian/,
     ],
-    ['is closed', { state: 'closed', labels: ['ralph-ready'] }, 'RUN_ISSUE_CLOSED', /closed/],
+    [
+      'is closed',
+      { state: 'closed', labels: ['ralph-ready'], hasDod: true },
+      'RUN_ISSUE_CLOSED',
+      /closed/,
+    ],
     [
       'already carries ralph-wip',
-      { state: 'open', labels: ['ralph-ready', 'ralph-wip'] },
+      { state: 'open', labels: ['ralph-ready', 'ralph-wip'], hasDod: true },
       'RUN_ALREADY_WIP',
       /ralph-wip/,
     ],
+    // next.sh parks a DoD-less issue on sight; a dispatch naming it never runs
+    // next.sh, so without this it would burn a whole iteration instead.
+    [
+      'has no DoD marker',
+      { state: 'open', labels: ['ralph-ready'], hasDod: false },
+      'RUN_NO_DOD',
+      /DoD/,
+    ],
+    // A port that cannot say fails closed, same as next.sh on an API failure.
+    ['has an unknown DoD verdict', { state: 'open', labels: ['ralph-ready'] }, 'RUN_NO_DOD', /DoD/],
   ])('409s without dispatching when the issue %s', async (_why, issue, code, message) => {
     const { sb } = makeSb();
     const { dispatched, github } = runPort(issue);
