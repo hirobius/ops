@@ -325,6 +325,18 @@
       "supportsJson": true
     },
     {
+      "id": "check-layout-tests",
+      "description": "Layout-integrity Playwright suite (pnpm run test:layout: route coverage + tests/layout-integrity.spec.ts against a vite build/preview server on :5200). Fails on any layout collision, overflow, or uncovered route. Formerly a bespoke quality.yml step; folded into the registry by ops#241.",
+      "severity": "error",
+      "gateScript": "scripts/check-layout-tests.mjs",
+      "fixturePath": "fixtures/check-layout-tests",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "ci-pr",
+      "supportsJson": true,
+      "skipMetaProbe": "drives a full Playwright run that rebuilds dist/ and binds :5200 — a second copy spawned by a meta-probe during the ci-pr run would race the real one"
+    },
+    {
       "id": "check-licenses",
       "description": "License compliance gate. Runs pnpm licenses list --prod and blocks copyleft/restrictive licenses (GPL/AGPL/LGPL/SSPL/BUSL/EUPL/OSL/CC-BY-NC/CDDL).",
       "severity": "error",
@@ -511,6 +523,30 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "pnpm-meta"
+    },
+    {
+      "id": "check-type-coverage",
+      "description": "Type-coverage floor (pnpm run check:type-coverage: type-coverage --at-least 99.9). Fails when coverage drops below the floor set in package.json. Formerly a bespoke quality.yml step; folded into the registry by ops#241.",
+      "severity": "error",
+      "gateScript": "scripts/check-type-coverage.mjs",
+      "fixturePath": "fixtures/check-type-coverage",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "ci-pr",
+      "supportsJson": true,
+      "skipMetaProbe": "re-runs the whole-program type-coverage analysis — the ci-pr run already reports it; a meta-probe copy only duplicates the work"
+    },
+    {
+      "id": "check-typecheck",
+      "description": "Whole-program TypeScript typecheck (pnpm run typecheck: tsc --noEmit -p tsconfig.typecheck.json). Fails on any type error. Formerly a bespoke quality.yml step; folded into the registry by ops#241.",
+      "severity": "error",
+      "gateScript": "scripts/check-typecheck.mjs",
+      "fixturePath": "fixtures/check-typecheck",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "ci-pr",
+      "supportsJson": true,
+      "skipMetaProbe": "re-runs the whole-program tsc check — the ci-pr run already reports it; a meta-probe copy only duplicates the work"
     },
     {
       "id": "check-unresponsive-grids",

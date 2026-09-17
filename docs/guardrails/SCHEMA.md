@@ -25,6 +25,16 @@ automated quality gate in the Hirobius repo.
 | `owner`       | `string`                           | yes      | Responsible party. Default: `"Adrian"`.                                                         |
 | `source`      | `"human" \| "hermes-distillation"` | yes      | `"human"` for hand-authored gates; `"hermes-distillation"` for auto-generated gates.            |
 
+### Optional: `skipMetaProbe`
+
+`"skipMetaProbe": "<reason>"` keeps a gate out of meta-gates that spawn every
+registered gate to introspect it (`audit-gates-supportjson` runs
+`node <gateScript> --json`). Use it only for gates that drive a full toolchain run
+(tsc, type-coverage, a Playwright build + preview server): a second copy spawned
+mid-run duplicates the work or races the real one. The reason is mandatory — a
+blank string or `true` is ignored and the gate is still probed
+(`selectProbeTargets` in `scripts/lib/guardrail-core.mjs`, ops#241).
+
 ## Adding a new gate
 
 1. Create `scripts/check-<name>.mjs` with a JSDoc block at the top.
