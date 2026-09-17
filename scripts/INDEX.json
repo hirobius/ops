@@ -508,7 +508,7 @@
       "purpose": "check-parked-triggers — evaluate the re-entry triggers in docs/ai/PARKED.md.",
       "pnpm": ["parked:check"],
       "gate": {
-        "channel": "pnpm-meta",
+        "channel": "ci-scheduled",
         "severity": "warn"
       }
     },

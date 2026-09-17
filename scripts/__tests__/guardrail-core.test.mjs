@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import {
   loadRegistry,
   selectGates,
+  selectProbeTargets,
   runGateCaptured,
   REGISTRY_PATH,
 } from '../lib/guardrail-core.mjs';
@@ -144,12 +145,61 @@ describe('runGateCaptured', () => {
     const dir = tmp();
     const script = join(dir, 'slow.mjs');
     // Block far longer than the timeout via a busy spin (no async needed).
-    writeFileSync(
-      script,
-      'const end = Date.now() + 5000; while (Date.now() < end) {}\n',
-    );
+    writeFileSync(script, 'const end = Date.now() + 5000; while (Date.now() < end) {}\n');
     const r = runGateCaptured(script, { timeoutMs: 150 });
     expect(r.timedOut).toBe(true);
     expect(r.exitCode).toBe(null);
+  });
+});
+
+describe('selectProbeTargets', () => {
+  // Meta-gates (audit-gates-supportjson) spawn every registered gate. A gate
+  // that drives a full toolchain run opts out with a non-empty reason string.
+  const PROBE_REGISTRY = {
+    gates: [
+      { id: 'plain', firingChannel: 'pre-commit' },
+      { id: 'meta', firingChannel: 'pnpm-meta' },
+      { id: 'self', firingChannel: 'ci-pr' },
+      { id: 'heavy', firingChannel: 'ci-pr', skipMetaProbe: 'drives a full Playwright run' },
+      { id: 'blank-reason', firingChannel: 'ci-pr', skipMetaProbe: '   ' },
+      { id: 'not-a-string', firingChannel: 'manual', skipMetaProbe: true },
+    ],
+  };
+
+  it('keeps probeable gates in declaration order', () => {
+    const r = selectProbeTargets({
+      registry: PROBE_REGISTRY,
+      skipChannels: ['pnpm-meta'],
+      selfId: 'self',
+    });
+    expect(r.targets.map((g) => g.id)).toEqual(['plain', 'blank-reason', 'not-a-string']);
+  });
+
+  it('reports each opted-out gate with its reason', () => {
+    const r = selectProbeTargets({
+      registry: PROBE_REGISTRY,
+      skipChannels: ['pnpm-meta'],
+      selfId: 'self',
+    });
+    expect(r.optedOut).toEqual([{ id: 'heavy', reason: 'drives a full Playwright run' }]);
+  });
+
+  it('does not honour an opt-out without a reason (blank or non-string)', () => {
+    const r = selectProbeTargets({ registry: PROBE_REGISTRY });
+    const ids = r.targets.map((g) => g.id);
+    expect(ids).toContain('blank-reason');
+    expect(ids).toContain('not-a-string');
+    expect(ids).not.toContain('heavy');
+  });
+
+  it('defaults to no channel skips and no self id', () => {
+    const r = selectProbeTargets({ registry: PROBE_REGISTRY });
+    expect(r.targets.map((g) => g.id)).toEqual([
+      'plain',
+      'meta',
+      'self',
+      'blank-reason',
+      'not-a-string',
+    ]);
   });
 });

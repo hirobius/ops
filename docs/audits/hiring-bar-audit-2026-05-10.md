@@ -16,7 +16,7 @@ All 5 declared prerender routes succeeded:
 - `✓ /visuals → dist/visuals/index.html`
 - `✓ /info → dist/info/index.html`
 
-Routes not prerendered (SPA fallback via Vercel rewrite): `/case-studies/the-ranch-foundation`, `/vibe-sketchbook/*`, `/lab/incubator`.
+Routes not prerendered (SPA fallback via Vercel rewrite): `/case-studies/<nonprofit-slug>`, `/vibe-sketchbook/*`, `/lab/incubator`.
 
 ---
 
@@ -24,10 +24,10 @@ Routes not prerendered (SPA fallback via Vercel rewrite): `/case-studies/the-ran
 
 ### `/`
 
-- 4 tiles render correctly: Microsoft Design Systems, Visual Design, The Ranch Foundation, Vibe Sketchbook.
+- 4 tiles render correctly: Microsoft Design Systems, Visual Design, Nonprofit client, Vibe Sketchbook.
 - Tile titles are clear and distinct. Caption ("DS showcase", "Work samples", "Nonprofit case study", "Playground") is legible.
 - `<h1>` is sr-only (`"Adrian Milsap portfolio home"`) — correct a11y pattern; visual identity comes from tile layout.
-- Ranch Foundation tile uses generic `plus` mark logo — same glyph as Vibe Sketchbook tile (`✦`). **fix-later**: Adrian to supply TRF mark (already noted in source comment).
+- Nonprofit client tile uses generic `plus` mark logo — same glyph as Vibe Sketchbook tile (`✦`). **fix-later**: Adrian to supply client mark (already noted in source comment).
 - Grid logic: 1 col mobile / 2 col md / 3 col xl — correct per spec. No overflow or layout-breaking code visible.
 - No console.log, no TODO/FIXME, no broken asset refs.
 - Status: **PASS**
@@ -73,14 +73,14 @@ Routes not prerendered (SPA fallback via Vercel rewrite): `/case-studies/the-ran
 - No console.log, no TODO/FIXME, no broken asset refs.
 - Status: **FIXED** (noindex now in static HTML)
 
-### `/case-studies/the-ranch-foundation`
+### `/case-studies/<nonprofit-slug>`
 
 - **Three visible placeholder blocks** were present — dashed-border divs with literal text:
-  - `"Visual placeholder — ranchfoundation.com screenshot"` (§ Why this exists)
-  - `"Visual placeholder — Wix Harmony layout + wellness practice card annotation"` (§ Decisions surfaced)
+  - `"Visual placeholder — client site screenshot"` (§ Why this exists)
+  - `"Visual placeholder — layout annotation"` (§ Decisions surfaced)
   - `"Visual placeholder — delivery status table"` (§ What's live / what's pending)
 
-  These would read as unfinished work to any hiring manager. **Fixed**: all three removed. The surrounding prose is sufficient to carry each section. Asset placeholders remain as HTML comments only (`{/* T2: replace with TRF asset */}`).
+  These would read as unfinished work to any hiring manager. **Fixed**: all three removed. The surrounding prose is sufficient to carry each section. Asset placeholders remain as HTML comments only (`{/* T2: replace with client asset */}`).
 
 - **React key warning** — `AT_A_GLANCE.map()` used bare `<>` fragments without `key` prop. `<dt>` and `<dd>` had keys but the fragment wrapping them did not, causing a React console warning. **Fixed**: fragments replaced with keyed `<Fragment key={label}>`. Import added.
 
@@ -102,7 +102,7 @@ Routes not prerendered (SPA fallback via Vercel rewrite): `/case-studies/the-ran
 **Mobile responsiveness signals**
 
 - Homepage uses JS-driven column count (`resolveHomeTileColumns`) with explicit 1/2/3 breakpoints. Clean.
-- Ranch Foundation, Hirobius, and MDS pages use `isMobile` hook for layout branching. Patterns are consistent.
+- Nonprofit client, Hirobius, and MDS pages use `isMobile` hook for layout branching. Patterns are consistent.
 - Visuals page has explicit mobile reorder for the Xbox App section — thoughtful.
 
 **Asset load verification**
@@ -113,7 +113,7 @@ Routes not prerendered (SPA fallback via Vercel rewrite): `/case-studies/the-ran
 **Console errors / warnings**
 
 - No `console.log` found in any public-facing page source.
-- One React key warning in TRF page (fixed in this audit).
+- One React key warning in the nonprofit page (fixed in this audit).
 - Prerender script `--localstorage-file` warning is a build-time artifact, not a runtime issue.
 
 **Accessibility quick scan**
@@ -131,8 +131,8 @@ Routes not prerendered (SPA fallback via Vercel rewrite): `/case-studies/the-ran
 
 ## Fix-now actions taken
 
-1. **TRF placeholder text removed** — `src/app/pages/hds/RanchFoundationCaseStudyPage.tsx` — 3 visible dashed placeholder divs replaced with HTML-comment stubs only.
-2. **TRF React key warning fixed** — same file — `AT_A_GLANCE.map()` fragments keyed via `<Fragment key={label}>`, `Fragment` import added.
+1. **Nonprofit page placeholder text removed** — `src/app/pages/hds/NonprofitCaseStudyPage.tsx` — 3 visible dashed placeholder divs replaced with HTML-comment stubs only.
+2. **Nonprofit page React key warning fixed** — same file — `AT_A_GLANCE.map()` fragments keyed via `<Fragment key={label}>`, `Fragment` import added.
 3. **Hirobius noindex in static HTML** — `scripts/prerender.mjs` — `noindex: true` field added to route entry; `injectIntoShell` now emits `<meta name="robots" content="noindex" />` when flag is set; strip regex updated to be idempotent. Verified in rebuilt `dist/case-studies/hirobius/index.html`.
 4. **Vibe Sketchbook default redirect** — `src/app/routes.tsx` — index route changed from `cloth-simulation` (WIP) to `logo-lab` (live).
 
@@ -140,13 +140,13 @@ Routes not prerendered (SPA fallback via Vercel rewrite): `/case-studies/the-ran
 
 ## Fix-later (T2 backlog)
 
-- **TRF not prerendered** — add `/case-studies/the-ranch-foundation` entry to `prerender.mjs` ROUTES with title/description/ogImage. Low urgency given Vercel SPA rewrite fallback.
+- **Nonprofit page not prerendered** — add `/case-studies/<nonprofit-slug>` entry to `prerender.mjs` ROUTES with title/description/ogImage. Low urgency given Vercel SPA rewrite fallback.
 - **MDS Pillar 02 empty gallery** — `gallerySlots: []` for Operational Scalability. Add assets or remove the empty gallery render path.
 - **MDS visual heading semantic** — `<p style={{...display1}}>` should be `<h2>` for semantic correctness. Currently has sr-only `<h1>` + visible `<p>`. Fix heading level.
 - **Vibe Sketchbook index page** — `SketchbookIndexPage` exists but is unreachable. Either wire it as the index route (replacing the current redirect), or delete it.
 - **`/info` Hirobius link** — consider whether the `/ops/hds/color` link should remain public-facing or be rewritten as prose-only for visitors without the ops password.
 - **Carousel scroll-driven stacking** — Safari < 18 gets plain horizontal scroll, no stack animation. Acceptable fallback per `@supports` guard; note for T2 refinement.
-- **Both home tiles use `✦` logo** — Ranch Foundation and Vibe Sketchbook share the same `plus` glyph. Adrian to supply TRF mark.
+- **Both home tiles use `✦` logo** — Nonprofit client and Vibe Sketchbook share the same `plus` glyph. Adrian to supply client mark.
 - **Focus visibility** — not tested at pixel level; inherits HDS tokens; surface for T2 a11y pass.
 
 ---

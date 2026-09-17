@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Ship the public portfolio at production-ready quality for design-systems role applications. Hide HDS docs + Hirobius case study under a locked `/ops/*`, tighten existing case studies, add a Ranch Foundation case study, audit and close hiring-bar gaps, then merge to `main` for Vercel deploy.
+**Goal:** Ship the public portfolio at production-ready quality for design-systems role applications. Hide HDS docs + Hirobius case study under a locked `/ops/*`, tighten existing case studies, add a nonprofit client case study, audit and close hiring-bar gaps, then merge to `main` for Vercel deploy.
 
 **Architecture:** React Router 7 single-page app, Vite + prerender for static deploy on Vercel. HDS doc subtree relocates from `/hds/*` to `/ops/hds/*` and gains a client-side password gate. Old `/hds/*` URLs redirect to new locations. Editorial work (case study tightening) is judgment-heavy and reviewed by Adrian, not unit-tested.
 
@@ -19,14 +19,14 @@
 - `src/lib/ops-gate.ts` — SHA-256 hash check + localStorage TTL helpers (pure logic, unit-testable)
 - `src/lib/ops-gate.test.ts` — vitest tests for `ops-gate.ts`
 - `src/app/components/OpsGate.tsx` — gate UI wrapper component for `/ops/*` routes
-- `src/app/pages/hds/RanchFoundationCaseStudyPage.tsx` — new case study page
+- `src/app/pages/hds/NonprofitCaseStudyPage.tsx` — new case study page
 - `docs/audits/hiring-bar-audit-2026-05-10.md` — hiring-bar audit punch list
 
 **Modified files:**
 
 - `.gitignore` — append local-only paths (already partially staged)
-- `src/app/routes.tsx` — relocate `/hds/*` under `/ops/hds/*`, add redirects, wrap `/ops/*` in `<OpsGate>`, route Ranch case study, 404 wet-paint + portfolio/draft
-- `src/app/pages/hds/PortfolioHomePage.tsx` — tile lineup: remove 2, add Ranch tile
+- `src/app/routes.tsx` — relocate `/hds/*` under `/ops/hds/*`, add redirects, wrap `/ops/*` in `<OpsGate>`, route Nonprofit case study, 404 wet-paint + portfolio/draft
+- `src/app/pages/hds/PortfolioHomePage.tsx` — tile lineup: remove 2, add Nonprofit tile
 - `src/app/pages/hds/MicrosoftDesignSystemsPage.tsx` — tighten copy
 - `src/app/pages/hds/HirobiusCaseStudyPage.tsx` — tighten copy + add `<Helmet>`-style noindex
 - `src/app/components/doc-shell.tsx` — `to="/hds"` → `to="/ops/hds"`
@@ -821,11 +821,11 @@ EOF
 
 ---
 
-## Task 7: Ranch Foundation case study scaffold + route
+## Task 7: nonprofit client case study scaffold + route
 
 **Files:**
 
-- Create: `src/app/pages/hds/RanchFoundationCaseStudyPage.tsx`
+- Create: `src/app/pages/hds/NonprofitCaseStudyPage.tsx`
 - Modify: `src/app/routes.tsx`
 
 - [ ] **Step 1: Read the Hirobius case study for style/structure**
@@ -834,16 +834,15 @@ EOF
 sed -n '1,60p' src/app/pages/hds/HirobiusCaseStudyPage.tsx
 ```
 
-The Ranch case study mirrors this file's structure: imports, `@category`, the same set of HDS doc primitives (`TextLockup`, etc.), motion wrapper, TOC registration.
+The nonprofit case study mirrors this file's structure: imports, `@category`, the same set of HDS doc primitives (`TextLockup`, etc.), motion wrapper, TOC registration.
 
-- [ ] **Step 2: Create skeleton at `src/app/pages/hds/RanchFoundationCaseStudyPage.tsx`**
+- [ ] **Step 2: Create skeleton at `src/app/pages/hds/NonprofitCaseStudyPage.tsx`**
 
 ```tsx
 // @doc-exempt: portfolio case study, not a consumer-facing HDS component
 /**
- * RanchFoundationCaseStudyPage
- * Case study for The Ranch Foundation — veteran nonprofit, ongoing engagement
- * since 2021 (Tech Design Director, board role + web/tech consulting).
+ * NonprofitCaseStudyPage
+ * Case study for a nonprofit client.
  * @category Portfolio
  */
 import { useLayoutEffect } from 'react';
@@ -893,7 +892,7 @@ function CaseStudySection({
   );
 }
 
-export default function RanchFoundationCaseStudyPage() {
+export default function NonprofitCaseStudyPage() {
   return (
     <motion.article
       className="hds-page-enter"
@@ -907,11 +906,11 @@ export default function RanchFoundationCaseStudyPage() {
       transition={{ duration: hds.motion.spatial.duration, ease: hds.motion.spatial.easing }}
     >
       <header>
-        <h1 style={SR_ONLY}>The Ranch Foundation case study</h1>
+        <h1 style={SR_ONLY}>Nonprofit client case study</h1>
         <TextLockup
           size="hero"
-          title="The Ranch Foundation"
-          description="Tech Design Director and ongoing technology partner for a veteran-focused holistic-healing nonprofit. Five-year engagement, board role, web + tooling work."
+          title="Nonprofit client"
+          description="Case study for a nonprofit client."
         />
       </header>
 
@@ -926,13 +925,13 @@ export default function RanchFoundationCaseStudyPage() {
 Add lazy import near the other case studies:
 
 ```tsx
-const RanchFoundationCaseStudyPage = lazy(() => import('./pages/hds/RanchFoundationCaseStudyPage'));
+const NonprofitCaseStudyPage = lazy(() => import('./pages/hds/NonprofitCaseStudyPage'));
 ```
 
 Add the route as a sibling to `case-studies/hirobius` (top-level under `/`):
 
 ```tsx
-{ path: 'case-studies/the-ranch-foundation', element: <LazyHDS Page={RanchFoundationCaseStudyPage} /> },
+{ path: 'case-studies/<nonprofit-slug>', element: <LazyHDS Page={NonprofitCaseStudyPage} /> },
 ```
 
 - [ ] **Step 4: Typecheck**
@@ -944,12 +943,12 @@ pnpm typecheck 2>&1 | tail -5
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/app/pages/hds/RanchFoundationCaseStudyPage.tsx src/app/routes.tsx
+git add src/app/pages/hds/NonprofitCaseStudyPage.tsx src/app/routes.tsx
 git commit -m "$(cat <<'EOF'
-feat(case-study): scaffold Ranch Foundation case study + route
+feat(case-study): scaffold nonprofit client case study + route
 
-Skeleton page at /case-studies/the-ranch-foundation. Sections
-filled in follow-up commit using clients/the-ranch-foundation/ data.
+Skeleton page at /case-studies/<nonprofit-slug>. Sections
+filled in follow-up commit using clients/<nonprofit-slug>/ data.
 
 Refs: site-redeploy-track1
 EOF
@@ -958,42 +957,42 @@ EOF
 
 ---
 
-## Task 8: Ranch Foundation case study content
+## Task 8: nonprofit client case study content
 
 **Files:**
 
-- Modify: `src/app/pages/hds/RanchFoundationCaseStudyPage.tsx`
+- Modify: `src/app/pages/hds/NonprofitCaseStudyPage.tsx`
 
 This is editorial work. Owner: sonnet, full creative discretion within the structure below.
 
 - [ ] **Step 1: Read source material**
 
 ```bash
-cat clients/the-ranch-foundation/meta.json
-cat clients/the-ranch-foundation/notes.md
-cat clients/the-ranch-foundation/goals.json
-cat clients/the-ranch-foundation/retainer.json 2>/dev/null
-cat clients/the-ranch-foundation/checklist.json 2>/dev/null
-cat clients/the-ranch-foundation/tasks.json 2>/dev/null
+cat clients/<nonprofit-slug>/meta.json
+cat clients/<nonprofit-slug>/notes.md
+cat clients/<nonprofit-slug>/goals.json
+cat clients/<nonprofit-slug>/retainer.json 2>/dev/null
+cat clients/<nonprofit-slug>/checklist.json 2>/dev/null
+cat clients/<nonprofit-slug>/tasks.json 2>/dev/null
 ```
 
-Internalize: 5-year engagement since founding (2021), Tech Design Director board role, primary contact Daniel Litzenberger (CEO/Army Ranger), Spokane WA, 501(c)(3), holistic healing for combat veterans, Wix-based current site rebuild in progress, Harmony layout adopted, "wellness practices" (renamed from services), three-item nav, donation platform blocked on EIN+Stripe verification.
+Internalize the engagement context from those files.
 
 - [ ] **Step 2: Write the case study sections**
 
 Inside the `<motion.article>`, after `<header>`, add `<CaseStudySection>` components. Aim for ~400 lines total in this file. Sections to write:
 
 1. **At a glance** — 4-line metadata (role, dates, scope, status), no narrative
-2. **Why this exists** — what TRF does, who it serves, why a small veteran nonprofit needed sustained design + tech help
-3. **The role** — Tech Design Director board seat + ongoing engagement; what that means in practice (strategy, web, tooling, decisions)
-4. **Constraints** — Wix-based stack (not React rebuild), volunteer photographers, 501(c)(3) compliance, donation-platform verification gate, CEO is field-experienced veteran not tech-trained
-5. **Decisions surfaced** — Harmony layout adoption, "wellness practices" naming, three-item nav, descriptive image naming for SEO/screen-readers, no sign-in / no blog by design, CTA copy ("Learn More" not "Book Now"), Cal.com for veteran scheduling
-6. **What's live / what's pending** — current state of the Wix rebuild, Google Workspace adoption, donation platform status, Cal.com evaluation
-7. **What working with TRF teaches** — short reflection: design systems thinking applied beyond enterprise; constraint-shaped decisions; why sustained engagement beats one-shot rebuilds
+2. **Why this exists** — what the client needed help with
+3. **The role** — what the engagement means in practice (strategy, web, tooling, decisions)
+4. **Constraints** — the platform, resourcing and compliance constraints that shaped the work
+5. **Decisions surfaced** — the layout, navigation, naming and copy decisions, and why
+6. **What's live / what's pending** — current state of the work
+7. **Reflection** — short: design systems thinking applied beyond enterprise; constraint-shaped decisions
 
-**Voice:** Adrian's voice — direct, declarative, uses concrete details. No filler ("It was clear that…", "We worked together to…"). Cite the year, the practice name, the constraint. Show the decision; don't narrate the deliberation.
+**Voice:** Adrian's voice — direct, declarative, uses concrete details. No filler ("It was clear that…", "We worked together to…"). Cite the concrete constraint. Show the decision; don't narrate the deliberation.
 
-**Visuals:** placeholder slots only in T1 (ship-fast). For each section that would benefit from a visual, add an inline `<div>` placeholder with a subtle dashed border and a comment `{/* T2: replace with TRF asset */}`. Real assets land in T2.
+**Visuals:** placeholder slots only in T1 (ship-fast). For each section that would benefit from a visual, add an inline `<div>` placeholder with a subtle dashed border and a comment `{/* T2: replace with client asset */}`. Real assets land in T2.
 
 - [ ] **Step 3: Typecheck**
 
@@ -1004,7 +1003,7 @@ pnpm typecheck 2>&1 | tail -5
 - [ ] **Step 4: Read the rendered page in source**
 
 ```bash
-wc -l src/app/pages/hds/RanchFoundationCaseStudyPage.tsx
+wc -l src/app/pages/hds/NonprofitCaseStudyPage.tsx
 ```
 
 Expected: ~300-450 lines.
@@ -1012,11 +1011,11 @@ Expected: ~300-450 lines.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/app/pages/hds/RanchFoundationCaseStudyPage.tsx
+git add src/app/pages/hds/NonprofitCaseStudyPage.tsx
 git commit -m "$(cat <<'EOF'
-feat(case-study): write Ranch Foundation case study content
+feat(case-study): write nonprofit client case study content
 
-Full narrative draft sourced from clients/the-ranch-foundation/.
+Full narrative draft sourced from clients/<nonprofit-slug>/.
 Visual slots are placeholders; real assets land in T2.
 
 Refs: site-redeploy-track1
@@ -1066,11 +1065,11 @@ const SHELL_ENTRY_CARDS: ShellEntryCard[] = [
     mobiusColor: tokenValues.primitive.color.amber['400'],
   },
   {
-    title: 'The Ranch Foundation',
+    title: 'Nonprofit client',
     caption: 'Nonprofit case study',
     meta: ['Portfolio'],
-    href: '/case-studies/the-ranch-foundation',
-    logo: SHELL_ENTRY_LOGOS.plus, // Placeholder — Adrian to provide TRF mark in T2
+    href: '/case-studies/<nonprofit-slug>',
+    logo: SHELL_ENTRY_LOGOS.plus, // Placeholder — Adrian to provide client mark in T2
     logoIdleScale: 0.92,
     logoHoverScale: 1.0,
     mobiusColor: tokenValues.primitive.color.green['500'],
@@ -1093,7 +1092,7 @@ Find around line 221-226. Replace with a leaner version:
 ```tsx
 const TILE_HOVER_COLORS = {
   visual: 'var(--semantic-color-feedback-bg-warning)',
-  ranch: 'var(--semantic-color-feedback-bg-success)',
+  nonprofit: 'var(--semantic-color-feedback-bg-success)',
   vibe: 'var(--semantic-color-feedback-bg-success)',
 } as const;
 ```
@@ -1108,8 +1107,8 @@ hoverColor={
     ? mdsTileHoverColor
     : card.title === 'Visual Design'
       ? TILE_HOVER_COLORS.visual
-      : card.title === 'The Ranch Foundation'
-        ? TILE_HOVER_COLORS.ranch
+      : card.title === 'Nonprofit client'
+        ? TILE_HOVER_COLORS.nonprofit
         : card.title === 'Vibe Sketchbook'
           ? TILE_HOVER_COLORS.vibe
           : ('hoverColor' in card ? card.hoverColor : undefined)
@@ -1135,8 +1134,8 @@ feat(home): update tile lineup for application-ready deploy
 
 - Remove Hirobius Design System tile (HDS docs hidden under /ops)
 - Remove Hirobius Case Study tile (still accessible via direct link)
-- Add The Ranch Foundation tile (placeholder logo; real mark in T2)
-- 4-tile lineup: MDS, Visual Design, Ranch, Vibe Sketchbook
+- Add the nonprofit client tile (placeholder logo; real mark in T2)
+- 4-tile lineup: MDS, Visual Design, Nonprofit, Vibe Sketchbook
 
 Refs: site-redeploy-track1
 EOF
@@ -1327,19 +1326,19 @@ pnpm dev
 
 Visit each in a browser (or via Playwright headless if Adrian is hands-off):
 
-| Route                                | What to check                                                                                                                                        |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                                  | 4 tiles render, hover colors work, Mobius color shifts on hover, no console errors, mobile layout intact                                             |
-| `/info`                              | Loads without error; copy is coherent (don't simplify here — that's T2)                                                                              |
-| `/microsoft-design-systems`          | Read end-to-end in <2 min; assets all load; no broken images; mobile-readable                                                                        |
-| `/visuals`                           | Carousel loads; bento sections render; assets load; "broken carousel" symptom from spec §5 surfaces here — note its symptom for T2 (don't fix in T1) |
-| `/vibe-sketchbook`                   | Index loads; each sketch (cloth-sim, logo-lab, particle-tunnel, morph-tiles, kinetic-type, three-scene) loads without console errors                 |
-| `/case-studies/hirobius`             | Read end-to-end in <3 min; assets load; noindex meta present (Inspector → `<head>`)                                                                  |
-| `/case-studies/the-ranch-foundation` | Loads; sections render; placeholder visuals visible but not broken                                                                                   |
-| `/lab/incubator`                     | Loads; decide if it stays or 404s — flag for §3 D5 decision in audit doc                                                                             |
-| `/wet-paint`, `/portfolio/draft`     | Both 404 (verify the redirect lands on `NotFoundPage`)                                                                                               |
-| `/hds/color`, `/hds/tokens`          | Both redirect to `/ops/hds/color`, `/ops/hds/tokens` (gated)                                                                                         |
-| `/ops/*`                             | Password screen renders; correct password unlocks; localStorage persists across page reloads; `?key=<wrong>` does nothing                            |
+| Route                            | What to check                                                                                                                                        |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                              | 4 tiles render, hover colors work, Mobius color shifts on hover, no console errors, mobile layout intact                                             |
+| `/info`                          | Loads without error; copy is coherent (don't simplify here — that's T2)                                                                              |
+| `/microsoft-design-systems`      | Read end-to-end in <2 min; assets all load; no broken images; mobile-readable                                                                        |
+| `/visuals`                       | Carousel loads; bento sections render; assets load; "broken carousel" symptom from spec §5 surfaces here — note its symptom for T2 (don't fix in T1) |
+| `/vibe-sketchbook`               | Index loads; each sketch (cloth-sim, logo-lab, particle-tunnel, morph-tiles, kinetic-type, three-scene) loads without console errors                 |
+| `/case-studies/hirobius`         | Read end-to-end in <3 min; assets load; noindex meta present (Inspector → `<head>`)                                                                  |
+| `/case-studies/<nonprofit-slug>` | Loads; sections render; placeholder visuals visible but not broken                                                                                   |
+| `/lab/incubator`                 | Loads; decide if it stays or 404s — flag for §3 D5 decision in audit doc                                                                             |
+| `/wet-paint`, `/portfolio/draft` | Both 404 (verify the redirect lands on `NotFoundPage`)                                                                                               |
+| `/hds/color`, `/hds/tokens`      | Both redirect to `/ops/hds/color`, `/ops/hds/tokens` (gated)                                                                                         |
+| `/ops/*`                         | Password screen renders; correct password unlocks; localStorage persists across page reloads; `?key=<wrong>` does nothing                            |
 
 - [ ] **Step 3: Write the audit document**
 
@@ -1376,7 +1375,7 @@ Walked every public route. Lens: would a design-systems hiring manager (Stripe /
 
 - _findings here_
 
-### `/case-studies/the-ranch-foundation`
+### `/case-studies/<nonprofit-slug>`
 
 - _findings here_
 
@@ -1502,7 +1501,7 @@ Expected: success, `dist/` populated.
 ```bash
 ls dist/index.html dist/microsoft-design-systems/index.html \
    dist/visuals/index.html dist/vibe-sketchbook/index.html \
-   dist/case-studies/the-ranch-foundation/index.html \
+   dist/case-studies/<nonprofit-slug>/index.html \
    dist/case-studies/hirobius/index.html 2>&1
 ```
 
@@ -1587,7 +1586,7 @@ Open `http://localhost:4173` and verify:
 - All 4 home tiles work
 - `/ops` shows password screen, correct password unlocks
 - `/ops/hds/color` accessible after unlock
-- `/case-studies/hirobius` and `/case-studies/the-ranch-foundation` render
+- `/case-studies/hirobius` and `/case-studies/<nonprofit-slug>` render
 - `/wet-paint`, `/portfolio/draft` 404
 - `/hds/color` redirects to `/ops/hds/color`
 
@@ -1626,9 +1625,9 @@ After Task 1 (working tree clean) commits, the remaining tasks have these depend
 Task 1 (clean working tree)
    ↓
    ├── Task 2 + 3 + 4 (OpsGate util + component + wiring) — sequential within itself, parallel to others
-   ├── Task 7 (Ranch case study scaffold)
+   ├── Task 7 (Nonprofit case study scaffold)
    │     ↓
-   │     Task 8 (Ranch case study content)
+   │     Task 8 (Nonprofit case study content)
    ├── Task 10 (MDS case study tighten) — independent
    └── Task 11 (Hirobius case study tighten) — independent
         ↓
@@ -1636,7 +1635,7 @@ Task 1 (clean working tree)
         ↓
         Task 6 (404 wet-paint + draft) — depends on Task 5 (same file: routes.tsx)
         ↓
-        Task 9 (homepage tile updates — depends on Task 8 because tile points to Ranch route)
+        Task 9 (homepage tile updates — depends on Task 8 because tile points to Nonprofit route)
         ↓
         Task 12 (hiring-bar audit — last)
         ↓
@@ -1658,7 +1657,7 @@ For **subagent-driven dispatch**, suggest these waves:
 **Wave 2 (after Wave 1):**
 
 - Agent D: Task 4 (sonnet, wire OpsGate into routes.tsx)
-- Agent E: Tasks 7 + 8 (sonnet, Ranch scaffold + content, sequential within agent)
+- Agent E: Tasks 7 + 8 (sonnet, Nonprofit scaffold + content, sequential within agent)
 
 **Wave 3 (after Wave 2):**
 
@@ -1666,7 +1665,7 @@ For **subagent-driven dispatch**, suggest these waves:
 
 **Wave 4 (after Wave 3):**
 
-- Agent G: Task 9 (sonnet, homepage tile updates — depends on Ranch route from Task 7)
+- Agent G: Task 9 (sonnet, homepage tile updates — depends on Nonprofit route from Task 7)
 
 **Wave 5 (sequential, single agent — judgment-heavy):**
 
@@ -1699,7 +1698,7 @@ For **subagent-driven dispatch**, suggest these waves:
 
 - D1 (gate mechanism: client-side + SHA-256 + 7-day TTL) → implemented in Task 2 ✓
 - D2 (Hirobius noindex) → Task 11 Step 3 ✓
-- D3 (Ranch placeholder slots) → Task 8 Step 2 ✓
+- D3 (Nonprofit placeholder slots) → Task 8 Step 2 ✓
 - D4 (4 tiles) → Task 9 Step 2 ✓
 - D5 (lab/incubator audit-decides) → Task 12 Step 3 (audit doc captures the verdict) ✓
 - D6 (Sketchbook stays as own tile) → Task 9 Step 2 ✓
