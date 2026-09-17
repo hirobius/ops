@@ -12,6 +12,7 @@ const pr = (over = {}) => ({
   headRef: 'ralph/issue-330-telemetry',
   gateConclusion: 'success',
   mergeableState: 'clean',
+  supervisedFiles: [],
   ...over,
 });
 
@@ -45,6 +46,41 @@ describe('ralph-watchdog: open-PR states', () => {
     const d = decideWatchdogAction({ openRalphPrs: [pr()], readyIssueCount: 1 });
     expect(d.action).toBe(ACTION.MERGE);
     expect(d.reason).toMatch(/FULL head SHA/);
+  });
+
+  it('does NOT merge a green PR that touches a supervised path without ralph-approved', () => {
+    // ops#238 (decided 2026-09-14): auto-merge on green is the default, but a
+    // diff into the revenue path — client-facing output, client PII, money —
+    // needs a human. Before this, the watchdog merged any green PR, so the
+    // boundary existed on paper only.
+    const d = decideWatchdogAction({
+      openRalphPrs: [pr({ supervisedFiles: ['lib/leads/pipeline.mjs'] })],
+      readyIssueCount: 1,
+    });
+    expect(d.action).toBe(ACTION.IDLE);
+    expect(d.idleReason).toBe(IDLE_REASON.AWAITING_APPROVAL);
+    expect(d.reason).toMatch(/lib\/leads\/pipeline\.mjs/);
+    expect(d.reason).toMatch(/ralph-approved/);
+  });
+
+  it('merges a supervised-path PR once a human adds ralph-approved', () => {
+    const d = decideWatchdogAction({
+      openRalphPrs: [pr({ supervisedFiles: ['lib/agent/llm.mjs'], prApproved: true })],
+      readyIssueCount: 1,
+    });
+    expect(d.action).toBe(ACTION.MERGE);
+  });
+
+  it('fails CLOSED when the diff could not be read — never merges on unknown', () => {
+    for (const supervisedFiles of [null, undefined]) {
+      const d = decideWatchdogAction({
+        openRalphPrs: [pr({ supervisedFiles })],
+        readyIssueCount: 1,
+      });
+      expect(d.action).toBe(ACTION.IDLE);
+      expect(d.idleReason).toBe(IDLE_REASON.AWAITING_APPROVAL);
+      expect(d.reason).toMatch(/could not read/i);
+    }
   });
 
   it('does NOT merge a green DRAFT pr — a draft cannot merge however green', () => {
@@ -261,6 +297,7 @@ const fakePort = (over = {}) => ({
   listRuns: async () => ({ workflow_runs: [] }),
   listCheckRuns: async () => ({ check_runs: [] }),
   getIssue: async () => ({ state: 'open' }),
+  listPrFiles: async () => [],
   ...over,
 });
 
@@ -336,6 +373,53 @@ describe('gatherFacts', () => {
       NOW,
     );
     expect(f.openRalphPrs[0].issueClosed).toBe(false);
+  });
+
+  it('reports only the supervised files from the diff, and reads ralph-approved', async () => {
+    const f = await gatherFacts(
+      fakePort({
+        listOpenPrs: async () => [
+          {
+            number: 9,
+            head: { ref: 'ralph/issue-9-x', sha: 's' },
+            labels: [{ name: 'ralph-approved' }],
+          },
+        ],
+        listPrFiles: async () => [
+          { filename: 'lib/leads/pipeline.mjs' },
+          { filename: 'docs/ai/HANDOFF.md' },
+          { filename: 'src/app/pages/ops/pitch/PitchPage.tsx' },
+        ],
+      }),
+      NOW,
+    );
+    expect(f.openRalphPrs[0].supervisedFiles).toEqual([
+      'lib/leads/pipeline.mjs',
+      'src/app/pages/ops/pitch/PitchPage.tsx',
+    ]);
+    expect(f.openRalphPrs[0].prApproved).toBe(true);
+  });
+
+  it('fails CLOSED on an unreadable or possibly truncated diff', async () => {
+    const full = Array.from({ length: 100 }, (_, i) => ({ filename: `docs/f${i}.md` }));
+    for (const listPrFiles of [
+      async () => {
+        throw new Error('502');
+      },
+      async () => full,
+    ]) {
+      const f = await gatherFacts(
+        fakePort({
+          listOpenPrs: async () => [
+            { number: 9, head: { ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
+          ],
+          listPrFiles,
+        }),
+        NOW,
+      );
+      expect(f.openRalphPrs[0].supervisedFiles).toBeNull();
+      expect(f.openRalphPrs[0].prApproved).toBe(false);
+    }
   });
 
   it('detects a run in flight from queued as well as in_progress', async () => {

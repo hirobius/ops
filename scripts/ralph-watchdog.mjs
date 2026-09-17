@@ -16,7 +16,10 @@
  * WHAT IT AUTOMATES vs REPORTS
  *
  * It only performs actions that are mechanical and safe to do unattended:
- *   merge      — the gate is green and the auto-merge simply did not arm
+ *   merge      — the gate is green and the auto-merge simply did not arm, and
+ *                the diff clears ops#238's boundary: no supervised revenue-path
+ *                file, or the PR carries ralph-approved. An unreadable diff
+ *                never merges.
  *   abandon    — close a PR that cannot proceed, so the queue unblocks
  *   dispatch   — re-dispatch ralph.yml when the chain died silently
  *
@@ -37,11 +40,16 @@
  */
 
 import { decideWatchdogAction, isMutating, ACTION } from '../lib/ops/ralph-watchdog.mjs';
+// ops#238's supervised paths ARE the revenue path — one list, two consumers.
+import { isRevenuePathFile } from './metric-north-star-share.mjs';
 
 const REPO = process.env.RALPH_WATCHDOG_REPO || 'hirobius/ops';
 const API = 'https://api.github.com';
 const READY_LABEL = 'ralph-ready';
+const APPROVE_LABEL = 'ralph-approved';
 const GATE_NAME = 'ralph-gate';
+/** One page of PR files. A full page may be truncated, so it counts as unreadable. */
+const PR_FILES_PAGE = 100;
 
 const TOKEN_HINT =
   'GITHUB_TOKEN (or GH_TOKEN) is missing, expired, or lacks scope. It needs contents, ' +
@@ -77,6 +85,7 @@ export function makeGitHubPort({ fetchImpl = globalThis.fetch, token } = {}) {
     listOpenPrs: () => call(`/repos/${REPO}/pulls?state=open&per_page=100`),
     listCheckRuns: (sha) => call(`/repos/${REPO}/commits/${sha}/check-runs?per_page=100`),
     getIssue: (n) => call(`/repos/${REPO}/issues/${n}`),
+    listPrFiles: (n) => call(`/repos/${REPO}/pulls/${n}/files?per_page=${PR_FILES_PAGE}`),
     listReadyIssues: () =>
       call(`/repos/${REPO}/issues?state=open&labels=${READY_LABEL}&per_page=100`),
     listRuns: () => call(`/repos/${REPO}/actions/workflows/ralph.yml/runs?per_page=10`),
@@ -132,6 +141,18 @@ export async function gatherFacts(port, nowMs) {
       }
     }
 
+    // Fail closed: an unreadable or possibly truncated diff is `null`, which
+    // the rule never merges without ralph-approved.
+    let supervisedFiles = null;
+    try {
+      const files = await port.listPrFiles(p.number);
+      if (Array.isArray(files) && files.length < PR_FILES_PAGE) {
+        supervisedFiles = files.map((f) => f.filename).filter((name) => isRevenuePathFile(name));
+      }
+    } catch {
+      supervisedFiles = null;
+    }
+
     ralphPrs.push({
       number: p.number,
       headRef: p.head.ref,
@@ -142,6 +163,8 @@ export async function gatherFacts(port, nowMs) {
       gateConclusion: gate ? (gate.status === 'completed' ? gate.conclusion : 'pending') : null,
       gatePendingMinutes: gate?.started_at ? minutesSince(gate.started_at, nowMs) : 0,
       selfhealAttempted: (p.labels || []).some((l) => l.name === 'ralph-selfheal-attempted'),
+      prApproved: (p.labels || []).some((l) => l.name === APPROVE_LABEL),
+      supervisedFiles,
       issueClosed,
     });
   }
