@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 146,
+  "totalScripts": 148,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,7 +41,7 @@
     }
   },
   "categoryCounts": {
-    "other": 74,
+    "other": 76,
     "audit": 16,
     "build": 1,
     "gate": 35,
@@ -1031,6 +1031,14 @@
       "gate": null
     },
     {
+      "name": "privacy-request.mjs",
+      "category": "other",
+      "prefix": "privacy",
+      "purpose": "contacting a business, delete what we hold on it, or tell it what we hold.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "process-call-recording.mjs",
       "category": "other",
       "prefix": "process",
@@ -1135,6 +1143,14 @@
       "prefix": "refresh",
       "purpose": "Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and computes per-gate `lastFiringAt` / `lastViolationAt` stats via scripts/lib/firing-stats.mjs.",
       "pnpm": ["guardrail:firing-stats"],
+      "gate": null
+    },
+    {
+      "name": "render-privacy-policy.mjs",
+      "category": "other",
+      "prefix": "render",
+      "purpose": "CAN-SPAM email footer, ready to paste (ops#38).",
+      "pnpm": [],
       "gate": null
     },
     {
