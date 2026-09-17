@@ -41,4 +41,13 @@ describe('secret-scan workflow contract', () => {
     expect(workflow).toMatch(/--config \.gitleaks\.toml/);
     expect(workflow).toMatch(/--redact/);
   });
+
+  // Each run scans only its own range, so every run must finish. A concurrency
+  // group cancels a *pending* run whenever a newer one queues, even with
+  // cancel-in-progress: false — that silently skips a push's before..after, a
+  // queued full-history dispatch, or a PR commit force-pushed away mid-scan.
+  it('declares no concurrency group, so no queued or running scan is ever cancelled', () => {
+    expect(workflow).not.toMatch(/^\s*concurrency:/m);
+    expect(workflow).not.toMatch(/cancel-in-progress/);
+  });
 });
