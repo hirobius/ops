@@ -68,7 +68,9 @@ not a bug.
   would let one loop cancel the other's pending run) and skips the batch,
   with a warning, while any Ralph PR is open or an issue claim is held. The
   batch branch is `ralph/metric-<metric>-<run_id>`, so `ralph-gate` gates it
-  and the issue loop waits on it.
+  and, once its PR is open, the issue loop waits on it. While the batch is
+  still running (no PR yet) the issue loop can't see it and may start
+  alongside — see the workflow header.
 - **Merge:** batch PRs link no issue, so `ralph-auto` can't pre-approve them —
   label the PR `ralph-approved`, then re-dispatch to re-measure.
 - The workflow's header comment is the full contract;

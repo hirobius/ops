@@ -27,13 +27,18 @@ name: Ralph Metric
 # and let a 90-minute batch hold the issue loop off entirely. So metric runs
 # serialize only against each other, and cross-loop exclusion is done by STATE,
 # the way ralph.yml does it: the guard skips when any Ralph PR is open
-# (open_ralph_prs) or an issue iteration holds a claim ref, and the batch PR's
-# ralph/ branch makes the issue loop wait on it in turn. Residual race: both
-# guards passing within the same few seconds → two open Ralph PRs, which
-# ralph-gate and ralph-watchdog already surface; nothing merges ungated.
+# (open_ralph_prs) or an issue iteration holds a claim ref, and once the batch
+# PR exists its ralph/ branch makes the issue loop wait on it in turn.
+# Known gap, one direction only: WHILE a batch runs (up to 90 min, before its PR
+# exists) it holds nothing ralph.yml's guard reads, so an issue iteration can
+# start alongside it → two open Ralph PRs. Both are still gated independently
+# and ralph-watchdog reports the extra one; closing the gap needs an engine-side
+# lock in hirobius/ralph, not this caller.
 #
 # MERGE — the batch PR has no linked issue, so `ralph-auto` batch pre-approval
-# cannot apply: it merges when a human labels the PR `ralph-approved`.
+# cannot apply: the sanctioned path is a human labelling it `ralph-approved`.
+# Note ralph-watchdog's hourly MERGE rule does not re-check approval labels, so
+# a gate-green, AI-approved batch PR can also be merged by that tick.
 #
 # METRIC — a gate id from docs/guardrails/registry.json whose gateScript's
 # --json output is the canonical { violations: Array } shape. ralph/metric.sh
