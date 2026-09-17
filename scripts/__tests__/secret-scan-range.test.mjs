@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,6 +18,19 @@ afterEach(() => {
   cleanup = [];
 });
 
+// The environment with every GIT_* variable removed. This suite runs inside
+// git hooks (.husky/pre-push runs `pnpm test`), and hooks export GIT_DIR and
+// related variables. A child `git init` / `git commit` that inherits them acts
+// on the ENCLOSING repository, not the temp dir. On 2026-09-16 that put empty
+// commits on the pushing branch and flipped core.bare=true in the shared
+// .git/config, which broke the main checkout.
+function isolatedGitEnv(extra = {}) {
+  const env = Object.fromEntries(
+    Object.entries(process.env).filter(([name]) => !name.toUpperCase().startsWith('GIT_')),
+  );
+  return { ...env, ...extra };
+}
+
 // A throwaway repo with two real commits, so the CLI's commit-existence
 // check runs against actual git objects rather than a stub.
 function repoWithTwoCommits() {
@@ -35,9 +48,14 @@ function repoWithTwoCommits() {
         'commit.gpgsign=false',
         ...args,
       ],
-      { cwd: dir, encoding: 'utf8' },
+      { cwd: dir, encoding: 'utf8', env: isolatedGitEnv() },
     ).stdout.trim();
   git('init', '-q');
+  // Fail before committing anything if git resolved some other repository.
+  const toplevel = git('rev-parse', '--show-toplevel');
+  if (!toplevel || realpathSync(toplevel) !== realpathSync(dir)) {
+    throw new Error(`scratch repo resolved to "${toplevel}", not ${dir}: refusing to commit`);
+  }
   git('commit', '-q', '--allow-empty', '-m', 'one');
   const first = git('rev-parse', 'HEAD');
   git('commit', '-q', '--allow-empty', '-m', 'two');
@@ -53,12 +71,11 @@ function runCli(cwd, eventName, payload) {
   const result = spawnSync('node', [SCRIPT], {
     cwd,
     encoding: 'utf8',
-    env: {
-      ...process.env,
+    env: isolatedGitEnv({
       GITHUB_EVENT_NAME: eventName,
       GITHUB_EVENT_PATH: eventPath,
       GITHUB_OUTPUT: outputPath,
-    },
+    }),
   });
   return { ...result, output: readFileSync(outputPath, 'utf8') };
 }
