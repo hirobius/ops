@@ -24,7 +24,7 @@ What we do today and why it's not a violation of anything:
       texts sent. Scrape-and-score is data collection, not outreach.
 
 **Bottom line:** nothing done under #21 so far triggers CAN-SPAM, TCPA, or
-CCPA obligations — those all attach at the point of *contact*, not collection.
+CCPA obligations — those all attach at the point of _contact_, not collection.
 The moment we send the first cold email or make the first cold call, that
 changes. This doc exists so we don't cross that line unprepared.
 
@@ -82,20 +82,21 @@ changes. This doc exists so we don't cross that line unprepared.
       suppression tombstones (`do_not_contact`, `unsubscribed`) — these must
       survive purge so we never re-contact someone who opted out.
 - [ ] Purge runs as a job, not manual cleanup (#37).
-- [ ] Purge job logs *what was deleted and why* (counts + reason), not the
+- [ ] Purge job logs _what was deleted and why_ (counts + reason), not the
       PII itself.
 
 ## Technical controls (build tracker)
 
-| Control | Purpose | Issue |
-|---|---|---|
-| `do_not_contact` / suppression list | Never re-contact opt-outs or bounces | #36 |
-| CRM lifecycle columns (`sourced`→`contacted`→`won`/`do_not_contact`) | Know contact state per lead | #36 |
-| Retention purge job (12mo) | Enforce the retention policy automatically | #37 |
-| Privacy policy page + CCPA request intake | CCPA/CPRA disclosure + rights requests | #38 |
-| CAN-SPAM footer (address + unsubscribe) | Legal requirement on every outreach email | folds into #9 |
-| Supabase RLS / service-role-only | No public or anon read path to PII | verify on every new table |
-| No PII in git/chat/logs | Don't leak what we're obligated to protect | `standards/secrets-management.md` |
+| Control                                                                                                          | Purpose                                            | Issue                               |
+| ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ----------------------------------- |
+| `do_not_contact` / suppression list                                                                              | Never re-contact opt-outs or bounces               | #36                                 |
+| CRM lifecycle columns (`sourced`→`contacted`→`won`/`do_not_contact`)                                             | Know contact state per lead                        | #36                                 |
+| Retention purge job (12mo)                                                                                       | Enforce the retention policy automatically         | #37                                 |
+| Privacy policy page + CCPA request intake                                                                        | CCPA/CPRA disclosure + rights requests             | #38                                 |
+| CAN-SPAM footer (address + unsubscribe)                                                                          | Legal requirement on every outreach email          | folds into #9                       |
+| Supabase RLS / service-role-only                                                                                 | No public or anon read path to PII                 | verify on every new table           |
+| No PII in git/chat/logs                                                                                          | Don't leak what we're obligated to protect         | `standards/secrets-management.md`   |
+| PII gate (out-of-repo denylist + private-link/email/phone scan: pre-commit, PR/push CI, weekly issue-text sweep) | Enforce "no PII in git" instead of relying on care | #27 · `docs/guardrails/pii-gate.md` |
 
 ## Before scaling outreach
 

@@ -132,7 +132,8 @@ export interface FleetIssue {
   comments: number;
   assignee: string | null;
   /**
-   * Whether the body carries a `- [ ]` checklist.
+   * Whether the body carries a `- [ ]` checklist or an acceptance/DoD section —
+   * `ralph/next.sh`'s own `has_dod_marker` test (lib/tasks/ralph-parked.mjs).
    *
    * `ralph/next.sh` parks a DoD-less issue on sight, so a row without one will
    * bounce the moment it is queued. Better to see that before tapping Queue
@@ -192,6 +193,11 @@ export interface FleetStatus {
   queue: FleetIssue[];
   /** Everything not blocked, parked or queued. The rest of the board. */
   backlog: FleetIssue[];
+  /**
+   * Every open sev1 across the fleet (ops#317). A call-out, not a lane: each one
+   * also sits in whichever lane its other labels put it in.
+   */
+  sev1: FleetIssue[];
   /** Every open issue the sweep saw — blocked + queue + backlog. */
   total: number;
   prs: FleetPr[];
@@ -238,6 +244,9 @@ function isFleetStatus(v: unknown): v is FleetStatus {
     Array.isArray(v['blocked']) &&
     Array.isArray(v['queue']) &&
     Array.isArray(v['backlog']) &&
+    // Required, not optional: a missing list would render as "no open sev1",
+    // the all-clear reading (ops#317).
+    Array.isArray(v['sev1']) &&
     Array.isArray(v['prs'])
   );
 }

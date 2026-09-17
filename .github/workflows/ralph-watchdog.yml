@@ -17,6 +17,11 @@ jobs:
       issues: write
       pull-requests: write
       actions: write
+      # Read-only, and required: a job-level permissions block sets every
+      # unlisted permission to none. The merge verdict is the `ralph-gate`
+      # commit status; the check run only dates a pending gate.
+      statuses: read
+      checks: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,3 +31,6 @@ jobs:
       - run: node scripts/ralph-watchdog.mjs --apply --json
         env:
           GITHUB_TOKEN: ${{ secrets.RALPH_WATCHDOG_TOKEN || secrets.GITHUB_TOKEN }}
+          # Pages Discord once per head SHA when a green PR waits on a human
+          # (awaiting-approval). Unset is fail-soft: the label and comment still land.
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}

@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+/** Build output the Playwright web server owns — see `webServer` below. */
+const PREVIEW_OUT_DIR = 'node_modules/.cache/playwright-preview';
+
 export default defineConfig({
   testDir: './tests',
   // Repo convention: `.spec.ts` = Playwright e2e, `.test.{ts,tsx}` = Vitest
@@ -36,8 +39,15 @@ export default defineConfig({
   // ERR_CONNECTION_REFUSED + blank actuals on late-Block-B tests. preview
   // serves the static bundle, no HMR, no file watching, no crash class.
   // reuseExistingServer: true — if already serving on 5200, reuse.
+  //
+  // PR #382 review: build into, and preview, PREVIEW_OUT_DIR — never Vite's
+  // default dist/. In the parallel ci-pr run other processes rebuild dist/
+  // (audit-gates-supportjson probes audit-bundle, and Vite empties outDir
+  // mid-build), so previewing dist/ could serve a 404 shell to a layout test
+  // mid-run. Under node_modules/ so git and every tree-walking gate skip the
+  // bundle. scripts/__tests__/quality-workflow.test.mjs pins this.
   webServer: {
-    command: 'pnpm build && npx vite preview --host 127.0.0.1 --port 5200',
+    command: `pnpm build --outDir ${PREVIEW_OUT_DIR} && npx vite preview --outDir ${PREVIEW_OUT_DIR} --host 127.0.0.1 --port 5200`,
     url: 'http://localhost:5200',
     reuseExistingServer: true,
     timeout: 180_000,

@@ -1153,22 +1153,6 @@ const REPLACEMENT_TABLE = {
     notes: 'Genuinely custom. Keep.',
   },
 
-  'check-route-smoke': {
-    verdict: 'partially-replaceable',
-    replacement: {
-      tool: 'Playwright / Vitest browser mode',
-      source: 'https://playwright.dev',
-      npmPackage: '@playwright/test',
-      configEffort: 'medium',
-      exampleConfig: '// playwright.config.ts: list of routes to smoke-test after vite preview',
-    },
-    keepReason: null,
-    migrationCost: 'medium',
-    coverageGain: 'higher',
-    notes:
-      'Playwright covers runtime route smoke tests more thoroughly (real browser, not fetch). The custom gate is ~110 LOC; Playwright provides proper browser rendering.',
-  },
-
   'check-code-connect': {
     verdict: 'partially-replaceable',
     replacement: {

@@ -15,15 +15,20 @@
  *
  *   loadRegistry(path?)            → { ok, registry } | { ok:false, error }
  *   selectGates({...})            → { ok, gates, skippedByScope, emptyReason } | { ok:false, reason, gate }
+ *   selectProbeTargets({...})     → { targets, optedOut }  (gates a meta-gate may spawn)
  *   runGateCaptured(script, opts) → { exitCode, durationMs, stdout, stderr, timedOut, spawnError }
+ *   gateOutcome(gate, exitCode)   → 'pass' | 'warn' | 'fail'   (registry severity, ops#306)
+ *   runGatesSerial({...})         → { results, stoppedAt }     (severity-aware fail-fast)
+ *   summarizeRun(results)         → { failures, warnings, exitCode }
  *
  * Candidate #11. Note: run-gates' serial dispatch streams gate output live
  * (stdio:'inherit') and its parallel dispatch uses async spawn with a
  * concurrency cap — two concerns this synchronous capture helper intentionally
- * does NOT model. run-gates therefore keeps its own dispatch and uses only
- * loadRegistry + selectGates here. audit-soft-gates (manual channel,
- * always-capture, always --json, per-gate timeout) maps onto runGateCaptured
- * cleanly and is its consumer.
+ * does NOT model. run-gates therefore keeps its own spawning and uses
+ * loadRegistry + selectGates + the severity helpers here (runGatesSerial takes
+ * run-gates' own spawner as an injected `runGate`). audit-soft-gates (manual
+ * channel, always-capture, always --json, per-gate timeout) maps onto
+ * runGateCaptured cleanly and is its consumer.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -46,7 +51,10 @@ export const REGISTRY_PATH = path.join(ROOT, 'docs/guardrails/registry.json');
  */
 export function loadRegistry(registryPath = REGISTRY_PATH) {
   if (!fs.existsSync(registryPath)) {
-    return { ok: false, error: { kind: 'not-found', message: `registry not found at ${registryPath}` } };
+    return {
+      ok: false,
+      error: { kind: 'not-found', message: `registry not found at ${registryPath}` },
+    };
   }
   try {
     const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
@@ -109,6 +117,121 @@ export function selectGates({ registry, channel = null, gate = null, changedFile
   }
 
   return { ok: true, gates: selected, skippedByScope, emptyReason: null };
+}
+
+// ── Severity (ops#306) ────────────────────────────────────────────────────────
+
+/** Registry severities that report a non-zero exit without failing the run. */
+const ADVISORY_SEVERITIES = new Set(['warn', 'info']);
+
+/**
+ * Classify one gate's exit under its registry `severity`. Pure.
+ *
+ *   exit 0                         → 'pass'
+ *   non-zero, severity warn|info   → 'warn'  (reported, does not fail the run)
+ *   non-zero, anything else        → 'fail'  (blocks the run)
+ *
+ * Fails closed: a missing or unrecognised severity is treated as blocking, so a
+ * gate nobody curated keeps the pre-#306 behaviour instead of silently going
+ * advisory. Severity governs every non-zero exit — a crashed warn gate (exit 2)
+ * warns too; the run does not second-guess the registry.
+ *
+ * @param {{severity?: string}} gate
+ * @param {number} exitCode
+ * @returns {'pass'|'warn'|'fail'}
+ */
+export function gateOutcome(gate, exitCode) {
+  if (exitCode === 0) return 'pass';
+  return ADVISORY_SEVERITIES.has(gate?.severity) ? 'warn' : 'fail';
+}
+
+/**
+ * One gate's classified result, as run-gates records it.
+ *
+ * @param {{id: string, severity?: string}} gate
+ * @param {number} exitCode
+ * @returns {{id: string, severity: string|null, exitCode: number, outcome: 'pass'|'warn'|'fail'}}
+ */
+export function gateResult(gate, exitCode) {
+  return {
+    id: gate.id,
+    severity: gate.severity ?? null,
+    exitCode,
+    outcome: gateOutcome(gate, exitCode),
+  };
+}
+
+/**
+ * Run gates one at a time in declaration order. The spawning is injected
+ * (`runGate(gate) → exitCode`) so the control flow is testable without a
+ * subprocess; run-gates passes its live-streaming spawnSync dispatcher.
+ *
+ * `failFast` stops at the first gate whose outcome is 'fail' — a failing warn
+ * gate never stops the run (ops#306; before, pre-commit exited on the first
+ * non-zero whatever its severity). `stoppedAt` is that gate's id, else null.
+ *
+ * @param {object} opts
+ * @param {any[]} opts.gates
+ * @param {(gate: any) => number} opts.runGate
+ * @param {boolean} opts.failFast
+ * @returns {{results: ReturnType<typeof gateResult>[], stoppedAt: string|null}}
+ */
+export function runGatesSerial({ gates, runGate, failFast }) {
+  const results = [];
+  for (const gate of gates) {
+    const result = gateResult(gate, runGate(gate));
+    results.push(result);
+    if (failFast && result.outcome === 'fail') return { results, stoppedAt: gate.id };
+  }
+  return { results, stoppedAt: null };
+}
+
+/**
+ * Fold classified gate results into the run's verdict. Pure. Only 'fail'
+ * outcomes (error-severity gates) set exitCode 1; 'warn' outcomes are listed
+ * for reporting and leave the run green.
+ *
+ * @param {ReturnType<typeof gateResult>[]} results
+ * @returns {{failures: ReturnType<typeof gateResult>[], warnings: ReturnType<typeof gateResult>[], exitCode: 0|1}}
+ */
+export function summarizeRun(results) {
+  const failures = results.filter((r) => r.outcome === 'fail');
+  const warnings = results.filter((r) => r.outcome === 'warn');
+  return { failures, warnings, exitCode: failures.length > 0 ? 1 : 0 };
+}
+
+/**
+ * Select the gates a meta-gate may spawn to introspect them (e.g.
+ * audit-gates-supportjson runs `node <gateScript> --json` for every gate).
+ * Pure — no spawning, no I/O.
+ *
+ * A gate opts out with `skipMetaProbe: "<reason>"` in registry.json. That is for
+ * gates that drive a full toolchain run (tsc, type-coverage, a Playwright build
+ * + preview server on :5200): spawning a second copy from inside the ci-pr run
+ * duplicates the work and, for Playwright, races the real run's build output
+ * and port. Only a non-empty string counts — an opt-out must say why, so a bare
+ * `true` or a blank reason is ignored and the gate is still probed.
+ *
+ * @param {object} opts
+ * @param {{gates: any[]}} opts.registry
+ * @param {string[]} [opts.skipChannels]  firingChannels never probed (cost)
+ * @param {string|null} [opts.selfId]     the meta-gate's own id (no recursion)
+ * @returns {{targets: any[], optedOut: {id: string, reason: string}[]}}
+ */
+export function selectProbeTargets({ registry, skipChannels = [], selfId = null }) {
+  const skip = new Set(skipChannels);
+  const targets = [];
+  const optedOut = [];
+  for (const g of (registry && registry.gates) || []) {
+    if (!g || skip.has(g.firingChannel) || g.id === selfId) continue;
+    const reason = typeof g.skipMetaProbe === 'string' ? g.skipMetaProbe.trim() : '';
+    if (reason) {
+      optedOut.push({ id: g.id, reason });
+      continue;
+    }
+    targets.push(g);
+  }
+  return { targets, optedOut };
 }
 
 /**

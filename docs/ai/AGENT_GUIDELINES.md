@@ -14,11 +14,11 @@ Per Adrian's directive 2026-05-01: **always pick the cheapest model that can do 
 
 ### Model selection matrix
 
-| Model | When to use | When NOT to use |
-|---|---|---|
-| **haiku** | Additive mechanical edits, single-pattern scrubs, file moves, emoji/comment scrubs, registry-summary writing, baseline regen, simple fixture additions, "follow the pattern" work. | **NEVER for deletions.** Never for judgment calls. |
-| **sonnet** (default) | Most unit work: schema extensions, new scripts, bridge endpoints, component refactors, validator additions. **REQUIRED for any task involving deletions** (file removals, dead-code pruning, dep removal, manifest cleanup). | When opus-class architectural reasoning is needed. |
-| **opus** | Cross-cutting architectural reasoning, ambiguous scope needing judgment, novel validator with subtle logic, opus-class units explicitly tagged. | Ordinary unit work. **Use sparingly — most expensive lever.** |
+| Model                | When to use                                                                                                                                                                                                                  | When NOT to use                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **haiku**            | Additive mechanical edits, single-pattern scrubs, file moves, emoji/comment scrubs, registry-summary writing, baseline regen, simple fixture additions, "follow the pattern" work.                                           | **NEVER for deletions.** Never for judgment calls.            |
+| **sonnet** (default) | Most unit work: schema extensions, new scripts, bridge endpoints, component refactors, validator additions. **REQUIRED for any task involving deletions** (file removals, dead-code pruning, dep removal, manifest cleanup). | When opus-class architectural reasoning is needed.            |
+| **opus**             | Cross-cutting architectural reasoning, ambiguous scope needing judgment, novel validator with subtle logic, opus-class units explicitly tagged.                                                                              | Ordinary unit work. **Use sparingly — most expensive lever.** |
 
 ### Effort
 
@@ -104,6 +104,7 @@ Pod N ran `pnpm lint:fix` over the full codebase as a single bulk operation. ESL
 ### The Pod 2 incident
 
 Pod 2's autonomous doc-coherence audit produced **~55% false-positive rate at P0**. Examples:
+
 - Claimed 9 typography tokens were "still live" — they weren't, all 9 truly removed.
 - Claimed `HdsSurface`/`Grid`/`HeadingStack`/`Dialog`/`Text` didn't exist — all 5 exist.
 - Claimed `component.padding` resolves to 12px — it's 24px.
@@ -113,6 +114,7 @@ The pattern: Pod 2 cross-referenced doc text without grounding each claim agains
 ### The rule
 
 Every claim in a unit's `description` or `agentNotes` MUST include a grounding ref:
+
 - `Source of truth: <file:line>` — for code claims.
 - `Validator output: <command>` — for test/build claims.
 - `Commit ref: <hash>` — for historical claims.
@@ -149,15 +151,21 @@ CI (`.github/workflows/quality.yml`) runs:
 
 ```
 + pnpm install --frozen-lockfile
-+ pnpm build                               # ADDED 2026-05-01 (Pod X) — catches Vite-only errors
-+ all of the above pre-commit gates
-+ pnpm test:layout
-+ pnpm size-limit                          # ADDED 2026-05-01 (Pod B1, warn-mode)
++ pnpm audit --audit-level high            # advisory only (continue-on-error, #243)
++ pnpm build                               # catches Vite-only errors
++ pnpm exec playwright install chromium    # setup for the layout-tests gate
++ node scripts/run-gates.mjs --channel ci-pr --parallel 4
 ```
+
+Every CI check — typecheck, type coverage, layout tests included — is a
+`ci-pr` gate in `docs/guardrails/registry.json`, never a bespoke workflow step
+(#241; `scripts/__tests__/quality-workflow.test.mjs` enforces it). List them with
+`node scripts/run-gates.mjs --channel ci-pr --dry-run`.
 
 ### Promotion path
 
 Each soft / warn-mode gate has a unit to promote it once burndown finishes:
+
 - `lint --max-warnings=0`: `12i-quality-eslint-burndown` (and `12i-quality-eslint-import-x-migration` for plugin compatibility).
 - `check-component-completeness` hard-fail: `12i-quality-component-completeness-burndown`.
 - `knip` hard-fail: `12i-quality-knip-promote-hard-fail`.
@@ -228,6 +236,7 @@ When `status` is anything other than `"claimed"` or `"done"`, `claimedBy` and `c
 A claim is "stale" when `claimedAt` is older than 4 hours and `status` is still `claimed` — usually the agent crashed. Detected by `node scripts/audit-claims.mjs` (separate from the validator on purpose: stale-claim is a runtime/timing condition, not a schema violation, and shouldn't lock the pre-commit hook).
 
 To recover a stale claim:
+
 - **Steal**: a fresh agent overwrites `claimedBy`/`claimedAt` with its own values. Commit message: `chore(orch): steal stale claim on <unit-id> from <prior-agent>`.
 - **Release**: revert to `status: approved`, clear claim fields, document in `agentNotes`.
 
@@ -256,12 +265,12 @@ For files that genuinely can't conform (specimen pages, brand letterforms, error
 
 After Pod 1's reconciliation 2026-05-01 — system uses **4 roles**, not 5 (sticky dropped):
 
-| Surface | Role | Background | Shadow | Border |
-|---|---|---|---|---|
-| Card / panel resting | `flat` | `surface.page` | none | `border.subtle` 1px |
-| Card / panel lifted | `raised` | `surface.raised` | `shadow.subtle` | none |
-| Popover / dropdown / tooltip | `floating` | `surface.raised` | `shadow.floating` | none |
-| Dialog / sheet / modal | `overlay` | `surface.overlay` | `shadow.overlay` | none |
+| Surface                      | Role       | Background        | Shadow            | Border              |
+| ---------------------------- | ---------- | ----------------- | ----------------- | ------------------- |
+| Card / panel resting         | `flat`     | `surface.page`    | none              | `border.subtle` 1px |
+| Card / panel lifted          | `raised`   | `surface.raised`  | `shadow.subtle`   | none                |
+| Popover / dropdown / tooltip | `floating` | `surface.raised`  | `shadow.floating` | none                |
+| Dialog / sheet / modal       | `overlay`  | `surface.overlay` | `shadow.overlay`  | none                |
 
 Cards default to `flat`. Bind via `semantic.elevation.{role}` — never raw `box-shadow` values.
 
@@ -364,6 +373,7 @@ Captured as `12s-infra-pre-merge-squash-protocol`.
 A **fixture** is a frozen input + expected output that the test runs against.
 
 Examples:
+
 - `fixtures/compiler/<case>/input.jsx + expected.json` — LLM compiler regression
 - `fixtures/llm-prompts/<slug>/input.txt + expected.jsx` — prompt regression suite (Pod A3)
 - `tests/visual.spec.ts-snapshots/*.png` — Playwright visual baselines (also fixtures)
@@ -392,6 +402,19 @@ The fixture **IS the contract**. Change behavior → change fixture → review d
 4. Re-run validator on clean HEAD; if it passes, the broken work is in the stash.
 5. Inspect stash; either fix or discard with `git stash drop`.
 
+### When a pre-commit gate fails on a file you didn't touch (ops#306)
+
+1. Confirm it actually blocked. Only `error`-severity gates stop a commit; a
+   `⚠ run-gates: [id] … not blocking` line is a `warn` finding — read it, but it
+   is not why the commit stopped. Semantics: `docs/guardrails/SCHEMA.md`.
+2. **Reproduce on `main` before treating it as your fault.** Run the same gate
+   (`node scripts/run-gates.mjs --gate <id>`) on a clean checkout of
+   `origin/main`. If it fails there too, it is pre-existing breakage, not your
+   change — say so explicitly (PR note or issue) instead of burning iterations
+   diagnosing your own diff.
+3. If `main` is green and your branch is red, rebase on `origin/main` first (a
+   stale base is a common cause), then fix the violation per §5.
+
 ### When a pod produces broken state
 
 If a sub-agent's commit breaks the build:
@@ -403,10 +426,11 @@ If a sub-agent's commit breaks the build:
 ### When orchestration drift surfaces
 
 `validate-orchestration --soft` (or now hard-fail) reports:
+
 - BAD_APPROVAL → fix to one of `proposed | approved | denied | needs-grilling`.
 - BAD_PRIORITY → fix to integer 1..5.
 - BAD_SPRINT → fix to integer 0..6.
-- MISSING_* → fill in the field.
+- MISSING\_\* → fill in the field.
 
 DO NOT mass-change `approval` to `approved` to bypass validation. Default for unratified work is `proposed`.
 
@@ -421,6 +445,7 @@ Covered: `.env`, `.env.local`, `.env.production`, `.env.test`, `.env.*.local`, a
 **Why:** `.env.local` holds API keys, OAuth tokens, webhook URLs, service credentials. One accidental commit or log line leaks all of them. Blast radius = account-wide.
 
 **What to do instead:**
+
 - If a script needs a new env var: add a comment in the script header documenting it. Human fills it in.
 - Never `cat`, `read`, or log `.env*` contents.
 - Never interpolate env values into output files or committed code.

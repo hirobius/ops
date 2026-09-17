@@ -63,6 +63,8 @@ const FLEET: FleetStatus = {
   ],
   total: 6,
   prs: [pr('client-alpha', 7, 'Client-alpha PR')],
+  // Required since ops#317: isFleetStatus rejects a payload with no sev1 array.
+  sev1: [],
   loop: [],
   truncated: false,
   errors: [],

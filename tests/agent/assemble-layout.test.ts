@@ -18,15 +18,19 @@ const LEAD = {
   category: 'landscaping',
   city: 'Austin',
   region: 'TX',
-  phone: '+1-555-0142',
+  phone: '+1-512-555-0142',
   email: 'hi@violetverge.com',
 };
 
 const CONTENT = {
   palettePreset: 'landscaping',
   palette: {
-    primary: '#7b2d8e', accent: '#e0a800', bg: '#fdfcff',
-    fg: '#1a121d', muted: '#efe7f2', onPrimary: '#ffffff',
+    primary: '#7b2d8e',
+    accent: '#e0a800',
+    bg: '#fdfcff',
+    fg: '#1a121d',
+    muted: '#efe7f2',
+    onPrimary: '#ffffff',
   },
   font: 'system',
   heroHeadline: 'Austin Landscaping',
@@ -115,20 +119,21 @@ describe('the agent schema constrains what the model may choose', () => {
 });
 
 /**
- * Drift guard (ops#191). The issue lists "Zod gate (sectionOrder superRefine
- * dupe rejection)" as a gate that must hold, but ops's VENDORED ClientConfig
- * schema has no such refinement — a duplicate-containing sectionOrder passes
- * defineClient here and would only fail at the site-engine build.
+ * Drift guard (ops#191 → resolved by ops#310). ops#191 listed "Zod gate
+ * (sectionOrder superRefine dupe rejection)" as a gate that must hold, but the
+ * vendored ClientConfig schema had drifted from site-engine's and lacked it — a
+ * duplicate-containing sectionOrder passed defineClient here and would only
+ * have failed at the site-engine build.
  *
- * We do not fork the vendored contract to fix that (its header forbids it), so
- * the duplicate rejection lives in the AGENT schema above instead. This test
- * pins the actual vendored behaviour so the day it re-syncs and starts
- * rejecting, someone is told rather than surprised.
+ * ops#310 re-synced lib/schema from site-engine, so the vendored contract now
+ * rejects duplicates itself. The agent schema above keeps its stricter
+ * exactly-five permutation rule: that is agent policy, not the contract (the
+ * contract allows a subset).
  */
 describe('vendored schema drift', () => {
-  it('vendored defineClient does NOT reject a duplicate sectionOrder (agent schema covers it)', () => {
+  it('vendored defineClient rejects a duplicate sectionOrder (re-synced in ops#310)', () => {
     const cfg = assemble(LEAD, CONTENT);
     cfg.layout.sectionOrder = ['services', 'services', 'reviews', 'gallery', 'contact'];
-    expect(() => defineClient(cfg)).not.toThrow();
+    expect(() => defineClient(cfg)).toThrow(/duplicate section id "services"/);
   });
 });

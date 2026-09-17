@@ -1,0 +1,113 @@
+name: PII weekly scan
+
+# Warn-only sweep for personal data that got past the per-commit gates: text
+# typed straight into GitHub, and the two sibling public repos (ops#27, ops#35).
+# It blocks nothing; it goes red so a hit is seen.
+#
+#   1. hirobius/ops issue + PR titles, bodies and comments updated in the last
+#      8 days (7-day cadence + 1 day overlap). Fails on ANY finding, warnings
+#      included: the volume is small and a pasted personal mailbox or phone in
+#      an issue is exactly what this is for.
+#   2. The main tips of hirobius/portal-kit and hirobius/site-engine, every
+#      tracked text file. Fails on errors only (denylist terms, private
+#      workspace links); email/phone warnings are listed in the summary. A tree
+#      scan re-reports the same fixture numbers every week, and a check that is
+#      permanently red gets ignored.
+#
+# Not covered: issue edit history (GraphQL userContentEdits). A hit in issue text
+# must be edited AND its old revision deleted — see docs/guardrails/pii-gate.md.
+#
+# All three repos are public, so the checkouts use the default token read-only.
+# Output never contains a matched value.
+
+on:
+  schedule:
+    # Mondays 15:23 UTC (08:23 Pacific) — off the top of the hour.
+    - cron: '23 15 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: pii-weekly
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    name: PII (recent issue text + sibling repo tips)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout ops (scanner)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # continue-on-error on every fetch/scan step so one failure still lets the
+      # other scans run; the last step turns the job red if any of them failed.
+      - name: Fetch ops issue and PR text updated in the last 8 days
+        id: fetch
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/pii-fetch-github-text.mjs --repo hirobius/ops --since-days 8 --out "$RUNNER_TEMP/ops-issue-text.json"
+
+      - name: Scan ops issue and PR text
+        id: text
+        if: steps.fetch.outcome == 'success'
+        continue-on-error: true
+        env:
+          PII_DENYLIST: ${{ secrets.PII_DENYLIST }}
+        run: node scripts/check-pii.mjs --records "$RUNNER_TEMP/ops-issue-text.json" --label "hirobius/ops issues and PRs (last 8 days)" --fail-on warn --github
+
+      - name: Checkout portal-kit
+        uses: actions/checkout@v4
+        with:
+          repository: hirobius/portal-kit
+          path: external/portal-kit
+          persist-credentials: false
+
+      - name: Scan portal-kit main
+        id: portal_kit
+        continue-on-error: true
+        env:
+          PII_DENYLIST: ${{ secrets.PII_DENYLIST }}
+        run: node scripts/check-pii.mjs --tree external/portal-kit --label hirobius/portal-kit --fail-on error --github
+
+      - name: Checkout site-engine
+        uses: actions/checkout@v4
+        with:
+          repository: hirobius/site-engine
+          path: external/site-engine
+          persist-credentials: false
+
+      - name: Scan site-engine main
+        id: site_engine
+        continue-on-error: true
+        env:
+          PII_DENYLIST: ${{ secrets.PII_DENYLIST }}
+        run: node scripts/check-pii.mjs --tree external/site-engine --label hirobius/site-engine --fail-on error --github
+
+      - name: Fail the job if any scan found personal data
+        if: always()
+        run: |
+          if [ "${{ steps.fetch.outcome == 'failure' }}" = "true" ]; then
+            echo "::error title=PII weekly scan::Issue text could not be fetched, so it was NOT scanned — see the fetch step's error."
+            exit 1
+          fi
+          if [ "${{ steps.text.outcome == 'failure' }}" = "true" ] \
+            || [ "${{ steps.portal_kit.outcome == 'failure' }}" = "true" ] \
+            || [ "${{ steps.site_engine.outcome == 'failure' }}" = "true" ]; then
+            echo "::error title=PII weekly scan::Personal data found (or a scan could not run) — see the job summary for masked locations and docs/guardrails/pii-gate.md for how to handle it."
+            exit 1
+          fi
+          echo "No failing PII findings."

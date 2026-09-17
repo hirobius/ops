@@ -1,0 +1,10 @@
+{
+  "_comment": "REAL violating fixture for check-pii (ops#27). SYNTHETIC DATA ONLY: 'Jane Example' and the document id are invented. In --fixture-mode the gate uses ONLY this file's denylist (never PII_DENYLIST or .pii-denylist), scans each file as if staged, and must exit 1: one denylist hit spanning a wrapped line, and one private Google Docs link.",
+  "denylist": ["jane\\s+example"],
+  "files": [
+    {
+      "path": "docs/clients/meeting-notes.md",
+      "text": "# Kickoff\n\nCall with Jane\nExample about the new site.\nShared brief: https://docs.google.com/document/d/SYNTHETIC-FIXTURE-DOC-ID/edit\n"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+name: PII scan
+
+# Scans what a pull request or a push to main ADDS — added lines, added or
+# renamed paths, and commit messages — plus a pull request's title, body and
+# branch name, for personal data: denylisted client names/contacts, private
+# Google/Microsoft workspace links (both fail the check), and emails outside the
+# allowlist or phone numbers (annotated warnings). Same engine as the pre-commit
+# and commit-msg gates (scripts/check-pii.mjs, registry id check-pii); this is
+# the backstop for commits made without the hooks (ops#27).
+#
+# The PR title is scanned on every edit because ops merges with the PR title as
+# the merge/squash commit message: a client name there lands in main's history.
+#
+# Why only the change range: ops main still carries known hits until the ops#27
+# history rewrite lands; a full scan would make every PR red for history nobody
+# can fix from their PR (same policy as the secret scan, ops#32).
+#
+# The denylist is PII itself, so it lives only in the PII_DENYLIST secret. When
+# the secret is absent (not yet created, or a fork PR, which never gets secrets)
+# the scan still runs the generic patterns and prints a warning naming the secret
+# and where to add it — it does not fail for that.
+#
+# Output never contains a matched value: rule, location and length only.
+# hirobius/ops is public, so Actions logs are public.
+#
+# Handling a hit: docs/guardrails/pii-gate.md
+
+on:
+  pull_request:
+    # edited: a title or body change must be rescanned before merge.
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  # A newer PR run covers base...head and the current title/body, a superset of
+  # the run it cancels. A push to main covers only its own before...after, so it
+  # must never be cancelled — and GitHub cancels a PENDING run whenever a newer
+  # one queues in the same group, whatever cancel-in-progress says. Each push
+  # therefore gets a group of its own (its SHA).
+  group: pii-scan-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  pii:
+    name: PII (changed lines and commit messages)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Both ends of the range must exist locally; the scan fails loud
+          # (naming fetch-depth) if either is missing.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Node built-ins only — no dependency install needed.
+      - name: Scan changes for personal data
+        env:
+          PII_DENYLIST: ${{ secrets.PII_DENYLIST }}
+        run: node scripts/check-pii.mjs --github-event --github

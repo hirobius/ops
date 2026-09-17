@@ -7,7 +7,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 
 ## 0. HARD RULES (no exceptions, apply to all agents including Claude)
 
-- **ANOTHER SESSION MAY BE RUNNING — claim before you touch anything.** Read `docs/ai/SESSION-BOARD.md` first, add your session id to its table, claim the subsystem you are about to work on, and confirm nothing else is in flight on it. Release the claim when you stop, including when you stop unfinished — a stale claim is worse than none. Re-read the board before each significant push. Three collisions on 2026-09-15 (migration `0012` numbered twice and **both applied to the live database**, two call tools built in parallel, a docs PR broken by a merge) all came from skipping this. Branch-per-session prevents overwrites, not duplicated work.
+- **ANOTHER SESSION MAY BE RUNNING — claim before you touch anything.** Read `docs/ai/SESSION-BOARD.md` first, add your session id to its table, claim the subsystem you are about to work on, and confirm nothing else is in flight on it. Release the claim when you stop, including when you stop unfinished — a stale claim is worse than none. Re-read the board before each significant push. Branch-per-session prevents overwrites, not duplicated work.
 - **NEVER read, write, create, or delete `.env*` files.** Keys are set by the human only. If a task needs a new key, document it in a comment in the script and stop — do not touch `.env.local`.
 - **NEVER git push.** Local commits only.
 - **NEVER run `pnpm check:release` or deploy commands.**
@@ -20,7 +20,8 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
   blocking). If the reason to act lies in the **future**, it is not an issue —
   add it to `docs/ai/PARKED.md` with a trigger; `pnpm parked:check` surfaces it
   when the condition fires. A discussion with no deliverable is not an issue.
-- **`/ops` is gated in production** by a server-side password: `api/ops-login.ts` checks `OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` and sets an httpOnly session cookie. Adrian sets those in the Vercel dashboard env (Production + Preview scopes). `pnpm dev` bypasses the gate. Claude must never read or write `.env*` files.
+- **Severity is orthogonal to `p0`–`p3`**: priority is _when_, severity is _what happens if we don't_. `sev1` (legal exposure, security incident, data loss, or already affecting a real third party) tops `/ops/standing` and fails `pnpm sev1:check` until closed; accept one unclosed only by relabeling it `sev2` with a comment on the issue giving the reason. `sev2` (could become sev1, degrades a production surface, breaks a trust signal): reviewed weekly. `sev3` (contained blast radius): normal backlog.
+- **`/ops` is gated in production** by a server-side password: `api/ops-login.ts` checks `OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` and sets an httpOnly session cookie. Adrian sets those in the Vercel dashboard env (Production + Preview scopes). `pnpm dev` bypasses the gate.
 
 ---
 
@@ -102,10 +103,8 @@ actually dispatching. The three rules that must not be rediscovered:
 
 ## 4. Learned rules — promoted from loop failures (2026-09-14)
 
-Distilled from the retro harvest of every Ralph park/blocked/attempt-failed comment
-in ops (ops#274 session; full corpus in `docs/ai/learned-rules.jsonl`, walk it with
-`pnpm guardrail:learned-rules`). These five earned always-on space because they
-change what a session does; the rest stay in the JSONL until promoted.
+Full corpus: `docs/ai/learned-rules.jsonl` (`pnpm guardrail:learned-rules`); the
+rest stay there until promoted.
 
 - **A park is not proof the work is stuck.** `iteration ended without a pushed
 branch` is frequently loop _infrastructure_ (bot-actor push rejection, a
@@ -128,5 +127,5 @@ branch` is frequently loop _infrastructure_ (bot-actor push rejection, a
 **Never queue an issue whose DoD requires editing `.github/workflows/*`** — the
 bot's token lacks the `workflows` scope. Split it: the workflow file goes to a
 human/adr-eng PR, the rest becomes a script-or-registry issue Ralph can push.
-Four issues each did the full work and then died at the push. **`.husky/` is NOT
-`.github/workflows/`** — hooks carry no scope restriction and Ralph can push them.
+**`.husky/` is NOT `.github/workflows/`** — hooks carry no scope restriction and
+Ralph can push them.

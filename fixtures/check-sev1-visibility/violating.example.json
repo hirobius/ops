@@ -1,0 +1,21 @@
+{
+  "_comment": "The ops#27 state that proved the gap: client PII in public git history, labelled sev1, still open — the disclosure obligation unmet for 71 days while it sat at p1 as one line among fifty. The open sev2 beside it must NOT be reported; only the sev1 is a fire. The gate must name hirobius/ops#27 and exit 1.",
+  "issues": [
+    {
+      "repo": "hirobius/ops",
+      "number": 27,
+      "title": "security: rewrite git history to purge client PII from the public repo",
+      "url": "https://github.com/hirobius/ops/issues/27",
+      "state": "open",
+      "labels": ["backlog", "p1", "sev1", "needs-decision"]
+    },
+    {
+      "repo": "hirobius/ops",
+      "number": 35,
+      "title": "compliance: prospecting data / PII / CAN-SPAM pass before outreach scales",
+      "url": "https://github.com/hirobius/ops/issues/35",
+      "state": "open",
+      "labels": ["backlog", "p2", "sev2", "needs-decision"]
+    }
+  ]
+}
