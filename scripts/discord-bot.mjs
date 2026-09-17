@@ -1191,10 +1191,16 @@ function formatRoutingDecision(result, clientSlug) {
   const { taskId, tier, model, effort, costCeiling, rationale, createdNew } = result;
   const created = createdNew ? '🆕 created' : '🔄 re-routed';
   const cost = costCeiling > 0 ? `$${costCeiling.toFixed(4)} ceiling` : 'free (local)';
+  // The /ops page reads the client store; say so when the assigner could not update it.
+  const syncFailed =
+    result.storeSync && result.storeSync.ok === false
+      ? [`⚠️ not on /ops yet: \`${String(result.storeSync.error).replace(/`/g, "'")}\``]
+      : [];
   return [
     `${created} \`${taskId}\` → \`${model}\` (${tier}, ${effort})`,
     `${cost} · ${rationale}`,
     `→ /ops/clients/${clientSlug}`,
+    ...syncFailed,
   ].join('\n');
 }
 

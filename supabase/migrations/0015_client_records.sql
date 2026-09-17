@@ -1,12 +1,13 @@
--- Migration 0015 — `client_records` (client records out of the public repo)
+-- Migration 0015 — `client_records` (the private store for client records)
 --
 -- Client records (identity, contact, retainer, tasks, automations, brand audit)
 -- are business-confidential and often carry PII. They used to be JSON under
 -- clients/<slug>/ — gitignored, so they existed only on the machine that wrote
--- them, and were baked into the /ops bundle at build time. They now live here,
--- in the private database, read by GET /api/clients through the ClientStore
--- port (lib/clients/store.mjs). The public repo keeps only clients/_template/
--- and pseudonymous slugs in code and tests.
+-- them, and were baked into the /ops bundle at build time. The app now reads
+-- them from here, in the private database, via GET /api/clients through the
+-- ClientStore port (lib/clients/store.mjs). Real records must never be committed
+-- to the public repo: only clients/_template/ and pseudonymous slugs in code and
+-- tests belong there.
 --
 -- One row per client; each column holds one of the former JSON files verbatim
 -- (jsonb), so the /ops pages render exactly what they rendered before:
@@ -15,8 +16,10 @@
 --   automation-config.json → automation_config · brand-audit.json → brand_audit
 --   automations/<id>/config.json → workflows ([{ id, config }], id order)
 --
--- Filled by the one-time, idempotent import (upsert on slug):
+-- Filled by the idempotent import (upsert on slug), re-run after hand edits to
+-- the local clients/<slug>/ folders:
 --   node --env-file=.env.local scripts/import-client-records.mjs --apply
+-- scripts/auto-assigner.mjs syncs the one client whose tasks.json it edits.
 --
 -- Named `client_records`, not `clients`: 0003_tasks.sql's header already refers
 -- to a separate `clients` table concept, so this avoids a silent

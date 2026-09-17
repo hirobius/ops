@@ -34,7 +34,7 @@ import type { BrandAuditTouchpoint as Touchpoint } from './clientTypes';
 // ── Client registry (private client store via GET /api/clients) ───────────────
 
 import { useClientRegistry } from './clientRegistry';
-import { ClientStoreStatus, hasClients } from './ClientStoreNotice';
+import { ClientStoreDrift, ClientStoreStatus, hasClients } from './ClientStoreNotice';
 
 // ── Static long-form copy for the closing scope note ──────────────────────────
 // This text mirrors the closing paragraph of the long-form
@@ -95,6 +95,7 @@ export default function ClientBrandAuditPage() {
     <Page>
       <style>{PRINT_CSS}</style>
       <Stack direction="column" gap="spacious">
+        <ClientStoreDrift state={clientStore} />
         <PageHeader
           breadcrumbs={[
             { label: 'Ops', href: '/ops' },

@@ -31,10 +31,10 @@ import type {
 } from './clientTypes';
 
 // ── Client registry (same source as ClientDashboardPage) ──────────────────────
-// Records come from the private client store via GET /api/clients — never from
-// files in this public repo.
+// Records come from the private client store via GET /api/clients, not from
+// files in this repo.
 import { useClientRegistry } from './clientRegistry';
-import { ClientStoreStatus, hasClients } from './ClientStoreNotice';
+import { ClientStoreDrift, ClientStoreStatus, hasClients } from './ClientStoreNotice';
 
 // ── Plain-language translation ────────────────────────────────────────────────
 // Status tone + client-facing labels live in the shared statusPresentation module.
@@ -94,6 +94,7 @@ export default function ClientReportPage() {
     <Page>
       <style>{PRINT_CSS}</style>
       <Stack direction="column" gap="spacious">
+        <ClientStoreDrift state={clientStore} />
         <PageHeader
           breadcrumbs={[
             { label: 'Ops', href: '/ops' },

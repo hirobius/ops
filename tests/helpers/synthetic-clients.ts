@@ -1,7 +1,8 @@
 /**
  * Synthetic client records for Playwright specs that render the /ops client
- * surfaces. Real client records live only in the private client store (never in
- * this public repo), and `vite preview` has no /api/* functions, so specs stub
+ * surfaces. Real client records are read from the private client store and must
+ * never be committed to this public repo, and `vite preview` has no /api/*
+ * functions, so specs stub
  * GET /api/clients with these. Every value is fictitious: pseudonymous slugs,
  * example.com / example.test domains, 555-01xx numbers.
  *

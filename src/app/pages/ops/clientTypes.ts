@@ -1,8 +1,9 @@
 // Shared types for the client records consumed by /ops dashboard surfaces.
 // Fields marked optional (`?`) are absent in at least one client at time of
-// authoring; required fields are present in all. Records live OUT of this public
-// repo, in the private `client_records` store (lib/clients/store.mjs, migration
-// 0015), served by GET /api/clients. Each record mirrors the local clients/<slug>/
+// authoring; required fields are present in all. Records are read from the
+// private `client_records` store (lib/clients/store.mjs, migration 0015), served
+// by GET /api/clients, and must never be committed to this public repo. Each
+// record mirrors the local clients/<slug>/
 // {meta,tasks,checklist,retainer,goals,…}.json files it was imported from
 // (scripts/import-client-records.mjs); only clients/_template/ is committed.
 

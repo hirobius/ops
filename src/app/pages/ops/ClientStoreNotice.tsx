@@ -6,6 +6,10 @@
  * useClientRegistry() (GET /api/clients). Renders nothing once at least one
  * client record has loaded.
  *
+ * ClientStoreDrift — the dev-only warning that this machine's gitignored
+ * clients/<slug>/ folders (where records are still written) disagree with the
+ * store, so the page is showing an older copy. Renders nothing otherwise.
+ *
  * The error text is shown verbatim: the API and fetchClientRecords() already
  * phrase it as "what is wrong + the fix" (missing env var, migration not
  * applied, expired session), so the page never collapses it to "offline".
@@ -42,4 +46,20 @@ export function ClientStoreStatus({ state }: { state: UseClientRegistryResult })
     );
   }
   return <EmptyState title="Loading client records…" />;
+}
+
+export function ClientStoreDrift({ state }: { state: UseClientRegistryResult }) {
+  const drift = state.localDrift;
+  if (!drift) return null;
+  const parts = [
+    drift.create.length > 0 ? `not in the store: ${drift.create.join(', ')}` : '',
+    drift.update.length > 0 ? `different from the store: ${drift.update.join(', ')}` : '',
+    drift.problems.length > 0 ? `unreadable: ${drift.problems.join('; ')}` : '',
+  ].filter(Boolean);
+  return (
+    <Callout tone="warning" role="status">
+      This page shows the client store, and clients/ on this machine disagrees with it (
+      {parts.join(' · ')}). Update the store with: {IMPORT_COMMAND}
+    </Callout>
+  );
 }

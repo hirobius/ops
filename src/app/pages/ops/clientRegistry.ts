@@ -1,8 +1,8 @@
 /**
  * Client registry — the browser side of the private client store.
  *
- * Client records live OUT of the public repo: in the Supabase `client_records`
- * table behind the ClientStore port (lib/clients/store.mjs), served by
+ * Client records are read from the private Supabase `client_records` table
+ * behind the ClientStore port (lib/clients/store.mjs), served by
  * GET /api/clients (api/clients.ts; scripts/clients-middleware.mjs in dev).
  * Nothing under clients/ is baked into the bundle any more — the old
  * import.meta.glob reads only ever worked on a machine holding the gitignored
@@ -18,6 +18,26 @@ import { usePoll } from '../../lib/usePoll';
 import type { ClientFiles, ClientRecord } from './clientTypes';
 
 export type { ClientRecord } from './clientTypes';
+
+/**
+ * Dev only: this machine's gitignored clients/<slug>/ folders disagree with the
+ * store (scripts/clients-middleware.mjs → localDrift in
+ * scripts/import-client-records.mjs). Slugs and file problems only.
+ */
+export interface LocalDrift {
+  /** Local clients the store does not have. */
+  create: string[];
+  /** Local clients whose files differ from the stored record. */
+  update: string[];
+  /** Local folders the import would reject (bad JSON, no meta.json, bad slug). */
+  problems: string[];
+}
+
+/** One GET /api/clients response. */
+export interface ClientStoreSnapshot {
+  clients: ClientRecord[];
+  localDrift: LocalDrift | null;
+}
 
 const ENDPOINT = '/api/clients';
 const POLL_INTERVAL_MS = 60_000;
@@ -62,15 +82,15 @@ async function failureMessage(res: Response): Promise<string> {
   return body.error;
 }
 
-/** GET /api/clients → ClientRecord[]. Throws an Error whose message names the fix. */
+/** GET /api/clients → records (+ the dev drift report). Throws an Error whose message names the fix. */
 export async function fetchClientRecords(
   signal?: AbortSignal,
   fetchImpl: typeof fetch = fetch,
-): Promise<ClientRecord[]> {
+): Promise<ClientStoreSnapshot> {
   const res = await fetchImpl(ENDPOINT, { signal });
   if (!res.ok) throw new Error(await failureMessage(res));
-  const body = (await res.json()) as { clients?: ClientRecord[] };
-  return body.clients ?? [];
+  const body = (await res.json()) as { clients?: ClientRecord[]; localDrift?: LocalDrift };
+  return { clients: body.clients ?? [], localDrift: body.localDrift ?? null };
 }
 
 export interface UseClientRegistryResult {
@@ -78,14 +98,16 @@ export interface UseClientRegistryResult {
   registry: Record<string, ClientFiles> | null;
   error: string | null;
   isInitialLoading: boolean;
+  /** Dev only: local clients/ folders the store has not caught up with. */
+  localDrift: LocalDrift | null;
 }
 
 /** The client registry every /ops client surface reads through. */
 export function useClientRegistry(): UseClientRegistryResult {
-  const { data, error, isInitialLoading } = usePoll<ClientRecord[]>(
+  const { data, error, isInitialLoading } = usePoll<ClientStoreSnapshot>(
     (signal) => fetchClientRecords(signal),
     { intervalMs: POLL_INTERVAL_MS },
   );
-  const registry = useMemo(() => (data ? buildClientRegistry(data) : null), [data]);
-  return { registry, error, isInitialLoading };
+  const registry = useMemo(() => (data ? buildClientRegistry(data.clients) : null), [data]);
+  return { registry, error, isInitialLoading, localDrift: data?.localDrift ?? null };
 }

@@ -27,7 +27,7 @@ import type {
   ClientWorkflow,
 } from './clientTypes';
 import { useClientRegistry } from './clientRegistry';
-import { ClientStoreStatus, hasClients } from './ClientStoreNotice';
+import { ClientStoreDrift, ClientStoreStatus, hasClients } from './ClientStoreNotice';
 
 // ── Status colours ─────────────────────────────────────────────────────────────
 
@@ -78,6 +78,7 @@ export default function ClientDashboardPage() {
   return (
     <Page>
       <Stack direction="column" gap="spacious">
+        <ClientStoreDrift state={clientStore} />
         <Header data={data} slug={slug ?? ''} />
         {data.meta.status === 'prospect' ? (
           <ProspectBody data={data} />

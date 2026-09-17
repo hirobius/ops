@@ -48,8 +48,20 @@ describe('buildClientRegistry', () => {
 describe('fetchClientRecords', () => {
   it('returns the records from GET /api/clients', async () => {
     const fetchImpl = vi.fn(async () => jsonResponse(200, { clients: [alpha] }));
-    await expect(fetchClientRecords(undefined, fetchImpl)).resolves.toEqual([alpha]);
+    await expect(fetchClientRecords(undefined, fetchImpl)).resolves.toEqual({
+      clients: [alpha],
+      localDrift: null,
+    });
     expect(fetchImpl).toHaveBeenCalledWith('/api/clients', { signal: undefined });
+  });
+
+  it("passes the dev server's local-drift report through so the page can warn", async () => {
+    const localDrift = { create: ['client-gamma'], update: ['client-alpha'], problems: [] };
+    const fetchImpl = vi.fn(async () => jsonResponse(200, { clients: [alpha], localDrift }));
+    await expect(fetchClientRecords(undefined, fetchImpl)).resolves.toEqual({
+      clients: [alpha],
+      localDrift,
+    });
   });
 
   it('surfaces the store error verbatim so the page can show the fix', async () => {

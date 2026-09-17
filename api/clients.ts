@@ -3,14 +3,16 @@
  *
  * Read side for the /ops client surfaces (the /ops/clients gallery, the
  * per-client dashboard/report/brand-audit pages, the Clients disclosure on
- * /ops). Client records live OUT of the public repo, in the private Supabase
- * `client_records` table (migration 0015) behind the ClientStore port in
- * lib/clients/store.mjs — this replaces the old build-time
+ * /ops). Client records are read from the private Supabase `client_records`
+ * table (migration 0015) behind the ClientStore port in lib/clients/store.mjs;
+ * they must never be committed to this public repo. This replaces the old build-time
  * import.meta.glob reads of clients/<slug>/*.json, which only ever worked on a
  * machine holding the gitignored files.
  *
- * Records enter the store via the one-time, idempotent
- * `node --env-file=.env.local scripts/import-client-records.mjs --apply`.
+ * Records enter the store via the idempotent import
+ * `node --env-file=.env.local scripts/import-client-records.mjs --apply` (re-run
+ * after hand edits to clients/<slug>/), and scripts/auto-assigner.mjs syncs the
+ * client whose tasks.json it edits.
  *
  * Success: { clients: ClientRecord[] }  (slug order; empty until imported)
  * Error:   { error, code? } with status 401/405/500/503

@@ -916,7 +916,7 @@
       "name": "import-client-records.mjs",
       "category": "other",
       "prefix": "import",
-      "purpose": "One-time, idempotent import of the local, gitignored clients/<slug>/ JSON into the private client store (Supabase client_records, migration 0015).",
+      "purpose": "Idempotent sync of the local, gitignored clients/<slug>/ JSON into the private client store (Supabase client_records, migration 0015).",
       "pnpm": [],
       "gate": null
     },

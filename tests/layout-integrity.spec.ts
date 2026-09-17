@@ -32,7 +32,7 @@ const DESKTOP = { width: 1440, height: 900 };
  * The lab sketchbook (/vibe-sketchbook/*) is the only exempt surface and is
  * tested separately. Parameterized routes (/ops/clients/:slug) are pinned to
  * known-good fixtures — for clients, the synthetic `client-alpha` record served
- * by the /api/clients stub below (real client records never live in this repo).
+ * by the /api/clients stub below (real client records must never be committed).
  */
 const ALL_ROUTES = [
   // ── Root + info ─────────────────────────────────────────────────────────────

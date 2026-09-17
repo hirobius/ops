@@ -1,6 +1,8 @@
 /**
- * Tests for scripts/import-client-records.mjs — the one-time, idempotent import
- * of the local, gitignored clients/<slug>/ JSON into the private ClientStore.
+ * Tests for scripts/import-client-records.mjs — the idempotent sync of the local,
+ * gitignored clients/<slug>/ JSON into the private ClientStore: the bulk import,
+ * the per-client write-through scripts call after editing a client folder, and
+ * the drift report the dev server shows when the two disagree.
  *
  * Fixtures are written to a throwaway temp dir and are entirely synthetic
  * (client-alpha / client-beta, example.com, 555-0100). No network, no git.
@@ -15,8 +17,10 @@ import {
   readLocalClientRecords,
   planImport,
   importClientRecords,
+  syncClientRecord,
+  localDrift,
 } from '../import-client-records.mjs';
-import { createMemoryClientStore } from '../../lib/clients/store.mjs';
+import { createMemoryClientStore, ClientStoreError } from '../../lib/clients/store.mjs';
 
 let root;
 
@@ -195,4 +199,162 @@ test('apply never deletes a stored client that is absent locally', async () => {
     (await store.list()).map((r) => r.slug),
     ['client-alpha', 'client-beta'],
   );
+});
+
+// ---------------------------------------------------------------------------
+// syncClientRecord — write-through for scripts that edit clients/<slug>/
+// ---------------------------------------------------------------------------
+
+const newTasks = {
+  phases: [
+    {
+      id: 'phase-1',
+      name: 'Phase 1',
+      status: 'in-progress',
+      tasks: [{ id: 't-new', title: 'Synthetic routed task', status: 'todo' }],
+    },
+  ],
+};
+
+/** Wrap a store so a test can see whether upsert ran. */
+function spyStore(store) {
+  const calls = [];
+  return {
+    calls,
+    list: () => store.list(),
+    upsert: async (records) => {
+      calls.push(records.map((r) => r.slug));
+      return store.upsert(records);
+    },
+  };
+}
+
+const syncAlpha = (openStore) => syncClientRecord({ slug: 'client-alpha', dir: root, openStore });
+
+test('syncClientRecord creates a client the store does not have yet', async () => {
+  writeJson('client-alpha/meta.json', alphaMeta);
+  const store = createMemoryClientStore();
+
+  const result = await syncAlpha(async () => store);
+
+  assert.deepEqual(result, { ok: true, action: 'create' });
+  assert.deepEqual(await store.list(), [alpha]);
+});
+
+test('syncClientRecord pushes a changed tasks.json (the auto-assigner write) and leaves other clients alone', async () => {
+  writeJson('client-alpha/meta.json', alphaMeta);
+  writeJson('client-alpha/tasks.json', newTasks);
+  const store = createMemoryClientStore([{ ...alpha, tasks: { phases: [] } }, beta]);
+
+  const result = await syncAlpha(async () => store);
+
+  assert.deepEqual(result, { ok: true, action: 'update' });
+  const stored = await store.list();
+  assert.deepEqual(stored.find((r) => r.slug === 'client-alpha')?.tasks, newTasks);
+  assert.deepEqual(
+    stored.find((r) => r.slug === 'client-beta'),
+    beta,
+  );
+});
+
+test('syncClientRecord does not write when the store already matches', async () => {
+  writeJson('client-alpha/meta.json', alphaMeta);
+  const store = spyStore(createMemoryClientStore([alpha]));
+
+  const result = await syncAlpha(async () => store);
+
+  assert.deepEqual(result, { ok: true, action: 'unchanged' });
+  assert.deepEqual(store.calls, []);
+});
+
+test('syncClientRecord reads only the named client — a broken sibling folder does not block it', async () => {
+  writeJson('client-alpha/meta.json', alphaMeta);
+  writeJson('client-beta/meta.json', '{ not json');
+
+  const result = await syncAlpha(async () => createMemoryClientStore());
+
+  assert.deepEqual(result, { ok: true, action: 'create' });
+});
+
+test('syncClientRecord never throws on a broken record: nothing is written and the error names the fix', async () => {
+  writeJson('client-alpha/meta.json', alphaMeta);
+  writeJson('client-alpha/tasks.json', '{ nope');
+  const store = createMemoryClientStore();
+
+  const result = await syncAlpha(async () => store);
+
+  assert.equal(result.ok, false);
+  assert.match(result.error, /tasks\.json is not valid JSON/);
+  assert.match(result.error, /\/ops\/clients\/client-alpha/);
+  assert.match(result.error, /import-client-records\.mjs --apply/);
+  assert.deepEqual(await store.list(), []);
+});
+
+test('syncClientRecord reports a client folder that does not exist', async () => {
+  const result = await syncAlpha(async () => createMemoryClientStore());
+  assert.equal(result.ok, false);
+  assert.match(result.error, /client-alpha: no meta\.json/);
+});
+
+test('syncClientRecord never throws when the store cannot be opened, and names the env fix', async () => {
+  writeJson('client-alpha/meta.json', alphaMeta);
+
+  const result = await syncAlpha(async () => {
+    throw new Error(
+      'SUPABASE_MISSING_ENV: set a Supabase URL (SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY',
+    );
+  });
+
+  assert.equal(result.ok, false);
+  assert.match(result.error, /SUPABASE_SERVICE_ROLE_KEY/);
+  assert.match(result.error, /\.env\.local/);
+  assert.match(result.error, /import-client-records\.mjs --apply/);
+});
+
+test('syncClientRecord never throws when the store fails (e.g. migration not applied)', async () => {
+  writeJson('client-alpha/meta.json', alphaMeta);
+  const failing = {
+    list: async () => {
+      throw new ClientStoreError('CLIENT_RECORDS_TABLE_MISSING', 503, 'apply the migration');
+    },
+    upsert: async () => {},
+  };
+
+  const result = await syncAlpha(async () => failing);
+
+  assert.equal(result.ok, false);
+  assert.match(result.error, /CLIENT_RECORDS_TABLE_MISSING: apply the migration/);
+});
+
+// ---------------------------------------------------------------------------
+// localDrift — does this machine's clients/ disagree with the store?
+// ---------------------------------------------------------------------------
+
+test('localDrift is null on a machine with no local client folders (e.g. a fresh clone)', () => {
+  assert.equal(localDrift(path.join(root, 'nope'), [alpha]), null);
+  writeJson('_template/meta.json', { id: '<<slug>>' });
+  assert.equal(localDrift(root, [alpha]), null);
+});
+
+test('localDrift is null when every local client matches the store', () => {
+  writeJson('client-alpha/meta.json', alphaMeta);
+  assert.equal(localDrift(root, [alpha, beta]), null);
+});
+
+test('localDrift lists local clients that are new to or differ from the store, and unreadable folders', () => {
+  writeJson('client-alpha/meta.json', alphaMeta);
+  writeJson('client-alpha/tasks.json', newTasks);
+  writeJson('client-gamma/meta.json', {
+    id: 'client-gamma',
+    name: 'Example Gamma',
+    status: 'active',
+  });
+  writeJson('client-delta/meta.json', '{ not json');
+
+  const drift = localDrift(root, [alpha, beta]);
+
+  assert.deepEqual(drift?.create, ['client-gamma']);
+  assert.deepEqual(drift?.update, ['client-alpha']);
+  assert.equal(drift?.problems.length, 1);
+  assert.match(drift?.problems[0] ?? '', /^client-delta: meta\.json/);
 });

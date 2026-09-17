@@ -1,7 +1,7 @@
 // @vitest-environment node
 /**
- * lib/clients/store.mjs — the ClientStore port (client records live OUT of the
- * public repo, in the private Supabase `client_records` table).
+ * lib/clients/store.mjs — the ClientStore port (client records are read from the
+ * private Supabase `client_records` table, never committed to this repo).
  *
  * One contract suite runs against BOTH adapters: the in-memory adapter (what
  * tests and the import script's dry runs use) and the Supabase adapter driven

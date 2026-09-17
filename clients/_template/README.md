@@ -1,10 +1,10 @@
 # Client template
 
-Client records are business-confidential and often carry PII, so they **never
-live in this public repo**. The `/ops` client surfaces read them from the private
-Supabase `client_records` table (migration `0015_client_records.sql`) via
-`GET /api/clients`. This folder is the only committed example, and every value
-in it is a `<<placeholder>>`.
+Client records are business-confidential and often carry PII, so they must
+**never be committed to this public repo**. The `/ops` client surfaces read them
+from the private Supabase `client_records` table (migration
+`0015_client_records.sql`) via `GET /api/clients`. This folder is the only
+committed example, and every value in it is a `<<placeholder>>`.
 
 When onboarding a new client:
 
@@ -23,6 +23,21 @@ node --env-file=.env.local scripts/import-client-records.mjs --apply  # write
 The import is idempotent (re-running only writes new or changed clients) and
 never deletes. Files marked **(optional)** can be skipped — the `/ops` pages
 handle missing files gracefully.
+
+## Keeping the store in step
+
+The `/ops` pages show the store, not these files, so a change here is invisible
+until it reaches the store:
+
+- **Hand edits** — re-run the `--apply` command above. Under `pnpm dev` the
+  client pages show a warning naming every client whose local folder differs
+  from the store (or that the import would reject), until you do.
+- **`scripts/auto-assigner.mjs`** (the Telegram/Discord bots and `/api/route`)
+  syncs the client whose `tasks.json` it edits. If that sync fails (e.g. no
+  Supabase keys in `.env.local` on that machine), the bot reply and the
+  assigner's stderr say so and give the fix.
+- The import overwrites the store with **this machine's** copy, so run it where
+  `clients/` is current (e.g. on the VPS if the bots run there).
 
 The `_template/` folder itself is **never imported and never shown**: slugs
 starting with `_` are scaffolding. Don't rename it. Slugs must be lowercase
