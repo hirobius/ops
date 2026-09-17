@@ -25,7 +25,7 @@ vi.mock('../../lib/photos/pexels.mjs', () => {
 });
 
 import { runPipeline } from '../../lib/agent/index.mjs';
-import { generateLeadSite, recordLiveUrl } from '../../lib/leads/pipeline.mjs';
+import { generateLeadSite, recordLiveUrl, toAgentLead } from '../../lib/leads/pipeline.mjs';
 
 /**
  * A recording Supabase stub. `select().eq().single()` resolves the fetch;
@@ -94,7 +94,54 @@ beforeEach(() => {
   vi.mocked(runPipeline).mockReset();
 });
 
+describe('toAgentLead', () => {
+  // One mapping shared by production generation and the model eval's --from-db
+  // mode (ops#7), so the eval scores exactly the input the agent really gets.
+  it('maps a leads row to pipeline input, turning nulls into absent fields', () => {
+    expect(
+      toAgentLead({
+        ...LEAD,
+        rating: 4.5,
+        review_count: 12,
+        description: 'Family-owned.',
+        street_address: '1 Main St',
+        hours: { Monday: '9 AM–5 PM' },
+        photos: ['/photos/a.jpg'],
+      }),
+    ).toEqual({
+      name: 'Acme',
+      category: 'roofing',
+      city: 'Austin',
+      region: 'TX',
+      phone: undefined,
+      email: undefined,
+      website: undefined,
+      rating: 4.5,
+      reviewCount: 12,
+      notes: 'Family-owned.',
+      hours: { Monday: '9 AM–5 PM' },
+      streetAddress: '1 Main St',
+      photos: ['/photos/a.jpg'],
+      logoUrl: undefined,
+    });
+  });
+
+  it('uses the photos it is given over the row’s own', () => {
+    expect(toAgentLead({ ...LEAD, photos: ['/row.jpg'] }, ['/stock.jpg']).photos).toEqual([
+      '/stock.jpg',
+    ]);
+    expect(toAgentLead({ ...LEAD, photos: null }).photos).toBeUndefined();
+  });
+});
+
 describe('generateLeadSite', () => {
+  it('feeds the agent the toAgentLead mapping of the row', async () => {
+    vi.mocked(runPipeline).mockResolvedValueOnce(PIPELINE_RESULT);
+    const { sb } = makeSb({ lead: LEAD });
+    await generateLeadSite(sb, 'lead-1');
+    expect(runPipeline).toHaveBeenCalledWith(toAgentLead(LEAD));
+  });
+
   it('404s when the lead is missing', async () => {
     const { sb } = makeSb({ lead: null });
     expect(await generateLeadSite(sb, 'nope')).toEqual({
