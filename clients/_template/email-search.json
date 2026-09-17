@@ -1,0 +1,33 @@
+{
+  "_note": "Gmail search terms for scripts/sync-client-emails.mjs. Mailbox addresses, business names and contact names are client PII: they belong only in this gitignored per-client copy, never in tracked code. Replace every <<placeholder>>.",
+  "queries": [
+    "from:<<shared-mailbox@client-domain>> OR to:<<shared-mailbox@client-domain>>",
+    "subject:<<client-nickname>> OR subject:\"<<business name>>\"",
+    "\"<<contact full name>>\" OR \"<<business name>>\""
+  ],
+  "keywords": {
+    "actionItems": [
+      "send",
+      "follow up",
+      "need",
+      "please",
+      "action",
+      "todo",
+      "track down",
+      "assign",
+      "credentials",
+      "login"
+    ],
+    "statusChanges": [
+      "done",
+      "complete",
+      "sent",
+      "in the mail",
+      "confirmed",
+      "activated",
+      "added",
+      "enabled"
+    ],
+    "blockers": ["blocked", "waiting", "pending", "can't", "not yet", "haven't"]
+  }
+}

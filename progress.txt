@@ -2221,3 +2221,100 @@ Issue #175: retire audit-tiers + check-contrast (DS-authoring gates, no target a
   self-executes discord.js Client + env checks at import time, nothing
   exported). Manual verification in a live Discord channel wasn't possible
   in this sandbox (no DISCORD_BOT_TOKEN). Rest of #30's scope remains open.
+
+## Issue #44 — leads: record live_url (2026-09-16)
+- Rescoped issue: preview_url stamping already shipped; live_url was read
+  (lib/outreach/map.mjs fallback, already tested) but nothing wrote it.
+  Lifecycle flip to 'published' explicitly declined (billing event stays
+  human) — out of scope by design, not an oversight.
+- Added recordLiveUrl(sb, leadId, { liveUrl }) to lib/leads/pipeline.mjs,
+  same fetch -> 404-guard -> update -> respond shape as renderLeadSite.
+  Writes ONLY live_url.
+- Added 'record_live_url' action to api/lead-action.ts's ACTIONS + switch,
+  URL-validated (http(s)) the same way as the existing 'render' case, same
+  OPS_AGENT_KEY auth seam (no new auth path).
+- Did NOT touch scripts/leads-middleware.mjs (dev Vite mirror) — it already
+  only mirrors 'generate'/'render', not the pitch_* actions either, so this
+  is a pre-existing gap, not something this issue's DoD asked to fix.
+- Tests: tests/api/lead-pipeline.test.ts (recordLiveUrl: 404, success,
+  500-on-write-error) + new tests/api/lead-action.test.ts (dispatcher-level:
+  success, bad-URL 400, missing-URL 400, unknown-lead 404, and the
+  no-side-effects assertion via a mutable-row stub that reads the row back
+  after the write, proving lifecycle/preview_url/contacted_at/pitch fields
+  are untouched).
+- Files changed: lib/leads/pipeline.mjs, api/lead-action.ts,
+  tests/api/lead-pipeline.test.ts, tests/api/lead-action.test.ts (new).
+- Branch: ralph/issue-44-record-live-url. Gate green (typecheck, 97 files /
+  1192 tests, lint). PR: https://github.com/hirobius/ops/pull/368
+- Notes for next iteration: none — slice is complete per DoD. Deploy-side
+  callback (clients#12/#15) is a different repo and out of scope here.
+
+## Issue #357 — chore: delete dead check-route-smoke.mjs gate (2026-09-16)
+- Decision: option (a) delete. The gate's DEFAULT_ROUTES (/, /vibe-sketchbook,
+  /hds, /hds/case-studies/hirobius, /microsoft-design-systems, /visuals,
+  /portfolio/draft) are pre-split portfolio-repo routes; none exist in this
+  app's src/app/routes.tsx (/hds/* is a bare redirect, rest 404 via
+  NotFoundPage). check-route-coverage.mjs + tests/layout-integrity.spec.ts
+  already cover this app's real routes, so the gate wasn't closing a gap —
+  confirmed no test/script depended on it beyond its own registrations.
+- Removed: scripts/check-route-smoke.mjs, fixtures/check-route-smoke/,
+  its docs/guardrails/registry.json entry (id: check-route-smoke), its
+  package.json check:route-smoke script + its call from check:release,
+  its REPLACEMENT_TABLE entry in scripts/audit-gate-replaceability.mjs
+  (dead reference — defaults to genuinely-custom for unlisted gates, so
+  nothing crashes without it), and its two rows in SYSTEMS_REGISTRY.md.
+  Regenerated scripts/INDEX.md/INDEX.json via generate-script-index.mjs.
+- DoD box 2 (validate-fixture-proof-of-firing stub flag) is moot — the
+  gate no longer exists to flag.
+- Files changed: scripts/check-route-smoke.mjs (deleted),
+  fixtures/check-route-smoke/* (deleted), docs/guardrails/registry.json,
+  package.json, SYSTEMS_REGISTRY.md, scripts/audit-gate-replaceability.mjs,
+  scripts/INDEX.md, scripts/INDEX.json.
+- Branch: ralph/issue-357-delete-check-route-smoke. Gate green (typecheck,
+  97 files / 1192 tests, lint). PR: (see issue comment)
+- Notes for next iteration: none — slice is complete per DoD.
+
+Issue #51 — human-in-the-loop "needs you" pager, smallest slice: the
+Discord pager only (DoD items 2+3), not the whole epic.
+- Premise check first: the issue's DoD item 1 ("Needs you lane on
+  /ops/tasks") is stale. /ops/tasks was retired 2026-09-15 (redirects to
+  /ops/standing); Standing's "Waiting on you" section (StandingPage.tsx,
+  fed by lib/tasks/fleet.mjs sortFleetLanes/BLOCKING_LABELS incl.
+  needs-adrian) already shows exactly this — live GitHub labels, issue
+  link, badge — built after this issue's DoD was written. Building a
+  second lane on a page that no longer exists would be wrong, not small.
+  Item 4 (unblock path) is already spelled out in the issue body itself.
+  Left both for a human decision on whether to caption Standing's lane
+  with the unblock instructions; not built here.
+- Built: the pager (item 2) + de-dup (item 3), wired into the EXISTING
+  import pass (POST /api/tasks, importIssuesHandler) — no new cron, no
+  new api/*.ts route, per the DoD's own item 5.
+  - lib/tasks/needs-adrian-pager.mjs (new, pure): detectNewlyNeedsAdrian
+    diffs a task's tags BEFORE this import's upsert vs AFTER — de-dup is
+    the diff itself (same idiom as sync-preview-urls.mjs's null
+    preview_url check), not a new timestamp column. Only pages on the
+    label appearing that wasn't there last import.
+  - lib/supabase/tasks.mjs: added listGithubTaskTags(sb) (key+tags read,
+    same scope as listGithubTaskKeys) — read BEFORE upsertTasks so it
+    captures the prior state.
+  - api/tasks.ts: importIssuesHandler now reads tags first, upserts,
+    diffs, then pageNeedsAdrian() fires notifyEvent({kind:
+    'approval_waiting', ...}) per newly-labeled task — exactly the kind
+    the issue's own Build Sketch names. Response gains `paged: n`.
+  - IMPORTANT gotcha caught + fixed: notifyEvent's committed-JSONL append
+    (appendFileSync against the repo tree) would throw EROFS in the real
+    Vercel Lambda (only /tmp is writable) — no existing api/*.ts route
+    calls notifyEvent today, so this was unhandled. Redirected the
+    append to /tmp/ops-events.jsonl for this call site AND wrapped each
+    per-row notify in try/catch so a notify failure never fails the
+    import that found the label change.
+- Files changed: lib/tasks/needs-adrian-pager.mjs (new),
+  lib/supabase/tasks.mjs, api/tasks.ts,
+  tests/api/needs-adrian-pager.test.ts (new),
+  tests/api/tasks-repo.test.ts, tests/api/import-issues-handler.test.ts.
+- Branch: ralph/issue-51-needs-adrian-pager. Gate green (typecheck,
+  typecheck:api, 101 files / 1211 tests, lint).
+- Notes for next iteration: DoD items 1+4 are a human call, not built —
+  commented back on the issue rather than guessed at. If Adrian wants a
+  literal lane on Standing beyond what's already there, or the unblock
+  caption, that's a follow-up, not this PR.

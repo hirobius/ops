@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 141,
+  "totalScripts": 154,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,10 +41,10 @@
     }
   },
   "categoryCounts": {
-    "other": 71,
+    "other": 77,
     "audit": 16,
     "build": 1,
-    "gate": 33,
+    "gate": 40,
     "generate": 11,
     "sync": 3,
     "test": 2,
@@ -141,7 +141,7 @@
       "name": "audit-gates-supportjson.mjs",
       "category": "audit",
       "prefix": "audit",
-      "purpose": "Meta-gate ratchet for the `--json` rollout (per unit 13p-8). For each registered gate that is NOT in the pnpm-meta channel (skipped for cost), spawn `node <gateScript> --json` with a 30s timeout, capture stdout, and",
+      "purpose": "Meta-gate ratchet for the `--json` rollout (per unit 13p-8). For each registered gate that is NOT in the pnpm-meta channel (skipped for cost) and does not opt out via `skipMetaProbe: \"<reason>\"` (full tsc /…",
       "pnpm": [],
       "gate": {
         "channel": "ci-pr",
@@ -377,7 +377,7 @@
       "pnpm": ["check:exemptions", "check:full"],
       "gate": {
         "channel": "pre-commit",
-        "severity": "warn"
+        "severity": "error"
       }
     },
     {
@@ -443,7 +443,18 @@
       "pnpm": ["check:colors", "check:full", "check:tokens"],
       "gate": {
         "channel": "pre-commit",
-        "severity": "warn"
+        "severity": "error"
+      }
+    },
+    {
+      "name": "check-layout-tests.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Layout-integrity Playwright suite as a ci-pr registry gate: runs `pnpm run test:layout` (check-route-coverage, then tests/layout-integrity.spec.ts against a `vite build && vite preview` server",
+      "pnpm": [],
+      "gate": {
+        "channel": "ci-pr",
+        "severity": "error"
       }
     },
     {
@@ -498,7 +509,7 @@
       "pnpm": ["check:full", "check:page-shell"],
       "gate": {
         "channel": "pre-commit",
-        "severity": "warn"
+        "severity": "error"
       }
     },
     {
@@ -508,8 +519,30 @@
       "purpose": "check-parked-triggers — evaluate the re-entry triggers in docs/ai/PARKED.md.",
       "pnpm": ["parked:check"],
       "gate": {
-        "channel": "pnpm-meta",
+        "channel": "ci-scheduled",
         "severity": "warn"
+      }
+    },
+    {
+      "name": "check-pii.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Blocks personal data (client names, contact mailboxes, phone numbers, private Google/Microsoft workspace links) from entering git (ops#27, ops#35).",
+      "pnpm": [],
+      "gate": {
+        "channel": "pre-commit",
+        "severity": "error"
+      }
+    },
+    {
+      "name": "check-production-health.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "just a 200 (ops#347, script half of #318).",
+      "pnpm": [],
+      "gate": {
+        "channel": "manual",
+        "severity": "error"
       }
     },
     {
@@ -546,14 +579,14 @@
       }
     },
     {
-      "name": "check-route-smoke.mjs",
+      "name": "check-schema-drift.mjs",
       "category": "gate",
       "prefix": "check",
-      "purpose": "(no header description)",
-      "pnpm": ["check:release", "check:route-smoke"],
+      "purpose": "offer everything site-engine ships.",
+      "pnpm": [],
       "gate": {
-        "channel": "pnpm-meta",
-        "severity": "warn"
+        "channel": "pre-commit",
+        "severity": "error"
       }
     },
     {
@@ -575,6 +608,17 @@
       "pnpm": ["check:full", "check:security"],
       "gate": {
         "channel": "pre-commit",
+        "severity": "error"
+      }
+    },
+    {
+      "name": "check-sev1-visibility.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Lists every open `sev1` issue and exits non-zero while any exists (ops#317).",
+      "pnpm": ["sev1:check"],
+      "gate": {
+        "channel": "pnpm-meta",
         "severity": "warn"
       }
     },
@@ -594,6 +638,17 @@
       "category": "gate",
       "prefix": "check",
       "purpose": "committed baseline JSON is older than any of its source files. The intent: catch baselines that should have been regenerated after a source change but weren't.",
+      "pnpm": [],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
+      "name": "check-spec-freshness.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Anti-rot gate for `docs/specs/<epic-slug>.md` (ops#294, decided in the ops#274 frontier-engineering session — `docs/ai/FRONTIER-DOCTRINE.md` §2, anti-rot rule 4). The doctrine's known failure mode is documents outliving",
       "pnpm": [],
       "gate": {
         "channel": "manual",
@@ -623,6 +678,28 @@
       }
     },
     {
+      "name": "check-type-coverage.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Type-coverage floor as a ci-pr registry gate: runs `pnpm run check:type-coverage` (type-coverage --at-least 99.9) and fails when coverage drops below the floor. Replaces the bespoke \"Type coverage\" step in",
+      "pnpm": [],
+      "gate": {
+        "channel": "ci-pr",
+        "severity": "error"
+      }
+    },
+    {
+      "name": "check-typecheck.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Whole-program TypeScript typecheck as a ci-pr registry gate: runs `pnpm run typecheck` (tsc --noEmit -p tsconfig.typecheck.json) and fails on any type error. Replaces the bespoke \"Typecheck\" step in",
+      "pnpm": [],
+      "gate": {
+        "channel": "ci-pr",
+        "severity": "error"
+      }
+    },
+    {
       "name": "check-unresponsive-grids.mjs",
       "category": "gate",
       "prefix": "check",
@@ -630,7 +707,7 @@
       "pnpm": ["check:full", "check:grids"],
       "gate": {
         "channel": "pre-commit",
-        "severity": "warn"
+        "severity": "error"
       }
     },
     {
@@ -641,7 +718,7 @@
       "pnpm": [],
       "gate": {
         "channel": "pre-commit",
-        "severity": "warn"
+        "severity": "error"
       }
     },
     {
@@ -666,6 +743,14 @@
       "prefix": "convert",
       "purpose": "(no header description)",
       "pnpm": ["assets:convert"],
+      "gate": null
+    },
+    {
+      "name": "crawl-lead-emails.mjs",
+      "category": "other",
+      "prefix": "crawl",
+      "purpose": "1 lead of 263 has an email. Google Business Profile has no email field, so no Maps scraper returns one and the B2B enrichment tier covers 3-person trades",
+      "pnpm": [],
       "gate": null
     },
     {
@@ -923,6 +1008,17 @@
       "gate": null
     },
     {
+      "name": "metric-human-gate-latency.mjs",
+      "category": "other",
+      "prefix": "metric",
+      "purpose": "Human-gate latency metric (ops#297, decided in the ops#274 frontier-engineering session, `docs/ai/FRONTIER-DOCTRINE.md` §7 — the second of the two adopted metrics; the first is #293,",
+      "pnpm": [],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
       "name": "metric-north-star-share.mjs",
       "category": "other",
       "prefix": "metric",
@@ -974,6 +1070,22 @@
       "gate": null
     },
     {
+      "name": "pii-commit-msg.mjs",
+      "category": "other",
+      "prefix": "pii",
+      "purpose": "Pre-commit sees only staged content, so without this a commit message naming a client passed every local hook and was first caught after the push, in public (ops#27). Runs `scripts/check-pii.mjs --message-file…",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "pii-fetch-github-text.mjs",
+      "category": "other",
+      "prefix": "pii",
+      "purpose": "Writes the issue/PR titles, bodies and comments of a repo that were updated in the last N days to a JSON records file, for `node scripts/check-pii.mjs --records <file>`. Used by",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "prerender.mjs",
       "category": "other",
       "prefix": null,
@@ -1001,7 +1113,7 @@
       "name": "promote-learned-rule.mjs",
       "category": "other",
       "prefix": "promote",
-      "purpose": "Interactive walker over docs/ai/learned-rules.jsonl. For each unpromoted entry (no `promotedAt` field), prompts Adrian to promote it to a real registry entry in docs/guardrails/registry.json. The actual flip from",
+      "purpose": "Interactive walker over docs/ai/learned-rules.jsonl. For each unpromoted entry (no `promotedAt` field), prompts Adrian to promote it to one of two destinations:",
       "pnpm": ["guardrail:learned-rules", "guardrail:promote-rule"],
       "gate": null
     },
@@ -1062,6 +1174,14 @@
       "gate": null
     },
     {
+      "name": "ralph-watchdog.mjs",
+      "category": "other",
+      "prefix": "ralph",
+      "purpose": "file is the I/O half: gather facts from GitHub, ask the rule what to do, and (with --apply) do the mechanical part of it. Same split as check-branch-ancestry / branch-ancestry.mjs.",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "reconcile-ralph-closures.mjs",
       "category": "other",
       "prefix": "reconcile",
@@ -1084,7 +1204,7 @@
       "name": "refresh-firing-stats.mjs",
       "category": "other",
       "prefix": "refresh",
-      "purpose": "Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and computes per-gate `lastFiringAt` / `lastViolationAt` stats.",
+      "purpose": "Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and computes per-gate `lastFiringAt` / `lastViolationAt` stats via scripts/lib/firing-stats.mjs.",
       "pnpm": ["guardrail:firing-stats"],
       "gate": null
     },
@@ -1142,6 +1262,14 @@
       "prefix": "scaffold",
       "purpose": "Creates a Swiss-canonical component skeleton from templates/component-template.tsx, plus a manifest stub and a fixture stub under fixtures/swiss-canon/<name>-clean/. The scaffolder makes",
       "pnpm": ["scaffold:component"],
+      "gate": null
+    },
+    {
+      "name": "secret-scan-range.mjs",
+      "category": "other",
+      "prefix": "secret",
+      "purpose": "Works out which commits the CI secret scan (.github/workflows/secret-scan.yml) covers for a GitHub Actions event. The answer is handed to `gitleaks git --log-opts`, which passes it to `git log -p` (ops#32).",
+      "pnpm": [],
       "gate": null
     },
     {

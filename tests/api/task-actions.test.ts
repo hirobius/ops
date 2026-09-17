@@ -1155,14 +1155,14 @@ describe('applyTaskAction — queue_on / queue_off (mirror-free, /ops/standing)'
     };
     const result = await applyTaskAction(
       sb,
-      { key: 'github:hirobius/lilac#3', action: 'queue_off' },
+      { key: 'github:hirobius/client-site#3', action: 'queue_off' },
       { github },
     );
     expect(result.status).toBe(200);
     expect(calls).toEqual([
       {
         op: 'remove',
-        issueUrl: 'https://github.com/hirobius/lilac/issues/3',
+        issueUrl: 'https://github.com/hirobius/client-site/issues/3',
         label: 'ralph-ready',
       },
     ]);

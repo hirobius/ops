@@ -93,7 +93,7 @@ function workflowState(mode: string | undefined): WorkflowState {
 // Workflow descriptions — one-line plain English. Falls back to the id if
 // we don't have a translation (so a new automation appears with no doc work).
 const WORKFLOW_BLURB: Record<string, string> = {
-  'lead-intake': 'New leads from your website land directly in EZLynx.',
+  'lead-intake': 'New leads from your website land directly in your management system.',
   'email-triage': 'Incoming email is sorted into work-queue categories.',
   'auto-responder': 'New leads get an acknowledgment email within minutes.',
   'renewal-reminder': 'Customers receive reminders before their policy renews.',

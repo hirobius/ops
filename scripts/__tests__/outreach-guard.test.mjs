@@ -1,6 +1,6 @@
 /**
  * Tests for lib/outreach/guard.mjs — the single outbound choke point for
- * cold outreach (#9). Mirrors lilac's automations/_shared/test-mode-guard.mjs:
+ * cold outreach (#9). Mirrors the client-site repo's automations/_shared/test-mode-guard.mjs:
  * every send decision routes through one pure function, so "could this have
  * emailed a real prospect?" is answerable by reading one file.
  */

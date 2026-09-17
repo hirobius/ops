@@ -32,8 +32,11 @@ Deployed on Vercel; `main` is production.
   dashboards / reports / brand audits. (Public client portals moved to
   `hirobius/portal-kit`; the old in-ops `/c/:slug` portal was removed.)
 - **`/ops/projects`, `/ops/digest`, `/ops` index** — fleet views. Merge
-  governance runs through ralph-gate's `ralph-auto`/`ralph-approved` labels on
-  the linked PR (the pre-Ralph `/admin/approvals` inbox was retired, ops#157).
+  governance follows ops#238: a green `ralph-gate` merges by default, and a
+  diff touching a supervised revenue path needs `ralph-approved` on the PR —
+  enforced by `scripts/ralph-watchdog.mjs`, not yet by the engine's
+  `ralph-auto` arm (see `ralph/README.md`). The pre-Ralph `/admin/approvals`
+  inbox was retired (ops#157).
 - **The `/ops` gate.** Server-side password: `api/ops-login.ts` checks
   `OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` and sets an httpOnly session cookie.
   `pnpm dev` bypasses it; production is gated.

@@ -7,6 +7,8 @@ name: Ralph Gate
 # ralph/* PRs: deterministic gate + independent AI review + HUMAN-approved
 # merge (label the PR `ralph-approved`, or pre-tag the issue `ralph-auto` for
 # batch approval) + one bounded self-heal on failure. Human PRs pass through.
+# The engine's ralph-auto arm has NO supervised-path check (ops#238, deferred);
+# in ops only scripts/ralph-watchdog.mjs enforces that boundary, on its own merges.
 # The `labeled` trigger is the approval fast-path: adding `ralph-approved`
 # arms auto-merge without re-running the review.
 

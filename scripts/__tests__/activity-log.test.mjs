@@ -9,16 +9,16 @@ import { parseGitLog, clusterByScope, formatActivityLog } from '../activity-log.
 
 describe('parseGitLog', () => {
   it('parses %H|%aI|%s lines', () => {
-    expect(parseGitLog('a|2026-05-08T00:00:00Z|feat(lilac): x')).toEqual([
-      { sha: 'a', date: '2026-05-08T00:00:00Z', subject: 'feat(lilac): x' },
+    expect(parseGitLog('a|2026-05-08T00:00:00Z|feat(acme): x')).toEqual([
+      { sha: 'a', date: '2026-05-08T00:00:00Z', subject: 'feat(acme): x' },
     ]);
   });
 });
 
 describe('clusterByScope', () => {
   const commits = [
-    { sha: 'a', date: '', subject: 'feat(lilac): retainer signed' },
-    { sha: 'b', date: '', subject: 'fix(lilac): drip typo' },
+    { sha: 'a', date: '', subject: 'feat(acme): retainer signed' },
+    { sha: 'b', date: '', subject: 'fix(acme): drip typo' },
     { sha: 'c', date: '', subject: 'feat(seo): pre-deploy hygiene' },
     { sha: 'd', date: '', subject: 'docs: misc cleanup' },
     { sha: 'e', date: '', subject: 'random subject without prefix' },
@@ -26,7 +26,7 @@ describe('clusterByScope', () => {
 
   it('groups commits by the scope in feat(scope): / fix(scope): prefixes', () => {
     const r = clusterByScope(commits);
-    expect(r.get('lilac').length).toBe(2);
+    expect(r.get('acme').length).toBe(2);
     expect(r.get('seo').length).toBe(1);
   });
 
@@ -37,7 +37,7 @@ describe('clusterByScope', () => {
 
   it('returns a Map preserving first-seen insertion order', () => {
     const r = clusterByScope(commits);
-    expect([...r.keys()]).toEqual(['lilac', 'seo', 'misc']);
+    expect([...r.keys()]).toEqual(['acme', 'seo', 'misc']);
   });
 });
 
@@ -54,11 +54,11 @@ describe('formatActivityLog', () => {
 
   it('lists each cluster as its own ## section with bullets', () => {
     const clusters = new Map([
-      ['lilac', [{ sha: 'a', date: '', subject: 'feat(lilac): retainer signed' }]],
+      ['acme', [{ sha: 'a', date: '', subject: 'feat(acme): retainer signed' }]],
       ['seo', [{ sha: 'b', date: '', subject: 'feat(seo): hygiene' }]],
     ]);
     const md = formatActivityLog({ clusters, period: '7 days', total: 2 });
-    expect(md).toMatch(/## lilac \(1\)/);
+    expect(md).toMatch(/## acme \(1\)/);
     expect(md).toMatch(/## seo \(1\)/);
     expect(md).toMatch(/- retainer signed/);
   });

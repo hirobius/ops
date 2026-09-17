@@ -8,10 +8,10 @@ Hirobius routes every dispatched task across **two tiers**. The tier is the firs
 
 For Hirobius, model choice splits cleanly along a single axis: **does the data leave the operator's machine?**
 
-| Tier | Privacy | Cost | Latency | Capability ceiling |
-|------|---------|------|---------|--------------------|
-| **Open · local**     | High (data never leaves the host) | $0 (electricity only) | Medium | Moderate (good enough for routing + classification + small gen + simple refactors) |
-| **Closed · frontier**| Lower (data goes to Anthropic) | High ($/1M tokens) | Low | Highest (architectural reasoning, ambiguous scope, novel logic) |
+| Tier                  | Privacy                           | Cost                  | Latency | Capability ceiling                                                                 |
+| --------------------- | --------------------------------- | --------------------- | ------- | ---------------------------------------------------------------------------------- |
+| **Open · local**      | High (data never leaves the host) | $0 (electricity only) | Medium  | Moderate (good enough for routing + classification + small gen + simple refactors) |
+| **Closed · frontier** | Lower (data goes to Anthropic)    | High ($/1M tokens)    | Low     | Highest (architectural reasoning, ambiguous scope, novel logic)                    |
 
 Routing by tier — not by model — keeps the assigner's logic stable as new models drop into each lane.
 
@@ -19,22 +19,22 @@ Routing by tier — not by model — keeps the assigner's logic stable as new mo
 
 ### Open · local (Ollama on workstation or VPS)
 
-| Model | Role |
-|-------|------|
-| `gemma4:e4b`             | **Default classifier / router.** 4B edge model — fast, JSON-disciplined, low RAM (~6GB). Used by `scripts/auto-assigner.mjs`. |
-| `gemma4:26b`             | Local generation (MoE, 3.8B active). Replaces what paid remote models did for non-privacy-sensitive small gen tasks. Needs ~16GB RAM. |
-| `hermes3:latest`         | T1 mechanical work via `scripts/hermes-unit.mjs`. Scrubs, renames, comments. Default Hermes Agent kanban orchestrator. |
-| `qwen2.5-coder:14b-hds`  | T2 component / schema / script work via `scripts/hermes-unit.mjs`. Coder-tuned. |
+| Model                   | Role                                                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `gemma4:e4b`            | **Default classifier / router.** 4B edge model — fast, JSON-disciplined, low RAM (~6GB). Used by `scripts/auto-assigner.mjs`.         |
+| `gemma4:26b`            | Local generation (MoE, 3.8B active). Replaces what paid remote models did for non-privacy-sensitive small gen tasks. Needs ~16GB RAM. |
+| `hermes3:latest`        | T1 mechanical work via `scripts/hermes-unit.mjs`. Scrubs, renames, comments. Default Hermes Agent kanban orchestrator.                |
+| `qwen2.5-coder:14b-hds` | T2 component / schema / script work via `scripts/hermes-unit.mjs`. Coder-tuned.                                                       |
 
-**Privacy note:** open-local is the only tier acceptable for client data (Lilac inboxes, Conrad's call recordings, EZLynx data). Auto-assigner forces tier=`open-local` whenever classifier flags `privacy: 'high'`.
+**Privacy note:** open-local is the only tier acceptable for client data (client inboxes, client call recordings, client business-system data). Auto-assigner forces tier=`open-local` whenever classifier flags `privacy: 'high'`.
 
 ### Closed · frontier (Anthropic, via Claude Code in-window subagents or `claude -p` skill)
 
-| Model | Role |
-|-------|------|
-| `haiku-4-5`   | T1 mechanical via Claude Code `Agent` dispatch. **Removed from autonomous dispatch (2026-05-04)** — defect rate cost more in repairs than dispatch saved. Reserve for human ideation / scratch-pad use. |
-| `sonnet-4-6`  | Default coding tier. **Required** for deletions per CLAUDE.md (sonnet-judgment rule, 2026-05-01). What `pickModel(closed-frontier, *)` returns by default. |
-| `opus-4-7`    | Cross-cutting architectural reasoning, ambiguous scope, novel validators. Used sparingly — most expensive lever. |
+| Model        | Role                                                                                                                                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `haiku-4-5`  | T1 mechanical via Claude Code `Agent` dispatch. **Removed from autonomous dispatch (2026-05-04)** — defect rate cost more in repairs than dispatch saved. Reserve for human ideation / scratch-pad use. |
+| `sonnet-4-6` | Default coding tier. **Required** for deletions per CLAUDE.md (sonnet-judgment rule, 2026-05-01). What `pickModel(closed-frontier, *)` returns by default.                                              |
+| `opus-4-7`   | Cross-cutting architectural reasoning, ambiguous scope, novel validators. Used sparingly — most expensive lever.                                                                                        |
 
 **Standing directive (Adrian, 2026-05-01):** always pick the cheapest model that can do the job. Within closed-frontier, default to sonnet (haiku is banned, opus is reserved).
 
@@ -63,8 +63,9 @@ pickModel(tier, effort):
 ```
 
 Manual override:
+
 ```
-node scripts/auto-assigner.mjs --client lilac-insure --task-id ai-1 \
+node scripts/auto-assigner.mjs --client <client-slug> --task-id ai-1 \
   --force-tier closed-frontier --force-model sonnet-4-6
 ```
 
@@ -74,22 +75,22 @@ The audit log (`docs/ai/routing-log.jsonl`) records both the classifier output a
 
 The price table in `scripts/auto-assigner.mjs` and `scripts/cost-ceiling-gate.mjs` (USD per 1M tokens, May 2026 estimates):
 
-| Model | Price |
-|-------|-------|
-| All `gemma*` / `hermes*` / `qwen*`   | $0 |
-| `haiku-4-5`   | $1.00 |
-| `sonnet-4-6`  | $3.00 |
-| `opus-4-7`    | $15.00 |
+| Model                              | Price  |
+| ---------------------------------- | ------ |
+| All `gemma*` / `hermes*` / `qwen*` | $0     |
+| `haiku-4-5`                        | $1.00  |
+| `sonnet-4-6`                       | $3.00  |
+| `opus-4-7`                         | $15.00 |
 
 Update both scripts when prices shift; the duplication is intentional at this scale (extract to `scripts/lib/model-tiers.mjs` when a third consumer appears).
 
 Effort multipliers (estimated tokens per task):
 
-| Effort | Tokens |
-|--------|--------|
-| min       |  2,000 |
-| standard  |  8,000 |
-| high      | 30,000 |
+| Effort   | Tokens |
+| -------- | ------ |
+| min      | 2,000  |
+| standard | 8,000  |
+| high     | 30,000 |
 
 Projected cost = `price_per_M_tokens × effort_tokens / 1_000_000`. Auto-assigner sets `costCeiling = projected × 1.25` (25% headroom). The gate refuses dispatch when `costSpent + projected > costCeiling`.
 
