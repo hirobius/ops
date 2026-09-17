@@ -14,6 +14,14 @@
  *   issue: ops#78 closed    reported for manual confirmation (no network here)
  *   event: <prose>          not machine-checkable; surfaced at quarterly review
  *
+ * A recurring entry (the betting table) carries `- **when it fires:** …`; the
+ * script prints that instruction for it instead of the one-shot "file a fresh
+ * issue, then delete the entry" rule, so its cadence is not ended by accident.
+ *
+ * Runs daily via .github/workflows/parked-triggers.yml: a fired trigger fails
+ * that scheduled run, so a due date does not depend on someone remembering.
+ * `--fixture-mode` reads $FIXTURE_FILE instead of docs/ai/PARKED.md.
+ *
  * Exit codes: 0 = nothing due · 1 = at least one trigger fired.
  * Read-only. Never edits PARKED.md — re-entry is a deliberate human act.
  */
@@ -22,10 +30,16 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
-const PARKED = join(repoRoot, 'docs/ai/PARKED.md');
+// --fixture-mode reads $FIXTURE_FILE instead, so validate-fixture-proof-of-firing
+// and the unit tests exercise the gate against a scratch file, not the live one.
+const FIXTURE_MODE = process.argv.includes('--fixture-mode');
+const PARKED =
+  FIXTURE_MODE && process.env.FIXTURE_FILE
+    ? process.env.FIXTURE_FILE
+    : join(repoRoot, 'docs/ai/PARKED.md');
 
 if (!existsSync(PARKED)) {
-  console.error('check-parked-triggers: docs/ai/PARKED.md not found — nothing to check.');
+  console.error(`check-parked-triggers: ${PARKED} not found — nothing to check.`);
   process.exit(0);
 }
 
@@ -38,13 +52,17 @@ function parseEntries(src) {
   for (const line of src) {
     const heading = /^###\s+(.*\S)\s*$/.exec(line);
     if (heading) {
-      current = { title: heading[1], triggers: [], origin: null };
+      current = { title: heading[1], triggers: [], origin: null, whenItFires: null };
       entries.push(current);
       continue;
     }
     if (!current) continue;
     const origin = /^\s*-\s+\*\*origin:\*\*\s*(.+?)\s*$/.exec(line);
     if (origin) current.origin = origin[1];
+    // A recurring entry (e.g. the betting table) says what to do instead of
+    // file-and-delete; its own instruction replaces the generic one.
+    const when = /^\s*-\s+\*\*when it fires:\*\*\s*(.+?)\s*$/.exec(line);
+    if (when) current.whenItFires = when[1];
     // `- **trigger:** \`date: 2026-12-01\`` and the `- **also:**` continuation
     const trig = /^\s*-\s+\*\*(?:trigger|also):\*\*\s*`([a-z]+):\s*([^`]+)`/.exec(line);
     if (trig) current.triggers.push({ kind: trig[1], value: trig[2].trim() });
@@ -102,10 +120,16 @@ if (fired.length) {
     console.log(`  • ${f.entry.title}`);
     console.log(`      ${f.why}`);
     if (f.entry.origin) console.log(`      origin: ${f.entry.origin}`);
+    if (f.entry.whenItFires) console.log(`      recurring — ${f.entry.whenItFires}`);
   }
-  console.log('\n  File a FRESH issue citing the parked entry + its origin issue,');
-  console.log('  then delete the entry from docs/ai/PARKED.md.');
-  console.log('  Do not reopen the original — its premise is stale by definition.\n');
+  if (fired.some((f) => !f.entry.whenItFires)) {
+    console.log('\n  File a FRESH issue citing the parked entry + its origin issue,');
+    console.log('  then delete the entry from docs/ai/PARKED.md.');
+    console.log('  Do not reopen the original — its premise is stale by definition.');
+    console.log('  (Entries marked "recurring" follow their own instruction instead.)\n');
+  } else {
+    console.log('');
+  }
 }
 
 if (reviewDue) {
