@@ -6,7 +6,8 @@
  * ops#317: severity is orthogonal to priority. ops#27 (client PII in public git
  * history, with an unmet disclosure obligation) sat at p1 for 71 days as one
  * line among fifty, and nothing surfaced it. So a sev1 does not go in a lane —
- * it goes above all of them, and stays until the issue is closed.
+ * it goes above all of them, and stays until the issue is closed — or accepted, which
+ * has exactly one route: relabel it sev2 with a comment on the issue giving the reason.
  *
  * It renders nothing ONLY when a real fleet payload arrived with no sev1 in it.
  * A failed read (expired GITHUB_TOKEN → 502, unset → 503) leaves `data` null,
@@ -82,8 +83,8 @@ export function Sev1Banner({
         <span style={s.count}>{sev1.length} open</span>
       </div>
       <p style={s.means}>
-        {SEV1_MEANS}. Stays at the top of this page until closed. Removing the sev1 label instead
-        needs a comment on the issue saying why.
+        {SEV1_MEANS}. Stays at the top of this page until closed. The only way to accept one without
+        closing it: relabel it sev2 with a comment on the issue giving the reason.
       </p>
       <ul style={s.list}>
         {sev1.map((i) => (

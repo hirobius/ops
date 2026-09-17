@@ -79,15 +79,18 @@ describe('Sev1Banner', () => {
     expect(container.textContent).toContain('hds');
   });
 
-  it('spells out what sev1 means, that it stays until closed, and that unlabelling needs a reason', () => {
+  it('spells out what sev1 means, that it stays until closed, and that relabeling sev2 is the only acceptance', () => {
     act(() => root.render(<Sev1Banner sev1={[PII]} {...LOADED} />));
     expect(container.textContent).toContain(
       'Legal exposure, security incident, data loss, or already affecting a real third party',
     );
     expect(container.textContent).toMatch(/until closed/);
-    // There is no "accepted" state to point at — only closing, or unlabelling with a stated reason.
-    expect(container.textContent).not.toMatch(/accepted/);
-    expect(container.textContent).toMatch(/comment on the issue saying why/);
+    // Adrian, 2026-09-16: accepting a sev1 without closing it has exactly one route —
+    // relabel it sev2, with a comment on the issue giving the reason. Bare unlabelling is not one.
+    expect(container.textContent).toMatch(
+      /only way to accept one without closing it: relabel it sev2 with a comment on the issue giving the reason/,
+    );
+    expect(container.textContent).not.toMatch(/Removing the sev1 label|saying why/);
     expect(container.textContent).toContain('1 open');
   });
 

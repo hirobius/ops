@@ -183,9 +183,12 @@ describe('formatReport', () => {
     expect(text).toContain('hirobius/hds#4');
     expect(text).toContain('Legal exposure, security incident, data loss');
     expect(text).toMatch(/until it is closed/);
-    // No 'accepted' state exists to point at — only closing, or unlabelling with a stated reason.
-    expect(text).not.toMatch(/accepted/);
-    expect(text).toMatch(/comment on the issue saying why/);
+    // Adrian, 2026-09-16: accepting a sev1 without closing it has exactly one route —
+    // relabel it sev2, with a comment on the issue giving the reason. Bare unlabelling is not one.
+    expect(text).toMatch(
+      /only way to accept one without closing it: relabel it sev2 with a comment on the issue giving the reason/,
+    );
+    expect(text).not.toMatch(/Removing the sev1 label|saying why/);
   });
 });
 

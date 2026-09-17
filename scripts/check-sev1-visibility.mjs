@@ -12,6 +12,8 @@
  * session happened to sweep every needs-human issue by hand. The repo had dozens
  * of guardrails for correctness and nothing for risk. A sev1 must not be one
  * line among fifty, so this prints them on their own and fails while any is open.
+ * Accepting one without closing it has exactly one route (CLAUDE.md §0): relabel
+ * it sev2 with a comment on the issue giving the reason.
  *
  * Warn severity, `pnpm sev1:check` (pnpm-meta, so `pnpm review:daily` runs it
  * too). It reports; it never blocks a commit. /ops/standing shows the same list
@@ -155,7 +157,7 @@ export function formatReport(open) {
     ...open.flatMap((i) => [`  • ${i.repo}#${i.number} — ${i.title}`, `      ${i.url}`]),
     '',
     'A sev1 stays on this list and on /ops/standing until it is closed.',
-    'Removing the sev1 label instead needs a comment on the issue saying why — it cannot be silently carried.',
+    'The only way to accept one without closing it: relabel it sev2 with a comment on the issue giving the reason.',
   ];
   return lines.join('\n');
 }
