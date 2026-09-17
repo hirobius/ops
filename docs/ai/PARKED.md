@@ -23,7 +23,10 @@ Each entry carries a `trigger:` of one of four kinds:
 | `event` | `event: <plain-English condition>`                             | a human, at review        |
 
 Run `pnpm parked:check` (or `node scripts/check-parked-triggers.mjs`). It exits
-non-zero and names any entry whose trigger has fired. `event:` triggers can't be
+non-zero and names any entry whose trigger has fired. Nobody has to remember to
+run it: `.github/workflows/parked-triggers.yml` runs it daily, and a fired
+trigger fails that scheduled run (GitHub notifies whoever last changed its cron
+line) every day until the entry is handled. `event:` triggers can't be
 evaluated automatically, so they surface on the **quarterly review** line below —
 that review is the backstop that stops this file becoming a graveyard.
 
@@ -34,14 +37,20 @@ original closed issue, then delete the entry here. Don't reopen the old issue �
 its premise is months stale by definition, and today's sweep found stale
 premises in six of the issues examined.
 
+**Exception — recurring entries.** An entry with a `- **when it fires:**` line
+(the betting table) is a cadence, not a one-shot reminder. Follow that line
+instead — usually "roll the date forward" — and keep the entry. The script
+prints the line in place of the file-and-delete instruction.
+
 ---
 
 ## Tripwires — dated, falsifiable, pre-committed
 
 > A tripwire is not work. It is **one measurable condition, one date, and an action
 > decided in advance**. It exists so a strategic question gets answered on a date
-> instead of drifting. `date:` triggers here fire automatically via
-> `pnpm parked:check`; the betting table (#319) reads that as a standing item.
+> instead of drifting. `date:` triggers here fire automatically — daily in CI
+> (`parked-triggers.yml`) and on demand via `pnpm parked:check`; the betting
+> table (#319) reads that as a standing item.
 
 ### Ship tripwire — one lead, one preview_url, one contact
 
@@ -51,6 +60,15 @@ premises in six of the issues examined.
 - **why not "email":** amended 2026-09-15. Of 39 qualified leads, **1 has an email and 38 have a phone**; the two that already carry a `preview_url` are phone-only. Requiring email would have failed this tripwire for reasons unrelated to the strategy it tests, and getting emails at all means #190 (Outscraper spend) — a purchasing decision. Any channel that reaches a human counts; a phone call tests the demand hypothesis identically.
 - **if it fires:** the factory-first sequencing is falsified. Pre-committed action — stop all infrastructure work for one cycle and close the gap manually, hand-building a site if necessary. A hand-built site tests the demand hypothesis identically.
 - **if it still can't ship after that cycle:** the § Pivot paths below become live.
+
+### Betting table — next sitting
+
+- **origin:** ops#319 (closed 2026-09-16 — Adrian accepted option C: 3-week cycle + 1-week cooldown)
+- **trigger:** `date: 2026-10-14`
+- **what it is:** one ~30-minute sitting. Every open `needs-adrian` / `needs-decision` issue gets an answer or "default stands"; pick the next cycle's short list; read #293 (north-star share) and any open `sev1` (#317).
+- **cadence:** a table opens each 4-week period (3-week cycle + 1-week cooldown). The 2026-09-16 backlog interview was the first table. This date sits one day before the ship tripwire on purpose.
+- **reminder:** the daily `parked-triggers.yml` run goes red on this date and stays red until the date is rolled forward, so the sitting does not depend on anyone remembering.
+- **when it fires:** run the table, record decisions on the issues themselves, then roll this date forward 4 weeks (recurring: keep this entry). Do not file an issue for it.
 
 ---
 
@@ -169,6 +187,48 @@ the umbrella.
 - **trigger:** `event: one specific skill-bar item removes a proven, recurring bottleneck`
 - **why parked:** 19 checkboxes, no DoD, structurally un-closeable. Net-new dashboard tooling — the exact expansion the feature freeze exists to hold.
 - **re-entry rule:** file the _one_ item, with a real DoD. Never revive the umbrella.
+
+### Monthly client report (Plausible stats + health checks + work log)
+
+- **origin:** ops#201 (closed 2026-09-16) — full shape and test-first DoD preserved there
+- **trigger:** `event: the first care-plan client has been live and paying for a full month`
+- **why parked:** the issue itself says "do NOT build before then" — it needs a paying client plus a month of real data, a Plausible account (se#84) and the Stripe care plan (#200). Until then it is a reminder, not work.
+- **re-entry rule:** file a fresh issue carrying #201's DoD (pure report-builder over injected sources first), not the old issue.
+
+### Always-on, fleet-aware Discord HQ bot
+
+- **origin:** ops#15 (closed 2026-09-16, parked on Adrian's triage call)
+- **trigger:** `event: a proven need to reach ops from the phone while the machine is off`
+- **what is actually left:** an always-on host off Adrian's machine (the bot still runs locally under pm2 and defaults to Ollama); a single cloud provider default for the hosted bot; pushed daily one-line recaps and blocked-task pings. Fleet-aware read commands already shipped (#255, #256 via #363, #257 via #364); deploy alerts are #11's `deploy-alert.mjs` + `lib/ops/notify.mjs`; the needs-you pager is #51; the production health check is #318/#347.
+- **security precondition:** remove or lock down the `!shell` raw passthrough in `scripts/discord-bot.mjs` (`execSync`, OWNER_ID-only gate) before hosting the bot 24/7 anywhere.
+- **deferred audit:** PR #364 deferred a nothing-silent check of the background push path (`DISCORD_HERMES_CHANNEL_ID` / hermes bridge) to this work.
+- **corrected dependencies:** `OPS_AGENT_KEY` machine auth already shipped (2026-07-07, `lib/ops-auth.mjs`); the "#8" in #15's body is a misnumbered reference, not the approvals inbox. Also drop the stale "machine is always running" Hermes/Ollama rationale from the bot's header when this is picked up.
+
+### Cross-repo Ralph dispatcher ("mayor")
+
+- **origin:** ops#89 and ops#47 (the full safety-layer plan) — #89 closed 2026-09-16 as a triage deferral. This effectively answers #87 Decision #6 ("mayor now vs per-repo crons as MVP") as "not now"; Adrian has not ruled on the design itself.
+- **trigger:** `event: a 4th Ralph repo is onboarded, two or more repos have non-empty ralph-ready queues at once, per-repo parallelism is relaxed (#302/#238), or usage limits are hit across repos`
+- **unmet DoD:** a scheduled orchestrator dispatches ready work across repos within the concurrency ceiling, reports to Discord, and never exceeds the approved autonomy level.
+- **still unbuilt:** a per-run and daily spend/usage ceiling (related: ops#71 codeburn); a cross-repo concurrency cap; restoring and re-registering `check-unit-overlap` (only orphan fixtures remain in `fixtures/check-unit-overlap/`) — required before any repo runs parallel Ralph PRs; the `watchdog-policy.json` + `proposed-units.jsonl` pattern.
+- **already shipped (don't rebuild):** claim refs with `RALPH_CLAIM_TTL`, per-cycle and lifetime attempt caps, `RALPH_ITER_TIMEOUT`, single-flight + wedge alerts, the ops hourly watchdog (#347/#365), Discord read commands.
+- **recommendation carried from #87 Decision #7 (not yet Adrian's ruling):** the mayor proposes only and never auto-tags `ralph-ready`.
+- **separate defect, not covered by parking the mayor:** site-engine's disabled `ralph.yml` schedule is tracked in [hirobius/site-engine#192](https://github.com/hirobius/site-engine/issues/192).
+- **stale leftovers:** `scripts/fleet-dispatch.mjs` and `scripts/fleet-watchdog.mjs` still describe themselves as the mayor's workers.
+
+### CommandPalette on /ops/tasks (⌘K jump-to-task + card actions)
+
+- **origin:** ops#142 (closed 2026-09-16). Adrian parked it 2026-07-30 ("lowest-urgency operator polish… revisit after the higher-priority board work") — parked, not ruled won't-do; the 2026-09-14 three-option question was never answered.
+- **trigger:** `event: HDS ships a palette that accepts external items and actions, or Adrian approves a bespoke ⌘K overlay in ops`
+- **why parked:** `@hirobius/design-system` 0.13's `CommandPalette` only takes `className` and owns its own open state and ⌘K binding; HDS has been frozen since 2026-07-09 (hds#80).
+- **salvage:** branch `claude/issue-142-20260712-1845` (commit `175fc57`) holds standalone helpers (`taskPaletteMatch.ts`, `taskPaletteActions.ts`, `useTaskCommandPalette.ts`, ~20 unit tests) that carry into a custom overlay. Its tests were never run and its `TaskCommandPalette.tsx` targets an API that doesn't exist. Don't delete the branch in a cleanup.
+- **re-entry rule:** file a fresh issue reusing #142's DoD.
+
+### Stripe billing — care-plan subscriptions
+
+- **origin:** ops#200 (closed 2026-09-16)
+- **trigger:** `event: the first care-plan client signs`
+- **decision (Adrian, 2026-09-16):** the first client's one-off SOW fee is paid by check. By card, Stripe would take ~3.4% of it (2.9% + 30¢, plus 0.4% Invoicing) versus $0. Stripe earns its keep on recurring care-plan billing, so it is set up then. Detail in #200.
+- **runbook preserved in #200:** account at https://dashboard.stripe.com/register, Payment Link for build fees, Subscription for the care plan.
 
 ---
 

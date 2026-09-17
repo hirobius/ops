@@ -10,7 +10,9 @@
  *   node scripts/sync-client-emails.mjs <slug> [--dry-run]
  *
  * What it does:
- *   1. Searches Gmail for threads tagged with the client slug / keywords
+ *   1. Searches Gmail with the queries in clients/<slug>/email-search.json
+ *      (gitignored; copy clients/_template/email-search.json — real mailbox
+ *      and contact terms are client PII and never live in tracked code)
  *   2. Extracts action items, status changes, and key decisions from threads
  *   3. Prints a structured summary
  *   4. (Unless --dry-run) Writes extracted context to clients/<slug>/email-log.json
@@ -30,8 +32,9 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { readEmailSearchConfig } from './lib/local-client-config.mjs';
 
-const ROOT    = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const envFile = path.join(ROOT, '.env.local');
 
 // Load env
@@ -42,12 +45,12 @@ if (fs.existsSync(envFile)) {
   }
 }
 
-const slug   = process.argv[2];
+const slug = process.argv[2];
 const dryRun = process.argv.includes('--dry-run');
 
 if (!slug) {
   console.error('Usage: node scripts/sync-client-emails.mjs <slug> [--dry-run]');
-  console.error('  Example: node scripts/sync-client-emails.mjs lilac-insure');
+  console.error('  Example: node scripts/sync-client-emails.mjs <client-slug>');
   process.exit(1);
 }
 
@@ -57,55 +60,39 @@ if (!fs.existsSync(clientDir)) {
   process.exit(1);
 }
 
-// Load client meta for search terms
-const metaPath = path.join(clientDir, 'meta.json');
-const meta     = fs.existsSync(metaPath) ? JSON.parse(fs.readFileSync(metaPath, 'utf8')) : {};
-
 // ── Gmail search config per client ───────────────────────────────────────────
+// Lives in the gitignored clients/<slug>/email-search.json (ops#27). Missing or
+// unfilled → exit with a message naming the file to create.
 
-const CLIENT_SEARCH_CONFIG = {
-  'lilac-insure': {
-    queries: [
-      'from:administration@lilacinsure.com OR to:administration@lilacinsure.com',
-      'subject:lilac OR subject:"lilac insure" OR subject:"lilac insurance"',
-      'EZLynx OR "Conrad Milsap" OR "Lilac Insurance"',
-    ],
-    keywords: {
-      actionItems: ['send', 'follow up', 'need', 'please', 'action', 'todo', 'track down', 'assign', 'credentials', 'login'],
-      statusChanges: ['done', 'complete', 'sent', 'in the mail', 'confirmed', 'activated', 'added', 'enabled'],
-      blockers: ['blocked', 'waiting', 'pending', 'can\'t', 'not yet', 'haven\'t'],
-    },
-  },
-};
-
-const config = CLIENT_SEARCH_CONFIG[slug] || {
-  queries: [`subject:${slug}`, `${meta.company || slug}`],
-  keywords: {
-    actionItems: ['send', 'follow up', 'need', 'please', 'action'],
-    statusChanges: ['done', 'complete', 'sent', 'confirmed'],
-    blockers: ['blocked', 'waiting', 'pending'],
-  },
-};
+let config;
+try {
+  config = readEmailSearchConfig(ROOT, slug);
+} catch (err) {
+  console.error(err.message);
+  process.exit(1);
+}
 
 // ── Gmail API via OAuth ───────────────────────────────────────────────────────
 
 async function getAccessToken() {
-  const clientId     = process.env.GMAIL_CLIENT_ID;
+  const clientId = process.env.GMAIL_CLIENT_ID;
   const clientSecret = process.env.GMAIL_CLIENT_SECRET;
   const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
 
   if (!clientId || !clientSecret || !refreshToken) {
-    throw new Error('Gmail OAuth not configured. Set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN in .env.local.\nRun: node scripts/gmail-auth.mjs to generate tokens.');
+    throw new Error(
+      'Gmail OAuth not configured. Set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN in .env.local.\nRun: node scripts/gmail-auth.mjs to generate tokens.',
+    );
   }
 
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id:     clientId,
+      client_id: clientId,
       client_secret: clientSecret,
       refresh_token: refreshToken,
-      grant_type:    'refresh_token',
+      grant_type: 'refresh_token',
     }),
   });
 
@@ -125,9 +112,12 @@ async function gmailSearch(token, query, maxResults = 20) {
 }
 
 async function getThread(token, threadId) {
-  const res = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/threads/${threadId}?format=metadata&metadataHeaders=Subject,From,To,Date`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await fetch(
+    `https://gmail.googleapis.com/gmail/v1/users/me/threads/${threadId}?format=metadata&metadataHeaders=Subject,From,To,Date`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
   if (!res.ok) return null;
   return res.json();
 }
@@ -140,32 +130,45 @@ function extractFromThread(thread, keywords) {
 
   for (const msg of msgs) {
     const headers = msg.payload?.headers || [];
-    const subject = headers.find(h => h.name === 'Subject')?.value || '';
-    const from    = headers.find(h => h.name === 'From')?.value || '';
-    const date    = headers.find(h => h.name === 'Date')?.value || '';
+    const subject = headers.find((h) => h.name === 'Subject')?.value || '';
+    const from = headers.find((h) => h.name === 'From')?.value || '';
+    const date = headers.find((h) => h.name === 'Date')?.value || '';
 
     findings.subjects.push(subject);
     if (date) findings.dates.push(date);
 
     // Body snippet (safe — no PII extraction, just keyword matching)
     const snippet = msg.snippet || '';
-    const text    = `${subject} ${snippet}`.toLowerCase();
+    const text = `${subject} ${snippet}`.toLowerCase();
 
     for (const kw of keywords.actionItems) {
       if (text.includes(kw)) {
-        findings.actionItems.push({ source: from.split('<')[0].trim() || 'unknown', subject, snippet: snippet.slice(0, 120) });
+        findings.actionItems.push({
+          source: from.split('<')[0].trim() || 'unknown',
+          subject,
+          snippet: snippet.slice(0, 120),
+        });
         break;
       }
     }
     for (const kw of keywords.statusChanges) {
       if (text.includes(kw)) {
-        findings.statusChanges.push({ source: from.split('<')[0].trim() || 'unknown', subject, snippet: snippet.slice(0, 120), date });
+        findings.statusChanges.push({
+          source: from.split('<')[0].trim() || 'unknown',
+          subject,
+          snippet: snippet.slice(0, 120),
+          date,
+        });
         break;
       }
     }
     for (const kw of keywords.blockers) {
       if (text.includes(kw)) {
-        findings.blockers.push({ source: from.split('<')[0].trim() || 'unknown', subject, snippet: snippet.slice(0, 120) });
+        findings.blockers.push({
+          source: from.split('<')[0].trim() || 'unknown',
+          subject,
+          snippet: snippet.slice(0, 120),
+        });
         break;
       }
     }
@@ -202,7 +205,13 @@ async function main() {
 
   console.log(`[sync] Found ${allThreads.length} unique threads`);
 
-  const allFindings = { actionItems: [], statusChanges: [], blockers: [], threadCount: allThreads.length, syncedAt: new Date().toISOString() };
+  const allFindings = {
+    actionItems: [],
+    statusChanges: [],
+    blockers: [],
+    threadCount: allThreads.length,
+    syncedAt: new Date().toISOString(),
+  };
 
   for (const t of allThreads) {
     const full = await getThread(token, t.id);
@@ -214,17 +223,18 @@ async function main() {
   }
 
   // Deduplicate by snippet
-  const dedup = (arr) => arr.filter((v, i, a) => a.findIndex(x => x.snippet === v.snippet) === i);
-  allFindings.actionItems  = dedup(allFindings.actionItems);
+  const dedup = (arr) => arr.filter((v, i, a) => a.findIndex((x) => x.snippet === v.snippet) === i);
+  allFindings.actionItems = dedup(allFindings.actionItems);
   allFindings.statusChanges = dedup(allFindings.statusChanges);
-  allFindings.blockers     = dedup(allFindings.blockers);
+  allFindings.blockers = dedup(allFindings.blockers);
 
   // Print summary
   console.log('\n── Action Items ──────────────────────────────────────────');
   for (const a of allFindings.actionItems) console.log(`  [${a.source}] ${a.snippet}`);
 
   console.log('\n── Status Changes ────────────────────────────────────────');
-  for (const s of allFindings.statusChanges) console.log(`  [${s.date?.slice(0,16) || '?'}] [${s.source}] ${s.snippet}`);
+  for (const s of allFindings.statusChanges)
+    console.log(`  [${s.date?.slice(0, 16) || '?'}] [${s.source}] ${s.snippet}`);
 
   console.log('\n── Blockers ──────────────────────────────────────────────');
   for (const b of allFindings.blockers) console.log(`  [${b.source}] ${b.snippet}`);
@@ -232,7 +242,9 @@ async function main() {
   if (!dryRun) {
     const logPath = path.join(clientDir, 'email-log.json');
     // Merge with existing log
-    const existing = fs.existsSync(logPath) ? JSON.parse(fs.readFileSync(logPath, 'utf8')) : { runs: [] };
+    const existing = fs.existsSync(logPath)
+      ? JSON.parse(fs.readFileSync(logPath, 'utf8'))
+      : { runs: [] };
     existing.runs.unshift(allFindings);
     existing.runs = existing.runs.slice(0, 10); // keep last 10 runs
     fs.writeFileSync(logPath, JSON.stringify(existing, null, 2));
@@ -242,4 +254,7 @@ async function main() {
   }
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

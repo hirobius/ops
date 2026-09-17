@@ -17,7 +17,7 @@ const base = {
   slug: 'violet-verge',
   business: {
     name: 'Violet Verge Landscaping',
-    phone: '+1-555-0142',
+    phone: '+1-512-555-0142',
     email: 'hi@violetverge.com',
     hours: [{ days: 'Mon–Fri', hours: '8–6' }],
     serviceAreas: ['Austin'],
@@ -25,7 +25,11 @@ const base = {
   brand: { palettePreset: 'landscaping' },
   layout: {},
   services: [{ title: 'Lawn care', description: 'We mow lawns.' }],
-  copy: { heroHeadline: 'Austin Landscaping', heroSub: 'Green all year.', about: 'Local & insured.' },
+  copy: {
+    heroHeadline: 'Austin Landscaping',
+    heroSub: 'Green all year.',
+    about: 'Local & insured.',
+  },
   form: { provider: 'web3forms', accessKey: 'abc123' },
   seo: {
     title: 'Landscaping in Austin',
@@ -45,11 +49,14 @@ const photo = (id: number) => ({
   photographer: 'Jane Doe',
 });
 
+/** The schema requires imageAlt whenever a hero image is set (ops#310 re-sync). */
+const HERO = { image: '/photos/stock-pexels-1.jpg', imageAlt: 'A tidy green lawn — stock photo' };
+
 describe('renderArtifacts(config, { photos })', () => {
   it('emits a curl download for each referenced photo', () => {
     const config = {
       ...base,
-      hero: { image: '/photos/stock-pexels-1.jpg' },
+      hero: HERO,
       gallery: [{ src: '/photos/stock-pexels-2.jpg', alt: 'A tidy green lawn — stock photo' }],
     };
     const { commands } = renderArtifacts(config, { photos: [photo(1), photo(2)] });
@@ -60,7 +67,7 @@ describe('renderArtifacts(config, { photos })', () => {
   });
 
   it('skips photos the config does not reference', () => {
-    const config = { ...base, hero: { image: '/photos/stock-pexels-1.jpg' }, gallery: [] };
+    const config = { ...base, hero: HERO, gallery: [] };
     const { commands } = renderArtifacts(config, { photos: [photo(1), photo(99)] });
 
     expect(commands).toContain('stock-pexels-1.jpg');
@@ -80,14 +87,14 @@ describe('renderArtifacts(config, { photos })', () => {
   });
 
   it('notes the imagery is stock and swappable, without making it a gate', () => {
-    const config = { ...base, hero: { image: '/photos/stock-pexels-1.jpg' }, gallery: [] };
+    const config = { ...base, hero: HERO, gallery: [] };
     const { commands } = renderArtifacts(config, { photos: [photo(1)] });
     expect(commands).toMatch(/stock imagery/i);
     expect(commands).toMatch(/optional/i);
   });
 
   it('creates the target directory before downloading into it', () => {
-    const config = { ...base, hero: { image: '/photos/stock-pexels-1.jpg' }, gallery: [] };
+    const config = { ...base, hero: HERO, gallery: [] };
     const { commands } = renderArtifacts(config, { photos: [photo(1)] });
     expect(commands).toMatch(/mkdir -p public\/photos/);
   });

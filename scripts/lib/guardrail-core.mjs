@@ -15,6 +15,7 @@
  *
  *   loadRegistry(path?)            → { ok, registry } | { ok:false, error }
  *   selectGates({...})            → { ok, gates, skippedByScope, emptyReason } | { ok:false, reason, gate }
+ *   selectProbeTargets({...})     → { targets, optedOut }  (gates a meta-gate may spawn)
  *   runGateCaptured(script, opts) → { exitCode, durationMs, stdout, stderr, timedOut, spawnError }
  *
  * Candidate #11. Note: run-gates' serial dispatch streams gate output live
@@ -46,7 +47,10 @@ export const REGISTRY_PATH = path.join(ROOT, 'docs/guardrails/registry.json');
  */
 export function loadRegistry(registryPath = REGISTRY_PATH) {
   if (!fs.existsSync(registryPath)) {
-    return { ok: false, error: { kind: 'not-found', message: `registry not found at ${registryPath}` } };
+    return {
+      ok: false,
+      error: { kind: 'not-found', message: `registry not found at ${registryPath}` },
+    };
   }
   try {
     const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
@@ -109,6 +113,40 @@ export function selectGates({ registry, channel = null, gate = null, changedFile
   }
 
   return { ok: true, gates: selected, skippedByScope, emptyReason: null };
+}
+
+/**
+ * Select the gates a meta-gate may spawn to introspect them (e.g.
+ * audit-gates-supportjson runs `node <gateScript> --json` for every gate).
+ * Pure — no spawning, no I/O.
+ *
+ * A gate opts out with `skipMetaProbe: "<reason>"` in registry.json. That is for
+ * gates that drive a full toolchain run (tsc, type-coverage, a Playwright build
+ * + preview server on :5200): spawning a second copy from inside the ci-pr run
+ * duplicates the work and, for Playwright, races the real run's build output
+ * and port. Only a non-empty string counts — an opt-out must say why, so a bare
+ * `true` or a blank reason is ignored and the gate is still probed.
+ *
+ * @param {object} opts
+ * @param {{gates: any[]}} opts.registry
+ * @param {string[]} [opts.skipChannels]  firingChannels never probed (cost)
+ * @param {string|null} [opts.selfId]     the meta-gate's own id (no recursion)
+ * @returns {{targets: any[], optedOut: {id: string, reason: string}[]}}
+ */
+export function selectProbeTargets({ registry, skipChannels = [], selfId = null }) {
+  const skip = new Set(skipChannels);
+  const targets = [];
+  const optedOut = [];
+  for (const g of (registry && registry.gates) || []) {
+    if (!g || skip.has(g.firingChannel) || g.id === selfId) continue;
+    const reason = typeof g.skipMetaProbe === 'string' ? g.skipMetaProbe.trim() : '';
+    if (reason) {
+      optedOut.push({ id: g.id, reason });
+      continue;
+    }
+    targets.push(g);
+  }
+  return { targets, optedOut };
 }
 
 /**

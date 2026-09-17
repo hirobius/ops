@@ -1,0 +1,10 @@
+{
+  "_comment": "REAL passing fixture for check-pii (ops#27). SYNTHETIC DATA ONLY. Every line is a known false-positive source from the 2026-09-16 sweep that the gate must NOT block: studio addresses, RFC 2606 example domains, commit-trailer and bot senders, 555 placeholder numbers, asset names shaped like addresses, public Google URLs and a bare host named in prose. Must exit 0.",
+  "denylist": ["jane\\s+example"],
+  "files": [
+    {
+      "path": "docs/outreach/template.md",
+      "text": "From: studio@hirobius.com\nReply-To: hello@example.com\nPhone: (206) 555-0100 or 206-555-0142\nLogo: logo@2x.png\nMap: https://www.google.com/maps/place/Seattle\nNever paste docs.google.com links here.\nCo-Authored-By: Claude <noreply@anthropic.com>\nSigned: Jane Doe (placeholder name)\n"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "generated": "2026-05-05T00:00:00.000Z",
-  "precommitStructureHash": "7ccfe2f7865786ff13b7978dffa88c7ba719954300dd5850d6ee757b793887a6",
-  "precommitStructureHashUpdatedAt": "2026-09-16T07:39:57.914Z",
+  "precommitStructureHash": "9484347e769aeebaa10ff668eccd55a378a498a57633323bc135b3af98f902c7",
+  "precommitStructureHashUpdatedAt": "2026-09-17T08:05:34.097Z",
   "gates": [
     {
       "id": "audit-batch-deliverables",
@@ -325,6 +325,18 @@
       "supportsJson": true
     },
     {
+      "id": "check-layout-tests",
+      "description": "Layout-integrity Playwright suite (pnpm run test:layout: route coverage + tests/layout-integrity.spec.ts against a vite build/preview server on :5200, built into node_modules/.cache/playwright-preview so no other gate rebuilding dist/ can clobber it). Fails on any layout collision, overflow, or uncovered route. Formerly a bespoke quality.yml step; folded into the registry by ops#241.",
+      "severity": "error",
+      "gateScript": "scripts/check-layout-tests.mjs",
+      "fixturePath": "fixtures/check-layout-tests",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "ci-pr",
+      "supportsJson": true,
+      "skipMetaProbe": "drives a full Playwright run that builds into node_modules/.cache/playwright-preview and binds :5200 — a second copy spawned by a meta-probe during the ci-pr run would race the real one"
+    },
+    {
       "id": "check-licenses",
       "description": "License compliance gate. Runs pnpm licenses list --prod and blocks copyleft/restrictive licenses (GPL/AGPL/LGPL/SSPL/BUSL/EUPL/OSL/CC-BY-NC/CDDL).",
       "severity": "error",
@@ -449,6 +461,18 @@
       "supportsJson": true
     },
     {
+      "id": "check-pii",
+      "description": "Blocks personal data from entering git (ops#27, ops#35). Scans lines ADDED by the staged change, plus staged paths, for denylist terms (real client/contact identifiers loaded from the PII_DENYLIST env/secret or the gitignored .pii-denylist file, never the repo) and private Google/Microsoft/SharePoint/Wix workspace links, which block; emails outside a reviewed allowlist and US phone numbers only warn, because run-gates blocks on any non-zero exit (ops#304) and the 2026-09-16 sweep measured those at ~11% precision. Denylist terms also match decoded and loosened copies of the text (percent/JSON/HTML escapes, accents, slugs, camelCase, comment-wrapped lines); UTF-16 and .gitattributes-binary text is scanned; copies of the denylist are blocked. With nothing staged (the post-commit re-run) it scans HEAD and its message, so a --no-verify bypass is logged. Output shows rule, location and match length, never the value. Commit messages: .husky/commit-msg via scripts/pii-commit-msg.mjs. CI backstop (added lines, commit messages, PR title/body/branch name): .github/workflows/pii-scan.yml; weekly issue-text and sibling-repo sweep: pii-weekly.yml. Guide: docs/guardrails/pii-gate.md.",
+      "severity": "error",
+      "gateScript": "scripts/check-pii.mjs",
+      "fixturePath": "fixtures/check-pii",
+      "owner": "Adrian",
+      "source": "agent",
+      "firingChannel": "pre-commit",
+      "scope": "full-tree",
+      "supportsJson": true
+    },
+    {
       "id": "check-security-baseline",
       "description": "Local security and dependency hygiene baseline. Checks that no committed runtime env files, npm credentials, obvious secrets, external font/CDN imports, or dangerous HTML injection exist in source.",
       "severity": "warn",
@@ -511,6 +535,30 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "pnpm-meta"
+    },
+    {
+      "id": "check-type-coverage",
+      "description": "Type-coverage floor (pnpm run check:type-coverage: type-coverage --at-least 99.9). Fails when coverage drops below the floor set in package.json. Formerly a bespoke quality.yml step; folded into the registry by ops#241.",
+      "severity": "error",
+      "gateScript": "scripts/check-type-coverage.mjs",
+      "fixturePath": "fixtures/check-type-coverage",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "ci-pr",
+      "supportsJson": true,
+      "skipMetaProbe": "re-runs the whole-program type-coverage analysis — the ci-pr run already reports it; a meta-probe copy only duplicates the work"
+    },
+    {
+      "id": "check-typecheck",
+      "description": "Whole-program TypeScript typecheck (pnpm run typecheck: tsc --noEmit -p tsconfig.typecheck.json). Fails on any type error. Formerly a bespoke quality.yml step; folded into the registry by ops#241.",
+      "severity": "error",
+      "gateScript": "scripts/check-typecheck.mjs",
+      "fixturePath": "fixtures/check-typecheck",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "ci-pr",
+      "supportsJson": true,
+      "skipMetaProbe": "re-runs the whole-program tsc check — the ci-pr run already reports it; a meta-probe copy only duplicates the work"
     },
     {
       "id": "check-unresponsive-grids",
@@ -592,13 +640,13 @@
     },
     {
       "id": "check-parked-triggers",
-      "description": "Evaluates the re-entry triggers in docs/ai/PARKED.md, the file holding work deliberately kept out of the issue queue. date: and path: triggers fire automatically; issue:/event: triggers surface at the quarterly review. Exits non-zero when an entry is due to re-enter the queue. Read-only — re-entry stays a deliberate human act. Warn severity: a fired trigger is information, not a defect in the commit.",
+      "description": "Evaluates the re-entry triggers in docs/ai/PARKED.md, the file holding work deliberately kept out of the issue queue. date: and path: triggers fire automatically; issue:/event: triggers surface at the quarterly review. Exits non-zero when an entry is due to re-enter the queue, and prints a recurring entry's own `when it fires:` instruction in place of file-and-delete. Runs daily via .github/workflows/parked-triggers.yml, where a fired trigger fails the scheduled run so the reminder does not depend on memory; `pnpm parked:check` runs it on demand. Read-only — re-entry stays a deliberate human act. Warn severity: a fired trigger is information, not a defect in the commit.",
       "severity": "warn",
       "gateScript": "scripts/check-parked-triggers.mjs",
       "fixturePath": "fixtures/check-parked-triggers",
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pnpm-meta"
+      "firingChannel": "ci-scheduled"
     },
     {
       "id": "check-sev1-visibility",

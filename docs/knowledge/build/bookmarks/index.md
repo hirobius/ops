@@ -2,7 +2,7 @@
 pillar: build
 source: bookmarks
 date: 2026-05-02
-total: 701
+total: 658
 ---
 
 # Bookmarks — build
@@ -201,8 +201,6 @@ total: 701
 
 ## Favorites bar > Job Hunt > Portfolio Inspirations
 
-- [▶ Nick McVey&#39;s Portfolio - Nick McVey Portfolio](https://www.figma.com/proto/bjrAKS8tv2x3oR8GGJkBTg/Nick-McVey-Portfolio?page-id=0%3A1&node-id=56-18157&starting-point-node-id=19%3A696)
-- [Nick McVey Portfolio – Figma](https://www.figma.com/file/bjrAKS8tv2x3oR8GGJkBTg/Nick-McVey-Portfolio?node-id=19-161&t=X4e91bSmJVOBirw8-0)
 - [The Essential Guide to a Stellar Design Portfolio | by Nick Babich | Springboard](https://medium.springboard.com/the-essential-guide-to-a-stellar-design-portfolio-1913df89ada7)
 - [Senior Product Designer - REMOTE in Boston, MA | Liberty Mutual Insurance](https://jobs.libertymutualgroup.com/job/18047635/senior-product-designer-remote-boston-ma/?mode=job&iis=Job+Board&iisn=Appcast&extcmp=bof-paid-text-apca-tech&iieid=45181657205)
 - [Design jobs in 98043, Washington | Jobs2Careers](https://www.jobs2careers.com/search/results?q=Design&l=98043%2C%20Washington&distance=48)
@@ -255,23 +253,9 @@ total: 701
 - [AEM Project Archetype | Adobe Experience Manager](https://experienceleague.adobe.com/en/docs/experience-manager-core-components/using/developing/archetype/overview)
 - [custom AEM components - Search](https://www.bing.com/search?pglt=163&q=custom+AEM+components&cvid=4ee3dc97841d4fc78fceefc41d79d042&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIGCAEQABhAMgYIAhAAGEAyBggDEAAYQDIGCAQQABhAMgYIBRAAGEAyBggGEEUYPDIICAcQ6QcY_FXSAQg0OTMzajBqMagCALACAA&FORM=ANNAB1&PC=U531)
 
-## Favorites bar > Job Hunt > Xbox > XDS > Prototypes
-
-- [Themes 2](https://qcq7iu.csb.app/)
-- [Rita Yu Themes Prototype](https://bkjc56.csb.app/)
-- [Garrison home Prototype - 01 | ProtoPie Cloud](https://cloud.protopie.io/p/18df36ae7eee00f6b4527267?ui=true&scaleToFit=true&enableHotspotHints=true&cursorType=touch&mockup=true&bgColor=%23F5F5F5&playSpeed=1&playerAppPopup=true)
-
 ## Favorites bar > Job Hunt > Xbox > XDS
 
-- [tailwind.config.js - Repos](https://microsoft.visualstudio.com/Xbox/_git/Xbox.CPE.DeveloperEcosystem.MGD.AEM?path=/ui.frontend/tailwind.config.js)
-- [XDS.Tokens - Repos](https://microsoft.visualstudio.com/Gaming.React/_git/XDS.Tokens)
-- [Icons - GamingDesign - _XboxFluent.pdf - All Documents](https://microsoft.sharepoint.com/teams/GamingDesign/Shared%20Documents/Forms/AllItems.aspx?ct=1674252966581&or=Teams%2DHL&ga=1&id=%2Fteams%2FGamingDesign%2FShared%20Documents%2FProduct%2F%5Fresources%2Ffonts%2FXbox%5FFluent%2Fv1%2E023%2F%5FXboxFluent%2Epdf&viewid=5421e9fd%2Ddc20%2D4c4c%2Da9bb%2D71484a5872fb&parent=%2Fteams%2FGamingDesign%2FShared%20Documents%2FProduct%2F%5Fresources%2Ffonts%2FXbox%5FFluent%2Fv1%2E023)
-- [Type Guidelines](https://microsoft.sharepoint.com/teams/BrandCentral/Pages/Bundles/Segoe_UI_fonts.aspx)
-- [Microsoft_type_guidelines.pdf](https://microsoft.sharepoint.com/teams/BrandCentral/Guidelines/Microsoft_type_guidelines.pdf)
 - [gaussianblur - CSS-only Acrylic Material from Fluent Design System - Stack Overflow](https://stackoverflow.com/questions/44522299/css-only-acrylic-material-from-fluent-design-system/57417852#57417852)
-- [Fonts XDS](https://microsoft.sharepoint.com/teams/GamingDesign/Shared%20Documents/Forms/AllItems.aspx?id=%2Fteams%2FGamingDesign%2FShared%20Documents%2FProduct%2F%5Fresources%2Ffonts&p=true&ct=1678148990815&or=Teams%2DHL&ga=1)
-- [XDS Component Prioritization Spreadsheet](https://microsoft.sharepoint.com/:x:/t/xboxdesigndev/Eeh4svRYRJ9NnVn-bEkF6wgBPI08Hw1Qu8SPVjB5ufo4BQ?e=Dk5Yur)
-- [GamingDesign - Variable - All Documents](https://microsoft.sharepoint.com/teams/GamingDesign/Shared%20Documents/Forms/AllItems.aspx?ct=1687453059844&or=Teams-HL&ga=1&LOF=1&OR=Teams-HL&CT=1692305365849&clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiIyOC8yMzA3MTMyNzExNiJ9&id=%2Fteams%2FGamingDesign%2FShared%20Documents%2FProduct%2F_resources%2Ffonts%2FSegoeUI_Variable%2Fv2%2E03%2FVariable&viewid=5421e9fd-dc20-4c4c-a9bb-71484a5872fb)
 
 ## Favorites bar > 3D > Learning > Articulation
 
@@ -343,7 +327,6 @@ total: 701
 - [Naming Tokens in Design Systems. Terms, Types, and Taxonomy to Describe… | by Nathan Curtis | EightShapes | Medium](https://medium.com/eightshapes-llc/naming-tokens-in-design-systems-9e86c7444676)
 - [pixellab.ai/docs/tools/rotate](https://www.pixellab.ai/docs/tools/rotate)
 - [Auto Documentation – Figma](https://www.figma.com/community/plugin/1134018716847999330/auto-documentation)
-- [150+ UX Design Systems - Google Sheets](https://docs.google.com/spreadsheets/d/1b8DtLFFIXIRz_e7bjBtRL2vFuqIBMCNPdIsLaDs8RME/edit?pli=1&gid=0#gid=0)
 - [Design System Hub | Figma](https://www.figma.com/community/plugin/1324752802910575903/design-system-hub)
 - [Iconic — Free “do wtf you want with” pixel-perfect icons](https://iconic.app/)
 - [(1) Sync Variables to GitHub - YouTube](https://www.youtube.com/watch?v=KA2WwX7qlYA)
@@ -353,7 +336,6 @@ total: 701
 - [Figma Kit | Park UI](https://park-ui.com/docs/figma)
 - [Figma Web Style Guide and FLEGOs (Community) – Figma](https://www.figma.com/design/mYu4Xpugxw1Vixf995HA30/Figma-Web-Style-Guide-and-FLEGOs--Community-?node-id=0-1289&p=f&t=jd9NYzmBiMXDsHlA-0)
 - [Park UI Design System Foundations | Figma](https://www.figma.com/community/file/1268615283036362769)
-- [Adrian Milsap](https://pumpkin-chicory-7bsx.squarespace.com/config/)
 - [New Project - shadcn/ui](https://ui.shadcn.com/create)
 - [shadcn/ui create | Figma](https://www.figma.com/community/plugin/1582277338374276192/shadcn-ui-create)
 - [shadcn/ui components with variables &amp; Tailwind classes - Updated January 2026 | Figma](https://www.figma.com/community/file/1342715840824755935)
@@ -395,7 +377,6 @@ total: 701
 ## Favorites bar > Toolbox > Avatars
 
 - [Avatar Creator integration | Ready Player Me](https://docs.readyplayer.me/ready-player-me/integration-guides/web-and-native-integration/avatar-creator-integration)
-- [Medford - Avatar creator gameplan](https://chatgpt.com/g/g-p-688e7af691748191ae4b6ae9be791442-medford/c/689bea51-8ebc-8321-a923-1ca43067c9b1)
 - [POLYGON Kids - Low Poly 3D Art by Synty | Characters | Unity Asset Store](https://assetstore.unity.com/packages/3d/characters/humanoids/humans/polygon-kids-low-poly-3d-art-by-synty-180629?aid=1100liZev)
 
 ## Favorites bar > Toolbox > Blender > Shader Techniques
@@ -505,7 +486,6 @@ total: 701
 - [Local sales &amp; use tax | Washington Department of Revenue](https://dor.wa.gov/taxes-rates/sales-use-tax-rates/local-sales-use-tax)
 - [Google Workspace Help](https://apps.google.com/supportwidget/articlehome?hl=en&article_url=https%3A%2F%2Fsupport.google.com%2Fa%2Fanswer%2F9400082%3Fhl%3Den&assistant_id=generic-unu&product_context=9400082&product_name=UnuFlow&trigger_context=a)
 - [Volunteers - BUILD](https://build.org/volunteers/)
-- [SEAP REii - Google Drive](https://drive.google.com/drive/folders/1Nss0YLTkEd1Pyu2-0F2VvQjUICNuVodQ)
 - [Starting over – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/205815378-Starting-over)
 - [Setting up automatic tax rates in the US – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/360053592211-Setting-up-automatic-tax-rates-in-the-US?platform=v6&websiteId=6362d6a9fd7cef74122e6d2a)
 
@@ -521,7 +501,6 @@ total: 701
 - [How to Build an Audience – Squarespace](https://www.squarespace.com/blog/audience-development)
 - [Convert Your Site Traffic into Repeat Customers – Squarespace](https://www.squarespace.com/blog/website-leads)
 - [Email campaign best practices – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/360001280808-Email-campaign-best-practices#h_01HJ6JG8EA4PH5MGZ44W9A9MF7)
-- [Campaign Marketing Core subscription](https://decagon-oboe-nkg9.squarespace.com/config/settings/billing/campaigns-checkout)
 - [Form blocks – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/206566737-Form-blocks?campaign=7.0-en&channel=email&source=2023-09-form-features&subchannel=product&utm_campaign=2023-09-form-features&utm_medium=email&utm_source=product&utm_term=7.0-en#toc-store-form-submitters-on-your-website)
 - [(2) How To Create A Sales Funnel For FREE: Step-by-Step Tutorial - YouTube](https://www.youtube.com/watch?v=Oq86E5cb6oI)
 - [Google Ads Help](https://support.google.com/google-ads?sjid=5522142763206475119-NC#topic=10286612)
@@ -529,7 +508,6 @@ total: 701
 - [Marketing Platform Home](https://marketingplatform.google.com/home?utm_campaign=SuiteHeader&utm_source=UniversalPicker&utm_medium=platformHomeButton&authuser=0)
 - [Google Marketing Platform](https://marketingplatform.google.com/about/small-business/)
 - [The Best Ad Tracking &amp; Attribution Software - Hyros](https://hyros.com/)
-- [Manage Form Submissions](https://decagon-oboe-nkg9.squarespace.com/config/profiles/form-submitters/678ca29c901a1e08c39fb2d1/forms/e7c52b1a-108a-47f7-8311-ebf1c22b2a3d?origin=form-notif-email)
 - [Marketing Reverse Engineering](https://secure.similarweb.com/account/login?returnUrl=https%3a%2f%2fpro.similarweb.com%2f#/digitalsuite/websiteanalysis/overview/website-performance/*/999/3m?webSource=Total&key=wizardofbarge.com)
 - [Ad Library (reverse engineering)](https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=US&is_targeted_country=false&media_type=all&q=mightyjaxx&search_type=keyword_unordered)
 - [Your guide to AdSense - Google AdSense Help](https://support.google.com/adsense/answer/3180977?hl=en)
@@ -538,7 +516,6 @@ total: 701
 - [Set up and install the Meta Pixel | Meta Business Help Center](https://www.facebook.com/business/help/952192354843755?id=1205376682832142)
 - [Using Meta Pixel with Squarespace – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/115015760107-Using-Meta-Pixel-with-Squarespace)
 - [Gen AI for Marketing with Gemini for Workspace](https://workspace.google.com/solutions/ai/marketing/)
-- [Lists &amp; Segments](https://decagon-oboe-nkg9.squarespace.com/config/profiles/lists-and-segments)
 - [The GaryVee Content Strategy: How to Grow and Distribute Your Brand’s Social Media Content](https://www.garyvaynerchuk.com/the-garyvee-content-strategy-how-to-grow-and-distribute-your-brands-social-media-content/)
 - [70+ Easy Ways to Promote Your Design Services for a Steady Flow of New Clients](https://s.muz.li/ZGVjZjAwZjIy)
 - [The Structure of an Advertising Agency](https://www.thebalancecareers.com/the-structure-of-an-advertising-agency-38911)
@@ -549,7 +526,6 @@ total: 701
 ## Favorites bar > Hirobius > SEO
 
 - [SEO Starter Guide: The Basics | Google Search Central  |  Documentation  |  Google for Developers](https://developers.google.com/search/docs/fundamentals/seo-starter-guide)
-- [Image Metadata Importing](https://decagon-oboe-nkg9.squarespace.com/config/settings/developer-tools/metadata-importing)
 - [Content metadata – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/218050027-Content-metadata)
 - [Google Images SEO: Image Metadata | Google Search Central  |  Documentation  |  Google for Developers](https://developers.google.com/search/docs/appearance/structured-data/image-license-metadata)
 - [Formatting your images for display on the web – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/206542517-Formatting-your-images-for-display-on-the-web)
@@ -557,10 +533,7 @@ total: 701
 - [Using AMP with Squarespace – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/223766868-Using-AMP-with-Squarespace)
 - [Promote Your Business with Merchant Center - Google for Retail](https://www.google.com/retail/)
 - [Get Listed on Google - Google Business Profile](https://www.google.com/business/)
-- [Your business details - Merchant Center](https://merchants.google.com/mc/merchantprofile/businessinfo/edit?a=755314670)
 - [Website checklist | Stripe Documentation](https://docs.stripe.com/get-started/checklist/website)
-- [Search Console Overview](https://search.google.com/search-console?resource_id=sc-domain%3Ahirobius.com)
-- [Google Search Console Insights](https://search.google.com/search-console/insights/u/0/?resource_id=sc-domain:hirobius.com&hl=en)
 - [SEO checklist – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/360002090267-SEO-checklist?platform=v6&websiteId=6362d6a9fd7cef74122e6d2a)
 
 ## Favorites bar > Hirobius > Funding
@@ -597,9 +570,7 @@ total: 701
 
 ## Favorites bar > Hirobius > Research
 
-- [Data Axle](https://www.referenceusa.com/Account/LogOn?ReturnUrl=%2fUsBusiness%2fDetail%2fTagged%2f9ef1ef016541495285c6616fdd3c37e2%3frecordId%3d771258058&recordId=771258058)
 - [Best Squarespace Websites (2025): 60+ Inspiring Examples](https://www.sparkplugin.com/blog/best-squarespace-websites?utm_source=googleads&gad_source=1&gclid=Cj0KCQiAqL28BhCrARIsACYJvkf3mfyESruAlkXw-IC79KK5vwcUXjq5CeqgtYilBO6ePAtjXf4b9Y8aAhQfEALw_wcB)
-- [Target Audience Personas / Avatars - Google Docs](https://docs.google.com/document/d/1ZfrlXG-KItthwyThRrtUNx4sXLFZvPGnnuNLR6gz5eM/edit?tab=t.0)
 - [Domain Overview Tool: Discover PPC and SEO Insights: mightyjaxx.com](https://www.spyfu.com/overview/domain?query=mightyjaxx.com)
 - [free website adspend tool - Google Search](https://www.google.com/search?q=free+website+adspend+tool&sca_esv=2486b9a4b840a925&rlz=1C5CHFA_enUS890US892&ei=ogiQZ4rdDePw0PEPooeBoQM&start=10&sa=N&sstk=ATObxK7xzMkI9r3HDw-4nBlKUcOzBxLk7tOuerspq6W93IfzBWRrWMoQP98JUHGu87ICTLOXSG0nVllROTwgUpge4exXrxF-yZRmJA&ved=2ahUKEwiKtvW92IeLAxVjODQIHaJDIDQQ8NMDegQIJBAW&biw=1440&bih=756&dpr=2)
 - [Bum Vase Handmade Ceramic Body Vase Unique Female Form Decor Modern Boho Vase for Dried Flowers Fun Home Decor Gift Artistic State - Etsy](https://www.etsy.com/listing/1554244955/bum-vase-handmade-ceramic-body-vase?gpla=1&gao=1&)
@@ -694,8 +665,6 @@ total: 701
 - [Website Tag Management Tools &amp; Solutions - Google Tag Manager](https://marketingplatform.google.com/about/tag-manager/)
 - [About properties - Analytics Help](https://support.google.com/analytics/answer/2649554?hl=en&ref_topic=1009620&sjid=12601183882011044160-NA)
 - [Skillshop class: Use Google Analytics to Meet Your Business Objectives : Google](https://skillshop.exceedlms.com/student/path/297729)
-- [Analytics | Home](https://analytics.google.com/analytics/web/#/p343140815/reports/intelligenthome)
-- [Tag: Hirobius (MC-F9FBX20SVQ) - Merchant Center](https://merchants.google.com/mc/conversionsettings/tag?a=755314670&tag=374453258&pli=1)
 - [Google Tag Manager](https://tagmanager.google.com/#/home)
 - [Use Digital Analytics to Grow Your Business - Use Digital Analytics to Grow Your Business](https://skillshop.exceedlms.com/uploads/resource_courses/targets/888911/original/index.html?_courseId=291144#/page/61af4bf9f27416613c16c02c)
 - [Google Analytics products | Google Blog](https://blog.google/products/marketingplatform/analytics/)
@@ -706,7 +675,6 @@ total: 701
 - [Designer Toy Discount Codes - The Toy Chronicle](https://www.thetoychronicle.com/discountcodes/)
 - [Increasing your store&#39;s sales – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/6579898926093-Increasing-your-store-s-sales)
 - [Sales Handbook - Gemini for Google Works | Google Workspace](https://workspace.google.com/learning/content/sales-handbook-gemini-for-google-workspace?utm_source=wgc&utm_medium=et&utm_campaign=FY24-Q1-global-WKSP274-website-dl-gemini-for-gws-sales-handbook&utm_content=wgc-content-tiles&utm_term=-)
-- [Hirobius Settings/Selling](https://decagon-oboe-nkg9.squarespace.com/config/settings/selling)
 - [Video Series: Introducing Commerce – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/360047047751-Video-Series-Introducing-Commerce)
 
 ## Favorites bar > Hirobius > Inventory Management
@@ -725,13 +693,11 @@ total: 701
 - [RESIN 3D PRINTING GUIDE - FROM SETUP TO YOUR FIRST MINIATURE - YouTube](https://www.youtube.com/watch?v=T8m0CTkS-zE)
 - [How to Paint 3D Resin Prints - Raven from Teen Titans - YouTube](https://www.youtube.com/watch?v=1cgaANsOnww)
 - [Elegoo Mars 2 Pro $300 Resin 3D Printer Review! - YouTube](https://www.youtube.com/watch?v=3AWWRP12hGw)
-- [Craftcloud® | Your Streamlined 3D Printing Service](https://craftcloud3d.com/?utm_source=New%20Subscribers&utm_medium=email&utm_campaign=Welcome%20back%20Jan%202025%20%2801JGPJNF94X62ZK6P60MZCVQD3%29&_kx=VSM10Vt6IQRoLWsCQ4TfVI6G_gGyGIHj3Wh9eDcajsY.TMsqKC)
 - [Quickstart: Manage your Google Cloud resources  |  Resource Manager Documentation](https://cloud.google.com/resource-manager/docs/manage-google-cloud-resources)
 
 ## Favorites bar > Hirobius > Taxes
 
 - [Squarespace Plan Comparison - TaxJar Support](https://support.taxjar.com/article/1070-squarespace-plan-comparison?locale=en-US)
-- [(Test product) — Hirobius®](https://decagon-oboe-nkg9.squarespace.com/config/settings/third-party-tools/extensions/taxjar)
 - [Check Taxes in Your State](https://www.bankrate.com/taxes/taxes-by-state/)
 - [Setting up manual tax rates in Squarespace – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/206540947-Setting-up-manual-tax-rates-in-Squarespace)
 - [Shipping and Taxes ST](https://event.on24.com/eventRegistration/EventLobbyServlet?target=reg20.jsp&eventid=4161847&sessionid=1&key=D44B25DF2C0495321CFC796964975CC2&groupId=4617357&partnerref=kbst&sourcepage=register)
@@ -739,7 +705,6 @@ total: 701
 
 ## Favorites bar > Hirobius > Operations
 
-- [Hirobius LLC Business Plan.docx - Google Docs](https://docs.google.com/document/d/145MurpNTnD-Wd9W1EQPL9XFGeWRMjLSs/edit)
 - [Google AI for Customer Service with Gemini for Workspace](https://workspace.google.com/solutions/ai/customer-service/)
 - [Label Google Drive files automatically using AI classification - Google Workspace Admin Help](https://support.google.com/a/answer/12676216)
 - [Add or delete an alternate email address (email alias) - Google Workspace Admin Help](https://support.google.com/a/answer/33327?hl=en&src=supportwidget0&authuser=0)
@@ -753,7 +718,6 @@ total: 701
 - [Show users that you offer free and fast shipping - Google Merchant Center Help](https://support.google.com/merchants/answer/14264257?hl=en&visit_id=638753346367894239-266443159&rd=1)
 - [I want Google to calculate my shipping speeds based on my carrier - Google Merchant Center Help](https://support.google.com/merchants/answer/12579417?hl=en&visit_id=638753346367894239-266443159&rd=1#zippy=%2Cusing-delivery-locations-and-information-from-your-shipping-carrier)
 - [Get started with Merchant Center - Google Merchant Center Help](https://support.google.com/merchants/answer/12159157?hl=en&ref_topic=7259125,7259405,&sjid=1309726674689098071-NA&visit_id=638753346367894239-266443159&rd=1)
-- [Shipping and returns - Merchant Center](https://merchants.google.com/mc/shipping/services?a=755314670&hl=en&fmp=2&gfr_referral=true&mcsubid=us-en-web-g-mc-gfr&_gl=1%2A1ecireh%2A_ga%2AMTI1Mzc5Njk1OS4xNjgzNDI0ODE4%2A_ga_946NLLCQF5%2AMTY4MzQyOTI0MC4yLjEuMTY4MzQzMDExNC4wLjAuMA..&_ga=2.222335771.1251849367.1683424818-1253796959.1683424818)
 
 ## Favorites bar > Hirobius > Launch Optimizations
 
@@ -767,24 +731,19 @@ total: 701
 - [Add your business registration number - Google Merchant Center Help](https://support.google.com/merchants/answer/12565963?hl=en)
 - [Set up the Google tag with gtag.js  |  Tag Platform  |  Google for Developers](https://developers.google.com/tag-platform/gtagjs)
 - [Small Business Advisors](https://business.google.com/advisors/expertise)
-- [Add product source - Merchant Center](https://merchants.google.com/mc/products/sources/createPrimaryFeed?a=755314670)
 - [How to upload your products to Merchant Center - Google Merchant Center Help](https://support.google.com/merchants/answer/11586438)
 - [About structured data markup for Merchant Center - Google Merchant Center Help](https://support.google.com/merchants/answer/6069143?sjid=2551704652856106979-NC#Getting_started)
 - [Climate Commitments | Stripe Documentation](https://docs.stripe.com/climate/commitments#manage-and-understand-your-commitment)
 - [Stripe Climate](https://stripe.com/climate)
-- [Hirobius®](https://decagon-oboe-nkg9.squarespace.com/config/settings/selling/checkout)
 - [Black Connect on Building Opportunities for Black Business Owners – Squarespace](https://www.squarespace.com/blog/black-connect-entrepreneurship)
 - [Black Entrepreneurship — Web Design &amp; Business Tips from Making It – Squarespace](https://www.squarespace.com/blog/tag/black-entrepreneurship)
-- [Project Inquiry — Adam Ho](https://docs.google.com/forms/d/e/1FAIpQLSef9cx3DwhcrFGroCbpEQaLSJuiJ3MwUOD9WA9aoTCN4ARsLQ/viewform)
 - [(1) A Plan Is Not a Strategy - YouTube](https://www.youtube.com/watch?v=iuYlGRnC7J8)
 - [Creating a promotional pop-up – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/115008375848-Creating-a-promotional-pop-up)
-- [Copy of Squarespace Prelaunch Checklist TEMPLATE - Google Docs](https://docs.google.com/document/d/1E12dQcHvfi1HGFOqpHFMJSKRMkMzMX7B6w714FpyoAI/edit?tab=t.0#heading=h.iar200nyocgi)
 - [Auto-Updating Website Policies - Privacy Policy Generator](https://termageddon.com/)
 - [Find Target market](https://www.shopify.com/blog/product-opportunities?syclid=cu3dhh3mb5es73e2dbqg&utm_campaign=ss_gro_blog_20250114_themedweekly&utm_medium=email&utm_source=mozart&utm_term=module1_CTA)
 - [What Is a Target Market and How Do You Find Yours? (2023) - Shopify](https://www.shopify.com/blog/target-market)
 - [Brand Positioning - Position Your Brand as Go-to Choice - Shopify](https://www.shopify.com/first-sale/brand-positioning-analysis?utm_campaign=First_Day_to_First_Sale&utm_source=blog)
 - [Explore 1% for the Planet Membership | Business Climate Activism &amp; ESG Giving Solution](https://www.onepercentfortheplanet.org/membership)
-- [Copy of Squarespace Prelaunch Checklist TEMPLATE - Google Docs](https://docs.google.com/document/d/1E12dQcHvfi1HGFOqpHFMJSKRMkMzMX7B6w714FpyoAI/edit?tab=t.0)
 - [Using TaxJar with Squarespace – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/360062100212-Using-TaxJar-with-Squarespace)
 - [Squarespace getting started - TaxJar Support](https://support.taxjar.com/article/348-squarespace-getting-started)
 
@@ -811,7 +770,6 @@ total: 701
 
 - [Independent Contractors](https://lni.wa.gov/insurance/insurance-requirements/independent-contractors/)
 - [Annual Reports | WA Secretary of State](https://www.sos.wa.gov/corporations-charities/frequently-asked-questions-faqs/annual-reports)
-- [💼 Legal - Google Docs](https://docs.google.com/document/d/1oM82_kb9-T6I0UvrvDPjfCmTzet-WheZudzW3HwWXiw/edit?tab=t.0)
 
 ## Favorites bar > Hirobius > Claude Knowledge Base
 
@@ -834,16 +792,13 @@ total: 701
 
 ## Favorites bar > Tab Collections > Folio
 
-- [Portfolio Planning | Google AI Studio](https://aistudio.google.com/prompts/1PWN__NGhsQA55EE6NTA7WOATwUxLyvMe)
 - [Park UI Design System Pro Components (Preview) – Figma](https://www.figma.com/design/wN70u2btZ6uKVxFJ8UPXvy/Park-UI-Design-System-Pro-Components--Preview-?node-id=1-27519&p=f&t=AGAQHQgJUtoIzuM1-0)
-- [Style Guide Starter (Copy) – Figma](https://www.figma.com/design/fus4cNd8M1suY8FwlR4VA9/Style-Guide-Starter--Copy-?node-id=0-1&p=f&t=64iqBqYNRE0xLrOZ-0)
 - [Typebot](https://typebot.io/)
 - [Chakra UI - Mastery](https://mastery.chakra-ui.com/)
 - [(6) Build Your Own Design System with ChakraUI #opensource - YouTube](https://www.youtube.com/watch?v=epJuxo8FKFA)
 - [(6) How to Turn ADHD Into a Genius-Level Advantage - YouTube](https://www.youtube.com/watch?v=moXqSeVQ1Fk)
 - [(6) QuiverAI - Are Illustrators and Brand Designers Cooked? 5 Tests - YouTube](https://www.youtube.com/watch?v=N38wvyexMQg)
 - [(6) YC Was Right: AI Can Run an Entire Business Now - YouTube](https://www.youtube.com/watch?v=Y4u7e0BlUPc)
-- [Community – Figma](https://www.figma.com/files/team/1107784138532077495/resources/community/plugin/1384128348852728339/chakra-ui-design-system?fuid=1107784130781961084)
 - [Read.cv Template | Figma](https://www.figma.com/community/file/1501274937411138885/read-cv-template)
 - [Figma Sites: Design, Prototype &amp; Publish Your Next Website](https://www.figma.com/sites/)
 - [Getting Started - shadcn/ui](https://ui.shadcn.com/docs/registry/getting-started)

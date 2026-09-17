@@ -9,12 +9,13 @@ Captured 2026-05-05 after a deep grill on what "completely deterministic gates" 
 `audit-typography-overrides` was authored, registered in the guardrail registry, and added to `pnpm tokens`. It looked wired. It wasn't. The validator never ran on a per-commit basis because nobody added it to `.husky/pre-commit`. **17 violations across 7 files shipped past the dormant gate** before we caught it manually. That is the failure mode every entry in this roadmap aims to make impossible.
 
 We then built two meta-validators:
+
 - `validate-guardrail-registry.mjs` — every `check-*.mjs` and `audit-*.mjs` must be registered.
 - `check-validator-wiring.mjs` — every registered entry must declare a `firingChannel` matching reality.
 
 Both are now in pre-commit. We empirically tested both with contrived violations: registry-validator caught an unregistered fake script (exit 1, blocked commit); wiring-validator caught BAD_CHANNEL, MISSING_CHANNEL, and WIRING_DRIFT cases (exit 1).
 
-That closes the *registration* and *wiring* loops. It does NOT close the *effect* loop. A wired gate could still be silently broken. The roadmap below addresses that.
+That closes the _registration_ and _wiring_ loops. It does NOT close the _effect_ loop. A wired gate could still be silently broken. The roadmap below addresses that.
 
 ---
 
@@ -38,9 +39,10 @@ Each principle below corresponds to one or more units in this roadmap.
 
 ### P0 — closes the deepest gap (effect not just wiring)
 
-**`13g-3-fixture-proof-of-firing`** *(scaffolded 2026-05-05 — all stubs generated; real fixtures to fill incrementally)*
+**`13g-3-fixture-proof-of-firing`** _(scaffolded 2026-05-05 — all stubs generated; real fixtures to fill incrementally)_
 
 Delivered by unit 13g-3:
+
 - `fixtures/<gate-id>/{violating.example.<ext>, passing.example.<ext>}` generated for all 73 registered gates.
 - `scripts/validate-fixture-proof-of-firing.mjs` — meta-validator: exits 0 with stub warnings, exits 1 on missing fixtures or real-fixture proof failure. mtime-scoped cache for fast pre-commit runs. `--json` mode for CI.
 - Wired into `.husky/pre-commit` immediately after `check-validator-wiring.mjs`.
@@ -55,6 +57,7 @@ Done when ≥80% of registered gates have real (non-stub) fixtures + meta-test g
 ### P0 — close cheap wiring-validator gaps
 
 **`13g-7-wiring-tamper-resistance`**
+
 - Extend `check-validator-wiring.mjs`:
   - Reject `|| true` (and other failure-swallowing patterns: `; true`, `; exit 0`, trailing `&`) immediately following a registered gate's invocation in `.husky/pre-commit`.
   - Reject conditional wraps: `if false; then`, `[ ... ] && node script.mjs`, `set +e` → call → `set -e` patterns.
@@ -65,6 +68,7 @@ Done when ≥80% of registered gates have real (non-stub) fixtures + meta-test g
 ### P0 — eliminate voluntary self-audit
 
 **`13g-8-agent-self-audit-required`**
+
 - Modify `scripts/hermes-unit.mjs`: the mark-done step runs `node scripts/audit-batch-deliverables.mjs --units <id>` and refuses to flip `status: claimed` → `done` if it fails.
 - Same for swarm.mjs's worker pool.
 - Add to the standard agent prompt template the line "audit will run automatically on mark-done; you cannot bypass."
@@ -73,6 +77,7 @@ Done when ≥80% of registered gates have real (non-stub) fixtures + meta-test g
 ### P1 — protect the pre-commit hook itself
 
 **`13g-9-precommit-structure-hash`**
+
 - Compute a canonical hash of `.husky/pre-commit` (after stripping comments + normalizing whitespace), store in the registry as `precommitStructureHash`.
 - `check-validator-wiring.mjs` recomputes on each run and fails if hash diverges without a corresponding update committed.
 - Forces structural changes to surface in PR diffs.
@@ -81,6 +86,7 @@ Done when ≥80% of registered gates have real (non-stub) fixtures + meta-test g
 ### P1 — every gate is a pure observer (audit)
 
 **`13g-10-gate-purity-audit`**
+
 - Author `scripts/audit-gate-purity.mjs` that walks every registered gate and statically checks for impure patterns: `fs.writeFileSync`, `Math.random`, `Date.now`, `new Date(`, `process.env` access outside an allowlist, network imports (`fetch`, `https`, `axios`).
 - Document each impurity finding; for each, decide: refactor to pure / declare exception in registry / replace gate.
 - Goal: every gate either certifies pure OR has a registry-recorded exception with rationale.
@@ -89,6 +95,7 @@ Done when ≥80% of registered gates have real (non-stub) fixtures + meta-test g
 ### P1 — single source of truth for the gate set
 
 **`13g-11-unified-gate-runner`**
+
 - Author `scripts/run-gates.mjs --channel <pre-commit|pre-push|ci-pr>` that walks the registry, filters by channel, and invokes each gate in order.
 - Replace the per-line `node scripts/check-*.mjs` listing in `.husky/pre-commit` with a single line: `node scripts/run-gates.mjs --channel pre-commit`.
 - CI workflows likewise call `node scripts/run-gates.mjs --channel ci-pr`.
@@ -97,7 +104,8 @@ Done when ≥80% of registered gates have real (non-stub) fixtures + meta-test g
 
 ### P1 — per-file scoping for speed
 
-**`13g-2-validator-self-register`** *(was Wave 1)*
+**`13g-2-validator-self-register`** _(was Wave 1)_
+
 - Each gate exposes a `glob` or `affectedFiles(changed)` API. Pre-commit reads `git diff --cached --name-only` and runs only the gates whose globs match changed files.
 - Sub-second pre-commit on small commits → adoption survives.
 - Mitigation against missing cross-file violations: gates that need full-tree scan (e.g. manifest-drift, route-coverage) opt out of scoping by declaring `scope: 'full-tree'` in registry.
@@ -105,6 +113,7 @@ Done when ≥80% of registered gates have real (non-stub) fixtures + meta-test g
 ### P2 — bypass detection
 
 **`13g-12-postcommit-verifier`**
+
 - A `.husky/post-commit` hook (or local cron) re-runs the full pre-commit gate set against the committed tree (NOT staged — committed). Append the result to `docs/guardrails/firing-log.jsonl` with commit SHA + per-gate exit code.
 - If a gate that was supposed to gate the commit fails post-commit, that means `--no-verify` was used or pre-commit silently failed. Surface as red row in `/ops/atlas#validators`.
 - Doesn't prevent bypass (that requires server-side gating we don't have), but makes it auditable.
@@ -112,6 +121,7 @@ Done when ≥80% of registered gates have real (non-stub) fixtures + meta-test g
 ### P2 — Hermes learned-rules pipe
 
 **`13g-13-learned-rules-promotion`**
+
 - Hermes post-mortem distillation already extracts a rule per failure. Currently goes to stdout.
 - New: append to `docs/ai/learned-rules.jsonl` with `{ rule, rationale, applies_to, source: 'hermes-distillation', evidence_unit_id, ts }`.
 - Author `scripts/promote-learned-rule.mjs` (interactive): walks recent unprommoted entries, asks Adrian to flip each to a registry entry as `severity: warn`. Once a learned rule has caught a real fixture-violation, promote to `severity: error`.
@@ -120,6 +130,7 @@ Done when ≥80% of registered gates have real (non-stub) fixtures + meta-test g
 ### P2 — firing telemetry
 
 **`13g-14-gate-firing-telemetry`**
+
 - Each gate emits a one-liner JSON to `docs/guardrails/firing-log.jsonl` per run: `{ gate, ts, exitCode, violations, durationMs, commitSha }`.
 - Periodic job (`pnpm guardrail:report`) updates `lastFiringAt` / `lastViolationAt` in registry from the log.
 - Surface dormant gates (no fires in 90 days) on `/ops/atlas#validators`.
@@ -128,10 +139,12 @@ Done when ≥80% of registered gates have real (non-stub) fixtures + meta-test g
 ### P3 — platform robustness
 
 **`13g-15-locked-node-version`**
+
 - Pin Node version in `package.json` `engines` and add `.nvmrc`.
 - Detect Windows-vs-WSL path divergences in hooks (the `tokens:verify` hook in `.claude/settings.json` has a hardcoded Windows path). Replace with cross-platform invocation or document as Adrian-only.
 
 **`13g-16-mutation-test-spike`**
+
 - Spike: pick one gate (e.g. `check-source-canon`). Programmatically inject N variations of the violation pattern. Measure what % the gate catches.
 - If it's <90%, that's evidence of incomplete coverage even with passing fixtures. Decide: invest in mutation-testing infrastructure (overkill for now?), or just rely on incident-driven fixture growth.
 - Don't run as a gate — this is a one-time analysis.
@@ -149,6 +162,7 @@ Lower CLAUDE.md's standard 6-8 cap to **2** for unattended overnight runs. Small
 ### Observer / loop-killer
 
 Author `scripts/swarm-watchdog.mjs`:
+
 - Polls `docs/ai/orchestration.json` every 60s.
 - For each `status: claimed` unit: if `claimedAt` is older than wall-clock-cap (default 25 min for sonnet, 45 min for opus), mark abort: revert claim, increment `attempts`, append `lastAbort` note. After 2 aborts on the same unit, mark `status: parked` and surface for Adrian's review.
 - For overall swarm: if total open claims exceeds the cap (2), refuse to dispatch new ones.
@@ -200,64 +214,81 @@ These were missed in the first pass. Most are P2/P3 candidates — appended for 
 
 ### GitHub-side
 
-**`13g-17-github-branch-protection-runbook`** *(P2 — write but don't enforce until we push)*
+**`13g-17-github-branch-protection-runbook`** _(P2 — write but don't enforce until we push)_
+
 - Document required-status-checks, no force-push to main, linear history, block-direct-push, in `docs/operations/github-branch-protection.md`. The settings live in GH UI, not the repo, so this is the readable contract.
 
-**`13g-18-codeowners`** *(P2)*
-- `.github/CODEOWNERS` even for a solo repo. Documents path → reviewer mapping. Forces explicit thought when paths cross client/agency boundaries (e.g. `clients/lilac-insure/legal/` requires Conrad ack, even though Conrad has no GH account).
+**`13g-18-codeowners`** _(P2)_
 
-**`13g-19-github-actions-permissions`** *(P3)*
+- `.github/CODEOWNERS` even for a solo repo. Documents path → reviewer mapping. Forces explicit thought when paths cross client/agency boundaries (e.g. `clients/<slug>/legal/` requires client ack, even though the client has no GH account).
+
+**`13g-19-github-actions-permissions`** _(P3)_
+
 - Add `permissions:` block to every workflow in `.github/workflows/*.yml`, scoped to least privilege.
 
-**`13g-20-signed-commits-policy`** *(P3 — solo low-priority)*
+**`13g-20-signed-commits-policy`** _(P3 — solo low-priority)_
+
 - Document `git commit -S` setup; configure GH to mark unsigned commits. Cryptographic attestation against compromised agent credentials.
 
-**`13g-21-dependabot`** *(P2 — overlaps `13s-1-dependency-hygiene`)*
+**`13g-21-dependabot`** _(P2 — overlaps `13s-1-dependency-hygiene`)_
+
 - `.github/dependabot.yml` for npm + GH Actions. Weekly cadence. Pair with the existing `pnpm audit` gate.
 
 ### Vercel-side
 
-**`13g-22-vercel-env-var-parity-check`** *(P1 — load-bearing for `13w-ops-3`)*
+**`13g-22-vercel-env-var-parity-check`** _(P1 — load-bearing for `13w-ops-3`)_
+
 - `api/route.ts` returns 503 with actionable message when `HIROBIUS_BRIDGE_URL` / `HDS_BRIDGE_SECRET` aren't set (already done). Add a build-time assertion: `vercel.json` build step that fails the deploy if required env vars are missing in the project. Surfaces config drift before runtime.
 
-**`13g-23-edge-vs-node-decision`** *(P3 — small ADR)*
+**`13g-23-edge-vs-node-decision`** _(P3 — small ADR)_
+
 - `docs/adr/00X-vercel-runtime.md` — pick edge or node for `api/route.ts`. Edge = faster cold-start + smaller limits + restricted Node API. Node = full runtime. Document the choice.
 
-**`13g-24-vercel-preview-deploy-pipeline`** *(P2)*
+**`13g-24-vercel-preview-deploy-pipeline`** _(P2)_
+
 - Push to non-main branches → Vercel preview deploy → preview URL re-runs `/api/route` smoke test. Closes the "we never test prod path until prod" loop.
 
 ### Backup / disaster recovery
 
-**`13g-25-orchestration-snapshot-cron`** *(P1 — cheap; high value)*
+**`13g-25-orchestration-snapshot-cron`** _(P1 — cheap; high value)_
+
 - Daily snapshot: `cp docs/ai/orchestration.json docs/ai/snapshots/orchestration.YYYY-MM-DD.json`. Keep last 30 days. Saved at first ops:dev hook OR by a `pnpm orchestration:snapshot` script.
 - Same idea for `docs/guardrails/registry.json`.
 
-**`13g-26-off-machine-backup-policy`** *(P2 — write-decision; not yet implement)*
+**`13g-26-off-machine-backup-policy`** _(P2 — write-decision; not yet implement)_
+
 - Distinguish "never push to main" from "never push at all." Decision doc: do we push `fix/ui-pipeline` to GH as off-machine backup? Argue the trade-offs.
 
-**`13g-27-atomic-registry-writes`** *(P1)*
+**`13g-27-atomic-registry-writes`** _(P1)_
+
 - Refactor every script that writes `orchestration.json` / `registry.json` to write to `<file>.tmp` then `fs.rename` (POSIX-atomic on same filesystem). Eliminates the corruption-mid-write class of bug we've already seen.
 
 ### Coverage / discipline
 
-**`13g-28-doc-drift-gate`** *(P2)*
+**`13g-28-doc-drift-gate`** _(P2)_
+
 - Author `scripts/check-doc-drift.mjs`: every code symbol mentioned in `docs/*.md` (functions, components, file paths, route paths) must resolve to an actual export / file / route. Catches docs-vs-code drift after refactors.
 
-**`13g-29-promotion-ratcheting`** *(P2)*
+**`13g-29-promotion-ratcheting`** _(P2)_
+
 - When flipping a registry entry's `severity: warn` → `error`, simulate by walking the last N commits and re-running the gate. If any past commit would have failed under the strict rule, surface for cleanup BEFORE promotion. Safer ratchet.
 
-**`13g-30-hook-idempotency-audit`** *(P3)*
+**`13g-30-hook-idempotency-audit`** _(P3)_
+
 - Verify every `.husky/*` hook + every `.claude/settings.json` PostToolUse is idempotent: running it twice on the same input must produce the same outcome. The current `eslint --fix` PostToolUse hook is the obvious risk (it mutates).
 
-**`13g-31-onboarding-bootstrap-script`** *(P2)*
+**`13g-31-onboarding-bootstrap-script`** _(P2)_
+
 - `scripts/bootstrap.sh` that installs all preconditions: pnpm, node version, gitleaks, ollama (optional), husky setup, .nvmrc-aware. README points to it. Future-Adrian (or actual hire) can clone + run + commit successfully without 30 minutes of "what's missing now."
 
-**`13g-32-validator-unit-tests`** *(P2)*
+**`13g-32-validator-unit-tests`** _(P2)_
+
 - Recursion concern: a validator that's wrong by N% is wrong by N% of all our protection. Test the validators themselves with vitest unit tests against contrived inputs. Pair with `13g-3` fixture proof-of-firing — fixtures prove behavior end-to-end; unit tests prove logic.
 
 ### Meta-budget
 
-**`13g-33-discipline-vs-feature-cost-tracking`** *(P3)*
+**`13g-33-discipline-vs-feature-cost-tracking`** _(P3)_
+
 - Track agent-cost spent on `13g-*` units vs `13w-*` units. If discipline cost > 25% of total, signal: "we're hardening at the expense of shipping." Surfaces in `/ops/build`.
 
 ---
@@ -285,14 +316,14 @@ Adrian's clarified position (2026-05-05): internal house-in-order metrics ARE va
 
 Methodology: closed-loop guardrail discipline. Each dimension is empirically proven by an existing meta-validator running in pre-commit. NOT navel-gazing — every metric is backed by a gate that fails the commit if drift occurs. Dimensions:
 
-| Dim | Methodology source | Empirical proof | Today |
-|---|---|---|---|
-| A1 Registration coverage | "Every gate is registered" — codified-gated-wired discipline | `validate-guardrail-registry.mjs` exits non-zero if drift | 100% (68/68) |
-| A2 Wiring honesty | "Every gate's declared firingChannel matches reality" | `check-validator-wiring.mjs` exits non-zero if drift | 100% (68/68) |
-| A3 Fixture proof-of-firing | "Every gate proves it catches what it claims" | `13g-3` deliverable; meta-test runs each gate against contrived violating + passing examples | 0% (target via `13g-3`) |
-| A4 Strict gating | "Static gates run pre-commit, not just pnpm-meta" | Wiring-validator records `firingChannel`; orphan `pnpm-meta` count surfaces | ~21% (14 pre-commit / 68 total) |
-| A5 Hardening cluster completeness | "13g-hardening cluster shipped" | `orchestration.json` status counts | ~12% (2/16 done; 16g-1 + 13g-16) |
-| A6 Debt closure ratio | "Phase 2 inventory turned into closures or baselines" | `docs/guardrails/full-strictness-inventory.json` count | undefined until Phase 2 |
+| Dim                               | Methodology source                                           | Empirical proof                                                                              | Today                            |
+| --------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------- | -------------------------------- |
+| A1 Registration coverage          | "Every gate is registered" — codified-gated-wired discipline | `validate-guardrail-registry.mjs` exits non-zero if drift                                    | 100% (68/68)                     |
+| A2 Wiring honesty                 | "Every gate's declared firingChannel matches reality"        | `check-validator-wiring.mjs` exits non-zero if drift                                         | 100% (68/68)                     |
+| A3 Fixture proof-of-firing        | "Every gate proves it catches what it claims"                | `13g-3` deliverable; meta-test runs each gate against contrived violating + passing examples | 0% (target via `13g-3`)          |
+| A4 Strict gating                  | "Static gates run pre-commit, not just pnpm-meta"            | Wiring-validator records `firingChannel`; orphan `pnpm-meta` count surfaces                  | ~21% (14 pre-commit / 68 total)  |
+| A5 Hardening cluster completeness | "13g-hardening cluster shipped"                              | `orchestration.json` status counts                                                           | ~12% (2/16 done; 16g-1 + 13g-16) |
+| A6 Debt closure ratio             | "Phase 2 inventory turned into closures or baselines"        | `docs/guardrails/full-strictness-inventory.json` count                                       | undefined until Phase 2          |
 
 These are NOT made up. They're the closed-loop discipline made measurable. Each dimension's score == "fraction of our discipline that's actually firing." Score A says: **is our own house in order?**
 
@@ -300,16 +331,16 @@ These are NOT made up. They're the closed-loop discipline made measurable. Each 
 
 Each dimension maps to a published framework with externally-validated thresholds. We don't invent thresholds; we compare to the published Elite tier.
 
-| Dim | Source framework | Metric | Elite threshold |
-|---|---|---|---|
-| B1 DORA | DORA / Google Cloud State of DevOps | Deployment frequency + change failure rate (derived from `git log` + `routing-log.jsonl` + `agent-audit-log.jsonl`) | "Elite": multi-deploy/day, <15% failure |
-| B2 SAMM/SSDF gate coverage | OWASP SAMM + NIST SSDF | Pre-commit covers: secrets, types, lint, deps, license, accessibility, perf, WCAG | 8/8 covered |
-| B3 WCAG 2.1 AA | W3C WCAG 2.1 | axe-playwright violations per route | 0 violations on critical pages |
-| B4 Web Vitals | Google Web Vitals | LCP/INP/CLS thresholds | "Good" on ≥75% of routes |
-| B5 TS strict-mode | TypeScript industry baseline | `tsconfig.strict` flags + zero `any` outside escape hatches | 100% strict |
-| B6 OSV/audit | OSV.dev / npm audit standard | Critical + high CVE count | 0 critical, 0 high |
-| B7 CHAOSS docs | CHAOSS (Linux Foundation) | % of public exports with JSDoc + top-level READMEs | 80% baseline |
-| B8 Test coverage | Istanbul/v8 coverage norms | Line + branch coverage from vitest+playwright | 80% baseline |
+| Dim                        | Source framework                    | Metric                                                                                                              | Elite threshold                         |
+| -------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| B1 DORA                    | DORA / Google Cloud State of DevOps | Deployment frequency + change failure rate (derived from `git log` + `routing-log.jsonl` + `agent-audit-log.jsonl`) | "Elite": multi-deploy/day, <15% failure |
+| B2 SAMM/SSDF gate coverage | OWASP SAMM + NIST SSDF              | Pre-commit covers: secrets, types, lint, deps, license, accessibility, perf, WCAG                                   | 8/8 covered                             |
+| B3 WCAG 2.1 AA             | W3C WCAG 2.1                        | axe-playwright violations per route                                                                                 | 0 violations on critical pages          |
+| B4 Web Vitals              | Google Web Vitals                   | LCP/INP/CLS thresholds                                                                                              | "Good" on ≥75% of routes                |
+| B5 TS strict-mode          | TypeScript industry baseline        | `tsconfig.strict` flags + zero `any` outside escape hatches                                                         | 100% strict                             |
+| B6 OSV/audit               | OSV.dev / npm audit standard        | Critical + high CVE count                                                                                           | 0 critical, 0 high                      |
+| B7 CHAOSS docs             | CHAOSS (Linux Foundation)           | % of public exports with JSDoc + top-level READMEs                                                                  | 80% baseline                            |
+| B8 Test coverage           | Istanbul/v8 coverage norms          | Line + branch coverage from vitest+playwright                                                                       | 80% baseline                            |
 
 Score B says: **how do we compare to the published Elite tier?**
 
@@ -322,16 +353,16 @@ Score B says: **how do we compare to the published Elite tier?**
 
 **Priority:** Score A goes first. Locking down own house before chasing industry comparisons. Once Score A is consistently >80, Score B becomes the next-edge focus.
 
-| Dim | Source framework | Metric | Elite / Target threshold |
-|---|---|---|---|
-| 1 | **DORA** (Google Cloud + DORA Reports) | Deployment Frequency + Change Failure Rate (derived from our git log + routing-log + agent-audit-log) | "Elite" tier: deploy multiple times/day; <15% change failure rate |
-| 2 | **OWASP SAMM** + **NIST SSDF** | Pre-commit gate coverage of: secrets, types, lint, deps, license, accessibility, perf, WCAG (each binary; score = % covered) | 8/8 covered = 100; partial coverage scaled |
-| 3 | **WCAG 2.1 AA** (W3C) | axe-playwright violations per route | Level AA = 0 violations per route across critical pages; AAA = 0 across all |
-| 4 | **Google Web Vitals** | LCP / INP / CLS thresholds per route | "Good" on all three for ≥75% of routes (Google's published target) |
-| 5 | **TypeScript strict-mode** | `tsconfig.strict` flag set + zero `any` outside escape hatches | 100% strict (industry baseline for modern TS) |
-| 6 | **OSV / npm audit** | Critical + high CVE count in `package.json` deps | 0 critical, 0 high (industry baseline; standard since SolarWinds) |
-| 7 | **CHAOSS** (Linux Foundation) | % of public exports with JSDoc + README coverage on top-level dirs | 80% (CHAOSS-suggested baseline for healthy projects) |
-| 8 | **Test coverage** (Istanbul/v8 norms) | Line + branch coverage from vitest+playwright | 80% (industry-standard baseline) |
+| Dim | Source framework                       | Metric                                                                                                                       | Elite / Target threshold                                                    |
+| --- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 1   | **DORA** (Google Cloud + DORA Reports) | Deployment Frequency + Change Failure Rate (derived from our git log + routing-log + agent-audit-log)                        | "Elite" tier: deploy multiple times/day; <15% change failure rate           |
+| 2   | **OWASP SAMM** + **NIST SSDF**         | Pre-commit gate coverage of: secrets, types, lint, deps, license, accessibility, perf, WCAG (each binary; score = % covered) | 8/8 covered = 100; partial coverage scaled                                  |
+| 3   | **WCAG 2.1 AA** (W3C)                  | axe-playwright violations per route                                                                                          | Level AA = 0 violations per route across critical pages; AAA = 0 across all |
+| 4   | **Google Web Vitals**                  | LCP / INP / CLS thresholds per route                                                                                         | "Good" on all three for ≥75% of routes (Google's published target)          |
+| 5   | **TypeScript strict-mode**             | `tsconfig.strict` flag set + zero `any` outside escape hatches                                                               | 100% strict (industry baseline for modern TS)                               |
+| 6   | **OSV / npm audit**                    | Critical + high CVE count in `package.json` deps                                                                             | 0 critical, 0 high (industry baseline; standard since SolarWinds)           |
+| 7   | **CHAOSS** (Linux Foundation)          | % of public exports with JSDoc + README coverage on top-level dirs                                                           | 80% (CHAOSS-suggested baseline for healthy projects)                        |
+| 8   | **Test coverage** (Istanbul/v8 norms)  | Line + branch coverage from vitest+playwright                                                                                | 80% (industry-standard baseline)                                            |
 
 Composite = weighted average. Initial weights equal (12.5% each); revisit per `13s-strength-1` ADR.
 
@@ -373,16 +404,16 @@ Adrian's standing rule (2026-05-05): every dimension MUST be backed by a real, w
 
 If a dimension surfaces a NEW gate need, that gate becomes a follow-up unit. Below: per-dimension status today + wiring obligation.
 
-| Dim | Data source today | Wiring obligation | New unit if missing |
-|---|---|---|---|
-| 1 DORA | `git log`, `routing-log.jsonl`, `agent-audit-log.jsonl` exist; derivation logic does not | **Author derivation script + smoke gate**: `scripts/derive-dora-metrics.mjs` reads sources, emits scores; CI verifies the script runs (no division-by-zero, no unhandled-error crashes) | `13s-strength-7-dora-derivation` |
-| 2 SAMM/SSDF | Registry + `firingChannel` already wired (today's commit) | None — readable from registry directly | n/a |
-| 3 WCAG AA | `.github/workflows/a11y.yml` exists | **Verify axe-playwright actually exits non-zero on violations**; if it doesn't, it's a green-theater gate | `13s-strength-8-wcag-hard-fail` |
-| 4 Web Vitals | `.github/workflows/perf.yml` exists; `12o-perf-bundle-budget-hard-fail-promote` is open | **Verify Lighthouse assertions actually fail the workflow on threshold breach** | `13s-strength-9-vitals-hard-fail` (overlaps with `12o-perf-bundle-budget-hard-fail-promote`) |
-| 5 TS strict | `tsconfig.typecheck.json` exists; pre-commit runs `pnpm typecheck` | None — already gated | n/a |
-| 6 OSV/audit | `pnpm audit` available; `13s-1-dependency-hygiene` is approved-not-done | **Wire `pnpm audit --audit-level=high` into ci-pr** (slow for pre-commit); refuse merge if non-zero | `13s-strength-10-audit-ci-gate` (subsumes 13s-1) |
-| 7 CHAOSS docs | `src/app/data/component-api.json` populated; `check-token-description-quality.mjs` exists | **Add JSDoc-presence gate for public exports**: refuse pre-commit on a public export with no description | `13s-strength-11-jsdoc-gate` |
-| 8 Test coverage | `12p-test-coverage-reporting-wired` approved-not-done | **Author the unit + wire `vitest --coverage` into pre-push or ci-pr with 80% threshold** | dispatch `12p-test-coverage-reporting-wired` |
+| Dim             | Data source today                                                                         | Wiring obligation                                                                                                                                                                       | New unit if missing                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| 1 DORA          | `git log`, `routing-log.jsonl`, `agent-audit-log.jsonl` exist; derivation logic does not  | **Author derivation script + smoke gate**: `scripts/derive-dora-metrics.mjs` reads sources, emits scores; CI verifies the script runs (no division-by-zero, no unhandled-error crashes) | `13s-strength-7-dora-derivation`                                                             |
+| 2 SAMM/SSDF     | Registry + `firingChannel` already wired (today's commit)                                 | None — readable from registry directly                                                                                                                                                  | n/a                                                                                          |
+| 3 WCAG AA       | `.github/workflows/a11y.yml` exists                                                       | **Verify axe-playwright actually exits non-zero on violations**; if it doesn't, it's a green-theater gate                                                                               | `13s-strength-8-wcag-hard-fail`                                                              |
+| 4 Web Vitals    | `.github/workflows/perf.yml` exists; `12o-perf-bundle-budget-hard-fail-promote` is open   | **Verify Lighthouse assertions actually fail the workflow on threshold breach**                                                                                                         | `13s-strength-9-vitals-hard-fail` (overlaps with `12o-perf-bundle-budget-hard-fail-promote`) |
+| 5 TS strict     | `tsconfig.typecheck.json` exists; pre-commit runs `pnpm typecheck`                        | None — already gated                                                                                                                                                                    | n/a                                                                                          |
+| 6 OSV/audit     | `pnpm audit` available; `13s-1-dependency-hygiene` is approved-not-done                   | **Wire `pnpm audit --audit-level=high` into ci-pr** (slow for pre-commit); refuse merge if non-zero                                                                                     | `13s-strength-10-audit-ci-gate` (subsumes 13s-1)                                             |
+| 7 CHAOSS docs   | `src/app/data/component-api.json` populated; `check-token-description-quality.mjs` exists | **Add JSDoc-presence gate for public exports**: refuse pre-commit on a public export with no description                                                                                | `13s-strength-11-jsdoc-gate`                                                                 |
+| 8 Test coverage | `12p-test-coverage-reporting-wired` approved-not-done                                     | **Author the unit + wire `vitest --coverage` into pre-push or ci-pr with 80% threshold**                                                                                                | dispatch `12p-test-coverage-reporting-wired`                                                 |
 
 **The contract:** the generator's output JSON includes per-dimension `wiringStatus: 'wired' | 'needs-wiring'`. A dimension marked `needs-wiring` shows the corresponding follow-up unit ID for the user to dispatch. The composite score is calculated only over `wired` dimensions, with the count exposed: `composite: 67/100 over 4 of 8 dimensions wired`.
 
@@ -392,28 +423,34 @@ If a dimension surfaces a NEW gate need, that gate becomes a follow-up unit. Bel
 
 ### New units in the `13s-strength` cluster
 
-**`13s-strength-1-score-spec`** *(P2 — define before building)*
+**`13s-strength-1-score-spec`** _(P2 — define before building)_
+
 - Author `docs/guardrails/strength-score-spec.md` formalizing the six dimensions, weights, and edge cases. Adrian-attended (small ADR-style decision doc).
 
-**`13s-strength-2-generator`** *(P2 — author once spec is signed)*
+**`13s-strength-2-generator`** _(P2 — author once spec is signed)_
+
 - `scripts/generate-strength-report.mjs` reads: `registry.json`, `orchestration.json`, `swarm-watchdog-decisions.jsonl`, `firing-log.jsonl`, `learned-rules.jsonl`. Emits two artifacts:
   - `docs/guardrails/strength-report.md` (human-readable: dashboard + per-dimension + recent changes)
   - `docs/guardrails/strength-report.json` (LLM-readable: structured score + dimension subscores + raw counts)
 - Idempotent. Pure observer of canonical state. No mutation.
 - Wire to `pnpm strength` AND a new pre-commit step so every commit refreshes the report.
 
-**`13s-strength-3-history-log`** *(P3)*
+**`13s-strength-3-history-log`** _(P3)_
+
 - `docs/guardrails/strength-history.jsonl` — append-only daily snapshot of the composite + dimension scores. One line per day. Drives sparklines in the atlas tab.
 - Generated by a cron / GH Actions scheduled run, OR from the watchdog's `onSessionEnd` hook.
 
-**`13s-strength-4-atlas-tab`** *(P3 — visual surface)*
+**`13s-strength-4-atlas-tab`** _(P3 — visual surface)_
+
 - New atlas tab `/ops/atlas#strength` (or extend the existing Validators tab). Renders `strength-report.json`. Big composite number top-center, six dimension bars, recent-changes feed, link to the markdown report. Mobile-first; HdsCard composition; existing token-only styling.
 
-**`13s-strength-5-llm-system-overview`** *(P2 — closes Adrian's "point humans and LLMs at" ask)*
+**`13s-strength-5-llm-system-overview`** _(P2 — closes Adrian's "point humans and LLMs at" ask)_
+
 - A short, generated single-page overview at `docs/guardrails/SYSTEM_OVERVIEW.md` derived from the strength report + key roadmap state. Designed to be the SINGLE artifact handed to a fresh LLM as boot context: "here's where the system stands, here's what's strong, here's what's weak, here's the active sprint." Used by future agents (hermes, sonnet) at dispatch-time so they don't start fresh.
 - Auto-regenerated from the strength generator on every run.
 
-**`13s-strength-6-watchdog-strength-hook`** *(P3)*
+**`13s-strength-6-watchdog-strength-hook`** _(P3)_
+
 - The watchdog's `onSessionEnd` hook calls `scripts/generate-strength-report.mjs` automatically. Closes the loop: every overnight run leaves the strength state up-to-date for the next session.
 
 ### What this gives us
