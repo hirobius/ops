@@ -16,15 +16,19 @@ const LEAD = {
   category: 'landscaping',
   city: 'Austin',
   region: 'TX',
-  phone: '+1-555-0142',
+  phone: '+1-512-555-0142',
   email: 'hi@violetverge.com',
 };
 
 const CONTENT = {
   palettePreset: 'landscaping',
   palette: {
-    primary: '#7b2d8e', accent: '#e0a800', bg: '#fdfcff',
-    fg: '#1a121d', muted: '#efe7f2', onPrimary: '#ffffff',
+    primary: '#7b2d8e',
+    accent: '#e0a800',
+    bg: '#fdfcff',
+    fg: '#1a121d',
+    muted: '#efe7f2',
+    onPrimary: '#ffffff',
   },
   font: 'system',
   heroHeadline: 'Austin Landscaping',
@@ -51,6 +55,16 @@ describe('assemble() + photo provenance objects', () => {
   it('uses the first photo as the hero image', () => {
     const config = defineClient(assemble({ ...LEAD, photos: [stock(1), stock(2)] }, CONTENT));
     expect(config.hero.image).toBe('/photos/stock-pexels-1.jpg');
+  });
+
+  it("carries the hero photo's own alt text — the schema requires it once image is set", () => {
+    const config = defineClient(assemble({ ...LEAD, photos: [stock(1), stock(2)] }, CONTENT));
+    expect(config.hero.imageAlt).toBe('A tidy green lawn — stock photo');
+  });
+
+  it('falls back to the "<business> photo" alt for a legacy plain-string hero', () => {
+    const config = defineClient(assemble({ ...LEAD, photos: ['/photos/real-1.jpg'] }, CONTENT));
+    expect(config.hero.imageAlt).toBe('Violet Verge Landscaping photo');
   });
 
   it('puts the remaining photos in the gallery, preserving their alt text', () => {
