@@ -1,4 +1,4 @@
-# Build & Decision Log — Access Tech launch + agency-OS hardening
+# Build & Decision Log — first client launch + agency-OS hardening
 
 > Running log of what we built and the decisions we made this push, so we can
 > validate at the end that we did the right things. Newest entries at the top of
@@ -6,7 +6,7 @@
 
 ## Built
 
-- **Access Tech client portal** (`access-tech-internal`, powered by `portal-kit`):
+- **Client portal** (the client's private portal repo, powered by `portal-kit`):
   single gated page — proposal, "Why This Strategy", DIY appeal guide, roadmap,
   filming guide; document reader with callouts + collapsible sections;
   cross-doc links; Copy-for-AI (top + bottom); dark/light + iOS fixes;
@@ -14,10 +14,10 @@
 - **portal-kit** shared static renderer (`theme.css` + `portal.js`): the reusable
   engine behind every client portal — markdown extras (`::: collapsible :::`,
   `> callout`, `[text](#doc)` cross-links), theme switcher, full-screen reader.
-- **Access Tech CRM workspace** onboarded into `ops/clients/access-tech/`
+- **Client CRM workspace** onboarded into `ops/clients/<client-slug>/`
   (local/gitignored; meta, retainer, checklist, tasks, goals, status).
 - **Legal templates** — `docs/legal/MSA-template.md` + `SOW-template.md`
-  (reusable; filled Access Tech version handed to Adrian separately).
+  (reusable; filled client version handed to Adrian separately).
 - **Determinism & autonomy audit** — 46 gates (27 enforced / 19 manual), Ralph
   idle-watchdog found DISABLED (the bottleneck), `--no-verify` gate hole, token
   source of truth already exists. Published as an artifact; findings below.
@@ -45,7 +45,7 @@
    destructive git, allow normal push); re-arm Ralph + Docker Sandbox for
    unattended runs; `/writing-for-agents`; the skills plugin (supersede vendored
    copies); an evals workstream to harden site-engine's LLM generation.
-8. **`access-tech-internal` repo → private** (portal content was readable on a
+8. **Client portal repo → private** (portal content was readable on a
    public repo despite the password gate).
 
 ## Audit findings (2026-09-12) → punch list
@@ -59,10 +59,10 @@
 
 ## Open / to validate at end of push
 
-- [ ] Access Tech workspace extracted into desktop `clients/access-tech/` +
-      renders on `/ops/clients/access-tech`.
-- [ ] MSA + SOW reviewed by counsel; filled Access Tech agreement sent to the client.
-- [ ] `access-tech-internal` repo set to **private** (Adrian).
+- [ ] Client workspace extracted into desktop `clients/<client-slug>/` +
+      renders on `/ops/clients/<client-slug>`.
+- [ ] MSA + SOW reviewed by counsel; filled client agreement sent to the client.
+- [ ] Client portal repo set to **private** (Adrian).
 - [ ] Vercel Web Analytics **enabled** in the project (Adrian).
 - [ ] git-guardrails hook installed with the tuned blocklist (Adrian, at terminal).
 - [ ] Determinism / autonomy audit run (next).

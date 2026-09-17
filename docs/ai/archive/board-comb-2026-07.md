@@ -21,8 +21,8 @@ PARKED repos).
 | Blocked (recycle, don't re-file)                      | 9     |
 
 The 115 already-issued span 10 repos (ops 29, client-repo 22, clients 11,
-veteran-resource-navigator 10, client-repo-2 9, hirobius-design-system 9,
-job-hunt 8, concrete 7, portfolio 7, access-tech 3) — **none get re-filed.**
+client-repo-3 10, client-repo-2 9, hirobius-design-system 9,
+job-hunt 8, concrete 7, portfolio 7, client-repo-4 3) — **none get re-filed.**
 
 ## The 57 candidates — triage
 

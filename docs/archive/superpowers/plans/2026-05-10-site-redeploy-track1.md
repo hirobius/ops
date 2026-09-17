@@ -842,8 +842,7 @@ The nonprofit case study mirrors this file's structure: imports, `@category`, th
 // @doc-exempt: portfolio case study, not a consumer-facing HDS component
 /**
  * NonprofitCaseStudyPage
- * Case study for a nonprofit client — ongoing engagement
- * (board role + web/tech consulting).
+ * Case study for a nonprofit client.
  * @category Portfolio
  */
 import { useLayoutEffect } from 'react';
@@ -911,7 +910,7 @@ export default function NonprofitCaseStudyPage() {
         <TextLockup
           size="hero"
           title="Nonprofit client"
-          description="Ongoing technology partner for a small nonprofit. Multi-year engagement, board role, web + tooling work."
+          description="Case study for a nonprofit client."
         />
       </header>
 
@@ -977,21 +976,21 @@ cat clients/<nonprofit-slug>/checklist.json 2>/dev/null
 cat clients/<nonprofit-slug>/tasks.json 2>/dev/null
 ```
 
-Internalize: multi-year engagement, board role, primary contact is the CEO, Wix-based current site rebuild in progress, Harmony layout adopted, three-item nav, donation platform blocked on EIN+Stripe verification.
+Internalize the engagement context from those files.
 
 - [ ] **Step 2: Write the case study sections**
 
 Inside the `<motion.article>`, after `<header>`, add `<CaseStudySection>` components. Aim for ~400 lines total in this file. Sections to write:
 
 1. **At a glance** — 4-line metadata (role, dates, scope, status), no narrative
-2. **Why this exists** — what the nonprofit does, who it serves, why a small nonprofit needed sustained design + tech help
-3. **The role** — Board seat + ongoing engagement; what that means in practice (strategy, web, tooling, decisions)
-4. **Constraints** — Wix-based stack (not React rebuild), volunteer photographers, nonprofit compliance, donation-platform verification gate, CEO is not tech-trained
-5. **Decisions surfaced** — Harmony layout adoption, three-item nav, descriptive image naming for SEO/screen-readers, no sign-in / no blog by design, CTA copy ("Learn More" not "Book Now"), Cal.com for scheduling
-6. **What's live / what's pending** — current state of the Wix rebuild, Google Workspace adoption, donation platform status, Cal.com evaluation
-7. **What working with the nonprofit teaches** — short reflection: design systems thinking applied beyond enterprise; constraint-shaped decisions; why sustained engagement beats one-shot rebuilds
+2. **Why this exists** — what the client needed help with
+3. **The role** — what the engagement means in practice (strategy, web, tooling, decisions)
+4. **Constraints** — the platform, resourcing and compliance constraints that shaped the work
+5. **Decisions surfaced** — the layout, navigation, naming and copy decisions, and why
+6. **What's live / what's pending** — current state of the work
+7. **Reflection** — short: design systems thinking applied beyond enterprise; constraint-shaped decisions
 
-**Voice:** Adrian's voice — direct, declarative, uses concrete details. No filler ("It was clear that…", "We worked together to…"). Cite the year, the practice name, the constraint. Show the decision; don't narrate the deliberation.
+**Voice:** Adrian's voice — direct, declarative, uses concrete details. No filler ("It was clear that…", "We worked together to…"). Cite the concrete constraint. Show the decision; don't narrate the deliberation.
 
 **Visuals:** placeholder slots only in T1 (ship-fast). For each section that would benefit from a visual, add an inline `<div>` placeholder with a subtle dashed border and a comment `{/* T2: replace with client asset */}`. Real assets land in T2.
 

@@ -2,7 +2,7 @@
 pillar: run
 source: bookmarks
 date: 2026-05-02
-total: 125
+total: 122
 ---
 
 # Bookmarks — run
@@ -12,7 +12,6 @@ total: 125
 - [OKLCH Color Palette Generator](https://gloss-modern-smile.figma.site/)
 - [Figma](https://www.figma.com/developers/explorer)
 - [Image compressor | Reduce Image Size Online | TinyIMG](https://tiny-img.com/image-compressor/)
-- [HOW TO | Vector - Recraft Vectorize](https://www.recraft.ai/project/245f975f-12b0-4f17-9c8c-d3f2ab988799?projectType=vectorize)
 - [General Sans Font Family | Fontshare: Quality Fonts. Free.](https://www.fontshare.com/fonts/general-sans)
 - [Figma product news &amp; release notes](https://www.figma.com/release-notes/)
 - [Create and edit a functional prototype or web app – Figma Learn - Help Center](https://help.figma.com/hc/en-us/articles/31304485164695-Create-and-edit-a-functional-prototype-or-web-app#h_01JTEVBJ0527WJSQ40FDX87CRH)
@@ -43,13 +42,12 @@ total: 125
 - [Paper Planes](https://paperplanes.world/)
 - [85 GSAP.js Examples | FreeFrontend](https://freefrontend.com/gsap-js/)
 - [GSAP | Docs &amp; Learning](https://gsap.com/cheatsheet)
-- [********\_\_\_\_********🚗](https://bruno-simon.com/)
+- [**\*\*\*\***\_\_\_\_**\*\*\*\***🚗](https://bruno-simon.com/)
 - [Jackalope Productions](https://github.com/Jackalope-Productions?view_as=member)
 - [three.js examples](https://threejs.org/examples/#webgl_animation_walk)
 - [ArtStation - 80.lv - Tips on Creating Stylised 3D Content](https://www.artstation.com/artwork/1AGwX)
 - [Madbox - Home](https://madbox.io/)
 - [Coastal World - Coastal Community Bank](https://www.coastalbank.com/coastal-world/)
-- [medford test | hirobius org | Supabase](https://supabase.com/dashboard/project/ftpehjdzbgevpqwljoft)
 - [Introduction - React Three Fiber](https://r3f.docs.pmnd.rs/getting-started/introduction)
 - [Poarch Creek Indians - Federally Recognized Tribe, Atmore Alabama](https://pci-nsn.gov/)
 - [Animated Dinosaur Bundle by Quaternius | Free download](https://poly.pizza/bundle/Animated-Dinosaur-Bundle-SmoLdBLO2K)
@@ -95,7 +93,6 @@ total: 125
 - [Anima: AI Design to Code | Figma to React | Figma to App / Website | Figma to HTML | Design to code automation](https://www.animaapp.com/)
 - [Is Figma Make ready for dev-handoff? | by Allie Paschal | UX Collective](https://uxdesign.cc/is-figma-make-ready-for-dev-handoff-9fe2594630e3)
 - [Outline To SVG](https://makertales.gumroad.com/l/O2SVG)
-- [AMEX Benefits](https://global.americanexpress.com/card-benefits/view-all?account_key=919557B9160CCBFABE5A67152B456E0C)
 - [The Heroku CLI | Heroku Dev Center](https://devcenter.heroku.com/articles/heroku-cli)
 - [Open Source Security VRP - Google Bug Hunters](https://bughunters.google.com/open-source-security)
 

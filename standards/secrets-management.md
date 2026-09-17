@@ -38,12 +38,12 @@ cross-contamination:
 
 - **One item per credential _set_** (per system) — never one mega-note.
 - **Item name:** `<Owner> — <System> — <purpose>`
-  - `Acme Co — EZLynx API`
-  - `Acme Co — Gravity Forms REST (read-only)`
+  - `Acme Co — CRM API`
+  - `Acme Co — Website forms REST (read-only)`
   - `Hirobius — GitHub PAT (packages)`
 - **Custom fields = env-var names.** Store each value in a field whose label is
   the _exact_ env-var name, so it maps 1:1 into `.env.local`:
-  - `Acme Co — EZLynx API` → `EZLYNX_API_URL`, `EZ_USER`, `EZ_PASSWORD`, `EZ_APP_SECRET`
+  - `Acme Co — CRM API` → `CRM_API_URL`, `CRM_USER`, `CRM_PASSWORD`, `CRM_APP_SECRET`
   - `Acme Co — Microsoft Graph app` → `MS_GRAPH_TENANT_ID`, `MS_GRAPH_CLIENT_ID`, `MS_GRAPH_CLIENT_SECRET`
 - **Notes field records:** which repo(s)/machine(s) it's deployed to, created
   date, last-rotated date, and the permission scope granted.
@@ -140,7 +140,7 @@ Run this per repo to fix cross-contamination that already exists:
 | Key type                 | Owner                                   | Collection            | Example                                            |
 | ------------------------ | --------------------------------------- | --------------------- | -------------------------------------------------- |
 | Your infra / tooling     | Hirobius                                | `Hirobius — Internal` | GitHub PAT, Vercel, domain, CI                     |
-| A client's systems       | That client                             | `<Client>`            | EZLynx, their M365 Graph app, their Gravity keys   |
+| A client's systems       | That client                             | `<Client>`            | their CRM, their M365 Graph app, their form keys   |
 | Shared vendor you resell | Hirobius (master) + per-client sub-keys | split                 | one master in Internal, scoped sub-keys per client |
 
 If you can't decide who owns a key, it's Internal until proven client-scoped —

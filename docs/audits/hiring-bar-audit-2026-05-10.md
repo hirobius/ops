@@ -77,7 +77,7 @@ Routes not prerendered (SPA fallback via Vercel rewrite): `/case-studies/<nonpro
 
 - **Three visible placeholder blocks** were present — dashed-border divs with literal text:
   - `"Visual placeholder — client site screenshot"` (§ Why this exists)
-  - `"Visual placeholder — Wix Harmony layout + practice card annotation"` (§ Decisions surfaced)
+  - `"Visual placeholder — layout annotation"` (§ Decisions surfaced)
   - `"Visual placeholder — delivery status table"` (§ What's live / what's pending)
 
   These would read as unfinished work to any hiring manager. **Fixed**: all three removed. The surrounding prose is sufficient to carry each section. Asset placeholders remain as HTML comments only (`{/* T2: replace with client asset */}`).

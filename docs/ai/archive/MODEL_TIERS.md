@@ -26,7 +26,7 @@ Routing by tier — not by model — keeps the assigner's logic stable as new mo
 | `hermes3:latest`        | T1 mechanical work via `scripts/hermes-unit.mjs`. Scrubs, renames, comments. Default Hermes Agent kanban orchestrator.                |
 | `qwen2.5-coder:14b-hds` | T2 component / schema / script work via `scripts/hermes-unit.mjs`. Coder-tuned.                                                       |
 
-**Privacy note:** open-local is the only tier acceptable for client data (client inboxes, client call recordings, AMS data). Auto-assigner forces tier=`open-local` whenever classifier flags `privacy: 'high'`.
+**Privacy note:** open-local is the only tier acceptable for client data (client inboxes, client call recordings, client business-system data). Auto-assigner forces tier=`open-local` whenever classifier flags `privacy: 'high'`.
 
 ### Closed · frontier (Anthropic, via Claude Code in-window subagents or `claude -p` skill)
 

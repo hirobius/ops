@@ -2,7 +2,7 @@
 pillar: _unclassified
 source: bookmarks
 date: 2026-05-02
-total: 165
+total: 156
 ---
 
 # Bookmarks — \_unclassified
@@ -13,7 +13,6 @@ total: 165
 - [Google AI Studio](https://aistudio.google.com/prompts/new_chat)
 - [ChatGPT](https://chatgpt.com/)
 - [Claude](https://claude.ai/login)
-- [Figma](https://www.figma.com/files/team/1107784138532077495/recents-and-sharing?fuid=1107784130781961084)
 - [PORTFOLIO 2026](https://swipe-quota-75373945.figma.site/)
 - [Portfolio Make](http://localhost:5178/)
 - [HDS Playground — Hirobius Design System](file:///C:/Users/Adrian/Desktop/hds-playground.html)
@@ -34,10 +33,8 @@ total: 165
 - [Kshitij Suri - Wall of Portfolios](https://www.wallofportfolios.in/portfolios/kshitij-suri/)
 - [The Future of Design Is Code and Canvas | Figma Blog](https://www.figma.com/blog/the-future-of-design-is-code-and-canvas/)
 - [Azeret Mono - Google Fonts](https://fonts.google.com/specimen/Azeret+Mono?preview.script=Latn)
-- [Stitch - Projects](https://stitch.withgoogle.com/projects/3482670911939584420?gad_source=1&gad_campaignid=23633839429&gbraid=0AAAABDBVx-_7B2MU7L_7wUC8XfAFWngc7&gclid=CjwKCAjwyYPOBhBxEiwAgpT8P-1KsNI_od8EV9ImWNrKIHEozNJ4VWxeUGquNXWbahHGO-LuGzoMGxoCUbYQAvD_BwE&pli=1)
 - [Designing a Figma Design System That AI Can Understand | by Alpesh Karanpuria | Mar, 2026 | Design Systems Collective](https://www.designsystemscollective.com/designing-a-figma-design-system-that-ai-can-understand-d4434f7601b5)
 - [Web Accessibility Color Contrast Checker - Conform to WCAG](https://accessibleweb.com/color-contrast-checker/)
-- [Adrian Milsap | LinkedIn](https://www.linkedin.com/in/adrianmilsap/)
 - [✔ Compress PDF - 100% free &amp; online - PDF24](https://tools.pdf24.org/en/compress-pdf#s=1776108033778)
 - [Figma Weave](https://app.weavy.ai/)
 - [Stitch - Docs](https://stitch.withgoogle.com/docs/design-md/format/?pli=1)
@@ -65,7 +62,6 @@ total: 165
 - [Post | Feed | LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7352394845610496001/)
 - [Home](https://www.searchwithjack.com/)
 - [Post | Feed | LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7320003653677760512/?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7320003653677760512%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29)
-- [Romina Kavcic | LinkedIn](https://www.linkedin.com/in/rominakavcic/)
 - [Post | Feed | LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7342930483615330305/?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7342930483615330305%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29)
 - [Post | Feed | LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7366840498143051777/?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7366840498143051777%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29)
 - [Post | Feed | LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7381330182722408448/?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7381330182722408448%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29)
@@ -93,8 +89,6 @@ total: 165
 - [Airtable - Superhuman AI](https://airtable.com/apppaprA2GXXxBSjs/shrjsPiubnIHIqTwH/tblCm6yevfjitvoCh/viwKzKHKKqd5d5bk8?utm_source=superhuman&utm_medium=referral&utm_campaign=interpreter-ai-that-manages-your-documents-even-offline&_bhlid=365eb63a376048faac25cb1a126956f2ec0c40a9)
 - [Higgsfield AI: Infrastructure for AI Video &amp; Image Gen](https://higgsfield.ai/)
 - [Pricing • Paper](https://paper.design/pricing)
-- [My First Project | MagicPath](https://www.magicpath.ai/files/399578714096144384)
-- [Welcome to Paper · Paper](https://app.paper.design/file/01KQ82N9A7ZH2P057W5NXG2S0N/01K4GP58P8JRM8PGBP0586VKYV)
 - [Post | LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7454826645498228736/)
 - [Mono Studio · Adrian Z.](https://azumbrunnen.me/mono.html)
 - [12 Designers’ Portfolios that will make you jealous | by Deep Adalja | Bootcamp | Medium](https://medium.com/design-bootcamp/12-designers-portfolios-that-will-make-you-jealous-5e5d5dbb7626)
@@ -126,7 +120,6 @@ total: 165
 - [(5) NVIDIA Just Solved AI&#39;s Biggest Problem - YouTube](https://www.youtube.com/watch?v=0vyMp_yjEJM)
 - [(5) Hermes: This Free AI SEO Super Agent is Insane - YouTube](https://www.youtube.com/watch?v=9GxvfazA-Bg)
 - [(5) Sneak Peak of future AI coding workflow - Ship 5x more PRs already - YouTube](https://www.youtube.com/watch?v=M_AmPWmkpwA)
-- [App Engine – App Engine – youtube-breakdowns – Google Cloud console](https://console.cloud.google.com/appengine/start?project=youtube-breakdowns-489817)
 
 ## Favorites bar
 
@@ -134,8 +127,6 @@ total: 165
 - [Google AI Studio](https://aistudio.google.com/)
 - [ChatGPT](https://chatgpt.com/?openaicom_referred=true)
 - [Google Gemini](https://gemini.google.com/app)
-- [Adrian Milsap admin](https://cargocollective.com/adrianmilsap/admin)
-- [Folio](https://www.figma.com/design/2WluO62zjanBiSNG9j6WzY/Folio-Presentation?node-id=2-2&p=f&t=uQZ8F31VdTH3Zx4o-0)
 - [Admin](https://account.squarespace.com/)
 - [Bookmarks](chrome://bookmarks/)
 

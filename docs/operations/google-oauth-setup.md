@@ -28,16 +28,16 @@ OPENAI_API_KEY=
 
 ### 1. Enable APIs in Google Cloud Console
 
-Project to use: `youtube-breakdowns-489817` (already exists)
+Project to use: the existing YouTube-breakdowns project (select it in the console's project picker first; the links below open in whichever project is selected)
 
 Enable both of these:
 
-- https://console.cloud.google.com/apis/library/gmail.googleapis.com?project=youtube-breakdowns-489817
-- https://console.cloud.google.com/apis/library/drive.googleapis.com?project=youtube-breakdowns-489817
+- https://console.cloud.google.com/apis/library/gmail.googleapis.com
+- https://console.cloud.google.com/apis/library/drive.googleapis.com
 
 ### 2. Create OAuth 2.0 credentials
 
-Go to: https://console.cloud.google.com/apis/credentials?project=youtube-breakdowns-489817
+Go to: https://console.cloud.google.com/apis/credentials
 
 - **Create Credentials → OAuth 2.0 Client ID**
 - Application type: **Desktop app**

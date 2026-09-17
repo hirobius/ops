@@ -15,6 +15,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { readLocalClientConfig } from './lib/local-client-config.mjs';
+import { isPrivateBookmarkUrl } from './lib/private-bookmark-filter.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'docs/knowledge');
@@ -174,6 +175,9 @@ function parseBookmarkHtml(html, source) {
 
     const [, url, title] = a;
     if (!url || url.startsWith('javascript:')) continue;
+    // Admin consoles, private files and identifier-bearing links stay out of
+    // the tracked exports (ops#27).
+    if (isPrivateBookmarkUrl(url)) continue;
 
     const folderPath = folderStack.join(' > ');
     const pillar = classifyFolder(folderPath || title);

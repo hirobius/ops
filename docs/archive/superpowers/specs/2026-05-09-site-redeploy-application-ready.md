@@ -172,16 +172,16 @@ This page is **kept accessible at `/case-studies/hirobius`** so Adrian can link 
 
 **Story arc:**
 
-1. Hook — nonprofit client, board role, multi-year ongoing engagement
-2. Scope — what the engagement actually covers (site, Google Workspace, tech strategy, board role)
-3. Constraint — Wix + AI editor constraint (not a from-scratch React build), volunteer photographers, nonprofit compliance, donation platform verification
-4. Design decisions surfaced — Harmony layout adopted, "wellness practices" naming, three-item nav, descriptive-naming-for-SEO, photo-volunteer process
+1. Hook — nonprofit client
+2. Scope — what the engagement actually covers
+3. Constraint — the platform, resourcing and compliance constraints
+4. Design decisions surfaced — layout, navigation and naming decisions
 5. Outcomes — current state of site rebuild, what's live, what's pending
-6. Reflection — what working with a mission-driven nonprofit teaches about design systems thinking
+6. Reflection — what the engagement teaches about design systems thinking
 
-**Format:** mirror the Hirobius case study's tightened structure (~400-line target). Image-led where assets exist; text-only where they don't (with notes that photography is in progress — that's part of the story).
+**Format:** mirror the Hirobius case study's tightened structure (~400-line target). Image-led where assets exist; text-only where they don't.
 
-**Asset gap:** unknown what visual assets exist for the nonprofit. Default (§7 D3): ship structural draft with placeholder slots, fill real assets in T2 — don't block T1 deploy on photography.
+**Asset gap:** unknown what visual assets exist for the nonprofit. Default (§7 D3): ship structural draft with placeholder slots, fill real assets in T2 — don't block T1 deploy on assets.
 
 **Owner:** sonnet, single agent (full creative discretion within structure above).
 

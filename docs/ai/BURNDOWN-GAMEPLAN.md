@@ -153,7 +153,7 @@ Well-scoped, low-risk. Promote in small batches (add a DoD checklist first to av
 **Phase 0 — now, autonomous (no you needed):** let the `ralph-auto` pool drain; recover parks; keep
 CI green. The watchdog backstops. _(Running tonight.)_
 
-**Phase 1 — Revenue (Access Tech = first paying client):**
+**Phase 1 — Revenue (first paying client):**
 
 1. Send the prospect the reinstatement email (drafted locally).
 2. On his reply: finalize the services agreement (needs his legal business name) + file the Google

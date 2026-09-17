@@ -25,16 +25,16 @@ describe('draftCaseStudy', () => {
   it('extracts headings (## Context, ## Problem, …) when present', () => {
     const text = [
       '## Context',
-      'Insurance agency, solo founder, manual processes.',
+      'Local service business, small team, manual processes.',
       '',
       '## Problem',
       'Spending 6h/wk on inbox triage.',
       '',
       '## Approach',
-      'Built classifier + Graph rules.',
+      'Built classifier + routing rules.',
     ].join('\n');
     const r = draftCaseStudy({ slug: 'acme', text });
-    expect(r.context).toContain('solo founder');
+    expect(r.context).toContain('small team');
     expect(r.problem).toContain('6h/wk');
     expect(r.approach).toContain('classifier');
     expect(r.outcome).toBe(''); // not present in input
