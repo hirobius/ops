@@ -61,6 +61,7 @@ import {
   SECRETS_URL,
   formatFindingLine,
   isFailing,
+  plainAnnotation,
   redactPath,
   summaryMarkdown,
   toAnnotation,
@@ -129,6 +130,11 @@ function parseArgs(argv) {
     }
   }
   if (process.env.HDS_FIXTURE_MODE === '1') opts.fixture = true;
+  if (opts.json && opts.github) {
+    throw new UsageError(
+      '--json and --github cannot be combined: annotations would corrupt the JSON on stdout.',
+    );
+  }
   return opts;
 }
 
@@ -169,17 +175,29 @@ function git(args, { cwd, env } = {}) {
   }
 }
 
+/** A git query whose failure just means "no": trimmed stdout, or null. */
+function gitOrNull(args) {
+  try {
+    return execFileSync('git', args, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+
 function splitNul(text) {
   return text.split('\0').filter(Boolean);
 }
 
 // ── Scan targets ─────────────────────────────────────────────────────────────
 //
-// A target is { label, units, paths, warning? }.
-//   unit  { path, text, firstLine, inRepoFile, prefix? } — text to scan; `path`
-//         drives the generic-pattern exemptions, `prefix` (another repo's
-//         name) is prepended for display, `inRepoFile` allows file annotations
-//   paths file paths checked against the denylist themselves
+// A target is { label, units, paths, prefix?, warning? }.
+//   units  { path, text, firstLine, inRepoFile } — text to scan; `path` drives
+//          the generic-pattern exemptions, `inRepoFile` allows file annotations
+//   paths  file paths checked against the denylist themselves
+//   prefix another repo's label, prepended to every displayed location
 
 function fileUnits(addedFiles) {
   return addedFiles.flatMap((f) =>
@@ -198,15 +216,7 @@ const stagedPaths = (...revs) =>
  */
 function stagedTarget() {
   const againstHead = git([...DIFF_FLAGS, '--cached']);
-  let mergeHead = null;
-  try {
-    mergeHead = execFileSync('git', ['rev-parse', '-q', '--verify', 'MERGE_HEAD^{commit}'], {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-  } catch {
-    // not merging
-  }
+  const mergeHead = gitOrNull(['rev-parse', '-q', '--verify', 'MERGE_HEAD^{commit}']);
   if (!mergeHead) {
     return {
       label: 'staged changes',
@@ -263,20 +273,12 @@ function githubEventRange() {
   } catch (err) {
     throw new UsageError(`cannot read the event payload: ${err.message}`);
   }
-  const succeeds = (args) => {
-    try {
-      execFileSync('git', args, { stdio: 'ignore' });
-      return true;
-    } catch {
-      return false;
-    }
-  };
   try {
     return resolveEventRange({
       eventName: process.env.GITHUB_EVENT_NAME,
       payload,
-      commitExists: (sha) => succeeds(['cat-file', '-e', `${sha}^{commit}`]),
-      hasParent: (sha) => succeeds(['rev-parse', '--verify', '--quiet', `${sha}^1`]),
+      commitExists: (sha) => gitOrNull(['cat-file', '-e', `${sha}^{commit}`]) !== null,
+      hasParent: (sha) => gitOrNull(['rev-parse', '--verify', '--quiet', `${sha}^1`]) !== null,
     });
   } catch (err) {
     throw new UsageError(err.message);
@@ -463,9 +465,7 @@ function report({ target, findings, denylist, opts }) {
 
   if (opts.github) {
     for (const notice of notices) {
-      process.stdout.write(
-        `::warning title=${notice.title}::${notice.text.replace(/\r?\n/g, ' ')}\n`,
-      );
+      process.stdout.write(`${plainAnnotation('warning', notice.title, notice.text)}\n`);
     }
     for (const f of findings) {
       process.stdout.write(`${toAnnotation(f, { inRepoFile: f.inRepoFile && f.line != null })}\n`);
@@ -541,19 +541,8 @@ function readIfExists(path) {
  * `.pii-denylist` kept there. null outside a git repository.
  */
 function mainCheckoutRoot() {
-  try {
-    const common = execFileSync(
-      'git',
-      ['rev-parse', '--path-format=absolute', '--git-common-dir'],
-      {
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'ignore'],
-      },
-    ).trim();
-    return common ? dirname(common) : null;
-  } catch {
-    return null;
-  }
+  const common = gitOrNull(['rev-parse', '--path-format=absolute', '--git-common-dir']);
+  return common ? dirname(common) : null;
 }
 
 function selectTarget(opts) {
@@ -598,7 +587,9 @@ function main() {
     if (err instanceof UsageError) {
       const msg = `check-pii: ${err.message}`;
       process.stderr.write(`${msg}\n`);
-      if (opts?.github) process.stdout.write(`::error title=PII scan could not run::${msg}\n`);
+      if (opts?.github) {
+        process.stdout.write(`${plainAnnotation('error', 'PII scan could not run', msg)}\n`);
+      }
       return 2;
     }
     throw err;

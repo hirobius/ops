@@ -49,6 +49,18 @@ describe('loadDenylist', () => {
     ]);
   });
 
+  it('does not double-report an entry present in both the variable and the file', () => {
+    const loaded = loadDenylist({
+      env: { PII_DENYLIST: 'example client co' },
+      roots: [root],
+      readFile: fileAt('# same list\nExample Client Co\njane\\s+example'),
+    });
+    expect(loaded.entries.map((e) => `${e.source}:${e.index}`)).toEqual([
+      'PII_DENYLIST:1',
+      '.pii-denylist:3',
+    ]);
+  });
+
   it('treats an empty variable (an unset Actions secret) as absent', () => {
     const loaded = loadDenylist({
       env: { PII_DENYLIST: '  \n' },

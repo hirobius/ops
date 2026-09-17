@@ -12,6 +12,10 @@ import { spawnSync } from 'node:child_process';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const SCRIPT = join(ROOT, 'scripts', 'check-pii.mjs');
 
+// Each test spawns several git and node processes. The 5 s default flakes when
+// .husky/pre-push runs the whole suite in parallel on a loaded Windows machine.
+const GIT_TEST_TIMEOUT_MS = 30_000;
+
 let cleanup = [];
 afterEach(() => {
   for (const dir of cleanup) rmSync(dir, { recursive: true, force: true });
@@ -73,7 +77,7 @@ function runCli(cwd, args = [], env = {}) {
   });
 }
 
-describe('check-pii — proof-of-firing fixtures', () => {
+describe('check-pii — proof-of-firing fixtures', { timeout: GIT_TEST_TIMEOUT_MS }, () => {
   const fixture = (name) => join(ROOT, 'fixtures', 'check-pii', `${name}.example.json`);
 
   it('fires on the violating fixture using only its synthetic denylist', () => {
@@ -93,7 +97,7 @@ describe('check-pii — proof-of-firing fixtures', () => {
   });
 });
 
-describe('check-pii — commit ranges (CI)', () => {
+describe('check-pii — commit ranges (CI)', { timeout: GIT_TEST_TIMEOUT_MS }, () => {
   function branchWithTwoCommits() {
     const repo = scratchRepo();
     repo.write('README.md', 'base\n');
@@ -161,7 +165,7 @@ describe('check-pii — commit ranges (CI)', () => {
   });
 });
 
-describe('check-pii — weekly targets', () => {
+describe('check-pii — weekly targets', { timeout: GIT_TEST_TIMEOUT_MS }, () => {
   function emptyDir() {
     const dir = mkdtempSync(join(tmpdir(), 'check-pii-cwd-'));
     cleanup.push(dir);
@@ -219,6 +223,12 @@ describe('check-pii — weekly targets', () => {
     expect(result.stdout).toMatch(/warn\s+hirobius\/ops#12 body:1:6\s+email/);
   });
 
+  it('refuses --json with --github, which would mix annotations into the JSON on stdout', () => {
+    const result = runCli(emptyDir(), ['--json', '--github', '--records', 'x.json']);
+    expect(result.status).toBe(2);
+    expect(result.stderr).toMatch(/--json and --github cannot be combined/);
+  });
+
   it('rejects a records file that is not a list of { location, text }', () => {
     const dir = emptyDir();
     const records = join(dir, 'records.json');
@@ -229,7 +239,7 @@ describe('check-pii — weekly targets', () => {
   });
 });
 
-describe('check-pii — staged changes (pre-commit)', () => {
+describe('check-pii — staged changes (pre-commit)', { timeout: GIT_TEST_TIMEOUT_MS }, () => {
   it('blocks a staged denylist term, printing its location but never the term', () => {
     const repo = scratchRepo();
     repo.write('.pii-denylist', '# synthetic\njane\\s+example\n');
