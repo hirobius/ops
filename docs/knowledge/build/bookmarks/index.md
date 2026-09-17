@@ -2,7 +2,7 @@
 pillar: build
 source: bookmarks
 date: 2026-05-02
-total: 701
+total: 684
 ---
 
 # Bookmarks — build
@@ -201,8 +201,6 @@ total: 701
 
 ## Favorites bar > Job Hunt > Portfolio Inspirations
 
-- [▶ Nick McVey&#39;s Portfolio - Nick McVey Portfolio](https://www.figma.com/proto/bjrAKS8tv2x3oR8GGJkBTg/Nick-McVey-Portfolio?page-id=0%3A1&node-id=56-18157&starting-point-node-id=19%3A696)
-- [Nick McVey Portfolio – Figma](https://www.figma.com/file/bjrAKS8tv2x3oR8GGJkBTg/Nick-McVey-Portfolio?node-id=19-161&t=X4e91bSmJVOBirw8-0)
 - [The Essential Guide to a Stellar Design Portfolio | by Nick Babich | Springboard](https://medium.springboard.com/the-essential-guide-to-a-stellar-design-portfolio-1913df89ada7)
 - [Senior Product Designer - REMOTE in Boston, MA | Liberty Mutual Insurance](https://jobs.libertymutualgroup.com/job/18047635/senior-product-designer-remote-boston-ma/?mode=job&iis=Job+Board&iisn=Appcast&extcmp=bof-paid-text-apca-tech&iieid=45181657205)
 - [Design jobs in 98043, Washington | Jobs2Careers](https://www.jobs2careers.com/search/results?q=Design&l=98043%2C%20Washington&distance=48)
@@ -265,13 +263,7 @@ total: 701
 
 - [tailwind.config.js - Repos](https://microsoft.visualstudio.com/Xbox/_git/Xbox.CPE.DeveloperEcosystem.MGD.AEM?path=/ui.frontend/tailwind.config.js)
 - [XDS.Tokens - Repos](https://microsoft.visualstudio.com/Gaming.React/_git/XDS.Tokens)
-- [Icons - GamingDesign - _XboxFluent.pdf - All Documents](https://microsoft.sharepoint.com/teams/GamingDesign/Shared%20Documents/Forms/AllItems.aspx?ct=1674252966581&or=Teams%2DHL&ga=1&id=%2Fteams%2FGamingDesign%2FShared%20Documents%2FProduct%2F%5Fresources%2Ffonts%2FXbox%5FFluent%2Fv1%2E023%2F%5FXboxFluent%2Epdf&viewid=5421e9fd%2Ddc20%2D4c4c%2Da9bb%2D71484a5872fb&parent=%2Fteams%2FGamingDesign%2FShared%20Documents%2FProduct%2F%5Fresources%2Ffonts%2FXbox%5FFluent%2Fv1%2E023)
-- [Type Guidelines](https://microsoft.sharepoint.com/teams/BrandCentral/Pages/Bundles/Segoe_UI_fonts.aspx)
-- [Microsoft_type_guidelines.pdf](https://microsoft.sharepoint.com/teams/BrandCentral/Guidelines/Microsoft_type_guidelines.pdf)
 - [gaussianblur - CSS-only Acrylic Material from Fluent Design System - Stack Overflow](https://stackoverflow.com/questions/44522299/css-only-acrylic-material-from-fluent-design-system/57417852#57417852)
-- [Fonts XDS](https://microsoft.sharepoint.com/teams/GamingDesign/Shared%20Documents/Forms/AllItems.aspx?id=%2Fteams%2FGamingDesign%2FShared%20Documents%2FProduct%2F%5Fresources%2Ffonts&p=true&ct=1678148990815&or=Teams%2DHL&ga=1)
-- [XDS Component Prioritization Spreadsheet](https://microsoft.sharepoint.com/:x:/t/xboxdesigndev/Eeh4svRYRJ9NnVn-bEkF6wgBPI08Hw1Qu8SPVjB5ufo4BQ?e=Dk5Yur)
-- [GamingDesign - Variable - All Documents](https://microsoft.sharepoint.com/teams/GamingDesign/Shared%20Documents/Forms/AllItems.aspx?ct=1687453059844&or=Teams-HL&ga=1&LOF=1&OR=Teams-HL&CT=1692305365849&clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiIyOC8yMzA3MTMyNzExNiJ9&id=%2Fteams%2FGamingDesign%2FShared%20Documents%2FProduct%2F_resources%2Ffonts%2FSegoeUI_Variable%2Fv2%2E03%2FVariable&viewid=5421e9fd-dc20-4c4c-a9bb-71484a5872fb)
 
 ## Favorites bar > 3D > Learning > Articulation
 
@@ -343,7 +335,6 @@ total: 701
 - [Naming Tokens in Design Systems. Terms, Types, and Taxonomy to Describe… | by Nathan Curtis | EightShapes | Medium](https://medium.com/eightshapes-llc/naming-tokens-in-design-systems-9e86c7444676)
 - [pixellab.ai/docs/tools/rotate](https://www.pixellab.ai/docs/tools/rotate)
 - [Auto Documentation – Figma](https://www.figma.com/community/plugin/1134018716847999330/auto-documentation)
-- [150+ UX Design Systems - Google Sheets](https://docs.google.com/spreadsheets/d/1b8DtLFFIXIRz_e7bjBtRL2vFuqIBMCNPdIsLaDs8RME/edit?pli=1&gid=0#gid=0)
 - [Design System Hub | Figma](https://www.figma.com/community/plugin/1324752802910575903/design-system-hub)
 - [Iconic — Free “do wtf you want with” pixel-perfect icons](https://iconic.app/)
 - [(1) Sync Variables to GitHub - YouTube](https://www.youtube.com/watch?v=KA2WwX7qlYA)
@@ -505,7 +496,6 @@ total: 701
 - [Local sales &amp; use tax | Washington Department of Revenue](https://dor.wa.gov/taxes-rates/sales-use-tax-rates/local-sales-use-tax)
 - [Google Workspace Help](https://apps.google.com/supportwidget/articlehome?hl=en&article_url=https%3A%2F%2Fsupport.google.com%2Fa%2Fanswer%2F9400082%3Fhl%3Den&assistant_id=generic-unu&product_context=9400082&product_name=UnuFlow&trigger_context=a)
 - [Volunteers - BUILD](https://build.org/volunteers/)
-- [SEAP REii - Google Drive](https://drive.google.com/drive/folders/1Nss0YLTkEd1Pyu2-0F2VvQjUICNuVodQ)
 - [Starting over – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/205815378-Starting-over)
 - [Setting up automatic tax rates in the US – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/360053592211-Setting-up-automatic-tax-rates-in-the-US?platform=v6&websiteId=6362d6a9fd7cef74122e6d2a)
 
@@ -599,7 +589,6 @@ total: 701
 
 - [Data Axle](https://www.referenceusa.com/Account/LogOn?ReturnUrl=%2fUsBusiness%2fDetail%2fTagged%2f9ef1ef016541495285c6616fdd3c37e2%3frecordId%3d771258058&recordId=771258058)
 - [Best Squarespace Websites (2025): 60+ Inspiring Examples](https://www.sparkplugin.com/blog/best-squarespace-websites?utm_source=googleads&gad_source=1&gclid=Cj0KCQiAqL28BhCrARIsACYJvkf3mfyESruAlkXw-IC79KK5vwcUXjq5CeqgtYilBO6ePAtjXf4b9Y8aAhQfEALw_wcB)
-- [Target Audience Personas / Avatars - Google Docs](https://docs.google.com/document/d/1ZfrlXG-KItthwyThRrtUNx4sXLFZvPGnnuNLR6gz5eM/edit?tab=t.0)
 - [Domain Overview Tool: Discover PPC and SEO Insights: mightyjaxx.com](https://www.spyfu.com/overview/domain?query=mightyjaxx.com)
 - [free website adspend tool - Google Search](https://www.google.com/search?q=free+website+adspend+tool&sca_esv=2486b9a4b840a925&rlz=1C5CHFA_enUS890US892&ei=ogiQZ4rdDePw0PEPooeBoQM&start=10&sa=N&sstk=ATObxK7xzMkI9r3HDw-4nBlKUcOzBxLk7tOuerspq6W93IfzBWRrWMoQP98JUHGu87ICTLOXSG0nVllROTwgUpge4exXrxF-yZRmJA&ved=2ahUKEwiKtvW92IeLAxVjODQIHaJDIDQQ8NMDegQIJBAW&biw=1440&bih=756&dpr=2)
 - [Bum Vase Handmade Ceramic Body Vase Unique Female Form Decor Modern Boho Vase for Dried Flowers Fun Home Decor Gift Artistic State - Etsy](https://www.etsy.com/listing/1554244955/bum-vase-handmade-ceramic-body-vase?gpla=1&gao=1&)
@@ -739,7 +728,6 @@ total: 701
 
 ## Favorites bar > Hirobius > Operations
 
-- [Hirobius LLC Business Plan.docx - Google Docs](https://docs.google.com/document/d/145MurpNTnD-Wd9W1EQPL9XFGeWRMjLSs/edit)
 - [Google AI for Customer Service with Gemini for Workspace](https://workspace.google.com/solutions/ai/customer-service/)
 - [Label Google Drive files automatically using AI classification - Google Workspace Admin Help](https://support.google.com/a/answer/12676216)
 - [Add or delete an alternate email address (email alias) - Google Workspace Admin Help](https://support.google.com/a/answer/33327?hl=en&src=supportwidget0&authuser=0)
@@ -775,16 +763,13 @@ total: 701
 - [Hirobius®](https://decagon-oboe-nkg9.squarespace.com/config/settings/selling/checkout)
 - [Black Connect on Building Opportunities for Black Business Owners – Squarespace](https://www.squarespace.com/blog/black-connect-entrepreneurship)
 - [Black Entrepreneurship — Web Design &amp; Business Tips from Making It – Squarespace](https://www.squarespace.com/blog/tag/black-entrepreneurship)
-- [Project Inquiry — Adam Ho](https://docs.google.com/forms/d/e/1FAIpQLSef9cx3DwhcrFGroCbpEQaLSJuiJ3MwUOD9WA9aoTCN4ARsLQ/viewform)
 - [(1) A Plan Is Not a Strategy - YouTube](https://www.youtube.com/watch?v=iuYlGRnC7J8)
 - [Creating a promotional pop-up – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/115008375848-Creating-a-promotional-pop-up)
-- [Copy of Squarespace Prelaunch Checklist TEMPLATE - Google Docs](https://docs.google.com/document/d/1E12dQcHvfi1HGFOqpHFMJSKRMkMzMX7B6w714FpyoAI/edit?tab=t.0#heading=h.iar200nyocgi)
 - [Auto-Updating Website Policies - Privacy Policy Generator](https://termageddon.com/)
 - [Find Target market](https://www.shopify.com/blog/product-opportunities?syclid=cu3dhh3mb5es73e2dbqg&utm_campaign=ss_gro_blog_20250114_themedweekly&utm_medium=email&utm_source=mozart&utm_term=module1_CTA)
 - [What Is a Target Market and How Do You Find Yours? (2023) - Shopify](https://www.shopify.com/blog/target-market)
 - [Brand Positioning - Position Your Brand as Go-to Choice - Shopify](https://www.shopify.com/first-sale/brand-positioning-analysis?utm_campaign=First_Day_to_First_Sale&utm_source=blog)
 - [Explore 1% for the Planet Membership | Business Climate Activism &amp; ESG Giving Solution](https://www.onepercentfortheplanet.org/membership)
-- [Copy of Squarespace Prelaunch Checklist TEMPLATE - Google Docs](https://docs.google.com/document/d/1E12dQcHvfi1HGFOqpHFMJSKRMkMzMX7B6w714FpyoAI/edit?tab=t.0)
 - [Using TaxJar with Squarespace – Squarespace Help Center](https://support.squarespace.com/hc/en-us/articles/360062100212-Using-TaxJar-with-Squarespace)
 - [Squarespace getting started - TaxJar Support](https://support.taxjar.com/article/348-squarespace-getting-started)
 
@@ -811,7 +796,6 @@ total: 701
 
 - [Independent Contractors](https://lni.wa.gov/insurance/insurance-requirements/independent-contractors/)
 - [Annual Reports | WA Secretary of State](https://www.sos.wa.gov/corporations-charities/frequently-asked-questions-faqs/annual-reports)
-- [💼 Legal - Google Docs](https://docs.google.com/document/d/1oM82_kb9-T6I0UvrvDPjfCmTzet-WheZudzW3HwWXiw/edit?tab=t.0)
 
 ## Favorites bar > Hirobius > Claude Knowledge Base
 

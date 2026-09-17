@@ -2,7 +2,7 @@
 pillar: run
 source: bookmarks
 date: 2026-05-02
-total: 126
+total: 125
 ---
 
 # Bookmarks — run
@@ -43,7 +43,7 @@ total: 126
 - [Paper Planes](https://paperplanes.world/)
 - [85 GSAP.js Examples | FreeFrontend](https://freefrontend.com/gsap-js/)
 - [GSAP | Docs &amp; Learning](https://gsap.com/cheatsheet)
-- [____________________🚗](https://bruno-simon.com/)
+- [********\_\_\_\_********🚗](https://bruno-simon.com/)
 - [Jackalope Productions](https://github.com/Jackalope-Productions?view_as=member)
 - [three.js examples](https://threejs.org/examples/#webgl_animation_walk)
 - [ArtStation - 80.lv - Tips on Creating Stylised 3D Content](https://www.artstation.com/artwork/1AGwX)
@@ -69,7 +69,6 @@ total: 126
 - [Billing Information ・ Render Dashboard](https://dashboard.render.com/billing)
 - [Stylized Cartoon Shader In THREE.JS ( Full Explanation ) - YouTube](https://www.youtube.com/watch?v=V5UllFImvoE&t=584s)
 - [(1) Build Epic Startups: NotebookLM + Gemini 2.5 Workflow - YouTube](https://www.youtube.com/watch?v=XN02F9ikYHI)
-- [Blazing Zebra - Patreon Guide - Google Sheets](https://docs.google.com/spreadsheets/d/1g9wRYLjsqPbMw53wcOU9PWFB-ze6zXv_J_ABz1U1IeQ/edit?gid=1552926236#gid=1552926236)
 - [Static.run: Free Hosting for Static Websites, Code and More.](https://static.run/)
 - [Gamma | Best AI Presentation Maker &amp; Website Builder](https://gamma.app/)
 - [Enhanced 3D Environment | Figma](https://www.figma.com/community/file/1530419781266759043)

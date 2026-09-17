@@ -14,14 +14,15 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { readLocalClientConfig } from './lib/local-client-config.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OUT  = path.join(ROOT, 'docs/knowledge');
+const OUT = path.join(ROOT, 'docs/knowledge');
 
-const argv    = process.argv.slice(2);
+const argv = process.argv.slice(2);
 const DRY_RUN = argv.includes('--dry-run');
 const fileIdx = argv.indexOf('--file');
-const SINGLE  = fileIdx !== -1 ? argv[fileIdx + 1] : null;
+const SINGLE = fileIdx !== -1 ? argv[fileIdx + 1] : null;
 
 // ── Pillar classification map ─────────────────────────────────────────────────
 // Folder name (lowercase) → pillar. First match wins.
@@ -29,42 +30,118 @@ const SINGLE  = fileIdx !== -1 ? argv[fileIdx + 1] : null;
 const PILLAR_MAP = {
   // BUILD — what Adrian makes
   build: [
-    'design system', 'design system samples', 'xds', 'hirobius', 'folio',
-    'illustration', 'ui', '3d', 'motion', 'blender', 'three.js', 'three js',
-    'animation libraries', 'vibe coding', 'touch controls', 'shader techniques',
-    'avatars', 'component', 'figma', 'storybook', 'hds',
+    'design system',
+    'design system samples',
+    'xds',
+    'hirobius',
+    'folio',
+    'illustration',
+    'ui',
+    '3d',
+    'motion',
+    'blender',
+    'three.js',
+    'three js',
+    'animation libraries',
+    'vibe coding',
+    'touch controls',
+    'shader techniques',
+    'avatars',
+    'component',
+    'figma',
+    'storybook',
+    'hds',
   ],
   // GROW — what makes the business bigger
   grow: [
-    'portfolio inspo', 'portfolio inspirations', 'branding', 'marketing', 'seo',
-    'funding', 'sales', 'job hunt', 'shops', 'stores', 'launch optimizations',
-    'linkedin', 'youtube', 'content', 'social', 'audience', 'email',
+    'portfolio inspo',
+    'portfolio inspirations',
+    'branding',
+    'marketing',
+    'seo',
+    'funding',
+    'sales',
+    'job hunt',
+    'shops',
+    'stores',
+    'launch optimizations',
+    'linkedin',
+    'youtube',
+    'content',
+    'social',
+    'audience',
+    'email',
   ],
   // RUN — what keeps it working
   run: [
-    'systems', 'automations', 'ai refs', 'ai', 'toolbox', 'claude',
-    'prompting', 'legal', 'operations', 'analytics', 'research', 'prototypes',
-    'tasks', 'ado', 'articulation', 'user research', 'helpful links',
-    'tools', 'productivity', 'automation', 'infrastructure', 'devops',
+    'systems',
+    'automations',
+    'ai refs',
+    'ai',
+    'toolbox',
+    'claude',
+    'prompting',
+    'legal',
+    'operations',
+    'analytics',
+    'research',
+    'prototypes',
+    'tasks',
+    'ado',
+    'articulation',
+    'user research',
+    'helpful links',
+    'tools',
+    'productivity',
+    'automation',
+    'infrastructure',
+    'devops',
   ],
   // Concrete Creations (sub-bucket of BUILD)
   'build/concrete-creations': [
-    'inventory', 'production options', 'fulfillment', 'sustainability',
-    'trademark', 'print settings', 'taxes', 'concrete', 'ranch',
+    'inventory',
+    'production options',
+    'fulfillment',
+    'sustainability',
+    'trademark',
+    'print settings',
+    'taxes',
+    'concrete',
   ],
   // Skip — personal / old job / irrelevant
   _skip: [
-    'xbox', 'games', 'gifs', 'mgd', 'google interview', 'aem', 'key decks',
-    'meeting recordings', 'onboarding', 'steam', 'tab collections',
-    'shopping list', 'shopping', 'new folder', 'inspo', 'character refs',
+    'xbox',
+    'games',
+    'gifs',
+    'mgd',
+    'google interview',
+    'aem',
+    'key decks',
+    'meeting recordings',
+    'onboarding',
+    'steam',
+    'tab collections',
+    'shopping list',
+    'shopping',
+    'new folder',
+    'inspo',
+    'character refs',
   ],
 };
 
+// Client-named bookmark folders are matched from the gitignored clients/local.json
+// ("bookmarkPillarKeywords": { "<pillar>": ["folder keyword", …] }) so client names
+// never sit in tracked code (ops#27). Local keywords are checked first.
+const LOCAL_PILLAR_KEYWORDS = readLocalClientConfig(ROOT).bookmarkPillarKeywords ?? {};
+
 function classifyFolder(folderPath) {
   const lower = folderPath.toLowerCase();
-  for (const [pillar, keywords] of Object.entries(PILLAR_MAP)) {
+  for (const [pillar, keywords] of [
+    ...Object.entries(LOCAL_PILLAR_KEYWORDS),
+    ...Object.entries(PILLAR_MAP),
+  ]) {
     for (const kw of keywords) {
-      if (lower.includes(kw)) return pillar;
+      if (lower.includes(kw.toLowerCase())) return pillar;
     }
   }
   return '_unclassified';
@@ -80,10 +157,16 @@ function parseBookmarkHtml(html, source) {
   for (const line of html.split('\n')) {
     // Folder open
     const h3 = line.match(/<H3[^>]*>([^<]+)<\/H3>/i);
-    if (h3) { folderStack.push(h3[1].trim()); continue; }
+    if (h3) {
+      folderStack.push(h3[1].trim());
+      continue;
+    }
 
     // Folder close (simplistic — works for standard Netscape bookmark format)
-    if (line.includes('</DL>')) { folderStack.pop(); continue; }
+    if (line.includes('</DL>')) {
+      folderStack.pop();
+      continue;
+    }
 
     // Bookmark link
     const a = line.match(/<A HREF="([^"]+)"[^>]*>([^<]*)<\/A>/i);
@@ -159,20 +242,22 @@ function writeKnowledge(bookmarks) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 const DEFAULT_FILES = [
-  { file: '/mnt/c/Users/Adrian/Desktop/bookmarks_5_2_26.html',  source: 'chrome'  },
-  { file: '/mnt/c/Users/Adrian/Desktop/favorites_5_2_26.html', source: 'edge'    },
+  { file: '/mnt/c/Users/Adrian/Desktop/bookmarks_5_2_26.html', source: 'chrome' },
+  { file: '/mnt/c/Users/Adrian/Desktop/favorites_5_2_26.html', source: 'edge' },
 ];
 
 const filesToProcess = SINGLE
   ? [{ file: SINGLE, source: path.basename(SINGLE) }]
-  : DEFAULT_FILES.filter(f => fs.existsSync(f.file));
+  : DEFAULT_FILES.filter((f) => fs.existsSync(f.file));
 
 if (filesToProcess.length === 0) {
   console.error('No bookmark files found. Use --file <path> or place exports at default paths.');
   process.exit(1);
 }
 
-console.log(`[bookmarks] Processing ${filesToProcess.length} file(s)${DRY_RUN ? ' (dry run)' : ''}...`);
+console.log(
+  `[bookmarks] Processing ${filesToProcess.length} file(s)${DRY_RUN ? ' (dry run)' : ''}...`,
+);
 
 let all = [];
 for (const { file, source } of filesToProcess) {
@@ -184,14 +269,20 @@ for (const { file, source } of filesToProcess) {
 
 // Deduplicate by URL
 const seen = new Set();
-all = all.filter(b => { if (seen.has(b.url)) return false; seen.add(b.url); return true; });
+all = all.filter((b) => {
+  if (seen.has(b.url)) return false;
+  seen.add(b.url);
+  return true;
+});
 console.log(`\n[bookmarks] ${all.length} unique bookmarks after dedup`);
 
 // Stats
 const stats = {};
-for (const b of all) { stats[b.pillar] = (stats[b.pillar] || 0) + 1; }
+for (const b of all) {
+  stats[b.pillar] = (stats[b.pillar] || 0) + 1;
+}
 console.log('\n[bookmarks] Pillar breakdown:');
-for (const [p, n] of Object.entries(stats).sort((a,b) => b[1]-a[1])) {
+for (const [p, n] of Object.entries(stats).sort((a, b) => b[1] - a[1])) {
   console.log(`  ${p}: ${n}`);
 }
 

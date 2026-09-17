@@ -14,13 +14,13 @@
       "checkedAt": "2026-07-07T20:11:18.183Z"
     },
     "prj_cMDIvWXl1Z9ykfnIkZgILvQOiyNS": {
-      "name": "lilac-insure",
+      "name": "client-project-1",
       "state": "READY",
       "target": "production",
       "checkedAt": "2026-07-07T20:11:18.183Z"
     },
     "prj_blQSWMxOMPpQ86JjEpXyjrHQmJ9z": {
-      "name": "lilac-bonds",
+      "name": "client-project-2",
       "state": "READY",
       "target": null,
       "checkedAt": "2026-07-07T20:11:18.183Z"

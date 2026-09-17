@@ -38,7 +38,7 @@ describe('ageDays', () => {
 describe('computePipeline', () => {
   const records = [
     {
-      slug: 'lilac-insure',
+      slug: 'acme-agency',
       status: 'active',
       lastContactAt: '2026-05-08',
       lastContactKind: 'email',
@@ -46,7 +46,7 @@ describe('computePipeline', () => {
       overdueAfterDays: 14,
     },
     {
-      slug: 'the-ranch-foundation',
+      slug: 'the-nonprofit',
       status: 'active',
       lastContactAt: '2026-04-20',
       lastContactKind: 'meeting',
@@ -54,7 +54,7 @@ describe('computePipeline', () => {
       overdueAfterDays: 14,
     },
     {
-      slug: 'prospect-001',
+      slug: 'prospect-a',
       status: 'prospect',
       lastContactAt: '2026-04-15',
       lastContactKind: 'call',
@@ -91,7 +91,7 @@ describe('computePipeline', () => {
 
   it('marks records as overdue when ageDays > overdueAfterDays (active + prospect only)', () => {
     const r = computePipeline(records, NOW);
-    expect(r.overdue.map((x) => x.slug)).toEqual(['prospect-001', 'the-ranch-foundation']);
+    expect(r.overdue.map((x) => x.slug)).toEqual(['prospect-a', 'the-nonprofit']);
   });
 
   it('sorts overdue by ageDays descending (most stale first)', () => {
@@ -101,7 +101,7 @@ describe('computePipeline', () => {
 
   it('puts active/prospect records within window into current bucket', () => {
     const r = computePipeline(records, NOW);
-    expect(r.current.map((x) => x.slug)).toEqual(['lilac-insure']);
+    expect(r.current.map((x) => x.slug)).toEqual(['acme-agency']);
   });
 
   it('excludes paused/archived statuses from overdue and current buckets entirely', () => {
@@ -112,7 +112,7 @@ describe('computePipeline', () => {
 
   it('preserves nextTouchSuggestion on each output record', () => {
     const r = computePipeline(records, NOW);
-    const lilac = r.current.find((x) => x.slug === 'lilac-insure');
-    expect(lilac.nextTouchSuggestion).toBe('call');
+    const acme = r.current.find((x) => x.slug === 'acme-agency');
+    expect(acme.nextTouchSuggestion).toBe('call');
   });
 });

@@ -7,6 +7,7 @@ blockedBy: Adrian (must complete manually — browser-based OAuth flow)
 # Google OAuth Setup — Gmail + Drive
 
 Enables two scripts:
+
 - `scripts/sync-client-emails.mjs` — Gmail thread parsing
 - `scripts/process-call-recording.mjs` — Download + transcribe call recording ZIPs from Drive
 
@@ -30,6 +31,7 @@ OPENAI_API_KEY=
 Project to use: `youtube-breakdowns-489817` (already exists)
 
 Enable both of these:
+
 - https://console.cloud.google.com/apis/library/gmail.googleapis.com?project=youtube-breakdowns-489817
 - https://console.cloud.google.com/apis/library/drive.googleapis.com?project=youtube-breakdowns-489817
 
@@ -50,6 +52,7 @@ Go to: https://console.cloud.google.com/apis/credentials?project=youtube-breakdo
 ### 3. Generate the refresh token
 
 Run this from the project root (the `!` prefix runs it in-session):
+
 ```
 ! node scripts/google-auth.mjs
 ```
@@ -82,13 +85,13 @@ The token covers both Gmail (read) and Drive (read) — one token for both scrip
 
 ```bash
 # Dry-run the prospect recording (downloads + extracts, no transcription spend)
-! node scripts/process-call-recording.mjs 1dNxov4T1BnawFKaKBz6OvjS3pgpiUpDL --client prospect-001 --dry-run
+! node scripts/process-call-recording.mjs <drive-file-id> --client <client-slug> --dry-run
 
 # Full transcription run
-! node scripts/process-call-recording.mjs 1dNxov4T1BnawFKaKBz6OvjS3pgpiUpDL --client prospect-001
+! node scripts/process-call-recording.mjs <drive-file-id> --client <client-slug>
 
 # Point at a whole folder (processes all ZIPs)
-! node scripts/process-call-recording.mjs <folder-id> --client prospect-001
+! node scripts/process-call-recording.mjs <folder-id> --client <client-slug>
 ```
 
 Transcripts land in `clients/<slug>/recordings/<date>-<name>.md`.

@@ -21,7 +21,7 @@ The bar for Track 1: a hiring manager at Stripe / Figma / Shopify / Atlassian / 
 
 | Track                              | Scope                                                                                                                         | Ships                              | Status       |
 | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ------------ |
-| **Track 1** (this spec)            | Application-critical IA + content polish + new Ranch case study + clean deploy                                                | This week                          | Spec'd here  |
+| **Track 1** (this spec)            | Application-critical IA + content polish + new Nonprofit case study + clean deploy                                            | This week                          | Spec'd here  |
 | **Track 2** (separate specs later) | Mobius restructure, horizontal scroll restore, sketchbook fold, more visuals, carousel fix, /info simplify, presentation deck | After Track 1 deploys, iteratively | Backlog only |
 
 **Discipline:** anything that would slip Track 1 past end-of-week gets pushed to Track 2. We don't mix.
@@ -30,31 +30,31 @@ The bar for Track 1: a hiring manager at Stripe / Figma / Shopify / Atlassian / 
 
 ### Tile lineup on `/` (homepage)
 
-| #   | Tile                     | Route                                | Status                   |
-| --- | ------------------------ | ------------------------------------ | ------------------------ |
-| 1   | Microsoft Design Systems | `/microsoft-design-systems`          | kept, copy tightened     |
-| 2   | Visual Design            | `/visuals`                           | kept, no expansion in T1 |
-| 3   | Ranch Foundation         | `/case-studies/the-ranch-foundation` | NEW                      |
-| 4   | Vibe Sketchbook          | `/vibe-sketchbook`                   | kept (fold-in is T2)     |
+| #   | Tile                     | Route                            | Status                   |
+| --- | ------------------------ | -------------------------------- | ------------------------ |
+| 1   | Microsoft Design Systems | `/microsoft-design-systems`      | kept, copy tightened     |
+| 2   | Visual Design            | `/visuals`                       | kept, no expansion in T1 |
+| 3   | Nonprofit client         | `/case-studies/<nonprofit-slug>` | NEW                      |
+| 4   | Vibe Sketchbook          | `/vibe-sketchbook`               | kept (fold-in is T2)     |
 
 Removed from main tiles: **Hirobius Design System** (HDS docs), **Hirobius Case Study**.
 
 ### Page status table
 
-| Route                                | After T1                                               | Notes                                                             |
-| ------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------------- |
-| `/`                                  | Updated tile grid                                      | 4 tiles                                                           |
-| `/info`                              | Unchanged                                              | Simplification is T2                                              |
-| `/wet-paint`                         | **Hidden from nav, route 404'd**                       | Name signals WIP — not for hiring lens                            |
-| `/portfolio/draft`                   | **Hidden from nav, route 404'd**                       | Same reason                                                       |
-| `/lab/incubator`                     | Unchanged, audited                                     | Keep if it lands; remove if it doesn't                            |
-| `/microsoft-design-systems`          | Tightened to ~300 lines                                | Strongest external case study                                     |
-| `/visuals`                           | Audited, unchanged structurally                        | Expansion is T2                                                   |
-| `/vibe-sketchbook/*`                 | Unchanged                                              | Fold-in is T2                                                     |
-| `/case-studies/hirobius`             | Tightened to ~400 lines, **kept accessible (untiled)** | Direct-link from recruiters; still strongest DS-flavored artifact |
-| `/case-studies/the-ranch-foundation` | **NEW**                                                | Full case study, real assets                                      |
-| `/hds/*`                             | **Moved to `/ops/hds/*`**                              | Internal only                                                     |
-| `/ops/*`                             | **Locked behind a gate**                               | All HDS docs + existing ops tooling                               |
+| Route                            | After T1                                               | Notes                                                             |
+| -------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------- |
+| `/`                              | Updated tile grid                                      | 4 tiles                                                           |
+| `/info`                          | Unchanged                                              | Simplification is T2                                              |
+| `/wet-paint`                     | **Hidden from nav, route 404'd**                       | Name signals WIP — not for hiring lens                            |
+| `/portfolio/draft`               | **Hidden from nav, route 404'd**                       | Same reason                                                       |
+| `/lab/incubator`                 | Unchanged, audited                                     | Keep if it lands; remove if it doesn't                            |
+| `/microsoft-design-systems`      | Tightened to ~300 lines                                | Strongest external case study                                     |
+| `/visuals`                       | Audited, unchanged structurally                        | Expansion is T2                                                   |
+| `/vibe-sketchbook/*`             | Unchanged                                              | Fold-in is T2                                                     |
+| `/case-studies/hirobius`         | Tightened to ~400 lines, **kept accessible (untiled)** | Direct-link from recruiters; still strongest DS-flavored artifact |
+| `/case-studies/<nonprofit-slug>` | **NEW**                                                | Full case study, real assets                                      |
+| `/hds/*`                         | **Moved to `/ops/hds/*`**                              | Internal only                                                     |
+| `/ops/*`                         | **Locked behind a gate**                               | All HDS docs + existing ops tooling                               |
 
 ## 4. Track 1 — work items
 
@@ -126,13 +126,13 @@ In `src/app/pages/hds/PortfolioHomePage.tsx`:
 
 - Remove `Hirobius Design System` tile (entry 3 in `SHELL_ENTRY_CARDS`)
 - Remove `Hirobius Case Study` tile (entry 5)
-- Add `Ranch Foundation` tile pointing to `/case-studies/the-ranch-foundation`
+- Add `Nonprofit client` tile pointing to `/case-studies/<nonprofit-slug>`
 - Re-balance tile color palette + Mobius hover colors
 - 4 tiles: 2-col at md, 4-col at xl (or 2x2 — verify what works at the responsive breakpoints)
 
-**Files touched:** `PortfolioHomePage.tsx` only. Need a `RanchFoundationLogo` SVG for `SHELL_ENTRY_LOGOS` — TRF uses an existing wordmark/logo on ranchfoundation.com; Adrian to provide a 1-color SVG version sized to match the other shell-entry logos. (Stub with a placeholder mark in T1 if not ready; swap in T2.)
+**Files touched:** `PortfolioHomePage.tsx` only. Need a `NonprofitClientLogo` SVG for `SHELL_ENTRY_LOGOS` — the client has an existing wordmark/logo on its current site; Adrian to provide a 1-color SVG version sized to match the other shell-entry logos. (Stub with a placeholder mark in T1 if not ready; swap in T2.)
 
-**Owner:** sonnet, single agent. **Sequential** with 4.7 (Ranch case study route must exist before tile points to it — or land the tile change with a placeholder route).
+**Owner:** sonnet, single agent. **Sequential** with 4.7 (Nonprofit case study route must exist before tile points to it — or land the tile change with a placeholder route).
 
 ### 4.5 Tighten Microsoft Design Systems case study
 
@@ -158,11 +158,11 @@ This page is **kept accessible at `/case-studies/hirobius`** so Adrian can link 
 
 **Owner:** sonnet, single agent. **Independent**, parallelizable.
 
-### 4.7 Ranch Foundation case study (new)
+### 4.7 Nonprofit client case study (new)
 
-`src/app/pages/hds/RanchFoundationCaseStudyPage.tsx` (new file) + route in `routes.tsx`.
+`src/app/pages/hds/NonprofitCaseStudyPage.tsx` (new file) + route in `routes.tsx`.
 
-**Source material** (already in repo at `clients/the-ranch-foundation/`):
+**Source material** (already in repo at `clients/<nonprofit-slug>/`):
 
 - `meta.json` — org info, contact, scope, engagement type
 - `notes.md` — relationship history, current state, design decisions
@@ -172,16 +172,16 @@ This page is **kept accessible at `/case-studies/hirobius`** so Adrian can link 
 
 **Story arc:**
 
-1. Hook — veteran nonprofit, Tech Design Director since 2021 founding, 5-year ongoing engagement
+1. Hook — nonprofit client, board role, multi-year ongoing engagement
 2. Scope — what the engagement actually covers (site, Google Workspace, tech strategy, board role)
-3. Constraint — Wix + AI editor constraint (not a from-scratch React build), volunteer photographers, 501(c)(3) compliance, donation platform verification
+3. Constraint — Wix + AI editor constraint (not a from-scratch React build), volunteer photographers, nonprofit compliance, donation platform verification
 4. Design decisions surfaced — Harmony layout adopted, "wellness practices" naming, three-item nav, descriptive-naming-for-SEO, photo-volunteer process
 5. Outcomes — current state of site rebuild, what's live, what's pending
 6. Reflection — what working with a mission-driven nonprofit teaches about design systems thinking
 
 **Format:** mirror the Hirobius case study's tightened structure (~400-line target). Image-led where assets exist; text-only where they don't (with notes that photography is in progress — that's part of the story).
 
-**Asset gap:** unknown what visual assets exist for TRF. Default (§7 D3): ship structural draft with placeholder slots, fill real assets in T2 — don't block T1 deploy on photography.
+**Asset gap:** unknown what visual assets exist for the nonprofit. Default (§7 D3): ship structural draft with placeholder slots, fill real assets in T2 — don't block T1 deploy on photography.
 
 **Owner:** sonnet, single agent (full creative discretion within structure above).
 
@@ -197,7 +197,7 @@ Walk every public page that survives Track 1, score against the design-systems h
 - `/visuals`
 - `/vibe-sketchbook` + each sketch
 - `/case-studies/hirobius` (after 4.6)
-- `/case-studies/the-ranch-foundation` (after 4.7)
+- `/case-studies/<nonprofit-slug>` (after 4.7)
 - `/lab/incubator` — keep or delete based on quality bar
 
 **Output:** per-page punch list committed as `docs/audits/hiring-bar-audit-2026-05-09.md`, then fixes applied.
@@ -236,12 +236,12 @@ This is the part Claude doesn't do. Adrian runs:
    ↓
    ├── 4.5 (MDS tighten)         ┐
    ├── 4.6 (Hirobius tighten)     │
-   ├── 4.7 (Ranch case study)    ├── parallel
+   ├── 4.7 (Nonprofit case study)    ├── parallel
    └── 4.3 (ops gate)             │
         ↓                          │
         4.2 (move HDS to /ops)    ┘
             ↓
-            4.4 (homepage tiles — depends on 4.7 for Ranch route)
+            4.4 (homepage tiles — depends on 4.7 for Nonprofit route)
                 ↓
                 4.8 (hiring-bar audit + fixes)
                     ↓
@@ -271,7 +271,7 @@ Each gets its own brainstorm → spec → plan → execute cycle, post-T1.
 ## 6. Out of scope (T1)
 
 - Multi-tenant / brand-token theming (Hirobius LLC client-tier work)
-- Lilac Insure / Phil prospect-001 case studies (T2 candidates, not committed)
+- Other client / prospect case studies (T2 candidates, not committed)
 - Adrian's other initiatives surfaced via memory: AI ingestion pipeline, hermes kanban, ops dashboard — those keep moving but are NOT part of this deploy
 - Any change to internal `/ops` tooling beyond what 4.2 + 4.3 require
 
@@ -281,21 +281,21 @@ Each gets its own brainstorm → spec → plan → execute cycle, post-T1.
 | --- | ------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------- |
 | D1  | `/ops` gate mechanism                       | Client-side password + SHA-256 hash + 7-day localStorage | Simplest, no server, source is public anyway                                |
 | D2  | `/case-studies/hirobius` indexing           | `noindex` (link-only)                                    | Stops it appearing in Google for casual searchers; Adrian sends direct link |
-| D3  | Ranch case study assets                     | Placeholder slots OK in T1, real assets land via T2      | Don't block T1 deploy on photo collection                                   |
-| D4  | Tile count after T1                         | 4 (MDS, Visuals, Ranch, Sketchbook)                      | Visuals + sketchbook stay separate in T1; merge is T2                       |
+| D3  | Nonprofit case study assets                 | Placeholder slots OK in T1, real assets land via T2      | Don't block T1 deploy on photo collection                                   |
+| D4  | Tile count after T1                         | 4 (MDS, Visuals, Nonprofit, Sketchbook)                  | Visuals + sketchbook stay separate in T1; merge is T2                       |
 | D5  | `/lab/incubator` keep-or-cut                | **Audit (4.8) decides**                                  | Don't pre-judge                                                             |
 | D6  | Sketches accessible from main nav after T1? | Yes — keep tile until T2 fold-in lands                   | Don't strip a working surface mid-flight                                    |
 
 ## 8. Risks
 
-| Risk                                                  | Mitigation                                                                                    |
-| ----------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Ranch case study can't be written without real assets | Default D3: ship structural draft with placeholder slots, fill assets in T2                   |
-| Case study tightening loses Adrian's voice            | Adrian reviews 4.5 + 4.6 commits before they land; revert + iterate if voice is wrong         |
-| `/ops` gate breaks dev workflow                       | Gate is conditional on `import.meta.env.PROD` only; dev mode stays open                       |
-| Working tree triage discards something Adrian wanted  | 4.1 commits a baseline before any deletion; recoverable from git                              |
-| Vercel deploy reveals env var gap                     | Pre-deploy checklist in 4.10 covers it; Adrian sets `VITE_OPS_GATE_HASH` before merge to main |
-| Scope creep mid-week                                  | Anything not already in T1 goes to T2 — no exceptions                                         |
+| Risk                                                      | Mitigation                                                                                    |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Nonprofit case study can't be written without real assets | Default D3: ship structural draft with placeholder slots, fill assets in T2                   |
+| Case study tightening loses Adrian's voice                | Adrian reviews 4.5 + 4.6 commits before they land; revert + iterate if voice is wrong         |
+| `/ops` gate breaks dev workflow                           | Gate is conditional on `import.meta.env.PROD` only; dev mode stays open                       |
+| Working tree triage discards something Adrian wanted      | 4.1 commits a baseline before any deletion; recoverable from git                              |
+| Vercel deploy reveals env var gap                         | Pre-deploy checklist in 4.10 covers it; Adrian sets `VITE_OPS_GATE_HASH` before merge to main |
+| Scope creep mid-week                                      | Anything not already in T1 goes to T2 — no exceptions                                         |
 
 ## 9. Success criteria
 
@@ -307,7 +307,7 @@ Track 1 is complete when:
 - [ ] `/wet-paint` and `/portfolio/draft` 404
 - [ ] MDS case study reads end-to-end in <2 minutes
 - [ ] Hirobius case study reads end-to-end in <3 minutes
-- [ ] Ranch Foundation case study exists and reads cleanly
+- [ ] Nonprofit client case study exists and reads cleanly
 - [ ] `pnpm typecheck && pnpm test:layout && pnpm build:prerender` green
 - [ ] `robots.txt` excludes `/ops/*`
 - [ ] Live site at production URL shows all of the above

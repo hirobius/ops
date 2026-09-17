@@ -9,12 +9,12 @@
 > is the authoritative copy. Every other repo links here rather than forking the
 > text. Adoption across the fleet is tracked in
 > [`secrets-adoption.md`](./secrets-adoption.md). Reference implementation:
-> `hirobius/lilac-insure` (the first client fully on the standard).
+> the first client's work repo (the first client fully on the standard).
 
 ## Principles
 
 1. **Bitwarden is the single source of truth.** Repos never contain secret
-   *values* — only the env-var *names*.
+   _values_ — only the env-var _names_.
 2. **Every secret has exactly one owner:** either **Internal (Hirobius)** or **a
    specific client**. Never both. A key used by both is a smell — split it.
 3. **Least privilege.** One scoped credential per system per client; a dedicated
@@ -27,7 +27,7 @@
 Use a Bitwarden **Organization**. **Collections are the boundary** that stops
 cross-contamination:
 
-- **One collection per client** — `Lilac Insurance`, `Acme Co`, …
+- **One collection per client** — `Acme Co`, `Globex`, …
 - **One `Hirobius — Internal` collection** for your own infra/dev/tooling keys
   (GitHub PATs, Vercel, domain, CI, etc.).
 - Share a client collection **only** with the people who operate that client.
@@ -36,25 +36,25 @@ cross-contamination:
 
 ## Item convention
 
-- **One item per credential *set*** (per system) — never one mega-note.
+- **One item per credential _set_** (per system) — never one mega-note.
 - **Item name:** `<Owner> — <System> — <purpose>`
-  - `Lilac — EZLynx API`
-  - `Lilac — Gravity Forms REST (read-only)`
+  - `Acme Co — EZLynx API`
+  - `Acme Co — Gravity Forms REST (read-only)`
   - `Hirobius — GitHub PAT (packages)`
 - **Custom fields = env-var names.** Store each value in a field whose label is
-  the *exact* env-var name, so it maps 1:1 into `.env.local`:
-  - `Lilac — EZLynx API` → `EZLYNX_API_URL`, `EZ_USER`, `EZ_PASSWORD`, `EZ_APP_SECRET`
-  - `Lilac — Microsoft Graph app` → `MS_GRAPH_TENANT_ID`, `MS_GRAPH_CLIENT_ID`, `MS_GRAPH_CLIENT_SECRET`
+  the _exact_ env-var name, so it maps 1:1 into `.env.local`:
+  - `Acme Co — EZLynx API` → `EZLYNX_API_URL`, `EZ_USER`, `EZ_PASSWORD`, `EZ_APP_SECRET`
+  - `Acme Co — Microsoft Graph app` → `MS_GRAPH_TENANT_ID`, `MS_GRAPH_CLIENT_ID`, `MS_GRAPH_CLIENT_SECRET`
 - **Notes field records:** which repo(s)/machine(s) it's deployed to, created
   date, last-rotated date, and the permission scope granted.
 
 ### Which Bitwarden item type
 
-| What you're storing | Item type |
-|---------------------|-----------|
-| **SSH private key** (git / server auth) | **SSH Key** item — used via the Bitwarden SSH agent, so the key authenticates without ever being copied to disk. |
+| What you're storing                                     | Item type                                                                                                                  |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **SSH private key** (git / server auth)                 | **SSH Key** item — used via the Bitwarden SSH agent, so the key authenticates without ever being copied to disk.           |
 | **API keys / tokens / client secrets / env-var values** | **Login** item with **hidden** custom fields (label = env-var name; base URL in the URI slot). Field masking + searchable. |
-| Genuinely unstructured misc | Secure Note (fallback only). |
+| Genuinely unstructured misc                             | Secure Note (fallback only).                                                                                               |
 
 - **SSH private keys never go in a Secure Note** — use the SSH Key item type.
 - **API secrets never go in the SSH agent** — it's for SSH keys only; use a Login
@@ -86,8 +86,8 @@ environments), the container is ephemeral and there's no durable local disk — 
   `op`) and exports the vars — so any `.env.local` is generated fresh each
   session and never persists or gets committed.
 - **One environment per owner.** Never put two clients' secrets in the same cloud
-  environment — same isolation rule as Bitwarden collections. A Lilac environment
-  holds only Lilac's keys.
+  environment — same isolation rule as Bitwarden collections. An Acme Co environment
+  holds only Acme Co's keys.
 
 ### The dev-vs-production boundary (important)
 
@@ -137,11 +137,11 @@ Run this per repo to fix cross-contamination that already exists:
 
 ## Owner classification — quick reference
 
-| Key type | Owner | Collection | Example |
-|----------|-------|-----------|---------|
-| Your infra / tooling | Hirobius | `Hirobius — Internal` | GitHub PAT, Vercel, domain, CI |
-| A client's systems | That client | `<Client>` | EZLynx, their M365 Graph app, their Gravity keys |
-| Shared vendor you resell | Hirobius (master) + per-client sub-keys | split | one master in Internal, scoped sub-keys per client |
+| Key type                 | Owner                                   | Collection            | Example                                            |
+| ------------------------ | --------------------------------------- | --------------------- | -------------------------------------------------- |
+| Your infra / tooling     | Hirobius                                | `Hirobius — Internal` | GitHub PAT, Vercel, domain, CI                     |
+| A client's systems       | That client                             | `<Client>`            | EZLynx, their M365 Graph app, their Gravity keys   |
+| Shared vendor you resell | Hirobius (master) + per-client sub-keys | split                 | one master in Internal, scoped sub-keys per client |
 
 If you can't decide who owns a key, it's Internal until proven client-scoped —
 and if a client ever needs it, mint them their **own** scoped key rather than

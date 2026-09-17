@@ -3,6 +3,7 @@
 Append-only ledger of governance updates.
 
 ## 2026-04-02T21:06:30.796Z - HDS layout and traceability semantic tier refactor
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                          |
@@ -30,6 +31,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-19T15:42:41.3603599-07:00 - Figma Tooling Boundary and Bidirectional Sync Scope
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                     |
@@ -56,6 +58,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-19T15:42:41.3603599-07:00 - Visual Spec Boundary and Figma Sync Scoping
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                               |
@@ -82,6 +85,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-02T21:12:22.858Z - Systems ledger telemetry normalization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                        |
@@ -109,6 +113,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-02T21:25:56.935Z - Motion foundations semantic tier refactor
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                      |
@@ -136,6 +141,7 @@ Change vs previous snapshot: -95 direct violations.
 ---
 
 ## 2026-04-02T21:35:18.699Z - Typography hierarchy refinement
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                      |
@@ -163,6 +169,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-02T21:38:33.114Z - Color hierarchy refinement
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                      |
@@ -190,6 +197,7 @@ Change vs previous snapshot: +4 direct violations.
 ---
 
 ## 2026-04-02T21:41:29.413Z - Spacing hierarchy refinement
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                      |
@@ -217,6 +225,7 @@ Change vs previous snapshot: -21 direct violations.
 ---
 
 ## 2026-04-02T22:32:33.698Z - Governance intent capture gate
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                      |
@@ -244,6 +253,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-02T23:18:39.578Z - Documentation table system alignment
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                      |
@@ -271,6 +281,7 @@ Change vs previous snapshot: +3 direct violations.
 ---
 
 ## 2026-04-02T23:33:10.286Z - Documentation shell label hierarchy split
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                      |
@@ -298,6 +309,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-02T23:49:04.199Z - Documentation table support column refinement
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                      |
@@ -325,6 +337,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-02T23:52:06.083Z - Properties table alignment
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                      |
@@ -352,6 +365,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-02T23:52:06.083Z - Typography specimen normalization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                      |
@@ -379,6 +393,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T00:12:19.251Z - Encoding sanitation pass
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                 |
@@ -406,6 +421,7 @@ Change vs previous snapshot: -12 direct violations.
 ---
 
 ## 2026-04-03T02:43:15.096Z - Table slot standardization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                     |
@@ -433,6 +449,7 @@ Change vs previous snapshot: -1 direct violations.
 ---
 
 ## 2026-04-03T02:46:24.390Z - Preview surface standardization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                             |
@@ -460,6 +477,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T02:50:17.880Z - Preview grammar consolidation
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                             |
@@ -487,6 +505,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T02:53:52.906Z - Preview terminology sweep
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                             |
@@ -514,6 +533,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T02:56:07.102Z - Preview terminology normalization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                             |
@@ -541,6 +561,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T04:30:19.636Z - Tokens viewing mode controller
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -568,6 +589,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T04:34:56.351Z - Tokens layout mode bifurcation
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -595,6 +617,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T04:51:10.591Z - Legacy token impact surfacing
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -622,6 +645,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T04:55:47.879Z - Token explorer mode control compaction
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -649,6 +673,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T04:59:07.956Z - Tokens inspector shell rail
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -676,6 +701,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T05:06:33.160Z - Tokens layout reversal
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -703,6 +729,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T05:19:25.720Z - Token explorer node simplification
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -730,6 +757,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T05:50:13.850Z - Token inspector governance overlays
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -757,6 +785,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T06:02:48.787Z - Tokens cockpit layout split
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -784,6 +813,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T06:07:03.235Z - Token explorer control and spacing refinement
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -811,6 +841,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T06:08:43.231Z - Tokens explorer row polish
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -838,6 +869,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T06:09:56.659Z - Token explorer tag compaction
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -865,6 +897,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T06:10:39.485Z - Token explorer spacing refinement
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -892,6 +925,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-03T06:11:17.321Z - Token inspector spacing refinement
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -919,6 +953,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-04T17:39:33.000Z - Documentation Automation & Sizing Governance
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                   |
@@ -946,6 +981,7 @@ Change vs previous snapshot: +5 direct violations.
 ---
 
 ## 2026-04-04T18:02:05.000Z - Library Distribution Boundary
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                |
@@ -973,6 +1009,7 @@ Change vs previous snapshot: +5 direct violations.
 ---
 
 ## 2026-04-04T18:43:09.586Z - System Sanitization & Ledger Backfill
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                |
@@ -1000,6 +1037,7 @@ Change vs previous snapshot: +5 direct violations.
 ---
 
 ## 2026-04-04T18:51:44.963Z - Build Status Telemetry Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                      |
@@ -1027,6 +1065,7 @@ Change vs previous snapshot: +5 direct violations.
 ---
 
 ## 2026-04-04T19:29:27.806Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                            |
@@ -1054,6 +1093,7 @@ Change vs previous snapshot: -5 direct violations.
 ---
 
 ## 2026-04-04T19:50:14.555Z - Storefront Documentation Automation
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                                |
@@ -1081,6 +1121,7 @@ Change vs previous snapshot: -5 direct violations.
 ---
 
 ## 2026-04-05T02:20:23.337Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -1108,6 +1149,7 @@ Change vs previous snapshot: +2 direct violations.
 ---
 
 ## 2026-04-05T02:21:19.498Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                              |
@@ -1135,6 +1177,7 @@ Change vs previous snapshot: -2 direct violations.
 ---
 
 ## 2026-04-05T22:36:09.238Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                            |
@@ -1162,6 +1205,7 @@ Change vs previous snapshot: +2 direct violations.
 ---
 
 ## 2026-04-06T04:08:55.258Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                  |
@@ -1189,6 +1233,7 @@ Change vs previous snapshot: +2 direct violations.
 ---
 
 ## 2026-04-06T04:49:24.645Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                  |
@@ -1216,6 +1261,7 @@ Change vs previous snapshot: +2 direct violations.
 ---
 
 ## 2026-04-06T17:40:35.041Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                         |
@@ -1243,6 +1289,7 @@ Change vs previous snapshot: +5 direct violations.
 ---
 
 ## 2026-04-08T19:44:53.902Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                               |
@@ -1270,6 +1317,7 @@ Change vs previous snapshot: -9 direct violations.
 ---
 
 ## 2026-04-16T04:36:16.351Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                   |
@@ -1297,6 +1345,7 @@ Change vs previous snapshot: +1 direct violations.
 ---
 
 ## 2026-04-16T04:36:50.369Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                   |
@@ -1324,6 +1373,7 @@ Change vs previous snapshot: -1 direct violations.
 ---
 
 ## 2026-04-17T06:58:03.088Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                               |
@@ -1351,6 +1401,7 @@ Change vs previous snapshot: +1 direct violations.
 ---
 
 ## 2026-04-17T06:58:37.501Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                               |
@@ -1378,6 +1429,7 @@ Change vs previous snapshot: -1 direct violations.
 ---
 
 ## 2026-04-18T15:57:35.241Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                              |
@@ -1405,6 +1457,7 @@ Change vs previous snapshot: +1 direct violations.
 ---
 
 ## 2026-04-20T23:33:59.000Z - feat: auto-generate Quick Token Reference from hirobius.tokens.json
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                |
@@ -1446,6 +1499,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T00:07:10.000Z - fix: resolve shell visual bugs and refactor HDS navigation
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                          |
@@ -1481,6 +1535,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T04:06:23.000Z - fix: optimize Mobius performance and restore sticky nav
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                        |
@@ -1525,6 +1580,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T04:08:46.000Z - feat: replace HdsWebGLTriangleLogo with Mobius branding
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                      |
@@ -1574,6 +1630,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T04:31:44.000Z - feat: add figma gemma context bridge
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                              |
@@ -1609,6 +1666,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T05:13:12.000Z - feat: generate overview roadmap
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                           |
@@ -1644,6 +1702,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T05:13:53.000Z - chore: refresh generated audit timestamps
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -1679,6 +1738,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T05:19:10.000Z - chore: recalibrate roadmap statuses
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                             |
@@ -1714,6 +1774,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T05:30:18.000Z - feat: refine overview roadmap surface
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                             |
@@ -1749,6 +1810,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T05:42:28.000Z - refine roadmap spacing and phase disclosures
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                              |
@@ -1784,6 +1846,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T05:44:17.000Z - align roadmap overview to twelve column grid
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -1819,6 +1882,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T05:49:14.000Z - refine roadmap layout and label line height
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                    |
@@ -1854,6 +1918,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T05:52:40.000Z - tune label line height and sidebar title
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                 |
@@ -1889,6 +1954,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T05:59:26.000Z - refine roadmap group disclosures
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -1924,6 +1990,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T16:48:59.000Z - clean up roadmap technical label usage
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -1959,6 +2026,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T17:02:57.000Z - refine roadmap generated lanes
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                            |
@@ -1994,6 +2062,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T17:08:31.000Z - reshape roadmap phases around design engineering
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                   |
@@ -2029,6 +2098,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T17:12:08.000Z - consolidate roadmap phases into three pillars
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                   |
@@ -2064,6 +2134,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T17:18:16.000Z - triage task history into current lanes
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -2099,6 +2170,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T20:17:39.000Z - test
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                         |
@@ -2134,6 +2206,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T20:25:37.000Z - refactor: extract InformationCard component for reusable disclosure pattern
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                          |
@@ -2178,6 +2251,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T20:27:34.000Z - gen
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                       |
@@ -2213,6 +2287,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T20:31:23.000Z - overview
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -2248,6 +2323,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T20:35:12.000Z - sync
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -2283,6 +2359,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T20:39:12.000Z - guard
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -2318,6 +2395,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T20:45:42.000Z - refactor: make HistoryCard static, match RoadmapGroupBlock styling
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -2359,6 +2437,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T20:52:00.000Z - fix: correct HistoryCard to match RoadmapLane structure
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -2400,6 +2479,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T21:09:51.000Z - fix: remove duplicative status labels from roadmap lane descriptions
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -2439,6 +2519,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T21:23:29.000Z - copy: update pipeline section messaging and TOC label
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -2479,6 +2560,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T21:25:24.000Z - copy: remove "Visual regression" from stack pills
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -2516,6 +2598,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T21:29:35.000Z - Add role/name two-line layout to stack pills
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                     |
@@ -2555,6 +2638,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-21T23:24:24.000Z - feat:
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                         |
@@ -2590,6 +2674,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-22T23:09:33.120Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                           |
@@ -2625,6 +2710,7 @@ Change vs previous snapshot: -2 direct violations.
 ---
 
 ## 2026-04-22T23:14:42.000Z - [HDS-V2] Typography Migration Complete: Pruned to 9-style ramp and verified self-healing guardrails.
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                      |
@@ -2684,6 +2770,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-22T23:15:58.000Z - ci: Add HDS V1→V2 migration audit as mandatory CI/CD gate
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -2729,6 +2816,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-22T23:16:20.000Z - chore: Update guardrails status — CI/CD merge gate now active
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -2764,6 +2852,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-22T23:17:42.000Z - feat: Auto-update HistoryCard on every commit
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                            |
@@ -2807,6 +2896,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-22T23:19:42.000Z - fix: OverviewPage now displays live commit history from auto-updated feed
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -2850,6 +2940,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-22T23:38:08.619Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                |
@@ -2885,6 +2976,7 @@ Change vs previous snapshot: -12 direct violations.
 ---
 
 ## 2026-04-22T23:45:28.000Z - feat: Surface utility component and ArchitectureSnapshotPage V2 refactor
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                  |
@@ -2936,6 +3028,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-22T23:51:18.000Z - feat: Compositional component logic — HdsSurface and HeadingStack
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                            |
@@ -2999,6 +3092,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-23T00:06:57.000Z - fix: restore TextLockup and clarify compositional guardrails
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                |
@@ -3045,6 +3139,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-23T00:11:14.000Z - feat: Finalize compositional guardrails — TextLockup variants and strict enforcement
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                              |
@@ -3106,6 +3201,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-23T01:18:42.482Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                        |
@@ -3141,6 +3237,7 @@ Change vs previous snapshot: -18 direct violations.
 ---
 
 ## 2026-04-23T01:22:08.999Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                        |
@@ -3176,6 +3273,7 @@ Change vs previous snapshot: -13 direct violations.
 ---
 
 ## 2026-04-23T01:25:37.978Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                        |
@@ -3211,6 +3309,7 @@ Change vs previous snapshot: -13 direct violations.
 ---
 
 ## 2026-04-23T02:43:19.781Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                             |
@@ -3246,6 +3345,7 @@ Change vs previous snapshot: -13 direct violations.
 ---
 
 ## 2026-04-24T03:51:50.000Z - arch(hds): systemic v2 architecture lock-in [skip ci]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                |
@@ -3281,6 +3381,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-24T03:52:55.000Z - chore(hds): sync post-commit artifacts [skip ci]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -3316,6 +3417,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-24T03:55:41.000Z - chore: sync commit history generator [skip ci]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -3351,6 +3453,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-04-24T07:17:57.847Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                        |
@@ -3386,6 +3489,7 @@ Change vs previous snapshot: -33 direct violations.
 ---
 
 ## 2026-04-24T15:56:01.000Z - chore(system): complete phase 11 infrastructure [skip ci]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                           |
@@ -3421,6 +3525,7 @@ Change vs previous snapshot: -22 direct violations.
 ---
 
 ## 2026-04-24T16:55:23.000Z - refactor(core): clean orchestration, establish ledger, enforce polymorphism, and eradicate a11y bypasses [skip ci]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                    |
@@ -3456,6 +3561,7 @@ Change vs previous snapshot: -22 direct violations.
 ---
 
 ## 2026-04-24T16:59:05.000Z - chore(system): track remaining doc shells and generated assets [skip ci]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                  |
@@ -3491,6 +3597,7 @@ Change vs previous snapshot: -22 direct violations.
 ---
 
 ## 2026-04-24T18:11:35.000Z - chore(repo): complete phase 13 great prune and generate final readme [skip ci]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                        |
@@ -3526,6 +3633,7 @@ Change vs previous snapshot: -22 direct violations.
 ---
 
 ## 2026-04-24T18:56:58.000Z - chore(repo): commit final generated manifests and visual snapshots [skip ci]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
@@ -3561,6 +3669,7 @@ Change vs previous snapshot: -22 direct violations.
 ---
 
 ## 2026-05-01T01:56:06.280Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                           |
@@ -3596,6 +3705,7 @@ Change vs previous snapshot: -11 direct violations.
 ---
 
 ## 2026-05-01T06:42:21.792Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -3631,6 +3741,7 @@ Change vs previous snapshot: -31 direct violations.
 ---
 
 ## 2026-05-01T07:07:10.823Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -3666,6 +3777,7 @@ Change vs previous snapshot: -32 direct violations.
 ---
 
 ## 2026-05-01T18:27:17.000Z - feat(10p): tab-focus-ring + asset-validation + decision-log ADRs
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                              |
@@ -3722,6 +3834,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T18:29:47.000Z - feat(figma): 10f-1-figma-snapshot-adapter normalized snapshot shape
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -3766,6 +3879,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T18:30:02.000Z - feat(bridge): 10f-7-xpath-query-endpoint subset-XPath /query
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -3810,6 +3924,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T18:38:55.000Z - chore(ai): wave-2 reconcile — 5 done + 3 in-progress (worktrees)
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -3859,6 +3974,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T18:56:39.000Z - merge: Pod 1 — 10o-22 ghost button delete + 10o-21 Knip drain
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                     |
@@ -3900,6 +4016,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T18:57:55.000Z - merge: Pod 2 — 10d-13 emoji + 10d-14 figmaLink + 10d-11 token-explorer deferral
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -3937,6 +4054,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T19:01:21.000Z - merge: Pod 4 — 11a-1..4 approval app schema + bridge + list + detail
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -3980,6 +4098,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T19:02:00.000Z - chore: refresh commit-history.json post Pod 1-7 merges
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -4015,6 +4134,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T19:16:32.000Z - fix(visual): /hds/tokens drift root-cause + targeted re-baseline
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -4070,6 +4190,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T19:16:53.000Z - fix(a11y): 10a-1-foundations-contrast-pass resolve two WCAG AA failures
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                 |
@@ -4123,6 +4244,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T19:20:09.000Z - feat(tokens): 10m-3-button-padding-tokens-size-segmented size-aware padding
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                         |
@@ -4179,6 +4301,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T19:21:00.000Z - merge: Pod 8 redo + tokens drift docs — 10a-1 contrast + 10m-3 button padding
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -4218,6 +4341,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T19:21:16.000Z - merge: overview page removal + nav cleanup (token-explorer + overview hidden)
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                     |
@@ -4257,6 +4381,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T19:22:03.000Z - chore(ai): wave-2 close — 13 units → done + 3 ad-hoc + 10c-1 denied
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -4307,6 +4432,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T19:49:35.000Z - fix(nav): restore NavItem import in HDSLayout post-merge
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                     |
@@ -4347,6 +4473,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T19:51:36.000Z - fix(hds): remove dead system.manifest.json import + SYSTEM_MANIFEST const
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -4390,6 +4517,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T20:14:11.000Z - chore(ai): restore 86-unit backlog scrub + 5 new directive units
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -4431,6 +4559,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T20:16:13.000Z - docs(ai): brief reconcile for Wave 2 + Phase 12 spec handoff
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -4472,6 +4601,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T20:38:46.000Z - feat(hds): 12a-1 remove auto-injected component index from doc shell
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -4516,6 +4646,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T20:42:40.000Z - feat(docs): 12d-1 manifest-driven docs pass — project intros from componentSpecs
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                |
@@ -4559,6 +4690,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T20:56:58.000Z - chore(ai): add backlog-23 FOUC prevention + delete TASKS.md
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -4600,6 +4732,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T21:05:59.000Z - fix(nav): remove duplicate sidebar nav from all HDS doc pages
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                          |
@@ -4645,6 +4778,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-01T21:15:48.000Z - fix(nav): strip DocLayout navSlot + tocSlot from all HDS doc pages
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                       |
@@ -4698,6 +4832,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-02T01:07:03.000Z - refactor(lab): 12i-bloat-legacy-token-dead-code extract colorUtils + drop voided helpers
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                       |
@@ -4739,6 +4874,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-02T01:08:28.000Z - refactor(types): 12i-bloat-token-audit-types-shared unify TokenAuditReport across HDSLayout + LegacyTokenDetail
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                    |
@@ -4779,6 +4915,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-02T01:14:11.000Z - ci(github): 12i-quality-ci-pr-gates add Quality-gates workflow on PR
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                             |
@@ -4827,6 +4964,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-02T01:14:35.000Z - chore(history): post-commit auto-updates after Pod 5 CI workflow merge
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -4862,6 +5000,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-02T01:19:20.000Z - docs(typography): 12j-doc-typography hot-fix wrong family + heading weight in DESIGN/DESIGN-HANDOFF
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                          |
@@ -4918,6 +5057,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-02T01:20:05.000Z - chore(history): post-Pod-6 auto-pipeline regen + commit-history bump
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -4953,6 +5093,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-02T01:21:53.000Z - chore(ai): mark 3 Pod-2 false-positives denied + queue 12f-4 video-ingestion unit
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -5022,6 +5163,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-02T03:43:58.891Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                      |
@@ -5057,6 +5199,7 @@ Change vs previous snapshot: -34 direct violations.
 ---
 
 ## 2026-05-02T08:15:39.969Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                                                                           |
@@ -5092,6 +5235,7 @@ Change vs previous snapshot: -47 direct violations.
 ---
 
 ## 2026-05-03T01:45:42.295Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -5127,6 +5271,7 @@ Change vs previous snapshot: -47 direct violations.
 ---
 
 ## 2026-05-03T06:22:18.953Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                      |
@@ -5162,6 +5307,7 @@ Change vs previous snapshot: -47 direct violations.
 ---
 
 ## 2026-05-03T06:25:04.000Z - feat(perf): 12o-perf-bundle-budget-hard-fail-promote enforce size-limit hard-fail
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                              |
@@ -5206,6 +5352,7 @@ Change vs previous snapshot: +3 direct violations.
 ---
 
 ## 2026-05-03T06:36:18.000Z - chore(orch): mark 12c-1-hirobius-case-study-homepage done [hermes-pod-sonnet-casestudy]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -5241,6 +5388,7 @@ Change vs previous snapshot: +3 direct violations.
 ---
 
 ## 2026-05-03T06:36:35.000Z - feat(hermes): capture validationCmd stderr into agentNotes for self-healing
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -5289,6 +5437,7 @@ Change vs previous snapshot: +3 direct violations.
 ---
 
 ## 2026-05-03T06:41:05.000Z - feat(home): 12c-1-hirobius-case-study-homepage case study slot + Swiss reflow
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -5332,6 +5481,7 @@ Change vs previous snapshot: +3 direct violations.
 ---
 
 ## 2026-05-03T06:42:27.000Z - feat(health): 10n-4-component-health-dashboard per-component health summary
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                      |
@@ -5376,6 +5526,7 @@ Change vs previous snapshot: +3 direct violations.
 ---
 
 ## 2026-05-03T06:48:04.000Z - chore(orch): claim 10o-11-github-actions-ci for sonnet-pod-ci
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -5411,6 +5562,7 @@ Change vs previous snapshot: +3 direct violations.
 ---
 
 ## 2026-05-03T06:49:43.000Z - feat(ops): 10o-11-github-actions-ci minimal PR gate workflow
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -5452,6 +5604,7 @@ Change vs previous snapshot: +3 direct violations.
 ---
 
 ## 2026-05-03T07:08:49.000Z - chore(orch): triage 5 stuck units — HITL dep/auth-blocked, backfill blocker notes
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -5504,6 +5657,7 @@ Change vs previous snapshot: +3 direct violations.
 ---
 
 ## 2026-05-03T15:46:17.817Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                           |
@@ -5539,6 +5693,7 @@ Change vs previous snapshot: -50 direct violations.
 ---
 
 ## 2026-05-03T16:01:22.064Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                      |
@@ -5574,6 +5729,7 @@ Change vs previous snapshot: -55 direct violations.
 ---
 
 ## 2026-05-03T16:03:14.090Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                             |
@@ -5609,6 +5765,7 @@ Change vs previous snapshot: -52 direct violations.
 ---
 
 ## 2026-05-03T16:04:22.744Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                             |
@@ -5644,6 +5801,7 @@ Change vs previous snapshot: -70 direct violations.
 ---
 
 ## 2026-05-03T16:26:34.414Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                  |
@@ -5679,6 +5837,7 @@ Change vs previous snapshot: -52 direct violations.
 ---
 
 ## 2026-05-03T19:19:29.822Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                        |
@@ -5714,6 +5873,7 @@ Change vs previous snapshot: -53 direct violations.
 ---
 
 ## 2026-05-04T06:18:28.587Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                |
@@ -5749,6 +5909,7 @@ Change vs previous snapshot: -50 direct violations.
 ---
 
 ## 2026-05-04T17:20:57.648Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                |
@@ -5784,6 +5945,7 @@ Change vs previous snapshot: -50 direct violations.
 ---
 
 ## 2026-05-04T18:02:31.332Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                    |
@@ -5819,6 +5981,7 @@ Change vs previous snapshot: -51 direct violations.
 ---
 
 ## 2026-05-04T18:32:38.432Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                    |
@@ -5854,6 +6017,7 @@ Change vs previous snapshot: -51 direct violations.
 ---
 
 ## 2026-05-04T19:14:19.205Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                                                                |
@@ -5889,6 +6053,7 @@ Change vs previous snapshot: -53 direct violations.
 ---
 
 ## 2026-05-04T19:17:37.289Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                                                                |
@@ -5924,6 +6089,7 @@ Change vs previous snapshot: -53 direct violations.
 ---
 
 ## 2026-05-04T19:35:06.874Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                          |
@@ -5959,6 +6125,7 @@ Change vs previous snapshot: -56 direct violations.
 ---
 
 ## 2026-05-04T19:39:43.236Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                          |
@@ -5994,6 +6161,7 @@ Change vs previous snapshot: -56 direct violations.
 ---
 
 ## 2026-05-04T20:10:47.384Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                          |
@@ -6029,16 +6197,17 @@ Change vs previous snapshot: -56 direct violations.
 ---
 
 ## 2026-05-05T00:31:20.154Z - System Health Synchronization
+
 ### Architectural Snapshot
 
-| Field          | Value                                                                                                                                                                                                            |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Focus          | pipeline, governance                                                                                                                                                                                             |
-| Change Pattern | telemetry normalization, policy enforcement                                                                                                                                                                      |
-| Why It Matters | Improved governance readability and reduced manual interpretation overhead for architecture reviews.                                                                                                             |
-| Runtime Impact | Dev-only script and ledger update; no runtime payload impact.                                                                                                                                                    |
-| System Effect  | Reduced via standardized system conventions.                                                                                                                                                                     |
-| Files          | `BACKLOG.md`, `DESIGN-HANDOFF.md`, `DESIGN.md`, `clients/lilac-insure/tasks.json`, `docs/ai/orchestration.json`, `docs/ai/rules/REACT_COMPONENTS.md`, `figma-agent-plugin/code.js`, `figma-agent-plugin/ui.html` |
+| Field          | Value                                                                                                                                                                                                      |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Focus          | pipeline, governance                                                                                                                                                                                       |
+| Change Pattern | telemetry normalization, policy enforcement                                                                                                                                                                |
+| Why It Matters | Improved governance readability and reduced manual interpretation overhead for architecture reviews.                                                                                                       |
+| Runtime Impact | Dev-only script and ledger update; no runtime payload impact.                                                                                                                                              |
+| System Effect  | Reduced via standardized system conventions.                                                                                                                                                               |
+| Files          | `BACKLOG.md`, `DESIGN-HANDOFF.md`, `DESIGN.md`, `clients/<slug>/tasks.json`, `docs/ai/orchestration.json`, `docs/ai/rules/REACT_COMPONENTS.md`, `figma-agent-plugin/code.js`, `figma-agent-plugin/ui.html` |
 
 ### Intent & Execution
 
@@ -6064,6 +6233,7 @@ Change vs previous snapshot: -56 direct violations.
 ---
 
 ## 2026-05-05T16:48:22.240Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -6099,6 +6269,7 @@ Change vs previous snapshot: -61 direct violations.
 ---
 
 ## 2026-05-05T20:18:33.618Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                     |
@@ -6134,6 +6305,7 @@ Change vs previous snapshot: -61 direct violations.
 ---
 
 ## 2026-05-05T21:12:53.338Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                   |
@@ -6169,6 +6341,7 @@ Change vs previous snapshot: -61 direct violations.
 ---
 
 ## 2026-05-06T03:36:35.792Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                            |
@@ -6204,6 +6377,7 @@ Change vs previous snapshot: -61 direct violations.
 ---
 
 ## 2026-05-06T05:56:08.000Z - chore(orch): add 13z-prune-and-consolidate cluster (7 units), chain 13y onto it
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6272,6 +6446,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T05:59:46.000Z - chore(orch): claim 13z-1-root-oneoff-cleanup for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6307,6 +6482,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:01:26.000Z - chore(orch): claim 13z-2-compact-done-units for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6342,6 +6518,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:05:02.000Z - chore(orch): claim 13z-3-archive-dir-delete for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6377,6 +6554,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:05:04.000Z - chore(orch): claim 13z-4-archive-stale-ai-status-docs for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6412,6 +6590,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:06:23.000Z - feat(docs): 13z-4-archive-stale-ai-status-docs archive stale AI status docs
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                                          |
@@ -6451,6 +6630,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:07:07.000Z - chore(orch): claim 13z-4-archive-stale-ai-status-docs for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6486,6 +6666,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:09:08.000Z - chore(orch): claim 13z-3-archive-dir-delete for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6521,6 +6702,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:09:54.000Z - chore(orch): claim 13z-4-archive-stale-ai-status-docs for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6556,6 +6738,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:10:40.000Z - chore(orch): claim 13z-5-knowledge-corpus-gitignore for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6591,6 +6774,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:11:35.000Z - chore(orch): claim 13z-6-gate-consolidation for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6626,6 +6810,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:12:11.000Z - chore(orch): claim 13z-3-archive-dir-delete for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6661,6 +6846,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:14:18.000Z - chore(orch): claim 13z-5-knowledge-corpus-gitignore for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6696,6 +6882,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:15:09.000Z - chore(orch): claim 12q-tailwind-arbitrary-burndown for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                    |
@@ -6731,6 +6918,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:15:47.000Z - chore(orch): claim 12q-tailwind-arbitrary-burndown for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6766,6 +6954,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:16:10.000Z - chore(orch): claim 12q-responsive-grids for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6801,6 +6990,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:17:07.000Z - chore(orch): claim 13z-1-root-oneoff-cleanup for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6836,6 +7026,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:17:09.000Z - chore(orch): claim 13z-5-knowledge-corpus-gitignore for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6871,6 +7062,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:18:30.000Z - chore(orch): claim 13z-2-compact-done-units for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                    |
@@ -6906,6 +7098,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:33:45.000Z - feat(orch): 13z-1 mark done + revert 4 orphan claims after WSL reboot
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                  |
@@ -6950,6 +7143,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:35:34.000Z - chore(orch): drop heal-loop --max-pods 4→2 for RAM safety on 15GB host
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -6988,6 +7182,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:35:42.000Z - chore(orch): claim 13z-2-compact-done-units for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7023,6 +7218,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:35:44.000Z - chore(orch): claim 13z-3-archive-dir-delete for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7058,6 +7254,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:36:45.000Z - chore(orch): claim 13z-2-compact-done-units for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7093,6 +7290,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:37:30.000Z - chore(orch): claim 13z-5-knowledge-corpus-gitignore for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7128,6 +7326,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:37:43.000Z - chore(orch): mark 13z-5-knowledge-corpus-gitignore done [hermes-agent]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7163,6 +7362,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:37:44.000Z - chore(orch): claim 13z-6-gate-consolidation for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7198,6 +7398,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:39:42.000Z - chore(orch): mark 13z-6-gate-consolidation done [hermes-agent]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                                             |
@@ -7233,6 +7434,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:39:44.000Z - chore(orch): claim 13z-7-scripts-audit-and-prune for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7268,6 +7470,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:40:15.000Z - chore(orch): claim 13z-2-compact-done-units for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7303,6 +7506,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:41:09.000Z - chore(orch): mark 13z-7-scripts-audit-and-prune done [hermes-agent]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7338,6 +7542,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:41:09.000Z - chore(orch): claim 13y-0-fix-broken-gates for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7373,6 +7578,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:43:10.000Z - chore(orch): claim 13z-2-compact-done-units for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7408,6 +7614,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:43:23.000Z - chore(orch): claim 13z-3-archive-dir-delete for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7443,6 +7650,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:44:23.000Z - chore(orch): mark 13z-3-archive-dir-delete done [hermes-agent]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7478,6 +7686,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:44:24.000Z - chore(orch): claim 12q-tailwind-arbitrary-burndown for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7513,6 +7722,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:45:07.000Z - chore(orch): claim 12q-responsive-grids for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7548,6 +7758,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:45:31.000Z - chore(orch): claim 12q-tokens-page-pre-keyboard-access for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -7583,6 +7794,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:46:10.909Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                          |
@@ -7618,6 +7830,7 @@ Change vs previous snapshot: -61 direct violations.
 ---
 
 ## 2026-05-06T06:48:27.000Z - chore(orch): claim 13y-0-fix-broken-gates for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7653,6 +7866,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:49:09.000Z - chore(orch): claim 12q-tokens-page-pre-keyboard-access for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -7688,6 +7902,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:52:50.000Z - chore(orch): claim 12q-exemption-marker-registry for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7723,6 +7938,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:52:50.000Z - chore(orch): claim 13y-0-fix-broken-gates for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7758,6 +7974,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:53:10.000Z - chore(orch): claim 12q-exemption-marker-registry for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7793,6 +8010,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:53:31.000Z - chore(orch): claim 12q-readme-doc-refs for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7828,6 +8046,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:53:58.000Z - chore(orch): claim 12q-license-cdn-fonts for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7863,6 +8082,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:54:28.000Z - chore(orch): claim 12q-semantic-page-headings for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                              |
@@ -7898,6 +8118,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:55:06.000Z - chore(orch): claim 12q-inline-styles-burndown for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7933,6 +8154,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:55:37.000Z - chore(orch): claim 12q-knip-dead-code-prune for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -7968,6 +8190,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:56:06.000Z - chore(orch): claim 12q-tokens-audit-radius-duration for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -8003,6 +8226,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:56:13.000Z - chore(orch): claim 13y-0-fix-broken-gates for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8038,6 +8262,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:56:28.000Z - chore(orch): mark 12q-tokens-audit-radius-duration done [hermes-agent]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -8073,6 +8298,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:56:28.000Z - chore(orch): claim 12q-figma-snapshot-baseline for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8108,6 +8334,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:57:00.000Z - chore(orch): claim 12q-shadow-color-token-type-mismatch for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                       |
@@ -8143,6 +8370,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:57:43.000Z - chore(orch): mark 12q-shadow-color-token-type-mismatch done [hermes-agent]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                       |
@@ -8178,6 +8406,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:57:44.000Z - chore(orch): claim 12q-prompt-regression-baseline for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8213,6 +8442,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:58:55.000Z - chore(orch): claim 12q-micromotion-feedback-gaps for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8248,6 +8478,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:59:28.000Z - chore(orch): claim 12s-infra-signal-fix-registry-crosswalk for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8283,6 +8514,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:59:42.000Z - chore(orch): claim 13z-2-compact-done-units for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8318,6 +8550,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T06:59:45.000Z - chore(orch): claim 13w-ops-12-build-page for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8353,6 +8586,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:01:27.000Z - chore(orch): claim 12q-tenants-css-tokenize-cc for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -8388,6 +8622,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:01:50.000Z - chore(orch): claim 13w-ops-13a-live-pod-tail for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8423,6 +8658,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:04:54.000Z - chore(orch): claim 12q-tenants-css-tokenize-cc for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -8458,6 +8694,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:08:24.000Z - chore(orch): claim 12q-tailwind-arbitrary-burndown for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8493,6 +8730,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:08:32.000Z - chore(orch): claim 12q-responsive-grids for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8528,6 +8766,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:09:04.000Z - chore(orch): claim 12q-tokens-page-pre-keyboard-access for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -8563,6 +8802,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:09:05.000Z - chore(orch): claim 12q-tailwind-arbitrary-burndown for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8598,6 +8838,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:12:18.000Z - chore(orch): claim 12q-tokens-page-pre-keyboard-access for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -8633,6 +8874,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:15:44.000Z - chore(orch): claim 12q-tailwind-arbitrary-burndown for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8668,6 +8910,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:15:56.000Z - chore(orch): claim 12q-exemption-marker-registry for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8703,6 +8946,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:16:20.000Z - chore(orch): claim 12q-readme-doc-refs for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8738,6 +8982,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:17:06.000Z - chore(orch): claim 12q-license-cdn-fonts for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8773,6 +9018,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:17:23.000Z - chore(orch): claim 12q-semantic-page-headings for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                              |
@@ -8808,6 +9054,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:18:09.000Z - chore(orch): claim 12q-inline-styles-burndown for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8843,6 +9090,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:18:41.000Z - chore(orch): claim 12q-knip-dead-code-prune for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8878,6 +9126,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:19:14.000Z - chore(orch): claim 12q-figma-snapshot-baseline for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8913,6 +9162,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:19:52.000Z - chore(orch): claim 12q-prompt-regression-baseline for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8948,6 +9198,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:20:07.000Z - chore(orch): claim 12q-responsive-grids for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -8983,6 +9234,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:20:24.000Z - chore(orch): claim 12q-prompt-regression-baseline for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9018,6 +9270,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:20:50.000Z - chore(orch): claim 12q-micromotion-feedback-gaps for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9053,6 +9306,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:21:17.000Z - chore(orch): claim 12s-infra-signal-fix-registry-crosswalk for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9088,6 +9342,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:21:46.000Z - chore(orch): claim 13w-ops-12-build-page for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9123,6 +9378,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:22:55.000Z - chore(orch): claim 12q-responsive-grids for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9158,6 +9414,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:23:01.000Z - chore(orch): claim 13w-ops-12-build-page for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9193,6 +9450,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:23:55.000Z - chore(orch): claim 13w-ops-13a-live-pod-tail for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9228,6 +9486,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:24:22.000Z - chore(orch): claim 12q-responsive-grids for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9263,6 +9522,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:24:40.000Z - chore(orch): claim 13w-ops-13a-live-pod-tail for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9298,6 +9558,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:25:44.000Z - chore(orch): claim 12q-figma-system-drift for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9333,6 +9594,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:31:19.000Z - chore(orch): claim 12q-tokens-page-pre-keyboard-access for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -9368,6 +9630,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:36:06.000Z - chore(orch): claim 12q-figma-master-shadcn-fidelity for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9403,6 +9666,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:38:23.000Z - chore(orch): claim 12q-exemption-marker-registry for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9438,6 +9702,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:38:39.000Z - chore(orch): claim 12q-readme-doc-refs for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9473,6 +9738,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:38:52.000Z - chore(orch): claim 12q-license-cdn-fonts for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9508,6 +9774,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:39:07.000Z - chore(orch): claim 12q-semantic-page-headings for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                              |
@@ -9543,6 +9810,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:39:15.000Z - chore(orch): claim 12q-figma-master-shadcn-fidelity for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9578,6 +9846,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:39:25.000Z - chore(orch): claim 12q-inline-styles-burndown for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9613,6 +9882,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:39:41.000Z - chore(orch): claim 12q-knip-dead-code-prune for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9648,6 +9918,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:40:02.000Z - chore(orch): claim 12q-figma-snapshot-baseline for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9683,6 +9954,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:40:24.000Z - chore(orch): claim 12q-prompt-regression-baseline for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9718,6 +9990,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:40:58.000Z - chore(orch): claim 12q-micromotion-feedback-gaps for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9753,6 +10026,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:41:09.000Z - chore(orch): claim 12s-infra-signal-fix-registry-crosswalk for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9788,6 +10062,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:41:26.000Z - chore(orch): claim 13w-ops-12-build-page for hermes-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9823,6 +10098,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:42:32.000Z - chore(orch): claim 12q-tokens-page-pre-keyboard-access for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                |
@@ -9858,6 +10134,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T07:59:32.000Z - chore(orch): claim 12q-exemption-marker-registry for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9893,6 +10170,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T08:12:32.000Z - chore(orch): claim 12q-readme-doc-refs for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9928,6 +10206,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T08:13:43.000Z - feat(readme): 12q-readme-doc-refs fix broken AI_ORCHESTRATION.md path
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9963,6 +10242,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T08:15:16.000Z - chore(orch): claim 12q-readme-doc-refs for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -9998,6 +10278,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T08:22:20.000Z - chore(orch): claim 12q-license-cdn-fonts for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10033,6 +10314,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T08:34:44.000Z - chore(orch): claim 12q-semantic-page-headings for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                              |
@@ -10068,6 +10350,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T08:44:19.000Z - chore(orch): claim 12q-inline-styles-burndown for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10103,6 +10386,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T08:54:02.000Z - chore(orch): claim 12q-knip-dead-code-prune for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10138,6 +10422,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T09:05:10.000Z - chore(orch): claim 12q-figma-snapshot-baseline for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10173,6 +10458,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T09:07:17.000Z - chore(orch): claim 12q-semantic-page-headings for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                              |
@@ -10208,6 +10494,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T09:15:35.000Z - chore(orch): claim 12q-figma-snapshot-baseline for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10243,6 +10530,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T09:18:59.000Z - chore(orch): claim 12q-prompt-regression-baseline for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10278,6 +10566,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T09:21:24.000Z - feat(tests): 12q-prompt-regression-baseline regenerate LLM prompt golden outputs after upstream system-prompt change
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -10313,6 +10602,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T09:22:10.000Z - chore(orch): mark 12q-prompt-regression-baseline done [kimi-agent]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10348,6 +10638,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T09:22:10.000Z - chore(orch): claim 12q-micromotion-feedback-gaps for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10383,6 +10674,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T09:27:34.000Z - chore(orch): claim 12q-knip-dead-code-prune for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10418,6 +10710,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T09:34:37.000Z - chore(orch): claim 12q-micromotion-feedback-gaps for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10453,6 +10746,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T09:36:28.000Z - chore(orch): claim 12s-infra-signal-fix-registry-crosswalk for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10488,6 +10782,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T09:39:57.000Z - chore(orch): claim 13w-ops-12-build-page for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10523,6 +10818,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T09:48:13.000Z - chore(orch): claim 13w-ops-13a-live-pod-tail for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10558,6 +10854,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T10:06:53.000Z - chore(orch): claim 12q-micromotion-feedback-gaps for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10593,6 +10890,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T10:09:17.000Z - chore(orch): claim 12s-infra-signal-fix-registry-crosswalk for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10628,6 +10926,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T13:10:06.000Z - fix(orch): unblock 13z-4 + 12q-readme-doc-refs; doc-ref-ok seam marker
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10679,6 +10978,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T13:15:21.000Z - revert(orch): 13z-6 + 13z-7 done→approved; hermes faked completion
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10732,6 +11032,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T13:17:20.000Z - chore(orch): claim 13z-6-gate-consolidation for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10767,6 +11068,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T13:22:09.000Z - chore(orch): disable hermes in heal-loop; close 13z-2-compact
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10814,6 +11116,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T13:23:59.000Z - chore(orch): claim 13z-6-gate-consolidation for kimi-agent
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10849,6 +11152,7 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-06T16:53:00.671Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                      |
@@ -10884,6 +11188,7 @@ Change vs previous snapshot: -132 direct violations.
 ---
 
 ## 2026-05-06T17:05:13.511Z - System Health Synchronization
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                                                                                                                                                                                                                       |
@@ -10919,6 +11224,7 @@ Change vs previous snapshot: -132 direct violations.
 ---
 
 ## 2026-05-10T04:27:43.000Z - chore(orchestration): mark 12u-cc-blender-claude-product-renders done [skip ci]
+
 ### Architectural Snapshot
 
 | Field          | Value                                                                       |
@@ -10954,30 +11260,35 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-05-11T18:02:17.939Z - System Health Synchronization
+
 ### Architectural Snapshot
-| Field | Value |
-| --- | --- |
-| Focus | pipeline, governance |
-| Change Pattern | telemetry normalization, policy enforcement |
+
+| Field          | Value                                                                                                |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| Focus          | pipeline, governance                                                                                 |
+| Change Pattern | telemetry normalization, policy enforcement                                                          |
 | Why It Matters | Improved governance readability and reduced manual interpretation overhead for architecture reviews. |
-| Runtime Impact | Dev-only script and ledger update; no runtime payload impact. |
-| System Effect | Reduced via standardized system conventions. |
-| Files | `DESIGN.md`, `public/assets/manifest.json` |
+| Runtime Impact | Dev-only script and ledger update; no runtime payload impact.                                        |
+| System Effect  | Reduced via standardized system conventions.                                                         |
+| Files          | `DESIGN.md`, `public/assets/manifest.json`                                                           |
 
 ### Intent & Execution
+
 Detected 1 new violation; manifest telemetry, phase progress, and LLMS context updated to reflect current system state.
 
 ### Audit Highlights
-| Date | Sev | Highlight |
-| --- | --- | --- |
+
+| Date    | Sev   | Highlight                                                                                                                                                                                                                                                                                                                |
+| ------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 2026-03 | ADDED | DocLinkCard was promoted into src/app/components/ and documented in HDS Navigation. Replaced page-local editorial CTA/resource cards and summary asides across the shell-native portfolio pages so navigation cards now have canonical system ownership and the remaining summary copy leans on existing doc primitives. |
-| 2026-03 | ADDED | HdsRadio added as the shared single-choice control in src/app/components/Controls.tsx. Documented in Components > Inputs with a 5-state demo matrix and primary rest label styling. |
-| 2026-01 | FIXED | Badge component created and placed into src/app/components/Badge.tsx |
+| 2026-03 | ADDED | HdsRadio added as the shared single-choice control in src/app/components/Controls.tsx. Documented in Components > Inputs with a 5-state demo matrix and primary rest label styling.                                                                                                                                      |
+| 2026-01 | FIXED | Badge component created and placed into src/app/components/Badge.tsx                                                                                                                                                                                                                                                     |
 
 ### Health Snapshot
-| Metric | Value | Source |
-| --- | --- | --- |
-| Direct Violations | 1 | [health-history.json](../src/app/data/health-history.json) |
+
+| Metric               | Value                    | Source                                                     |
+| -------------------- | ------------------------ | ---------------------------------------------------------- |
+| Direct Violations    | 1                        | [health-history.json](../src/app/data/health-history.json) |
 | Snapshot Recorded At | 2026-05-11T18:02:17.939Z | [health-history.json](../src/app/data/health-history.json) |
 
 Change vs previous snapshot: -136 direct violations.
@@ -10985,30 +11296,35 @@ Change vs previous snapshot: -136 direct violations.
 ---
 
 ## 2026-05-11T22:16:07.237Z - System Health Synchronization
+
 ### Architectural Snapshot
-| Field | Value |
-| --- | --- |
-| Focus | pipeline, governance |
-| Change Pattern | telemetry normalization, policy enforcement |
+
+| Field          | Value                                                                                                |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| Focus          | pipeline, governance                                                                                 |
+| Change Pattern | telemetry normalization, policy enforcement                                                          |
 | Why It Matters | Improved governance readability and reduced manual interpretation overhead for architecture reviews. |
-| Runtime Impact | Dev-only script and ledger update; no runtime payload impact. |
-| System Effect | Reduced via standardized system conventions. |
-| Files | `DESIGN.md`, `docs/ai/orchestration.json`, `src/app/design-system/generated-token-descriptions.ts` |
+| Runtime Impact | Dev-only script and ledger update; no runtime payload impact.                                        |
+| System Effect  | Reduced via standardized system conventions.                                                         |
+| Files          | `DESIGN.md`, `docs/ai/orchestration.json`, `src/app/design-system/generated-token-descriptions.ts`   |
 
 ### Intent & Execution
+
 Detected 1 new violation; manifest telemetry, phase progress, and LLMS context updated to reflect current system state.
 
 ### Audit Highlights
-| Date | Sev | Highlight |
-| --- | --- | --- |
+
+| Date    | Sev   | Highlight                                                                                                                                                                                                                                                                                                                |
+| ------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 2026-03 | ADDED | DocLinkCard was promoted into src/app/components/ and documented in HDS Navigation. Replaced page-local editorial CTA/resource cards and summary asides across the shell-native portfolio pages so navigation cards now have canonical system ownership and the remaining summary copy leans on existing doc primitives. |
-| 2026-03 | ADDED | HdsRadio added as the shared single-choice control in src/app/components/Controls.tsx. Documented in Components > Inputs with a 5-state demo matrix and primary rest label styling. |
-| 2026-01 | FIXED | Badge component created and placed into src/app/components/Badge.tsx |
+| 2026-03 | ADDED | HdsRadio added as the shared single-choice control in src/app/components/Controls.tsx. Documented in Components > Inputs with a 5-state demo matrix and primary rest label styling.                                                                                                                                      |
+| 2026-01 | FIXED | Badge component created and placed into src/app/components/Badge.tsx                                                                                                                                                                                                                                                     |
 
 ### Health Snapshot
-| Metric | Value | Source |
-| --- | --- | --- |
-| Direct Violations | 1 | [health-history.json](../src/app/data/health-history.json) |
+
+| Metric               | Value                    | Source                                                     |
+| -------------------- | ------------------------ | ---------------------------------------------------------- |
+| Direct Violations    | 1                        | [health-history.json](../src/app/data/health-history.json) |
 | Snapshot Recorded At | 2026-05-11T22:16:07.237Z | [health-history.json](../src/app/data/health-history.json) |
 
 Change vs previous snapshot: -136 direct violations.
@@ -11016,30 +11332,35 @@ Change vs previous snapshot: -136 direct violations.
 ---
 
 ## 2026-05-12T02:00:22.093Z - System Health Synchronization
+
 ### Architectural Snapshot
-| Field | Value |
-| --- | --- |
-| Focus | pipeline, governance |
-| Change Pattern | telemetry normalization, policy enforcement |
-| Why It Matters | Improved governance readability and reduced manual interpretation overhead for architecture reviews. |
-| Runtime Impact | Dev-only script and ledger update; no runtime payload impact. |
-| System Effect | Reduced via standardized system conventions. |
-| Files | `DESIGN.md`, `src/app/components/OpsGate.tsx`, `src/app/components/code-block.tsx`, `src/app/components/foundation-swatch.tsx`, `src/app/components/health-rail.tsx`, `src/app/components/history-card.tsx`, `src/app/components/info-page.tsx`, `src/app/components/lab/legacy-token-detail.tsx` |
+
+| Field          | Value                                                                                                                                                                                                                                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Focus          | pipeline, governance                                                                                                                                                                                                                                                                              |
+| Change Pattern | telemetry normalization, policy enforcement                                                                                                                                                                                                                                                       |
+| Why It Matters | Improved governance readability and reduced manual interpretation overhead for architecture reviews.                                                                                                                                                                                              |
+| Runtime Impact | Dev-only script and ledger update; no runtime payload impact.                                                                                                                                                                                                                                     |
+| System Effect  | Reduced via standardized system conventions.                                                                                                                                                                                                                                                      |
+| Files          | `DESIGN.md`, `src/app/components/OpsGate.tsx`, `src/app/components/code-block.tsx`, `src/app/components/foundation-swatch.tsx`, `src/app/components/health-rail.tsx`, `src/app/components/history-card.tsx`, `src/app/components/info-page.tsx`, `src/app/components/lab/legacy-token-detail.tsx` |
 
 ### Intent & Execution
+
 Detected 1 new violation; manifest telemetry, phase progress, and LLMS context updated to reflect current system state.
 
 ### Audit Highlights
-| Date | Sev | Highlight |
-| --- | --- | --- |
+
+| Date    | Sev   | Highlight                                                                                                                                                                                                                                                                                                                |
+| ------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 2026-03 | ADDED | DocLinkCard was promoted into src/app/components/ and documented in HDS Navigation. Replaced page-local editorial CTA/resource cards and summary asides across the shell-native portfolio pages so navigation cards now have canonical system ownership and the remaining summary copy leans on existing doc primitives. |
-| 2026-03 | ADDED | HdsRadio added as the shared single-choice control in src/app/components/Controls.tsx. Documented in Components > Inputs with a 5-state demo matrix and primary rest label styling. |
-| 2026-01 | FIXED | Badge component created and placed into src/app/components/Badge.tsx |
+| 2026-03 | ADDED | HdsRadio added as the shared single-choice control in src/app/components/Controls.tsx. Documented in Components > Inputs with a 5-state demo matrix and primary rest label styling.                                                                                                                                      |
+| 2026-01 | FIXED | Badge component created and placed into src/app/components/Badge.tsx                                                                                                                                                                                                                                                     |
 
 ### Health Snapshot
-| Metric | Value | Source |
-| --- | --- | --- |
-| Direct Violations | 1 | [health-history.json](../src/app/data/health-history.json) |
+
+| Metric               | Value                    | Source                                                     |
+| -------------------- | ------------------------ | ---------------------------------------------------------- |
+| Direct Violations    | 1                        | [health-history.json](../src/app/data/health-history.json) |
 | Snapshot Recorded At | 2026-05-12T02:00:22.093Z | [health-history.json](../src/app/data/health-history.json) |
 
 Change vs previous snapshot: -136 direct violations.
@@ -11047,17 +11368,20 @@ Change vs previous snapshot: -136 direct violations.
 ---
 
 ## 2026-06-17T21:06:46.000Z - chore(wip): recover stashed HDS lint/gate fixes onto safety branch
+
 ### Architectural Snapshot
-| Field | Value |
-| --- | --- |
-| Focus | tokens |
-| Change Pattern | alias normalization / usage mapping |
-| Why It Matters | Improved token inspection throughput by making lineage, impact, and governance cues easier to parse. |
-| Runtime Impact | Neutral; documentation-shell and design-system surface refinement only. |
-| System Effect | Reduced via a more consistent inspection surface and shared token-node grammar. |
-| Files | `scripts/audit-batch-deliverables.mjs`, `scripts/build-tokens.mjs`, `src/app/components/mobius-scene.tsx`, `src/app/components/perf-budget.ts`, `src/app/pages/hds/SpacingPage.tsx`, `src/app/pages/ops/OpsCommandPalette.tsx`, `src/app/pages/ops/agentic-os/SkillsBar.tsx`, `src/app/pages/ops/kanban/correlateThreads.ts` |
+
+| Field          | Value                                                                                                                                                                                                                                                                                                                        |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Focus          | tokens                                                                                                                                                                                                                                                                                                                       |
+| Change Pattern | alias normalization / usage mapping                                                                                                                                                                                                                                                                                          |
+| Why It Matters | Improved token inspection throughput by making lineage, impact, and governance cues easier to parse.                                                                                                                                                                                                                         |
+| Runtime Impact | Neutral; documentation-shell and design-system surface refinement only.                                                                                                                                                                                                                                                      |
+| System Effect  | Reduced via a more consistent inspection surface and shared token-node grammar.                                                                                                                                                                                                                                              |
+| Files          | `scripts/audit-batch-deliverables.mjs`, `scripts/build-tokens.mjs`, `src/app/components/mobius-scene.tsx`, `src/app/components/perf-budget.ts`, `src/app/pages/hds/SpacingPage.tsx`, `src/app/pages/ops/OpsCommandPalette.tsx`, `src/app/pages/ops/agentic-os/SkillsBar.tsx`, `src/app/pages/ops/kanban/correlateThreads.ts` |
 
 ### Intent & Execution
+
 Recovered from local stash (was: lint+gate-fixes-pending) via git stash branch.
 
 Includes tenant-token CSS, SkillsBar wiring, audit-batch missing-file guard,
@@ -11067,16 +11391,18 @@ build-tokens generator, perf-budget, and assorted ops/hds/sketch page fixes.
 Incomplete WIP preserved for safety — known lint errors/warnings pending.
 
 ### Audit Highlights
-| Date | Sev | Highlight |
-| --- | --- | --- |
+
+| Date    | Sev   | Highlight                                                                                                                                                                                                                                                                                    |
+| ------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-03 | ADDED | Token compliance auditor added (scripts/audit-components.mjs). Scans all HDS components for hardcoded hex colors, rgba strings, transparency helper values, and unlicensed border-radius values. Run via pnpm tokens:audit. Zero violations required before any component is marked shipped. |
-| 2026-04 | ADDED | Semantic mapping audit introduced as a report-first governance layer. Components and docs pages now get scored for direct primitive leaks, semantic space aliases were added for component/layout/section/sidebar usage, and sidebar typography aliases now own the nav / TOC voice. |
-| 2026-03 | FIXED | Full token migration (phase 2a + 2b): all portfolio pages and shared components replaced hardcoded Tailwind color classes with HDS semantic tokens. Zero hardcoded hex values in component layer. |
+| 2026-04 | ADDED | Semantic mapping audit introduced as a report-first governance layer. Components and docs pages now get scored for direct primitive leaks, semantic space aliases were added for component/layout/section/sidebar usage, and sidebar typography aliases now own the nav / TOC voice.         |
+| 2026-03 | FIXED | Full token migration (phase 2a + 2b): all portfolio pages and shared components replaced hardcoded Tailwind color classes with HDS semantic tokens. Zero hardcoded hex values in component layer.                                                                                            |
 
 ### Health Snapshot
-| Metric | Value | Source |
-| --- | --- | --- |
-| Direct Violations | 1 | [health-history.json](../src/app/data/health-history.json) |
+
+| Metric               | Value                    | Source                                                     |
+| -------------------- | ------------------------ | ---------------------------------------------------------- |
+| Direct Violations    | 1                        | [health-history.json](../src/app/data/health-history.json) |
 | Snapshot Recorded At | 2026-05-11T18:02:17.939Z | [health-history.json](../src/app/data/health-history.json) |
 
 Change vs previous snapshot: 0 direct violations.
@@ -11084,30 +11410,35 @@ Change vs previous snapshot: 0 direct violations.
 ---
 
 ## 2026-06-17T21:55:58.650Z - System Health Synchronization
+
 ### Architectural Snapshot
-| Field | Value |
-| --- | --- |
-| Focus | pipeline, governance |
-| Change Pattern | telemetry normalization, policy enforcement |
+
+| Field          | Value                                                                                                |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| Focus          | pipeline, governance                                                                                 |
+| Change Pattern | telemetry normalization, policy enforcement                                                          |
 | Why It Matters | Improved governance readability and reduced manual interpretation overhead for architecture reviews. |
-| Runtime Impact | Dev-only script and ledger update; no runtime payload impact. |
-| System Effect | Reduced via standardized system conventions. |
-| Files | `src/app/components/componentPreviewRegistry.tsx` |
+| Runtime Impact | Dev-only script and ledger update; no runtime payload impact.                                        |
+| System Effect  | Reduced via standardized system conventions.                                                         |
+| Files          | `src/app/components/componentPreviewRegistry.tsx`                                                    |
 
 ### Intent & Execution
+
 Detected 1 new violation; manifest telemetry, phase progress, and LLMS context updated to reflect current system state.
 
 ### Audit Highlights
-| Date | Sev | Highlight |
-| --- | --- | --- |
+
+| Date    | Sev   | Highlight                                                                                                                                                                                                                                                                                                                |
+| ------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 2026-03 | ADDED | DocLinkCard was promoted into src/app/components/ and documented in HDS Navigation. Replaced page-local editorial CTA/resource cards and summary asides across the shell-native portfolio pages so navigation cards now have canonical system ownership and the remaining summary copy leans on existing doc primitives. |
-| 2026-03 | ADDED | HdsRadio added as the shared single-choice control in src/app/components/Controls.tsx. Documented in Components > Inputs with a 5-state demo matrix and primary rest label styling. |
-| 2026-01 | FIXED | Badge component created and placed into src/app/components/Badge.tsx |
+| 2026-03 | ADDED | HdsRadio added as the shared single-choice control in src/app/components/Controls.tsx. Documented in Components > Inputs with a 5-state demo matrix and primary rest label styling.                                                                                                                                      |
+| 2026-01 | FIXED | Badge component created and placed into src/app/components/Badge.tsx                                                                                                                                                                                                                                                     |
 
 ### Health Snapshot
-| Metric | Value | Source |
-| --- | --- | --- |
-| Direct Violations | 1 | [health-history.json](../src/app/data/health-history.json) |
+
+| Metric               | Value                    | Source                                                     |
+| -------------------- | ------------------------ | ---------------------------------------------------------- |
+| Direct Violations    | 1                        | [health-history.json](../src/app/data/health-history.json) |
 | Snapshot Recorded At | 2026-06-17T21:55:58.650Z | [health-history.json](../src/app/data/health-history.json) |
 
 Change vs previous snapshot: -136 direct violations.

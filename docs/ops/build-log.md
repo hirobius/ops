@@ -5,6 +5,7 @@
 > each section. Started 2026-09-11.
 
 ## Built
+
 - **Access Tech client portal** (`access-tech-internal`, powered by `portal-kit`):
   single gated page — proposal, "Why This Strategy", DIY appeal guide, roadmap,
   filming guide; document reader with callouts + collapsible sections;
@@ -23,14 +24,15 @@
 - **This build log.**
 
 ## Decisions
+
 1. **Profile-repair price = $400** — fair (market $300–800), refund-guaranteed,
    with a free DIY option; not the market floor, not gouging.
-2. **Design system: unify tokens, not framework.** Client portals + Lilac stay
+2. **Design system: unify tokens, not framework.** Client portals + the client site stay
    vanilla/static (bulletproof, no build); ops stays React/HDS. One DTCG token
    source → generated CSS vars (portals) + React components (ops). Same visual
    language everywhere; right runtime per surface.
 3. **All clients live in `ops/clients/`** — gitignored (PII-safe), rendered on
-   `/ops/clients/<slug>`. Client *delivery* tasks live in the workspace
+   `/ops/clients/<slug>`. Client _delivery_ tasks live in the workspace
    `tasks.json`; the GitHub board stays for building the OS itself.
 4. **Autonomy relaxed** — Claude pushes. ops changes go via `claude/*` branch +
    PR (never direct to prod `main`); client repos push freely.
@@ -47,22 +49,24 @@
    public repo despite the password gate).
 
 ## Audit findings (2026-09-12) → punch list
+
 1. **Re-arm the Ralph idle-watchdog** (dial: A cloud cron every ~3h [rec] · B reliable local runner · C manual=status quo). PENDING Adrian.
 2. Fix the `--no-verify` hole — editorconfig-checker skip-when-unavailable so remote sessions keep every pre-commit gate. (Claude, branch+PR)
 3. Codify the Operating Contract → `~/.claude/CLAUDE.md` + client-repo CLAUDE.md.
 4. Promote the top ~6 manual gates to CI; mark the rest advisory in the registry.
 5. Add 3 cross-repo gates: client-repo privacy · portal client-safe lint · token-drift guard.
-6. Token unification — portal-kit + Lilac consume `hirobius.tokens.json`.
+6. Token unification — portal-kit + the client site consume `hirobius.tokens.json`.
 
 ## Open / to validate at end of push
+
 - [ ] Access Tech workspace extracted into desktop `clients/access-tech/` +
       renders on `/ops/clients/access-tech`.
-- [ ] MSA + SOW reviewed by counsel; filled Access Tech agreement sent to Phil.
+- [ ] MSA + SOW reviewed by counsel; filled Access Tech agreement sent to the client.
 - [ ] `access-tech-internal` repo set to **private** (Adrian).
 - [ ] Vercel Web Analytics **enabled** in the project (Adrian).
 - [ ] git-guardrails hook installed with the tuned blocklist (Adrian, at terminal).
 - [ ] Determinism / autonomy audit run (next).
-- [ ] Design-token unification built (portal-kit + Lilac ← one source).
+- [ ] Design-token unification built (portal-kit + client site ← one source).
 - [ ] Operating Contract codified into auto-loading memory / `CLAUDE.md`.
 - [ ] Ralph loop re-arm decision (autonomy dial).
 - [ ] Hirobius internal agent — backlog idea.

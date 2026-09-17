@@ -31,7 +31,7 @@ create table if not exists tasks (
   native_key   text,                            -- original id within the source (OPS-25, LEAD-001)
 
   -- placement --------------------------------------------------------------
-  lane         text not null,                   -- leads|client-sites|lilac|agency|ops|hirobius-clients|learning|career (or backlog/client lanes)
+  lane         text not null,                   -- leads|client-sites|<client>|agency|ops|hirobius-clients|learning|career (or backlog/client lanes)
   "group"      text,                            -- sidebar group: Pipeline | Client work | Internal | Personal
   phase        text,                            -- the "## heading" section within a lane
   title        text not null,
