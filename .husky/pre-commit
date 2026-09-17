@@ -9,7 +9,11 @@ else
 fi
 
 echo "Running lint-staged (Prettier formatting on staged files)..."
-pnpm exec lint-staged
+# --max-arg-length: lint-staged 17 passes parseInt(undefined) = NaN when the
+# flag is absent, which silently disables file chunking. A commit staging
+# ~140 files (e.g. merging main into an old branch) then spawns one prettier
+# call longer than cmd.exe's limit on Windows and the hook fails.
+pnpm exec lint-staged --max-arg-length 3000
 
 echo "Running fast static analysis..."
 pnpm typecheck
