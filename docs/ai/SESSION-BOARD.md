@@ -63,13 +63,43 @@ believes it.
 | `lib/outreach/`, `lib/leads/`, lead scripts                                       | _(nobody)_              | —          | **RELEASED 2026-09-16 — session closed out. Crawler MERGED (#346). Extraction proven on live content; never fetched a trades site (this container 403s all egress), so hit rate across the 223 lead sites is still unknown.** |
 | `docs/guardrails/`, `registry.json`                                               | _(nobody)_              | —          | **FREE — #329 DONE (#349, ralph loop). #330 is open and carries `ralph-wip` — the loop holds it, do not start it.**                                                                                                           |
 | `lib/chain/`, `lib/supabase/leads.mjs`                                            | _(nobody)_              | —          | **FREE — #322 done (#345)**                                                                                                                                                                                                   |
-| `docs/ai/`, `CLAUDE.md`                                                           | _(nobody)_              | —          | **FREE — both sessions released 2026-09-16; budget 24.5KB of 25.0KB**                                                                                                                                                         |
+| `docs/ai/`, `CLAUDE.md`                                                           | _(nobody)_              | —          | **FREE — released 2026-09-17 by the close-out session; budget 24.8KB of 25.0KB**                                                                                                                                              |
 | client-site repo (3e: no `main` branch)                                           | —                       | —          | **DONE 2026-09-16 — `main` created, default set**                                                                                                                                                                             |
 | `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery                | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)**                                                                                                   |
 | `scripts/ralph-watchdog.mjs`, `lib/ops/ralph-watchdog.mjs`                        | _(nobody)_              | —          | **FREE — merged #375**                                                                                                                                                                                                        |
-| `StandingPage`, `ralphStatus.ts`, `lib/tasks/fleet*.mjs`, `lib/github/issues.mjs` | _(nobody)_              | —          | **FREE — Merged as ops#367.**                                                                                                                                                                                                 |
+| `StandingPage`, `ralphStatus.ts`, `lib/tasks/fleet*.mjs`, `lib/github/issues.mjs` | _(nobody)_              | —          | **FREE — merged as ops#367 and ops#388.**                                                                                                                                                                                     |
 
 ## Messages — newest first
+
+### 2026-09-17 · session-closeout → all · 14 ops + 6 hds PRs merged; four holds
+
+**Nothing is in flight from this session.** It only wrote `docs/ai/` and
+`status.json`, and holds no claim. Every claim row above is `_(nobody)_` or
+already released — do not treat any of them as live.
+
+**Read `main`, not a branch.** 14 ops PRs merged today and 6 in hirobius/hds
+(#211–#216). Roll-call with detail is in `DONE-LOG.md`; `HANDOFF.md` carries
+only what still steers.
+
+**Three things that will trip a session that does not know them:**
+
+1. **The PII gate is live but its denylist is not.** `check-pii` runs pre-commit,
+   on the commit message, on every PR and main push, and weekly — but
+   `PII_DENYLIST` / `.pii-denylist` are Adrian's to create and do not exist yet,
+   so it currently matches generic patterns only. A client tenant's name reached
+   a PR test fixture today unflagged. **Do not read a green gate as "clean".**
+2. **`pii-weekly` first fires Mon 2026-09-21 15:23 UTC** and will go red on the
+   ops#346 PR body until Adrian redacts it. That red is expected, not a break.
+3. **A green merge button proved nothing today.** `ralph-gate` is the sole
+   required check and it passes non-Ralph PRs untested. Run the repo's real gate
+   against the exact pushed head before believing a merge is safe.
+
+**Four ops PRs and three hds PRs are open, and every one waits on a human** —
+ops #380 (`OPS_AGENT_KEY` secret), #387 (migration `0015` + import, writes
+production), #378 (draft, needs a real eval run), #384 (draft, waits for the new
+hirobius.com); hds #210 (draft, tenant-rename decision), #207, #208. **Do not
+rebuild any of them.** Filed today: `site-engine#192` — that loop has had no
+scheduled watchdog since 2026-07-16.
 
 ### 2026-09-16 · ops-dashboard → all · session closed out; what is NOT finished
 
