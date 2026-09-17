@@ -60,9 +60,16 @@
  *                       Used by .husky/pre-commit for per-file scoping
  *                       per unit 13g-2-validator-self-register.
  *
+ * Severity (ops#306): each gate's registry `severity` decides what a non-zero
+ * exit means. `error` fails the run (and stops pre-commit's fail-fast); `warn`
+ * and `info` print a warning and let the run pass. A missing or unrecognised
+ * severity fails closed as `error`. Semantics: docs/guardrails/SCHEMA.md.
+ * (Classification lives in scripts/lib/guardrail-core.mjs — gateOutcome,
+ * runGatesSerial, summarizeRun.)
+ *
  * Exit codes:
- *   0 — all gates passed
- *   1 — one or more gates failed (error details written to stderr)
+ *   0 — no error-severity gate failed (warn-severity findings may have printed)
+ *   1 — one or more error-severity gates failed (details written to stderr)
  *   2 — invocation error (bad flags, registry not found, etc.)
  *
  * @module run-gates
@@ -73,7 +80,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync, spawn } from 'node:child_process';
 import { performance } from 'node:perf_hooks';
-import { loadRegistry, selectGates, REGISTRY_PATH } from './lib/guardrail-core.mjs';
+import {
+  loadRegistry,
+  selectGates,
+  gateResult,
+  runGatesSerial,
+  summarizeRun,
+  REGISTRY_PATH,
+} from './lib/guardrail-core.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -424,31 +438,36 @@ const label = gateArg
 
 console.log(`run-gates: running ${label}`);
 
-const failures = [];
+const results = [];
 
 if (concurrency <= 1) {
-  // Serial execution — declaration order preserved
-  for (const gate of selectedGates) {
-    console.log(`\n── [${gate.id}] ──`);
-    const code = runGateSync(gate);
-    if (code !== 0) {
-      failures.push({ id: gate.id, code });
-      // For pre-commit, fail fast on first error to match current behavior —
-      // unless --continue-on-failure is set (post-commit's logger needs every
-      // gate's result, even after one fails — see 13g-12-postcommit-verifier)
-      // OR --emit-inventory is set (debt-baseline run needs every gate's
-      // result so the inventory file isn't truncated mid-channel — see
-      // 13p-1/13p-2). --emit-jsonl alone does NOT disable fail-fast: the
-      // failing gate's own entry is already appended above (in runGateSync,
-      // before this check), so a blocking pre-commit run can log a violation
-      // and still stop at the first failure (issue #330) instead of paying
-      // for every remaining gate on every failed commit.
-      if (isPreCommit && !continueOnFailure && !emitInventoryArg) {
-        console.error(`\n✗ run-gates: gate '${gate.id}' failed (exit ${code})`);
-        writeInventory();
-        process.exit(1);
-      }
-    }
+  // Serial execution — declaration order preserved.
+  // For pre-commit, fail fast on the first failing ERROR-severity gate — a
+  // failing warn gate prints and the run continues (ops#306). Fail-fast is off
+  // when --continue-on-failure is set (post-commit's logger needs every gate's
+  // result, even after one fails — see 13g-12-postcommit-verifier) OR
+  // --emit-inventory is set (debt-baseline run needs every gate's result so the
+  // inventory file isn't truncated mid-channel — see 13p-1/13p-2). --emit-jsonl
+  // alone does NOT disable fail-fast: the failing gate's own entry is appended
+  // in runGateSync before the stop, so a blocking pre-commit run can log a
+  // violation and still stop at the first failure (issue #330) instead of
+  // paying for every remaining gate on every failed commit.
+  const serial = runGatesSerial({
+    gates: selectedGates,
+    failFast: isPreCommit && !continueOnFailure && !emitInventoryArg,
+    runGate: (gate) => {
+      console.log(`\n── [${gate.id}] ──`);
+      const code = runGateSync(gate);
+      if (code !== 0) reportGateExit(gateResult(gate, code));
+      return code;
+    },
+  });
+  results.push(...serial.results);
+  if (serial.stoppedAt) {
+    const { exitCode } = serial.results.at(-1);
+    console.error(`\n✗ run-gates: gate '${serial.stoppedAt}' failed (exit ${exitCode})`);
+    writeInventory();
+    process.exit(1);
   }
 } else {
   // Parallel execution with concurrency cap
@@ -459,9 +478,9 @@ if (concurrency <= 1) {
       const gate = selectedGates[cursor++];
       console.log(`\n── [${gate.id}] ──`);
       const code = await runGateAsync(gate);
-      if (code !== 0) {
-        failures.push({ id: gate.id, code });
-      }
+      const result = gateResult(gate, code);
+      if (code !== 0) reportGateExit(result);
+      results.push(result);
     }
   }
 
@@ -469,17 +488,40 @@ if (concurrency <= 1) {
   await Promise.all(workers);
 }
 
+/** Say, right under a gate's own output, whether its non-zero exit blocks. */
+function reportGateExit({ id, severity, exitCode, outcome }) {
+  if (outcome === 'warn') {
+    console.warn(
+      `⚠ run-gates: [${id}] exit ${exitCode} — severity '${severity}', reported, not blocking`,
+    );
+  }
+}
+
 // ── Final summary ─────────────────────────────────────────────────────────────
 
 writeInventory();
 
+const { failures, warnings } = summarizeRun(results);
+
+if (warnings.length > 0) {
+  console.warn(`\n⚠ run-gates: ${warnings.length} gate(s) warned (not blocking):`);
+  for (const { id, severity, exitCode } of warnings) {
+    console.warn(`    [${id}] exit ${exitCode} (severity '${severity}')`);
+  }
+}
+
 if (failures.length === 0) {
-  console.log(`\n✓ run-gates: all ${selectedGates.length} gate(s) passed`);
+  const passed = selectedGates.length - warnings.length;
+  console.log(
+    warnings.length === 0
+      ? `\n✓ run-gates: all ${selectedGates.length} gate(s) passed`
+      : `\n✓ run-gates: no blocking failures (${passed} passed, ${warnings.length} warned)`,
+  );
   process.exit(0);
 } else {
   console.error(`\n✗ run-gates: ${failures.length} gate(s) failed:`);
-  for (const { id, code } of failures) {
-    console.error(`    [${id}] exit ${code}`);
+  for (const { id, exitCode } of failures) {
+    console.error(`    [${id}] exit ${exitCode}`);
   }
   // When --emit-inventory is set, exit 0 even if gates failed: the inventory's
   // job is to capture the current state of debt for downstream classification.

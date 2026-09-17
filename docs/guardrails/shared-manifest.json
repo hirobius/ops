@@ -4,7 +4,7 @@
   "note": "Pinned sha256 of shared guardrail harness scripts. Regenerate with `node scripts/check-guardrail-drift.mjs --write` in the canonical repo after any intentional change.",
   "files": {
     "scripts/validate-fixture-proof-of-firing.mjs": "sha256:c4ecba38881433e447e23f8d5bc3b1959c42995f9a4583812cfb2a2e295e0d1c",
-    "scripts/run-gates.mjs": "sha256:6517e2c6bdfd5f8327e965be23adca212f7866bcb6040909233d65be9c53e71a",
+    "scripts/run-gates.mjs": "sha256:4bee767627ada817fd5f986c3e16900919fbb7e7a8cae0005a8b603ac0e1aa05",
     "scripts/validate-guardrail-registry.mjs": "sha256:d7acb3f5423039270d2308ce834553dd6292343e957601a29c6f0d9d4835048f",
     "scripts/check-guardrail-drift.mjs": "sha256:b524c33ac70625ab870b6a12fe97f2300e09d82b912f62774da364879d807a2a"
   }
