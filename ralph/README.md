@@ -66,8 +66,10 @@ not a bug.
   count to reach.
 - **Single-flight:** it has its own concurrency group (sharing `ralph.yml`'s
   would let one loop cancel the other's pending run) and skips the batch,
-  with a warning, while any Ralph PR is open or an issue claim is held. The
-  batch branch is `ralph/metric-<metric>-<run_id>`, so `ralph-gate` gates it
+  with a warning, while any Ralph PR is open or a live issue claim is held
+  (leaked claim refs — issue closed, or past `RALPH_CLAIM_TTL` with no PR —
+  are reported and ignored). The batch branch is
+  `ralph/metric-<metric>-<run_id>`, so `ralph-gate` gates it
   and, once its PR is open, the issue loop waits on it. While the batch is
   still running (no PR yet) the issue loop can't see it and may start
   alongside — see the workflow header.

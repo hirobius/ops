@@ -25,10 +25,15 @@ name: Ralph Metric
 # ralph.yml's pending chain-hop run (stranding the claim ref that run already
 # took), let every push-to-main run silently cancel a pending metric dispatch,
 # and let a 90-minute batch hold the issue loop off entirely. So metric runs
-# serialize only against each other, and cross-loop exclusion is done by STATE,
-# the way ralph.yml does it: the guard skips when any Ralph PR is open
-# (open_ralph_prs) or an issue iteration holds a claim ref, and once the batch
-# PR exists its ralph/ branch makes the issue loop wait on it in turn.
+# serialize only against each other, and cross-loop exclusion is done by STATE:
+# the guard skips when any Ralph PR is open (open_ralph_prs, the same check
+# ralph.yml's guard makes) or an issue iteration holds a LIVE claim ref, and
+# once the batch PR exists its ralph/ branch makes the issue loop wait on it in
+# turn. ralph.yml itself never blocks on other issues' claims; this guard reads
+# them because an issue iteration has no PR yet. Live = issue open and
+# lib.sh's claim_is_stale says not stale. Leaked refs (closed issue, or older
+# than RALPH_CLAIM_TTL with no PR) are reported and ignored, or one leak would
+# skip every batch until someone deleted it by hand.
 # Known gap, one direction only: WHILE a batch runs (up to 90 min, before its PR
 # exists) it holds nothing ralph.yml's guard reads, so an issue iteration can
 # start alongside it → two open Ralph PRs. Both are still gated independently
@@ -67,6 +72,9 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+      # claim_is_stale reads each claim's issue comments. Without issues: read
+      # that read fails and EVERY claim, live ones included, reads as stale.
+      issues: read
       pull-requests: read
     outputs:
       decision: ${{ steps.measure.outputs.status == 'complete' && 'complete' || steps.guard.outputs.decision }}
@@ -126,18 +134,40 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          . ralph/lib.sh
           # A gh/git failure aborts this step red — an API outage must never
-          # read as "nothing in flight".
+          # read as "nothing in flight". pipefail matters: Actions' default
+          # `bash -e` would let `git ls-remote | sed` hide a failed ls-remote.
+          set -euo pipefail
+          . ralph/lib.sh
           prs=$(open_ralph_prs)
-          claims=$(git ls-remote --heads origin 'ralph/claim-*' | sed 's#.*refs/heads/##')
-          if [ "$(jq length <<<"$prs")" -eq 0 ] && [ -z "$claims" ]; then
+          refs=$(git ls-remote --heads origin 'ralph/claim-*')
+          # Only a LIVE claim means an issue iteration is running. Claim refs
+          # leak (seven on 2026-09-16, all on issues closed in July), and
+          # blocking on every ref would skip each batch until someone deleted
+          # them by hand. Live = issue still OPEN and lib.sh's claim_is_stale
+          # (no open PR and no claim comment within RALPH_CLAIM_TTL) says no.
+          live=""
+          stale=""
+          for n in $(sed -nE 's#.*refs/heads/ralph/claim-([0-9]+)$#\1#p' <<<"$refs"); do
+            # Un-swallowed probe first: claim_is_stale reads an API error as
+            # "stale" (right for the engine's reclaim, wrong for this guard),
+            # so an outage has to stop this step here instead.
+            state=$(gh issue view "$n" --json state --jq .state)
+            if [ "$state" = "OPEN" ] && ! claim_is_stale "$n"; then
+              live="$live #$n"
+            else
+              stale="$stale #$n"
+            fi
+          done
+          if [ -n "$stale" ]; then
+            echo "::notice::Ignoring stale Ralph claim ref(s):$stale (issue closed, or no PR and no claim comment within RALPH_CLAIM_TTL). They block nothing, but delete them at $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/branches/all?query=ralph%2Fclaim-"
+          fi
+          if [ "$(jq length <<<"$prs")" -eq 0 ] && [ -z "$live" ]; then
             echo "decision=batch" >>"$GITHUB_OUTPUT"
             exit 0
           fi
           open=$(jq -r '[.[] | "#\(.number) (\(.headRefName))"] | join(", ")' <<<"$prs")
-          held=$(paste -sd ' ' - <<<"$claims")
-          echo "::warning::Batch skipped — Ralph is single-flight and work is already in flight. Open Ralph PR(s): ${open:-none}. Claim ref(s): ${held:-none}. Re-dispatch once they clear. A claim ref with no ralph.yml run in progress is stale — delete it at $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/branches/all?query=ralph%2Fclaim-"
+          echo "::warning::Batch skipped — Ralph is single-flight and work is already in flight. Open Ralph PR(s): ${open:-none}. Live issue claim(s):${live:- none}. Re-dispatch once they clear."
           echo "decision=skip" >>"$GITHUB_OUTPUT"
 
       - name: Report
@@ -239,16 +269,29 @@ jobs:
           BRANCH: ${{ needs.measure.outputs.branch }}
           WORK_OUTCOME: ${{ steps.work.outcome }}
         run: |
-          pr=$(gh pr list --state open --head "$BRANCH" --json url --jq '.[0].url // empty')
+          # Everything here goes through the job token (GH_TOKEN) and names the
+          # repo explicitly — never through the git remote. claude-code-action
+          # has already pointed origin at a URL carrying its app token and then
+          # revoked that token in its always() "Revoke app token" step, so a
+          # remote call fails auth on this private repo.
+          pr=$(gh pr list -R "$GITHUB_REPOSITORY" --state open --head "$BRANCH" --json url --jq '.[0].url // empty')
           if [ -n "$pr" ]; then
             echo "::notice::Batch PR opened: $pr — ralph-gate runs the gate + independent AI review; label it ralph-approved to merge, then re-dispatch this workflow to re-measure."
             printf '### ralph-metric batch\n\nPR: %s\n' "$pr" >>"$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+          # git/ref/ matches exactly (a prefix is a 404, not a list). Only a 404
+          # means "not pushed"; any other failure must never read as that state.
+          code=0
+          err=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$BRANCH" --silent 2>&1) || code=$?
+          if [ "$code" -eq 0 ]; then
             # Not opened from here on purpose: a PR created with the job token
             # triggers no workflows, so ralph-gate would never gate it.
             echo "::error::$BRANCH was pushed but no PR was opened (claude step: $WORK_OUTCOME). Open it by hand so ralph-gate runs: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/compare/main...$BRANCH?expand=1"
+            exit 1
+          fi
+          if ! grep -q 'HTTP 404' <<<"$err"; then
+            echo "::error::Could not check whether $BRANCH was pushed (claude step: $WORK_OUTCOME) — gh api said: $err. Look for the branch at $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/branches/all?query=$BRANCH before re-dispatching: if it exists, open its PR by hand so ralph-gate runs."
             exit 1
           fi
           echo "::error::The batch ended without pushing $BRANCH (claude step: $WORK_OUTCOME), so there is no PR. A deliberate stop ends with a 'ralph-blocked:' message — read the 'Run Claude Code' step log, address the cause, then re-dispatch."

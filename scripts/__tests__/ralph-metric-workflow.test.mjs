@@ -55,6 +55,41 @@ function concurrencyGroup(text) {
   return line ? unquote(line.replace(/^\s+group:/, '')) : null;
 }
 
+/** Lines of job `name` (under `jobs:`), up to the next job or top-level key. */
+function jobBlock(text, name) {
+  const lines = text.split('\n');
+  const start = lines.findIndex((l) => l === `  ${name}:`);
+  if (start === -1) return '';
+  const out = [];
+  for (const line of lines.slice(start + 1)) {
+    const indent = line.search(/\S/);
+    if (indent !== -1 && indent <= 2) break;
+    out.push(line);
+  }
+  return out.join('\n');
+}
+
+/** The `run: |` script of the step whose `- name:` starts with `prefix`. */
+function stepRun(text, prefix) {
+  const lines = text.split('\n');
+  const start = lines.findIndex((l) => l.trimStart().startsWith(`- name: ${prefix}`));
+  if (start === -1) return '';
+  const stepIndent = lines[start].search(/\S/);
+  const out = [];
+  let runIndent = -1;
+  for (const line of lines.slice(start + 1)) {
+    const indent = line.search(/\S/);
+    if (indent !== -1 && indent <= stepIndent) break; // next step, job, or key
+    if (runIndent === -1) {
+      if (/^\s+run: \|\s*$/.test(line)) runIndent = indent;
+      continue;
+    }
+    if (indent !== -1 && indent <= runIndent) break;
+    out.push(line);
+  }
+  return out.join('\n');
+}
+
 /** The block-scalar prompt handed to claude-code-action. */
 function promptText(text) {
   const m = /\n(\s+)prompt: \|\n((?:\1\s+.*\n|\s*\n)+)/.exec(text);
@@ -134,6 +169,43 @@ describe('ralph-metric.yml — bounded metric loop caller (ops#90)', () => {
     });
   });
 
+  describe('single-flight guard', () => {
+    const guard = stepRun(code, 'Single-flight guard');
+
+    it('exists as a run step', () => {
+      expect(guard, 'Single-flight guard run script not found').not.toBe('');
+    });
+
+    // Claim refs leak (7 on 2026-09-16, every issue closed since July). A guard
+    // that blocks on ANY claim ref skips every batch until a human deletes them
+    // by hand; ralph.yml never blocks on other issues' claims at all.
+    it('blocks only on LIVE claims — a leaked claim ref must not stall the loop', () => {
+      expect(guard).toMatch(/\. ralph\/lib\.sh/);
+      expect(guard).toMatch(/claim_is_stale "\$n"/);
+      expect(guard, 'a claim on a closed issue must read as stale').toMatch(/"OPEN"/);
+    });
+
+    // claim_is_stale reads the issue's claim comments. Without issues: read the
+    // `gh issue view` inside it fails, `last` is empty, and EVERY claim —
+    // live ones included — reads as stale.
+    it('grants the measure job issues: read', () => {
+      expect(jobBlock(code, 'measure')).toMatch(
+        /\n\s+permissions:\n(?:\s+[\w-]+: \w+\n)*?\s+issues: read\n/,
+      );
+    });
+
+    it('fails closed — a gh/git failure aborts red, never reads as nothing in flight', () => {
+      // Actions' default `bash -e` has no pipefail: `git ls-remote | sed` would
+      // turn a failed ls-remote into an empty (idle) claim list.
+      expect(guard).toMatch(/set -euo pipefail/);
+      // claim_is_stale swallows API errors as "stale"; the guard probes each
+      // claim's issue first, un-swallowed, so an outage stops the step instead.
+      const probe = guard.split('\n').find((l) => /gh issue view "\$n"/.test(l));
+      expect(probe, 'no fail-closed gh issue view probe per claim').toBeTruthy();
+      expect(probe).not.toMatch(/\|\| (true|echo)|2>\/dev\/null/);
+    });
+  });
+
   describe('batch', () => {
     it('runs only when the measure job decided a batch is needed', () => {
       expect(code).toMatch(/if: needs\.measure\.outputs\.decision == 'batch'/);
@@ -160,6 +232,29 @@ describe('ralph-metric.yml — bounded metric loop caller (ops#90)', () => {
 
     it('never lets the model game the measurement', () => {
       expect(promptText(raw)).toMatch(/do not edit the measuring gate/i);
+    });
+  });
+
+  describe('reconcile', () => {
+    const reconcile = stepRun(code, 'Reconcile');
+
+    it('exists as a run step', () => {
+      expect(reconcile, 'Reconcile run script not found').not.toBe('');
+    });
+
+    // By the time Reconcile runs, claude-code-action has pointed origin at a URL
+    // carrying its app token and then revoked that token (`Revoke app token`,
+    // if: always()), so anything that talks to origin fails auth on this
+    // private repo.
+    it('checks the pushed branch through the job token, never through origin', () => {
+      expect(reconcile).not.toMatch(/\borigin\b/);
+      expect(reconcile).toMatch(/gh api "repos\/\$GITHUB_REPOSITORY\/git\/ref\/heads\/\$BRANCH"/);
+      expect(reconcile).toMatch(/gh pr list -R "\$GITHUB_REPOSITORY"/);
+    });
+
+    it('a failed branch check is its own red outcome, never "not pushed"', () => {
+      expect(reconcile).toMatch(/HTTP 404/);
+      expect(reconcile).toMatch(/could not check/i);
     });
   });
 
