@@ -170,6 +170,13 @@ the umbrella.
 - **why parked:** 19 checkboxes, no DoD, structurally un-closeable. Net-new dashboard tooling — the exact expansion the feature freeze exists to hold.
 - **re-entry rule:** file the _one_ item, with a real DoD. Never revive the umbrella.
 
+### Monthly client report (Plausible stats + health checks + work log)
+
+- **origin:** ops#201 (closed 2026-09-16) — full shape and test-first DoD preserved there
+- **trigger:** `event: the first care-plan client has been live and paying for a full month`
+- **why parked:** the issue itself says "do NOT build before then" — it needs a paying client plus a month of real data, a Plausible account (se#84) and the Stripe care plan (#200). Until then it is a reminder, not work.
+- **re-entry rule:** file a fresh issue carrying #201's DoD (pure report-builder over injected sources first), not the old issue.
+
 ---
 
 ## Cross-repo
