@@ -48,7 +48,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline/promises';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { stdin as input, stdout as output } from 'node:process';
 
 import { readLearnedRules, LEARNED_RULES_FILE } from './persist-learned-rule.mjs';
@@ -165,7 +165,9 @@ export function buildJsonOutput(rules) {
 // ── CLI ──────────────────────────────────────────────────────────────────────
 
 function isMain() {
-  return import.meta.url === `file://${process.argv[1]}`;
+  // pathToFileURL, not `file://${argv[1]}`: on Windows argv[1] is `C:\…`, so the
+  // template never equals `file:///C:/…` and the CLI silently never ran.
+  return Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
 }
 
 function writeBackJsonl(rulesPath, allRules) {
