@@ -649,6 +649,17 @@
       "firingChannel": "ci-scheduled"
     },
     {
+      "id": "check-sev1-visibility",
+      "description": "Lists every open sev1 issue (gh search, owner hirobius — the ladder labels live in ops and hds) and exits non-zero while any exists (ops#317). Severity is orthogonal to p0–p3: sev1 = legal exposure, security incident, data loss, or already affecting a real third party. ops#27 sat at p1 for 71 days with nothing surfacing it. Warn severity: it reports, it never blocks a commit. /ops/standing shows the same list without running a command. A gh failure reports the result as UNKNOWN, never as clean.",
+      "severity": "warn",
+      "gateScript": "scripts/check-sev1-visibility.mjs",
+      "fixturePath": "fixtures/check-sev1-visibility",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "pnpm-meta",
+      "supportsJson": true
+    },
+    {
       "id": "metric-north-star-share",
       "description": "Over a rolling window (default 14 days), the share of merged PRs whose diff touches the revenue path (lib/agent, lib/leads, lib/lead-gen, lib/render, lib/outreach, api/lead-action.ts, the ops leads UI). Network required (GitHub Search + REST API) — manual channel only, same as audit-deps. Emits a violation when the share is below target, so ralph/metric.sh can drive off it.",
       "severity": "warn",

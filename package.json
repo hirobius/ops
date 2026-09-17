@@ -122,6 +122,7 @@
     "test:watch": "vitest",
     "tokens:audit:pages": "node scripts/audit-pages.mjs",
     "parked:check": "node scripts/check-parked-triggers.mjs",
+    "sev1:check": "node scripts/check-sev1-visibility.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "typecheck:api": "tsc --noEmit -p tsconfig.api-check.json",
     "visual-ingest": "node scripts/visual-ingest.mjs",
