@@ -212,7 +212,7 @@ the umbrella.
 - **still unbuilt:** a per-run and daily spend/usage ceiling (related: ops#71 codeburn); a cross-repo concurrency cap; restoring and re-registering `check-unit-overlap` (only orphan fixtures remain in `fixtures/check-unit-overlap/`) — required before any repo runs parallel Ralph PRs; the `watchdog-policy.json` + `proposed-units.jsonl` pattern.
 - **already shipped (don't rebuild):** claim refs with `RALPH_CLAIM_TTL`, per-cycle and lifetime attempt caps, `RALPH_ITER_TIMEOUT`, single-flight + wedge alerts, the ops hourly watchdog (#347/#365), Discord read commands.
 - **recommendation carried from #87 Decision #7 (not yet Adrian's ruling):** the mayor proposes only and never auto-tags `ralph-ready`.
-- **⚠️ a current defect, not part of this parked entry:** site-engine's `ralph.yml` schedule has been commented out since 2026-07-16 (site-engine#159), and `scripts/ralph-watchdog.mjs` defaults to `hirobius/ops` only, so a failed or parked site-engine iteration idles until someone relabels. Parking the mayor does not cover it. It needs its own site-engine Work issue routed as an adr-eng workflow PR: a 6h `schedule:` mirroring the merged ops#232, with hds#201 as the still-open equivalent for hds. Once that issue exists, replace this line with a link to it.
+- **separate defect, not covered by parking the mayor:** site-engine's disabled `ralph.yml` schedule is tracked in [hirobius/site-engine#192](https://github.com/hirobius/site-engine/issues/192).
 - **stale leftovers:** `scripts/fleet-dispatch.mjs` and `scripts/fleet-watchdog.mjs` still describe themselves as the mayor's workers.
 
 ### CommandPalette on /ops/tasks (⌘K jump-to-task + card actions)
