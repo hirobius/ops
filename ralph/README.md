@@ -61,12 +61,23 @@ no `schedule:` trigger without Adrian's explicit per-item cron yes
 manually to continue. Between dispatches nothing runs — that's expected,
 not a bug.
 
-**Status:** `ralph/metric.sh` ships here, verified against a real registry
-gate. The `.github/workflows/ralph-metric.yml` thin wrapper is drafted but
-not committed — GitHub App tokens used by both Ralph and dispatched Claude
-sessions are rejected outright on any push touching `.github/workflows/*`
-(no `workflows` permission scope). A human has to add that one file; see
-ops#90 for the exact YAML to paste in.
+- **Run it:** Actions → Ralph Metric → Run workflow, with `metric` = a
+  compliant gate id (e.g. `audit-gates-supportjson`) and `target` = the
+  count to reach.
+- **Single-flight:** it has its own concurrency group (sharing `ralph.yml`'s
+  would let one loop cancel the other's pending run) and skips the batch,
+  with a warning, while any Ralph PR is open or a live issue claim is held
+  (leaked claim refs — issue closed, or past `RALPH_CLAIM_TTL` with no PR —
+  are reported and ignored). The batch branch is
+  `ralph/metric-<metric>-<run_id>`, so `ralph-gate` gates it
+  and, once its PR is open, the issue loop waits on it. While the batch is
+  still running (no PR yet) the issue loop can't see it and may start
+  alongside — see the workflow header.
+- **Merge:** batch PRs link no issue, so `ralph-auto` can't pre-approve them —
+  label the PR `ralph-approved`, then re-dispatch to re-measure.
+- The workflow's header comment is the full contract;
+  `scripts/__tests__/ralph-metric-workflow.test.mjs` pins its safety
+  invariants.
 
 ## Add Ralph to another hirobius repo
 

@@ -184,7 +184,7 @@ describe('SkillTile — slug input variant', () => {
     hint: 'pick a client',
     group: 'Ops',
     showJsonResult: false,
-    input: { kind: 'slug', label: 'Client slug', placeholder: 'lilac-insure' },
+    input: { kind: 'slug', label: 'Client slug', placeholder: 'acme-agency' },
   };
 
   beforeEach(() => {

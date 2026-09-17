@@ -10,14 +10,14 @@ import { parseGitLog, bucketCommits, formatDigest } from '../client-digest.mjs';
 describe('parseGitLog', () => {
   it('parses pipe-delimited %H|%aI|%s lines into commit records', () => {
     const text =
-      'abc123|2026-05-08T10:00:00Z|feat(lilac): retainer signed\n' +
-      'def456|2026-05-09T11:00:00Z|fix(lilac): drip-email typo';
+      'abc123|2026-05-08T10:00:00Z|feat(acme): retainer signed\n' +
+      'def456|2026-05-09T11:00:00Z|fix(acme): drip-email typo';
     const commits = parseGitLog(text);
     expect(commits).toHaveLength(2);
     expect(commits[0]).toEqual({
       sha: 'abc123',
       date: '2026-05-08T10:00:00Z',
-      subject: 'feat(lilac): retainer signed',
+      subject: 'feat(acme): retainer signed',
     });
   });
 
@@ -32,11 +32,11 @@ describe('parseGitLog', () => {
 
 describe('bucketCommits', () => {
   const commits = [
-    { sha: 'a', date: '2026-05-08T00:00:00Z', subject: 'feat(lilac): retainer signed' },
-    { sha: 'b', date: '2026-05-09T00:00:00Z', subject: 'fix(lilac): drip-email typo' },
-    { sha: 'c', date: '2026-05-10T00:00:00Z', subject: 'docs(lilac): meeting notes' },
+    { sha: 'a', date: '2026-05-08T00:00:00Z', subject: 'feat(acme): retainer signed' },
+    { sha: 'b', date: '2026-05-09T00:00:00Z', subject: 'fix(acme): drip-email typo' },
+    { sha: 'c', date: '2026-05-10T00:00:00Z', subject: 'docs(acme): meeting notes' },
     { sha: 'd', date: '2026-05-10T00:00:00Z', subject: 'TODO: send proposal' },
-    { sha: 'e', date: '2026-05-10T00:00:00Z', subject: 'BLOCKER: waiting on Conrad' },
+    { sha: 'e', date: '2026-05-10T00:00:00Z', subject: 'BLOCKER: waiting on client' },
   ];
 
   it('puts feat/refactor/fix in shipped', () => {
@@ -62,12 +62,10 @@ describe('bucketCommits', () => {
 
 describe('formatDigest', () => {
   const base = {
-    slug: 'lilac-insure',
+    slug: 'acme-agency',
     period: '7 days',
     sections: {
-      shipped: [
-        { sha: 'a', date: '2026-05-08T00:00:00Z', subject: 'feat(lilac): retainer signed' },
-      ],
+      shipped: [{ sha: 'a', date: '2026-05-08T00:00:00Z', subject: 'feat(acme): retainer signed' }],
       next: [{ sha: 'd', date: '2026-05-10T00:00:00Z', subject: 'TODO: send proposal' }],
       blocker: [],
       other: [],
@@ -76,7 +74,7 @@ describe('formatDigest', () => {
 
   it('emits a markdown heading with the slug and period', () => {
     const md = formatDigest(base);
-    expect(md).toMatch(/# .*lilac-insure/);
+    expect(md).toMatch(/# .*acme-agency/);
     expect(md).toMatch(/7 days/);
   });
 
@@ -94,14 +92,23 @@ describe('formatDigest', () => {
   it('includes Blocker section when present', () => {
     const md = formatDigest({
       ...base,
-      sections: { ...base.sections, blocker: [{ sha: 'e', date: '2026-05-10T00:00:00Z', subject: 'BLOCKER: waiting on Conrad' }] },
+      sections: {
+        ...base.sections,
+        blocker: [
+          { sha: 'e', date: '2026-05-10T00:00:00Z', subject: 'BLOCKER: waiting on client' },
+        ],
+      },
     });
     expect(md).toMatch(/## Blockers?/);
-    expect(md).toMatch(/waiting on Conrad/);
+    expect(md).toMatch(/waiting on client/);
   });
 
   it('returns a "no activity" line when all sections are empty', () => {
-    const md = formatDigest({ slug: 'x', period: '7 days', sections: { shipped: [], next: [], blocker: [], other: [] } });
+    const md = formatDigest({
+      slug: 'x',
+      period: '7 days',
+      sections: { shipped: [], next: [], blocker: [], other: [] },
+    });
     expect(md.toLowerCase()).toMatch(/no activity/);
   });
 });

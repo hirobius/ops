@@ -19,14 +19,6 @@ export interface DemoBuild {
 
 export const DEMOS: readonly DemoBuild[] = [
   {
-    slug: 'elizabeth-beard-real-estate',
-    name: 'Elizabeth Beard — Spokane Real Estate',
-    vertical: 'Real estate',
-    url: 'https://claude.ai/artifact/RuSriuKtXQRhrvDCX59fJ3',
-    services: ['website', 'design'],
-    note: 'Spokane agent site build.',
-  },
-  {
     slug: 'meridian-real-estate',
     name: 'Meridian — Modern Real Estate',
     vertical: 'Real estate',

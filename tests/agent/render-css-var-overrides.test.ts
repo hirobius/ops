@@ -29,14 +29,18 @@ const base = {
   slug: 'violet-verge',
   business: {
     name: 'Violet Verge Landscaping',
-    phone: '+1-555-0142',
+    phone: '+1-512-555-0142',
     email: 'hi@violetverge.com',
     hours: [{ days: 'Mon–Fri', hours: '8–6' }],
     serviceAreas: ['Austin'],
   },
   layout: {},
   services: [{ title: 'Lawn care', description: 'We mow lawns.' }],
-  copy: { heroHeadline: 'Austin Landscaping', heroSub: 'Green all year.', about: 'Local & insured.' },
+  copy: {
+    heroHeadline: 'Austin Landscaping',
+    heroSub: 'Green all year.',
+    about: 'Local & insured.',
+  },
   form: { provider: 'web3forms', accessKey: 'abc123' },
   seo: {
     title: 'Landscaping in Austin',

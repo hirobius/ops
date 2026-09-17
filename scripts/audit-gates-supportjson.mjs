@@ -3,7 +3,9 @@
  * scripts/audit-gates-supportjson.mjs
  *
  * Meta-gate ratchet for the `--json` rollout (per unit 13p-8). For each
- * registered gate that is NOT in the pnpm-meta channel (skipped for cost),
+ * registered gate that is NOT in the pnpm-meta channel (skipped for cost) and
+ * does not opt out via `skipMetaProbe: "<reason>"` (full tsc / Playwright runs
+ * that a second, concurrent copy would duplicate or race — ops#241),
  * spawn `node <gateScript> --json` with a 30s timeout, capture stdout, and
  * verify it parses as `{ violations: Array }` per the canonical contract
  * documented in `scripts/lib/gate-output.mjs`.
@@ -40,6 +42,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { hasJsonFlag, emitResult } from './lib/gate-output.mjs';
+import { selectProbeTargets } from './lib/guardrail-core.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REGISTRY_PATH = path.join(ROOT, 'docs/guardrails/registry.json');
@@ -66,13 +69,14 @@ try {
 
 // Skip pnpm-meta channel for cost (47 gates × 30s ≈ 23 min worst case).
 // Strict cohort = pre-commit + ci-pr + manual + ci-scheduled + pre-push.
-const SKIP_CHANNELS = new Set(['pnpm-meta']);
 // The meta-gate must not invoke itself (recursion → infinite spawn loop).
-const SELF_ID = 'audit-gates-supportjson';
-
-const target = registry.gates.filter(
-  (g) => g && !SKIP_CHANNELS.has(g.firingChannel) && g.id !== SELF_ID,
-);
+// Gates carrying `skipMetaProbe: "<reason>"` (full tsc / Playwright runs) are
+// not spawned either — they are listed as opted out, not counted (ops#241).
+const { targets: target, optedOut } = selectProbeTargets({
+  registry,
+  skipChannels: ['pnpm-meta'],
+  selfId: 'audit-gates-supportjson',
+});
 
 // ── Probe each gate ──────────────────────────────────────────────────────────
 
@@ -148,10 +152,10 @@ const summary = {
   partial: results.filter((r) => r.bucket === 'partial').length,
   nonCompliant: results.filter((r) => r.bucket === 'non-compliant').length,
   errored: results.filter((r) => r.bucket === 'errored').length,
+  optedOut: optedOut.length,
 };
-summary.compliancePct = summary.total === 0
-  ? 0
-  : Math.round((summary.compliant / summary.total) * 100);
+summary.compliancePct =
+  summary.total === 0 ? 0 : Math.round((summary.compliant / summary.total) * 100);
 
 // Convert non-compliant + partial + errored into Violation rows so the
 // inventory can pick this gate's findings up via run-gates --emit-inventory.
@@ -179,6 +183,12 @@ if (jsonMode) {
   process.stdout.write(`  non-compliant: ${summary.nonCompliant.toString().padStart(3)}\n`);
   process.stdout.write(`  errored:       ${summary.errored.toString().padStart(3)}\n`);
   process.stdout.write(`  compliance:    ${summary.compliancePct}%\n`);
+  process.stdout.write(
+    `  not probed:    ${summary.optedOut.toString().padStart(3)} (skipMetaProbe)\n`,
+  );
+  for (const o of optedOut) {
+    process.stdout.write(`    - ${o.id}: ${o.reason}\n`);
+  }
 
   if (verbose || summary.compliant < summary.total) {
     process.stdout.write('\nNon-compliant / partial / errored gates:\n');

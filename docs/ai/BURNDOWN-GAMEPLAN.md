@@ -134,7 +134,7 @@ Well-scoped, low-risk. Promote in small batches (add a DoD checklist first to av
 ### G. Platform / infra features
 
 - **#8 (blocked)** — approvals inbox + autonomous-run log on /ops · **#201** — monthly client report
-- **#228** — agentic review loop · **#234** — unify design tokens across portals + Lilac (cross-repo-ish)
+- **#228** — agentic review loop · **#234** — unify design tokens across portals + the client site (cross-repo-ish)
 - **#3 / #5** — Playwright MCP self-verify; pre-edit blast-radius hook (both `ralph-auto`)
 - **#19** — extract Concrete Creations multi-tenant subsystem to its own repo (big; human decision)
 - **#7** — evaluate Sonnet 5 for MODELS tiering (an eval + decision)
@@ -153,9 +153,9 @@ Well-scoped, low-risk. Promote in small batches (add a DoD checklist first to av
 **Phase 0 — now, autonomous (no you needed):** let the `ralph-auto` pool drain; recover parks; keep
 CI green. The watchdog backstops. _(Running tonight.)_
 
-**Phase 1 — Revenue (Access Tech = first paying client):**
+**Phase 1 — Revenue (first paying client):**
 
-1. Send Phil the reinstatement email (drafted — `phil-profile-repair-email.txt`).
+1. Send the prospect the reinstatement email (drafted locally).
 2. On his reply: finalize the services agreement (needs his legal business name) + file the Google
    appeal within 3 business days.
 3. When the first deal closes: run the Stripe no-code setup (#200, ~20 min).

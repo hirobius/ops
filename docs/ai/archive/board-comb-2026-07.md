@@ -20,9 +20,9 @@ PARKED repos).
 | Open, no issue yet (combing candidates)               | 57    |
 | Blocked (recycle, don't re-file)                      | 9     |
 
-The 115 already-issued span 10 repos (ops 29, lilac-insure 22, clients 11,
-veteran-resource-navigator 10, lilac-bonds 9, hirobius-design-system 9,
-job-hunt 8, concrete 7, portfolio 7, access-tech 3) — **none get re-filed.**
+The 115 already-issued span 10 repos (ops 29, client-repo 22, clients 11,
+client-repo-3 10, client-repo-2 9, hirobius-design-system 9,
+job-hunt 8, concrete 7, portfolio 7, client-repo-4 3) — **none get re-filed.**
 
 ## The 57 candidates — triage
 
@@ -66,8 +66,8 @@ and the like. Feature expansion — park until freeze lifts.
 
 ### ⑥ Security lane (2)
 
-- `backlog:security-history-rewrite` — client PII (lilac-insure / prospect-001 /
-  the-ranch-foundation) still in git history on a **public** repo; tip-scrub (PR #2)
+- `backlog:security-history-rewrite` — client PII (the three client workspaces)
+  still in git history on a **public** repo; tip-scrub (PR #2)
   fixed going-forward only. Genuinely important; it's a `clients`-repo history
   rewrite needing a human go → file with `needs-adrian` (do NOT auto-run filter-repo).
 - `backlog:13s-10-grc-career-planning` — HITL research → park.

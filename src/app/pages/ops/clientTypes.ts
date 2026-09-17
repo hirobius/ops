@@ -1,7 +1,7 @@
 // Shared types for client/* JSON files consumed by /ops dashboard surfaces.
 // Fields marked optional (`?`) are absent in at least one client at time of
-// authoring; required fields are present in all (lilac-insure, the-ranch-foundation,
-// prospect-001). Source of truth: clients/<slug>/{meta,tasks,checklist,retainer,goals}.json.
+// authoring; required fields are present in all client and prospect workspaces.
+// Source of truth: clients/<slug>/{meta,tasks,checklist,retainer,goals}.json.
 
 interface ClientContact {
   name?: string;

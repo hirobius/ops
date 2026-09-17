@@ -23,8 +23,12 @@ const LEAD = {
 };
 
 const GOOD_PALETTE = {
-  primary: '#7b2d8e', accent: '#e0a800', bg: '#fdfcff',
-  fg: '#1a121d', muted: '#efe7f2', onPrimary: '#ffffff',
+  primary: '#7b2d8e',
+  accent: '#e0a800',
+  bg: '#fdfcff',
+  fg: '#1a121d',
+  muted: '#efe7f2',
+  onPrimary: '#ffffff',
 };
 
 const CONTENT = {
@@ -69,8 +73,12 @@ describe('buildFromContent', () => {
   it('rejects a stock preset palette, same as the API repair loop would', () => {
     const p = PALETTE_PRESETS.landscaping;
     const lazy = {
-      primary: p['--brand-primary'], accent: p['--brand-accent'], bg: p['--brand-bg'],
-      fg: p['--brand-fg'], muted: p['--brand-muted'], onPrimary: p['--brand-on-primary'],
+      primary: p['--brand-primary'],
+      accent: p['--brand-accent'],
+      bg: p['--brand-bg'],
+      fg: p['--brand-fg'],
+      muted: p['--brand-muted'],
+      onPrimary: p['--brand-on-primary'],
     };
     const r = buildFromContent(LEAD, { ...CONTENT, palette: lazy });
     expect(r.ok).toBe(false);
@@ -124,7 +132,10 @@ describe('buildFromContent', () => {
 
   it('never invents a phone or email — absent stays a visible placeholder', () => {
     const r = buildFromContent({ name: 'X Co', city: 'Austin', region: 'TX' }, CONTENT);
-    expect(r.config?.business.phone).toBe('(000) 000-0000');
+    // The fleet-standard placeholder (site-engine lead-to-config.ts): legal under
+    // the 10-digit NANP phone rule, yet never dialable (its exchange starts with 0).
+    expect(r.ok).toBe(true);
+    expect(r.config?.business.phone).toBe('(555) 010-0000');
     expect(r.notes.join('\n')).toMatch(/placeholder/i);
   });
 });
