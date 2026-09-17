@@ -51,8 +51,10 @@ outreach engine.
 Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home.
 The pre-Ralph `/admin/approvals` inbox + its `queue`/`unqueue`
 lifecycle were retired 2026-07-13 (ops#157) — merge governance now runs
-entirely through ralph-gate's `ralph-auto`/`ralph-approved` labels (the dead
-`localhost:3005/orchestration/*` bridge is fully retired). Auth:
+through `ralph-gate` and the ops#238 boundary: green merges by default, a diff
+touching a supervised revenue path needs `ralph-approved` (enforced by
+`scripts/ralph-watchdog.mjs`; the engine's `ralph-auto` arm has no path check
+yet). The dead `localhost:3005/orchestration/*` bridge is fully retired. Auth:
 `OPS_GATE_PASSWORD`+`OPS_SESSION_SECRET` (gate), `OPS_AGENT_KEY` (machine auth,
 #25). Fleet: `/ops/projects` + `scripts/deploy-alert.mjs` (#11). Task machinery:
 `tasks` table + GitHub-issue importer (#25) + dispatch (opens an issue @-mentioning

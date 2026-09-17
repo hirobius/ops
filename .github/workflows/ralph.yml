@@ -17,14 +17,16 @@ name: Ralph
 # workflow + ralph/lib.sh — one logic for CI and local runs.
 #
 # ops is private client automation — correctness over speed, no destructive
-# ops, merges are human-approved (`ralph-approved` on the PR, or the issue
-# pre-tagged `ralph-auto`). Auth: CLAUDE_CODE_OAUTH_TOKEN (Max) — NO API key.
+# ops. Merges follow ops#238: green `ralph-gate` merges by default; a diff on a
+# supervised revenue path needs `ralph-approved` (watchdog-enforced only — the
+# engine's `ralph-auto` arm has no path check yet; see ralph/README.md).
+# Auth: CLAUDE_CODE_OAUTH_TOKEN (Max) — NO API key.
 
 on:
   workflow_dispatch:
     inputs:
       issue:
-        description: "Issue number to work (blank = deterministic pick via ralph/next.sh)"
+        description: 'Issue number to work (blank = deterministic pick via ralph/next.sh)'
         required: false
         type: string
   issues:
@@ -38,7 +40,7 @@ on:
     # while that runner is off. Hourly was retired 2026-07-16 for cost — 6h keeps
     # Actions minutes AND Claude usage negligible (most ticks no-op via the
     # single-flight guard). Comment this block out to hand fully back to local.
-    - cron: "11 */6 * * *"
+    - cron: '11 */6 * * *'
 
 concurrency:
   group: ralph-${{ github.repository }}
