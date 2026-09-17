@@ -37,7 +37,7 @@
  * matters.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Badge, Button } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
@@ -55,6 +55,9 @@ import {
   type StandingAction,
 } from '../ralphStatus';
 import { deriveChain } from '../../../../../lib/chain/evidence.mjs';
+import { RepoFilter } from './RepoFilter';
+import { filterByRepo } from './repoScope';
+import { useRepoScope } from './useRepoScope';
 import { Sev1Banner } from './Sev1Banner';
 
 const POLL_MS = 60_000;
@@ -109,13 +112,17 @@ export default function StandingPage() {
   });
 
   /**
-   * Which repo the lanes are scoped to, or null for the whole fleet.
-   *
-   * Derived from what the sweep returned, never configured — same rule as the
-   * repo set itself. A filter naming a repo that no longer has open issues
-   * would be a second place to keep in sync, so there isn't one.
+   * Which repo the lanes are scoped to — `?repo=`, resolved against the repos
+   * the sweep actually returned (see useRepoScope). Every issue and PR lane AND
+   * the loop follow it: loop state is per repo, and a fleet-wide loop under a
+   * scoped queue would read another repo's failure as this one's. Deploys are
+   * Vercel projects with no repo field, so they alone stay fleet-wide.
    */
-  const [repoFilter, setRepoFilter] = useState<string | null>(null);
+  const scope = useRepoScope(data);
+  const selectedRepo = scope.selected?.repo ?? null;
+  /** "in ops" for scoped empty states; the fleet-wide copy otherwise. */
+  const scoped = (fleetCopy: string, scopedCopy: (name: string) => string) =>
+    scope.selected ? scopedCopy(scope.selected.param) : fleetCopy;
   /** Lanes the operator has expanded past their truncation, by lane name. */
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
   const toggleLane = useCallback((lane: string) => {
@@ -126,17 +133,11 @@ export default function StandingPage() {
     });
   }, []);
 
-  const inScope = useCallback(
-    <T extends { repo: string }>(rows: T[]) =>
-      repoFilter ? rows.filter((r) => r.repo === repoFilter) : rows,
-    [repoFilter],
-  );
-
-  const blocked = inScope(data?.blocked ?? []);
-  const prs = inScope(data?.prs ?? []);
-  const queue = inScope(data?.queue ?? []);
-  const backlog = inScope(data?.backlog ?? []);
-  const loop = data?.loop ?? [];
+  const blocked = filterByRepo(data?.blocked ?? [], selectedRepo);
+  const prs = filterByRepo(data?.prs ?? [], selectedRepo);
+  const queue = filterByRepo(data?.queue ?? [], selectedRepo);
+  const backlog = filterByRepo(data?.backlog ?? [], selectedRepo);
+  const loop = filterByRepo(data?.loop ?? [], selectedRepo);
   const needsToken = error?.includes('GITHUB_TOKEN') ?? false;
   /** A real payload has arrived — not merely "a request finished". */
   const loaded = data !== null;
@@ -220,7 +221,15 @@ export default function StandingPage() {
       {/* ── 0. Open sev1 (ops#317) — above everything; UNKNOWN if the read failed ── */}
       <Sev1Banner sev1={data?.sev1 ?? []} error={error} needsToken={needsToken} loaded={loaded} />
 
-      <RepoFilter repos={data?.repos ?? []} active={repoFilter} onPick={setRepoFilter} />
+      {loaded ? (
+        <RepoFilter
+          options={scope.options}
+          selected={selectedRepo}
+          unknown={scope.unknown}
+          ambiguous={scope.ambiguous}
+          onSelect={scope.select}
+        />
+      ) : null}
 
       <TruncationNotice data={data} />
 
@@ -266,7 +275,10 @@ export default function StandingPage() {
           error={error}
           loaded={loaded}
           empty={blocked.length === 0}
-          emptyCopy="Nothing is waiting on a decision. Rare — enjoy it."
+          emptyCopy={scoped(
+            'Nothing is waiting on a decision. Rare — enjoy it.',
+            (name) => `Nothing in ${name} is waiting on you.`,
+          )}
         >
           <ul style={s.list}>
             {(expanded.has('blocked') ? blocked : blocked.slice(0, SHOWN)).map((b: FleetIssue) => (
@@ -297,7 +309,11 @@ export default function StandingPage() {
           error={error}
           loaded={loaded}
           empty={loop.length === 0}
-          emptyCopy="No repo carries a ralph-* label, so there is no loop to watch."
+          emptyCopy={scoped(
+            'No repo carries a ralph-* label, so there is no loop to watch.',
+            (name) =>
+              `No loop is watched in ${name} — runs are read only for repos with a ralph-* labelled issue.`,
+          )}
         >
           <ul style={s.list}>
             {loop.map((l: LoopState) => (
@@ -340,7 +356,10 @@ export default function StandingPage() {
           error={error}
           loaded={loaded}
           empty={prs.length === 0}
-          emptyCopy="No PR is open anywhere in the fleet."
+          emptyCopy={scoped(
+            'No PR is open anywhere in the fleet.',
+            (name) => `No open PRs in ${name}.`,
+          )}
         >
           <ul style={s.list}>
             {(expanded.has('prs') ? prs : prs.slice(0, SHOWN)).map((pr) => (
@@ -432,7 +451,10 @@ export default function StandingPage() {
           error={error}
           loaded={loaded}
           empty={queue.length === 0}
-          emptyCopy="The ready pool is empty — the loop has nothing to pick up. Label something ralph-ready, biased to the revenue path."
+          emptyCopy={scoped(
+            'The ready pool is empty — the loop has nothing to pick up. Label something ralph-ready, biased to the revenue path.',
+            (name) => `Nothing in ${name} is queued for the loop.`,
+          )}
         >
           <ul style={s.list}>
             {(expanded.has('queue') ? queue : queue.slice(0, SHOWN)).map((q: FleetIssue) => (
@@ -470,7 +492,10 @@ export default function StandingPage() {
           error={error}
           loaded={loaded}
           empty={backlog.length === 0}
-          emptyCopy="Nothing else open. Every issue is blocked, parked or queued."
+          emptyCopy={scoped(
+            'Nothing else open. Every issue is blocked, parked or queued.',
+            (name) => `Nothing else open in ${name}.`,
+          )}
         >
           <ul style={s.list}>
             {(expanded.has('backlog') ? backlog : backlog.slice(0, BACKLOG_SHOWN)).map(
@@ -788,45 +813,6 @@ function Age({ days }: { days: number | null }) {
 }
 
 /**
- * Scope every lane to one repo. Reads from the sweep's own repo list, so the
- * chips cannot drift from what is actually being shown.
- */
-function RepoFilter({
-  repos,
-  active,
-  onPick,
-}: {
-  repos: string[];
-  active: string | null;
-  onPick: (repo: string | null) => void;
-}) {
-  if (repos.length < 2) return null;
-  return (
-    <div style={s.chips}>
-      <button
-        type="button"
-        className="hds-focus"
-        style={active === null ? s.chipOn : s.chipOff}
-        onClick={() => onPick(null)}
-      >
-        All
-      </button>
-      {repos.map((r) => (
-        <button
-          key={r}
-          type="button"
-          className="hds-focus"
-          style={active === r ? s.chipOn : s.chipOff}
-          onClick={() => onPick(r)}
-        >
-          {shortRepo(r)}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/**
  * Reach the rest of a truncated lane.
  *
  * It used to be static text — "+35 more" — which on a phone meant 35 issues
@@ -884,10 +870,15 @@ function Section({
   count: string;
   children: ReactNode;
 }) {
+  // Named by its heading, so each lane is a landmark a screen reader can jump
+  // between on a long phone scroll.
+  const headingId = useId();
   return (
-    <section style={s.section}>
+    <section style={s.section} aria-labelledby={headingId}>
       <div style={s.sectionHead}>
-        <h2 style={s.sectionTitle}>{title}</h2>
+        <h2 id={headingId} style={s.sectionTitle}>
+          {title}
+        </h2>
         <span style={s.sectionCount}>{count}</span>
       </div>
       {children}
@@ -1271,11 +1262,6 @@ const s = {
   },
 
   /* queue */
-  chips: {
-    display: 'flex',
-    flexWrap: 'wrap' as const,
-    gap: hds.space.px6,
-  },
   chip: {
     ...hds.typeStyles.labelTechnical,
     padding: `${hds.space.px4} ${hds.space.px8}`,
@@ -1345,24 +1331,6 @@ const s = {
   ageOld: {
     ...hds.typeStyles.labelTechnical,
     color: 'var(--semantic-color-feedback-warning)',
-  },
-  chipOn: {
-    ...hds.typeStyles.labelTechnical,
-    padding: `${hds.space.px4} ${hds.space.px8}`,
-    borderRadius: hds.borderRadius.sm,
-    border: '1px solid var(--semantic-color-border-strong)',
-    background: 'var(--semantic-color-surface-raised)',
-    color: 'var(--semantic-color-content-primary)',
-    cursor: 'pointer',
-  },
-  chipOff: {
-    ...hds.typeStyles.labelTechnical,
-    padding: `${hds.space.px4} ${hds.space.px8}`,
-    borderRadius: hds.borderRadius.sm,
-    border: '1px solid var(--semantic-color-border-default)',
-    background: 'transparent',
-    color: 'var(--semantic-color-content-secondary)',
-    cursor: 'pointer',
   },
   moreButton: {
     ...hds.typeStyles.caption,
