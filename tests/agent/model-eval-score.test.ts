@@ -3,20 +3,23 @@
  * tests/agent/model-eval-score.test.ts — ops#7.
  *
  * The verdict rule, written down as tests so "switch if quality holds and cost
- * drops" means one thing. From the issue's acceptance line: judged overall on
- * the same leads >= the production baseline, at lower cost. The guards that keep
- * it honest:
+ * drops" means one thing. Adrian's rule (2026-09-16, on #7): SWITCH when the lower
+ * bound of the 95% CI of (candidate − baseline) judged overall is ≥ −0.25 AND the
+ * candidate's judge pass rate is no lower than the baseline's, plus the cost and
+ * reliability conditions. The guards that keep it honest:
  *   - a model that fails to produce valid configs more often has not "held quality"
  *   - a model whose sites fail the judge's pass bar more often has not either, and
  *     the regenerations that failure triggers in production are part of its cost
- *   - quality is a confidence interval against a margin, not two raw means, so
- *     equally good models come out INCONCLUSIVE rather than as a coin flip
+ *   - quality is a confidence interval against a margin, not two raw means, so the
+ *     verdict is not a coin flip on noise
  */
 import { describe, it, expect } from 'vitest';
 import {
   MIN_LEADS,
   MIN_PAIRS,
+  SWITCH_MARGINS,
   compareArms,
+  describeMargins,
   costPerPassingSite,
   judgeAgreement,
   meanCI,
@@ -126,7 +129,7 @@ describe('compareArms', () => {
     expect(r.costRatio).toBeCloseTo(2 / 3);
   });
 
-  it('SWITCH on an exact tie in quality — the issue says ">= baseline"', () => {
+  it('SWITCH on an exact tie in quality', () => {
     const r = compareArms(
       paired(10, { overall: 4, cost: 0.06 }, { overall: 4, cost: 0.03 }),
       'opus-4-8',
@@ -146,9 +149,11 @@ describe('compareArms', () => {
   });
 
   it('honours an explicit non-inferiority margin on the quality check', () => {
+    // Every lead −0.125: inside the default −0.25 margin, outside a stricter one.
     const data = paired(10, { overall: 4.5, cost: 0.06 }, { overall: 4.375, cost: 0.03 });
-    expect(compareArms(data, 'opus-4-8', 'sonnet-5').verdict).toBe('KEEP');
-    expect(compareArms(data, 'opus-4-8', 'sonnet-5', { tolerance: 0.125 }).verdict).toBe('SWITCH');
+    expect(compareArms(data, 'opus-4-8', 'sonnet-5').verdict).toBe('SWITCH');
+    expect(compareArms(data, 'opus-4-8', 'sonnet-5', { tolerance: 0.1 }).verdict).toBe('KEEP');
+    expect(compareArms(data, 'opus-4-8', 'sonnet-5', { tolerance: 0 }).verdict).toBe('KEEP');
   });
 
   it('KEEP when it is not cheaper per passing site', () => {
@@ -211,6 +216,82 @@ describe('compareArms', () => {
     const r = compareArms(data, 'opus-4-8', 'sonnet-5');
     expect(r.pairs).toBe(6);
     expect(r.baselineMeanOverall).toBe(4);
+  });
+});
+
+describe("compareArms — Adrian's switch rule (2026-09-16) is the default", () => {
+  it('defaults to a −0.25 quality margin and no pass-rate shortfall', () => {
+    expect(SWITCH_MARGINS).toEqual({ tolerance: 0.25, passTolerance: 0 });
+    const r = compareArms(paired(10, {}, {}), 'opus-4-8', 'sonnet-5');
+    expect(r.tolerance).toBe(0.25);
+    expect(r.passTolerance).toBe(0);
+  });
+
+  it('SWITCH when the 95% CI lower bound sits exactly at −0.25', () => {
+    const r = compareArms(
+      paired(10, { overall: 4.5, cost: 0.06 }, { overall: 4.25, cost: 0.03 }),
+      'opus-4-8',
+      'sonnet-5',
+    );
+    expect(r.quality.low).toBeCloseTo(-0.25);
+    expect(check(r, 'quality').ok).toBe(true);
+    expect(r.verdict).toBe('SWITCH');
+  });
+
+  it('KEEP when the whole interval sits below −0.25', () => {
+    const r = compareArms(
+      paired(10, { overall: 4.5, cost: 0.06 }, { overall: 4.125, cost: 0.03 }),
+      'opus-4-8',
+      'sonnet-5',
+    );
+    expect(check(r, 'quality').ok).toBe(false);
+    expect(r.verdict).toBe('KEEP');
+  });
+
+  it('holds pass rate when the paired pass rates are equal, even though they differ lead by lead', () => {
+    // Both arms pass 8 of 10, on different leads: the per-lead Δ interval straddles 0,
+    // but "no lower than the baseline's" is a comparison of the two rates.
+    const data = grid(10, 1, (i) => ({
+      b: { overall: 4, pass: i < 8, cost: 0.06 },
+      c: { overall: 4, pass: i >= 2, cost: 0.001 },
+    }));
+    const r = compareArms(data, 'opus-4-8', 'sonnet-5');
+    expect(r.candidatePassRate).toBe(r.baselinePassRate);
+    expect(r.passDelta.low).toBeLessThan(0);
+    expect(check(r, 'pass-rate').ok).toBe(true);
+    expect(r.verdict).toBe('SWITCH');
+  });
+
+  it('KEEP when the candidate passes fewer sites, even with quality inside the margin', () => {
+    const data = grid(10, 1, (i) => ({
+      b: { overall: 4, pass: true, cost: 0.06 },
+      c: { overall: 4, pass: i !== 0, cost: 0.001 },
+    }));
+    const r = compareArms(data, 'opus-4-8', 'sonnet-5');
+    expect(check(r, 'quality').ok).toBe(true);
+    const passRate = check(r, 'pass-rate');
+    expect(passRate.ok).toBe(false);
+    expect(passRate.detail).toMatch(/90% vs baseline 100%/);
+    expect(r.verdict).toBe('KEEP');
+  });
+
+  it('a pass-rate shortfall is only allowed through an explicit --pass-tolerance', () => {
+    const data = grid(10, 1, (i) => ({
+      b: { overall: 4, pass: true, cost: 0.06 },
+      c: { overall: 4, pass: i !== 0, cost: 0.001 },
+    }));
+    const r = compareArms(data, 'opus-4-8', 'sonnet-5', { passTolerance: 0.1 });
+    expect(check(r, 'pass-rate').ok).toBe(true);
+    expect(r.verdict).toBe('SWITCH');
+  });
+
+  it('describeMargins states the rule in words the CLI and report share', () => {
+    expect(describeMargins()).toBe(
+      "Δ overall 95% CI lower bound ≥ −0.25 · pass rate no lower than the baseline's",
+    );
+    expect(describeMargins({ tolerance: 0.1, passTolerance: 0.05 })).toBe(
+      "Δ overall 95% CI lower bound ≥ −0.1 · pass rate ≥ the baseline's − 5 pts",
+    );
   });
 });
 
@@ -297,14 +378,15 @@ describe('compareArms — confidence interval, not a coin flip', () => {
       b: { overall: 4, cost: 0.06 },
       c: { overall: i % 2 ? 4.25 : 3.75, cost: 0.03 },
     }));
-    const strict = compareArms(data, 'opus-4-8', 'sonnet-5');
+    const strict = compareArms(data, 'opus-4-8', 'sonnet-5', { tolerance: 0 });
     expect(check(strict, 'quality').ok).toBeNull();
     expect(strict.verdict).toBe('INCONCLUSIVE');
     expect(strict.quality.low).toBeLessThan(0);
     expect(strict.quality.high).toBeGreaterThan(0);
     expect(check(strict, 'quality').detail).toMatch(/95% CI/);
 
-    expect(compareArms(data, 'opus-4-8', 'sonnet-5', { tolerance: 0.25 }).verdict).toBe('SWITCH');
+    // The default −0.25 margin clears the whole interval.
+    expect(compareArms(data, 'opus-4-8', 'sonnet-5').verdict).toBe('SWITCH');
   });
 
   it('KEEP only when the whole interval sits below the margin', () => {
@@ -321,9 +403,10 @@ describe('compareArms — confidence interval, not a coin flip', () => {
   });
 
   it('a definite failure on another check still means KEEP while quality is undecided', () => {
+    // Per-lead deltas alternate +0.25 / −0.75: mean −0.25, 95% CI about [−0.63, +0.13].
     const data = grid(10, 1, (i) => ({
       b: { overall: 4, cost: 0.03 },
-      c: { overall: i % 2 ? 4.25 : 3.75, cost: 0.06 },
+      c: { overall: i % 2 ? 4.25 : 3.25, cost: 0.06 },
     }));
     const r = compareArms(data, 'opus-4-8', 'sonnet-5');
     expect(check(r, 'quality').ok).toBeNull();
@@ -344,10 +427,10 @@ describe('compareArms — confidence interval, not a coin flip', () => {
     expect(check(r, 'sample').detail).toMatch(/3 leads/);
   });
 
-  it('two equally good arms almost never come out SWITCH or KEEP by chance', () => {
+  it('at margin 0, two equally good arms almost never pass or fail the quality check by chance', () => {
     const rand = mulberry32(7);
     const score = () => 3.5 + rand(); // same distribution for both arms
-    const tally = { SWITCH: 0, KEEP: 0, INCONCLUSIVE: 0 };
+    const tally = { holds: 0, fails: 0, undecided: 0 };
     const runs = 400;
     for (let run = 0; run < runs; run++) {
       const data = grid(8, 2, () => {
@@ -358,12 +441,29 @@ describe('compareArms — confidence interval, not a coin flip', () => {
           c: { overall: c, pass: c >= 4, cost: 0.03 },
         };
       });
-      tally[compareArms(data, 'opus-4-8', 'sonnet-5').verdict as keyof typeof tally]++;
+      const ok = check(compareArms(data, 'opus-4-8', 'sonnet-5', { tolerance: 0 }), 'quality').ok;
+      tally[ok === null ? 'undecided' : ok ? 'holds' : 'fails']++;
     }
-    // Was ~53% SWITCH / ~47% KEEP on raw means. A 95% interval puts each wrong call near 2.5%.
-    expect(tally.SWITCH / runs).toBeLessThan(0.05);
-    expect(tally.KEEP / runs).toBeLessThan(0.1);
-    expect(tally.INCONCLUSIVE / runs).toBeGreaterThan(0.85);
+    // Raw means split ~53/47. A 95% interval puts each wrong call near 2.5%.
+    expect(tally.holds / runs).toBeLessThan(0.05);
+    expect(tally.fails / runs).toBeLessThan(0.1);
+    expect(tally.undecided / runs).toBeGreaterThan(0.85);
+  });
+
+  it('under the default rule, a candidate truly 0.25 worse almost never comes out SWITCH', () => {
+    const rand = mulberry32(13);
+    const runs = 400;
+    let switched = 0;
+    for (let run = 0; run < runs; run++) {
+      // Every site passes and the candidate is cheaper, so quality alone decides.
+      const data = grid(8, 2, () => ({
+        b: { overall: 3.5 + rand(), cost: 0.06 },
+        c: { overall: 3.25 + rand(), cost: 0.03 },
+      }));
+      if (compareArms(data, 'opus-4-8', 'sonnet-5').verdict === 'SWITCH') switched++;
+    }
+    // The CI lower bound must clear −0.25 while the true Δ sits on it: ~2.5% at most.
+    expect(switched / runs).toBeLessThan(0.05);
   });
 });
 
@@ -446,6 +546,31 @@ describe('renderMarkdown', () => {
     expect(md).toMatch(/Judge swap/i);
     expect(md).toMatch(/95% CI/);
     expect(md).toMatch(/per passing site/);
+  });
+
+  it("states Adrian's switch rule by default, and any override the run used", () => {
+    const { units } = paired(10, { cost: 0.06 }, { cost: 0.03 });
+    const leads = Array.from({ length: 10 }, (_, i) => ({
+      index: i,
+      name: `L${i}`,
+      category: 'landscaping',
+      city: 'Boise',
+      region: 'ID',
+    }));
+    const md = renderMarkdown(baseReport(units, leads));
+    expect(md).toContain(describeMargins());
+    expect(md).toMatch(/lower bound of the 95% CI .*≥ −0\.25/);
+    expect(md).toMatch(/pass rate .*no lower than the baseline's/);
+    expect(md).toMatch(/Adrian.*2026-09-16/);
+    expect(md).not.toMatch(/overrides? the decided/i);
+
+    const overridden = renderMarkdown(baseReport(units, leads), {
+      tolerance: 0.1,
+      passTolerance: 0.05,
+    });
+    expect(overridden).toContain(describeMargins({ tolerance: 0.1, passTolerance: 0.05 }));
+    expect(overridden).toMatch(/≥ −0\.1\b/);
+    expect(overridden).toMatch(/overrides? the decided/i);
   });
 
   it('keeps business names and towns out — the report is pasted into a public issue', () => {

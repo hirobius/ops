@@ -73,14 +73,21 @@ describe('scripts/eval-agent-models.mjs', () => {
     expect(r.out).toMatch(/--from-db/);
     expect(r.out).toMatch(/--max-usd/);
     expect(r.out).toMatch(/--pass-tolerance/);
+    // The decided rule is the documented default.
+    expect(r.out).toMatch(/--tolerance <X>.*default 0\.25/);
+    expect(r.out).toMatch(/--pass-tolerance <X>.*default 0 = no lower than the baseline/);
   });
 
-  it('shows the non-inferiority margins the verdict will use before anything runs', () => {
+  it("shows the switch rule the verdict will use before anything runs — Adrian's by default", () => {
     const defaults = run(['--dry-run']);
-    expect(defaults.out).toMatch(/Margins: overall −0 · pass rate −0 pts/);
-    const set = run(['--dry-run', '--tolerance', '0.25', '--pass-tolerance', '0.1']);
+    expect(defaults.out).toMatch(
+      /Switch rule: Δ overall 95% CI lower bound ≥ −0\.25 · pass rate no lower than the baseline's \(Adrian, 2026-09-16\)/,
+    );
+    const set = run(['--dry-run', '--tolerance', '0.1', '--pass-tolerance', '0.1']);
     expect(set.code).toBe(0);
-    expect(set.out).toMatch(/Margins: overall −0\.25 · pass rate −10 pts/);
+    expect(set.out).toMatch(
+      /Switch rule: Δ overall 95% CI lower bound ≥ −0\.1 · pass rate ≥ the baseline's − 10 pts \(overrides the decided/,
+    );
   });
 
   it('rejects a pass-rate margin outside 0–1', () => {

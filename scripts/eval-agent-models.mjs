@@ -9,6 +9,12 @@
  * SWITCH / KEEP / INCONCLUSIVE verdict per candidate. The decision rule lives in
  * lib/agent/eval/score.mjs; the runner design in lib/agent/eval/run.mjs.
  *
+ * Switch rule by default (Adrian, 2026-09-16): SWITCH when the lower bound of the 95% CI
+ * of (candidate − Opus) judged overall is ≥ −0.25 AND the candidate's judge pass rate is
+ * no lower than Opus's, with generation failures no more frequent and a lower cost per
+ * passing site. --tolerance / --pass-tolerance override the two margins for one run; the
+ * report then says it departed from the decided rule.
+ *
  * THIS SPENDS MONEY: real, billed Claude API calls. --dry-run shows the plan and
  * a rough cost with no key and no calls; --max-usd caps the real spend.
  *
@@ -42,6 +48,7 @@ import { ARMS, DEFAULTS, planEval, runModelEval, validateLeads } from '../lib/ag
 import { FIXTURE_LEADS } from '../lib/agent/eval/fixture-leads.mjs';
 import { renderMarkdown } from '../lib/agent/eval/report.mjs';
 import { PRICING_SOURCE } from '../lib/agent/eval/pricing.mjs';
+import { SWITCH_MARGINS, describeMargins, isDecidedRule } from '../lib/agent/eval/score.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const KEYS_URL = 'https://console.anthropic.com/settings/keys';
@@ -60,11 +67,15 @@ Options:
   --trials <N>                  repeats per lead × arm (default ${DEFAULTS.trials})
   --max-usd <N>                 stop scheduling work at this real spend (default ${DEFAULTS.maxUsd})
   --concurrency <N>             parallel lead × arm units (default ${DEFAULTS.concurrency})
-  --tolerance <X>               non-inferiority margin on judged overall, 1–5 scale (default 0 = the issue's ">= baseline")
-  --pass-tolerance <X>          non-inferiority margin on judge pass rate, 0–1 (default 0; 0.1 = 10 points)
+  --tolerance <X>               quality margin: SWITCH needs the 95% CI lower bound of Δ judged overall ≥ −X, 1–5 scale (default ${SWITCH_MARGINS.tolerance})
+  --pass-tolerance <X>          points the candidate's judge pass rate may trail the baseline's, 0–1 (default ${SWITCH_MARGINS.passTolerance} = no lower than the baseline; 0.1 = 10 points)
   --out <dir>                   report directory (default temp/agent-model-eval)
   --dry-run                     print the plan and a rough cost — no key, no API calls
   --help
+
+Switch rule (Adrian, 2026-09-16): ${describeMargins(SWITCH_MARGINS)},
+plus generation failures no more frequent and a lower cost per passing site. Override the
+margins only for a one-off look; the decided rule is the one the verdict stands on.
 
 Arms: ${Object.entries(ARMS)
   .map(([id, a]) => `\n  ${id.padEnd(22)} ${a.label}`)
@@ -82,8 +93,8 @@ function parseArgs(argv) {
     trials: DEFAULTS.trials,
     maxUsd: DEFAULTS.maxUsd,
     concurrency: DEFAULTS.concurrency,
-    tolerance: 0,
-    passTolerance: 0,
+    tolerance: SWITCH_MARGINS.tolerance,
+    passTolerance: SWITCH_MARGINS.passTolerance,
     out: join(ROOT, 'temp', 'agent-model-eval'),
     fromDb: null,
     leadsFile: null,
@@ -212,10 +223,13 @@ async function main() {
       `Arms: ${o.arms.join(', ')} (baseline ${o.baseline}) · judge ${DEFAULTS.judgeModel}` +
         (o.judgeCandidates.length ? ` · judge candidates ${o.judgeCandidates.join(', ')}` : ''),
       `Trials: ${o.trials} · concurrency ${o.concurrency} · spend ceiling $${o.maxUsd}`,
-      `Margins: overall −${o.tolerance} · pass rate −${o.passTolerance * 100} pts` +
-        (o.tolerance || o.passTolerance
+      `Switch rule: ${describeMargins(o)} ` +
+        (isDecidedRule(o)
+          ? '(Adrian, 2026-09-16)'
+          : `(overrides the decided rule: ${describeMargins(SWITCH_MARGINS)})`) +
+        (o.tolerance
           ? ''
-          : ' (at 0, a candidate only as good as the baseline comes out INCONCLUSIVE)'),
+          : ' · at quality margin 0 a candidate only as good as the baseline usually comes out INCONCLUSIVE'),
       `Calls — enrich: ${plan.calls.enrich} · generate: ${plan.calls.generate} (+ repair retries) · ` +
         `reference judge: ${plan.calls.referenceJudge} · candidate judge: ${plan.calls.candidateJudge}`,
       `Rough upper estimate (every call at its max output, one generate attempt): $${plan.roughCostUsd.toFixed(2)}`,
