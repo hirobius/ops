@@ -39,6 +39,18 @@ describe('isRevenuePathFile', () => {
     expect(isRevenuePathFile('src/app/pages/ops/pitch/PitchPage.tsx')).toBe(true);
   });
 
+  it('counts outreach sends and the lead store/API — added 2026-09-16 (ops#238 merge boundary)', () => {
+    // One list, two consumers: this set is also the watchdog's supervised-path
+    // boundary, so these gate unattended merges as well as feed the metric.
+    expect(isRevenuePathFile('scripts/push-outreach.mjs')).toBe(true);
+    expect(isRevenuePathFile('lib/supabase/leads.mjs')).toBe(true);
+    expect(isRevenuePathFile('api/leads.ts')).toBe(true);
+    expect(isRevenuePathFile('api/pull-leads.ts')).toBe(true);
+    // Neighbours stay out: only the named files were added, not their dirs.
+    expect(isRevenuePathFile('lib/supabase/server.mjs')).toBe(false);
+    expect(isRevenuePathFile('api/ops-login.ts')).toBe(false);
+  });
+
   it('does not match unrelated paths', () => {
     expect(isRevenuePathFile('src/app/pages/ops/tasks/TasksPage.tsx')).toBe(false);
     expect(isRevenuePathFile('scripts/audit-deps.mjs')).toBe(false);
@@ -60,6 +72,10 @@ describe('isRevenuePathFile', () => {
         'api/lead-action.ts',
         'src/app/pages/ops/leads/',
         'src/app/pages/ops/pitch/',
+        'scripts/push-outreach.mjs',
+        'lib/supabase/leads.mjs',
+        'api/leads.ts',
+        'api/pull-leads.ts',
       ]),
     );
   });

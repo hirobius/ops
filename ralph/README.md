@@ -1,6 +1,6 @@
 # Ralph — the autonomous issue→PR loop
 
-Deterministic, auditable, human-approved. GitHub **is** the state store:
+Deterministic, auditable, human-approved on the revenue path. GitHub **is** the state store:
 `ralph-ready` label = queue · claim refs = locks · branches/PRs = work product
 · comments = audit trail. All state changes go through `gh` — nothing else.
 
@@ -10,8 +10,15 @@ Deterministic, auditable, human-approved. GitHub **is** the state store:
    queue drains, another runner is active, or errors repeat.
 2. Everything is audited: `ralph/runs.jsonl` (one JSON line per iteration) +
    full transcripts in `ralph/logs/`. Health check: `bash ralph/status.sh`.
-3. Merges need a human: label the PR `ralph-approved` — or **batch-approve**
-   by tagging issues `ralph-auto` alongside `ralph-ready` before you walk away.
+3. Merges follow ops#238: a green `ralph-gate` merges by default — the hourly
+   watchdog (`scripts/ralph-watchdog.mjs`) merges any the engine did not arm.
+   A diff touching a **supervised revenue path** (`REVENUE_PATH_PREFIXES` in
+   `scripts/metric-north-star-share.mjs`) waits for a human to label the PR
+   `ralph-approved`, and an unreadable diff never merges unapproved.
+   **Gap:** that boundary covers the watchdog's merge path only. The shared
+   engine (`hirobius/ralph` `ralph-gate-reusable.yml@v1`) still arms
+   auto-merge for an issue tagged `ralph-auto` with no path check (deferred,
+   ops#238) — so never `ralph-auto` an issue that touches a supervised path.
 4. Ctrl-C is always safe; state lives in GitHub and the next run reconciles.
 5. Knobs live in `ralph/config.env` (timeout, attempt cap, PR wait).
 
@@ -28,8 +35,8 @@ error (bounded backoff, never silent).
 |---|---|---|
 | `ralph-ready` | human | queued for the loop (the governor) |
 | `p0`–`p3` | human | priority; selector sorts p0→p3 then issue # |
-| `ralph-auto` | human | batch pre-approval: PR auto-merges after gate + AI review |
-| `ralph-approved` | human | per-PR approval: arms auto-merge |
+| `ralph-auto` | human | engine fast-path: auto-merge arms right after gate + AI review — **no supervised-path check yet** (ops#238), so never on revenue-path work |
+| `ralph-approved` | human | per-PR approval: arms auto-merge; the only way a supervised revenue-path diff merges (ops#238) |
 | `ralph-wip` | loop | claimed, in progress (claim ref is the real lock) |
 | `ralph-parked` | loop | gave up with a reason — re-add `ralph-ready` to retry |
 | `needs-adrian` | loop | malformed/blocked on a human (e.g. no acceptance criteria) |

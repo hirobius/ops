@@ -18,8 +18,8 @@
  * It only performs actions that are mechanical and safe to do unattended:
  *   merge      — the gate is green and the auto-merge simply did not arm, and
  *                the diff clears ops#238's boundary: no supervised revenue-path
- *                file, or the PR carries ralph-approved. An unreadable diff
- *                never merges.
+ *                file (a rename counts on its old path too), or the PR carries
+ *                ralph-approved. An unreadable diff never merges.
  *   abandon    — close a PR that cannot proceed, so the queue unblocks
  *   dispatch   — re-dispatch ralph.yml when the chain died silently
  *
@@ -30,16 +30,32 @@
  * That line is deliberate. A watchdog that "fixes" red CI unattended is how a
  * test gets skipped at 3am.
  *
+ * "Green" means the `ralph-gate` COMMIT STATUS — the check branch protection
+ * requires — never the engine's `ralph-gate / ralph-gate` Actions check run,
+ * which exits 0 even when it sets the status to failure (PR #325).
+ *
+ * SCOPE: this is the watchdog's own merge path only. The shared engine
+ * (hirobius/ralph ralph-gate-reusable.yml@v1) still arms auto-merge for a PR
+ * whose issue carries ralph-auto WITHOUT any path check; closing that is the
+ * deferred engine-side half of ops#238.
+ *
  * Usage:
  *   node scripts/ralph-watchdog.mjs                 # dry run (default)
  *   node scripts/ralph-watchdog.mjs --json          # machine-readable
  *   node scripts/ralph-watchdog.mjs --apply         # actually act
  *
- * Auth: GITHUB_TOKEN (or GH_TOKEN) with contents+issues+pull-requests+actions.
- * Inside GitHub Actions the job's own GITHUB_TOKEN is sufficient.
+ * Auth: GITHUB_TOKEN (or GH_TOKEN) with contents+issues+pull-requests+actions,
+ * plus statuses:read and checks:read. Inside GitHub Actions the job's own
+ * GITHUB_TOKEN is sufficient, given those in ralph-watchdog.yml's permissions.
  */
 
-import { decideWatchdogAction, isMutating, ACTION } from '../lib/ops/ralph-watchdog.mjs';
+import {
+  decideWatchdogAction,
+  isMutating,
+  ACTION,
+  DIFF_UNREADABLE,
+  PR_FILES_API_CAP,
+} from '../lib/ops/ralph-watchdog.mjs';
 // ops#238's supervised paths ARE the revenue path — one list, two consumers.
 import { isRevenuePathFile } from './metric-north-star-share.mjs';
 
@@ -47,13 +63,14 @@ const REPO = process.env.RALPH_WATCHDOG_REPO || 'hirobius/ops';
 const API = 'https://api.github.com';
 const READY_LABEL = 'ralph-ready';
 const APPROVE_LABEL = 'ralph-approved';
+/** The required status context, matched exactly, and a substring of the engine check run's name. */
 const GATE_NAME = 'ralph-gate';
-/** One page of PR files. A full page may be truncated, so it counts as unreadable. */
-const PR_FILES_PAGE = 100;
+/** GitHub's per_page maximum for pulls/{n}/files. */
+const PR_FILES_PER_PAGE = 100;
 
 const TOKEN_HINT =
   'GITHUB_TOKEN (or GH_TOKEN) is missing, expired, or lacks scope. It needs contents, ' +
-  'issues, pull-requests and actions on ' +
+  'issues, pull-requests and actions, plus read on commit statuses and checks, on ' +
   REPO +
   '. Create a fine-grained token at https://github.com/settings/personal-access-tokens — ' +
   'inside GitHub Actions the job token already suffices.';
@@ -84,8 +101,12 @@ export function makeGitHubPort({ fetchImpl = globalThis.fetch, token } = {}) {
   return {
     listOpenPrs: () => call(`/repos/${REPO}/pulls?state=open&per_page=100`),
     listCheckRuns: (sha) => call(`/repos/${REPO}/commits/${sha}/check-runs?per_page=100`),
+    // Latest status per context. A context missing from page 1 reads as
+    // pending, which never merges — so no pagination is needed to stay safe.
+    getCombinedStatus: (sha) => call(`/repos/${REPO}/commits/${sha}/status?per_page=100`),
     getIssue: (n) => call(`/repos/${REPO}/issues/${n}`),
-    listPrFiles: (n) => call(`/repos/${REPO}/pulls/${n}/files?per_page=${PR_FILES_PAGE}`),
+    listPrFiles: (n, page) =>
+      call(`/repos/${REPO}/pulls/${n}/files?per_page=${PR_FILES_PER_PAGE}&page=${page}`),
     listReadyIssues: () =>
       call(`/repos/${REPO}/issues?state=open&labels=${READY_LABEL}&per_page=100`),
     listRuns: () => call(`/repos/${REPO}/actions/workflows/ralph.yml/runs?per_page=10`),
@@ -114,6 +135,52 @@ export function makeGitHubPort({ fetchImpl = globalThis.fetch, token } = {}) {
 }
 
 /**
+ * The `ralph-gate` verdict from the combined commit status. success → success;
+ * failure or error → failure; pending or no such context → pending (never
+ * merges; staleness is still measured from the check run).
+ */
+function gateFromStatus(combined) {
+  const status = (combined?.statuses || []).find((s) => s.context === GATE_NAME);
+  if (status?.state === 'success') return 'success';
+  if (status?.state === 'failure' || status?.state === 'error') return 'failure';
+  return 'pending';
+}
+
+/**
+ * Read the whole diff, page by page, and return the paths under a supervised
+ * (revenue) path — a rename counts on BOTH its new and its previous path, or
+ * moving a file out of a supervised dir would slip through.
+ *
+ * Fails closed with `supervisedFiles: null`: on any API error or malformed page
+ * (transient — the next tick retries), and when every page up to GitHub's
+ * 3000-file cap comes back full (permanent — the API cannot list the rest).
+ */
+async function readSupervisedFiles(port, prNumber) {
+  const unreadable = (why) => ({ supervisedFiles: null, diffUnreadable: why });
+  const supervised = new Set();
+  const maxPages = Math.ceil(PR_FILES_API_CAP / PR_FILES_PER_PAGE);
+  for (let page = 1; page <= maxPages; page++) {
+    let files;
+    try {
+      files = await port.listPrFiles(prNumber, page);
+    } catch {
+      return unreadable(DIFF_UNREADABLE.API_ERROR);
+    }
+    if (!Array.isArray(files)) return unreadable(DIFF_UNREADABLE.API_ERROR);
+    for (const f of files) {
+      if (typeof f?.filename !== 'string') return unreadable(DIFF_UNREADABLE.API_ERROR);
+      for (const path of [f.filename, f.previous_filename]) {
+        if (typeof path === 'string' && isRevenuePathFile(path)) supervised.add(path);
+      }
+    }
+    if (files.length < PR_FILES_PER_PAGE) {
+      return { supervisedFiles: [...supervised], diffUnreadable: null };
+    }
+  }
+  return unreadable(DIFF_UNREADABLE.FILE_CAP);
+}
+
+/**
  * Collect the facts the rule needs. Exported so it can be tested against an
  * injected port with no network.
  */
@@ -127,8 +194,10 @@ export async function gatherFacts(port, nowMs) {
 
   const ralphPrs = [];
   for (const p of prs.filter((x) => (x.head?.ref || '').startsWith('ralph/'))) {
+    // The verdict is the required commit status; the check run only dates it.
+    const gateConclusion = gateFromStatus(await port.getCombinedStatus(p.head.sha));
     const checks = await port.listCheckRuns(p.head.sha);
-    const gate = (checks?.check_runs || []).find((c) => (c.name || '').includes(GATE_NAME));
+    const gateRun = (checks?.check_runs || []).find((c) => (c.name || '').includes(GATE_NAME));
     const m = /^ralph\/issue-(\d+)/.exec(p.head.ref);
     const issueNumber = m ? Number(m[1]) : null;
 
@@ -141,17 +210,9 @@ export async function gatherFacts(port, nowMs) {
       }
     }
 
-    // Fail closed: an unreadable or possibly truncated diff is `null`, which
-    // the rule never merges without ralph-approved.
-    let supervisedFiles = null;
-    try {
-      const files = await port.listPrFiles(p.number);
-      if (Array.isArray(files) && files.length < PR_FILES_PAGE) {
-        supervisedFiles = files.map((f) => f.filename).filter((name) => isRevenuePathFile(name));
-      }
-    } catch {
-      supervisedFiles = null;
-    }
+    // Fail closed: an unreadable diff is `null`, which the rule never merges
+    // without ralph-approved.
+    const { supervisedFiles, diffUnreadable } = await readSupervisedFiles(port, p.number);
 
     ralphPrs.push({
       number: p.number,
@@ -160,11 +221,12 @@ export async function gatherFacts(port, nowMs) {
       issueNumber,
       draft: Boolean(p.draft),
       mergeableState: p.mergeable_state,
-      gateConclusion: gate ? (gate.status === 'completed' ? gate.conclusion : 'pending') : null,
-      gatePendingMinutes: gate?.started_at ? minutesSince(gate.started_at, nowMs) : 0,
+      gateConclusion,
+      gatePendingMinutes: gateRun?.started_at ? minutesSince(gateRun.started_at, nowMs) : 0,
       selfhealAttempted: (p.labels || []).some((l) => l.name === 'ralph-selfheal-attempted'),
       prApproved: (p.labels || []).some((l) => l.name === APPROVE_LABEL),
       supervisedFiles,
+      diffUnreadable,
       issueClosed,
     });
   }
@@ -201,6 +263,32 @@ export async function applyDecision(port, decision) {
   }
 }
 
+/**
+ * The `--json` report. PR fields describe the PR the decision acted on, and are
+ * null when there is none — so a reader can tell "awaiting approval on these
+ * files" from "no PR" without re-deriving the rule.
+ */
+export function buildReport({ decision, facts, apply, performed }) {
+  const pr = decision.pr;
+  return {
+    ok: true,
+    dryRun: !apply,
+    action: decision.action,
+    idleReason: decision.idleReason ?? null,
+    reason: decision.reason,
+    pr: pr?.number ?? null,
+    supervisedFiles: pr ? (pr.supervisedFiles ?? null) : null,
+    diffUnreadable: pr ? (pr.diffUnreadable ?? null) : null,
+    prApproved: pr ? pr.prApproved === true : null,
+    performed,
+    facts: {
+      openRalphPrs: facts.openRalphPrs.map((p) => p.number),
+      readyIssueCount: facts.readyIssueCount,
+      runInProgress: facts.runInProgress,
+    },
+  };
+}
+
 async function main() {
   const argv = process.argv.slice(2);
   const jsonMode = argv.includes('--json');
@@ -224,21 +312,9 @@ async function main() {
     let performed = null;
     if (apply && isMutating(decision)) performed = await applyDecision(port, decision);
 
-    const out = {
-      ok: true,
-      dryRun: !apply,
-      action: decision.action,
-      reason: decision.reason,
-      pr: decision.pr?.number ?? null,
-      performed,
-      facts: {
-        openRalphPrs: facts.openRalphPrs.map((p) => p.number),
-        readyIssueCount: facts.readyIssueCount,
-        runInProgress: facts.runInProgress,
-      },
-    };
-    if (jsonMode) console.log(JSON.stringify(out, null, 2));
-    else {
+    if (jsonMode) {
+      console.log(JSON.stringify(buildReport({ decision, facts, apply, performed }), null, 2));
+    } else {
       console.log(`ralph-watchdog: ${decision.action.toUpperCase()}${apply ? '' : ' (dry run)'}`);
       console.log(`  ${decision.reason}`);
       if (performed) console.log(`  → ${performed}`);

@@ -13,8 +13,9 @@
  *
  * REVENUE_PATH_PREFIXES is the one reviewable definition of "revenue path" —
  * changing what counts is a deliberate edit to this constant, not a drifting
- * interpretation. Meant to be reused by the #238 auto-merge path allowlist
- * once that lands, rather than duplicated.
+ * interpretation. It is also the #238 supervised-path merge boundary, reused
+ * (not duplicated) by scripts/ralph-watchdog.mjs — so an edit here changes
+ * what may merge unattended, not only what the metric counts.
  *
  * DEFAULT_TARGET_SHARE is a starting instrument threshold, not a calibrated
  * policy — Adrian can retune it (or pass --target) once a few windows of
@@ -55,6 +56,14 @@ export const REVENUE_PATH_PREFIXES = [
   // Added 2026-09-15 with /ops/pitch: the call sheet is where a built site
   // becomes a conversation, which is as revenue-path as the generator.
   'src/app/pages/ops/pitch/',
+  // Added 2026-09-16 (Adrian, ops#238): the real send, the lead store, and the
+  // lead intake API. This list is also the watchdog's supervised-path merge
+  // boundary (scripts/ralph-watchdog.mjs), so these now need ralph-approved to
+  // merge unattended, not just count toward the metric.
+  'scripts/push-outreach.mjs',
+  'lib/supabase/leads.mjs',
+  'api/leads.ts',
+  'api/pull-leads.ts',
 ];
 
 /** Starting instrument threshold — see module header. */
