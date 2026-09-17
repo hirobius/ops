@@ -21,11 +21,15 @@
  *     authenticated-identity feed, so the repo set is DISCOVERED: a repo joins
  *     this view by existing, across every owner the token can see.
  *
- * Deliberately NOT a task board. /ops/tasks is where work gets moved; this page
- * is read-only and exists so the fleet can be understood without operating it.
  * It leads with the chain because the fleet's recurring failure is aim, not
  * capability — #185 sat p0 and unqueued for 64 days, then shipped in two hours
  * once it was labelled (ops#274).
+ *
+ * It is also where work gets moved: /ops/tasks and /ops/projects redirect here,
+ * and every issue row carries the same mirror-free actions, which write labels
+ * straight to GitHub (lib/tasks/actions.mjs). The two that act on the loop
+ * rather than on a label ask first — `run` jumps the queue and steals any
+ * claim, and arming `auto` merges with no supervised-path check (ops#238).
  *
  * Nothing here can go stale the way a hand-maintained status table does; the
  * one it replaced had drifted on three separate facts at once. Every lane
@@ -47,6 +51,7 @@ import {
   type DeployProject,
   type FleetStatus,
   type FleetIssue,
+  type LoopState,
   type StandingAction,
 } from '../ralphStatus';
 import { deriveChain } from '../../../../../lib/chain/evidence.mjs';
@@ -97,16 +102,41 @@ interface Chain {
 }
 
 export default function StandingPage() {
-  const { data, error } = usePoll<FleetStatus>(fetchFleetStatus, {
+  const { data, error, refetch } = usePoll<FleetStatus>(fetchFleetStatus, {
     intervalMs: POLL_MS,
     offlineIntervalMs: POLL_MS * 3,
     requestTimeoutMs: 20_000,
   });
 
-  const blocked = data?.blocked ?? [];
-  const prs = data?.prs ?? [];
-  const queue = data?.queue ?? [];
-  const backlog = data?.backlog ?? [];
+  /**
+   * Which repo the lanes are scoped to, or null for the whole fleet.
+   *
+   * Derived from what the sweep returned, never configured — same rule as the
+   * repo set itself. A filter naming a repo that no longer has open issues
+   * would be a second place to keep in sync, so there isn't one.
+   */
+  const [repoFilter, setRepoFilter] = useState<string | null>(null);
+  /** Lanes the operator has expanded past their truncation, by lane name. */
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  const toggleLane = useCallback((lane: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(lane)) next.add(lane);
+      return next;
+    });
+  }, []);
+
+  const inScope = useCallback(
+    <T extends { repo: string }>(rows: T[]) =>
+      repoFilter ? rows.filter((r) => r.repo === repoFilter) : rows,
+    [repoFilter],
+  );
+
+  const blocked = inScope(data?.blocked ?? []);
+  const prs = inScope(data?.prs ?? []);
+  const queue = inScope(data?.queue ?? []);
+  const backlog = inScope(data?.backlog ?? []);
+  const loop = data?.loop ?? [];
   const needsToken = error?.includes('GITHUB_TOKEN') ?? false;
   /** A real payload has arrived — not merely "a request finished". */
   const loaded = data !== null;
@@ -127,33 +157,54 @@ export default function StandingPage() {
   });
 
   const [busy, setBusy] = useState<ReadonlySet<string>>(new Set());
-  const [note, setNote] = useState<{ text: string; ok: boolean } | null>(null);
+  /**
+   * Per-row action outcomes, keyed `owner/repo#n`.
+   *
+   * This was ONE note rendered at the top of the page. On a phone that is
+   * ~1500px above the button being tapped, so on 2026-09-16 three re-queues
+   * that each returned 200 and each changed the label on GitHub read as "the
+   * button does nothing" — the only broken part was the feedback. An outcome
+   * has to render where the thumb is, or from the operator's seat it does not
+   * exist.
+   */
+  const [acted, setActed] = useState<ReadonlyMap<string, ActionOutcome>>(new Map());
+  /**
+   * Rows `run` has already fired at, keyed `owner/repo#n`. The row does not
+   * pick up `ralph-wip` until the engine claims the issue, so without this a
+   * second tap in that window would dispatch the same issue twice.
+   */
+  const [dispatched, setDispatched] = useState<ReadonlySet<string>>(new Set());
 
   const act = useCallback(
-    async (repo: string, number: number, action: StandingAction, label: string) => {
+    async (
+      repo: string,
+      number: number,
+      action: StandingAction,
+      label: string,
+      priority?: string | null,
+    ) => {
       const id = `${repo}#${number}`;
       setBusy((prev) => new Set(prev).add(id));
-      const result = await actOnIssue(repo, number, action);
+      const result = await actOnIssue(repo, number, action, priority);
       setBusy((prev) => {
         const next = new Set(prev);
         next.delete(id);
         return next;
       });
-      // Never silent either way: the lane only re-reads on the next poll, so
-      // without this the tap looks like it did nothing for up to a minute.
-      if (result.ok) {
-        setNote({
-          text: `${label} — ${shortRepo(repo)}#${number}. Refreshes on the next poll.`,
-          ok: true,
-        });
-      } else {
-        setNote({
-          text: `${shortRepo(repo)}#${number}: ${result.error ?? 'action failed'}`,
-          ok: false,
-        });
-      }
+      setActed((prev) =>
+        new Map(prev).set(
+          id,
+          result.ok
+            ? { text: `${label} — GitHub updated.`, ok: true }
+            : { text: result.error ?? 'action failed', ok: false },
+        ),
+      );
+      if (result.ok && action === 'run_now') setDispatched((prev) => new Set(prev).add(id));
+      // Pull the change straight back instead of leaving the row sitting in the
+      // wrong lane for up to a full poll interval.
+      if (result.ok) refetch();
     },
-    [],
+    [refetch],
   );
 
   return (
@@ -169,11 +220,9 @@ export default function StandingPage() {
       {/* ── 0. Open sev1 (ops#317) — above everything; UNKNOWN if the read failed ── */}
       <Sev1Banner sev1={data?.sev1 ?? []} error={error} needsToken={needsToken} loaded={loaded} />
 
-      {note ? (
-        <p style={note.ok ? s.noteOk : s.noteBad} role="status">
-          {note.text}
-        </p>
-      ) : null}
+      <RepoFilter repos={data?.repos ?? []} active={repoFilter} onPick={setRepoFilter} />
+
+      <TruncationNotice data={data} />
 
       {/* ── 1. The chain ─────────────────────────────────────────────────── */}
       <Section title="The chain" count={`${chain.reachedEnd} paid`}>
@@ -220,47 +269,68 @@ export default function StandingPage() {
           emptyCopy="Nothing is waiting on a decision. Rare — enjoy it."
         >
           <ul style={s.list}>
-            {blocked.slice(0, SHOWN).map((b: FleetIssue) => (
-              <li key={`${b.repo}#${b.number}`} style={s.row}>
-                <a
-                  href={b.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hds-focus"
-                  style={s.rowLink}
-                >
-                  <span style={s.num}>#{b.number}</span>
-                  <span style={s.title}>{b.title}</span>
-                </a>
+            {(expanded.has('blocked') ? blocked : blocked.slice(0, SHOWN)).map((b: FleetIssue) => (
+              <IssueRow
+                key={`${b.repo}#${b.number}`}
+                issue={b}
+                busy={busy}
+                acted={acted}
+                dispatched={dispatched}
+                act={act}
+              />
+            ))}
+          </ul>
+        </Lane>
+        <MoreToggle
+          lane="blocked"
+          total={blocked.length}
+          shown={SHOWN}
+          expanded={expanded.has('blocked')}
+          onToggle={toggleLane}
+        />
+      </Section>
+
+      {/* ── 3. Is the loop turning ───────────────────────────────────────── */}
+      <Section title="The loop" count={loopCount(loop)}>
+        <Lane
+          needsToken={needsToken}
+          error={error}
+          loaded={loaded}
+          empty={loop.length === 0}
+          emptyCopy="No repo carries a ralph-* label, so there is no loop to watch."
+        >
+          <ul style={s.list}>
+            {loop.map((l: LoopState) => (
+              <li key={l.repo} style={s.row}>
                 <div style={s.metaRow}>
-                  {b.label ? (
-                    <Badge tone={b.label === 'ralph-parked' ? 'danger' : 'warning'}>
-                      {b.label}
-                    </Badge>
-                  ) : null}
-                  <span style={s.meta}>
-                    {shortRepo(b.repo)}
-                    {b.prio ? ` · ${b.prio}` : ''}
-                  </span>
-                  {b.label === 'ralph-parked' ? (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      disabled={busy.has(`${b.repo}#${b.number}`)}
-                      onClick={() => act(b.repo, b.number, 'ralph_requeue', 'Re-queued')}
-                    >
-                      {busy.has(`${b.repo}#${b.number}`) ? 're-queueing…' : 'Re-queue'}
-                    </Button>
-                  ) : null}
+                  <Badge tone={LOOP_TONE[l.state]}>{l.state}</Badge>
+                  <span style={s.meta}>{shortRepo(l.repo)}</span>
+                  <span style={s.meta}>{loopDetail(l)}</span>
                 </div>
+                {l.run ? (
+                  <a
+                    href={l.run.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hds-focus"
+                    style={s.rowLink}
+                  >
+                    <span style={s.num}>#{l.run.number}</span>
+                    <span style={s.title}>{l.run.title}</span>
+                  </a>
+                ) : null}
               </li>
             ))}
           </ul>
         </Lane>
-        {blocked.length > SHOWN ? <p style={s.more}>+{blocked.length - SHOWN} more</p> : null}
+        <p style={s.footnote}>
+          A park does not re-trigger the loop — only a merge to <code style={s.code}>main</code>{' '}
+          hops the chain, with a 6h watchdog behind it. An idle loop with a non-empty queue above is
+          waiting for one of those, not working.
+        </p>
       </Section>
 
-      {/* ── 3. In flight ─────────────────────────────────────────────────── */}
+      {/* ── 4. In flight ─────────────────────────────────────────────────── */}
       <Section
         title="In flight"
         count={laneCount(needsToken, error, loaded, prs.length, ['open PR', 'open PRs'])}
@@ -273,7 +343,7 @@ export default function StandingPage() {
           emptyCopy="No PR is open anywhere in the fleet."
         >
           <ul style={s.list}>
-            {prs.slice(0, SHOWN).map((pr) => (
+            {(expanded.has('prs') ? prs : prs.slice(0, SHOWN)).map((pr) => (
               <li key={`${pr.repo}#${pr.number}`} style={s.row}>
                 <a
                   href={pr.url}
@@ -293,11 +363,13 @@ export default function StandingPage() {
             ))}
           </ul>
         </Lane>
-        {prs.length > SHOWN ? (
-          <p style={s.more}>
-            +{prs.length - SHOWN} more open across the fleet, least recently touched
-          </p>
-        ) : null}
+        <MoreToggle
+          lane="prs"
+          total={prs.length}
+          shown={SHOWN}
+          expanded={expanded.has('prs')}
+          onToggle={toggleLane}
+        />
       </Section>
 
       {/* ── Deploys ──────────────────────────────────────────────────────── */}
@@ -347,7 +419,7 @@ export default function StandingPage() {
         <p style={s.notice}>{data.errors.map((e) => `${e.repo}: ${e.error}`).join(' · ')}</p>
       ) : null}
 
-      {/* ── 4. Queued ────────────────────────────────────────────────────── */}
+      {/* ── 5. Queued ────────────────────────────────────────────────────── */}
       <Section
         title="Queued for the loop"
         count={laneCount(needsToken, error, loaded, queue.length, [
@@ -362,30 +434,33 @@ export default function StandingPage() {
           empty={queue.length === 0}
           emptyCopy="The ready pool is empty — the loop has nothing to pick up. Label something ralph-ready, biased to the revenue path."
         >
-          <div style={s.chips}>
-            {queue.slice(0, 12).map((q) => (
-              <a
+          <ul style={s.list}>
+            {(expanded.has('queue') ? queue : queue.slice(0, SHOWN)).map((q: FleetIssue) => (
+              <IssueRow
                 key={`${q.repo}#${q.number}`}
-                href={q.url}
-                target="_blank"
-                rel="noreferrer"
-                className="hds-focus"
-                style={s.chip}
-                title={q.title}
-              >
-                #{q.number} {q.prio ?? ''}
-                {q.wip ? ' · working' : ''}
-              </a>
+                issue={q}
+                busy={busy}
+                acted={acted}
+                dispatched={dispatched}
+                act={act}
+              />
             ))}
-          </div>
+          </ul>
         </Lane>
+        <MoreToggle
+          lane="queue"
+          total={queue.length}
+          shown={SHOWN}
+          expanded={expanded.has('queue')}
+          onToggle={toggleLane}
+        />
         <p style={s.footnote}>
           Selector order mirrors <code style={s.code}>ralph/next.sh</code> exactly — this is the
           order the loop will actually take them in.
         </p>
       </Section>
 
-      {/* ── 5. The rest of the board ─────────────────────────────────────── */}
+      {/* ── 6. The rest of the board ─────────────────────────────────────── */}
       <Section
         title="Backlog"
         count={laneCount(needsToken, error, loaded, backlog.length, ['issue', 'issues'])}
@@ -398,42 +473,30 @@ export default function StandingPage() {
           emptyCopy="Nothing else open. Every issue is blocked, parked or queued."
         >
           <ul style={s.list}>
-            {backlog.slice(0, BACKLOG_SHOWN).map((b: FleetIssue) => (
-              <li key={`${b.repo}#${b.number}`} style={s.row}>
-                <a
-                  href={b.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hds-focus"
-                  style={s.rowLink}
-                >
-                  <span style={s.num}>#{b.number}</span>
-                  <span style={s.title}>{b.title}</span>
-                </a>
-                <div style={s.metaRow}>
-                  <span style={s.meta}>
-                    {shortRepo(b.repo)}
-                    {b.prio ? ` · ${b.prio}` : ''}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    disabled={busy.has(`${b.repo}#${b.number}`)}
-                    onClick={() => act(b.repo, b.number, 'queue_on', 'Queued')}
-                  >
-                    {busy.has(`${b.repo}#${b.number}`) ? 'queueing…' : 'Queue'}
-                  </Button>
-                </div>
-              </li>
-            ))}
+            {(expanded.has('backlog') ? backlog : backlog.slice(0, BACKLOG_SHOWN)).map(
+              (b: FleetIssue) => (
+                <IssueRow
+                  key={`${b.repo}#${b.number}`}
+                  issue={b}
+                  busy={busy}
+                  acted={acted}
+                  dispatched={dispatched}
+                  act={act}
+                />
+              ),
+            )}
           </ul>
         </Lane>
-        {backlog.length > BACKLOG_SHOWN ? (
-          <p style={s.more}>+{backlog.length - BACKLOG_SHOWN} more, lower priority</p>
-        ) : null}
+        <MoreToggle
+          lane="backlog"
+          total={backlog.length}
+          shown={BACKLOG_SHOWN}
+          expanded={expanded.has('backlog')}
+          onToggle={toggleLane}
+        />
         <p style={s.footnote}>
-          Live from GitHub, every repo the token can see. Queue writes the label straight to the
-          issue — no mirror, so it works on repos the importer never touched.
+          Live from GitHub, every repo the token can see. Actions write the label straight to the
+          issue — no mirror, so they work on repos the importer never touched.
         </p>
       </Section>
     </div>
@@ -441,6 +504,376 @@ export default function StandingPage() {
 }
 
 /* ── pieces ─────────────────────────────────────────────────────────────── */
+
+const PRIORITIES = ['p0', 'p1', 'p2', 'p3'] as const;
+
+/**
+ * One issue, in every lane.
+ *
+ * Every lane rendered its own subset before this: the queue was bare chips with
+ * no metadata and no actions, the backlog had one button, "waiting on you" had
+ * two. The same issue was more readable and more operable depending on which
+ * lane it happened to land in, for no reason an operator could see. One
+ * component means the row is the row.
+ */
+function IssueRow({
+  issue,
+  busy,
+  acted,
+  dispatched,
+  act,
+}: {
+  issue: FleetIssue;
+  busy: ReadonlySet<string>;
+  acted: ReadonlyMap<string, ActionOutcome>;
+  dispatched: ReadonlySet<string>;
+  act: (
+    repo: string,
+    number: number,
+    action: StandingAction,
+    label: string,
+    priority?: string | null,
+  ) => void;
+}) {
+  const id = `${issue.repo}#${issue.number}`;
+  const outcome = acted.get(id);
+  return (
+    <li style={outcome?.ok ? { ...s.row, ...s.rowActed } : s.row}>
+      <a href={issue.url} target="_blank" rel="noreferrer" className="hds-focus" style={s.rowLink}>
+        <span style={s.num}>#{issue.number}</span>
+        <span style={s.title}>{issue.title}</span>
+      </a>
+      {issue.excerpt ? <p style={s.excerpt}>{issue.excerpt}</p> : null}
+      <IssueMeta issue={issue} />
+      <IssueActions id={id} issue={issue} busy={busy} dispatched={dispatched} act={act} />
+      <RowResult outcome={outcome} />
+    </li>
+  );
+}
+
+/**
+ * The at-a-glance facts, in the order they change a decision: where it lives,
+ * how urgent it is called, how long it has actually waited, whether anyone is
+ * talking about it, and whether the loop will even accept it.
+ */
+function IssueMeta({ issue }: { issue: FleetIssue }) {
+  return (
+    <div style={s.metaRow}>
+      <span style={s.meta}>{shortRepo(issue.repo)}</span>
+      {issue.prio ? <span style={s.meta}>{issue.prio}</span> : null}
+      <Age days={issue.ageDays} />
+      {issue.quietDays !== null ? (
+        <span style={s.meta} title="Days since anything touched it">
+          quiet {issue.quietDays}d
+        </span>
+      ) : null}
+      {issue.comments > 0 ? (
+        <span style={s.meta} title={`${issue.comments} comments`}>
+          {issue.comments}💬
+        </span>
+      ) : null}
+      {issue.assignee ? <span style={s.meta}>@{issue.assignee}</span> : null}
+      {/* A DoD-less issue is parked on sight by ralph/next.sh. Saying so here
+          costs a word; discovering it costs a whole iteration. */}
+      {issue.hasDod ? null : (
+        <span
+          style={s.warn}
+          title="No `- [ ]` checklist or acceptance/DoD section — ralph/next.sh parks this on sight"
+        >
+          no DoD
+        </span>
+      )}
+      {issue.wip ? <Badge tone="info">wip</Badge> : null}
+      {issue.labels
+        .filter((l) => !PRIORITIES.includes(l as (typeof PRIORITIES)[number]))
+        .map((l) => (
+          <span key={l} style={s.labelChip}>
+            {l}
+          </span>
+        ))}
+    </div>
+  );
+}
+
+/**
+ * The baseline every row carries.
+ *
+ * The primary button is whatever this row's state makes it — Re-queue a parked
+ * issue, Unblock a gated one, Queue or Unqueue anything else — so one thumb
+ * position always does the obvious thing. The rest are the toggles the loop
+ * actually reads: `ralph-auto` arms self-merge, priority is what
+ * `ralph/next.sh` ranks on, and Run jumps the queue outright.
+ *
+ * Run and arming auto act on the loop, not on a label, so both ask first.
+ * Run is offered only on a row in the queue lane that no iteration holds and
+ * that carries a DoD — the rule the server re-checks against a fresh read
+ * before it dispatches — and stays disabled once it has fired. A dispatch
+ * skips ralph/next.sh, so its confirm names what that costs. Disarming auto
+ * stays one tap: taking a risk away should never cost more than adding it.
+ */
+export function IssueActions({
+  id,
+  issue,
+  busy,
+  dispatched,
+  act,
+}: {
+  id: string;
+  issue: FleetIssue;
+  busy: ReadonlySet<string>;
+  /** Rows `run` has already fired at this session, keyed `owner/repo#n`. */
+  dispatched: ReadonlySet<string>;
+  act: (
+    repo: string,
+    number: number,
+    action: StandingAction,
+    label: string,
+    priority?: string | null,
+  ) => void;
+}) {
+  const working = busy.has(id);
+  const name = `${shortRepo(issue.repo)}#${issue.number}`;
+  const go = (action: StandingAction, label: string, priority?: string | null) => () =>
+    act(issue.repo, issue.number, action, label, priority);
+  /** `go`, behind a confirm — cancelling sends nothing. */
+  const ask = (question: string, action: StandingAction, label: string) => () => {
+    if (window.confirm(question)) act(issue.repo, issue.number, action, label);
+  };
+
+  // In the queue lane (ralph-ready, not parked or gated), not held by an
+  // iteration, and with a DoD: an explicit dispatch steals any claim and skips
+  // ralph/next.sh, which would park a DoD-less issue on sight.
+  const runnable = issue.queued && !issue.wip && !issue.label && issue.hasDod;
+  const fired = dispatched.has(id);
+
+  const primary =
+    issue.label === 'ralph-parked'
+      ? { action: 'ralph_requeue' as const, note: 'Re-queued', text: 'Re-queue' }
+      : issue.label
+        ? { action: 'unblock' as const, note: 'Unblocked + queued', text: 'Unblock' }
+        : issue.queued
+          ? { action: 'queue_off' as const, note: 'Removed from the queue', text: 'Unqueue' }
+          : { action: 'queue_on' as const, note: 'Queued', text: 'Queue' };
+
+  return (
+    <div style={s.actions}>
+      <Button
+        size="sm"
+        variant="secondary"
+        disabled={working}
+        onClick={go(primary.action, primary.note)}
+        aria-label={`${primary.text} ${shortRepo(issue.repo)}#${issue.number}`}
+      >
+        {working ? '…' : primary.text}
+      </Button>
+
+      <Button
+        size="sm"
+        variant="tertiary"
+        disabled={working}
+        onClick={
+          issue.auto
+            ? go('auto_off_direct', 'Auto-merge off')
+            : ask(
+                `Arm auto-merge on ${name}?\n\nops#238: a green PR on this issue merges with NO ` +
+                  'supervised-path check — a diff that touches a revenue path merges without ' +
+                  'ralph-approved.',
+                'auto_on_direct',
+                'Auto-merge armed',
+              )
+        }
+        aria-label={`${issue.auto ? 'Disarm' : 'Arm'} auto-merge on ${name}`}
+      >
+        {issue.auto ? 'auto ✓' : 'auto'}
+      </Button>
+
+      {runnable ? (
+        <Button
+          size="sm"
+          variant="tertiary"
+          disabled={working || fired}
+          onClick={ask(
+            `Run the loop on ${name} now?\n\nThis dispatches ralph.yml at this issue and jumps ` +
+              'the queue. It skips ralph/next.sh: it may stack a second Ralph PR on one already ' +
+              'open, and the attempt budgets do not apply.',
+            'run_now',
+            'Dispatched — jumps the queue',
+          )}
+          aria-label={`Run the loop on ${name} now — jumps the queue`}
+        >
+          {fired ? 'dispatched' : 'run'}
+        </Button>
+      ) : null}
+
+      <div style={s.prioGroup} role="group" aria-label={`Priority for #${issue.number}`}>
+        {PRIORITIES.map((prio) => (
+          <button
+            key={prio}
+            type="button"
+            className="hds-focus"
+            style={issue.prio === prio ? s.prioOn : s.prioOff}
+            disabled={working}
+            aria-pressed={issue.prio === prio}
+            aria-label={`Set ${shortRepo(issue.repo)}#${issue.number} to ${prio}`}
+            onClick={() => act(issue.repo, issue.number, 'bump_priority', `Now ${prio}`, prio)}
+          >
+            {prio}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The page claims to show the whole board. When the sweep hit its cap it does
+ * not, and this is the only thing that says so — the cap used to reach nothing
+ * but `console.warn`.
+ */
+function TruncationNotice({ data }: { data: FleetStatus | null }) {
+  if (!data?.truncated) return null;
+  return (
+    <p style={s.truncated} role="status">
+      <strong style={s.strong}>This is not the whole board.</strong> The sweep hit its pagination
+      cap at {data.counts.openIssues} issues and more are open beyond it. Raise{' '}
+      <code style={s.code}>LIST_ISSUES_MAX_PAGES</code> in{' '}
+      <code style={s.code}>lib/github/issues.mjs</code> — each page is one more sequential request
+      inside the function&rsquo;s time budget, so raise it deliberately.
+    </p>
+  );
+}
+
+/** Badge tone per loop state — `unknown` is neutral, never a healthy green. */
+const LOOP_TONE = {
+  running: 'success',
+  failed: 'danger',
+  idle: 'neutral',
+  unknown: 'warning',
+} as const;
+
+/** The count beside "The loop": what is wrong, or that nothing is. */
+function loopCount(loop: LoopState[]): string {
+  if (!loop.length) return '';
+  const failed = loop.filter((l) => l.state === 'failed').length;
+  if (failed) return `${failed} failing`;
+  const running = loop.filter((l) => l.state === 'running').length;
+  if (running) return `${running} running`;
+  const unknown = loop.filter((l) => l.state === 'unknown').length;
+  if (unknown === loop.length) return 'unreadable';
+  return 'idle';
+}
+
+/**
+ * The one line under a loop row. An `unknown` row says WHY it is unknown —
+ * CLAUDE.md §4 records a whole iteration lost to reading a startup_failure as
+ * an engine regression when it was a permission wall, so the raw reason is
+ * worth more here than a tidy verdict.
+ */
+function loopDetail(l: LoopState): string {
+  if (l.state === 'running') return 'iteration in progress';
+  if (l.state === 'unknown') return l.error ? `unreadable — ${l.error}` : 'no runs found';
+  const since = l.quietHours === null ? 'unknown age' : `${l.quietHours}h ago`;
+  return l.state === 'failed' ? `${l.conclusion ?? 'failed'} · ${since}` : `last run ${since}`;
+}
+
+/**
+ * How long this has been open. Nothing else on the row carried a clock, which
+ * is how ops#185 sat p0 and unqueued for 64 days without the page ever saying
+ * so. Anything a month old is called out, because that is the threshold where
+ * "still open" stops being normal and starts being the finding.
+ */
+function Age({ days }: { days: number | null }) {
+  if (days === null) return null;
+  return <span style={days >= 30 ? s.ageOld : s.meta}>{days}d</span>;
+}
+
+/**
+ * Scope every lane to one repo. Reads from the sweep's own repo list, so the
+ * chips cannot drift from what is actually being shown.
+ */
+function RepoFilter({
+  repos,
+  active,
+  onPick,
+}: {
+  repos: string[];
+  active: string | null;
+  onPick: (repo: string | null) => void;
+}) {
+  if (repos.length < 2) return null;
+  return (
+    <div style={s.chips}>
+      <button
+        type="button"
+        className="hds-focus"
+        style={active === null ? s.chipOn : s.chipOff}
+        onClick={() => onPick(null)}
+      >
+        All
+      </button>
+      {repos.map((r) => (
+        <button
+          key={r}
+          type="button"
+          className="hds-focus"
+          style={active === r ? s.chipOn : s.chipOff}
+          onClick={() => onPick(r)}
+        >
+          {shortRepo(r)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Reach the rest of a truncated lane.
+ *
+ * It used to be static text — "+35 more" — which on a phone meant 35 issues
+ * existed and could not be got at without leaving for GitHub. A count that
+ * names work you cannot reach is a worse answer than no count.
+ */
+function MoreToggle({
+  lane,
+  total,
+  shown,
+  expanded,
+  onToggle,
+}: {
+  lane: string;
+  total: number;
+  shown: number;
+  expanded: boolean;
+  onToggle: (lane: string) => void;
+}) {
+  if (total <= shown) return null;
+  return (
+    <button type="button" className="hds-focus" style={s.moreButton} onClick={() => onToggle(lane)}>
+      {expanded ? `Show first ${shown}` : `Show all ${total}`}
+    </button>
+  );
+}
+
+/** What one tap did. `text` is the backend's own message when `ok` is false. */
+interface ActionOutcome {
+  text: string;
+  ok: boolean;
+}
+
+/**
+ * The outcome of a one-tap action, rendered INSIDE the row it belongs to.
+ *
+ * `role="status"` so a screen reader announces it; the visible line is what
+ * stops a successful write from looking like a dead button.
+ */
+function RowResult({ outcome }: { outcome: ActionOutcome | undefined }) {
+  if (!outcome) return null;
+  return (
+    <p style={outcome.ok ? s.rowOk : s.rowBad} role="status">
+      {outcome.text}
+    </p>
+  );
+}
 
 function Section({
   title,
@@ -836,11 +1269,6 @@ const s = {
     ...hds.typeStyles.caption,
     color: 'var(--semantic-color-content-secondary)',
   },
-  more: {
-    ...hds.typeStyles.caption,
-    margin: 0,
-    color: 'var(--semantic-color-content-secondary)',
-  },
 
   /* queue */
   chips: {
@@ -858,23 +1286,107 @@ const s = {
     whiteSpace: 'nowrap' as const,
   },
 
-  noteOk: {
+  excerpt: {
+    ...hds.typeStyles.caption,
+    margin: `${hds.space.px4} 0 0`,
+    color: 'var(--semantic-color-content-secondary)',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical' as const,
+    overflow: 'hidden',
+  },
+  labelChip: {
+    ...hds.typeStyles.caption,
+    padding: `0 ${hds.space.px4}`,
+    borderRadius: hds.borderRadius.sm,
+    border: '1px solid var(--semantic-color-border-default)',
+    color: 'var(--semantic-color-content-tertiary)',
+  },
+  warn: {
+    ...hds.typeStyles.labelTechnical,
+    color: 'var(--semantic-color-feedback-warning)',
+  },
+  actions: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    alignItems: 'center',
+    gap: hds.space.px6,
+    marginTop: hds.space.px6,
+  },
+  prioGroup: {
+    display: 'flex',
+    gap: '1px',
+  },
+  prioOn: {
+    ...hds.typeStyles.labelTechnical,
+    padding: `${hds.space.px4} ${hds.space.px6}`,
+    border: '1px solid var(--semantic-color-border-strong)',
+    background: 'var(--semantic-color-surface-raised)',
+    color: 'var(--semantic-color-content-primary)',
+    cursor: 'pointer',
+  },
+  prioOff: {
+    ...hds.typeStyles.labelTechnical,
+    padding: `${hds.space.px4} ${hds.space.px6}`,
+    border: '1px solid var(--semantic-color-border-default)',
+    background: 'transparent',
+    color: 'var(--semantic-color-content-tertiary)',
+    cursor: 'pointer',
+  },
+  truncated: {
     ...hds.typeStyles.bodySmall,
     margin: 0,
     padding: hds.space.px8,
     borderRadius: hds.borderRadius.sm,
-    borderLeft: '3px solid var(--semantic-color-feedback-success)',
+    borderLeft: '3px solid var(--semantic-color-feedback-warning)',
     background: 'var(--semantic-color-surface-raised)',
     color: 'var(--semantic-color-content-primary)',
   },
-  noteBad: {
-    ...hds.typeStyles.bodySmall,
-    margin: 0,
-    padding: hds.space.px8,
+  ageOld: {
+    ...hds.typeStyles.labelTechnical,
+    color: 'var(--semantic-color-feedback-warning)',
+  },
+  chipOn: {
+    ...hds.typeStyles.labelTechnical,
+    padding: `${hds.space.px4} ${hds.space.px8}`,
     borderRadius: hds.borderRadius.sm,
-    borderLeft: '3px solid var(--semantic-color-feedback-error)',
+    border: '1px solid var(--semantic-color-border-strong)',
     background: 'var(--semantic-color-surface-raised)',
     color: 'var(--semantic-color-content-primary)',
+    cursor: 'pointer',
+  },
+  chipOff: {
+    ...hds.typeStyles.labelTechnical,
+    padding: `${hds.space.px4} ${hds.space.px8}`,
+    borderRadius: hds.borderRadius.sm,
+    border: '1px solid var(--semantic-color-border-default)',
+    background: 'transparent',
+    color: 'var(--semantic-color-content-secondary)',
+    cursor: 'pointer',
+  },
+  moreButton: {
+    ...hds.typeStyles.caption,
+    padding: `${hds.space.px4} ${hds.space.px8}`,
+    borderRadius: hds.borderRadius.sm,
+    border: '1px solid var(--semantic-color-border-default)',
+    background: 'transparent',
+    color: 'var(--semantic-color-content-accent)',
+    cursor: 'pointer',
+    alignSelf: 'flex-start' as const,
+  },
+  /* A row that has been acted on recedes, so the eye moves to what is left. */
+  rowActed: {
+    opacity: 0.55,
+  },
+  rowOk: {
+    ...hds.typeStyles.caption,
+    margin: `${hds.space.px4} 0 0`,
+    color: 'var(--semantic-color-feedback-success)',
+  },
+  rowBad: {
+    ...hds.typeStyles.caption,
+    margin: `${hds.space.px4} 0 0`,
+    color: 'var(--semantic-color-feedback-error)',
   },
   notice: {
     ...hds.typeStyles.bodySmall,

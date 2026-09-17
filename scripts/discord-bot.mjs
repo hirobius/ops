@@ -277,7 +277,7 @@ async function fetchOpenIssues() {
         'fleet repos to .env.local to read live issue data.',
     );
   }
-  return port.listOpenIssues();
+  return (await port.listOpenIssues()).issues;
 }
 
 // Tiny fuzzy repo resolver for !backlog <name> — accepts partial / case-insensitive,

@@ -58,17 +58,75 @@ Claim before you start. Release when you stop, including when you stop
 unfinished. A stale claim is worse than no claim, because the next session
 believes it.
 
-| Subsystem                                                          | Held by                 | Since      | State                                                                                                                                                                                                                         |
-| ------------------------------------------------------------------ | ----------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lib/outreach/`, `lib/leads/`, lead scripts                        | _(nobody)_              | —          | **RELEASED 2026-09-16 — session closed out. Crawler MERGED (#346). Extraction proven on live content; never fetched a trades site (this container 403s all egress), so hit rate across the 223 lead sites is still unknown.** |
-| `docs/guardrails/`, `registry.json`                                | _(nobody)_              | —          | **FREE — #329 DONE (#349, ralph loop). #330 is open and carries `ralph-wip` — the loop holds it, do not start it.**                                                                                                           |
-| `lib/chain/`, `lib/supabase/leads.mjs`                             | _(nobody)_              | —          | **FREE — #322 done (#345)**                                                                                                                                                                                                   |
-| `docs/ai/`, `CLAUDE.md`                                            | _(nobody)_              | —          | **FREE — both sessions released 2026-09-16; budget 24.5KB of 25.0KB**                                                                                                                                                         |
-| client-site repo (3e: no `main` branch)                            | —                       | —          | **DONE 2026-09-16 — `main` created, default set**                                                                                                                                                                             |
-| `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)**                                                                                                   |
-| `scripts/ralph-watchdog.mjs`, `lib/ops/ralph-watchdog.mjs`         | _(nobody)_              | —          | **FREE — merged #375**                                                                                                                                                                                                        |
+| Subsystem                                                                         | Held by                 | Since      | State                                                                                                                                                                                                                         |
+| --------------------------------------------------------------------------------- | ----------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/outreach/`, `lib/leads/`, lead scripts                                       | _(nobody)_              | —          | **RELEASED 2026-09-16 — session closed out. Crawler MERGED (#346). Extraction proven on live content; never fetched a trades site (this container 403s all egress), so hit rate across the 223 lead sites is still unknown.** |
+| `docs/guardrails/`, `registry.json`                                               | _(nobody)_              | —          | **FREE — #329 DONE (#349, ralph loop). #330 is open and carries `ralph-wip` — the loop holds it, do not start it.**                                                                                                           |
+| `lib/chain/`, `lib/supabase/leads.mjs`                                            | _(nobody)_              | —          | **FREE — #322 done (#345)**                                                                                                                                                                                                   |
+| `docs/ai/`, `CLAUDE.md`                                                           | _(nobody)_              | —          | **FREE — both sessions released 2026-09-16; budget 24.5KB of 25.0KB**                                                                                                                                                         |
+| client-site repo (3e: no `main` branch)                                           | —                       | —          | **DONE 2026-09-16 — `main` created, default set**                                                                                                                                                                             |
+| `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery                | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)**                                                                                                   |
+| `scripts/ralph-watchdog.mjs`, `lib/ops/ralph-watchdog.mjs`                        | _(nobody)_              | —          | **FREE — merged #375**                                                                                                                                                                                                        |
+| `StandingPage`, `ralphStatus.ts`, `lib/tasks/fleet*.mjs`, `lib/github/issues.mjs` | _(nobody)_              | —          | **FREE — Merged as ops#367.**                                                                                                                                                                                                 |
 
 ## Messages — newest first
+
+### 2026-09-16 · ops-dashboard → all · session closed out; what is NOT finished
+
+**Nothing is in flight. `StandingPage` and `lib/github/issues.mjs` are free.**
+
+**The Standing work is merged as ops#367** (squash, 2026-09-17). Do not rebuild
+any of it — read it on `main`, not on its branch, which may be gone.
+
+**One contract change that will bite a caller you did not expect.**
+`listOpenIssues()` no longer returns an array. It returns
+`{ issues, truncated, fetched }`. `fleet-status.mjs`, `api/tasks.ts` and
+`scripts/discord-bot.mjs` were updated in ops#367; anything branched from `main`
+before it merged and calling `listOpenIssues()` is not. The reason it was worth breaking: `truncated` was
+computed and sent **only to `console.warn`**, so a fleet past 500 open issues
+would have silently under-reported itself on the page whose whole claim is that
+it shows the entire board.
+
+**Two findings VERIFIED and parked rather than filed** — both fail the intake bar
+because neither has a current reason to act:
+
+- `leads.qualified` is a stored flag written by a batch script, while every
+  neighbouring funnel stage tests a column's presence. **Queried it: 17 flagged,
+  17 at `lead_score >= 60`, zero rows disagreeing either way.** Exact today;
+  drifts the moment the scorer is reweighted without a full rescore.
+- `fetchRalphStatus()` / `?ralph=1` are referenced by nothing but their own test
+  — `/ops/tasks` redirected away on 2026-09-15. NOT deleted: out of scope, and
+  §4 says diff a deletion's premise against `main` first. It also still fans out
+  over the **hardcoded** `FLEET_REPOS`, the trap `?fleet=1` exists to avoid.
+
+**A DS bug ops cannot file.** `Button` documents `label` as its accessible name
+and emits no `aria-label` when children are present — verified in the rendered
+DOM, not the source. Every `<Button label="…">run</Button>` in the fleet
+announces only "run". Parked under Cross-repo; ops works around it locally.
+
+**HANDOFF was at its 25.0KB ceiling,** so the DS Alert Figma-drift item moved
+from Adrian's actions into `PARKED.md` Cross-repo — **relocated with full detail
+and a trigger, not dropped.** It is the same class as the Button bug: a
+design-system action that cannot be actioned from here.
+
+**The Playwright trap will cost the next session 15 minutes if it is not read.**
+`pnpm test:layout` fails **15/15**, on routes any given diff never touches,
+blaming missing browsers. That is CLAUDE.md §4's red herring exactly. The
+container ships chromium **r1194**; the repo pins Playwright 1.58.2, which wants
+**r1208** AND the newer layout. Fix, session-local:
+
+```
+ln -sfn chromium-1194 /opt/pw-browsers/chromium-1208
+ln -sfn chromium_headless_shell-1194 /opt/pw-browsers/chromium_headless_shell-1208
+ln -sfn chrome-linux /opt/pw-browsers/chromium-1194/chrome-linux64
+mkdir -p /opt/pw-browsers/chromium_headless_shell-1194/chrome-headless-shell-linux64
+ln -sfn ../chrome-linux/headless_shell \
+  /opt/pw-browsers/chromium_headless_shell-1194/chrome-headless-shell-linux64/chrome-headless-shell
+```
+
+Then 15/15 green in ~28s. The same missing Chrome makes `generate-strength-report`'s
+Lighthouse step fail on **every** commit here — it degrades to a partial score
+rather than blocking, so do not read that as a regression either.
 
 ### 2026-09-16 · ralph-dispatch → all · A TESTED wedge-watchdog, and why it is not a Routine
 

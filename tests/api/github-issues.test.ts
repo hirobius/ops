@@ -10,6 +10,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { makeGitHubPort } from '../../lib/github/issues.mjs';
+import { hasDodMarker } from '../../lib/tasks/ralph-parked.mjs';
 
 function rawIssue(n, repo = 'hirobius/ops') {
   return {
@@ -56,10 +57,12 @@ describe('makeGitHubPort().listOpenIssues — pagination', () => {
       .mockResolvedValueOnce(pageResponse(page2, null));
     vi.stubGlobal('fetch', fetchMock);
 
-    const issues = await makeGitHubPort().listOpenIssues();
+    const { issues, truncated, fetched } = await makeGitHubPort().listOpenIssues();
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(issues.length).toBe(150);
+    expect(fetched).toBe(150);
+    expect(truncated).toBe(false);
     expect(issues[0].number).toBe(1);
     expect(issues.at(-1).number).toBe(150);
   });
@@ -74,12 +77,16 @@ describe('makeGitHubPort().listOpenIssues — pagination', () => {
     vi.stubGlobal('fetch', fetchMock);
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    const issues = await makeGitHubPort().listOpenIssues();
+    const { issues, truncated } = await makeGitHubPort().listOpenIssues();
 
     expect(fetchMock).toHaveBeenCalledTimes(5);
     expect(issues.length).toBe(500);
     expect(warnSpy).toHaveBeenCalledTimes(1);
     expect(warnSpy.mock.calls[0][0]).toContain('pagination cap');
+    // The warning alone was the whole reporting path, and nobody reads a
+    // serverless console. `truncated` is what lets the page admit it is
+    // showing a partial board.
+    expect(truncated).toBe(true);
   });
 
   it('excludes pull requests and normalizes fields on a single page', async () => {
@@ -88,10 +95,63 @@ describe('makeGitHubPort().listOpenIssues — pagination', () => {
       .mockResolvedValue(pageResponse([rawIssue(1), { ...rawIssue(2), pull_request: {} }]));
     vi.stubGlobal('fetch', fetchMock);
 
-    const issues = await makeGitHubPort().listOpenIssues();
+    const { issues } = await makeGitHubPort().listOpenIssues();
 
     expect(issues).toHaveLength(1);
     expect(issues[0]).toMatchObject({ repo: 'hirobius/ops', number: 1 });
+  });
+
+  it('derives the read-at-a-glance metadata and never forwards the body', async () => {
+    const body = '## The gap\n\nSites self-register on deploy, no paste.\n\n## DoD\n- [ ] it works';
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          pageResponse([{ ...rawIssue(1), body, comments: 14, assignee: { login: 'adr-eng' } }]),
+        ),
+    );
+
+    const { issues } = await makeGitHubPort().listOpenIssues();
+
+    expect(issues[0].comments).toBe(14);
+    expect(issues[0].assignee).toBe('adr-eng');
+    expect(issues[0].hasDod).toBe(true);
+    // Markdown syntax carries no meaning at excerpt size — headings and
+    // checkboxes truncated mid-token read as noise.
+    expect(issues[0].excerpt).toBe('The gap Sites self-register on deploy, no paste. DoD it works');
+    // 500 bodies on a 60s poll is megabytes; the derived fields are the point.
+    expect(issues[0]).not.toHaveProperty('body');
+  });
+
+  it('reports hasDod false when the body has no checklist or DoD section — the loop parks those', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(pageResponse([{ ...rawIssue(1), body: 'Just a paragraph.' }])),
+    );
+    const { issues } = await makeGitHubPort().listOpenIssues();
+    expect(issues[0].hasDod).toBe(false);
+  });
+
+  it('agrees with ralph/next.sh on a DoD section that has no checklist', async () => {
+    // next.sh's has_dod_marker accepts an acceptance / DoD / definition-of-done
+    // section, not only `- [ ]`. A checklist-only test flagged these rows
+    // "no DoD" while the loop happily took them — the row must say what the
+    // loop will actually do, so it reuses the loop's own port of the regex.
+    const bodies = [
+      '## Acceptance criteria\n\nThe page renders the banner.',
+      'Definition of done: the cron is green for a week.',
+      '## DoD\nShip it.',
+    ];
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(pageResponse(bodies.map((body, i) => ({ ...rawIssue(i + 1), body })))),
+    );
+    const { issues } = await makeGitHubPort().listOpenIssues();
+    expect(issues.map((i: { hasDod: boolean }) => i.hasDod)).toEqual([true, true, true]);
+    for (const body of bodies) expect(hasDodMarker(body)).toBe(true);
   });
 });
 
@@ -540,5 +600,118 @@ describe('makeGitHubPort().dispatchWorkflow (ops#113 — "Run Ralph" board actio
         inputs: { issue: '113' },
       }),
     ).rejects.toThrow(/GITHUB_TOKEN/);
+  });
+
+  it('carries the HTTP status on the thrown error so a caller can tell 404 from 403', async () => {
+    // Standing's run reads the issue first with the same token; after that read
+    // succeeds, a dispatch 404 means "no ralph.yml here", not "rotate the token".
+    // It can only say so if the status survives the throw.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: { get: () => null },
+        text: async () => '',
+      }),
+    );
+
+    await expect(
+      makeGitHubPort()!.dispatchWorkflow({
+        owner: 'hirobius',
+        repo: 'ops',
+        workflow: 'ralph.yml',
+        inputs: { issue: '113' },
+      }),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+});
+
+describe('makeGitHubPort().getIssue (Standing run guard)', () => {
+  beforeEach(() => {
+    vi.stubEnv('GITHUB_TOKEN', 'test-token');
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  function issueFetch(body: string | null) {
+    return vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: { get: () => null },
+      json: async () => ({
+        number: 44,
+        state: 'open',
+        labels: [{ name: 'ralph-ready' }, { name: 'p1' }],
+        body,
+      }),
+    });
+  }
+
+  it('GETs one issue and returns its state, label names and DoD verdict — never the body', async () => {
+    const fetchMock = issueFetch('not forwarded');
+    vi.stubGlobal('fetch', fetchMock);
+
+    const issue = await makeGitHubPort()!.getIssue({ owner: 'hirobius', repo: 'ops', number: 44 });
+
+    expect(fetchMock.mock.calls[0][0]).toBe('https://api.github.com/repos/hirobius/ops/issues/44');
+    expect(issue).toEqual({
+      number: 44,
+      state: 'open',
+      labels: ['ralph-ready', 'p1'],
+      hasDod: false,
+    });
+  });
+
+  it("derives hasDod with next.sh's own has_dod_marker rule", async () => {
+    // run_now refuses a DoD-less issue because an explicit dispatch skips
+    // next.sh, which would have parked it on sight. The verdict must be the
+    // loop's, so a body the loop accepts is never refused here.
+    for (const [body, want] of [
+      ['## Acceptance\nthe page loads', true],
+      ['- [ ] ship it', true],
+      ['just prose', false],
+      [null, false],
+    ] as const) {
+      vi.stubGlobal('fetch', issueFetch(body));
+      const issue = await makeGitHubPort()!.getIssue({
+        owner: 'hirobius',
+        repo: 'ops',
+        number: 44,
+      });
+      expect(issue.hasDod).toBe(want);
+    }
+  });
+
+  it('throws an actionable token error on 401/403', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        headers: { get: () => null },
+        text: async () => '',
+      }),
+    );
+    await expect(
+      makeGitHubPort()!.getIssue({ owner: 'hirobius', repo: 'ops', number: 44 }),
+    ).rejects.toThrow(/GITHUB_TOKEN/);
+  });
+
+  it('throws with the status on any other failure', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: { get: () => null },
+        text: async () => 'Not Found',
+      }),
+    );
+    await expect(
+      makeGitHubPort()!.getIssue({ owner: 'hirobius', repo: 'ops', number: 9999 }),
+    ).rejects.toMatchObject({ status: 404 });
   });
 });

@@ -58,11 +58,11 @@ not read it to get oriented.
   Marking pitched stamps `contacted_at` + `contact_channel` — the evidence #321
   needs. Notes live in the `lead_notes` TABLE, never a column. Not a CRM.
 - **🪟 `/ops/standing` is the ONLY fleet surface.** Chain, waiting-on-you, in
-  flight, queue, backlog, deploys. `/ops/tasks` + `/ops/projects` redirect here.
+  flight, loop health, queue, backlog, deploys. `/ops/tasks` + `/ops/projects` redirect here.
   Its actions write labels straight to GitHub, bypassing the Supabase mirror on
   purpose — Standing lists repos the importer never touched. Stage 5 reports
   **stored vs live** `preview_url`s (#322); unreachable reads `unchecked`, never
-  `dead` — the usual cause is our egress, not the site.
+  `dead` — usually our egress, not the site.
 - **🎯 Revenue path is merged, unrun.** The generator takes real hours, address,
   photos and a contrast-checked palette. Spec: `docs/specs/leads-to-site.md`.
   Doctrine finding that still steers: **we have the machinery and mis-aim it.**
@@ -95,8 +95,6 @@ not read it to get oriented.
   renames plus an ops migration across ~41 files. No agent writes the changeset.
 - **Run the client onboarding prompt** → stands up the client repo to fleet
   spec + files its tasks.
-- **File the Alert Figma-drift issue** in the DS repo (not ops): tone-colored
-  title + border, danger→`circle-alert`; node 33:34.
 - **Run the ops-history PII scrub** — runbook in `REPO-PROCEDURES.md`; hygiene,
   not urgency.
 - **Remove `PORTAL_HMAC_SECRET` + `VITE_PORTAL_HMAC_SECRET` from Vercel** —
