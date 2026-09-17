@@ -21,7 +21,16 @@
  *        fetch (empty while stored keys exist, or a would-be mass-retire) —
  *        never mass-retire on one anomalous read. Scoped strictly to
  *        `github:*` keys; other sources are untouched.
- *        Success: { imported: n, retired: n, reconcile: 'ok' | 'skipped:<reason>' }
+ *
+ *        Also pages Discord (ops#51): a task whose `needs-adrian` label is
+ *        new since the last import (lib/tasks/needs-adrian-pager.mjs, a pure
+ *        before/after diff — no new column) fires one `notifyEvent`
+ *        (`approval_waiting`) with the issue's title + link. De-dup is the
+ *        diff itself, not a stamp — an already-tagged task never re-fires.
+ *        Fail-soft: the notify seam's file append targets `/tmp` here (the
+ *        deployed function's own tree is read-only) and any failure is
+ *        swallowed — a Discord hiccup must never fail the import.
+ *        Success: { imported: n, retired: n, paged: n, reconcile: 'ok' | 'skipped:<reason>' }
  *
  * Both methods are service-role + ops-gated, so no Supabase/GitHub credential
  * reaches the browser. In dev, GET is also served by scripts/tasks-middleware.mjs.
@@ -46,14 +55,22 @@ import {
   messageOf,
   type HandlerResult,
 } from '../lib/api/handler.js';
-import { listTasks, upsertTasks, listGithubTaskKeys, retireTasks } from '../lib/supabase/tasks.mjs';
+import {
+  listTasks,
+  upsertTasks,
+  listGithubTaskKeys,
+  listGithubTaskTags,
+  retireTasks,
+} from '../lib/supabase/tasks.mjs';
 import { mapIssuesToTasks } from '../lib/tasks/import-issues.mjs';
 import { orderRalphQueue } from '../lib/tasks/ralph-queue.mjs';
 import { buildFleetStatus } from '../lib/tasks/fleet-status.mjs';
 import { reconcileGithubTasks, reconcileGuard } from '../lib/tasks/reconcile-github-tasks.mjs';
+import { detectNewlyNeedsAdrian } from '../lib/tasks/needs-adrian-pager.mjs';
 import { parseParkedReason, hasDodMarker } from '../lib/tasks/ralph-parked.mjs';
 import { classifyWedged } from '../lib/tasks/ralph-wedge.mjs';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
+import { notifyEvent } from '../lib/ops/notify.mjs';
 
 const DEFAULT_LIMIT = 1000;
 const MAX_LIMIT = 2000;
@@ -184,6 +201,36 @@ function buildPrRow(
   };
 }
 
+/**
+ * Fires one `approval_waiting` notify per newly-`needs-adrian` task (ops#51)
+ * — fail-soft per row, since a notify hiccup must never fail the import that
+ * found it. The deployed function's own tree is read-only (Vercel Lambda:
+ * only `/tmp` is writable), so the notify seam's committed-log append is
+ * redirected there instead of its repo-root default.
+ */
+async function pageNeedsAdrian(
+  rows: Array<{ key: string; title: string; source_url?: string }>,
+): Promise<void> {
+  const ts = new Date().toISOString();
+  for (const row of rows) {
+    try {
+      await notifyEvent(
+        {
+          ts,
+          kind: 'approval_waiting',
+          title: `${row.title} — needs you`,
+          detail: `${row.key} labeled needs-adrian`,
+          url: row.source_url,
+          task: row.key,
+        },
+        { path: '/tmp/ops-events.jsonl' },
+      );
+    } catch (err) {
+      console.error(`needs-adrian pager: notify failed for ${row.key} — ${messageOf(err)}`);
+    }
+  }
+}
+
 export async function importIssuesHandler(
   sb: SupabaseClient,
   _req: VercelRequest,
@@ -210,8 +257,18 @@ export async function importIssuesHandler(
   }
 
   const rows = mapIssuesToTasks(issues);
+
+  // Read tags BEFORE the upsert overwrites them — the "before" side of the
+  // pager's transition diff (ops#51). Independent of the reconcile guard
+  // below: a suspect live fetch should still page a genuine label change.
+  const { data: existingTagRows, error: tagsError } = await listGithubTaskTags(sb);
+  if (tagsError) return { status: 500, body: { error: tagsError.message } };
+
   const { error: upsertError } = await upsertTasks(sb, rows);
   if (upsertError) return { status: 500, body: { error: upsertError.message } };
+
+  const newlyNeedsAdrian = detectNewlyNeedsAdrian(existingTagRows ?? [], rows);
+  await pageNeedsAdrian(newlyNeedsAdrian);
 
   const liveKeys = rows.map((row) => row.key);
   const { data: existingRows, error: listError } = await listGithubTaskKeys(sb);
@@ -222,7 +279,12 @@ export async function importIssuesHandler(
   if (!guard.ok) {
     return {
       status: 200,
-      body: { imported: rows.length, retired: 0, reconcile: `skipped:${guard.reason}` },
+      body: {
+        imported: rows.length,
+        retired: 0,
+        paged: newlyNeedsAdrian.length,
+        reconcile: `skipped:${guard.reason}`,
+      },
     };
   }
 
@@ -234,7 +296,12 @@ export async function importIssuesHandler(
 
   return {
     status: 200,
-    body: { imported: rows.length, retired: keysToRetire.length, reconcile: 'ok' },
+    body: {
+      imported: rows.length,
+      retired: keysToRetire.length,
+      paged: newlyNeedsAdrian.length,
+      reconcile: 'ok',
+    },
   };
 }
 
