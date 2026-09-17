@@ -10,6 +10,7 @@ const SCRIPT = join(dirname(fileURLToPath(import.meta.url)), '..', 'secret-scan-
 
 const BASE = 'a'.repeat(40);
 const HEAD = 'b'.repeat(40);
+const everyCommitPresent = () => true;
 
 let cleanup = [];
 afterEach(() => {
@@ -67,6 +68,7 @@ describe('resolveScanRange', () => {
     const result = resolveScanRange({
       eventName: 'pull_request',
       payload: { pull_request: { base: { sha: BASE }, head: { sha: HEAD } } },
+      commitExists: everyCommitPresent,
     });
     expect(result.logOpts).toBe(`${BASE}..${HEAD}`);
   });
@@ -75,6 +77,7 @@ describe('resolveScanRange', () => {
     const result = resolveScanRange({
       eventName: 'push',
       payload: { before: BASE, after: HEAD },
+      commitExists: everyCommitPresent,
     });
     expect(result.logOpts).toBe(`${BASE}..${HEAD}`);
   });
@@ -83,6 +86,7 @@ describe('resolveScanRange', () => {
     const result = resolveScanRange({
       eventName: 'push',
       payload: { before: '0'.repeat(40), after: HEAD },
+      commitExists: everyCommitPresent,
     });
     expect(result.logOpts).toBe(`-1 ${HEAD}`);
     expect(result.warning).toMatch(/only the pushed tip/i);

@@ -57,7 +57,9 @@ function requireCommit(sha, role, commitExists) {
   }
 }
 
-export function resolveScanRange({ eventName, payload, commitExists = () => true }) {
+// commitExists is deliberately required (no default): defaulting it to "yes"
+// would silently disable the missing-commit guard this module exists for.
+export function resolveScanRange({ eventName, payload, commitExists }) {
   if (eventName === 'pull_request') {
     const base = assertSha(payload.pull_request?.base?.sha, 'pull request base');
     const head = assertSha(payload.pull_request?.head?.sha, 'pull request head');

@@ -23,8 +23,8 @@ regexes = [
 # scan (ops#32). Path AND regex both have to match, so a real webhook pasted into
 # that file is still caught. The fixture-proof run is unaffected because it
 # scans a temp copy outside this path.
-# gitleaks 8.30.1 (the version CI pins) applies this. Older releases load the
-# config but ignore the exemption, so they still report the fixture.
+# Checked: gitleaks 8.30.1 (the version CI pins) applies it. 8.21.0 loads the
+# config but ignores the exemption, so it still reports the fixture.
 [[rules]]
 id = "slack-webhook-url"
 [[rules.allowlists]]
