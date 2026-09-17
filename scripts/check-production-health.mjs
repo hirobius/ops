@@ -33,7 +33,9 @@
  *                          https://hirobius-ops.vercel.app
  *   OPS_AGENT_KEY           required — machine-auth bearer token for headless
  *                          agents (lib/ops-auth.mjs); Adrian sets it in Vercel.
- *   SUPABASE_ACCESS_TOKEN   optional — enables the direct project-status check.
+ *   SUPABASE_ACCESS_TOKEN   optional — enables the direct project-status check. Only
+ *                          this script reads it (from the repo's Actions secrets
+ *                          when scheduled); nothing deployed on Vercel does.
  *   SUPABASE_PROJECT_REF    optional — defaults to the ops project (vvyccwxtcwvlusweenje).
  *
  * Scheduled caller: .github/workflows/production-health.yml (#318) runs this
@@ -47,12 +49,13 @@
  * @module check-production-health
  */
 
+import { appendFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { hasJsonFlag, emitResult, exitCodeFor } from './lib/gate-output.mjs';
 import { notifyEvent } from '../lib/ops/notify.mjs';
 
-const VERCEL_ENV_URL =
-  'https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables';
+const VERCEL_PROJECT_URL = 'https://vercel.com/adrian-6234s-projects/hirobius-ops';
+const VERCEL_ENV_URL = `${VERCEL_PROJECT_URL}/settings/environment-variables`;
 const SUPABASE_TOKENS_URL = 'https://supabase.com/dashboard/account/tokens';
 /** Where the scheduled caller (.github/workflows/production-health.yml, #318) reads its secrets. */
 const GITHUB_SECRETS_URL = 'https://github.com/hirobius/ops/settings/secrets/actions';
@@ -69,6 +72,27 @@ export const OPS_AGENT_KEY_FIX =
 
 function resumeUrl(projectRef) {
   return `https://supabase.com/dashboard/project/${projectRef}`;
+}
+
+/**
+ * Best-effort read of an ops API error body (`{ error, code? }`, per
+ * lib/api/handler.ts). Never throws: a non-JSON body (a platform error page)
+ * yields `{}`. The server's own message is truncated — it lands in Discord and
+ * in a public Actions log, and only needs to say what went wrong.
+ *
+ * @param {{ json: () => Promise<unknown> }} res
+ * @returns {Promise<{ error?: string, code?: string }>}
+ */
+async function errorBodyOf(res) {
+  try {
+    const body = /** @type {any} */ (await res.json());
+    const out = {};
+    if (typeof body?.error === 'string' && body.error.trim()) out.error = body.error.slice(0, 200);
+    if (typeof body?.code === 'string' && body.code.trim()) out.code = body.code.slice(0, 60);
+    return out;
+  } catch {
+    return {};
+  }
 }
 
 function violation(rule, message) {
@@ -120,10 +144,39 @@ export async function checkTasksEndpoint({ baseUrl, agentKey, projectRef, fetchI
   }
 
   if (!res.ok) {
+    const { error, code } = await errorBodyOf(res);
+    const said = [code, error].filter(Boolean).join(': ');
+    const head = `GET ${url} returned HTTP ${res.status}${said ? ` (${said})` : ''}`;
+
+    // lib/api/handler.ts withServiceClient: the deployment has no Supabase env.
+    if (code === 'ENV_MISSING_SUPABASE') {
+      return {
+        ok: false,
+        state: 'http_error',
+        message:
+          `${head} — the deployment cannot find its Supabase credentials. Set SUPABASE_URL and ` +
+          `SUPABASE_SERVICE_ROLE_KEY in Vercel (Production), then redeploy: ${VERCEL_ENV_URL}`,
+      };
+    }
+
+    // A paused or unreachable database surfaces here, not only as the empty
+    // 200: api/tasks.ts answers { status: 500, body: { error } } when listTasks
+    // fails, and a hung query times the function out (504).
+    if (res.status >= 500) {
+      return {
+        ok: false,
+        state: 'http_error',
+        message:
+          `${head} — the most likely cause is the Supabase database (paused on the free-tier ` +
+          `7-day idle timer, or unreachable). Check the project status and resume it: ` +
+          `${resumeUrl(projectRef)} — if the database is healthy, check the deployment: ${VERCEL_PROJECT_URL}`,
+      };
+    }
+
     return {
       ok: false,
       state: 'http_error',
-      message: `GET ${url} returned HTTP ${res.status} — check the deployment: https://vercel.com/adrian-6234s-projects/hirobius-ops`,
+      message: `${head} — check the deployment: ${VERCEL_PROJECT_URL}`,
     };
   }
 
@@ -179,8 +232,8 @@ export async function checkSupabaseProjectStatus({ projectRef, accessToken, fetc
       state: 'skipped',
       message:
         'SUPABASE_ACCESS_TOKEN not set — skipping the direct project-status check ' +
-        `(INACTIVE/COMING_UP/RESTORING detail). Create one at ${SUPABASE_TOKENS_URL} and set it ` +
-        `in Vercel to enable it: ${VERCEL_ENV_URL}`,
+        `(INACTIVE/COMING_UP/RESTORING detail). Create one at ${SUPABASE_TOKENS_URL} and add it ` +
+        `as the GitHub Actions secret the cron reads (nothing on Vercel uses it): ${GITHUB_SECRETS_URL}`,
     };
   }
 
@@ -201,7 +254,8 @@ export async function checkSupabaseProjectStatus({ projectRef, accessToken, fetc
       state: 'unauthorized',
       message:
         `Supabase Management API rejected SUPABASE_ACCESS_TOKEN (HTTP ${res.status}) — it may be ` +
-        `expired/revoked. Rotate it at ${SUPABASE_TOKENS_URL} and update it in Vercel: ${VERCEL_ENV_URL}`,
+        `expired/revoked. Rotate it at ${SUPABASE_TOKENS_URL} and update the GitHub Actions secret ` +
+        `the cron reads: ${GITHUB_SECRETS_URL}`,
     };
   }
 
@@ -298,19 +352,77 @@ export async function runHealthCheck({
 
   let notified = null;
   if (violations.length > 0) {
-    notified = await notify(
-      {
-        ts: now(),
-        kind: 'deploy_error',
-        title: 'check-production-health: /ops live data path failed',
-        detail: violations.map((v) => v.message).join('\n'),
-        task: 'ops#347',
-      },
-      { fetch: fetchImpl },
-    );
+    try {
+      notified = await notify(
+        {
+          ts: now(),
+          kind: 'deploy_error',
+          title: 'check-production-health: /ops live data path failed',
+          detail: violations.map((v) => v.message).join('\n'),
+          task: 'ops#347',
+        },
+        { fetch: fetchImpl },
+      );
+    } catch (e) {
+      // The Discord leg never throws, but the event-log append can. Keep the
+      // violations: a notify failure must not hide what was wrong.
+      notified = { appended: null, discord: { sent: false, reason: `notify threw: ${e.message}` } };
+    }
   }
 
   return { violations, checks, notified };
+}
+
+// ── Page delivery ────────────────────────────────────────────────────────────
+
+/**
+ * Did a failing run actually reach Discord? `notifyEvent` is fail-soft — it
+ * resolves `{ discord: { sent: false, reason } }` instead of throwing — so a
+ * dead webhook would otherwise leave a red run with no page and no trace.
+ *
+ * @param {Array<object>} violations
+ * @param {{ discord?: { sent: boolean, reason?: string } } | null} notified
+ * @returns {{ paged: boolean, undeliveredReason: string | null }}
+ */
+export function pageDelivery(violations, notified) {
+  if (violations.length === 0) return { paged: false, undeliveredReason: null };
+  const discord = notified?.discord;
+  if (discord?.sent) return { paged: true, undeliveredReason: null };
+  return {
+    paged: false,
+    undeliveredReason: discord?.reason || 'the notify seam returned no Discord result',
+  };
+}
+
+/** Escapes workflow-command data so a multi-line reason stays one annotation. */
+function escapeWorkflowData(text) {
+  return String(text).replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+}
+
+/**
+ * Hands the delivery outcome to the scheduled caller. Writes `paged=true|false`
+ * to `$GITHUB_OUTPUT` (the workflow's fallback page keys off it), and when a
+ * failing run's page did not go out, prints a GitHub `::error` annotation that
+ * names the variable and where to fix it.
+ *
+ * @param {{ paged: boolean, undeliveredReason: string | null }} delivery
+ * @param {{ env?: NodeJS.ProcessEnv, appendFile?: typeof appendFileSync, log?: (line: string) => void }} [opts]
+ */
+export function reportPageDelivery(
+  delivery,
+  { env = process.env, appendFile = appendFileSync, log = console.log } = {},
+) {
+  if (env.GITHUB_OUTPUT) appendFile(env.GITHUB_OUTPUT, `paged=${delivery.paged}\n`, 'utf8');
+  if (!delivery.undeliveredReason) return;
+  const message =
+    `check-production-health failed but its Discord page was not delivered: ` +
+    `${delivery.undeliveredReason} — check that DISCORD_WEBHOOK_URL still points at a live ` +
+    `webhook and update the GitHub Actions secret: ${GITHUB_SECRETS_URL}`;
+  log(
+    env.GITHUB_ACTIONS === 'true'
+      ? `::error title=Discord page not delivered::${escapeWorkflowData(message)}`
+      : message,
+  );
 }
 
 // ── Fixture mode ─────────────────────────────────────────────────────────────
@@ -406,13 +518,20 @@ async function main() {
     process.exit(2);
   }
 
-  const { violations, checks } = await runHealthCheck();
+  const { violations, checks, notified } = await runHealthCheck();
+  const delivery = pageDelivery(violations, notified);
 
   if (jsonMode) {
+    // --json keeps stdout JSON-only (scripts/lib/gate-output.mjs), so the
+    // annotation goes to stderr there.
+    reportPageDelivery(delivery, { log: console.error });
     emitResult(
       {
         violations,
-        summary: Object.fromEntries(Object.entries(checks).map(([k, v]) => [k, v.state])),
+        summary: {
+          ...Object.fromEntries(Object.entries(checks).map(([k, v]) => [k, v.state])),
+          paged: delivery.paged,
+        },
         ok: violations.length === 0,
       },
       true,
@@ -424,6 +543,7 @@ async function main() {
   for (const [name, result] of Object.entries(checks)) {
     console.log(`${result.ok ? '✓' : '✗'} ${name}: ${result.message}`);
   }
+  reportPageDelivery(delivery);
   if (violations.length === 0) {
     console.log('check-production-health: all checks green ✓');
     process.exit(0);

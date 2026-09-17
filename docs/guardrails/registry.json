@@ -395,7 +395,7 @@
     },
     {
       "id": "check-production-health",
-      "description": "Asserts /ops's live data path, not just a 200 (ops#347, script half of #318). Hits GET /api/tasks as a headless agent and fails on the paused-database shape ({ tasks: [] } with rows expected); where SUPABASE_ACCESS_TOKEN is set, also reads the Supabase project's status directly and distinguishes INACTIVE/COMING_UP/RESTORING/healthy. Notifies via lib/ops/notify.mjs on failure. Fired every 6h (+ workflow_dispatch) by .github/workflows/production-health.yml (#318), which fails with a named-secret message when OPS_AGENT_KEY or DISCORD_WEBHOOK_URL is missing from the repo's Actions secrets.",
+      "description": "Asserts /ops's live data path, not just a 200 (ops#347, script half of #318). Hits GET /api/tasks as a headless agent and fails on the paused-database shape ({ tasks: [] } with rows expected); where SUPABASE_ACCESS_TOKEN is set, also reads the Supabase project's status directly and distinguishes INACTIVE/COMING_UP/RESTORING/healthy. Notifies via lib/ops/notify.mjs on failure. Fired every 6h (+ workflow_dispatch, main only) by .github/workflows/production-health.yml (#318), which fails with a named-secret message when OPS_AGENT_KEY or DISCORD_WEBHOOK_URL is missing from the repo's Actions secrets, and pages Discord itself whenever the script's own page did not go out.",
       "severity": "error",
       "gateScript": "scripts/check-production-health.mjs",
       "fixturePath": "fixtures/check-production-health",

@@ -5,6 +5,8 @@ import {
   checkTasksEndpoint,
   checkSupabaseProjectStatus,
   runHealthCheck,
+  pageDelivery,
+  reportPageDelivery,
   DEFAULT_PROJECT_REF,
   OPS_BASE_URL_FIX,
   OPS_AGENT_KEY_FIX,
@@ -13,6 +15,11 @@ import {
 function jsonResponse(status, body) {
   return { ok: status >= 200 && status < 300, status, json: () => Promise.resolve(body) };
 }
+
+const VERCEL_ENV_URL =
+  'https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables';
+const GITHUB_SECRETS_URL = 'https://github.com/hirobius/ops/settings/secrets/actions';
+const SUPABASE_TOKENS_URL = 'https://supabase.com/dashboard/account/tokens';
 
 describe('missingEnvViolations', () => {
   it('is empty when both required vars are set', () => {
@@ -83,6 +90,53 @@ describe('checkTasksEndpoint', () => {
     expect(result.message).toMatch(/HTTP 500/);
   });
 
+  // A paused database most likely surfaces as a 5xx, not the empty 200:
+  // api/tasks.ts returns { status: 500, body: { error } } when listTasks fails.
+  it('names the database, the server error, and the resume link on a 500', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(jsonResponse(500, { error: 'TypeError: fetch failed' }));
+    const result = await checkTasksEndpoint({ ...opts, fetchImpl });
+    expect(result.ok).toBe(false);
+    expect(result.state).toBe('http_error');
+    expect(result.message).toContain('HTTP 500');
+    expect(result.message).toContain('TypeError: fetch failed');
+    expect(result.message).toMatch(/Supabase/);
+    expect(result.message).toContain(
+      `https://supabase.com/dashboard/project/${DEFAULT_PROJECT_REF}`,
+    );
+  });
+
+  it('still names the database and the resume link when a 5xx body is not JSON', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 504,
+      json: () => Promise.reject(new SyntaxError('Unexpected token <')),
+    });
+    const result = await checkTasksEndpoint({ ...opts, fetchImpl });
+    expect(result.ok).toBe(false);
+    expect(result.state).toBe('http_error');
+    expect(result.message).toContain('HTTP 504');
+    expect(result.message).toContain(
+      `https://supabase.com/dashboard/project/${DEFAULT_PROJECT_REF}`,
+    );
+  });
+
+  it('points a 503 ENV_MISSING_SUPABASE at the Vercel env vars, not a paused database', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse(503, {
+        error: 'SUPABASE_URL is not set',
+        code: 'ENV_MISSING_SUPABASE',
+      }),
+    );
+    const result = await checkTasksEndpoint({ ...opts, fetchImpl });
+    expect(result.ok).toBe(false);
+    expect(result.state).toBe('http_error');
+    expect(result.message).toContain('ENV_MISSING_SUPABASE');
+    expect(result.message).toContain('SUPABASE_URL is not set');
+    expect(result.message).toContain(VERCEL_ENV_URL);
+  });
+
   it.each([401, 403])(
     'names OPS_AGENT_KEY and both places to fix it on HTTP %i',
     async (status) => {
@@ -136,6 +190,10 @@ describe('checkSupabaseProjectStatus', () => {
     expect(result.ok).toBe(true);
     expect(result.state).toBe('skipped');
     expect(result.message).toMatch(/SUPABASE_ACCESS_TOKEN/);
+    // Only the cron reads this token, from the repo's Actions secrets —
+    // nothing on Vercel does, so Vercel is the wrong place to send Adrian.
+    expect(result.message).toContain(GITHUB_SECRETS_URL);
+    expect(result.message).not.toContain(VERCEL_ENV_URL);
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
@@ -183,6 +241,9 @@ describe('checkSupabaseProjectStatus', () => {
     expect(result.state).toBe('unauthorized');
     expect(result.message).toMatch(/SUPABASE_ACCESS_TOKEN/);
     expect(result.message).toMatch(/Rotate it/);
+    expect(result.message).toContain(SUPABASE_TOKENS_URL);
+    expect(result.message).toContain(GITHUB_SECRETS_URL);
+    expect(result.message).not.toContain(VERCEL_ENV_URL);
   });
 
   it('reports an unrecognized status as degraded', async () => {
@@ -243,5 +304,90 @@ describe('runHealthCheck', () => {
       'tasks-endpoint-empty',
       'supabase-project-inactive',
     ]);
+  });
+
+  it('still returns the violations when the notify seam throws', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse(200, { tasks: [] }));
+    const notify = vi.fn().mockRejectedValue(new Error('EACCES: docs/ops/events.jsonl'));
+    const { violations, notified } = await runHealthCheck({ env: baseEnv, fetchImpl, notify });
+    expect(violations.map((v) => v.rule)).toEqual(['tasks-endpoint-empty']);
+    expect(notified.discord.sent).toBe(false);
+    expect(notified.discord.reason).toContain('EACCES');
+  });
+});
+
+describe('pageDelivery', () => {
+  const failing = [{ rule: 'tasks-endpoint-empty', message: 'x' }];
+
+  it('is not a page when there were no violations', () => {
+    expect(pageDelivery([], null)).toEqual({ paged: false, undeliveredReason: null });
+  });
+
+  it('is paged only when Discord actually accepted the post', () => {
+    expect(pageDelivery(failing, { appended: {}, discord: { sent: true } })).toEqual({
+      paged: true,
+      undeliveredReason: null,
+    });
+  });
+
+  it('surfaces the Discord reason when a failing run was not delivered', () => {
+    expect(
+      pageDelivery(failing, {
+        appended: {},
+        discord: { sent: false, reason: 'Discord 404: Unknown Webhook' },
+      }),
+    ).toEqual({ paged: false, undeliveredReason: 'Discord 404: Unknown Webhook' });
+  });
+
+  it('treats a missing notify result as undelivered', () => {
+    const out = pageDelivery(failing, null);
+    expect(out.paged).toBe(false);
+    expect(out.undeliveredReason).toEqual(expect.any(String));
+  });
+});
+
+describe('reportPageDelivery', () => {
+  it('writes paged=true to GITHUB_OUTPUT and prints no error when delivered', () => {
+    const appendFile = vi.fn();
+    const log = vi.fn();
+    reportPageDelivery(
+      { paged: true, undeliveredReason: null },
+      { env: { GITHUB_OUTPUT: '/tmp/out' }, appendFile, log },
+    );
+    expect(appendFile).toHaveBeenCalledWith('/tmp/out', 'paged=true\n', 'utf8');
+    expect(log).not.toHaveBeenCalled();
+  });
+
+  it('writes paged=false and a GitHub ::error annotation naming the webhook fix when undelivered', () => {
+    const appendFile = vi.fn();
+    const log = vi.fn();
+    reportPageDelivery(
+      { paged: false, undeliveredReason: 'Discord 404: Unknown Webhook\n{"code": 10015}' },
+      { env: { GITHUB_ACTIONS: 'true', GITHUB_OUTPUT: '/tmp/out' }, appendFile, log },
+    );
+    expect(appendFile).toHaveBeenCalledWith('/tmp/out', 'paged=false\n', 'utf8');
+    expect(log).toHaveBeenCalledOnce();
+    const [line] = log.mock.calls[0];
+    expect(line.startsWith('::error title=Discord page not delivered::')).toBe(true);
+    expect(line).toContain('Discord 404: Unknown Webhook');
+    expect(line).toContain('DISCORD_WEBHOOK_URL');
+    expect(line).toContain(GITHUB_SECRETS_URL);
+    // Workflow-command data must stay on one line.
+    expect(line).not.toMatch(/\n/);
+    expect(line).toContain('%0A');
+  });
+
+  it('prints a plain line and does not touch GITHUB_OUTPUT outside GitHub Actions', () => {
+    const appendFile = vi.fn();
+    const log = vi.fn();
+    reportPageDelivery(
+      { paged: false, undeliveredReason: 'Discord POST failed: timeout' },
+      { env: {}, appendFile, log },
+    );
+    expect(appendFile).not.toHaveBeenCalled();
+    const [line] = log.mock.calls[0];
+    expect(line.startsWith('::')).toBe(false);
+    expect(line).toContain('Discord POST failed: timeout');
+    expect(line).toContain('DISCORD_WEBHOOK_URL');
   });
 });

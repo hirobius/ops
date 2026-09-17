@@ -8,10 +8,18 @@ name: Production health
 #
 # Loud on failure, two ways:
 #   - the script pages Discord through lib/ops/notify.mjs with the cause and
-#     the fix (including the Supabase resume link), then exits 1 so the run
-#     goes red;
-#   - if the check cannot run at all (a missing secret, a setup failure), the
-#     last step pages Discord itself — a broken watchdog must never be silent.
+#     the fix (the Supabase resume link for an empty board or a 5xx), then
+#     exits 1 so the run goes red. It writes `paged=true` to the step output
+#     only when Discord accepted the post, and prints a `::error` annotation
+#     when it did not;
+#   - if no page went out (a missing secret, a setup failure, a crash, or a
+#     Discord post that failed), the last step pages Discord itself — a broken
+#     watchdog must never be silent.
+#
+# Main only: the job hands OPS_AGENT_KEY (full operator bearer) and, if set,
+# SUPABASE_ACCESS_TOKEN (account-wide) to a script from the checked-out ref.
+# Agents can push scripts/ but not this file, and run logs are public, so a
+# `workflow_dispatch --ref <branch>` must not run a branch's script with them.
 #
 # Repository secrets (https://github.com/hirobius/ops/settings/secrets/actions):
 #   OPS_AGENT_KEY          required — the SAME value as OPS_AGENT_KEY in Vercel
@@ -39,6 +47,8 @@ permissions:
 jobs:
   health:
     name: /ops live data path
+    # See "Main only" in the header. Schedule runs always use the default branch.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -87,20 +97,33 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: node scripts/check-production-health.mjs
 
-      # The script pages Discord itself when a check fails. This covers the
-      # other case: the check never ran, so /ops is unwatched until someone looks.
-      - name: Page Discord when the check could not run
-        if: failure() && steps.health.outcome != 'failure'
+      # The script pages Discord itself when a check fails, and sets
+      # paged=true only when Discord accepted it. Anything else that fails the
+      # run (the check never ran, crashed, or its page bounced) pages from here,
+      # so /ops is never unwatched without anyone knowing.
+      - name: Page Discord when no page went out
+        if: failure() && steps.health.outputs.paged != 'true'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           MISSING: ${{ steps.secrets.outputs.missing }}
+          HEALTH_OUTCOME: ${{ steps.health.outcome }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -n "$MISSING" ]; then
+            TITLE="Production health cron could not run: /ops is unwatched"
             DETAIL="Missing repository secret(s): $MISSING. Add them at $SECRETS_URL (OPS_AGENT_KEY = the same value as in Vercel Production)."
+          elif [ "$HEALTH_OUTCOME" = "failure" ]; then
+            TITLE="Production health check failed and its own page did not go out"
+            DETAIL="The /ops live data path check failed, but it crashed or Discord rejected its page. The cause and the fix are in the run log: $RUN_URL"
           else
+            TITLE="Production health cron could not run: /ops is unwatched"
             DETAIL="A setup step failed before the health check ran. See the run log: $RUN_URL"
           fi
-          node scripts/notify.mjs --kind blocked \
-            --title "Production health cron could not run: /ops is unwatched" \
-            --detail "$DETAIL" --url "$RUN_URL" --task "ops#318"
+          out=$(node scripts/notify.mjs --kind blocked \
+            --title "$TITLE" --detail "$DETAIL" --url "$RUN_URL" --task "ops#318") || true
+          echo "$out"
+          # notify.mjs is fail-soft (exit 0 when Discord refuses), so say so here.
+          if ! printf '%s\n' "$out" | grep -q '^Posted to Discord\.$'; then
+            echo "::error title=Discord page not delivered::No Discord page went out for this failed run. Check that DISCORD_WEBHOOK_URL still points at a live webhook and update it at $SECRETS_URL"
+            exit 1
+          fi
