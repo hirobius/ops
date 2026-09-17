@@ -50,6 +50,7 @@ import {
   type StandingAction,
 } from '../ralphStatus';
 import { deriveChain } from '../../../../../lib/chain/evidence.mjs';
+import { Sev1Banner } from './Sev1Banner';
 
 const POLL_MS = 60_000;
 const SHOWN = 8;
@@ -164,6 +165,9 @@ export default function StandingPage() {
       />
 
       <Coverage data={data} error={error} needsToken={needsToken} />
+
+      {/* ── 0. Open sev1 (ops#317) — above everything, absent when none ──── */}
+      <Sev1Banner sev1={data?.sev1 ?? []} />
 
       {note ? (
         <p style={note.ok ? s.noteOk : s.noteBad} role="status">
