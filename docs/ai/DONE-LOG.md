@@ -686,3 +686,95 @@ _Last updated: 2026-07-13 (**Ralph parked inbox — reasons, one-tap re-queue, w
 - **Learned rule 15** added to `docs/ai/learned-rules.jsonl`: a migration's
   filename is a label for the change, not an inventory of its objects. Same
   family as "find a stored field's writer before citing it as evidence".
+
+## 2026-09-17 — the gate day: PII, secrets, severity, Windows, and an hds Figma foundation
+
+**ops — 14 PRs merged.**
+
+| PR   | What landed                                                                                       |
+| ---- | ------------------------------------------------------------------------------------------------- |
+| #373 | Two Windows path bugs that failed the pre-push suite on every Windows checkout                    |
+| #376 | Re-synced vendored `lib/schema` from site-engine — `sectionOrder` dupes now rejected (ops#310)    |
+| #374 | 2026-09-16 backlog triage parked (#15, #89, #142, #200, #201) + `parked-triggers` on a daily cron |
+| #381 | `ralph-metric.yml` — a bounded metric-loop caller (ops#90)                                        |
+| #383 | `secret-scan.yml` — gitleaks over PR and main-push commits                                        |
+| #382 | Every `quality.yml` check routed through `run-gates.mjs` (#241)                                   |
+| #385 | Personal data removed from current files (ops#27)                                                 |
+| #386 | The PII gate: out-of-repo denylist, pre-commit, commit-msg, CI and a weekly scan (#27, #35)       |
+| #389 | lint-staged chunking restored so large commits do not exceed cmd.exe's limit                      |
+| #375 | Watchdog enforces the ops#238 supervised-path boundary before merging                             |
+| #379 | A sev1–sev3 severity axis with sev1 visibility (ops#317)                                          |
+| #377 | `run-gates` honours registry severity; gate severities curated (ops#306)                          |
+| #367 | `/ops/standing` — every issue readable and operable from a phone                                  |
+| #388 | `/ops/standing` — every lane filtered by repo                                                     |
+
+**Cross-repo:** PII redactions in `concrete#11` and `portal-kit#1`. Filed
+`site-engine#192` — that repo's Ralph loop has had no scheduled watchdog since
+2026-07-16 because its `ralph.yml` schedule is disabled.
+
+**hirobius/hds — 6 PRs merged, nothing published.** #211 (stop dead Code Connect
+stubs and fake Figma links; tenant metadata schema), #213 (tested tokens → Figma
+model, `pnpm figma:model`, dark-mode fix), #215 (push, snapshot, drift check and
+native import on a Pro plan), #216 (Brand and Density collections for demo
+tenants; design ↔ code links from one `figmaUrl`), #214 (parity contract + Code
+Connect **v2** templates generated from `cva`, gated in CI), #212 (honest README,
+root MIT licence, Figma docs + ADR-025). **ADR-025 is Accepted 2026-09-17.** The
+plan constraint that shaped all of it: **publishing custom Code Connect requires
+an Organization or Enterprise seat — Professional cannot**, so no Dev Mode
+snippet is live however complete the templates are. No npm publish happened; hds
+remains on v0.13.0 and the release stays held (hds#199).
+
+**Still open at close of day — each waiting on a human, not a session.** ops #380
+(needs the `OPS_AGENT_KEY` Actions secret), #387 (needs Supabase migration `0015`
+plus the import run by Adrian — it writes production), #378 (draft; needs a real
+eval run and `ralph-approved`), #384 (draft; waits for the new hirobius.com to
+exist). hds #210 (draft; blocked on the tenant-rename decision), #207, #208.
+
+**ops#27 after today.** Prevention and current-file redaction have landed across
+ops, concrete and portal-kit; the scope now also covers hds, site-engine and
+portal-kit. The **history rewrite is still pending** — rehearsed, with a runbook
+in `REPO-PROCEDURES.md`. Two artefacts joined the cleanup list: the `refs/pull`
+copy of ops#388's early commit, and the #367/#388 PR text. The gate ships without
+its denylist loaded (`PII_DENYLIST` / `.pii-denylist` are Adrian's to create), so
+today it matches generic patterns only — which is how a client tenant's name
+reached a PR test fixture unflagged.
+
+### Detail moved out of HANDOFF today (steering budget, ops#292)
+
+- **First-contact stack (ops#326).** All outbound routes through one choke point,
+  `lib/outreach/guard.mjs`. The lesson that earned its place in HANDOFF for a
+  week: a scoring ceiling (59 against a threshold of 60) made custom-domain leads
+  permanently unqualifiable, and the weighting ranked the _hardest_ sells
+  highest. A Wix site is a **proven buyer**; a decade with no site is a revealed
+  preference.
+- **Why the email tier cannot be bought around.** The enrichment vendors (Hunter,
+  Apollo, Clay) build from corporate-domain crawls and cover a 3-person plumber
+  badly; no Maps scraper (Outscraper, Apify, SerpApi, BrightData) returns an
+  address, because Google Business Profile has no email field at all.
+- **Call-queue mechanics.** `node scripts/export-call-list.mjs --limit 100 > calls.csv`
+  (261 eligible, 100 queued, 38 with a real opening line);
+  `node scripts/log-call.mjs --id <id> --outcome <o>`, funnel via `--funnel`.
+  Outcomes are a closed vocabulary on purpose — 200 calls logged as free text are
+  anecdotes, not data. B2B calls to business numbers sit largely outside the
+  national DNC registry, but WA (most of this list) needs all-party consent to
+  record. Per Adrian's 2026-09-16 directive no session raises dialling; the
+  mechanics live here so they are not lost.
+- **`/ops/standing` stage 5** reports **stored vs live** `preview_url`s (#322);
+  an unreachable URL reads `unchecked`, never `dead` — usually our egress, not
+  the site.
+- **The revenue-path generator** takes real hours, address, photos and a
+  contrast-checked palette. Spec: `docs/specs/leads-to-site.md`.
+- **hds 0.14.0, the shape of the hold (hds#199).** The release path is armed but
+  has zero fuel: `.changeset/` is empty so no "Version Packages" PR can open, and
+  `NPM_TOKEN` is unverified. Cutting it means the breaking `Hds*`→unprefixed
+  renames plus an ops migration across ~41 files. No agent writes the changeset.
+- **The ops-history PII scrub** is no longer a separate line in Adrian's actions
+  — it is the unfinished half of ops#27 above.
+- **Decision, 2026-09-15 — the call channel is not the email channel.** Email
+  needs an address and a `lead_score`; calls need neither and repeat. Notes are a
+  table (`lead_notes`), never a column — a column loses the conversation.
+- **Fleet directive, 2026-09-16 — fixture tests do not prove an extractor
+  works.** Run the real path against any reachable live host first (check the
+  proxy's `noProxy` list); 28 fixtures missed what one live fetch caught (#346).
+  Superseded in HANDOFF by the 2026-09-17 denylist rule, which is the same
+  failure one layer up.
