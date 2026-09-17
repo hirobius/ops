@@ -10,7 +10,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -195,7 +195,8 @@ describe('SPEC_STATUSES', () => {
 
 describe('listSpecFiles', () => {
   it('lists real epic files, excluding README.md and _template.md', () => {
-    const files = listSpecFiles(join(ROOT, 'docs', 'specs')).map((f) => f.split('/').pop());
+    // basename, not split('/'): join() yields backslashes on Windows.
+    const files = listSpecFiles(join(ROOT, 'docs', 'specs')).map((f) => basename(f));
     expect(files).toContain('leads-to-site.md');
     expect(files).not.toContain('README.md');
     expect(files).not.toContain('_template.md');
