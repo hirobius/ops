@@ -251,7 +251,7 @@
     {
       "id": "check-exemptions",
       "description": "Keeps escape hatches visible and well-formed. Checks that only known exemption markers are used and every exemption marker includes a non-empty reason after the colon.",
-      "severity": "warn",
+      "severity": "error",
       "gateScript": "scripts/check-exemptions.mjs",
       "fixturePath": "fixtures/check-exemptions",
       "owner": "Adrian",
@@ -315,7 +315,7 @@
     {
       "id": "check-hardcoded-colors",
       "description": "Catches hardcoded color values in non-CSS color contexts that bypass the CSS custom property cascade and are invisible to check-inline-styles / check-tier-bypass.",
-      "severity": "warn",
+      "severity": "error",
       "gateScript": "scripts/check-hardcoded-colors.mjs",
       "fixturePath": "fixtures/check-hardcoded-colors",
       "owner": "Adrian",
@@ -398,7 +398,7 @@
     {
       "id": "check-page-shell",
       "description": "Forbids direct Container usage in src/app/pages/**. Pages must use Page (which wraps Container + applies the canonical vertical padding) so every page receives consistent layout.",
-      "severity": "warn",
+      "severity": "error",
       "gateScript": "scripts/check-page-shell.mjs",
       "fixturePath": "fixtures/check-page-shell",
       "owner": "Adrian",
@@ -475,7 +475,7 @@
     {
       "id": "check-security-baseline",
       "description": "Local security and dependency hygiene baseline. Checks that no committed runtime env files, npm credentials, obvious secrets, external font/CDN imports, or dangerous HTML injection exist in source.",
-      "severity": "warn",
+      "severity": "error",
       "gateScript": "scripts/check-security-baseline.mjs",
       "fixturePath": "fixtures/check-security-baseline",
       "owner": "Adrian",
@@ -563,7 +563,7 @@
     {
       "id": "check-unresponsive-grids",
       "description": "Catches static multi-column gridTemplateColumns values with no nearby isMobile guard. Every multi-column grid must be responsive.",
-      "severity": "warn",
+      "severity": "error",
       "gateScript": "scripts/check-unresponsive-grids.mjs",
       "fixturePath": "fixtures/check-unresponsive-grids",
       "owner": "Adrian",
@@ -573,7 +573,7 @@
     {
       "id": "check-validator-wiring",
       "description": "Meta-validator: every gate registered in docs/guardrails/registry.json has a firingChannel that matches actual invocation. Catches aspirational guardrails — gates registered but never really firing.",
-      "severity": "warn",
+      "severity": "error",
       "gateScript": "scripts/check-validator-wiring.mjs",
       "fixturePath": "fixtures/check-validator-wiring",
       "owner": "Adrian",

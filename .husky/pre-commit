@@ -42,7 +42,8 @@ echo "Running all pre-commit registry gates (15 gates, declaration order)..."
 # still appended to the firing log before this run exits, so a violation
 # that aborts the commit is captured -- not just runs where everything
 # passed (issue #330). Fail-fast is unaffected: the run still stops at the
-# first failing gate.
+# first failing error-severity gate. A failing warn-severity gate prints and
+# the run continues (ops#306; semantics in docs/guardrails/SCHEMA.md).
 SCOPE="$(git diff --cached --name-only | tr '\n' ',')"
 node scripts/run-gates.mjs --channel pre-commit --scope "$SCOPE" --emit-jsonl docs/guardrails/firing-log.jsonl
 

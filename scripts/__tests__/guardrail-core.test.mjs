@@ -7,6 +7,9 @@ import {
   selectGates,
   selectProbeTargets,
   runGateCaptured,
+  gateOutcome,
+  runGatesSerial,
+  summarizeRun,
   REGISTRY_PATH,
 } from '../lib/guardrail-core.mjs';
 
@@ -121,6 +124,177 @@ describe('selectGates', () => {
     expect(r.gates).toEqual([]);
     expect(r.emptyReason).toBe('scope-filtered-all');
     expect(r.skippedByScope).toEqual(['d']);
+  });
+});
+
+// ── Severity (ops#306) ────────────────────────────────────────────────────────
+// A failing `error` gate blocks the run; a failing `warn` gate reports and
+// passes. Severity used to be decorative — run-gates failed on any non-zero.
+
+describe('gateOutcome', () => {
+  it('passes a zero exit whatever the severity', () => {
+    expect(gateOutcome({ id: 'e', severity: 'error' }, 0)).toBe('pass');
+    expect(gateOutcome({ id: 'w', severity: 'warn' }, 0)).toBe('pass');
+  });
+
+  it('fails a non-zero error-severity gate', () => {
+    expect(gateOutcome({ id: 'e', severity: 'error' }, 1)).toBe('fail');
+  });
+
+  it('only warns for a non-zero warn- or info-severity gate', () => {
+    expect(gateOutcome({ id: 'w', severity: 'warn' }, 1)).toBe('warn');
+    expect(gateOutcome({ id: 'w', severity: 'warn' }, 2)).toBe('warn');
+    expect(gateOutcome({ id: 'i', severity: 'info' }, 1)).toBe('warn');
+  });
+
+  it('fails closed when severity is missing or unrecognised', () => {
+    // A gate with no deliberate severity keeps the old blocking behaviour
+    // rather than silently becoming advisory.
+    expect(gateOutcome({ id: 'x' }, 1)).toBe('fail');
+    expect(gateOutcome({ id: 'x', severity: 'Warn' }, 1)).toBe('fail');
+  });
+});
+
+describe('runGatesSerial', () => {
+  const GATES = [
+    { id: 'warn-red', severity: 'warn' },
+    { id: 'ok', severity: 'error' },
+    { id: 'error-red', severity: 'error' },
+    { id: 'after', severity: 'error' },
+  ];
+  const EXITS = { 'warn-red': 1, ok: 0, 'error-red': 1, after: 0 };
+
+  function fakeRunner() {
+    const ran = [];
+    return {
+      ran,
+      runGate: (gate) => {
+        ran.push(gate.id);
+        return EXITS[gate.id];
+      },
+    };
+  }
+
+  it('fail-fast runs past a failing warn gate and stops at the first failing error gate', () => {
+    const { ran, runGate } = fakeRunner();
+    const r = runGatesSerial({ gates: GATES, runGate, failFast: true });
+    expect(ran).toEqual(['warn-red', 'ok', 'error-red']);
+    expect(r.stoppedAt).toBe('error-red');
+    expect(r.results).toEqual([
+      { id: 'warn-red', severity: 'warn', exitCode: 1, outcome: 'warn' },
+      { id: 'ok', severity: 'error', exitCode: 0, outcome: 'pass' },
+      { id: 'error-red', severity: 'error', exitCode: 1, outcome: 'fail' },
+    ]);
+  });
+
+  it('without fail-fast runs every gate even after an error gate fails', () => {
+    const { ran, runGate } = fakeRunner();
+    const r = runGatesSerial({ gates: GATES, runGate, failFast: false });
+    expect(ran).toEqual(['warn-red', 'ok', 'error-red', 'after']);
+    expect(r.stoppedAt).toBe(null);
+    expect(r.results.map((x) => x.outcome)).toEqual(['warn', 'pass', 'fail', 'pass']);
+  });
+});
+
+describe('registry severity curation (ops#306)', () => {
+  // Every gate on a channel that run-gates runs as BLOCKING — `.husky/pre-commit`
+  // (--channel pre-commit) and `.github/workflows/quality.yml` (--channel ci-pr)
+  // — with the severity decided for it. Since ops#306 severity decides whether
+  // a gate blocks, so the lock is exhaustive per channel: flipping any row to
+  // `warn`, adding a gate to one of these channels, or moving a gate off one
+  // all fail here until someone decides on purpose. Changing a row is a
+  // standards decision — update the curation record in
+  // docs/guardrails/SCHEMA.md alongside this table.
+  const DECIDED = {
+    'pre-commit': {
+      // error — a finding is a defect in the change; blocks the commit.
+      'check-security-baseline': 'error',
+      'check-hardcoded-colors': 'error',
+      'check-page-shell': 'error',
+      'check-unresponsive-grids': 'error',
+      'check-validator-wiring': 'error',
+      'check-licenses': 'error',
+      'check-secrets': 'error',
+      'check-steering-budget': 'error',
+      'validate-fixture-proof-of-firing': 'error',
+      'validate-orchestration': 'error',
+      'check-schema-drift': 'error',
+      // error — denylist terms and private workspace links must block; email and
+      // phone findings are warn inside the script (exit 0 at --fail-on error).
+      'check-pii': 'error',
+      // error by Adrian's call — the only check that an exemption marker carries
+      // a reason, so a reasonless marker blocks at commit (see SCHEMA.md).
+      'check-exemptions': 'error',
+      // warn — reporting / bookkeeping, the two "unsure" gates (each still
+      // blocks PR CI: see SCHEMA.md), and a gate that always exits 0.
+      'generate-strength-report': 'warn',
+      'audit-batch-deliverables': 'warn',
+      'audit-claims': 'warn',
+      'audit-exceptions': 'warn',
+      'check-route-coverage': 'warn',
+      'check-og-meta': 'warn',
+      'check-branch-ancestry': 'warn',
+    },
+    'ci-pr': {
+      'check-fixture-stubs-ratchet': 'error',
+      'check-guardrail-drift': 'error',
+      // error — the bespoke quality.yml steps folded into run-gates (ops#241).
+      'check-layout-tests': 'error',
+      'check-type-coverage': 'error',
+      'check-typecheck': 'error',
+      'audit-gate-purity': 'warn',
+      'audit-gates-supportjson': 'warn',
+    },
+  };
+
+  it.each(Object.keys(DECIDED))(
+    'every %s gate carries its decided severity, and no undecided gate is on the channel',
+    (channel) => {
+      const { registry } = loadRegistry(REGISTRY_PATH);
+      const actual = Object.fromEntries(
+        registry.gates.filter((g) => g.firingChannel === channel).map((g) => [g.id, g.severity]),
+      );
+      expect(
+        actual,
+        `${channel} is a blocking channel: a gate was added to it, removed from it, or had its ` +
+          'severity changed. Decide the severity on purpose (docs/guardrails/SCHEMA.md → ' +
+          '"Severity semantics"), then update DECIDED here and the curation record there.',
+      ).toEqual(DECIDED[channel]);
+    },
+  );
+
+  it('every registry severity is one run-gates recognises', () => {
+    const { registry } = loadRegistry(REGISTRY_PATH);
+    const unknown = registry.gates
+      .filter((g) => !['error', 'warn', 'info'].includes(g.severity))
+      .map((g) => `${g.id}:${g.severity}`);
+    expect(unknown).toEqual([]);
+  });
+});
+
+describe('summarizeRun', () => {
+  const pass = { id: 'p', severity: 'error', exitCode: 0, outcome: 'pass' };
+  const warned = { id: 'w', severity: 'warn', exitCode: 1, outcome: 'warn' };
+  const failed = { id: 'f', severity: 'error', exitCode: 1, outcome: 'fail' };
+
+  it('exits 0 when every gate passed', () => {
+    expect(summarizeRun([pass])).toEqual({ failures: [], warnings: [], exitCode: 0 });
+  });
+
+  it('exits 0 when only warn gates reported findings, and lists them', () => {
+    expect(summarizeRun([pass, warned])).toEqual({
+      failures: [],
+      warnings: [warned],
+      exitCode: 0,
+    });
+  });
+
+  it('exits 1 when any error gate failed, keeping warnings separate', () => {
+    expect(summarizeRun([warned, failed, pass])).toEqual({
+      failures: [failed],
+      warnings: [warned],
+      exitCode: 1,
+    });
   });
 });
 

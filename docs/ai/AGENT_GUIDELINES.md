@@ -402,6 +402,19 @@ The fixture **IS the contract**. Change behavior → change fixture → review d
 4. Re-run validator on clean HEAD; if it passes, the broken work is in the stash.
 5. Inspect stash; either fix or discard with `git stash drop`.
 
+### When a pre-commit gate fails on a file you didn't touch (ops#306)
+
+1. Confirm it actually blocked. Only `error`-severity gates stop a commit; a
+   `⚠ run-gates: [id] … not blocking` line is a `warn` finding — read it, but it
+   is not why the commit stopped. Semantics: `docs/guardrails/SCHEMA.md`.
+2. **Reproduce on `main` before treating it as your fault.** Run the same gate
+   (`node scripts/run-gates.mjs --gate <id>`) on a clean checkout of
+   `origin/main`. If it fails there too, it is pre-existing breakage, not your
+   change — say so explicitly (PR note or issue) instead of burning iterations
+   diagnosing your own diff.
+3. If `main` is green and your branch is red, rebase on `origin/main` first (a
+   stale base is a common cause), then fix the violation per §5.
+
 ### When a pod produces broken state
 
 If a sub-agent's commit breaks the build:

@@ -13,11 +13,12 @@
  * The stop hook actively misleads here: it reads the orphaned pointer as
  * "N unpushed commits" and advises pushing, which is the one wrong move.
  *
- * NEVER BLOCKS. run-gates.mjs fails the whole pre-commit run on any non-zero
- * exit REGARDLESS of the registry `severity` field — severity is metadata, not
- * enforcement. That is exactly the ops#304 incident, where a warn-severity
- * finding bricked every commit in the repo. So this gate exits 0 in the normal
- * path, always, and only prints.
+ * NEVER BLOCKS. When this gate was written, run-gates.mjs failed the whole
+ * pre-commit run on any non-zero exit regardless of the registry `severity`
+ * field — the ops#304 incident, where a warn-severity finding bricked every
+ * commit in the repo. ops#306 made run-gates honour severity (a failing `warn`
+ * gate now reports without blocking), but this gate still exits 0 in the normal
+ * path, always, and only prints — so it stays harmless when invoked directly.
  *
  * The one exception is `--fixture-mode`, where validate-fixture-proof-of-firing
  * runs the gate against fixtures/check-branch-ancestry/violating.example.json
@@ -50,7 +51,10 @@ const MAIN_REF = 'refs/remotes/origin/main';
 /** Run a git command, returning trimmed stdout, or null if it fails. */
 function git(args) {
   try {
-    return execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    return execFileSync('git', args, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
   } catch {
     return null;
   }
