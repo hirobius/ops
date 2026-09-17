@@ -19,6 +19,15 @@ coverage/
 *.key
 .vercel
 
+# PII denylist (ops#27) — real client/contact identifiers, PII itself. Read by
+# scripts/check-pii.mjs; the CI copy is the PII_DENYLIST Actions secret. The
+# wildcards also cover copies (.pii-denylist~, .pii-denylist.bak,
+# pii-denylist.txt); the gate blocks any that are force-added.
+# See docs/guardrails/pii-gate.md.
+*pii[-_.]denylist*
+*pii[-_.]deny[-_.]list*
+!/scripts/__tests__/pii-denylist.test.mjs
+
 # HDS batch scan output (generated at runtime; not committed)
 scans/
 docs/visual-catalog/

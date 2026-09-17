@@ -1,4 +1,9 @@
 #!/usr/bin/env sh
+# Blocks a commit message carrying personal data (denylisted client names,
+# private workspace links) before the commit exists — pre-commit only sees
+# staged content. Blocking. See docs/guardrails/pii-gate.md.
+node scripts/pii-commit-msg.mjs "$1" || exit 1
+
 # Validates that commits on feature branches reference an open Hermes Kanban
 # task. Warn-only by default; promote with KANBAN_REF_ENFORCE=error.
 # See scripts/check-commit-message-task-ref.mjs for the full rule.
