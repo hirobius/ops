@@ -395,13 +395,13 @@
     },
     {
       "id": "check-production-health",
-      "description": "Asserts /ops's live data path, not just a 200 (ops#347, script half of #318). Hits GET /api/tasks as a headless agent and fails on the paused-database shape ({ tasks: [] } with rows expected); where SUPABASE_ACCESS_TOKEN is set, also reads the Supabase project's status directly and distinguishes INACTIVE/COMING_UP/RESTORING/healthy. Notifies via lib/ops/notify.mjs on failure. Runs standalone today (no workflow file present, by design — #347 scope); firingChannel is 'manual' until parent #318's ~6h cron caller lands in a human .github/workflows/* PR, at which point flip this to 'ci-scheduled' (check-validator-wiring.mjs enforces the declared channel matches an actual caller, so declaring ci-scheduled before that caller exists would itself be a wiring-drift violation).",
+      "description": "Asserts /ops's live data path, not just a 200 (ops#347, script half of #318). Hits GET /api/tasks as a headless agent and fails on the paused-database shape ({ tasks: [] } with rows expected); where SUPABASE_ACCESS_TOKEN is set, also reads the Supabase project's status directly and distinguishes INACTIVE/COMING_UP/RESTORING/healthy. Notifies via lib/ops/notify.mjs on failure. Fired every 6h (+ workflow_dispatch) by .github/workflows/production-health.yml (#318), which fails with a named-secret message when OPS_AGENT_KEY or DISCORD_WEBHOOK_URL is missing from the repo's Actions secrets.",
       "severity": "error",
       "gateScript": "scripts/check-production-health.mjs",
       "fixturePath": "fixtures/check-production-health",
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "manual",
+      "firingChannel": "ci-scheduled",
       "supportsJson": true
     },
     {

@@ -36,6 +36,11 @@
  *   SUPABASE_ACCESS_TOKEN   optional — enables the direct project-status check.
  *   SUPABASE_PROJECT_REF    optional — defaults to the ops project (vvyccwxtcwvlusweenje).
  *
+ * Scheduled caller: .github/workflows/production-health.yml (#318) runs this
+ * every 6h, reading OPS_AGENT_KEY / DISCORD_WEBHOOK_URL / SUPABASE_ACCESS_TOKEN
+ * from the repo's Actions secrets. That workflow's header is the one place the
+ * secret setup is documented.
+ *
  * Exit codes: 0 healthy · 1 unhealthy (or --json config error) · 2 invocation
  * error (missing required env, non-json mode).
  *
@@ -49,6 +54,8 @@ import { notifyEvent } from '../lib/ops/notify.mjs';
 const VERCEL_ENV_URL =
   'https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables';
 const SUPABASE_TOKENS_URL = 'https://supabase.com/dashboard/account/tokens';
+/** Where the scheduled caller (.github/workflows/production-health.yml, #318) reads its secrets. */
+const GITHUB_SECRETS_URL = 'https://github.com/hirobius/ops/settings/secrets/actions';
 export const DEFAULT_PROJECT_REF = 'vvyccwxtcwvlusweenje';
 
 export const OPS_BASE_URL_FIX =
@@ -98,6 +105,17 @@ export async function checkTasksEndpoint({ baseUrl, agentKey, projectRef, fetchI
       ok: false,
       state: 'unreachable',
       message: `GET ${url} failed: ${e.message} — the deployment may be down, or OPS_BASE_URL may be wrong.`,
+    };
+  }
+
+  if (res.status === 401 || res.status === 403) {
+    return {
+      ok: false,
+      state: 'unauthorized',
+      message:
+        `GET ${url} rejected OPS_AGENT_KEY (HTTP ${res.status}) — the key this check sends does not ` +
+        `match the deployment's OPS_AGENT_KEY (or it is unset there). Set the same value in Vercel ` +
+        `(Production): ${VERCEL_ENV_URL} and in the GitHub Actions secret the cron reads: ${GITHUB_SECRETS_URL}`,
     };
   }
 

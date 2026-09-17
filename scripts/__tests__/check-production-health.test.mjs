@@ -83,6 +83,24 @@ describe('checkTasksEndpoint', () => {
     expect(result.message).toMatch(/HTTP 500/);
   });
 
+  it.each([401, 403])(
+    'names OPS_AGENT_KEY and both places to fix it on HTTP %i',
+    async (status) => {
+      const fetchImpl = vi
+        .fn()
+        .mockResolvedValue({ ok: false, status, json: () => Promise.resolve({}) });
+      const result = await checkTasksEndpoint({ ...opts, fetchImpl });
+      expect(result.ok).toBe(false);
+      expect(result.state).toBe('unauthorized');
+      expect(result.message).toContain('OPS_AGENT_KEY');
+      expect(result.message).toContain(`HTTP ${status}`);
+      expect(result.message).toContain(
+        'https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables',
+      );
+      expect(result.message).toContain('https://github.com/hirobius/ops/settings/secrets/actions');
+    },
+  );
+
   it('fails when the endpoint is unreachable', async () => {
     const fetchImpl = vi.fn().mockRejectedValue(new Error('fetch failed'));
     const result = await checkTasksEndpoint({ ...opts, fetchImpl });
