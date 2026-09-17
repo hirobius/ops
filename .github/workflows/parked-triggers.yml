@@ -1,0 +1,39 @@
+name: Parked triggers
+
+# Daily evaluation of docs/ai/PARKED.md, so a dated trigger (the betting table,
+# the ship tripwire, the quarterly review) is noticed without anyone remembering
+# to run `pnpm parked:check` (ops#319; review on PR #374).
+#
+# A fired trigger exits 1 and fails this scheduled run. GitHub sends the
+# failed-run notification to whoever last changed the cron line, and the run
+# stays red every day until the entry is handled: rolled forward if it is
+# recurring, or filed as a fresh issue and deleted if it is one-shot.
+#
+# Node builtins only, so there is no install step.
+
+on:
+  schedule:
+    # Daily 13:00 UTC
+    - cron: '0 13 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Evaluate parked triggers
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check parked triggers
+        run: node scripts/check-parked-triggers.mjs

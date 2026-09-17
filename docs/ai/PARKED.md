@@ -23,7 +23,10 @@ Each entry carries a `trigger:` of one of four kinds:
 | `event` | `event: <plain-English condition>`                             | a human, at review        |
 
 Run `pnpm parked:check` (or `node scripts/check-parked-triggers.mjs`). It exits
-non-zero and names any entry whose trigger has fired. `event:` triggers can't be
+non-zero and names any entry whose trigger has fired. Nobody has to remember to
+run it: `.github/workflows/parked-triggers.yml` runs it daily, and a fired
+trigger fails that scheduled run (GitHub notifies whoever last changed its cron
+line) every day until the entry is handled. `event:` triggers can't be
 evaluated automatically, so they surface on the **quarterly review** line below —
 that review is the backstop that stops this file becoming a graveyard.
 
@@ -34,14 +37,20 @@ original closed issue, then delete the entry here. Don't reopen the old issue �
 its premise is months stale by definition, and today's sweep found stale
 premises in six of the issues examined.
 
+**Exception — recurring entries.** An entry with a `- **when it fires:**` line
+(the betting table) is a cadence, not a one-shot reminder. Follow that line
+instead — usually "roll the date forward" — and keep the entry. The script
+prints the line in place of the file-and-delete instruction.
+
 ---
 
 ## Tripwires — dated, falsifiable, pre-committed
 
 > A tripwire is not work. It is **one measurable condition, one date, and an action
 > decided in advance**. It exists so a strategic question gets answered on a date
-> instead of drifting. `date:` triggers here fire automatically via
-> `pnpm parked:check`; the betting table (#319) reads that as a standing item.
+> instead of drifting. `date:` triggers here fire automatically — daily in CI
+> (`parked-triggers.yml`) and on demand via `pnpm parked:check`; the betting
+> table (#319) reads that as a standing item.
 
 ### Ship tripwire — one lead, one preview_url, one contact
 
@@ -58,7 +67,8 @@ premises in six of the issues examined.
 - **trigger:** `date: 2026-10-14`
 - **what it is:** one ~30-minute sitting. Every open `needs-adrian` / `needs-decision` issue gets an answer or "default stands"; pick the next cycle's short list; read #293 (north-star share) and any open `sev1` (#317).
 - **cadence:** a table opens each 4-week period (3-week cycle + 1-week cooldown). The 2026-09-16 backlog interview was the first table. This date sits one day before the ship tripwire on purpose.
-- **when it fires:** run the table, record decisions on the issues themselves, then roll this date forward 4 weeks. Do not file an issue for it.
+- **reminder:** the daily `parked-triggers.yml` run goes red on this date and stays red until the date is rolled forward, so the sitting does not depend on anyone remembering.
+- **when it fires:** run the table, record decisions on the issues themselves, then roll this date forward 4 weeks (recurring: keep this entry). Do not file an issue for it.
 
 ---
 
@@ -202,7 +212,7 @@ the umbrella.
 - **still unbuilt:** a per-run and daily spend/usage ceiling (related: ops#71 codeburn); a cross-repo concurrency cap; restoring and re-registering `check-unit-overlap` (only orphan fixtures remain in `fixtures/check-unit-overlap/`) — required before any repo runs parallel Ralph PRs; the `watchdog-policy.json` + `proposed-units.jsonl` pattern.
 - **already shipped (don't rebuild):** claim refs with `RALPH_CLAIM_TTL`, per-cycle and lifetime attempt caps, `RALPH_ITER_TIMEOUT`, single-flight + wedge alerts, the ops hourly watchdog (#347/#365), Discord read commands.
 - **recommendation carried from #87 Decision #7 (not yet Adrian's ruling):** the mayor proposes only and never auto-tags `ralph-ready`.
-- **⚠️ not covered by crons today:** site-engine's `ralph.yml` schedule has been commented out since 2026-07-16 and the hourly watchdog only covers ops, so a failed site-engine iteration halts silently. That needs its own human workflow PR in site-engine (mirror hds#201) — parking the mayor does not cover it.
+- **⚠️ a current defect, not part of this parked entry:** site-engine's `ralph.yml` schedule has been commented out since 2026-07-16 (site-engine#159), and `scripts/ralph-watchdog.mjs` defaults to `hirobius/ops` only, so a failed or parked site-engine iteration idles until someone relabels. Parking the mayor does not cover it. It needs its own site-engine Work issue routed as an adr-eng workflow PR: a 6h `schedule:` mirroring the merged ops#232, with hds#201 as the still-open equivalent for hds. Once that issue exists, replace this line with a link to it.
 - **stale leftovers:** `scripts/fleet-dispatch.mjs` and `scripts/fleet-watchdog.mjs` still describe themselves as the mayor's workers.
 
 ### CommandPalette on /ops/tasks (⌘K jump-to-task + card actions)
@@ -217,7 +227,7 @@ the umbrella.
 
 - **origin:** ops#200 (closed 2026-09-16)
 - **trigger:** `event: the first care-plan client signs`
-- **decision (Adrian, 2026-09-16):** Access Tech's one-off $400 (SOW #001) is paid by check — Stripe costs ~$13.50 on that by card (2.9% + 30¢, plus 0.4% Invoicing) versus $0. Stripe earns its keep on recurring care-plan billing, so it is set up then.
+- **decision (Adrian, 2026-09-16):** the first client's one-off SOW fee is paid by check. By card, Stripe would take ~3.4% of it (2.9% + 30¢, plus 0.4% Invoicing) versus $0. Stripe earns its keep on recurring care-plan billing, so it is set up then. Detail in #200.
 - **runbook preserved in #200:** account at https://dashboard.stripe.com/register, Payment Link for build fees, Subscription for the care plan.
 
 ---

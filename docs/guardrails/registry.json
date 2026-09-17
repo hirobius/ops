@@ -592,13 +592,13 @@
     },
     {
       "id": "check-parked-triggers",
-      "description": "Evaluates the re-entry triggers in docs/ai/PARKED.md, the file holding work deliberately kept out of the issue queue. date: and path: triggers fire automatically; issue:/event: triggers surface at the quarterly review. Exits non-zero when an entry is due to re-enter the queue. Read-only — re-entry stays a deliberate human act. Warn severity: a fired trigger is information, not a defect in the commit.",
+      "description": "Evaluates the re-entry triggers in docs/ai/PARKED.md, the file holding work deliberately kept out of the issue queue. date: and path: triggers fire automatically; issue:/event: triggers surface at the quarterly review. Exits non-zero when an entry is due to re-enter the queue, and prints a recurring entry's own `when it fires:` instruction in place of file-and-delete. Runs daily via .github/workflows/parked-triggers.yml, where a fired trigger fails the scheduled run so the reminder does not depend on memory; `pnpm parked:check` runs it on demand. Read-only — re-entry stays a deliberate human act. Warn severity: a fired trigger is information, not a defect in the commit.",
       "severity": "warn",
       "gateScript": "scripts/check-parked-triggers.mjs",
       "fixturePath": "fixtures/check-parked-triggers",
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pnpm-meta"
+      "firingChannel": "ci-scheduled"
     },
     {
       "id": "metric-north-star-share",
