@@ -27,7 +27,7 @@ const BASE_LEAD = {
   category: 'roofing',
   city: 'Austin',
   region: 'TX',
-  phone: '+1-555-1000',
+  phone: '+1-512-555-1000',
   email: 'owner@acmeroofing.com',
   photos: [],
 };
