@@ -4,12 +4,12 @@ Deploys the always-on side of the Hirobius internal AI ops platform to a small V
 
 ## Recommendation
 
-| Provider | Plan | Specs | Price | Notes |
-|----------|------|-------|-------|-------|
-| **Hetzner Cloud** | CX22 | 2 vCPU, 4GB RAM, 40GB SSD | €4.51/mo | **Recommended.** Strong reliability/price ratio for 24/7 background processes. EU and US datacenters. |
-| Hostinger | KVM 2 | 2 vCPU, 8GB RAM, 100GB SSD | ~$7-9/mo | One-click Ubuntu template (the option referenced in the Hermes YouTube video). Higher RAM if you want headroom for `gemma4:26b`. |
-| DigitalOcean | Basic 2GB | 1 vCPU, 2GB RAM, 50GB SSD | $6/mo | Equivalent fallback. Ample reach in US. |
-| Linode | Nanode 1GB | 1 vCPU, 1GB RAM, 25GB SSD | $5/mo | Tightest budget; cuts it close on RAM for Ollama. |
+| Provider          | Plan       | Specs                      | Price    | Notes                                                                                                                            |
+| ----------------- | ---------- | -------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Hetzner Cloud** | CX22       | 2 vCPU, 4GB RAM, 40GB SSD  | €4.51/mo | **Recommended.** Strong reliability/price ratio for 24/7 background processes. EU and US datacenters.                            |
+| Hostinger         | KVM 2      | 2 vCPU, 8GB RAM, 100GB SSD | ~$7-9/mo | One-click Ubuntu template (the option referenced in the Hermes YouTube video). Higher RAM if you want headroom for `gemma4:26b`. |
+| DigitalOcean      | Basic 2GB  | 1 vCPU, 2GB RAM, 50GB SSD  | $6/mo    | Equivalent fallback. Ample reach in US.                                                                                          |
+| Linode            | Nanode 1GB | 1 vCPU, 1GB RAM, 25GB SSD  | $5/mo    | Tightest budget; cuts it close on RAM for Ollama.                                                                                |
 
 **For Hirobius's MVP scope (assigner + Discord/Telegram + classifier-only Ollama), Hetzner CX22 is the sweet spot.**
 
@@ -111,7 +111,7 @@ Required vars for the bots:
 DISCORD_BOT_TOKEN=...
 DISCORD_OWNER_ID=...
 DISCORD_GUILD_ID=...
-DISCORD_DEFAULT_CLIENT=lilac-insure
+DISCORD_DEFAULT_CLIENT=<client-slug>   # or "defaultClient" in the gitignored clients/local.json
 
 TELEGRAM_BOT_TOKEN=...
 TELEGRAM_OWNER_ID=...
@@ -124,6 +124,7 @@ OLLAMA_HOST=http://localhost:11434
 ```
 
 Permissions:
+
 ```bash
 chmod 600 .env.local
 ```
@@ -131,8 +132,8 @@ chmod 600 .env.local
 ### 6. Smoke test
 
 ```bash
-echo "Set up Outlook auto-responder for Lilac" | \
-  node scripts/auto-assigner.mjs --client lilac-insure
+echo "Set up Outlook auto-responder for the client" | \
+  node scripts/auto-assigner.mjs --client <client-slug>
 # expect: JSON output with verdict=task, tier=open-local, model=gemma4:e4b
 ```
 
@@ -181,6 +182,7 @@ WantedBy=multi-user.target
 ```
 
 Enable + start:
+
 ```bash
 sudo mkdir -p /var/log/hirobius
 sudo chown hirobius:hirobius /var/log/hirobius
@@ -219,6 +221,7 @@ Bind it to a watchexec / cron / alias as fits your workflow. Step 8 of the paren
 - `clients/<slug>/tasks.json` — these live in git. Commit + push from workstation; pull on VPS before each `git pull` upgrade.
 
 Cron snapshot (on VPS):
+
 ```cron
 0 3 * * * cp /home/hirobius/adrian-milsap/docs/ai/routing-log.jsonl /home/hirobius/backups/routing-log-$(date +\%Y\%m\%d).jsonl
 0 4 * * 0 find /home/hirobius/backups -name 'routing-log-*.jsonl' -mtime +30 -delete

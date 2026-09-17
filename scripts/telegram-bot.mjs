@@ -14,7 +14,9 @@
  * Required env vars in .env.local:
  *   TELEGRAM_BOT_TOKEN=<bot token from @BotFather>
  *   TELEGRAM_OWNER_ID=<your Telegram user ID — message @userinfobot to find it>
- *   DISCORD_DEFAULT_CLIENT=lilac-insure   (shared default; same var as Discord)
+ *   DISCORD_DEFAULT_CLIENT=<client-slug>  (shared default; same var as Discord.
+ *                                          Or set "defaultClient" in the gitignored
+ *                                          clients/local.json instead)
  *
  * Run:
  *   pnpm telegram   (or node scripts/telegram-bot.mjs)
@@ -30,6 +32,11 @@ import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import {
+  missingDefaultClientMessage,
+  readLocalClientConfig,
+  resolveDefaultClient,
+} from './lib/local-client-config.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -42,15 +49,22 @@ if (fs.existsSync(envLocal)) {
   }
 }
 
-const BOT_TOKEN      = process.env.TELEGRAM_BOT_TOKEN;
-const OWNER_ID       = process.env.TELEGRAM_OWNER_ID;
-const DEFAULT_CLIENT = process.env.DISCORD_DEFAULT_CLIENT || 'lilac-insure';
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const OWNER_ID = process.env.TELEGRAM_OWNER_ID;
+// Client names never live in tracked code (ops#27): env var, else clients/local.json.
+const DEFAULT_CLIENT = resolveDefaultClient({ config: readLocalClientConfig(ROOT) });
 
-if (!BOT_TOKEN) { console.error('[tg] TELEGRAM_BOT_TOKEN not set in .env.local'); process.exit(1); }
-if (!OWNER_ID)  { console.error('[tg] TELEGRAM_OWNER_ID not set in .env.local');  process.exit(1); }
+if (!BOT_TOKEN) {
+  console.error('[tg] TELEGRAM_BOT_TOKEN not set in .env.local');
+  process.exit(1);
+}
+if (!OWNER_ID) {
+  console.error('[tg] TELEGRAM_OWNER_ID not set in .env.local');
+  process.exit(1);
+}
 
 const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
-const POLL_TIMEOUT = 25;  // seconds — Telegram supports up to 50
+const POLL_TIMEOUT = 25; // seconds — Telegram supports up to 50
 
 // ── Auto-assigner integration ─────────────────────────────────────────────────
 
@@ -68,12 +82,20 @@ function runAssigner(text, clientSlug) {
     });
     let stdout = '';
     let stderr = '';
-    proc.stdout.on('data', (c) => { stdout += c.toString(); });
-    proc.stderr.on('data', (c) => { stderr += c.toString(); });
+    proc.stdout.on('data', (c) => {
+      stdout += c.toString();
+    });
+    proc.stderr.on('data', (c) => {
+      stderr += c.toString();
+    });
     proc.on('error', reject);
     proc.on('close', (code) => {
       let result = null;
-      try { result = JSON.parse(stdout); } catch { /* result stays null */ }
+      try {
+        result = JSON.parse(stdout);
+      } catch {
+        /* result stays null */
+      }
       resolve({ code, result, stderr });
     });
     proc.stdin.write(text);
@@ -84,7 +106,7 @@ function runAssigner(text, clientSlug) {
 function formatRoutingDecision(result, clientSlug) {
   const { taskId, tier, model, effort, costCeiling, rationale, createdNew } = result;
   const created = createdNew ? '🆕 created' : '🔄 re-routed';
-  const cost    = costCeiling > 0 ? `$${costCeiling.toFixed(4)} ceiling` : 'free (local)';
+  const cost = costCeiling > 0 ? `$${costCeiling.toFixed(4)} ceiling` : 'free (local)';
   return [
     `${created} \`${taskId}\` → \`${model}\` (${tier}, ${effort})`,
     `${cost} · ${rationale}`,
@@ -96,9 +118,9 @@ function formatRoutingDecision(result, clientSlug) {
 
 async function tg(method, body) {
   const response = await fetch(`${API}/${method}`, {
-    method:  'POST',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify(body),
+    body: JSON.stringify(body),
   });
   const data = await response.json();
   if (!data.ok) throw new Error(`telegram ${method} failed: ${data.description}`);
@@ -109,8 +131,8 @@ async function sendMessage(chatId, text) {
   // Telegram messages cap at 4096 chars. Chunk for safety.
   for (let i = 0; i < text.length; i += 4000) {
     await tg('sendMessage', {
-      chat_id:    chatId,
-      text:       text.slice(i, i + 4000),
+      chat_id: chatId,
+      text: text.slice(i, i + 4000),
       parse_mode: 'Markdown',
       disable_web_page_preview: true,
     });
@@ -118,7 +140,11 @@ async function sendMessage(chatId, text) {
 }
 
 async function sendTyping(chatId) {
-  try { await tg('sendChatAction', { chat_id: chatId, action: 'typing' }); } catch { /* non-fatal */ }
+  try {
+    await tg('sendChatAction', { chat_id: chatId, action: 'typing' });
+  } catch {
+    /* non-fatal */
+  }
 }
 
 // ── Main poll loop ────────────────────────────────────────────────────────────
@@ -126,7 +152,7 @@ async function sendTyping(chatId) {
 async function handleMessage(message) {
   const chatId = message.chat?.id;
   const fromId = String(message.from?.id ?? '');
-  const text   = (message.text ?? '').trim();
+  const text = (message.text ?? '').trim();
   if (!chatId || !text) return;
   if (fromId !== String(OWNER_ID)) {
     console.log(`[tg] dropped non-owner message from ${fromId}`);
@@ -137,13 +163,18 @@ async function handleMessage(message) {
 
   // !help shortcut — mirror Discord cmdHelp content
   if (text === '/start' || text === '/help' || text === '!help') {
-    await sendMessage(chatId, [
-      '*Hirobius HQ — Telegram*',
-      '',
-      `Type a task and the auto-assigner classifies + routes it to a tier (\`${DEFAULT_CLIENT}\` by default).`,
-      'Prefix with `[client-slug]` to target a different client: `[the-ranch-foundation] do X`.',
-      'Routing decisions land in \`/ops\` Sessions feed.',
-    ].join('\n'));
+    await sendMessage(
+      chatId,
+      [
+        '*Hirobius HQ — Telegram*',
+        '',
+        DEFAULT_CLIENT
+          ? `Type a task and the auto-assigner classifies + routes it to a tier (\`${DEFAULT_CLIENT}\` by default).`
+          : `Type a task and the auto-assigner classifies + routes it to a tier. ${missingDefaultClientMessage()}`,
+        'Prefix with `[client-slug]` to target a different client: `[client-slug] do X`.',
+        'Routing decisions land in \`/ops\` Sessions feed.',
+      ].join('\n'),
+    );
     return;
   }
 
@@ -151,6 +182,10 @@ async function handleMessage(message) {
 
   try {
     const { client: clientSlug, rest } = parseClientPrefix(text);
+    if (!clientSlug) {
+      await sendMessage(chatId, `⚠️ ${missingDefaultClientMessage()}`);
+      return;
+    }
     const { code, result, stderr } = await runAssigner(rest, clientSlug);
 
     if (code === 0 && result?.verdict === 'task') {
@@ -158,7 +193,10 @@ async function handleMessage(message) {
       return;
     }
     if (code === 2) {
-      await sendMessage(chatId, '🗨️ Logged as not-a-task (memory note, not routed). Use `/help` for syntax.');
+      await sendMessage(
+        chatId,
+        '🗨️ Logged as not-a-task (memory note, not routed). Use `/help` for syntax.',
+      );
       return;
     }
     if (code === 3 && result?.reason) {
@@ -166,7 +204,10 @@ async function handleMessage(message) {
       return;
     }
     if (code === 1) {
-      await sendMessage(chatId, `⚠️ Assigner runtime error:\n\`\`\`\n${(stderr || 'unknown').slice(0, 500)}\n\`\`\``);
+      await sendMessage(
+        chatId,
+        `⚠️ Assigner runtime error:\n\`\`\`\n${(stderr || 'unknown').slice(0, 500)}\n\`\`\``,
+      );
       return;
     }
     await sendMessage(chatId, `(unhandled exit code ${code})`);
@@ -177,11 +218,16 @@ async function handleMessage(message) {
 }
 
 async function main() {
-  console.log(`[tg] Online — owner=${OWNER_ID}, default-client=${DEFAULT_CLIENT}`);
+  console.log(`[tg] Online — owner=${OWNER_ID}, default-client=${DEFAULT_CLIENT ?? '(none)'}`);
+  if (!DEFAULT_CLIENT) console.warn(`[tg] ${missingDefaultClientMessage()}`);
   let offset = 0;
   while (true) {
     try {
-      const updates = await tg('getUpdates', { offset, timeout: POLL_TIMEOUT, allowed_updates: ['message'] });
+      const updates = await tg('getUpdates', {
+        offset,
+        timeout: POLL_TIMEOUT,
+        allowed_updates: ['message'],
+      });
       for (const update of updates) {
         offset = update.update_id + 1;
         if (update.message) {

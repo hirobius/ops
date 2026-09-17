@@ -89,6 +89,12 @@ import { fileURLToPath } from 'url';
 import { makeGitHubPort } from '../lib/github/issues.mjs';
 import { listProjects } from '../lib/projects/index.mjs';
 import { RALPH_WORKFLOW_FILE } from '../lib/tasks/actions.mjs';
+import {
+  clientAliasPromptLines,
+  missingDefaultClientMessage,
+  readLocalClientConfig,
+  resolveDefaultClient,
+} from './lib/local-client-config.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -115,8 +121,11 @@ const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'hermes3';
 // overrides the default per-channel/thread.
 const BOT_PROVIDER_DEFAULT = (process.env.DISCORD_BOT_PROVIDER || 'ollama').toLowerCase();
 // Default client for the auto-assigner when a non-! message has no [slug]
-// prefix. Override via env when the bot lives in a multi-client server.
-const DEFAULT_CLIENT = process.env.DISCORD_DEFAULT_CLIENT || 'lilac-insure';
+// prefix: DISCORD_DEFAULT_CLIENT, else `defaultClient` in the gitignored
+// clients/local.json (client names never live in tracked code — ops#27).
+// Nicknames for the NL system prompt come from the same file's `aliases`.
+const LOCAL_CLIENTS = readLocalClientConfig(ROOT);
+const DEFAULT_CLIENT = resolveDefaultClient({ config: LOCAL_CLIENTS });
 const LOG_FILE = '/tmp/youtube-knowledge-cron.log';
 const HERMES_LOG = '/tmp/hermes-loop.log';
 
@@ -159,6 +168,7 @@ function describeProvider(name) {
 }
 
 console.log(`[bot] default AI provider: ${describeProvider(BOT_PROVIDER_DEFAULT)}`);
+if (!DEFAULT_CLIENT) console.warn(`[bot] ${missingDefaultClientMessage()}`);
 if (BOT_PROVIDER_DEFAULT === 'anthropic' && !anthropic) {
   console.warn(
     '[bot] DISCORD_BOT_PROVIDER=anthropic but ANTHROPIC_API_KEY missing or SDK not loaded — falling back to Ollama at runtime',
@@ -418,11 +428,11 @@ const TOOL_DEFS = [
   {
     name: 'client_status',
     description:
-      'Get a status summary for a Hirobius client workspace: tasks by phase/swimlane, checklist blockers, retainer/payment status. Use when asked about a client like "lilac", "lilac insure", "Conrad", etc.',
+      'Get a status summary for a Hirobius client workspace: tasks by phase/swimlane, checklist blockers, retainer/payment status. Use when asked about a client by name, nickname or slug.',
     parameters: {
       type: 'object',
       properties: {
-        slug: { type: 'string', description: 'Client slug directory name, e.g. "lilac-insure"' },
+        slug: { type: 'string', description: 'Client slug: the folder name under clients/' },
       },
       required: ['slug'],
     },
@@ -434,7 +444,7 @@ const TOOL_DEFS = [
     parameters: {
       type: 'object',
       properties: {
-        slug: { type: 'string', description: 'Client slug, e.g. "lilac-insure"' },
+        slug: { type: 'string', description: 'Client slug: the folder name under clients/' },
         dry_run: { type: 'boolean', description: 'If true, print findings without writing files' },
       },
       required: ['slug'],
@@ -467,7 +477,8 @@ function executeTool(name, input) {
       return lines.slice(0, input.lines || 50).join('\n');
     }
     if (name === 'client_status') {
-      return getClientStatus(input.slug || 'lilac-insure');
+      const slug = input.slug || DEFAULT_CLIENT;
+      return slug ? getClientStatus(slug) : missingDefaultClientMessage();
     }
     if (name === 'sync_client_emails') {
       const dryFlag = input.dry_run ? '--dry-run' : '';
@@ -511,8 +522,8 @@ Available commands (run via shell_exec):
 - kill <pid>                               — stop a loop
 
 Client workspace:
-- "pull up lilac", "how's Conrad's project", "lilac status" → use client_status tool with slug "lilac-insure"
-- "sync lilac emails", "parse emails for lilac" → use sync_client_emails tool
+${clientAliasPromptLines(LOCAL_CLIENTS).join('\n')}
+- "sync <client> emails", "parse emails for <client>" → use sync_client_emails tool
 - Client data lives in clients/<slug>/ — tasks, checklist, retainer, notes, goals
 
 Agent routing:
@@ -720,8 +731,10 @@ async function cmdHelp(channel) {
     [
       '**Hirobius HQ Bot**',
       '',
-      `Type a task description and the auto-assigner classifies + routes it to a tier (\`${DEFAULT_CLIENT}\` by default).`,
-      'Prefix with \`[client-slug]\` to target a different client: \`[the-ranch-foundation] do X\`.',
+      DEFAULT_CLIENT
+        ? `Type a task description and the auto-assigner classifies + routes it to a tier (\`${DEFAULT_CLIENT}\` by default).`
+        : `Type a task description and the auto-assigner classifies + routes it to a tier. ${missingDefaultClientMessage()}`,
+      'Prefix with \`[client-slug]\` to target a different client: \`[client-slug] do X\`.',
       "Anything that isn't a task falls through to natural-language chat.",
       '',
       '**Quick shortcuts (no API cost):**',
@@ -1152,6 +1165,8 @@ async function cmdDispatch(channel, args) {
 // stays a thin transport — all classification + tier routing logic lives in
 // auto-assigner.mjs so Telegram/CLI/Discord share one brain.
 
+let warnedNoDefaultClient = false;
+
 function parseClientPrefix(text) {
   const match = text.match(/^\[([a-z0-9-]+)\]\s*(.+)$/i);
   if (match) return { client: match[1], rest: match[2] };
@@ -1345,27 +1360,35 @@ async function handleMessage(msg) {
   }
 
   // Auto-assigner first — classify + route as a task if applicable.
-  // Falls through to NL-AI for not-task / runtime-error paths.
-  try {
-    await msg.channel.sendTyping();
-    const { client: clientSlug, rest } = parseClientPrefix(text);
-    const { code, result, stderr } = await runAssigner(rest, clientSlug);
+  // Falls through to NL-AI for not-task / runtime-error paths. With no default
+  // client and no [slug] prefix the assigner is skipped, and the channel is told
+  // once per process how to configure one.
+  const { client: clientSlug, rest } = parseClientPrefix(text);
+  if (!clientSlug && !warnedNoDefaultClient) {
+    warnedNoDefaultClient = true;
+    await send(msg.channel, `⚠️ ${missingDefaultClientMessage()}`);
+  }
+  if (clientSlug) {
+    try {
+      await msg.channel.sendTyping();
+      const { code, result, stderr } = await runAssigner(rest, clientSlug);
 
-    if (code === 0 && result?.verdict === 'task') {
-      await send(msg.channel, formatRoutingDecision(result, clientSlug));
-      return;
+      if (code === 0 && result?.verdict === 'task') {
+        await send(msg.channel, formatRoutingDecision(result, clientSlug));
+        return;
+      }
+      if (code === 3 && result?.reason) {
+        await send(msg.channel, `🤔 Ambiguous: ${result.reason}\nClarify or rephrase.`);
+        return;
+      }
+      if (code === 1) {
+        // assigner runtime error — log and fall through to NL-AI
+        console.warn('[bot] assigner runtime error:', stderr.trim().slice(0, 300));
+      }
+      // code 2 (not-a-task) or unparsed result → fall through to NL-AI
+    } catch (e) {
+      console.warn('[bot] assigner spawn failed, falling through to NL-AI:', e.message);
     }
-    if (code === 3 && result?.reason) {
-      await send(msg.channel, `🤔 Ambiguous: ${result.reason}\nClarify or rephrase.`);
-      return;
-    }
-    if (code === 1) {
-      // assigner runtime error — log and fall through to NL-AI
-      console.warn('[bot] assigner runtime error:', stderr.trim().slice(0, 300));
-    }
-    // code 2 (not-a-task) or unparsed result → fall through to NL-AI
-  } catch (e) {
-    console.warn('[bot] assigner spawn failed, falling through to NL-AI:', e.message);
   }
 
   // Natural language fallback → AI

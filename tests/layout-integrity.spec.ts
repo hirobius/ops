@@ -51,9 +51,9 @@ const ALL_ROUTES = [
   '/ops/tasks',
   '/ops/projects',
   '/ops/clients',
-  '/ops/clients/lilac-insure',
-  '/ops/clients/lilac-insure/report',
-  '/ops/clients/lilac-insure/brand-audit',
+  '/ops/clients/example-client',
+  '/ops/clients/example-client/report',
+  '/ops/clients/example-client/brand-audit',
   // ── Ops · temporary (deleted with OpsDashboardPage once harvest is finalized) ──
   // Client portal retired 2026-09-16 — /c/:slug removed (portals live in portal-kit).
 ] as const;

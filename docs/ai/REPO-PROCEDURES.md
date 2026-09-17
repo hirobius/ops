@@ -63,7 +63,7 @@ wiring only.
 Sibling to the universal prompt above, but for a **new, private, Hirobius-owned
 client-work repo** (one per engagement). The universal prompt onboards an
 _existing_ fleet repo; this one _stands up_ a client repo from a project + its
-`tasks.json`. Core rule (learned on Lilac): **the work repo is private and stays
+`tasks.json`. Core rule (learned on the first client): **the work repo is private and stays
 Hirobius-owned — you never hand the client the repo, you hand them a curated
 deliverable.** Client PII + internal business (pricing, legal, pro-bono,
 competitor, brand-audit) live here safely _because it's private_; the handoff

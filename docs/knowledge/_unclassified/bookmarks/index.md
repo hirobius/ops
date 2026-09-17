@@ -2,30 +2,17 @@
 pillar: _unclassified
 source: bookmarks
 date: 2026-05-02
-total: 197
+total: 156
 ---
 
-# Bookmarks — _unclassified
-
-## Bookmarks bar > Lilac
-
-- [Mail - Administration - Outlook](https://outlook.office.com/mail/?deeplink=mail%2F)
-- [AI Workflow Automation Software &amp; Tools | Make](https://www.make.com/en?pc=enusio&gad_source=1)
-- [SOPs for Business Processes: A 6-Step Writing Guide](https://scribe.com/library/sops-for-business-processes-with-scribe)
-- [Automations | Cursor Docs](https://cursor.com/docs/cloud-agent/automations)
-- [Insurance Agency Websites Built For SEO, Mobile, &amp; Conversions](https://advisorevolved.com/#why)
-- [Outlook](https://outlook.cloud.microsoft/mail/?deeplink=mail%2F)
+# Bookmarks — \_unclassified
 
 ## Bookmarks bar
 
-- [Mail](https://mail.google.com/mail/u/0/?ogbl#inbox)
-- [Drive](https://drive.google.com/drive/my-drive)
 - [NotebookLM](https://notebooklm.google.com/?original_referer=https:%2F%2Fadmin.google.com%23&pli=1)
 - [Google AI Studio](https://aistudio.google.com/prompts/new_chat)
 - [ChatGPT](https://chatgpt.com/)
 - [Claude](https://claude.ai/login)
-- [Figma](https://www.figma.com/files/team/1107784138532077495/recents-and-sharing?fuid=1107784130781961084)
-- [Lilac Insure](https://docs.google.com/document/d/161_cRiCEv5KeYFFSelqbLN6L-TSRlS994gEpGNov2rk/edit?tab=t.ua42t9h1lskp)
 - [PORTFOLIO 2026](https://swipe-quota-75373945.figma.site/)
 - [Portfolio Make](http://localhost:5178/)
 - [HDS Playground — Hirobius Design System](file:///C:/Users/Adrian/Desktop/hds-playground.html)
@@ -46,13 +33,10 @@ total: 197
 - [Kshitij Suri - Wall of Portfolios](https://www.wallofportfolios.in/portfolios/kshitij-suri/)
 - [The Future of Design Is Code and Canvas | Figma Blog](https://www.figma.com/blog/the-future-of-design-is-code-and-canvas/)
 - [Azeret Mono - Google Fonts](https://fonts.google.com/specimen/Azeret+Mono?preview.script=Latn)
-- [Stitch - Projects](https://stitch.withgoogle.com/projects/3482670911939584420?gad_source=1&gad_campaignid=23633839429&gbraid=0AAAABDBVx-_7B2MU7L_7wUC8XfAFWngc7&gclid=CjwKCAjwyYPOBhBxEiwAgpT8P-1KsNI_od8EV9ImWNrKIHEozNJ4VWxeUGquNXWbahHGO-LuGzoMGxoCUbYQAvD_BwE&pli=1)
 - [Designing a Figma Design System That AI Can Understand | by Alpesh Karanpuria | Mar, 2026 | Design Systems Collective](https://www.designsystemscollective.com/designing-a-figma-design-system-that-ai-can-understand-d4434f7601b5)
 - [Web Accessibility Color Contrast Checker - Conform to WCAG](https://accessibleweb.com/color-contrast-checker/)
-- [Adrian Milsap | LinkedIn](https://www.linkedin.com/in/adrianmilsap/)
 - [✔ Compress PDF - 100% free &amp; online - PDF24](https://tools.pdf24.org/en/compress-pdf#s=1776108033778)
 - [Figma Weave](https://app.weavy.ai/)
-- [resume_adrianMilsap - Google Docs](https://docs.google.com/document/d/1BMarW29u7mjmMchRBIzWOuD0WHbgGepuAKamAF3w-fA/edit?tab=t.0)
 - [Stitch - Docs](https://stitch.withgoogle.com/docs/design-md/format/?pli=1)
 - [Code From Your Phone Like a Boss: tmux + Tailscale + Termius + Claude Code = Developer Heaven 🚀 | by Emre Isik | Medium](https://emreisik.dev/code-from-your-phone-like-a-boss-tmux-tailscale-termius-claude-code-developer-heaven-95119c704f20)
 - [Buttondown — Newsletter software for people like you](https://buttondown.com/?utm_source=referral)
@@ -78,7 +62,6 @@ total: 197
 - [Post | Feed | LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7352394845610496001/)
 - [Home](https://www.searchwithjack.com/)
 - [Post | Feed | LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7320003653677760512/?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7320003653677760512%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29)
-- [Romina Kavcic | LinkedIn](https://www.linkedin.com/in/rominakavcic/)
 - [Post | Feed | LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7342930483615330305/?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7342930483615330305%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29)
 - [Post | Feed | LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7366840498143051777/?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7366840498143051777%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29)
 - [Post | Feed | LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7381330182722408448/?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7381330182722408448%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29)
@@ -106,18 +89,14 @@ total: 197
 - [Airtable - Superhuman AI](https://airtable.com/apppaprA2GXXxBSjs/shrjsPiubnIHIqTwH/tblCm6yevfjitvoCh/viwKzKHKKqd5d5bk8?utm_source=superhuman&utm_medium=referral&utm_campaign=interpreter-ai-that-manages-your-documents-even-offline&_bhlid=365eb63a376048faac25cb1a126956f2ec0c40a9)
 - [Higgsfield AI: Infrastructure for AI Video &amp; Image Gen](https://higgsfield.ai/)
 - [Pricing • Paper](https://paper.design/pricing)
-- [My First Project | MagicPath](https://www.magicpath.ai/files/399578714096144384)
-- [Welcome to Paper · Paper](https://app.paper.design/file/01KQ82N9A7ZH2P057W5NXG2S0N/01K4GP58P8JRM8PGBP0586VKYV)
 - [Post | LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7454826645498228736/)
 - [Mono Studio · Adrian Z.](https://azumbrunnen.me/mono.html)
-- [Igor_Sokoltsov_Resume - Google Docs](https://docs.google.com/document/d/1bfUSsaFqqk3r6HNUUTfknLBrTT8V1ZJr_MH2B6n6urg/edit?tab=t.0)
 - [12 Designers’ Portfolios that will make you jealous | by Deep Adalja | Bootcamp | Medium](https://medium.com/design-bootcamp/12-designers-portfolios-that-will-make-you-jealous-5e5d5dbb7626)
 - [Claude Design + Seedance 2.0 = INSANE Animated Websites - YouTube](https://www.youtube.com/watch?v=7uW1SKmx-Ic&list=LL&index=25)
 - [Airbnb | Design Book | Manual](https://manualcreative.com/work/airbnb)
 - [Discover Web apps | Mobbin](https://mobbin.com/discover/apps/web/top?via=aneta)
 - [Invisible Details of Interaction Design](https://rauno.me/craft/interaction-design)
 - [How to Create a Visual Identity System That Works](https://fabrikbrands.com/branding-matters/branding/how-to-create-a-visual-identity-system/)
-- [Igor_Sokoltsov_Resume.pdf - Google Drive](https://drive.google.com/file/d/1Kj_Bq4JdX4dpnXGc5mkxk5WsJiISADVu/view)
 
 ## Bookmarks bar > Design Engineering
 
@@ -141,23 +120,15 @@ total: 197
 - [(5) NVIDIA Just Solved AI&#39;s Biggest Problem - YouTube](https://www.youtube.com/watch?v=0vyMp_yjEJM)
 - [(5) Hermes: This Free AI SEO Super Agent is Insane - YouTube](https://www.youtube.com/watch?v=9GxvfazA-Bg)
 - [(5) Sneak Peak of future AI coding workflow - Ship 5x more PRs already - YouTube](https://www.youtube.com/watch?v=M_AmPWmkpwA)
-- [App Engine – App Engine – youtube-breakdowns – Google Cloud console](https://console.cloud.google.com/appengine/start?project=youtube-breakdowns-489817)
 
 ## Favorites bar
 
 - [Clockify](https://app.clockify.me/tracker)
-- [Ops](https://docs.google.com/document/d/1IwhwMCxRsuwxzCodznjtf6vsUTlruD_b15vQ0kmihgM/edit?tab=t.3lv8vp6ivnge)
 - [Google AI Studio](https://aistudio.google.com/)
 - [ChatGPT](https://chatgpt.com/?openaicom_referred=true)
 - [Google Gemini](https://gemini.google.com/app)
-- [Adrian Milsap admin](https://cargocollective.com/adrianmilsap/admin)
-- [Chat](https://mail.google.com/mail/u/0/?ogbl#chat/home)
-- [Admin](https://admin.google.com/ac/home?hl=en)
-- [Folio](https://www.figma.com/design/2WluO62zjanBiSNG9j6WzY/Folio-Presentation?node-id=2-2&p=f&t=uQZ8F31VdTH3Zx4o-0)
-- [Ranch / Tech](https://chat.google.com/app/chat/AAQAFpjJqgc)
 - [Admin](https://account.squarespace.com/)
 - [Bookmarks](chrome://bookmarks/)
-- [Insurance Agency Spokane, WA | Lilac Insurance Group, LLC](https://www.lilacinsure.com/)
 
 ## Favorites bar > Design
 
@@ -174,14 +145,8 @@ total: 197
 
 ## Favorites bar > Medford
 
-- [Project Medford](https://planner.cloud.microsoft/webui/plan/WHdpIyvXDEa1X9pMMAAgzGUAFfBe/view/board?tid=956ff15c-f9a0-44b4-9cc0-5d3631b1a198)
-- [Identifying the Right Players for Virtual Casino Growth - Google Docs](https://docs.google.com/document/d/11OShZMqpXDQ8AxSuh9FFMknHSwzYqUpd7VFCFYcSmxE/edit?pli=1&tab=t.0#heading=h.6qt0m9a17b7c)
-- [Competitive Landscape Research.xlsx](https://jackalopeproductions.sharepoint.com/:x:/s/ProjectMedford/EQNsYgKWD2pNufKM2_JYwhMB_1vRJi2QakXKtkFIz7xDSQ?e=VT0IQL&nav=MTVfe0EwMTZFNkY5LUE0MTQtNDRFRC05MDVELTg0OTRBQ0Y5OUZENX0)
-- [Medford Player Journey.docx](https://jackalopeproductions.sharepoint.com/:w:/s/ProjectMedford/ERsLJPg-lINHk8mFlEKnItEBFwQVvuFOoXNGCdJZzYImnw?e=ntgbTQ&wdOrigin=TEAMS-MAGLEV.teams_ns.rwc&wdExp=TEAMS-TREATMENT&wdhostclicktime=1753743410106&web=1)
 - [3D RPG Fantasy Game](https://treat-patent-pro.figma.site/)
 - [VO3 AI Video Generator - Advanced AI Video Creation Platform](https://vo3.org/)
-- [Medford Social Casino - Overview Doc](https://docs.google.com/document/d/1SGdnjfYJrh7Yt2fhP2ZEue1vtJePlS5956jt6o7Aapw/edit?tab=t.0)
-- [Presentation 1.pptx](https://jackalopeproductions-my.sharepoint.com/:p:/r/personal/v-allie_jackalope_pro/_layouts/15/Doc.aspx?sourcedoc=%7BD1A051C2-A56D-427A-BEFE-8E47B2807CD1%7D&file=Presentation%201.pptx&fromShare=true&action=edit&mobileredirect=true)
 - [I&#39;ve created a cozy game where you decorate rooms! (Free demo, feel free to AMA!) : r/CozyGamers](https://www.reddit.com/r/CozyGamers/comments/18l6ha3/ive_created_a_cozy_game_where_you_decorate_rooms/)
 - [Explore 3D Models - Sketchfab](https://sketchfab.com/3d-models)
 - [fly.pieter.com](https://fly.pieter.com/)
@@ -233,18 +198,3 @@ total: 197
 
 - [Create your own Google Maps style - Snazzy Maps - Free Styles for Google Maps](https://snazzymaps.com/editor/customize/126378)
 - [Destinations | Ikon Pass](https://www.ikonpass.com/en/destinations)
-
-## Favorites bar > Sam > Civil Engineering
-
-- [project engineer - Google Search](https://www.google.com/search?q=project+engineer&rlz=1C5CHFA_enUS890US892&oq=project+engineer&gs_lcrp=EgZjaHJvbWUyDAgAEEUYORixAxiABDIKCAEQABixAxiABDIKCAIQABixAxiABDIHCAMQABiABDIHCAQQABiABDIHCAUQABiABDIHCAYQABiABDIHCAcQABiABDIHCAgQABiABDIHCAkQABiABNIBCDM1NDRqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8)
-- [structural design associates - Google Search](https://www.google.com/search?q=structural+design+associates&rlz=1C5CHFA_enUS890US892&oq=structural+design+associate&gs_lcrp=EgZjaHJvbWUqCggAEAAY4wIYgAQyCggAEAAY4wIYgAQyEAgBEC4YrwEYxwEYgAQYjgUyBggCEEUYOTIHCAMQABiABDIICAQQABgWGB4yCAgFEAAYFhgeMggIBhAAGBYYHjIICAcQABgWGB4yCAgIEAAYFhgeMggICRAAGBYYHtIBCTEwNzg0ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8)
-- [Civil Engineering vs. Industrial Engineering | Norwich University - Online](https://online.norwich.edu/civil-engineering-vs-industrial-engineering)
-- [Our Expert Guide to Civil Engineering Design](https://info.stonewallco.com/blog/our-expert-guide-to-civil-engineering-design)
-- [Civil Engineers : Occupational Outlook Handbook: : U.S. Bureau of Labor Statistics](https://www.bls.gov/ooh/architecture-and-engineering/civil-engineers.htm#:~:text=What%20Civil%20Engineers%20Do%20About,and%20water%20and%20sewage%20systems.)
-- [civil engineering designer - Google Search](https://www.google.com/search?q=civil+engineering+designer&rlz=1C5CHFA_enUS890US892&oq=civil+engineering+designer&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQABiABDIHCAIQABiABDIHCAMQABiABDIHCAQQABiABDIHCAUQABiABDIHCAYQABiABDIHCAcQABiABDIHCAgQABiABDINCAkQLhivARjHARiABNIBCDQ2MzlqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8)
-- [clearancejobs.com/jobs?clearance=2&amp;keywords=civil+engineering&amp;sort_info=timestamp+desc](https://www.clearancejobs.com/jobs?clearance=2&keywords=civil+engineering&sort_info=timestamp+desc)
-
-## Favorites bar > Sam
-
-- [Sign in | Clipchamp](https://app.clipchamp.com/login)
-- [Samuel Milsap YouTube](https://studio.youtube.com/channel/UCpGeUANSHup8luM9uKiXjjw?token=yEtmVquhD0ToDwV9vJuMVA)

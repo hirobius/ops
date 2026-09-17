@@ -78,7 +78,7 @@ describe('priorityOf', () => {
 
 describe('ownersOf', () => {
   it('dedupes and preserves first-seen order', () => {
-    expect(ownersOf(['hirobius/ops', 'adr-eng/access', 'hirobius/lilac'])).toEqual([
+    expect(ownersOf(['hirobius/ops', 'adr-eng/access', 'hirobius/client-site'])).toEqual([
       'hirobius',
       'adr-eng',
     ]);
@@ -106,7 +106,7 @@ describe('sortFleetLanes', () => {
     issue({ repo: 'hirobius/ops', number: 200, labels: ['needs-adrian', 'p1'] }),
     issue({ repo: 'hirobius/ops', number: 306, labels: ['needs-adrian', 'p2'] }),
     issue({ repo: 'adr-eng/access', number: 7, labels: ['ralph-parked'] }),
-    issue({ repo: 'hirobius/lilac', number: 12, labels: ['ralph-ready', 'p0'] }),
+    issue({ repo: 'hirobius/client-site', number: 12, labels: ['ralph-ready', 'p0'] }),
     issue({ repo: 'hirobius/ops', number: 309, labels: ['ralph-ready', 'p2'] }),
     issue({ repo: 'hirobius/ops', number: 99, labels: ['backlog'] }),
   ];
@@ -151,7 +151,7 @@ describe('sortFleetLanes', () => {
   it('discovers every repo that appeared, across owners, sorted', () => {
     expect(sortFleetLanes(fleet).repos).toEqual([
       'adr-eng/access',
-      'hirobius/lilac',
+      'hirobius/client-site',
       'hirobius/ops',
     ]);
   });
