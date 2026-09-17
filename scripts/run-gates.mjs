@@ -83,6 +83,7 @@ import { performance } from 'node:perf_hooks';
 import {
   loadRegistry,
   selectGates,
+  gateOutcome,
   gateResult,
   runGatesSerial,
   summarizeRun,
@@ -458,7 +459,7 @@ if (concurrency <= 1) {
     runGate: (gate) => {
       console.log(`\n── [${gate.id}] ──`);
       const code = runGateSync(gate);
-      if (code !== 0) reportGateExit(gateResult(gate, code));
+      reportWarnedGate(gate, code);
       return code;
     },
   });
@@ -478,9 +479,8 @@ if (concurrency <= 1) {
       const gate = selectedGates[cursor++];
       console.log(`\n── [${gate.id}] ──`);
       const code = await runGateAsync(gate);
-      const result = gateResult(gate, code);
-      if (code !== 0) reportGateExit(result);
-      results.push(result);
+      reportWarnedGate(gate, code);
+      results.push(gateResult(gate, code));
     }
   }
 
@@ -488,13 +488,16 @@ if (concurrency <= 1) {
   await Promise.all(workers);
 }
 
-/** Say, right under a gate's own output, whether its non-zero exit blocks. */
-function reportGateExit({ id, severity, exitCode, outcome }) {
-  if (outcome === 'warn') {
-    console.warn(
-      `⚠ run-gates: [${id}] exit ${exitCode} — severity '${severity}', reported, not blocking`,
-    );
-  }
+/**
+ * Right under a gate's own output, flag a non-zero exit that will NOT block the
+ * run (warn/info severity), so a red-looking gate isn't mistaken for the reason
+ * a commit stopped. Blocking failures are reported by the fail-fast / summary.
+ */
+function reportWarnedGate(gate, exitCode) {
+  if (gateOutcome(gate, exitCode) !== 'warn') return;
+  console.warn(
+    `⚠ run-gates: [${gate.id}] exit ${exitCode} — severity '${gate.severity}', reported, not blocking`,
+  );
 }
 
 // ── Final summary ─────────────────────────────────────────────────────────────
