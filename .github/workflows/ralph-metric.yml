@@ -1,0 +1,250 @@
+name: Ralph Metric
+
+# Bounded metric loop (ops#90) — a Ralph variant whose queue AND stop condition
+# are a number, not a human-tagged issue. One dispatch = one cycle:
+#
+#   measure <metric> vs <target> ─┬─ at/below target → COMPLETE, no PR, stop
+#                                 └─ above target → single-flight guard →
+#                                    one claude-code-action batch on
+#                                    ralph/metric-<metric>-<run_id> →
+#                                    bash ralph/gate.sh green → PR → ralph-gate
+#                                    (gate + independent AI review) → merge on
+#                                    `ralph-approved` → re-dispatch to re-measure.
+#
+# TRIGGER — workflow_dispatch ONLY, deliberately. No `schedule:` trigger: a cron
+# needs Adrian's explicit per-item yes (standing rule; ops#90 decision
+# 2026-09-16), so between dispatches nothing runs — that is expected, not a bug.
+# Re-dispatch manually to re-measure and continue. If a cron is approved later,
+# it cannot call claude-code-action directly (the action rejects `schedule`
+# events): route it through a workflow_dispatch hop the way the Ralph engine's
+# chain hop does, and add `allowed_bots: "*"` because the hop dispatches as a bot.
+#
+# CONCURRENCY — its own group, deliberately NOT ralph.yml's `ralph-<repo>`.
+# GitHub keeps one running + one pending run per group, and a newly queued run
+# CANCELS the pending one. Sharing the group would let a metric dispatch cancel
+# ralph.yml's pending chain-hop run (stranding the claim ref that run already
+# took), let every push-to-main run silently cancel a pending metric dispatch,
+# and let a 90-minute batch hold the issue loop off entirely. So metric runs
+# serialize only against each other, and cross-loop exclusion is done by STATE,
+# the way ralph.yml does it: the guard skips when any Ralph PR is open
+# (open_ralph_prs) or an issue iteration holds a claim ref, and the batch PR's
+# ralph/ branch makes the issue loop wait on it in turn. Residual race: both
+# guards passing within the same few seconds → two open Ralph PRs, which
+# ralph-gate and ralph-watchdog already surface; nothing merges ungated.
+#
+# MERGE — the batch PR has no linked issue, so `ralph-auto` batch pre-approval
+# cannot apply: it merges when a human labels the PR `ralph-approved`.
+#
+# METRIC — a gate id from docs/guardrails/registry.json whose gateScript's
+# --json output is the canonical { violations: Array } shape. ralph/metric.sh
+# enforces that and fails loud, naming the fix. Known-compliant pilot:
+# audit-gates-supportjson.
+
+on:
+  workflow_dispatch:
+    inputs:
+      metric:
+        description: 'Gate id from docs/guardrails/registry.json (its --json must return { violations: Array })'
+        required: true
+        type: string
+      target:
+        description: 'Violation count to reach (0 = fully clean)'
+        required: true
+        type: string
+
+concurrency:
+  group: ralph-metric-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      decision: ${{ steps.measure.outputs.status == 'complete' && 'complete' || steps.guard.outputs.decision }}
+      metric: ${{ steps.measure.outputs.metric }}
+      target: ${{ steps.measure.outputs.target }}
+      current: ${{ steps.measure.outputs.current }}
+      branch: ${{ steps.measure.outputs.branch }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install dependencies (the measured gate runs under node)
+        run: pnpm install --frozen-lockfile
+
+      - name: Measure — ralph/metric.sh <metric> <target>
+        id: measure
+        env:
+          METRIC: ${{ inputs.metric }}
+          TARGET: ${{ inputs.target }}
+        run: |
+          # Registry gate ids are kebab-case; nothing else may reach a branch
+          # name or the model's prompt.
+          if ! [[ "$METRIC" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
+            echo "::error::metric must be a kebab-case gate id from docs/guardrails/registry.json (.gates[].id) — got '$METRIC'."
+            exit 1
+          fi
+          code=0
+          out=$(bash ralph/metric.sh "$METRIC" "$TARGET") || code=$?
+          echo "$out"
+          # Exit contract (ralph/metric.sh header): 0 = at/below target,
+          # 1 = above target, 2 = usage/registry/contract error (its stderr,
+          # printed above, names the fix). Anything else is a crash.
+          if [ "$code" -ne 0 ] && [ "$code" -ne 1 ]; then
+            echo "::error::ralph/metric.sh exited $code for '$METRIC' — nothing was measured, so no batch runs. Its message above names the fix."
+            exit 1
+          fi
+          current=$(sed -nE 's/^current=([0-9]+) target=[0-9]+$/\1/p' <<<"$out")
+          if [ -z "$current" ]; then
+            echo "::error::ralph/metric.sh exited $code but printed no 'current=<n> target=<n>' line — its stdout contract changed. Fix ralph/metric.sh or this parser in .github/workflows/ralph-metric.yml."
+            exit 1
+          fi
+          if [ "$code" -eq 0 ]; then status=complete; else status=batch; fi
+          {
+            echo "status=$status"
+            echo "metric=$METRIC"
+            echo "target=$TARGET"
+            echo "current=$current"
+            echo "branch=ralph/metric-$METRIC-$GITHUB_RUN_ID"
+          } >>"$GITHUB_OUTPUT"
+
+      - name: Single-flight guard — never stack a batch on in-flight Ralph work
+        id: guard
+        if: steps.measure.outputs.status == 'batch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          . ralph/lib.sh
+          # A gh/git failure aborts this step red — an API outage must never
+          # read as "nothing in flight".
+          prs=$(open_ralph_prs)
+          claims=$(git ls-remote --heads origin 'ralph/claim-*' | sed 's#.*refs/heads/##')
+          if [ "$(jq length <<<"$prs")" -eq 0 ] && [ -z "$claims" ]; then
+            echo "decision=batch" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+          open=$(jq -r '[.[] | "#\(.number) (\(.headRefName))"] | join(", ")' <<<"$prs")
+          held=$(paste -sd ' ' - <<<"$claims")
+          echo "::warning::Batch skipped — Ralph is single-flight and work is already in flight. Open Ralph PR(s): ${open:-none}. Claim ref(s): ${held:-none}. Re-dispatch once they clear. A claim ref with no ralph.yml run in progress is stale — delete it at $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/branches/all?query=ralph%2Fclaim-"
+          echo "decision=skip" >>"$GITHUB_OUTPUT"
+
+      - name: Report
+        if: steps.measure.outputs.status != ''
+        env:
+          STATUS: ${{ steps.measure.outputs.status }}
+          DECISION: ${{ steps.guard.outputs.decision }}
+          METRIC: ${{ steps.measure.outputs.metric }}
+          TARGET: ${{ steps.measure.outputs.target }}
+          CURRENT: ${{ steps.measure.outputs.current }}
+        run: |
+          case "$STATUS/$DECISION" in
+            complete/*) msg="COMPLETE — '$METRIC' is at target (current=$CURRENT, target=$TARGET). No batch, no PR." ;;
+            batch/batch) msg="'$METRIC' is above target (current=$CURRENT, target=$TARGET) — starting one bounded batch." ;;
+            *) msg="'$METRIC' is above target (current=$CURRENT, target=$TARGET) but the batch was SKIPPED — see the single-flight guard warning." ;;
+          esac
+          echo "::notice::$msg"
+          printf '### ralph-metric\n\n%s\n' "$msg" >>"$GITHUB_STEP_SUMMARY"
+
+  batch:
+    needs: measure
+    if: needs.measure.outputs.decision == 'batch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install dependencies (so ralph/gate.sh and ralph/metric.sh can run)
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Claude Code — one bounded batch against the metric
+        id: work
+        continue-on-error: true # reconcile decides the real outcome
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --allowedTools "Bash,Read,Write,Edit,Glob,Grep"
+          prompt: |
+            Run ONE bounded batch of the Ralph metric loop
+            (.github/workflows/ralph-metric.yml, ops#90), then STOP. Read AGENTS.md
+            first — its "Ralph quality bar" section is binding. There is no issue
+            for this work: the metric is the task.
+
+            METRIC=${{ needs.measure.outputs.metric }} (gate id in docs/guardrails/registry.json)
+            CURRENT=${{ needs.measure.outputs.current }} violations, TARGET=${{ needs.measure.outputs.target }}
+            BRANCH=${{ needs.measure.outputs.branch }}
+
+            1. See the violations: look up METRIC's `gateScript` in
+               docs/guardrails/registry.json and run `node <gateScript> --json`.
+               Re-measure at any time with `bash ralph/metric.sh <METRIC> <TARGET>`.
+            2. Fix ONE bounded batch — one cohesive group of violations, small
+               enough to review in one sitting (rule of thumb: at most 10 files).
+               Leave the rest for the next dispatch; never close the whole gap in
+               one PR.
+            3. Fix the CAUSE of each violation. Do not edit the measuring gate
+               script, its registry entry, or any baseline, allowlist, or
+               suppression to make the number drop — gaming the measurement is a
+               failed batch.
+            4. Re-measure. The count must be strictly lower than CURRENT, or open
+               no PR. Measuring runs other gates, and some rewrite their ratchet
+               baselines (docs/guardrails/baselines/) as a side effect — restore
+               those with `git checkout -- docs/guardrails/baselines` before you
+               commit; a baseline change is never part of a batch.
+            5. `bash ralph/gate.sh` MUST pass green before any PR. Never weaken
+               tests or types to pass it. Red gate = no PR.
+            6. Commit on BRANCH exactly — it starts with ralph/metric-, which is
+               how ralph-gate recognises a Ralph PR and gates it. Push it and open
+               a PR against main titled
+               `ralph(metric): <METRIC> <CURRENT> -> <new count>`. In the body:
+               what you fixed, the before/after counts, and this run:
+               ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+               Put NO closing keyword (Closes/Fixes/Resolves + an issue number)
+               in the title or body — there is no issue to close, and GitHub
+               closes whichever issue such a keyword names when the PR merges.
+            7. NEVER merge and never push to main — a human approves the merge
+               (`ralph-approved` on the PR). Never touch ralph-* labels or
+               refs/heads/ralph/claim-* refs. No destructive ops (DB migrations,
+               deletes). Never edit .github/workflows/* — this token cannot push
+               them; if a fix needs one, treat it as needing a human (step 8).
+            8. If the batch needs a human decision, or no violation can be fixed
+               safely, open no PR: make your final message start with
+               `ralph-blocked: <one-line reason>` and STOP.
+
+      - name: Reconcile — state decides what actually happened
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ needs.measure.outputs.branch }}
+          WORK_OUTCOME: ${{ steps.work.outcome }}
+        run: |
+          pr=$(gh pr list --state open --head "$BRANCH" --json url --jq '.[0].url // empty')
+          if [ -n "$pr" ]; then
+            echo "::notice::Batch PR opened: $pr — ralph-gate runs the gate + independent AI review; label it ralph-approved to merge, then re-dispatch this workflow to re-measure."
+            printf '### ralph-metric batch\n\nPR: %s\n' "$pr" >>"$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            # Not opened from here on purpose: a PR created with the job token
+            # triggers no workflows, so ralph-gate would never gate it.
+            echo "::error::$BRANCH was pushed but no PR was opened (claude step: $WORK_OUTCOME). Open it by hand so ralph-gate runs: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/compare/main...$BRANCH?expand=1"
+            exit 1
+          fi
+          echo "::error::The batch ended without pushing $BRANCH (claude step: $WORK_OUTCOME), so there is no PR. A deliberate stop ends with a 'ralph-blocked:' message — read the 'Run Claude Code' step log, address the cause, then re-dispatch."
+          exit 1
