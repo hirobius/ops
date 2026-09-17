@@ -172,6 +172,25 @@ describe('runPrivacyRequest — opt-out', () => {
     expect(sb.db.leads.map((l) => l.do_not_contact)).toEqual([true, true]);
   });
 
+  test('matches the website a requester gives, however they write it', async () => {
+    const sb = fakeSupabase({
+      leads: [
+        lead({ website: 'https://www.cascadefence.example/services' }),
+        lead({ id: 'lead-2', place_id: 'ChIJ-other', website: 'https://cascadefence.example.net' }),
+      ],
+      lead_notes: [],
+    });
+
+    await runPrivacyRequest(sb, {
+      type: 'opt-out',
+      identifiers: { website: 'CascadeFence.example' },
+      apply: true,
+      now: NOW,
+    });
+
+    expect(sb.db.leads.map((l) => l.do_not_contact)).toEqual([true, false]);
+  });
+
   test('keeps the original reason and date on a lead that had already opted out', async () => {
     const sb = fakeSupabase({
       leads: [

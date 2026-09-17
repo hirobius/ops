@@ -8,10 +8,15 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
+import { PRIVACY_CONTACT_EMAIL } from '../../lib/compliance/identity.mjs';
 import { canSpamFooter, renderPrivacyPolicy } from '../../lib/compliance/policy.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const TEMPLATE = readFileSync(join(ROOT, 'docs/prospecting/privacy-policy.md'), 'utf8');
+
+// Entity and address are fixed facts (Adrian, 2026-09-16), asserted literally.
+// The privacy contact is due to change, so these tests assert it is WIRED to
+// the constant; changing the address stays a one-line edit to identity.mjs.
 
 describe('renderPrivacyPolicy', () => {
   test('fills the entity, mailing address, privacy contact and effective date', () => {
@@ -19,7 +24,7 @@ describe('renderPrivacyPolicy', () => {
 
     expect(page).toContain('Hirobius LLC');
     expect(page).toContain('44 W 29th Ave, Spokane, WA 99203');
-    expect(page).toContain('adrian@hirobius.com');
+    expect(page).toContain(PRIVACY_CONTACT_EMAIL);
     expect(page).toContain('2026-09-16');
     expect(page).not.toMatch(/\{\{[A-Z_]+\}\}/);
   });
@@ -99,7 +104,7 @@ describe('canSpamFooter', () => {
     expect(footer).toContain('44 W 29th Ave, Spokane, WA 99203');
     expect(footer).toMatch(/advertisement/i);
     expect(footer).toMatch(/reply "unsubscribe"/i);
-    expect(footer).toContain('adrian@hirobius.com');
+    expect(footer).toContain(PRIVACY_CONTACT_EMAIL);
   });
 
   test('links the privacy policy when it has a public URL, and says nothing about it when it does not', () => {

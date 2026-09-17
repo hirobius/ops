@@ -112,7 +112,8 @@ promises).
    Done: that sets `do_not_contact`.
 2. **Everything else, find the lead (dry run):**
    `node scripts/privacy-request.mjs --type <opt-out|delete|know> --email <address>`
-   (or `--phone`, `--place-id`, `--id`). It lists the matches and what it would change.
+   (or `--phone`, `--website`, `--place-id`, `--id`). It lists the matches and what it
+   would change.
 3. **Verify delete and know requests, not opt-outs.** Reply to the email address
    on the record, or call the phone number on the record, and confirm the
    request came from the business. Don't disclose or delete on an unverified

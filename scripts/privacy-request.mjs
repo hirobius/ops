@@ -20,7 +20,11 @@
  */
 
 import { PRIVACY_CONTACT_EMAIL } from '../lib/compliance/identity.mjs';
-import { REQUEST_TYPES, runPrivacyRequest } from '../lib/compliance/privacy-request.mjs';
+import {
+  DELETION_KEEPS,
+  REQUEST_TYPES,
+  runPrivacyRequest,
+} from '../lib/compliance/privacy-request.mjs';
 
 function parseArgs(argv) {
   const o = { type: null, identifiers: {}, apply: false, allowMultiple: false, help: false };
@@ -31,6 +35,7 @@ function parseArgs(argv) {
     else if (a === '--email') o.identifiers.email = argv[++i];
     else if (a === '--phone') o.identifiers.phone = argv[++i];
     else if (a === '--place-id') o.identifiers.placeId = argv[++i];
+    else if (a === '--website') o.identifiers.website = argv[++i];
     else if (a === '--apply') o.apply = true;
     else if (a === '--dry-run') o.apply = false;
     else if (a === '--allow-multiple') o.allowMultiple = true;
@@ -50,14 +55,16 @@ Usage:
   node scripts/privacy-request.mjs --type <${REQUEST_TYPES.join('|')}> <identifier...> [--apply] [--allow-multiple]
 
 Identifiers (any of them; a lead matching ANY is included):
-  --id <lead-id>  --email <address>  --phone <number, any format>  --place-id <google place id>
+  --id <lead-id>  --email <address>  --phone <number, any format>
+  --website <site, any form>  --place-id <google place id>
 
 Types:
-  opt-out  Mark do_not_contact. Every outreach list, the call list, the pitch queue and
-           every collection tool already skip these leads. Keeps an earlier opt-out's date.
-  delete   Null every column except the suppression minimum (id, created_at, status,
-           place_id, do_not_contact, suppression_reason, unsubscribed_at) and delete the
-           lead's notes. Prints what it cannot reach (sample sites, Smartlead, local files).
+  opt-out  Mark do_not_contact. push-outreach, the call list, the pitch queue, lead
+           ingest and the email crawler skip these leads (audit-sites and site
+           generation do not yet). Keeps an earlier opt-out's reason and date.
+  delete   Null every column except the suppression minimum, and delete the lead's
+           notes. Prints what it cannot reach (sample sites, Smartlead, local files).
+           Kept: ${DELETION_KEEPS.join(', ')}
   know     Print everything held on the lead, notes included. Never writes.
 
 Flags:
@@ -72,8 +79,9 @@ Verify delete and know requests before running them. Opt-outs need no verificati
 async function main() {
   const o = parseArgs(process.argv.slice(2));
   if (o.help) return printHelp();
-  if (!o.type) {
-    console.error(`Need --type (${REQUEST_TYPES.join(', ')}). Run --help for usage.`);
+  // Validate before connecting, so a mistyped invocation fails without touching the database.
+  if (!REQUEST_TYPES.includes(o.type)) {
+    console.error(`Need --type ${REQUEST_TYPES.join(' | ')}. Run --help for usage.`);
     process.exitCode = 1;
     return;
   }
@@ -89,8 +97,9 @@ async function main() {
 
   if (!result.matches.length) {
     console.log(
-      'No lead matches. Tell the requester we hold nothing under those details; if they want to\n' +
-        'be sure they are never added, ask for the business phone or Google Maps listing and re-run.',
+      'No lead matches. Before telling the requester we hold nothing, try their other details\n' +
+        '(phone, website, email). A business we do not hold cannot be suppressed ahead of time —\n' +
+        'a known gap, see "Handling a privacy request" in docs/prospecting/compliance.md.',
     );
     return;
   }
