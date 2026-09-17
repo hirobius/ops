@@ -195,33 +195,63 @@ describe('runGatesSerial', () => {
   });
 });
 
-describe('registry severity curation (ops#306, Adrian 2026-09-16)', () => {
-  // The decision table from the issue: blocking correctness/safety checks are
-  // `error`; reporting/bookkeeping gates and the three "unsure" ones are `warn`.
-  // Changing any of these is a standards decision — update the issue record
-  // and docs/guardrails/SCHEMA.md alongside this test.
+describe('registry severity curation (ops#306)', () => {
+  // Every gate on a channel that run-gates runs as BLOCKING — `.husky/pre-commit`
+  // (--channel pre-commit) and `.github/workflows/quality.yml` (--channel ci-pr)
+  // — with the severity decided for it. Since ops#306 severity decides whether
+  // a gate blocks, so the lock is exhaustive per channel: flipping any row to
+  // `warn`, adding a gate to one of these channels, or moving a gate off one
+  // all fail here until someone decides on purpose. Changing a row is a
+  // standards decision — update the curation record in
+  // docs/guardrails/SCHEMA.md alongside this table.
   const DECIDED = {
-    'check-security-baseline': 'error',
-    'check-hardcoded-colors': 'error',
-    'check-page-shell': 'error',
-    'check-unresponsive-grids': 'error',
-    'check-validator-wiring': 'error',
-    'generate-strength-report': 'warn',
-    'audit-batch-deliverables': 'warn',
-    'audit-claims': 'warn',
-    'audit-exceptions': 'warn',
-    'check-route-coverage': 'warn',
-    'check-og-meta': 'warn',
-    'check-exemptions': 'warn',
+    'pre-commit': {
+      // error — a finding is a defect in the change; blocks the commit.
+      'check-security-baseline': 'error',
+      'check-hardcoded-colors': 'error',
+      'check-page-shell': 'error',
+      'check-unresponsive-grids': 'error',
+      'check-validator-wiring': 'error',
+      'check-licenses': 'error',
+      'check-secrets': 'error',
+      'check-steering-budget': 'error',
+      'validate-fixture-proof-of-firing': 'error',
+      'validate-orchestration': 'error',
+      'check-schema-drift': 'error',
+      // warn — reporting / bookkeeping, the three "unsure" gates (each still
+      // blocks PR CI: see SCHEMA.md), and a gate that always exits 0.
+      'generate-strength-report': 'warn',
+      'audit-batch-deliverables': 'warn',
+      'audit-claims': 'warn',
+      'audit-exceptions': 'warn',
+      'check-route-coverage': 'warn',
+      'check-og-meta': 'warn',
+      'check-exemptions': 'warn',
+      'check-branch-ancestry': 'warn',
+    },
+    'ci-pr': {
+      'check-fixture-stubs-ratchet': 'error',
+      'check-guardrail-drift': 'error',
+      'audit-gate-purity': 'warn',
+      'audit-gates-supportjson': 'warn',
+    },
   };
 
-  it('every decided gate carries its decided severity', () => {
-    const { registry } = loadRegistry(REGISTRY_PATH);
-    const actual = Object.fromEntries(
-      Object.keys(DECIDED).map((id) => [id, registry.gates.find((g) => g.id === id)?.severity]),
-    );
-    expect(actual).toEqual(DECIDED);
-  });
+  it.each(Object.keys(DECIDED))(
+    'every %s gate carries its decided severity, and no undecided gate is on the channel',
+    (channel) => {
+      const { registry } = loadRegistry(REGISTRY_PATH);
+      const actual = Object.fromEntries(
+        registry.gates.filter((g) => g.firingChannel === channel).map((g) => [g.id, g.severity]),
+      );
+      expect(
+        actual,
+        `${channel} is a blocking channel: a gate was added to it, removed from it, or had its ` +
+          'severity changed. Decide the severity on purpose (docs/guardrails/SCHEMA.md → ' +
+          '"Severity semantics"), then update DECIDED here and the curation record there.',
+      ).toEqual(DECIDED[channel]);
+    },
+  );
 
   it('every registry severity is one run-gates recognises', () => {
     const { registry } = loadRegistry(REGISTRY_PATH);

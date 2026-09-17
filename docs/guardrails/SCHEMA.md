@@ -29,8 +29,12 @@ automated quality gate in the Hirobius repo.
 
 1. Create `scripts/check-<name>.mjs` with a JSDoc block at the top.
 2. Run `node scripts/validate-guardrail-registry.mjs --update` to auto-append a stub entry.
-3. Fill in `description` and **choose `severity` deliberately** (see below) —
-   the stub's `warn` means the gate will never block anything.
+3. Fill in `description`, set `firingChannel` (the stub has none, so it runs on
+   no channel), and **choose `severity` deliberately** (see below) — the stub's
+   `warn` means the gate will never block anything. Putting a gate on
+   `pre-commit` or `ci-pr` fails the curation lock in
+   `scripts/__tests__/guardrail-core.test.mjs` until its severity is added to
+   that test's `DECIDED` table and to the curation record below.
 4. Commit both the script and the updated `registry.json`.
 
 ## Severity semantics (ops#306)
@@ -46,7 +50,10 @@ field, so severity was decorative and was never curated.
 | `info`   | Same as `warn`.                                                                     | Pure telemetry.                                                                               |
 
 - **Fails closed.** A missing or unrecognised severity is treated as `error`,
-  so an uncurated gate keeps blocking rather than silently going advisory.
+  so an uncurated gate keeps blocking rather than silently going advisory. The
+  registry test also rejects such a value, but vitest runs on `pre-push`, not
+  `pre-commit`, and sibling repos syncing `run-gates.mjs` have their own
+  registries — the runner is the check that always runs.
 - **Severity covers every non-zero exit**, including a crash (exit 2) — a
   crashed `warn` gate warns. If a gate must block when it cannot run, it is an
   `error` gate.
@@ -73,12 +80,33 @@ Every gate on a blocking channel had its severity decided, not inherited.
   `check-steering-budget`, `validate-fixture-proof-of-firing`,
   `validate-orchestration`, `check-schema-drift`.
 
+**Stub fixtures do not demote a gate.** Four of the five promoted gates
+(`check-security-baseline`, `check-hardcoded-colors`, `check-page-shell`,
+`check-validator-wiring`) still have `// TODO` stub fixtures, and they stay
+`error` on purpose. A fixture proves a gate _fires_; severity decides what a
+firing _does_. A stub leaves the first unproven and says nothing about the
+second. Demoting these gates to `warn` would not make their firing any more
+provable. It would only stop them blocking whatever violations they do catch,
+every one of which already blocked a commit before ops#306. Burning the stubs down is
+`check-fixture-stubs-ratchet`'s job (`ci-pr`), not severity's.
+
 **`pre-commit` — `warn` (informs):**
 
 - Reporting / bookkeeping: `generate-strength-report`,
   `audit-batch-deliverables`, `audit-claims`, `audit-exceptions`.
 - Were "unsure", resolved to `warn`: `check-route-coverage`, `check-og-meta`,
-  `check-exemptions`.
+  `check-exemptions`. All three stop blocking at **commit** only. Each still
+  runs directly, outside run-gates, and still fails the PR in CI:
+  `check-route-coverage` through `pnpm test:layout` (`quality.yml`), the other
+  two through `pnpm check:full` (`ci.yml` → "Full checks").
+- Known trade-off on `check-exemptions`: it is the only check that an
+  exemption marker carries a reason (CLAUDE.md rule 10). The `error` gates skip
+  any line holding their marker, whatever follows the colon
+  (`check-security-baseline` on `security-ok`, `check-hardcoded-colors` on
+  `// color-ok:`). So a reasonless marker now prints a warning at commit and is
+  first blocked by CI's "Full checks". To block it at commit instead, promote
+  `check-exemptions` to `error`. It passes on the current tree and has a real
+  fixture.
 - `check-branch-ancestry` — exits 0 by design (ops#335), so `warn` changes
   nothing.
 
@@ -91,10 +119,17 @@ changes nothing.
 it directly, not through run-gates; it is warn-only unless
 `KANBAN_REF_ENFORCE=error`.
 
-The seven pre-commit gates now `warn` were previously blocking **by accident of
-the runner, not by decision**; making them advisory is the explicit call above.
-`scripts/__tests__/guardrail-core.test.mjs` pins the decided rows — changing one
-is a standards decision, so update that test and this record together.
+The seven pre-commit gates now `warn` that can exit non-zero were previously
+blocking **by accident of the runner, not by decision**. Making them advisory
+is the explicit call above.
+
+**The lock.** `scripts/__tests__/guardrail-core.test.mjs` pins the severity of
+**every** gate on `pre-commit` and `ci-pr`, the two channels run-gates runs as
+blocking (`.husky/pre-commit`, `.github/workflows/quality.yml`). Each channel's
+table must match exactly, so the test fails in any of three cases: a row flips
+severity, a gate is added to one of those channels, or a gate is moved off one.
+Changing a row is a standards decision, so update that test and this record
+together. The test runs in `pnpm test`, which `.husky/pre-push` runs.
 
 ## Validator
 
@@ -102,7 +137,8 @@ is a standards decision, so update that test and this record together.
 `scripts/audit-*.mjs` and asserts every file is registered. Exit 1 with a
 missing list if not. Exit 0 if clean.
 
-Use `--update` to auto-append missing entries (stub fields, severity=warn).
+Use `--update` to auto-append missing entries (stub fields, severity=warn, no
+firingChannel — see [Adding a new gate](#adding-a-new-gate)).
 It also rejects any entry carrying `lastFiringAt` or `lastViolationAt` (see
 below) — those fields cannot return to `registry.json`.
 
