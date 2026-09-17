@@ -27,7 +27,6 @@ function unit(leadIndex: number, arm: string, trial: number, spec: UnitSpec = {}
     leadIndex,
     arm,
     trial,
-    skipped: false,
     generation: ok
       ? { ok: true, attempts: 1, costUsd: cost, tokens: {}, ms: 1000, stopReasons: ['tool_use'] }
       : { ok: false, error: 'boom', costUsd: cost, tokens: {}, ms: 1000, stopReasons: [] },
@@ -118,6 +117,30 @@ describe('compareArms', () => {
     const r = compareArms(data, 'opus-4-8', 'sonnet-5');
     expect(r.candidateErrors).toBe(1);
     expect(r.verdict).toBe('KEEP');
+  });
+
+  it('judges reliability on failure RATE, so a run stopped mid-pair is not skewed by unequal attempts', () => {
+    // Baseline attempted 10 with 1 failure (10%); candidate attempted 9 with 1 (11%) → worse.
+    const worse = paired(9, { cost: 0.06 }, { cost: 0.02 });
+    worse.units.push(unit(9, 'opus-4-8', 1, { ok: false, cost: 0.06 }));
+    worse.units[1] = unit(0, 'sonnet-5', 1, { ok: false, cost: 0.02 });
+    expect(
+      compareArms(worse, 'opus-4-8', 'sonnet-5').checks.find(
+        (c: { name: string }) => c.name === 'reliability',
+      ).ok,
+    ).toBe(false);
+
+    // Baseline 2 of 10 failed (20%); candidate 2 of 11 (18%) → not worse, though the count ties.
+    const better = paired(10, { cost: 0.06 }, { cost: 0.02 });
+    better.units[0] = unit(0, 'opus-4-8', 1, { ok: false, cost: 0.06 });
+    better.units[2] = unit(1, 'opus-4-8', 1, { ok: false, cost: 0.06 });
+    better.units[3] = unit(1, 'sonnet-5', 1, { ok: false, cost: 0.02 });
+    better.units.push(unit(10, 'sonnet-5', 1, { ok: false, cost: 0.02 }));
+    expect(
+      compareArms(better, 'opus-4-8', 'sonnet-5').checks.find(
+        (c: { name: string }) => c.name === 'reliability',
+      ).ok,
+    ).toBe(true);
   });
 
   it('prices failed attempts into cost per successful generation', () => {
