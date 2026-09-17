@@ -13,7 +13,7 @@ import type { RepoOption } from './repoScope';
 const OPTIONS: RepoOption[] = [
   { repo: 'hirobius/job-hunt', param: 'job-hunt', issues: 32, prs: 0, count: 32 },
   { repo: 'hirobius/ops', param: 'ops', issues: 28, prs: 2, count: 30 },
-  { repo: 'hirobius/lilac', param: 'lilac', issues: 26, prs: 0, count: 26 },
+  { repo: 'hirobius/client-alpha', param: 'client-alpha', issues: 26, prs: 0, count: 26 },
 ];
 
 afterEach(cleanup);
@@ -39,7 +39,7 @@ describe('RepoFilter', () => {
       'All repos88',
       'job-hunt32',
       'ops30',
-      'lilac26',
+      'client-alpha26',
     ]);
   });
 
@@ -101,10 +101,10 @@ describe('RepoFilter', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /^lilac/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^client-alpha/ }));
     fireEvent.click(screen.getByRole('button', { name: /^All repos/ }));
 
-    expect(onSelect.mock.calls).toEqual([['lilac'], [null]]);
+    expect(onSelect.mock.calls).toEqual([['client-alpha'], [null]]);
   });
 
   it('does not re-report the chip that is already selected', () => {

@@ -12,7 +12,7 @@ const row = (repo: string) => ({ repo });
 describe('repoOptions', () => {
   it('counts every issue and PR lane per repo, busiest first', () => {
     const options = repoOptions({
-      blocked: [row('hirobius/ops'), row('hirobius/lilac')],
+      blocked: [row('hirobius/ops'), row('hirobius/client-alpha')],
       queue: [row('hirobius/ops')],
       backlog: [row('hirobius/job-hunt'), row('hirobius/job-hunt'), row('hirobius/job-hunt')],
       prs: [row('hirobius/ops')],
@@ -21,7 +21,7 @@ describe('repoOptions', () => {
     expect(options).toEqual([
       { repo: 'hirobius/job-hunt', param: 'job-hunt', issues: 3, prs: 0, count: 3 },
       { repo: 'hirobius/ops', param: 'ops', issues: 2, prs: 1, count: 3 },
-      { repo: 'hirobius/lilac', param: 'lilac', issues: 1, prs: 0, count: 1 },
+      { repo: 'hirobius/client-alpha', param: 'client-alpha', issues: 1, prs: 0, count: 1 },
     ]);
   });
 
@@ -118,7 +118,7 @@ describe('resolveRepoParam', () => {
 describe('filterByRepo', () => {
   const rows = [
     { repo: 'hirobius/ops', number: 1 },
-    { repo: 'hirobius/lilac', number: 2 },
+    { repo: 'hirobius/client-alpha', number: 2 },
     { repo: 'hirobius/ops', number: 3 },
   ];
 

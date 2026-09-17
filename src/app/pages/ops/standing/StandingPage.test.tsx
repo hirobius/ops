@@ -50,19 +50,19 @@ const FLEET: FleetStatus = {
   liveness: null,
   env: {},
   owners: ['hirobius'],
-  repos: ['hirobius/job-hunt', 'hirobius/lilac', 'hirobius/ops'],
+  repos: ['hirobius/client-alpha', 'hirobius/job-hunt', 'hirobius/ops'],
   blocked: [
     issue('ops', 1, 'Decide the ops thing', { label: 'needs-adrian' }),
-    issue('lilac', 2, 'Decide the lilac thing', { label: 'needs-adrian' }),
+    issue('client-alpha', 2, 'Decide the client-alpha thing', { label: 'needs-adrian' }),
   ],
   queue: [issue('ops', 3, 'Queued ops work', { queued: true })],
   backlog: [
     issue('job-hunt', 4, 'Job hunt backlog A'),
     issue('job-hunt', 5, 'Job hunt backlog B'),
-    issue('lilac', 6, 'Lilac backlog'),
+    issue('client-alpha', 6, 'Client-alpha backlog'),
   ],
   total: 6,
-  prs: [pr('lilac', 7, 'Lilac PR')],
+  prs: [pr('client-alpha', 7, 'Client-alpha PR')],
   loop: [],
   truncated: false,
   errors: [],
@@ -123,7 +123,7 @@ describe('StandingPage — repo filter', () => {
     const waiting = lane('Waiting on you');
     expect(within(waiting).getByText('1 blocked on you')).toBeTruthy();
     expect(within(waiting).getByText('Decide the ops thing')).toBeTruthy();
-    expect(within(waiting).queryByText('Decide the lilac thing')).toBeNull();
+    expect(within(waiting).queryByText('Decide the client-alpha thing')).toBeNull();
 
     expect(within(lane('Queued for the loop')).getByText('1 ralph-ready issue')).toBeTruthy();
     expect(chip(/^ops/).getAttribute('aria-pressed')).toBe('true');
@@ -145,9 +145,9 @@ describe('StandingPage — repo filter', () => {
     const router = await renderAt('/ops/standing');
     expect(within(lane('Waiting on you')).getByText('2 blocked on you')).toBeTruthy();
 
-    fireEvent.click(chip(/^lilac/));
+    fireEvent.click(chip(/^client-alpha/));
 
-    expect(router.state.location.search).toBe('?repo=lilac');
+    expect(router.state.location.search).toBe('?repo=client-alpha');
     expect(within(lane('Waiting on you')).getByText('1 blocked on you')).toBeTruthy();
     expect(within(lane('Waiting on you')).queryByText('Decide the ops thing')).toBeNull();
 
@@ -158,7 +158,7 @@ describe('StandingPage — repo filter', () => {
   });
 
   it('clears the param when All repos is chosen', async () => {
-    const router = await renderAt('/ops/standing?repo=lilac');
+    const router = await renderAt('/ops/standing?repo=client-alpha');
 
     fireEvent.click(chip(/^All repos/));
 
@@ -233,13 +233,13 @@ describe('StandingPage — repo filter', () => {
     fleet = {
       ...FLEET,
       loop: [
-        loop('lilac', {
+        loop('client-alpha', {
           state: 'failed',
           conclusion: 'failure',
           run: {
             number: 99,
-            title: 'Ralph lilac#2',
-            url: 'https://github.com/hirobius/lilac/actions/runs/99',
+            title: 'Ralph client-alpha#2',
+            url: 'https://github.com/hirobius/client-alpha/actions/runs/99',
           },
         }),
         loop('ops', {}),
@@ -252,7 +252,7 @@ describe('StandingPage — repo filter', () => {
     expect(within(theLoop).getAllByText('idle')).toHaveLength(2);
     expect(within(theLoop).queryByText('1 failing')).toBeNull();
     expect(within(theLoop).queryByText('failed')).toBeNull();
-    expect(within(theLoop).queryByText('Ralph lilac#2')).toBeNull();
+    expect(within(theLoop).queryByText('Ralph client-alpha#2')).toBeNull();
     expect(within(theLoop).getByText('ops')).toBeTruthy();
   });
 
@@ -260,13 +260,13 @@ describe('StandingPage — repo filter', () => {
     fleet = {
       ...FLEET,
       loop: [
-        loop('lilac', {
+        loop('client-alpha', {
           state: 'failed',
           conclusion: 'failure',
           run: {
             number: 99,
-            title: 'Ralph lilac#2',
-            url: 'https://github.com/hirobius/lilac/actions/runs/99',
+            title: 'Ralph client-alpha#2',
+            url: 'https://github.com/hirobius/client-alpha/actions/runs/99',
           },
         }),
         loop('ops', {}),
@@ -275,7 +275,7 @@ describe('StandingPage — repo filter', () => {
     const router = await renderAt('/ops/standing');
 
     expect(within(lane('The loop')).getByText('1 failing')).toBeTruthy();
-    expect(within(lane('The loop')).getByText('Ralph lilac#2')).toBeTruthy();
+    expect(within(lane('The loop')).getByText('Ralph client-alpha#2')).toBeTruthy();
 
     fireEvent.click(chip(/^job-hunt/));
 
