@@ -11,7 +11,7 @@
  *   clients/<slug>/email-search.json { "queries": ["<gmail query>", …],
  *                                      "keywords": { "actionItems": […], "statusChanges": […], "blockers": […] } }
  *
- * Shapes to copy: clients/_template/local.example.json and
+ * Shapes to copy: the local.json example in clients/_template/README.md and
  * clients/_template/email-search.json.
  */
 
