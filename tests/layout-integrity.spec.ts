@@ -59,7 +59,7 @@ const ALL_ROUTES = [
 ] as const;
 
 for (const route of ALL_ROUTES) {
-  test(`layout-integrity [desktop] ${route}`, async ({ page }) => {
+  test(`layout-integrity [desktop] ${route}`, async ({ page, baseURL }) => {
     // This suite runs against `vite preview` — a static build with no
     // deployed /api/* functions — so OpsGate's /api/ops-me check would
     // always fail and every /ops route would render the login screen
@@ -74,12 +74,39 @@ for (const route of ALL_ROUTES) {
     await page.setViewportSize(DESKTOP);
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(`${e.message}`));
-    await page.goto(route);
+    // A 404 shell or a missing bundle chunk raises no pageerror and renders no
+    // grids, so the collision audit below would find nothing and pass. Record
+    // every same-origin script/stylesheet the app failed to load.
+    const appOrigin = new URL(route, baseURL).origin;
+    const missingAssets: string[] = [];
+    page.on('response', (res) => {
+      const type = res.request().resourceType();
+      const sameOrigin = new URL(res.url()).origin === appOrigin;
+      if (sameOrigin && (type === 'script' || type === 'stylesheet') && res.status() >= 400) {
+        missingAssets.push(`${res.status()} ${res.url()}`);
+      }
+    });
+    const response = await page.goto(route);
     await page.waitForLoadState('networkidle');
     // Allow one animation frame for layout to settle after hydration.
     await page.waitForTimeout(300);
 
-    // Trigger 0 — Render Health: page must not have crashed into the recovery
+    // Trigger 0 — Render Health, part 1: the audit must run against the real
+    // app. A blank page passes every layout check, so it has to fail here.
+    expect(
+      response?.ok(),
+      `RENDER FAILED: Route did not serve the app shell (HTTP ${response?.status()}).\nRoute: ${route}`,
+    ).toBe(true);
+    expect(
+      missingAssets,
+      [`RENDER FAILED: App assets failed to load.`, `Route: ${route}`, ...missingAssets].join('\n'),
+    ).toEqual([]);
+    expect(
+      await page.locator('#root > *').count(),
+      `RENDER FAILED: The app root rendered nothing.\nRoute: ${route}`,
+    ).toBeGreaterThan(0);
+
+    // Trigger 0 — Render Health, part 2: page must not have crashed into the recovery
     // surface, and must not have surfaced a runtime page-error during render.
     const renderedErrorRecovery = await page.locator('[data-role="error-recovery"]').count();
     expect(
