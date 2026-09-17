@@ -18,8 +18,10 @@ What we do today and why it's not a violation of anything:
       its own site).
 - [x] Storage is a **private, service-role-only Supabase** — no public read
       access, no anon key exposure.
-- [x] Scraped PII never touches git: `prospects/*` and `clients/*` (except
-      `clients/_template/`) are **gitignored**.
+- [ ] Scraped PII never touches git. **Not true today.** `prospects/*` and
+      `clients/*` (except `clients/_template/`) are gitignored, but real lead
+      facts are committed to public repos (see "Real lead data is in public
+      GitHub repos" under Known gaps).
 - [x] **Nobody has been contacted yet.** No emails sent, no calls made, no
       texts sent. Scrape-and-score is data collection, not outreach.
 
@@ -118,10 +120,22 @@ promises).
    on the record, or call the phone number on the record, and confirm the
    request came from the business. Don't disclose or delete on an unverified
    request.
-4. **Apply:** re-run with `--apply`. For `delete`, do every `MANUAL:` line it
-   prints: take down any sample site (site-engine app and Vercel project),
-   remove the lead from any Smartlead campaign, and delete local `prospects/` and
-   `clients/<slug>/` copies. For `know`, send the JSON it prints.
+4. **Apply:** re-run with `--apply`. For `opt-out` and `delete`, do every
+   `MANUAL:` line it prints before replying. An opt-out prints a Smartlead step
+   for any lead with an email: suppression only stops future pushes, so a
+   sequence already sending keeps sending its follow-ups until the lead is
+   unsubscribed in Smartlead. A delete also prints: take down any sample site
+   (Vercel project), remove the business from the public `hirobius/site-engine`
+   repo (`apps/<slug>/`) and from `docs/prospecting/run-log.md` here, and delete
+   local `prospects/` and `clients/<slug>/` copies. For `know`, send the JSON it
+   prints.
+
+   A request matching more than one lead refuses (`know` always, `opt-out` and
+   `delete` on `--apply`). Look at the matches, narrow with `--id`, and pass
+   `--allow-multiple` only when every match is the requester. A website on a
+   shared host (Facebook, Instagram, linktr.ee, Wix, Google Sites…) matches on
+   the page path, not the host, so give the full page address.
+
 5. **Reply** to the requester from the privacy contact inbox to confirm what was done.
 
 **Email unsubscribes do not reach Supabase on their own yet.** The Smartlead
@@ -135,6 +149,18 @@ next campaign. Until that route exists, **before every `push-outreach.mjs
 
 **Known gaps (not claimed on the policy page):**
 
+- **Real lead data is in public GitHub repos (confirmed 2026-09-16).**
+  `hirobius/site-engine` is public, and sample-site configs in `apps/<slug>/`
+  copy real lead facts (one app's `client.config.ts` header reads "Real lead
+  facts used verbatim: business name, phone, hours, city"). `lib/render/index.mjs` tells the operator to
+  paste generated configs there. `docs/prospecting/run-log.md` in this public
+  repo names shortlisted leads with scores and review counts. The policy page
+  says so (under "Who we share it with"), and a deletion prints `MANUAL:` steps
+  for both, but a delete commit leaves the data in git history. **Recommended:**
+  keep real-lead configs out of public repos (make `site-engine` private or keep
+  lead-backed apps elsewhere) and stop naming real businesses in `run-log.md`;
+  then drop the GitHub paragraph from the page. Erasing what is already in
+  history needs a history rewrite and force-push, which is Adrian's call.
 - No log of requests received and how each was answered. The CCPA regulations
   expect covered businesses to keep one for 24 months.
 - A business we don't hold yet can't be suppressed ahead of time. Suppression

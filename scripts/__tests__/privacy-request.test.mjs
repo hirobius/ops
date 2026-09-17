@@ -191,6 +191,29 @@ describe('runPrivacyRequest — opt-out', () => {
     expect(sb.db.leads.map((l) => l.do_not_contact)).toEqual([true, false]);
   });
 
+  test('tells the operator to stop any Smartlead sequence already sending to the lead', async () => {
+    // Suppression only stops future pushes; a campaign already in flight keeps
+    // sending its follow-ups until the lead is removed from it in Smartlead.
+    const sb = fakeSupabase({
+      leads: [lead({}), lead({ id: 'lead-2', place_id: 'ChIJ-no-email', email: null })],
+      lead_notes: [],
+    });
+
+    const withEmail = await runPrivacyRequest(sb, {
+      type: 'opt-out',
+      identifiers: { id: 'lead-1' },
+      now: NOW,
+    });
+    expect(withEmail.changes[0].warnings.join('\n')).toMatch(/Smartlead/);
+
+    const withoutEmail = await runPrivacyRequest(sb, {
+      type: 'opt-out',
+      identifiers: { id: 'lead-2' },
+      now: NOW,
+    });
+    expect(withoutEmail.changes[0].warnings).toEqual([]);
+  });
+
   test('keeps the original reason and date on a lead that had already opted out', async () => {
     const sb = fakeSupabase({
       leads: [
@@ -284,6 +307,29 @@ describe('runPrivacyRequest — delete', () => {
     expect(warnings).toMatch(/Smartlead/);
   });
 
+  test('warns about copies in public GitHub repos, naming the business so it can still be searched for', async () => {
+    // hirobius/site-engine and hirobius/ops are public: a sample site's
+    // client.config.ts and run-log.md carry real lead facts, in git history too.
+    const sb = fakeSupabase({
+      leads: [lead({ slug: 'cascade-fence-deck', preview_url: null })],
+      lead_notes: [],
+    });
+
+    const result = await runPrivacyRequest(sb, {
+      type: 'delete',
+      identifiers: { id: 'lead-1' },
+      apply: true,
+      now: NOW,
+    });
+
+    const warnings = result.changes[0].warnings.join('\n');
+    expect(warnings).toContain('site-engine');
+    expect(warnings).toContain('apps/cascade-fence-deck');
+    expect(warnings).toMatch(/git history/);
+    expect(warnings).toContain('run-log.md');
+    expect(warnings).toContain('Cascade Fence & Deck');
+  });
+
   test('warns that a lead without a place id cannot be kept from being collected again', async () => {
     const sb = fakeSupabase({ leads: [lead({ place_id: null })], lead_notes: [] });
 
@@ -324,6 +370,90 @@ describe('runPrivacyRequest — know', () => {
   });
 });
 
+describe('runPrivacyRequest — a website on a shared platform names one page, not the platform', () => {
+  // Social-only leads store their Facebook/Instagram/linktr.ee page in `website`
+  // (scripts/lib/outscraper-normalize.mjs), so many unrelated businesses share a host.
+  const socialLeads = () =>
+    fakeSupabase({
+      leads: [
+        lead({
+          id: 'alpha',
+          place_id: 'ChIJ-alpha',
+          name: 'Alpha Roofing',
+          email: null,
+          phone: null,
+          website: 'https://www.facebook.com/alpha-roofing/',
+        }),
+        lead({
+          id: 'beta',
+          place_id: 'ChIJ-beta',
+          name: 'Beta Plumbing',
+          email: null,
+          phone: null,
+          website: 'https://facebook.com/beta-plumbing',
+        }),
+        lead({
+          id: 'gamma',
+          place_id: 'ChIJ-gamma',
+          name: 'Gamma Septic',
+          email: null,
+          phone: null,
+          website: 'https://m.facebook.com/profile.php?id=100064',
+        }),
+      ],
+      lead_notes: [{ id: 'n-beta', lead_id: 'beta', author: 'adrian', body: 'owner is selling' }],
+    });
+
+  test('know discloses only the requester page, never other businesses on the same host', async () => {
+    const result = await runPrivacyRequest(socialLeads(), {
+      type: 'know',
+      identifiers: { website: 'facebook.com/alpha-roofing' },
+      now: NOW,
+    });
+
+    expect(result.disclosures.map((d) => d.record.name)).toEqual(['Alpha Roofing']);
+    expect(JSON.stringify(result.disclosures)).not.toContain('owner is selling');
+  });
+
+  test('opt-out suppresses only the requester page', async () => {
+    const sb = socialLeads();
+
+    await runPrivacyRequest(sb, {
+      type: 'opt-out',
+      identifiers: { website: 'https://facebook.com/Alpha-Roofing' },
+      apply: true,
+      now: NOW,
+    });
+
+    expect(sb.db.leads.map((l) => [l.id, l.do_not_contact])).toEqual([
+      ['alpha', true],
+      ['beta', false],
+      ['gamma', false],
+    ]);
+  });
+
+  test('a profile id in the query string is what tells two profile pages apart', async () => {
+    const sb = socialLeads();
+
+    const result = await runPrivacyRequest(sb, {
+      type: 'know',
+      identifiers: { website: 'facebook.com/profile.php?id=100064' },
+      now: NOW,
+    });
+
+    expect(result.disclosures.map((d) => d.record.name)).toEqual(['Gamma Septic']);
+  });
+
+  test('the bare platform address identifies no one', async () => {
+    await expect(
+      runPrivacyRequest(socialLeads(), {
+        type: 'know',
+        identifiers: { website: 'https://www.facebook.com/' },
+      }),
+    ).rejects.toThrow(/identifier/);
+  });
+});
+
 describe('runPrivacyRequest — refuses to guess', () => {
   const sb = () => fakeSupabase({ leads: [lead({})], lead_notes: [] });
 
@@ -356,6 +486,49 @@ describe('runPrivacyRequest — refuses to guess', () => {
     const allowed = twoLocations();
     await runPrivacyRequest(allowed, { ...request, allowMultiple: true });
     expect(allowed.db.leads.every((l) => l.name === null)).toBe(true);
+  });
+
+  const twoBusinessesOneNumber = () =>
+    fakeSupabase({
+      leads: [
+        lead({}),
+        lead({
+          id: 'lead-2',
+          place_id: 'ChIJ-shared-line',
+          name: 'Other Business',
+          email: 'hi@other.example',
+        }),
+      ],
+      lead_notes: [{ id: 'n2', lead_id: 'lead-2', author: 'adrian', body: 'not the requester' }],
+    });
+
+  test('a know request that matches more than one business discloses nothing, unless allowed', async () => {
+    const request = { type: 'know', identifiers: { phone: '509-555-0100' }, now: NOW };
+
+    await expect(runPrivacyRequest(twoBusinessesOneNumber(), request)).rejects.toThrow(/2 leads/);
+
+    const allowed = await runPrivacyRequest(twoBusinessesOneNumber(), {
+      ...request,
+      allowMultiple: true,
+    });
+    expect(allowed.disclosures).toHaveLength(2);
+  });
+
+  test('an opt-out that matches more than one business writes nothing, unless allowed', async () => {
+    const request = {
+      type: 'opt-out',
+      identifiers: { phone: '509-555-0100' },
+      apply: true,
+      now: NOW,
+    };
+
+    const refused = twoBusinessesOneNumber();
+    await expect(runPrivacyRequest(refused, request)).rejects.toThrow(/2 leads/);
+    expect(refused.db.leads.every((l) => l.do_not_contact === false)).toBe(true);
+
+    const allowed = twoBusinessesOneNumber();
+    await runPrivacyRequest(allowed, { ...request, allowMultiple: true });
+    expect(allowed.db.leads.every((l) => l.do_not_contact === true)).toBe(true);
   });
 
   test('a request with no usable identifier, which would otherwise match nothing silently', async () => {

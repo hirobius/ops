@@ -18,7 +18,7 @@
 
 // Hosts that indicate a business has NO real site of its own — only a social /
 // link-in-bio / auto-generated presence. These are prime targets.
-const SOCIAL_HOSTS = [
+export const SOCIAL_HOSTS = [
   'facebook.com',
   'fb.com',
   'instagram.com',
@@ -35,7 +35,7 @@ const SOCIAL_HOSTS = [
 
 // DIY site-builder hosts — the business has *something*, but it's templated and
 // usually a soft sell for a better spec site.
-const BUILDER_HOSTS = [
+export const BUILDER_HOSTS = [
   'wixsite.com',
   'wix.com',
   'squarespace.com',

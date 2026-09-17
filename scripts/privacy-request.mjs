@@ -57,19 +57,25 @@ Usage:
 Identifiers (any of them; a lead matching ANY is included):
   --id <lead-id>  --email <address>  --phone <number, any format>
   --website <site, any form>  --place-id <google place id>
+  On a shared host (Facebook, Instagram, linktr.ee, Wix...) --website matches the
+  page path, not the host: give the full page address.
 
 Types:
   opt-out  Mark do_not_contact. push-outreach, the call list, the pitch queue, lead
            ingest and the email crawler skip these leads (audit-sites and site
            generation do not yet). Keeps an earlier opt-out's reason and date.
+           Prints what it cannot reach (a Smartlead sequence already sending).
   delete   Null every column except the suppression minimum, and delete the lead's
-           notes. Prints what it cannot reach (sample sites, Smartlead, local files).
+           notes. Prints what it cannot reach (sample sites, Smartlead, public
+           GitHub repos, local files).
            Kept: ${DELETION_KEEPS.join(', ')}
   know     Print everything held on the lead, notes included. Never writes.
+           Refuses when more than one lead matches, since it discloses them all.
 
 Flags:
   --apply           Write. Without it this is a dry run.
-  --allow-multiple  Let a deletion proceed when it matches more than one lead.
+  --allow-multiple  Let a request proceed when it matches more than one lead. Without
+                    it, know refuses, and opt-out and delete refuse on --apply.
   --help, -h        This message.
 
 Verify delete and know requests before running them. Opt-outs need no verification.

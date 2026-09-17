@@ -132,10 +132,34 @@ describe('leads repository', () => {
   });
 
   it('upsertLeads: suppression-lookup error (e.g. pre-0007 column) falls back to plain upsert', async () => {
-    const { sb, getUpsertRows } = suppressionSb([], { message: 'column do_not_contact does not exist' });
+    const { sb, getUpsertRows } = suppressionSb([], {
+      message: 'column do_not_contact does not exist',
+    });
     const { error } = await upsertLeads(sb, [{ place_id: 'p1' }]);
     expect(error).toBeNull();
     expect(getUpsertRows()).toEqual([{ place_id: 'p1' }]); // ingest not blocked
+  });
+
+  it('upsertLeads: PostgREST missing-column error (42703) on do_not_contact also falls back', async () => {
+    const { sb, getUpsertRows } = suppressionSb([], {
+      code: '42703',
+      message: 'column leads.do_not_contact does not exist',
+    });
+    const { error } = await upsertLeads(sb, [{ place_id: 'p1' }]);
+    expect(error).toBeNull();
+    expect(getUpsertRows()).toEqual([{ place_id: 'p1' }]);
+  });
+
+  it('upsertLeads: any other suppression-lookup error fails closed — no upsert, error returned', async () => {
+    // A deletion request leaves a stripped row (place_id + do_not_contact). An
+    // upsert that skipped the suppression check would write the business's
+    // name, phone and email back onto it.
+    const lookupError = { code: '57014', message: 'canceling statement due to statement timeout' };
+    const { sb, getUpsertRows } = suppressionSb([], lookupError);
+    const { data, error } = await upsertLeads(sb, [{ place_id: 'p1' }]);
+    expect(getUpsertRows()).toBeNull();
+    expect(data).toBeNull();
+    expect(error).toBe(lookupError);
   });
 
   it('upsertLeads: empty input returns without touching the db', async () => {
