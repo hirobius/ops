@@ -251,7 +251,7 @@
     {
       "id": "check-exemptions",
       "description": "Keeps escape hatches visible and well-formed. Checks that only known exemption markers are used and every exemption marker includes a non-empty reason after the colon.",
-      "severity": "warn",
+      "severity": "error",
       "gateScript": "scripts/check-exemptions.mjs",
       "fixturePath": "fixtures/check-exemptions",
       "owner": "Adrian",

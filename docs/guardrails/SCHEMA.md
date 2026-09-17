@@ -79,6 +79,14 @@ Every gate on a blocking channel had its severity decided, not inherited.
 - Already `error`, kept: `check-licenses`, `check-secrets`,
   `check-steering-budget`, `validate-fixture-proof-of-firing`,
   `validate-orchestration`, `check-schema-drift`.
+- Was "unsure", resolved to `error` by Adrian: `check-exemptions`. It is the
+  only check that an exemption marker carries a reason (CLAUDE.md rule 10). The
+  `error` gates skip any line holding their marker, whatever follows the colon
+  (`check-security-baseline` on `security-ok`, `check-hardcoded-colors` on
+  `// color-ok:`), so as `warn` a reasonless marker would only print at commit
+  and first be blocked by CI's "Full checks". As `error` it blocks the commit.
+  It passes on the current tree and has a real fixture. This overrides the
+  default of resolving "unsure" gates to `warn`, for this gate only.
 
 **Stub fixtures do not demote a gate.** Four of the five promoted gates
 (`check-security-baseline`, `check-hardcoded-colors`, `check-page-shell`,
@@ -94,19 +102,11 @@ every one of which already blocked a commit before ops#306. Burning the stubs do
 
 - Reporting / bookkeeping: `generate-strength-report`,
   `audit-batch-deliverables`, `audit-claims`, `audit-exceptions`.
-- Were "unsure", resolved to `warn`: `check-route-coverage`, `check-og-meta`,
-  `check-exemptions`. All three stop blocking at **commit** only. Each still
-  runs directly, outside run-gates, and still fails the PR in CI:
-  `check-route-coverage` through `pnpm test:layout` (`quality.yml`), the other
-  two through `pnpm check:full` (`ci.yml` → "Full checks").
-- Known trade-off on `check-exemptions`: it is the only check that an
-  exemption marker carries a reason (CLAUDE.md rule 10). The `error` gates skip
-  any line holding their marker, whatever follows the colon
-  (`check-security-baseline` on `security-ok`, `check-hardcoded-colors` on
-  `// color-ok:`). So a reasonless marker now prints a warning at commit and is
-  first blocked by CI's "Full checks". To block it at commit instead, promote
-  `check-exemptions` to `error`. It passes on the current tree and has a real
-  fixture.
+- Were "unsure", resolved to `warn`: `check-route-coverage`, `check-og-meta`.
+  Both stop blocking at **commit** only. Each still runs directly, outside
+  run-gates, and still fails the PR in CI: `check-route-coverage` through
+  `pnpm test:layout` (`quality.yml`), `check-og-meta` through
+  `pnpm check:full` (`ci.yml` → "Full checks").
 - `check-branch-ancestry` — exits 0 by design (ops#335), so `warn` changes
   nothing.
 
@@ -119,7 +119,7 @@ changes nothing.
 it directly, not through run-gates; it is warn-only unless
 `KANBAN_REF_ENFORCE=error`.
 
-The seven pre-commit gates now `warn` that can exit non-zero were previously
+The six pre-commit gates now `warn` that can exit non-zero were previously
 blocking **by accident of the runner, not by decision**. Making them advisory
 is the explicit call above.
 

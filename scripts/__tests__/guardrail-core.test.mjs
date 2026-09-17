@@ -218,7 +218,10 @@ describe('registry severity curation (ops#306)', () => {
       'validate-fixture-proof-of-firing': 'error',
       'validate-orchestration': 'error',
       'check-schema-drift': 'error',
-      // warn — reporting / bookkeeping, the three "unsure" gates (each still
+      // error by Adrian's call — the only check that an exemption marker carries
+      // a reason, so a reasonless marker blocks at commit (see SCHEMA.md).
+      'check-exemptions': 'error',
+      // warn — reporting / bookkeeping, the two "unsure" gates (each still
       // blocks PR CI: see SCHEMA.md), and a gate that always exits 0.
       'generate-strength-report': 'warn',
       'audit-batch-deliverables': 'warn',
@@ -226,7 +229,6 @@ describe('registry severity curation (ops#306)', () => {
       'audit-exceptions': 'warn',
       'check-route-coverage': 'warn',
       'check-og-meta': 'warn',
-      'check-exemptions': 'warn',
       'check-branch-ancestry': 'warn',
     },
     'ci-pr': {

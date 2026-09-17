@@ -377,7 +377,7 @@
       "pnpm": ["check:exemptions", "check:full"],
       "gate": {
         "channel": "pre-commit",
-        "severity": "warn"
+        "severity": "error"
       }
     },
     {
@@ -443,7 +443,7 @@
       "pnpm": ["check:colors", "check:full", "check:tokens"],
       "gate": {
         "channel": "pre-commit",
-        "severity": "warn"
+        "severity": "error"
       }
     },
     {
@@ -498,7 +498,7 @@
       "pnpm": ["check:full", "check:page-shell"],
       "gate": {
         "channel": "pre-commit",
-        "severity": "warn"
+        "severity": "error"
       }
     },
     {
@@ -586,7 +586,7 @@
       "pnpm": ["check:full", "check:security"],
       "gate": {
         "channel": "pre-commit",
-        "severity": "warn"
+        "severity": "error"
       }
     },
     {
@@ -652,7 +652,7 @@
       "pnpm": ["check:full", "check:grids"],
       "gate": {
         "channel": "pre-commit",
-        "severity": "warn"
+        "severity": "error"
       }
     },
     {
@@ -663,7 +663,7 @@
       "pnpm": [],
       "gate": {
         "channel": "pre-commit",
-        "severity": "warn"
+        "severity": "error"
       }
     },
     {
