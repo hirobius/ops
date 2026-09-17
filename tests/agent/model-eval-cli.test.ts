@@ -72,5 +72,20 @@ describe('scripts/eval-agent-models.mjs', () => {
     expect(r.code).toBe(0);
     expect(r.out).toMatch(/--from-db/);
     expect(r.out).toMatch(/--max-usd/);
+    expect(r.out).toMatch(/--pass-tolerance/);
+  });
+
+  it('shows the non-inferiority margins the verdict will use before anything runs', () => {
+    const defaults = run(['--dry-run']);
+    expect(defaults.out).toMatch(/Margins: overall −0 · pass rate −0 pts/);
+    const set = run(['--dry-run', '--tolerance', '0.25', '--pass-tolerance', '0.1']);
+    expect(set.code).toBe(0);
+    expect(set.out).toMatch(/Margins: overall −0\.25 · pass rate −10 pts/);
+  });
+
+  it('rejects a pass-rate margin outside 0–1', () => {
+    const r = run(['--dry-run', '--pass-tolerance', '10']);
+    expect(r.code).toBe(2);
+    expect(r.err).toMatch(/--pass-tolerance/);
   });
 });

@@ -22,11 +22,14 @@
  *   SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY       only for --from-db (read-only; nothing is written)
  *
  * Output: temp/agent-model-eval/<timestamp>.md (the decision record) and .json
- * (every unit, config, usage and judge note). temp/ is gitignored — real lead
- * data never lands in git; paste the .md into the issue.
+ * (every unit, config, usage and judge note). temp/ is gitignored. The .md names
+ * no prospect — leads appear as # · trade · state, business names are redacted from
+ * failure text — so it is the one to paste into #7 (a public repo). Never paste the
+ * .json: it holds the real business names and generated configs.
  *
- * Exit codes: 0 finished (any verdict) · 1 stopped by a rejected key / unknown
- * model · 2 invocation or setup error · 3 stopped at the --max-usd ceiling
+ * Exit codes: 0 finished (any verdict) · 1 stopped by an API refusal (rejected key,
+ * unknown model, no credit, invalid request) · 2 invocation or setup error · 3 stopped
+ * early at the --max-usd ceiling or because the API stayed unavailable after retries
  * (partial report still written).
  *
  * @module eval-agent-models
@@ -57,7 +60,8 @@ Options:
   --trials <N>                  repeats per lead × arm (default ${DEFAULTS.trials})
   --max-usd <N>                 stop scheduling work at this real spend (default ${DEFAULTS.maxUsd})
   --concurrency <N>             parallel lead × arm units (default ${DEFAULTS.concurrency})
-  --tolerance <X>               allowed drop in mean judged overall (default 0 = the issue's ">= baseline")
+  --tolerance <X>               non-inferiority margin on judged overall, 1–5 scale (default 0 = the issue's ">= baseline")
+  --pass-tolerance <X>          non-inferiority margin on judge pass rate, 0–1 (default 0; 0.1 = 10 points)
   --out <dir>                   report directory (default temp/agent-model-eval)
   --dry-run                     print the plan and a rough cost — no key, no API calls
   --help
@@ -79,6 +83,7 @@ function parseArgs(argv) {
     maxUsd: DEFAULTS.maxUsd,
     concurrency: DEFAULTS.concurrency,
     tolerance: 0,
+    passTolerance: 0,
     out: join(ROOT, 'temp', 'agent-model-eval'),
     fromDb: null,
     leadsFile: null,
@@ -90,10 +95,11 @@ function parseArgs(argv) {
     if (v === undefined || v.startsWith('--')) throw new UsageError(`${flag} needs a value.`);
     return v;
   };
-  const number = (i, flag, { integer = false, min = 0 } = {}) => {
+  const number = (i, flag, { integer = false, min = 0, max = Infinity } = {}) => {
     const n = Number(value(i, flag));
-    if (!Number.isFinite(n) || n < min || (integer && !Number.isInteger(n))) {
-      throw new UsageError(`${flag} must be ${integer ? 'an integer' : 'a number'} ≥ ${min}.`);
+    if (!Number.isFinite(n) || n < min || n > max || (integer && !Number.isInteger(n))) {
+      const range = Number.isFinite(max) ? `between ${min} and ${max}` : `≥ ${min}`;
+      throw new UsageError(`${flag} must be ${integer ? 'an integer' : 'a number'} ${range}.`);
     }
     return n;
   };
@@ -113,7 +119,8 @@ function parseArgs(argv) {
     else if (a === '--trials') o.trials = number(i++, a, { integer: true, min: 1 });
     else if (a === '--max-usd') o.maxUsd = number(i++, a);
     else if (a === '--concurrency') o.concurrency = number(i++, a, { integer: true, min: 1 });
-    else if (a === '--tolerance') o.tolerance = number(i++, a);
+    else if (a === '--tolerance') o.tolerance = number(i++, a, { max: 4 });
+    else if (a === '--pass-tolerance') o.passTolerance = number(i++, a, { max: 1 });
     else if (a === '--out') o.out = resolve(value(i++, a));
     else if (a === '--from-db') o.fromDb = number(i++, a, { integer: true, min: 1 });
     else if (a === '--leads') o.leadsFile = resolve(value(i++, a));
@@ -150,6 +157,9 @@ async function loadLeads(o) {
 }
 
 function progressLine(event) {
+  if (event.type === 'retry') {
+    return `  ${event.stage} on ${event.model}: API error (${event.error}) — retrying in ${Math.round(event.delayMs / 1000)}s`;
+  }
   if (event.type === 'enrich') {
     return `  enrich lead ${event.leadIndex} ${event.ok ? 'ok' : 'FAILED'} · spent $${event.spentUsd.toFixed(3)}`;
   }
@@ -202,6 +212,10 @@ async function main() {
       `Arms: ${o.arms.join(', ')} (baseline ${o.baseline}) · judge ${DEFAULTS.judgeModel}` +
         (o.judgeCandidates.length ? ` · judge candidates ${o.judgeCandidates.join(', ')}` : ''),
       `Trials: ${o.trials} · concurrency ${o.concurrency} · spend ceiling $${o.maxUsd}`,
+      `Margins: overall −${o.tolerance} · pass rate −${o.passTolerance * 100} pts` +
+        (o.tolerance || o.passTolerance
+          ? ''
+          : ' (at 0, a candidate only as good as the baseline comes out INCONCLUSIVE)'),
       `Calls — enrich: ${plan.calls.enrich} · generate: ${plan.calls.generate} (+ repair retries) · ` +
         `reference judge: ${plan.calls.referenceJudge} · candidate judge: ${plan.calls.candidateJudge}`,
       `Rough upper estimate (every call at its max output, one generate attempt): $${plan.roughCostUsd.toFixed(2)}`,
@@ -247,7 +261,11 @@ async function main() {
 
   result.options.source = source;
   result.options.tolerance = o.tolerance;
-  const markdown = renderMarkdown(result, { tolerance: o.tolerance });
+  result.options.passTolerance = o.passTolerance;
+  const markdown = renderMarkdown(result, {
+    tolerance: o.tolerance,
+    passTolerance: o.passTolerance,
+  });
   const stamp = result.startedAt.replace(/[:.]/g, '-');
   mkdirSync(o.out, { recursive: true });
   const mdPath = join(o.out, `${stamp}.md`);
@@ -256,7 +274,10 @@ async function main() {
   writeFileSync(jsonPath, `${JSON.stringify(result, null, 2)}\n`);
 
   console.log(`\n${markdown}`);
-  console.log(`Report: ${mdPath}\nFull data: ${jsonPath}`);
+  console.log(
+    `Report: ${mdPath} (no business names — the one to paste into #7)\n` +
+      `Full data: ${jsonPath} (real business names — keep it local)`,
+  );
   return result.aborted ? 3 : 0;
 }
 

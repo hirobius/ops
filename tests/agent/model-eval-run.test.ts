@@ -9,13 +9,17 @@
  *   - failures are recorded per unit, never silently dropped
  *   - the spend ceiling actually stops the run
  *   - a bad key or model id stops the run loudly instead of logging 48 errors
+ *   - API trouble (rate limits, overload, dropped connections, no credit) is never
+ *     scored as the model's own failure
  */
 import { describe, it, expect, vi } from 'vitest';
+import { APIConnectionError } from '@anthropic-ai/sdk';
 import { costOfUsage, priceFor, PRICING_SOURCE } from '../../lib/agent/eval/pricing.mjs';
 import {
   runModelEval,
   planEval,
   validateLeads,
+  classifyError,
   ARMS,
   DEFAULTS,
 } from '../../lib/agent/eval/run.mjs';
@@ -228,5 +232,141 @@ describe('runModelEval', () => {
       runModelEval({ ...baseOpts, arms: ['opus-4-8', 'gpt-9'], stages }),
     ).rejects.toThrow(/gpt-9/);
     expect(stages.enrich).not.toHaveBeenCalled();
+  });
+});
+
+describe('classifyError', () => {
+  const http = (status: number, message = 'x') => Object.assign(new Error(message), { status });
+
+  it('treats rate limits, overload, server errors and dropped connections as transient', () => {
+    for (const status of [408, 409, 429, 500, 502, 503, 529]) {
+      expect(classifyError(http(status))).toBe('transient');
+    }
+    expect(classifyError(new APIConnectionError({ message: 'socket hang up' }))).toBe('transient');
+  });
+
+  it('treats a request the API refuses outright as fatal', () => {
+    for (const status of [400, 401, 403, 404, 413])
+      expect(classifyError(http(status))).toBe('fatal');
+  });
+
+  it("counts only the model's own output failures against the model", () => {
+    expect(classifyError(new Error('Model returned no tool call (stop_reason: max_tokens)'))).toBe(
+      'output',
+    );
+    expect(classifyError(new Error('generate: config did not validate after 3 attempts.'))).toBe(
+      'output',
+    );
+  });
+});
+
+describe('runModelEval — API trouble is not the model failing', () => {
+  const overloaded = () => Object.assign(new Error('Overloaded'), { status: 529 });
+  const noWait = { retryDelaysMs: [1, 1, 1], sleep: vi.fn(async () => {}) };
+
+  it('retries an overloaded generate call and records nothing against the model', async () => {
+    const stages = stubStages();
+    const realGenerate = stages.generate.getMockImplementation()!;
+    let thrown = 0;
+    stages.generate.mockImplementation(async (lead, brief, opts: StageOpts = {}) => {
+      if (opts.model === 'claude-sonnet-5' && thrown === 0) {
+        thrown++;
+        // The abandoned try was billed before the overload hit.
+        opts.onUsage?.({ model: opts.model, usage: USAGE, stopReason: 'tool_use' });
+        throw overloaded();
+      }
+      return realGenerate(lead, brief, opts);
+    });
+    const sleep = vi.fn(async () => {});
+    const result = await runModelEval({ ...baseOpts, ...noWait, sleep, stages });
+    expect(sleep).toHaveBeenCalledTimes(1);
+    expect(result.aborted).toBe(false);
+    expect(result.units).toHaveLength(8);
+    expect(result.units.every((u: { generation: { ok: boolean } }) => u.generation.ok)).toBe(true);
+    // The abandoned try counts toward real spend, not toward the unit's cost per site.
+    const retried = result.units.find(
+      (u: { arm: string; generation: { retries: number } }) =>
+        u.arm === 'sonnet-5' && u.generation.retries === 1,
+    );
+    expect(retried.generation.costUsd).toBeCloseTo(costOfUsage('claude-sonnet-5', USAGE), 9);
+    const unitSpend = result.units.reduce(
+      (s: number, u: { generation: { costUsd: number } }) => s + u.generation.costUsd,
+      0,
+    );
+    expect(result.totalCostUsd).toBeGreaterThan(unitSpend);
+  });
+
+  it('retries a rate-limited candidate judge instead of logging a judge failure', async () => {
+    const stages = stubStages();
+    const realJudge = stages.judge.getMockImplementation()!;
+    let thrown = 0;
+    stages.judge.mockImplementation(async (lead, config, opts: StageOpts = {}) => {
+      if (opts.model === 'claude-sonnet-5' && thrown === 0) {
+        thrown++;
+        throw Object.assign(new Error('rate_limit_error'), { status: 429 });
+      }
+      return realJudge(lead, config, opts);
+    });
+    const result = await runModelEval({ ...baseOpts, ...noWait, stages });
+    const candidateFailures = result.units.filter(
+      (u: { candidates: Record<string, { ok: boolean }> }) => !u.candidates['sonnet-5'].ok,
+    );
+    expect(candidateFailures).toHaveLength(0);
+  });
+
+  it('retries a dropped connection', async () => {
+    const stages = stubStages();
+    const realGenerate = stages.generate.getMockImplementation()!;
+    let thrown = 0;
+    stages.generate.mockImplementation(async (lead, brief, opts: StageOpts = {}) => {
+      if (thrown++ === 0) throw new APIConnectionError({ message: 'Connection error.' });
+      return realGenerate(lead, brief, opts);
+    });
+    const result = await runModelEval({ ...baseOpts, ...noWait, stages });
+    expect(result.units.every((u: { generation: { ok: boolean } }) => u.generation.ok)).toBe(true);
+  });
+
+  it('stops early with a partial result when the API stays unavailable, and blames the API', async () => {
+    const stages = stubStages();
+    const realGenerate = stages.generate.getMockImplementation()!;
+    stages.generate.mockImplementation(async (lead, brief, opts: StageOpts = {}) => {
+      if (opts.model === 'claude-sonnet-5') throw overloaded();
+      return realGenerate(lead, brief, opts);
+    });
+    const result = await runModelEval({ ...baseOpts, ...noWait, stages });
+    expect(result.aborted).toBe(true);
+    expect(result.abortReason).toMatch(/529/);
+    expect(result.abortReason).toMatch(/re-run/i);
+    // No unit is recorded as a Sonnet generation failure.
+    expect(
+      result.units.filter(
+        (u: { arm: string; generation: { ok: boolean } }) =>
+          u.arm === 'sonnet-5' && !u.generation.ok,
+      ),
+    ).toHaveLength(0);
+  });
+
+  it('stops at once, actionably, when the account is out of credit', async () => {
+    const stages = stubStages();
+    stages.generate.mockImplementation(async () => {
+      throw Object.assign(
+        new Error(
+          '400 {"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API."}}',
+        ),
+        { status: 400 },
+      );
+    });
+    await expect(runModelEval({ ...baseOpts, ...noWait, stages })).rejects.toThrow(
+      /credit.*console\.anthropic\.com\/settings\/billing/s,
+    );
+    expect(stages.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops on any other refused request rather than scoring it as the model failing', async () => {
+    const stages = stubStages();
+    stages.judge.mockImplementation(async () => {
+      throw Object.assign(new Error('thinking: unsupported for this model'), { status: 400 });
+    });
+    await expect(runModelEval({ ...baseOpts, ...noWait, stages })).rejects.toThrow(/HTTP 400/);
   });
 });
