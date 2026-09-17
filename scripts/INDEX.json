@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 146,
+  "totalScripts": 148,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,7 +41,7 @@
     }
   },
   "categoryCounts": {
-    "other": 74,
+    "other": 76,
     "audit": 16,
     "build": 1,
     "gate": 35,
@@ -675,6 +675,14 @@
       "gate": null
     },
     {
+      "name": "clients-middleware.mjs",
+      "category": "other",
+      "prefix": "clients",
+      "purpose": "Dev-only mirror of GET /api/clients (client records from the private store), using the same ClientStore adapter + response mapping as the prod function",
+      "pnpm": [],
+      "gate": null
+    },
+    {
       "name": "component-discovery.mjs",
       "category": "other",
       "prefix": "component",
@@ -901,6 +909,14 @@
       "category": "other",
       "prefix": "headless",
       "purpose": "(no header description)",
+      "pnpm": [],
+      "gate": null
+    },
+    {
+      "name": "import-client-records.mjs",
+      "category": "other",
+      "prefix": "import",
+      "purpose": "Idempotent sync of the local, gitignored clients/<slug>/ JSON into the private client store (Supabase client_records, migration 0015).",
       "pnpm": [],
       "gate": null
     },

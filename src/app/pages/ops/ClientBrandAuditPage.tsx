@@ -4,7 +4,9 @@
 /**
  * ClientBrandAuditPage — /ops/clients/:slug/brand-audit
  *
- * Renders clients/<slug>/brand-audit.json as a printable slide deck.
+ * Renders a client's brand audit (the former clients/<slug>/brand-audit.json,
+ * now the `brandAudit` of its record in the private client store, read via
+ * GET /api/clients) as a printable slide deck.
  * Each section is a deck-slide div with page-break-before: always under
  * @media print, so save-as-PDF produces a one-touchpoint-per-page document
  * the client can read in 5 minutes or hand to a designer.
@@ -27,58 +29,12 @@ import { Page, Stack, Badge, EmptyState } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { PageHeader } from './PageHeader';
 
-import type { ClientMeta } from './clientTypes';
+import type { BrandAuditTouchpoint as Touchpoint } from './clientTypes';
 
-interface Touchpoint {
-  id: string;
-  channel: string;
-  url: string | null;
-  status: string;
-  items: string[];
-}
+// ── Client registry (private client store via GET /api/clients) ───────────────
 
-interface CompetitorRef {
-  name: string;
-  url?: string;
-  notes?: string;
-}
-
-interface BrandAuditFile {
-  summary?: string;
-  website?: { url?: string; platform?: string; assessment?: string; notes?: string };
-  touchpoints?: Touchpoint[];
-  quickWins?: string[];
-  competitorReferences?: CompetitorRef[];
-  deliverable?: string;
-}
-
-// ── Manifest-driven loader ────────────────────────────────────────────────────
-
-const _audits = import.meta.glob<{ default: BrandAuditFile }>(
-  '../../../../clients/*/brand-audit.json',
-  { eager: true },
-);
-const _metas = import.meta.glob<{ default: ClientMeta }>('../../../../clients/*/meta.json', {
-  eager: true,
-});
-
-function slugOf(p: string) {
-  return p.match(/clients\/([^/]+)\//)?.[1] ?? '';
-}
-function shouldRegister(slug: string) {
-  return Boolean(slug) && !slug.startsWith('_');
-}
-
-const AUDITS: Record<string, BrandAuditFile> = {};
-const METAS: Record<string, ClientMeta> = {};
-for (const [p, m] of Object.entries(_audits)) {
-  const s = slugOf(p);
-  if (shouldRegister(s)) AUDITS[s] = m.default;
-}
-for (const [p, m] of Object.entries(_metas)) {
-  const s = slugOf(p);
-  if (shouldRegister(s)) METAS[s] = m.default;
-}
+import { useClientRegistry } from './clientRegistry';
+import { ClientStoreDrift, ClientStoreStatus, hasClients } from './ClientStoreNotice';
 
 // ── Static long-form copy for the closing scope note ──────────────────────────
 // This text mirrors the closing paragraph of the long-form
@@ -109,13 +65,19 @@ function statusLabel(status: string): string {
 
 export default function ClientBrandAuditPage() {
   const { slug } = useParams<{ slug: string }>();
-  const audit = AUDITS[slug ?? ''];
-  const meta = METAS[slug ?? ''];
+  const clientStore = useClientRegistry();
+  const client = clientStore.registry?.[slug ?? ''];
+  const audit = client?.brandAudit;
+  const meta = client?.meta;
 
   if (!audit || !meta) {
     return (
       <Page maxWidth="content">
-        <EmptyState title={`No brand audit found for ${slug ?? ''}`} />
+        {hasClients(clientStore) ? (
+          <EmptyState title={`No brand audit found for ${slug ?? ''}`} />
+        ) : (
+          <ClientStoreStatus state={clientStore} />
+        )}
       </Page>
     );
   }
@@ -133,6 +95,7 @@ export default function ClientBrandAuditPage() {
     <Page>
       <style>{PRINT_CSS}</style>
       <Stack direction="column" gap="spacious">
+        <ClientStoreDrift state={clientStore} />
         <PageHeader
           breadcrumbs={[
             { label: 'Ops', href: '/ops' },

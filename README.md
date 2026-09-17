@@ -28,8 +28,14 @@ Deployed on Vercel; `main` is production.
   → `lib/agent` (enrich → generate → judge → loop → validated `ClientConfig`) →
   `lib/render` (hand-off to the `hirobius/clients` Astro factory). State in
   Supabase (`lib/leads`, `lib/supabase`).
-- **`/ops/clients` — client CRM.** `clients/<slug>/*.json` rendered as client
-  dashboards / reports / brand audits. (Public client portals moved to
+- **`/ops/clients` — client CRM.** The pages read client records from the private
+  Supabase `client_records` table via `GET /api/clients` (`lib/clients/store.mjs`
+  port) and render them as client dashboards / reports / brand audits. Real records
+  must never be committed to this public repo. They are still written to local,
+  gitignored `clients/<slug>/*.json` (by hand, and by `scripts/auto-assigner.mjs`,
+  which syncs the client it edits into the store); after a hand edit run
+  `scripts/import-client-records.mjs --apply`. In `pnpm dev` the client pages warn
+  when the local folders and the store disagree. (Public client portals moved to
   `hirobius/portal-kit`; the old in-ops `/c/:slug` portal was removed.)
 - **`/ops/projects`, `/ops/digest`, `/ops` index** — fleet views. Merge
   governance runs through ralph-gate's `ralph-auto`/`ralph-approved` labels on
@@ -84,8 +90,8 @@ pnpm build        # prebuild (ensure-ops-data) → vite build
 src/app/        React dashboard (pages, components, lib)
 api/            Vercel serverless functions (ops-login, tasks, tasks-import, task-action, leads, projects, …)
 lib/            framework-agnostic engine (agent, lead-gen, leads, render, schema, github, supabase, tasks)
-clients/        per-client CRM data (gitignored real clients; _template tracked)
-supabase/       SQL migrations (leads, tasks)
+clients/        local import source for client records (gitignored; only _template tracked)
+supabase/       SQL migrations (leads, tasks, digest, client_records)
 scripts/        gates, generators, dev middleware, ensure-ops-data
 docs/           architecture, ai/handoff, guardrails
 ```

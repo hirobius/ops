@@ -1,103 +1,113 @@
 /**
- * Manifest-driven client registry. Vite's import.meta.glob auto-discovers the
- * clients/<slug>/*.json files at build time; this module joins them into a map.
+ * Client registry — the browser side of the private client store.
  *
- * - buildClientRegistry(): the shared assembler used by ClientDashboardPage and
- *   ClientReportPage, which glob a wider 7-file set. The import.meta.glob calls
- *   must live in the consuming module to be statically analysed, so each page owns
- *   its globs and passes the results here (this is why the assembly used to be
- *   copy-pasted into both pages).
- * - CLIENT_REGISTRY: the narrower 4-file set (meta/tasks/checklist/retainer) shared
- *   by OpsDashboardPage + SessionsPage. Kept as its own inline assembly to preserve
- *   its exact current behaviour (notably its slug guard).
+ * Client records are read from the private Supabase `client_records` table
+ * behind the ClientStore port (lib/clients/store.mjs), served by
+ * GET /api/clients (api/clients.ts; scripts/clients-middleware.mjs in dev).
+ * Nothing under clients/ is baked into the bundle any more — the old
+ * import.meta.glob reads only ever worked on a machine holding the gitignored
+ * files, and a committed record would have shipped in the public build.
+ *
+ * - fetchClientRecords(): one GET, with fail-loud errors that carry the fix.
+ * - buildClientRegistry(): records → slug-keyed ClientFiles map (pure).
+ * - useClientRegistry(): the hook every client surface reads through.
  */
 
-import type {
-  ClientFiles,
-  ClientMeta,
-  ClientTasksFile,
-  ClientChecklistFile,
-  ClientRetainerFile,
-  ClientGoalsFile,
-  ClientAutomationConfig,
-  ClientWorkflowConfig,
-} from './clientTypes';
+import { useMemo } from 'react';
+import { usePoll } from '../../lib/usePoll';
+import type { ClientFiles, ClientRecord } from './clientTypes';
 
-type Glob<T> = Record<string, { default: T }>;
+export type { ClientRecord } from './clientTypes';
 
-export interface ClientGlobs {
-  metas: Glob<ClientMeta>;
-  tasks?: Glob<ClientTasksFile>;
-  checks?: Glob<ClientChecklistFile>;
-  retains?: Glob<ClientRetainerFile>;
-  goals?: Glob<ClientGoalsFile>;
-  autoCfgs?: Glob<ClientAutomationConfig>;
-  workflows?: Glob<ClientWorkflowConfig>;
+/**
+ * Dev only: this machine's gitignored clients/<slug>/ folders disagree with the
+ * store (scripts/clients-middleware.mjs → localDrift in
+ * scripts/import-client-records.mjs). Slugs and file problems only.
+ */
+export interface LocalDrift {
+  /** Local clients the store does not have. */
+  create: string[];
+  /** Local clients whose files differ from the stored record. */
+  update: string[];
+  /** Local folders the import would reject (bad JSON, no meta.json, bad slug). */
+  problems: string[];
 }
 
-function slugOf(p: string) {
-  return p.match(/clients\/([^/]+)\//)?.[1] ?? '';
+/** One GET /api/clients response. */
+export interface ClientStoreSnapshot {
+  clients: ClientRecord[];
+  localDrift: LocalDrift | null;
 }
-function workflowOf(p: string) {
-  const m = p.match(/clients\/([^/]+)\/automations\/([^/]+)\/config\.json/);
-  return m ? { slug: m[1], workflowId: m[2] } : null;
-}
-/** Skip slugs starting with `_` (e.g. `_template/`) — scaffolding, not real clients. */
+
+const ENDPOINT = '/api/clients';
+const POLL_INTERVAL_MS = 60_000;
+const VERCEL_ENV_URL =
+  'https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables';
+
+/** Skip slugs starting with `_` (e.g. `_template`) — scaffolding, never a client. */
 function shouldRegister(slug: string) {
   return Boolean(slug) && !slug.startsWith('_');
 }
 
-/**
- * Join already-globbed client files into a registry keyed by slug. Pure — callers
- * own the import.meta.glob calls so Vite can statically analyse them.
- */
-export function buildClientRegistry(globs: ClientGlobs): Record<string, ClientFiles> {
+/** Join fetched client records into a registry keyed by slug. Pure. */
+export function buildClientRegistry(records: ClientRecord[]): Record<string, ClientFiles> {
   const reg: Record<string, ClientFiles> = {};
-  for (const [p, m] of Object.entries(globs.metas)) {
-    const s = slugOf(p);
-    if (shouldRegister(s)) reg[s] = { meta: m.default };
-  }
-  for (const [p, m] of Object.entries(globs.tasks ?? {})) {
-    const s = slugOf(p);
-    if (shouldRegister(s) && reg[s]) reg[s].tasks = m.default;
-  }
-  for (const [p, m] of Object.entries(globs.checks ?? {})) {
-    const s = slugOf(p);
-    if (shouldRegister(s) && reg[s]) reg[s].checklist = m.default;
-  }
-  for (const [p, m] of Object.entries(globs.retains ?? {})) {
-    const s = slugOf(p);
-    if (shouldRegister(s) && reg[s]) reg[s].retainer = m.default;
-  }
-  for (const [p, m] of Object.entries(globs.goals ?? {})) {
-    const s = slugOf(p);
-    if (shouldRegister(s) && reg[s]) reg[s].goals = m.default;
-  }
-  for (const [p, m] of Object.entries(globs.autoCfgs ?? {})) {
-    const s = slugOf(p);
-    if (shouldRegister(s) && reg[s]) reg[s].automationConfig = m.default;
-  }
-  for (const [p, m] of Object.entries(globs.workflows ?? {})) {
-    const r = workflowOf(p);
-    if (!r || !shouldRegister(r.slug) || !reg[r.slug]) continue;
-    reg[r.slug].workflows = [...(reg[r.slug].workflows ?? []), { id: r.workflowId, config: m.default }];
-  }
-  for (const slug of Object.keys(reg)) {
-    if (reg[slug].workflows) reg[slug].workflows!.sort((a, b) => a.id.localeCompare(b.id));
+  for (const { slug, status: _status, ...files } of records) {
+    if (!shouldRegister(slug) || !files.meta) continue;
+    reg[slug] = files.workflows
+      ? { ...files, workflows: [...files.workflows].sort((a, b) => a.id.localeCompare(b.id)) }
+      : files;
   }
   return reg;
 }
 
-// ── 4-file registry for OpsDashboardPage + SessionsPage (unchanged behaviour) ────
-const _metas   = import.meta.glob<{ default: ClientMeta }>('../../../../clients/*/meta.json',      { eager: true });
-const _tasks   = import.meta.glob<{ default: ClientTasksFile }>('../../../../clients/*/tasks.json',     { eager: true });
-const _checks  = import.meta.glob<{ default: ClientChecklistFile }>('../../../../clients/*/checklist.json', { eager: true });
-const _retains = import.meta.glob<{ default: ClientRetainerFile }>('../../../../clients/*/retainer.json',  { eager: true });
+/** The actionable message for a failed GET /api/clients. */
+async function failureMessage(res: Response): Promise<string> {
+  if (res.status === 401) {
+    return 'Ops session expired (401 from /api/clients) — reload /ops and sign in again.';
+  }
+  let body: { error?: unknown; code?: unknown } | null = null;
+  try {
+    body = (await res.json()) as { error?: unknown; code?: unknown };
+  } catch {
+    body = null;
+  }
+  if (!body || typeof body.error !== 'string') return `GET ${ENDPOINT} failed: HTTP ${res.status}`;
+  if (body.code === 'ENV_MISSING_SUPABASE') {
+    return (
+      `${body.error} — set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel ` +
+      `(${VERCEL_ENV_URL}, Production + Preview) and redeploy; for local dev they come from .env.local.`
+    );
+  }
+  return body.error;
+}
 
-export const CLIENT_REGISTRY: Record<string, ClientFiles> = {};
-for (const [p, m] of Object.entries(_metas))   { const s = slugOf(p); if (s) CLIENT_REGISTRY[s] = { meta: m.default }; }
-for (const [p, m] of Object.entries(_tasks))   { const s = slugOf(p); if (s && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].tasks     = m.default; }
-for (const [p, m] of Object.entries(_checks))  { const s = slugOf(p); if (s && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].checklist = m.default; }
-for (const [p, m] of Object.entries(_retains)) { const s = slugOf(p); if (s && CLIENT_REGISTRY[s]) CLIENT_REGISTRY[s].retainer  = m.default; }
+/** GET /api/clients → records (+ the dev drift report). Throws an Error whose message names the fix. */
+export async function fetchClientRecords(
+  signal?: AbortSignal,
+  fetchImpl: typeof fetch = fetch,
+): Promise<ClientStoreSnapshot> {
+  const res = await fetchImpl(ENDPOINT, { signal });
+  if (!res.ok) throw new Error(await failureMessage(res));
+  const body = (await res.json()) as { clients?: ClientRecord[]; localDrift?: LocalDrift };
+  return { clients: body.clients ?? [], localDrift: body.localDrift ?? null };
+}
 
-export const CLIENT_SLUGS = Object.keys(CLIENT_REGISTRY).sort();
+export interface UseClientRegistryResult {
+  /** null until the first successful load. */
+  registry: Record<string, ClientFiles> | null;
+  error: string | null;
+  isInitialLoading: boolean;
+  /** Dev only: local clients/ folders the store has not caught up with. */
+  localDrift: LocalDrift | null;
+}
+
+/** The client registry every /ops client surface reads through. */
+export function useClientRegistry(): UseClientRegistryResult {
+  const { data, error, isInitialLoading } = usePoll<ClientStoreSnapshot>(
+    (signal) => fetchClientRecords(signal),
+    { intervalMs: POLL_INTERVAL_MS },
+  );
+  const registry = useMemo(() => (data ? buildClientRegistry(data.clients) : null), [data]);
+  return { registry, error, isInitialLoading, localDrift: data?.localDrift ?? null };
+}

@@ -5,8 +5,14 @@
  *
  * Tier-aware task router. Classifies free-text input via local gemma4:e4b,
  * derives tier + model + cost ceiling deterministically, mutates the target
- * task in clients/<slug>/tasks.json, and appends an audit entry to
+ * task in clients/<slug>/tasks.json, syncs that client into the private client
+ * store (the /ops client pages read only the store — see
+ * scripts/import-client-records.mjs), and appends an audit entry to
  * docs/ai/routing-log.jsonl.
+ *
+ * A failed store sync does not fail the routing (tasks.json is already written):
+ * the JSON output carries `storeSync: { ok: false, error }` naming the fix, the
+ * error is echoed to stderr, and the bots add it to their reply.
  *
  * Replaces the "Ramble Processor" concept — input classification is folded
  * into the assigner's first pass.
@@ -33,6 +39,7 @@
 import { readFileSync, writeFileSync, appendFileSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { syncClientRecord } from './import-client-records.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ROUTING_LOG = resolve(ROOT, 'docs/ai/routing-log.jsonl');
@@ -48,25 +55,25 @@ const ASSIGNER_VERSION = 'auto-assigner-v1';
 // estimates; update when prices shift. Effort multiplier turns this into a
 // projected ceiling per task.
 const PRICE_PER_M_TOKENS = {
-  'gemma4:e4b':              0,
-  'gemma4:26b':              0,
-  'hermes3':                 0,
-  'qwen2.5-coder:14b-hds':   0,
-  'haiku-4-5':               1.00,
-  'sonnet-4-6':              3.00,
-  'opus-4-7':               15.00,
+  'gemma4:e4b': 0,
+  'gemma4:26b': 0,
+  hermes3: 0,
+  'qwen2.5-coder:14b-hds': 0,
+  'haiku-4-5': 1.0,
+  'sonnet-4-6': 3.0,
+  'opus-4-7': 15.0,
 };
 
 const EFFORT_TOKENS = { min: 2_000, standard: 8_000, high: 30_000 };
 
 const TIER_OF_MODEL = {
-  'gemma4:e4b':            'open-local',
-  'gemma4:26b':            'open-local',
-  'hermes3':               'open-local',
+  'gemma4:e4b': 'open-local',
+  'gemma4:26b': 'open-local',
+  hermes3: 'open-local',
   'qwen2.5-coder:14b-hds': 'open-local',
-  'haiku-4-5':             'closed-frontier',
-  'sonnet-4-6':            'closed-frontier',
-  'opus-4-7':              'closed-frontier',
+  'haiku-4-5': 'closed-frontier',
+  'sonnet-4-6': 'closed-frontier',
+  'opus-4-7': 'closed-frontier',
 };
 
 function pickTier({ privacy, capability }) {
@@ -162,10 +169,10 @@ async function classify(text) {
 
 function validateClassification(c) {
   const enums = {
-    verdict:    ['task', 'not-task', 'ambiguous'],
-    privacy:    ['low', 'medium', 'high'],
+    verdict: ['task', 'not-task', 'ambiguous'],
+    privacy: ['low', 'medium', 'high'],
     capability: ['simple', 'moderate', 'advanced'],
-    effort:     ['min', 'standard', 'high'],
+    effort: ['min', 'standard', 'high'],
   };
   for (const [field, allowed] of Object.entries(enums)) {
     if (c.verdict === 'not-task' && field !== 'verdict') continue;
@@ -199,7 +206,9 @@ async function readStdin() {
     if (process.stdin.isTTY) return resolve('');
     let data = '';
     process.stdin.setEncoding('utf8');
-    process.stdin.on('data', (chunk) => { data += chunk; });
+    process.stdin.on('data', (chunk) => {
+      data += chunk;
+    });
     process.stdin.on('end', () => resolve(data.trim()));
     process.stdin.on('error', reject);
   });
@@ -236,7 +245,7 @@ function findTaskById(data, taskId) {
 function appendNewTask(data, phaseId, taskTemplate) {
   const phase = phaseId
     ? (data.phases ?? []).find((p) => p.id === phaseId)
-    : (data.phases ?? []).find((p) => p.status === 'in-progress') ?? data.phases?.[0];
+    : ((data.phases ?? []).find((p) => p.status === 'in-progress') ?? data.phases?.[0]);
   if (!phase) throw new Error(`No phase available to append task (phaseId=${phaseId ?? 'auto'})`);
 
   const targetList = phase.swimlanes?.length
@@ -248,14 +257,14 @@ function appendNewTask(data, phaseId, taskTemplate) {
 }
 
 function applyRouting(task, routing) {
-  task.assignee          = routing.assignee;
-  task.model             = routing.model;
-  task.effort            = routing.effort;
-  task.costCeiling       = routing.costCeiling;
-  task.costSpent         = task.costSpent ?? 0;
-  task.routedBy          = ASSIGNER_VERSION;
-  task.routedAt          = routing.routedAt;
-  task.routingRationale  = routing.routingRationale;
+  task.assignee = routing.assignee;
+  task.model = routing.model;
+  task.effort = routing.effort;
+  task.costCeiling = routing.costCeiling;
+  task.costSpent = task.costSpent ?? 0;
+  task.routedBy = ASSIGNER_VERSION;
+  task.routedAt = routing.routedAt;
+  task.routingRationale = routing.routingRationale;
 }
 
 // ---------- audit log -------------------------------------------------------
@@ -326,23 +335,23 @@ async function main() {
   }
 
   // task verdict — derive tier, model, ceiling
-  const forcedTier  = args['force-tier']  || null;
+  const forcedTier = args['force-tier'] || null;
   const forcedModel = args['force-model'] || null;
 
-  const tier  = forcedTier  ?? pickTier(classification);
+  const tier = forcedTier ?? pickTier(classification);
   const model = forcedModel ?? pickModel(tier, classification.effort);
 
   if (TIER_OF_MODEL[model] && TIER_OF_MODEL[model] !== tier) {
     console.error(
       `error: forced model ${model} belongs to tier ${TIER_OF_MODEL[model]}, ` +
-      `not requested tier ${tier}`,
+        `not requested tier ${tier}`,
     );
     process.exit(1);
   }
 
-  const projected   = projectedCostUsd(model, classification.effort);
-  const costCeiling = Number((projected * 1.25).toFixed(4));  // 25% headroom
-  const routedAt    = new Date().toISOString();
+  const projected = projectedCostUsd(model, classification.effort);
+  const costCeiling = Number((projected * 1.25).toFixed(4)); // 25% headroom
+  const routedAt = new Date().toISOString();
 
   const routingRationale =
     `${classification.reason} ` +
@@ -353,20 +362,20 @@ async function main() {
   if (!targetTask) {
     const newId = `t-${Date.now().toString(36)}`;
     targetTask = {
-      id:       newId,
-      title:    classification.title || inputText.slice(0, 90),
-      status:   'todo',
-      owner:    'Adrian',
-      notes:    inputText !== classification.title ? inputText : undefined,
+      id: newId,
+      title: classification.title || inputText.slice(0, 90),
+      status: 'todo',
+      owner: 'Adrian',
+      notes: inputText !== classification.title ? inputText : undefined,
     };
     phase = appendNewTask(tasksData, args.phase, targetTask);
     createdNew = true;
   }
 
   applyRouting(targetTask, {
-    assignee:         model,
+    assignee: model,
     model,
-    effort:           classification.effort,
+    effort: classification.effort,
     costCeiling,
     routedAt,
     routingRationale,
@@ -374,40 +383,54 @@ async function main() {
 
   saveTasks(tasksPath, tasksData);
 
+  // The /ops client pages read the private store, not tasks.json — push the change.
+  const storeSync = await syncClientRecord({ slug: clientSlug, dir: resolve(ROOT, 'clients') });
+  if (!storeSync.ok) {
+    console.error(`auto-assigner warning: client store not updated — ${storeSync.error}`);
+  }
+
   appendAuditEntry({
     assigner: ASSIGNER_VERSION,
-    client:   clientSlug,
-    verdict:  'task',
-    taskId:   targetTask.id,
-    phaseId:  phase?.id,
+    client: clientSlug,
+    verdict: 'task',
+    taskId: targetTask.id,
+    phaseId: phase?.id,
     createdNew,
     tier,
     model,
-    effort:        classification.effort,
-    privacy:       classification.privacy,
-    capability:    classification.capability,
-    projectedUsd:  projected,
+    effort: classification.effort,
+    privacy: classification.privacy,
+    capability: classification.capability,
+    projectedUsd: projected,
     costCeiling,
     forcedTier,
     forcedModel,
-    rationale:     routingRationale,
-    inputDigest:   inputText.slice(0, 500),
+    rationale: routingRationale,
+    inputDigest: inputText.slice(0, 500),
+    storeSynced: storeSync.ok,
   });
 
-  console.log(JSON.stringify({
-    verdict:   'task',
-    taskId:    targetTask.id,
-    title:     targetTask.title,
-    phaseId:   phase?.id,
-    createdNew,
-    tier,
-    model,
-    effort:    classification.effort,
-    costCeiling,
-    routedAt,
-    rationale: routingRationale,
-    client:    clientSlug,
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        verdict: 'task',
+        taskId: targetTask.id,
+        title: targetTask.title,
+        phaseId: phase?.id,
+        createdNew,
+        tier,
+        model,
+        effort: classification.effort,
+        costCeiling,
+        routedAt,
+        rationale: routingRationale,
+        client: clientSlug,
+        storeSync,
+      },
+      null,
+      2,
+    ),
+  );
   process.exit(0);
 }
 

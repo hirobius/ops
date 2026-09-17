@@ -1,7 +1,11 @@
-// Shared types for client/* JSON files consumed by /ops dashboard surfaces.
+// Shared types for the client records consumed by /ops dashboard surfaces.
 // Fields marked optional (`?`) are absent in at least one client at time of
-// authoring; required fields are present in all (lilac-insure, the-ranch-foundation,
-// prospect-001). Source of truth: clients/<slug>/{meta,tasks,checklist,retainer,goals}.json.
+// authoring; required fields are present in all. Records are read from the
+// private `client_records` store (lib/clients/store.mjs, migration 0015), served
+// by GET /api/clients, and must never be committed to this public repo. Each
+// record mirrors the local clients/<slug>/
+// {meta,tasks,checklist,retainer,goals,…}.json files it was imported from
+// (scripts/import-client-records.mjs); only clients/_template/ is committed.
 
 interface ClientContact {
   name?: string;
@@ -258,6 +262,31 @@ export interface ClientWorkflow {
   config: ClientWorkflowConfig;
 }
 
+// ── Brand audit (clients/<slug>/brand-audit.json) ─────────────────────────────
+
+export interface BrandAuditTouchpoint {
+  id: string;
+  channel: string;
+  url: string | null;
+  status: string;
+  items: string[];
+}
+
+export interface BrandAuditCompetitorRef {
+  name: string;
+  url?: string;
+  notes?: string;
+}
+
+export interface BrandAuditFile {
+  summary?: string;
+  website?: { url?: string; platform?: string; assessment?: string; notes?: string };
+  touchpoints?: BrandAuditTouchpoint[];
+  quickWins?: string[];
+  competitorReferences?: BrandAuditCompetitorRef[];
+  deliverable?: string;
+}
+
 export interface ClientFiles {
   meta: ClientMeta;
   tasks?: ClientTasksFile;
@@ -266,4 +295,13 @@ export interface ClientFiles {
   goals?: ClientGoalsFile;
   automationConfig?: ClientAutomationConfig;
   workflows?: ClientWorkflow[];
+  brandAudit?: BrandAuditFile;
+}
+
+/** One client as GET /api/clients returns it — the ClientRecord of lib/clients/store.mjs. */
+export interface ClientRecord extends ClientFiles {
+  /** Pseudonymous, lowercase-kebab slug; the /ops/clients/:slug route key. */
+  slug: string;
+  /** status.json — contact cadence; not rendered by the pages yet. */
+  status?: Record<string, unknown>;
 }

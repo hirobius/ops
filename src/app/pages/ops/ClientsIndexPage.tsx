@@ -14,11 +14,17 @@
  * we're doing for them. A committed "Samples & demos" section (see `demos.ts`)
  * showcases concept builds that aren't clients.
  *
+ * Client records come from the private client store (GET /api/clients via
+ * useClientRegistry), not from files in this repo. Until the store has answered
+ * (loading, or unreachable) the Active / Prospects / Pipeline sections are not
+ * rendered at all: "0 active · $0 retainer" under an error reads as real
+ * figures. A reachable-but-empty store is a real zero and does render them.
+ *
  * @category Internal
  * @tier utility
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router';
 
@@ -32,7 +38,8 @@ import { PageHeader } from './PageHeader';
 import { fetchFleetStatus, type FleetStatus } from './ralphStatus';
 
 import type { ClientFiles } from './clientTypes';
-import { CLIENT_REGISTRY } from './clientRegistry';
+import { useClientRegistry } from './clientRegistry';
+import { ClientStoreDrift, ClientStoreStatus } from './ClientStoreNotice';
 import { DEMOS, type DemoBuild } from './demos';
 
 // ── Tone helpers ──────────────────────────────────────────────────────────────
@@ -116,49 +123,68 @@ function deriveCard(slug: string, { meta, tasks, retainer, checklist }: ClientFi
   };
 }
 
-// Skip scaffolding slugs (`_template`) — they aren't real clients.
-const ALL_CARDS = Object.entries(CLIENT_REGISTRY)
-  .filter(([slug]) => !slug.startsWith('_'))
-  .map(([slug, files]) => deriveCard(slug, files));
-const CLIENTS = ALL_CARDS.filter((c) => c.status === 'active');
-const PROSPECTS = ALL_CARDS.filter((c) => c.status === 'prospect');
+/** Split the registry into cards (scaffold `_` slugs are already filtered by the registry). */
+function cardsOf(registry: Record<string, ClientFiles>) {
+  const all = Object.entries(registry)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([slug, files]) => deriveCard(slug, files));
+  return {
+    ALL_CARDS: all,
+    CLIENTS: all.filter((c) => c.status === 'active'),
+    PROSPECTS: all.filter((c) => c.status === 'prospect'),
+  };
+}
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 /** @public */
 export default function ClientsIndexPage() {
+  const clientStore = useClientRegistry();
+  const { registry } = clientStore;
+  const { ALL_CARDS, CLIENTS, PROSPECTS } = useMemo(() => cardsOf(registry ?? {}), [registry]);
+  const counts = registry
+    ? ` — ${CLIENTS.length} active, ${PROSPECTS.length} prospect, ${DEMOS.length} demos`
+    : '';
+
   return (
     <Page>
       <Stack direction="column" gap="spacious">
         <PageHeader
           breadcrumbs={[{ label: 'Ops', href: '/ops' }, { label: 'Clients' }]}
           title="Clients"
-          lede={`Active retainers, prospects & sample builds — ${CLIENTS.length} active, ${PROSPECTS.length} prospect, ${DEMOS.length} demos.`}
+          lede={`Active retainers, prospects & sample builds${counts}.`}
         />
+
+        {/* Client records are read from the private store — loading, unavailable
+            (with the fix), empty-store and (dev) local-drift states. */}
+        <ClientStoreStatus state={clientStore} />
+        <ClientStoreDrift state={clientStore} />
 
         {/* Lead funnel — the tier upstream of clients (Supabase leads), so the
             whole picture (leads → prospects → clients) reads in one place. */}
         <LeadFunnelStrip />
 
-        {/* Active clients */}
-        <section>
-          <div style={s.sectionHead}>
-            <h2 style={s.sectionTitle}>Active</h2>
-            <a href="/ops/clients/new" style={s.addLink}>
-              + New client
-            </a>{' '}
-            {/* route-ok: scaffold-new-client page is planned, see ops-dashboard backlog */}
-          </div>
-          <div style={s.clientGrid}>
-            {CLIENTS.map((c) => (
-              <ClientRow key={c.slug} client={c} />
-            ))}
-            <NewClientSlot />
-          </div>
-        </section>
+        {/* Active clients — only once the store has answered. */}
+        {registry && (
+          <section>
+            <div style={s.sectionHead}>
+              <h2 style={s.sectionTitle}>Active</h2>
+              <a href="/ops/clients/new" style={s.addLink}>
+                + New client
+              </a>{' '}
+              {/* route-ok: scaffold-new-client page is planned, see ops-dashboard backlog */}
+            </div>
+            <div style={s.clientGrid}>
+              {CLIENTS.map((c) => (
+                <ClientRow key={c.slug} client={c} />
+              ))}
+              <NewClientSlot />
+            </div>
+          </section>
+        )}
 
         {/* Prospects */}
-        {PROSPECTS.length > 0 && (
+        {registry && PROSPECTS.length > 0 && (
           <section>
             <h2 style={s.sectionTitle}>Prospects</h2>
             <div style={s.clientGrid}>
@@ -182,31 +208,33 @@ export default function ClientsIndexPage() {
           </section>
         )}
 
-        {/* Pipeline summary */}
-        <section>
-          <h2 style={s.sectionTitle}>Pipeline</h2>
-          <div style={s.pipelineGrid}>
-            <PipelineCard label="Active Clients" value={String(CLIENTS.length)} />
-            <PipelineCard
-              label="Open Tasks"
-              value={String(ALL_CARDS.reduce((a, c) => a + c.openTaskCount, 0))}
-            />
-            <PipelineCard
-              label="Blockers"
-              value={String(ALL_CARDS.reduce((a, c) => a + c.blockerCount, 0))}
-              highlight={ALL_CARDS.some((c) => c.blockerCount > 0)}
-            />
-            <PipelineCard
-              label="Retainer Value"
-              value={`$${CLIENTS.reduce((a, c) => a + c.retainerAmount, 0).toLocaleString()}`}
-            />
-            <PipelineCard
-              label="Prospects"
-              value={String(PROSPECTS.length)}
-              note={PROSPECTS.map((p) => p.name).join(', ')}
-            />
-          </div>
-        </section>
+        {/* Pipeline summary — derived from the store, so absent until it answers. */}
+        {registry && (
+          <section>
+            <h2 style={s.sectionTitle}>Pipeline</h2>
+            <div style={s.pipelineGrid}>
+              <PipelineCard label="Active Clients" value={String(CLIENTS.length)} />
+              <PipelineCard
+                label="Open Tasks"
+                value={String(ALL_CARDS.reduce((a, c) => a + c.openTaskCount, 0))}
+              />
+              <PipelineCard
+                label="Blockers"
+                value={String(ALL_CARDS.reduce((a, c) => a + c.blockerCount, 0))}
+                highlight={ALL_CARDS.some((c) => c.blockerCount > 0)}
+              />
+              <PipelineCard
+                label="Retainer Value"
+                value={`$${CLIENTS.reduce((a, c) => a + c.retainerAmount, 0).toLocaleString()}`}
+              />
+              <PipelineCard
+                label="Prospects"
+                value={String(PROSPECTS.length)}
+                note={PROSPECTS.map((p) => p.name).join(', ')}
+              />
+            </div>
+          </section>
+        )}
       </Stack>
     </Page>
   );
