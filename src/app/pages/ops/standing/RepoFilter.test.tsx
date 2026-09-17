@@ -7,6 +7,7 @@
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import hds from '@hirobius/design-system/tokens';
 import { RepoFilter } from './RepoFilter';
 import type { RepoOption } from './repoScope';
 
@@ -215,7 +216,9 @@ describe('RepoFilter', () => {
     );
 
     for (const chip of chips()) {
-      expect(chip.style.minHeight).toBe('var(--primitive-size-interactive-min)');
+      // Assert against the design-system token the component consumes, not a
+      // hand-written primitive var (check-tier-bypass forbids those).
+      expect(chip.style.minHeight).toBe(hds.size.interactive.min);
     }
   });
 });
