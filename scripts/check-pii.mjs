@@ -10,9 +10,15 @@
  *   error  denylist term         real client/contact identifiers, loaded from
  *                                the PII_DENYLIST env var (the Actions secret)
  *                                and/or the gitignored .pii-denylist file —
- *                                the list is PII itself, so never in the repo
+ *                                the list is PII itself, so never in the repo.
+ *                                Also matched in decoded/loosened copies of the
+ *                                text (percent/JSON/HTML escapes, accents,
+ *                                slugs, camelCase, comment-wrapped lines)
  *   error  private workspace URL Google Docs/Drive/Chat/Mail/Admin, Outlook /
  *                                M365 admin / Azure portal, SharePoint, Wix editor
+ *   error  denylist file         .pii-denylist or a copy of it (any file named
+ *                                like pii-denylist, or a line that is an
+ *                                entry's pattern text)
  *   warn   email address         outside the reviewed allowlist
  *   warn   US phone number       placeholders (555, repeated digits) skipped
  *
@@ -26,15 +32,27 @@
  *
  * MASKING: output names the rule, the location and the match LENGTH, never the
  * value — ops, portal-kit and site-engine are public, so CI logs are public. A
- * file path that itself matches the denylist is replaced by a hash.
+ * file path that itself matches the denylist is replaced by a hash everywhere
+ * it would be printed.
  *
  * MODES (what is scanned):
- *   (default)              lines ADDED in the staged change + staged paths (pre-commit)
+ *   (default)              lines ADDED in the staged change + staged paths (pre-commit).
+ *                          With nothing staged (the post-commit re-run, which
+ *                          catches --no-verify commits): what HEAD adds against
+ *                          every parent, + its message
+ *   --message-file <file>  a commit message file (.husky/commit-msg via
+ *                          scripts/pii-commit-msg.mjs)
  *   --range A..B           lines B adds since forking from A, + commit messages
- *   --github-event         the pull_request / push range from $GITHUB_EVENT_PATH
+ *   --github-event         the pull_request / push range from $GITHUB_EVENT_PATH,
+ *                          + the pull request title, body and branch name
  *   --tree <dir>           every tracked text file in another checkout (weekly)
  *   --records <file.json>  [{ "location", "text" }] records (weekly issue text)
  *   --fixture-mode         FIXTURE_FILE={ denylist: [...], files: [{ path, text }] }
+ *
+ * Content git calls binary is still scanned: diffs run with --text (so a
+ * `-diff`/`binary` attribute cannot hide a file), UTF-16 files are decoded
+ * (lib/pii/decode.mjs), and a changed file that is neither is named in a
+ * notice as not scanned.
  *
  * OPTIONS:
  *   --fail-on error|warn   lowest severity that fails the run (default: error)
@@ -52,10 +70,12 @@
 import { execFileSync } from 'node:child_process';
 import { appendFileSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
+import { decodeText } from '../lib/pii/decode.mjs';
 import { detectPii } from '../lib/pii/detect.mjs';
 import { DENYLIST_ENV, DENYLIST_FILE, loadDenylist, parseDenylist } from '../lib/pii/denylist.mjs';
-import { addedBlocks, addedInBoth } from '../lib/pii/diff.mjs';
-import { parseRangeSpec, resolveEventRange } from '../lib/pii/range.mjs';
+import { addedInAll, addedLineBlocks } from '../lib/pii/diff.mjs';
+import { commitMessageText, pullRequestEventText } from '../lib/pii/github-text.mjs';
+import { EMPTY_TREE, parseRangeSpec, resolveEventRange } from '../lib/pii/range.mjs';
 import {
   GUIDE,
   SECRETS_URL,
@@ -83,6 +103,7 @@ function parseArgs(argv) {
     githubEvent: false,
     tree: null,
     records: null,
+    messageFile: null,
   };
   const takeValue = (i, flag) => {
     const value = argv[i + 1];
@@ -123,6 +144,9 @@ function parseArgs(argv) {
       case '--records':
         opts.records = takeValue(i++, arg);
         break;
+      case '--message-file':
+        opts.messageFile = takeValue(i++, arg);
+        break;
       default:
         throw new UsageError(
           `Unknown argument ${JSON.stringify(arg)}. See the header of scripts/check-pii.mjs.`,
@@ -140,6 +164,11 @@ function parseArgs(argv) {
 
 // ── git ──────────────────────────────────────────────────────────────────────
 
+/**
+ * `--text` so a `.gitattributes` `-diff`/`binary` attribute cannot hide a text
+ * file; `--full-index` so a file with NUL bytes can be re-read by blob id
+ * (lib/pii/diff.mjs).
+ */
 const DIFF_FLAGS = [
   '-c',
   'core.quotepath=false',
@@ -147,22 +176,27 @@ const DIFF_FLAGS = [
   '--no-color',
   '--no-ext-diff',
   '--no-textconv',
+  '--text',
+  '--full-index',
   '--src-prefix=a/',
   '--dst-prefix=b/',
   '-U0',
 ];
+
+/** Paths a change adds or edits: added, copied, modified, renamed, type-changed. */
+const CHANGED_PATHS = ['--name-only', '-z', '--diff-filter=ACMRT'];
 
 /**
  * Run git. The inherited environment is kept on purpose for staged/range
  * scans: inside a hook, GIT_INDEX_FILE may point at a temporary index
  * (`git commit -a`), and that index is exactly what must be scanned.
  */
-function git(args, { cwd, env } = {}) {
+function git(args, { cwd, env, buffer = false } = {}) {
   try {
     return execFileSync('git', args, {
       cwd,
       env: env ?? process.env,
-      encoding: 'utf8',
+      encoding: buffer ? 'buffer' : 'utf8',
       maxBuffer: 512 * 1024 * 1024,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -193,44 +227,104 @@ function splitNul(text) {
 
 // ── Scan targets ─────────────────────────────────────────────────────────────
 //
-// A target is { label, units, paths, prefix?, warning? }.
-//   units  { path, text, firstLine, inRepoFile } — text to scan; `path` drives
-//          the generic-pattern exemptions, `inRepoFile` allows file annotations
-//   paths  file paths checked against the denylist themselves
-//   prefix another repo's label, prepended to every displayed location
+// A target is { label, units, paths, prefix?, warning?, skipped? }.
+//   units    { path, text, firstLine, inRepoFile } — text to scan; `path` drives
+//            the generic-pattern exemptions, `inRepoFile` allows file annotations
+//   paths    file paths checked against the denylist themselves
+//   prefix   another repo's label, prepended to every displayed location
+//   skipped  changed binary files that could not be read as text
 
-function fileUnits(addedFiles) {
-  return addedFiles.flatMap((f) =>
-    f.blocks.map((b) => ({ path: f.path, text: b.text, firstLine: b.firstLine, inRepoFile: true })),
-  );
+const MAX_TEXT_BYTES = 5 * 1024 * 1024;
+
+/** A blob as text: null when it is binary (not UTF-8/UTF-16) or over 5 MB. */
+function blobText(blob) {
+  const size = Number(git(['cat-file', '-s', blob]).trim());
+  if (!(size <= MAX_TEXT_BYTES)) return null;
+  return decodeText(git(['cat-file', 'blob', blob], { buffer: true }));
 }
 
-const stagedPaths = (...revs) =>
-  splitNul(git(['diff', '--cached', '--name-only', '-z', '--diff-filter=ACMR', ...revs]));
+/**
+ * Scan units for what a diff adds. A file with NUL bytes (UTF-16, images,
+ * archives) is re-read from its blobs: decoded text is compared line by line
+ * against the old side(s); anything undecodable is reported as skipped.
+ */
+function contentUnits(addedFiles) {
+  const units = [];
+  const skipped = [];
+  const unit = (path, block) => ({
+    path,
+    text: block.text,
+    firstLine: block.firstLine,
+    inRepoFile: true,
+  });
+  for (const file of addedFiles) {
+    if (!file.binary) {
+      units.push(...file.blocks.map((block) => unit(file.path, block)));
+      continue;
+    }
+    const text = file.newBlob ? blobText(file.newBlob) : null;
+    if (text === null) {
+      skipped.push(file.path);
+      continue;
+    }
+    const oldTexts = file.oldBlobs.map((blob) => (blob ? (blobText(blob) ?? '') : ''));
+    units.push(...addedLineBlocks(text, oldTexts).map((block) => unit(file.path, block)));
+  }
+  return { units, skipped };
+}
+
+function commitMessageUnit(sha, body) {
+  return {
+    path: `commit ${sha.slice(0, 12)} message`,
+    text: body,
+    firstLine: 1,
+    inRepoFile: false,
+  };
+}
 
 /**
  * The staged change. While a merge is being concluded (MERGE_HEAD exists),
  * only what is new against BOTH parents is scanned: merging main into a branch
  * must not re-block on lines main already carried (ops main has known hits
  * until the ops#27 rewrite), while a conflict resolution is still checked.
+ *
+ * With nothing staged, this is the post-commit re-run (.husky/post-commit runs
+ * the pre-commit channel after the commit, when the index equals HEAD), so the
+ * commit that was just made is scanned instead — that is what makes a
+ * `--no-verify` bypass show up in the firing log.
  */
 function stagedTarget() {
   const againstHead = git([...DIFF_FLAGS, '--cached']);
   const mergeHead = gitOrNull(['rev-parse', '-q', '--verify', 'MERGE_HEAD^{commit}']);
   if (!mergeHead) {
+    if (againstHead.trim() === '') return lastCommitTarget();
     return {
       label: 'staged changes',
-      units: fileUnits(addedBlocks(againstHead)),
-      paths: stagedPaths(),
+      ...contentUnits(addedInAll([againstHead])),
+      paths: splitNul(git(['diff', '--cached', ...CHANGED_PATHS])),
     };
   }
   const againstMergeHead = git([...DIFF_FLAGS, '--cached', mergeHead]);
-  const theirPaths = new Set(stagedPaths(mergeHead));
+  const theirPaths = new Set(splitNul(git(['diff', '--cached', ...CHANGED_PATHS, mergeHead])));
   return {
     label: 'staged merge (new against both parents)',
-    units: fileUnits(addedInBoth(againstHead, againstMergeHead)),
-    paths: stagedPaths().filter((p) => theirPaths.has(p)),
+    ...contentUnits(addedInAll([againstHead, againstMergeHead])),
+    paths: splitNul(git(['diff', '--cached', ...CHANGED_PATHS])).filter((p) => theirPaths.has(p)),
   };
+}
+
+/** HEAD: what it adds against every parent (a merge adds only its own edits), + its message. */
+function lastCommitTarget() {
+  const label = 'last commit (nothing staged)';
+  const head = gitOrNull(['rev-parse', '-q', '--verify', 'HEAD^{commit}']);
+  if (!head) return { label, units: [], paths: [] };
+  const parents = git(['rev-list', '--parents', '-n', '1', head]).trim().split(' ').slice(1);
+  const bases = parents.length > 0 ? parents : [EMPTY_TREE];
+  const content = contentUnits(addedInAll(bases.map((base) => git([...DIFF_FLAGS, base, head]))));
+  const pathSets = bases.map((base) => splitNul(git(['diff', ...CHANGED_PATHS, base, head])));
+  const paths = pathSets[0].filter((p) => pathSets.every((set) => set.includes(p)));
+  const message = commitMessageUnit(head, git(['log', '-1', '--format=%B', head]));
+  return { label, units: [...content.units, message], skipped: content.skipped, paths };
 }
 
 /**
@@ -238,29 +332,35 @@ function stagedTarget() {
  * the message of every commit in it (commit messages are published with the
  * code and the 2026-09-16 sweep found PII in them).
  */
-function rangeTarget(range, label) {
+function rangeTarget(range, label, extraUnits = []) {
   const messages = git(['log', '--format=%H%x00%B%x1e', ...range.logArgs])
     .split('\x1e')
     .map((record) => record.replace(/^\n/, ''))
     .filter((record) => record.includes('\0'))
     .map((record) => {
       const [sha, body] = record.split('\0');
-      return {
-        path: `commit ${sha.slice(0, 12)} message`,
-        text: body,
-        firstLine: 1,
-        inRepoFile: false,
-      };
+      return commitMessageUnit(sha, body);
     });
+  const content = contentUnits(addedInAll([git([...DIFF_FLAGS, ...range.diffArgs])]));
   return {
     label,
     warning: range.warning,
-    units: [...fileUnits(addedBlocks(git([...DIFF_FLAGS, ...range.diffArgs]))), ...messages],
-    paths: splitNul(git(['diff', '--name-only', '-z', '--diff-filter=ACMR', ...range.diffArgs])),
+    units: [...content.units, ...messages, ...extraUnits],
+    skipped: content.skipped,
+    paths: splitNul(git(['diff', ...CHANGED_PATHS, ...range.diffArgs])),
   };
 }
 
-function githubEventRange() {
+function textUnits(records) {
+  return records.map((r) => ({ path: r.location, text: r.text, firstLine: 1, inRepoFile: false }));
+}
+
+/**
+ * The event's commit range, plus the pull request's own title, body and branch
+ * name: the title becomes main's merge or squash commit message.
+ */
+function githubEventTarget() {
+  const eventName = process.env.GITHUB_EVENT_NAME;
   const missing = ['GITHUB_EVENT_NAME', 'GITHUB_EVENT_PATH'].filter((name) => !process.env[name]);
   if (missing.length > 0) {
     throw new UsageError(
@@ -273,9 +373,10 @@ function githubEventRange() {
   } catch (err) {
     throw new UsageError(`cannot read the event payload: ${err.message}`);
   }
+  let range;
   try {
-    return resolveEventRange({
-      eventName: process.env.GITHUB_EVENT_NAME,
+    range = resolveEventRange({
+      eventName,
       payload,
       commitExists: (sha) => gitOrNull(['cat-file', '-e', `${sha}^{commit}`]) !== null,
       hasParent: (sha) => gitOrNull(['rev-parse', '--verify', '--quiet', `${sha}^1`]) !== null,
@@ -283,13 +384,35 @@ function githubEventRange() {
   } catch (err) {
     throw new UsageError(err.message);
   }
+  return rangeTarget(
+    range,
+    `${eventName} changes`,
+    textUnits(pullRequestEventText(eventName, payload)),
+  );
 }
 
-const MAX_TREE_FILE_BYTES = 5 * 1024 * 1024;
+/** A commit message file, as git will store it (comments and the verbose diff removed). */
+function messageFileTarget(file) {
+  let raw;
+  try {
+    raw = readFileSync(file, 'utf8');
+  } catch (err) {
+    throw new UsageError(`cannot read commit message file ${file}: ${err.message}`);
+  }
+  const configured = gitOrNull(['config', '--get', 'core.commentChar']);
+  const commentChar = configured && configured !== 'auto' ? configured : '#';
+  return {
+    label: 'commit message',
+    units: textUnits([
+      { location: 'commit message', text: commitMessageText(raw, { commentChar }) },
+    ]),
+    paths: [],
+  };
+}
 
 /**
  * Every tracked text file in another checkout (the weekly scan of the
- * portal-kit and site-engine tips). Binary files (a NUL in the first 8 KB) and
+ * portal-kit and site-engine tips). UTF-16 files are decoded; binary files and
  * files over 5 MB are skipped. GIT_* is stripped so a hook's GIT_DIR can never
  * redirect `git -C <dir>` to a different repository.
  */
@@ -304,8 +427,9 @@ function treeTarget(dir, label) {
     } catch {
       continue; // listed but absent (sparse checkout, submodule dir)
     }
-    if (buf.length > MAX_TREE_FILE_BYTES || buf.subarray(0, 8000).includes(0)) continue;
-    units.push({ path, text: buf.toString('utf8'), firstLine: 1, inRepoFile: false });
+    const text = buf.length > MAX_TEXT_BYTES ? null : decodeText(buf);
+    if (text === null) continue;
+    units.push({ path, text, firstLine: 1, inRepoFile: false });
   }
   return { label, prefix: `${label}:`, units, paths };
 }
@@ -329,16 +453,7 @@ function recordsTarget(file, label) {
       'records file must be a JSON array of { "location": string, "text": string }.',
     );
   }
-  return {
-    label,
-    units: records.map((r) => ({
-      path: r.location,
-      text: r.text,
-      firstLine: 1,
-      inRepoFile: false,
-    })),
-    paths: [],
-  };
+  return { label, units: textUnits(records), paths: [] };
 }
 
 /**
@@ -371,40 +486,75 @@ function fixtureTarget() {
 
 // ── Scan ─────────────────────────────────────────────────────────────────────
 
-function scan(target, denylist) {
-  const findings = [];
-  const redacted = new Map();
-  const display = (path, prefix) => `${prefix ?? ''}${redacted.get(path) ?? path}`;
+/**
+ * A file named like the denylist (`.pii-denylist~`, `pii-denylist.txt`, …).
+ * The gate's own tests are the one reviewed exception.
+ */
+const DENYLIST_NAME = /pii[-_. ]?deny[-_. ]?list/i;
+const DENYLIST_NAME_EXEMPT = /^scripts\/__tests__\/pii-[^/]*\.test\.mjs$/;
 
-  for (const path of target.paths) {
-    const pathHits = detectPii(path, { path, denylist: denylist.entries }).filter(
-      (f) => f.rule === 'denylist',
-    );
-    if (pathHits.length === 0) continue;
-    redacted.set(path, redactPath(path));
-    for (const hit of pathHits) {
-      findings.push({
-        ...hit,
-        detail: `${hit.detail} in a file path`,
-        path: display(path, target.prefix),
-        line: null,
-        column: null,
-        inRepoFile: false,
-      });
+function isDenylistCopyName(path) {
+  const normalized = path.replace(/\\/g, '/');
+  return DENYLIST_NAME.test(normalized.split('/').pop()) && !DENYLIST_NAME_EXEMPT.test(normalized);
+}
+
+/**
+ * How a location is printed. Any path or label that matches the denylist is
+ * replaced by a hash — tested per path, so no route (a content finding, a
+ * notice, a path git listed differently) can print it raw.
+ */
+function makeDisplay(target, denylist) {
+  const hits = new Map();
+  const denylistHits = (path) => {
+    if (!hits.has(path)) {
+      hits.set(
+        path,
+        detectPii(path, { path, denylist: denylist.entries }).filter((f) => f.rule === 'denylist'),
+      );
     }
-  }
+    return hits.get(path);
+  };
+  return {
+    denylistHits,
+    isRedacted: (path) => denylistHits(path).length > 0,
+    show: (path) =>
+      `${target.prefix ?? ''}${denylistHits(path).length > 0 ? redactPath(path) : path}`,
+  };
+}
 
-  for (const path of target.paths) {
-    if (path.split('/').pop() !== DENYLIST_FILE) continue;
+function scan(target, denylist, display) {
+  const findings = [];
+  // The path goes last: a path hit carries the unredacted path and its own offsets.
+  const pathFinding = (path, { rule, detail, severity, length = 0 }) =>
     findings.push({
-      rule: 'denylist-file',
-      detail: `${DENYLIST_FILE} is tracked or staged — it is PII itself and must stay gitignored (git rm --cached ${DENYLIST_FILE})`,
-      severity: 'error',
-      path: display(path, target.prefix),
+      rule,
+      detail,
+      severity,
+      length,
+      path: display.show(path),
       line: null,
       column: null,
-      length: 0,
       inRepoFile: false,
+    });
+
+  const paths = [
+    ...new Set([
+      ...target.paths,
+      ...target.units.filter((u) => u.inRepoFile).map((u) => u.path),
+      ...(target.skipped ?? []),
+    ]),
+  ];
+  for (const path of paths) {
+    for (const hit of display.denylistHits(path)) {
+      pathFinding(path, { ...hit, detail: `${hit.detail} in a file path` });
+    }
+  }
+  for (const path of paths) {
+    if (!isDenylistCopyName(path)) continue;
+    pathFinding(path, {
+      rule: 'denylist-file',
+      detail: `the denylist or a copy of it is tracked or staged — it is PII itself and must stay out of git (git rm --cached <file>; ${DENYLIST_FILE} copies are gitignored as *pii-denylist*)`,
+      severity: 'error',
     });
   }
 
@@ -417,8 +567,8 @@ function scan(target, denylist) {
     for (const f of hits) {
       findings.push({
         ...f,
-        path: display(unit.path, target.prefix),
-        inRepoFile: unit.inRepoFile && !redacted.has(unit.path),
+        path: display.show(unit.path),
+        inRepoFile: unit.inRepoFile && !display.isRedacted(unit.path),
       });
     }
   }
@@ -432,7 +582,7 @@ function scan(target, denylist) {
  * Loud, actionable notices: a scan that silently skipped the denylist would
  * look exactly like a clean one (the fail-loud convention in CLAUDE.md).
  */
-function collectNotices(target, denylist, { github }) {
+function collectNotices(target, denylist, display, { github }) {
   const notices = [];
   if (denylist.sources.length === 0) {
     notices.push({
@@ -451,13 +601,23 @@ function collectNotices(target, denylist, { github }) {
       text: `Skipped invalid denylist entries: ${where}. Fix those lines — they are not being checked.`,
     });
   }
+  const skipped = target.skipped ?? [];
+  if (skipped.length > 0) {
+    const shown = skipped.slice(0, 20).map((p) => display.show(p));
+    const more = skipped.length > shown.length ? ` and ${skipped.length - shown.length} more` : '';
+    const count =
+      skipped.length === 1 ? '1 binary file was' : `${skipped.length} binary files were`;
+    notices.push({
+      title: 'PII scan: binary files not scanned',
+      text: `${count} not scanned for personal data (not UTF-8/UTF-16 text, or over 5 MB): ${shown.join(', ')}${more}. Spreadsheets, documents, PDFs, archives and images can hold client data this gate cannot read — open each one and confirm it has none.`,
+    });
+  }
   if (target.warning) notices.push({ title: 'PII scan range', text: target.warning });
   return notices;
 }
 
-function report({ target, findings, denylist, opts }) {
+function report({ target, findings, notices, denylist, opts }) {
   const failing = findings.filter((f) => isFailing(f, opts.failOn));
-  const notices = collectNotices(target, denylist, opts);
   const label = opts.label ?? target.label;
   const log = opts.json
     ? (line) => process.stderr.write(`${line}\n`)
@@ -546,15 +706,20 @@ function mainCheckoutRoot() {
 }
 
 function selectTarget(opts) {
-  const chosen = [opts.range, opts.githubEvent || null, opts.tree, opts.records].filter(Boolean);
+  const chosen = [
+    opts.range,
+    opts.githubEvent || null,
+    opts.tree,
+    opts.records,
+    opts.messageFile,
+  ].filter(Boolean);
   if (chosen.length > 1) {
-    throw new UsageError('Pick one of --range, --github-event, --tree, --records.');
+    throw new UsageError('Pick one of --range, --github-event, --tree, --records, --message-file.');
   }
   if (opts.tree) return treeTarget(opts.tree, opts.label ?? basename(opts.tree));
   if (opts.records) return recordsTarget(opts.records, opts.label ?? basename(opts.records));
-  if (opts.githubEvent) {
-    return rangeTarget(githubEventRange(), `${process.env.GITHUB_EVENT_NAME} changes`);
-  }
+  if (opts.messageFile) return messageFileTarget(opts.messageFile);
+  if (opts.githubEvent) return githubEventTarget();
   if (opts.range) {
     let range;
     try {
@@ -581,8 +746,10 @@ function main() {
             readFile: readIfExists,
           }),
         };
-    const findings = scan(target, denylist);
-    return report({ target, findings, denylist, opts });
+    const display = makeDisplay(target, denylist);
+    const findings = scan(target, denylist, display);
+    const notices = collectNotices(target, denylist, display, opts);
+    return report({ target, findings, notices, denylist, opts });
   } catch (err) {
     if (err instanceof UsageError) {
       const msg = `check-pii: ${err.message}`;

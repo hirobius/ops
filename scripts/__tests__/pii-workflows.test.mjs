@@ -10,6 +10,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { stripYamlComments } from '../lib/yaml-comments.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -19,8 +20,10 @@ const load = (name) =>
 describe('pii-scan workflow (every PR and push to main)', () => {
   const workflow = load('pii-scan.yml');
 
-  it('runs on pull requests and pushes to main with full history and read-only contents', () => {
-    expect(workflow).toMatch(/^\s*pull_request:/m);
+  it('runs on pull requests (including title/body edits) and pushes to main with full history and read-only contents', () => {
+    expect(workflow).toMatch(
+      /^\s*pull_request:\s*\n\s*types:\s*\[opened, synchronize, reopened, edited\]/m,
+    );
     expect(workflow).toMatch(/^\s*push:\s*\n\s*branches:\s*\[main\]/m);
     expect(workflow).toMatch(/fetch-depth:\s*0/);
     expect(workflow).toMatch(/persist-credentials:\s*false/);
@@ -31,6 +34,47 @@ describe('pii-scan workflow (every PR and push to main)', () => {
     expect(workflow).toMatch(/node scripts\/check-pii\.mjs --github-event --github/);
     expect(workflow).toMatch(/PII_DENYLIST:\s*\$\{\{\s*secrets\.PII_DENYLIST\s*\}\}/);
     expect(workflow).not.toMatch(/continue-on-error/);
+  });
+
+  // GitHub keeps one PENDING run per concurrency group and cancels it when a
+  // newer one queues, whatever cancel-in-progress says. A push run scans only
+  // its own before...after, so each push needs a group of its own.
+  it('gives every push to main its own concurrency group, so no push range is dropped', () => {
+    expect(workflow).toMatch(
+      /group:\s*pii-scan-\$\{\{\s*github\.event_name == 'push' && github\.sha \|\| github\.ref\s*\}\}/,
+    );
+    expect(workflow).toMatch(
+      /cancel-in-progress:\s*\$\{\{\s*github\.event_name == 'pull_request'\s*\}\}/,
+    );
+  });
+});
+
+describe('local hooks and ignores for the PII gate', () => {
+  // GIT_* stripped: this suite runs inside git hooks, whose GIT_DIR must not
+  // redirect the query (read-only here, but the rule has no exceptions).
+  const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !/^GIT_/i.test(k)));
+  const ignored = (path) =>
+    spawnSync('git', ['check-ignore', '-q', '--no-index', path], { cwd: ROOT, env }).status === 0;
+
+  it('scans the commit message in .husky/commit-msg and stops the commit on a hit', () => {
+    const hook = readFileSync(join(ROOT, '.husky', 'commit-msg'), 'utf8');
+    expect(hook).toMatch(/^node scripts\/pii-commit-msg\.mjs "\$1" \|\| exit 1$/m);
+  });
+
+  it('gitignores the denylist and its likely copies, but not the gate source and tests', () => {
+    for (const path of [
+      '.pii-denylist',
+      '.pii-denylist~',
+      '.pii-denylist.bak',
+      'pii-denylist.txt',
+      'backup/pii_denylist.md',
+      'pii-deny-list.txt',
+    ]) {
+      expect(ignored(path), path).toBe(true);
+    }
+    for (const path of ['scripts/__tests__/pii-denylist.test.mjs', 'lib/pii/denylist.mjs']) {
+      expect(ignored(path), path).toBe(false);
+    }
   });
 });
 

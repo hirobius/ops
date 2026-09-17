@@ -349,7 +349,77 @@ describe('check-pii — staged changes (pre-commit)', { timeout: GIT_TEST_TIMEOU
 
     const result = runCli(repo.dir);
     expect(result.status).toBe(1);
-    expect(result.stdout).toMatch(/\.pii-denylist is tracked or staged/);
+    expect(result.stdout).toMatch(/\.pii-denylist\s+denylist-file: the denylist or a copy of it/);
+  });
+
+  it('blocks copies of the denylist under other names, and lines that repeat its patterns', () => {
+    const repo = scratchRepo();
+    repo.write('.pii-denylist~', 'jane\\s+example\n');
+    repo.write('backup/pii-denylist.txt', '# list\n');
+    repo.write('notes.md', 'old list:\njane\\s+example\n');
+    repo.git('add', '.pii-denylist~', 'backup/pii-denylist.txt', 'notes.md');
+
+    const result = runCli(repo.dir, [], { PII_DENYLIST: 'jane\\s+example' });
+    expect(result.status).toBe(1);
+    expect(result.stdout).toMatch(/\.pii-denylist~\s+denylist-file/);
+    expect(result.stdout).toMatch(/backup\/pii-denylist\.txt\s+denylist-file/);
+    expect(result.stdout).toMatch(
+      /notes\.md:2:1\s+denylist-file: line is the pattern of denylist entry 1/,
+    );
+  });
+
+  it("does not treat the gate's own denylist test file as a copy of the list", () => {
+    const repo = scratchRepo();
+    repo.write('scripts/__tests__/pii-denylist.test.mjs', 'it("parses", () => {});\n');
+    repo.git('add', 'scripts/__tests__/pii-denylist.test.mjs');
+
+    const result = runCli(repo.dir, [], { PII_DENYLIST: 'jane\\s+example' });
+    expect(result.status, result.stdout).toBe(0);
+  });
+
+  it('redacts a denylisted path that contains a space in every output, content findings included', () => {
+    const repo = scratchRepo();
+    repo.write('clients/Jane Example notes.md', 'Reach jane.example@fictional-client.biz\n');
+    repo.git('add', 'clients');
+    const env = { PII_DENYLIST: 'jane.example' };
+
+    const plain = runCli(repo.dir, [], env);
+    expect(plain.status).toBe(1);
+    expect(plain.stdout).toMatch(/in a file path/);
+    expect(plain.stdout).toMatch(
+      /\[path redacted: matches the denylist, sha256 [0-9a-f]{12}\]:1:7\s+denylist entry 1/,
+    );
+
+    const json = runCli(repo.dir, ['--json'], env);
+    expect(JSON.parse(json.stdout).violations.map((v) => v.file)).toEqual([
+      expect.stringMatching(/^\[path redacted/),
+      expect.stringMatching(/^\[path redacted/),
+      expect.stringMatching(/^\[path redacted/),
+    ]);
+
+    const github = runCli(repo.dir, ['--github'], env);
+    expect(github.stdout).not.toMatch(/::(error|warning) file=/);
+
+    for (const result of [plain, json, github]) {
+      expect(result.stdout + result.stderr).not.toMatch(/jane|example notes|fictional/i);
+    }
+  });
+
+  it('checks and redacts the path of a file whose type changed (symlink to regular file)', () => {
+    const repo = scratchRepo();
+    repo.write('link-target.txt', 'elsewhere');
+    const linkBlob = repo.git('hash-object', '-w', 'link-target.txt');
+    repo.git('update-index', '--add', '--cacheinfo', `120000,${linkBlob},clients/Jane Example`);
+    repo.git('commit', '-q', '-m', 'link');
+    repo.write('file.txt', 'Invoice for Jane Example\n');
+    const fileBlob = repo.git('hash-object', '-w', 'file.txt');
+    repo.git('update-index', '--cacheinfo', `100644,${fileBlob},clients/Jane Example`);
+
+    const result = runCli(repo.dir, [], { PII_DENYLIST: 'jane\\s+example' });
+    expect(result.status).toBe(1);
+    expect(result.stdout).toMatch(/denylist entry 1 \(PII_DENYLIST\) in a file path/);
+    expect(result.stdout).toMatch(/\[path redacted[^\]]*\]:1:13/);
+    expect(result.stdout).not.toMatch(/jane/i);
   });
 
   it('emits the gate-output JSON contract with no values in it', () => {
@@ -373,3 +443,221 @@ describe('check-pii — staged changes (pre-commit)', { timeout: GIT_TEST_TIMEOU
     expect(result.stdout).not.toMatch(/drive\.google|SYNTHETIC/);
   });
 });
+
+describe('check-pii — content git treats as binary', { timeout: GIT_TEST_TIMEOUT_MS }, () => {
+  const utf16le = (text) =>
+    Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(text, 'utf16le')]);
+
+  it('decodes and scans a staged UTF-16 file', () => {
+    const repo = scratchRepo();
+    writeFileSync(
+      join(repo.dir, 'leads.csv'),
+      utf16le('name,email\r\nJane Example,jane@fictional-client.biz\r\n'),
+    );
+    repo.git('add', 'leads.csv');
+
+    const result = runCli(repo.dir, [], { PII_DENYLIST: 'jane\\s+example' });
+    expect(result.status).toBe(1);
+    expect(result.stdout).toMatch(/leads\.csv:2:1\s+denylist entry 1/);
+    expect(result.stdout).toMatch(/warn\s+leads\.csv:2:14\s+email/);
+  });
+
+  it('in a changed UTF-16 file, scans only the lines the change adds', () => {
+    const repo = scratchRepo();
+    writeFileSync(join(repo.dir, 'leads.csv'), utf16le('name\r\nJane Example\r\n'));
+    repo.git('add', 'leads.csv');
+    repo.git('commit', '-q', '-m', 'base');
+    writeFileSync(
+      join(repo.dir, 'leads.csv'),
+      utf16le('name\r\nJane Example\r\nExample Client Co\r\n'),
+    );
+    repo.git('add', 'leads.csv');
+
+    const result = runCli(repo.dir, [], { PII_DENYLIST: 'jane\\s+example\nexample client co' });
+    expect(result.status).toBe(1);
+    expect(result.stdout).toMatch(/leads\.csv:3:1\s+denylist entry 2/);
+    expect(result.stdout).not.toMatch(/leads\.csv:2:1/);
+  });
+
+  it('scans text files that .gitattributes marks -diff or binary, staged and as a range', () => {
+    const repo = scratchRepo();
+    repo.write('README.md', 'base\n');
+    repo.git('add', 'README.md');
+    repo.git('commit', '-q', '-m', 'base');
+    const base = repo.git('rev-parse', 'HEAD');
+    repo.write('.gitattributes', '*.txt -diff\n*.dat binary\n');
+    repo.write(
+      'notes.txt',
+      'Met Jane Example.\nhttps://docs.google.com/document/d/SYNTHETIC/edit\n',
+    );
+    repo.write('export.dat', 'Jane Example\n');
+    repo.git('add', '.gitattributes', 'notes.txt', 'export.dat');
+    const env = { PII_DENYLIST: 'jane\\s+example' };
+
+    const staged = runCli(repo.dir, [], env);
+    expect(staged.status).toBe(1);
+    expect(staged.stdout).toMatch(/notes\.txt:1:5\s+denylist entry 1/);
+    expect(staged.stdout).toMatch(/notes\.txt:2:1\s+private-url/);
+    expect(staged.stdout).toMatch(/export\.dat:1:1\s+denylist entry 1/);
+
+    repo.git('commit', '-q', '-m', 'notes');
+    const range = runCli(repo.dir, ['--range', `${base}..HEAD`], env);
+    expect(range.status).toBe(1);
+    expect(range.stdout).toMatch(/notes\.txt:1:5\s+denylist entry 1/);
+    expect(range.stdout).toMatch(/export\.dat:1:1\s+denylist entry 1/);
+  });
+
+  it('names an added binary file it cannot read as text, without failing for it', () => {
+    const repo = scratchRepo();
+    writeFileSync(
+      join(repo.dir, 'contacts.xlsx'),
+      Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x14, 0, 0, 0, 0x08, 0, 0x99, 0x88]),
+    );
+    repo.git('add', 'contacts.xlsx');
+
+    const result = runCli(repo.dir, [], { PII_DENYLIST: 'jane\\s+example' });
+    expect(result.status).toBe(0);
+    expect(result.stdout).toMatch(/1 binary file was not scanned[^\n]*contacts\.xlsx/);
+  });
+
+  it('decodes UTF-16 files in a tree scan', () => {
+    const repo = scratchRepo();
+    writeFileSync(
+      join(repo.dir, 'export.txt'),
+      utf16le('https://drive.google.com/drive/folders/SYNTHETIC\r\n'),
+    );
+    repo.git('add', 'export.txt');
+    repo.git('commit', '-q', '-m', 'tip');
+
+    const result = runCli(repo.dir, ['--tree', repo.dir, '--label', 'kit']);
+    expect(result.status).toBe(1);
+    expect(result.stdout).toMatch(/kit:export\.txt:1:1\s+private-url/);
+  });
+});
+
+describe(
+  'check-pii — commit messages and pull request text',
+  { timeout: GIT_TEST_TIMEOUT_MS },
+  () => {
+    it('scans a commit message file, skipping git comment lines and the verbose diff below the scissors', () => {
+      const repo = scratchRepo();
+      const message = join(repo.dir, '.git', 'COMMIT_EDITMSG');
+      writeFileSync(
+        message,
+        [
+          'docs: notes',
+          '',
+          'See https://docs.google.com/document/d/SYNTHETIC/edit',
+          '# Please enter the commit message. Changes: clients/Jane Example.md',
+          '# ------------------------ >8 ------------------------',
+          '+Jane Example',
+          '',
+        ].join('\n'),
+      );
+
+      const result = runCli(repo.dir, ['--message-file', message], {
+        PII_DENYLIST: 'jane\\s+example',
+      });
+      expect(result.status).toBe(1);
+      expect(result.stdout).toMatch(/commit message:3:5\s+private-url/);
+      expect(result.stdout).not.toMatch(/denylist entry/);
+    });
+
+    it('blocks a denylisted name in a commit message and passes a clean one', () => {
+      const repo = scratchRepo();
+      const message = join(repo.dir, 'msg.txt');
+      const env = { PII_DENYLIST: 'jane\\s+example' };
+      writeFileSync(message, 'feat: site for Jane Example\n');
+      expect(runCli(repo.dir, ['--message-file', message], env).status).toBe(1);
+      writeFileSync(message, 'feat: site for a client\n');
+      expect(runCli(repo.dir, ['--message-file', message], env).status).toBe(0);
+    });
+
+    it('scans the pull request title, body and branch name from the event payload', () => {
+      const repo = scratchRepo();
+      repo.write('README.md', 'base\n');
+      repo.git('add', 'README.md');
+      repo.git('commit', '-q', '-m', 'base');
+      const base = repo.git('rev-parse', 'HEAD');
+      repo.write('README.md', 'base\nmore\n');
+      repo.git('add', 'README.md');
+      repo.git('commit', '-q', '-m', 'docs: more');
+      const head = repo.git('rev-parse', 'HEAD');
+      const eventPath = join(repo.dir, 'event.json');
+      writeFileSync(
+        eventPath,
+        JSON.stringify({
+          action: 'edited',
+          pull_request: {
+            base: { sha: base },
+            head: { sha: head, ref: 'jane-example-site' },
+            title: 'Site for Jane Example',
+            body: 'Brief: https://docs.google.com/document/d/SYNTHETIC/edit',
+          },
+        }),
+      );
+
+      const result = runCli(repo.dir, ['--github-event'], {
+        GITHUB_EVENT_NAME: 'pull_request',
+        GITHUB_EVENT_PATH: eventPath,
+        PII_DENYLIST: 'jane\\s+example',
+      });
+      expect(result.status).toBe(1);
+      expect(result.stdout).toMatch(/pull request title:1:10\s+denylist entry 1/);
+      expect(result.stdout).toMatch(/pull request body:1:8\s+private-url/);
+      expect(result.stdout).toMatch(/pull request branch name:1:1\s+denylist entry 1/);
+      expect(result.stdout).not.toMatch(/jane|docs\.google/i);
+    });
+  },
+);
+
+describe(
+  'check-pii — nothing staged (the post-commit re-run)',
+  { timeout: GIT_TEST_TIMEOUT_MS },
+  () => {
+    it('scans the last commit, content and message, so a --no-verify commit is still caught', () => {
+      const repo = scratchRepo();
+      repo.write('a.md', 'base\n');
+      repo.git('add', 'a.md');
+      repo.git('commit', '-q', '-m', 'base');
+      repo.write('a.md', 'base\nJane Example\n');
+      repo.git('add', 'a.md');
+      repo.git('commit', '-q', '--no-verify', '-m', 'notes for Jane Example');
+      const head = repo.git('rev-parse', 'HEAD');
+
+      const result = runCli(repo.dir, [], { PII_DENYLIST: 'jane\\s+example' });
+      expect(result.status).toBe(1);
+      expect(result.stdout).toMatch(/last commit/);
+      expect(result.stdout).toMatch(/a\.md:2:1\s+denylist entry 1/);
+      expect(result.stdout).toContain(`commit ${head.slice(0, 12)} message:1:11`);
+    });
+
+    it('after a merge commit, scans only what the merge added against every parent', () => {
+      const repo = scratchRepo();
+      repo.write('base.md', 'base\n');
+      repo.git('add', 'base.md');
+      repo.git('commit', '-q', '-m', 'base');
+      repo.git('branch', '-M', 'main');
+      repo.git('checkout', '-q', '-b', 'feature');
+      repo.write('feature.md', 'feature work\n');
+      repo.git('add', 'feature.md');
+      repo.git('commit', '-q', '-m', 'feature');
+      repo.git('checkout', '-q', 'main');
+      repo.write('main.md', 'Example Client Co onboarding\n');
+      repo.git('add', 'main.md');
+      repo.git('commit', '-q', '-m', 'main change');
+      repo.git('checkout', '-q', 'feature');
+      repo.git('merge', '-q', '--no-ff', '-m', 'merge main', 'main');
+
+      const result = runCli(repo.dir, [], { PII_DENYLIST: 'example client co' });
+      expect(result.status, result.stdout).toBe(0);
+      expect(result.stdout).toMatch(/last commit/);
+    });
+
+    it('finds nothing to scan in a repository with no commits and nothing staged', () => {
+      const repo = scratchRepo();
+      const result = runCli(repo.dir, [], { PII_DENYLIST: 'jane\\s+example' });
+      expect(result.status, result.stderr).toBe(0);
+    });
+  },
+);

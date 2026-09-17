@@ -4,7 +4,11 @@
  * synthetic.
  */
 import { describe, it, expect } from 'vitest';
-import { fetchRecentText } from '../../lib/pii/github-text.mjs';
+import {
+  commitMessageText,
+  fetchRecentText,
+  pullRequestEventText,
+} from '../../lib/pii/github-text.mjs';
 
 function fakeGitHub(routes) {
   const calls = [];
@@ -67,5 +71,45 @@ describe('fetchRecentText', () => {
     await expect(
       fetchRecentText({ repo: 'hirobius/ops', since: SINCE, token: 'bad', fetchImpl }),
     ).rejects.toThrow(/GITHUB_TOKEN.*401.*issues: read.*pull-requests: read/);
+  });
+});
+
+describe('pullRequestEventText', () => {
+  it('returns the title, body and head branch name of a pull_request event', () => {
+    expect(
+      pullRequestEventText('pull_request', {
+        pull_request: { title: 'Site for a client', body: 'Details', head: { ref: 'client-site' } },
+      }),
+    ).toEqual([
+      { location: 'pull request title', text: 'Site for a client' },
+      { location: 'pull request body', text: 'Details' },
+      { location: 'pull request branch name', text: 'client-site' },
+    ]);
+  });
+
+  it('skips an empty body and returns nothing for other events', () => {
+    expect(
+      pullRequestEventText('pull_request', { pull_request: { title: 'T', body: null, head: {} } }),
+    ).toEqual([{ location: 'pull request title', text: 'T' }]);
+    expect(pullRequestEventText('push', { pull_request: { title: 'T' } })).toEqual([]);
+  });
+});
+
+describe('commitMessageText', () => {
+  it('blanks comment lines (keeping line numbers) and drops everything from the scissors line down', () => {
+    const raw = [
+      'subject',
+      '# comment',
+      'body',
+      '# ------------------------ >8 ------------------------',
+      '+diff',
+    ].join('\n');
+    expect(commitMessageText(raw)).toBe('subject\n\nbody');
+  });
+
+  it('honours a custom comment character', () => {
+    expect(commitMessageText('subject\n; note\n# kept', { commentChar: ';' })).toBe(
+      'subject\n\n# kept',
+    );
   });
 });

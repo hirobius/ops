@@ -198,3 +198,103 @@ describe('detectPii — paths exempt from the generic patterns', () => {
     expect(rules).toEqual(['private-url', 'email']);
   });
 });
+
+// The forms a name takes in code, URLs, JSON and HTML. Written with escapes so
+// no invisible character sits in this file.
+describe('detectPii — denylist terms in encoded or reformatted text', () => {
+  const entries = parseDenylist(
+    'jane\\s+example\n@example-client\\.com\njos\u00e9\\s+example\n',
+  ).entries;
+  const hits = (text) =>
+    detectPii(text, { path: 'x.md', denylist: entries }).filter((f) => f.rule === 'denylist');
+
+  const forms = {
+    'a path slug': 'clients/jane-example/brief.md',
+    'a snake_case name': 'const jane_example = 1;',
+    'a camelCase name': 'function sendJaneExampleInvoice() {}',
+    'a dotted name': 'jane.example.test.ts',
+    'a map URL with plus-joined words': 'https://www.google.com/maps/place/Jane+Example+Studio',
+    'a percent-encoded space': 'q=Jane%20Example',
+    'a percent-encoded mailbox': 'mailto:jane%40example-client.com',
+    'an HTML non-breaking space entity': 'Jane&nbsp;Example',
+    'a JSON-escaped newline': '{"name": "Jane\\nExample"}',
+    'a JSON unicode escape': '{"name": "Jane\\u0020Example"}',
+    'an ASCII-escaped accent (Python json ensure_ascii)': '{"name": "Jos\\u00e9 Example"}',
+    'an HTML accent entity': 'Jos&eacute; Example',
+    'a decomposed accent (NFD)': 'Jose\u0301 Example',
+    'the name without its accent': 'Jose Example',
+    'a zero-width space inside the name': 'Ja\u200bne Example',
+    'a soft hyphen inside the name': 'Jane Ex\u00adample',
+    'a non-breaking space': 'Jane\u00a0Example',
+    'a fullwidth letter (NFKC)': '\uff2aane Example',
+    'a // comment wrapped across lines': '// Call Jane\n// Example tomorrow',
+    'a JSDoc comment wrapped across lines': '/**\n * Owner: Jane\n * Example\n */',
+    'a # comment wrapped across lines': '# Jane\n#   Example',
+    'a quoted reply wrapped across lines': '> Jane\n> Example wrote:',
+  };
+
+  for (const [form, text] of Object.entries(forms)) {
+    it(`catches ${form}`, () => {
+      expect(hits(text), JSON.stringify(text)).toHaveLength(1);
+    });
+  }
+
+  it('reports the line, column and length of the text as written', () => {
+    expect(hits('line one\nsee Jane%20Example here')).toEqual([
+      expect.objectContaining({ line: 2, column: 5, length: 14 }),
+    ]);
+    expect(hits('x\n// Jane\n// Example')).toEqual([
+      expect.objectContaining({ line: 2, column: 4, length: 15 }),
+    ]);
+  });
+
+  it('reports a plain match once, not once per normalized form', () => {
+    expect(hits('Jane Example')).toHaveLength(1);
+    expect(hits('Jane Example and jane-example')).toHaveLength(2);
+  });
+
+  it('does not join words that are not the name', () => {
+    expect(hits('Janet Example, janeexample, Jane Examinations')).toEqual([]);
+  });
+
+  it('catches private workspace links written JSON-escaped or percent-encoded', () => {
+    const urls = (text) =>
+      detectPii(text, { path: 'x.json' })
+        .filter((f) => f.rule === 'private-url')
+        .map((f) => [f.column, f.length]);
+    // Column and length of the escaped URL as written, up to the closing quote.
+    expect(urls('{"u":"https:\\/\\/docs.google.com\\/document\\/d\\/SYNTHETIC\\/edit"}')).toEqual([
+      [7, 55],
+    ]);
+    expect(
+      urls('https://www.google.com/url?q=https%3A%2F%2Fdocs.google.com%2Fdocument%2Fd%2FSYNTHETIC'),
+    ).toHaveLength(1);
+    expect(urls('https://docs.google.com/document/d/SYNTHETIC')).toHaveLength(1);
+  });
+});
+
+describe('detectPii — copies of the denylist', () => {
+  const entries = parseDenylist(
+    'jane\\s+example\n@example-client\\.com\nexample client co\n',
+  ).entries;
+
+  it("flags a line that is an entry's pattern text, which the pattern itself cannot match", () => {
+    const findings = detectPii('# backup\n  jane\\s+example\n@EXAMPLE-CLIENT\\.com\n', {
+      path: 'notes/list.txt',
+      denylist: entries,
+    });
+    expect(findings).toEqual([
+      expect.objectContaining({ rule: 'denylist-file', line: 2, column: 3, length: 14 }),
+      expect.objectContaining({ rule: 'denylist-file', line: 3, column: 1, length: 20 }),
+    ]);
+    expect(findings.every((f) => f.severity === 'error')).toBe(true);
+    expect(JSON.stringify(findings)).not.toMatch(/jane|client/i);
+  });
+
+  it('leaves a literal entry to the ordinary denylist rule', () => {
+    const rules = detectPii('example client co\n', { path: 'a.md', denylist: entries }).map(
+      (f) => f.rule,
+    );
+    expect(rules).toEqual(['denylist']);
+  });
+});
