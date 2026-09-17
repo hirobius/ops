@@ -26,54 +26,15 @@ import type {
   ClientFiles,
   ClientMeta,
   ClientTasksFile,
-  ClientChecklistFile,
-  ClientRetainerFile,
-  ClientGoalsFile,
   ClientAutomationConfig,
-  ClientWorkflowConfig,
   ClientWorkflow,
 } from './clientTypes';
-import { buildClientRegistry } from './clientRegistry';
 
-// ── Manifest-driven registry (same shape as ClientDashboardPage) ──────────────
-// The glob() calls stay here (Vite statically analyses them at build time); the
-// assembly loop is shared via buildClientRegistry.
-
-const _metas = import.meta.glob<{ default: ClientMeta }>('../../../../clients/*/meta.json', {
-  eager: true,
-});
-const _tasks = import.meta.glob<{ default: ClientTasksFile }>('../../../../clients/*/tasks.json', {
-  eager: true,
-});
-const _checks = import.meta.glob<{ default: ClientChecklistFile }>(
-  '../../../../clients/*/checklist.json',
-  { eager: true },
-);
-const _retains = import.meta.glob<{ default: ClientRetainerFile }>(
-  '../../../../clients/*/retainer.json',
-  { eager: true },
-);
-const _goals = import.meta.glob<{ default: ClientGoalsFile }>('../../../../clients/*/goals.json', {
-  eager: true,
-});
-const _autoCfgs = import.meta.glob<{ default: ClientAutomationConfig }>(
-  '../../../../clients/*/automation-config.json',
-  { eager: true },
-);
-const _workflows = import.meta.glob<{ default: ClientWorkflowConfig }>(
-  '../../../../clients/*/automations/*/config.json',
-  { eager: true },
-);
-
-const REGISTRY = buildClientRegistry({
-  metas: _metas,
-  tasks: _tasks,
-  checks: _checks,
-  retains: _retains,
-  goals: _goals,
-  autoCfgs: _autoCfgs,
-  workflows: _workflows,
-});
+// ── Client registry (same source as ClientDashboardPage) ──────────────────────
+// Records come from the private client store via GET /api/clients — never from
+// files in this public repo.
+import { useClientRegistry } from './clientRegistry';
+import { ClientStoreStatus, hasClients } from './ClientStoreNotice';
 
 // ── Plain-language translation ────────────────────────────────────────────────
 // Status tone + client-facing labels live in the shared statusPresentation module.
@@ -104,12 +65,17 @@ const WORKFLOW_BLURB: Record<string, string> = {
 
 export default function ClientReportPage() {
   const { slug } = useParams<{ slug: string }>();
-  const data = REGISTRY[slug ?? ''];
+  const clientStore = useClientRegistry();
+  const data = clientStore.registry?.[slug ?? ''];
 
   if (!data) {
     return (
       <Page maxWidth="content">
-        <EmptyState title={`No report found for ${slug ?? ''}`} />
+        {hasClients(clientStore) ? (
+          <EmptyState title={`No report found for ${slug ?? ''}`} />
+        ) : (
+          <ClientStoreStatus state={clientStore} />
+        )}
       </Page>
     );
   }
@@ -122,7 +88,7 @@ export default function ClientReportPage() {
 
   const activePhase = pickActivePhase(data.tasks);
   const blockers = pickClientBlockers(data);
-  const inFlight = pickInFlight(activePhase);
+  const inFlight = pickInFlight(data.tasks, activePhase);
 
   return (
     <Page>
@@ -372,14 +338,12 @@ interface InFlightItem {
   notes?: string;
 }
 
-function pickInFlight(phase?: ClientPhaseLite): InFlightItem[] {
-  // Pull task list out of REGISTRY again for the active phase id.
+function pickInFlight(tasks: ClientTasksFile | undefined, phase?: ClientPhaseLite): InFlightItem[] {
+  // Read the active phase from THIS client's tasks. (It used to search every
+  // client in the registry for the phase id — ids like `phase-1` repeat across
+  // clients, so a report could list another client's tasks.)
   if (!phase) return [];
-  const slug = Object.keys(REGISTRY).find((s) =>
-    (REGISTRY[s].tasks?.phases ?? []).some((p) => p.id === phase.id),
-  );
-  if (!slug) return [];
-  const p = (REGISTRY[slug].tasks?.phases ?? []).find((p) => p.id === phase.id);
+  const p = (tasks?.phases ?? []).find((p) => p.id === phase.id);
   if (!p) return [];
   const all = (p.swimlanes ?? []).flatMap((b) => b.tasks ?? []).concat(p.tasks ?? []);
   return all

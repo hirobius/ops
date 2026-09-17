@@ -1,35 +1,52 @@
 # Client template
 
+Client records are business-confidential and often carry PII, so they **never
+live in this public repo**. The `/ops` client surfaces read them from the private
+Supabase `client_records` table (migration `0015_client_records.sql`) via
+`GET /api/clients`. This folder is the only committed example, and every value
+in it is a `<<placeholder>>`.
+
 When onboarding a new client:
 
 ```bash
-cp -r clients/_template clients/<new-slug>
+cp -r clients/_template clients/<new-slug>   # gitignored — stays on your machine
 ```
 
-Then walk the files below and replace every `<<placeholder>>` with real
-values. Files marked **(optional)** can be skipped initially — leave them
-as-is or delete them; the `/ops` dashboard handles missing files gracefully.
+Walk the files below and replace every `<<placeholder>>` with real values, then
+load the folder into the private store:
 
-The `_template/` folder itself is **excluded from the `/ops` dashboard**
-because slugs starting with `_` are filtered out by `ClientDashboardPage`'s
-manifest registry. Don't rename it.
+```bash
+node --env-file=.env.local scripts/import-client-records.mjs          # dry run
+node --env-file=.env.local scripts/import-client-records.mjs --apply  # write
+```
+
+The import is idempotent (re-running only writes new or changed clients) and
+never deletes. Files marked **(optional)** can be skipped — the `/ops` pages
+handle missing files gracefully.
+
+The `_template/` folder itself is **never imported and never shown**: slugs
+starting with `_` are scaffolding. Don't rename it. Slugs must be lowercase
+kebab-case; use a pseudonymous slug (e.g. `client-alpha`) anywhere a slug could
+end up in code, tests, docs, issues or PRs.
 
 ## Files
 
-| File | Required? | Edit before launch |
-|------|-----------|-------------------|
-| `meta.json` | yes | identity, contact, scale, status |
-| `tasks.json` | (optional) | starts empty; add phases as you scope |
-| `checklist.json` | (optional) | access / security / payments gates |
-| `retainer.json` | yes if billing | scope, currency, blockers |
-| `goals.json` | (optional) | micro / macro outcomes |
-| `automation-config.json` | yes if shipping automations | mode + recipients + system env keys + LLM provider |
-| `automations/` | (optional) | per-workflow folders, mirror Lilac's pattern |
+| File                           | Required?                   | Edit before launch                                 |
+| ------------------------------ | --------------------------- | -------------------------------------------------- |
+| `meta.json`                    | yes                         | identity, contact, scale, status                   |
+| `tasks.json`                   | (optional)                  | starts empty; add phases as you scope              |
+| `checklist.json`               | (optional)                  | access / security / payments gates                 |
+| `retainer.json`                | yes if billing              | scope, currency, blockers                          |
+| `goals.json`                   | (optional)                  | micro / macro outcomes                             |
+| `status.json`                  | (optional)                  | contact cadence                                    |
+| `automation-config.json`       | yes if shipping automations | mode + recipients + system env keys + LLM provider |
+| `automations/<id>/config.json` | (optional)                  | one folder per workflow                            |
+| `brand-audit.json`             | (optional)                  | touchpoints + quick wins for the brand-audit deck  |
 
 ## What's wired automatically
 
-- `/ops/clients/<new-slug>` route renders without any code change
-- Tasks, checklist, retainer, goals all surface from their JSON files
+- `/ops/clients/<new-slug>` renders without any code change once imported
+- Tasks, checklist, retainer, goals all surface from their record fields
 - `automation-config.json` (if present) shows the Automations panel with
   system readiness + LLM provider + workflows
 
@@ -46,5 +63,5 @@ manifest registry. Don't rename it.
 - **Test mode default** — every `automation-config.json` ships with
   `mode: "test"` and a `testRecipient` you control. Promote to production
   per-workflow, never globally.
-- **No secrets in JSON.** Only env-key *names* live here; values stay in
+- **No secrets in JSON.** Only env-key _names_ live here; values stay in
   `.env.local` (which Hirobius does not touch).

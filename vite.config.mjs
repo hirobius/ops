@@ -15,6 +15,7 @@ import { createResearchFeedMiddleware } from './scripts/research-feed-middleware
 import { createLeadsMiddleware } from './scripts/leads-middleware.mjs';
 import { createTasksMiddleware } from './scripts/tasks-middleware.mjs';
 import { createDigestMiddleware } from './scripts/digest-middleware.mjs';
+import { createClientsMiddleware } from './scripts/clients-middleware.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -137,6 +138,17 @@ export default defineConfig(({ mode }) => {
           const digest = createDigestMiddleware();
           server.middlewares.use('/api/digest-action', digest.action);
           server.middlewares.use('/api/digest', digest.list);
+        },
+      },
+      // Dev-only: client records — GET /api/clients. Client records live in the
+      // private client_records store, not in the repo; mirrors api/clients.ts via
+      // the same lib/clients logic.
+      {
+        name: 'ops-clients-api',
+        apply: 'serve',
+        configureServer(server) {
+          const clients = createClientsMiddleware();
+          server.middlewares.use('/api/clients', clients.list);
         },
       },
       // Dev-only: POST /api/skills/:id — whitelisted skill runner that backs the

@@ -28,8 +28,11 @@ Deployed on Vercel; `main` is production.
   → `lib/agent` (enrich → generate → judge → loop → validated `ClientConfig`) →
   `lib/render` (hand-off to the `hirobius/clients` Astro factory). State in
   Supabase (`lib/leads`, `lib/supabase`).
-- **`/ops/clients` — client CRM.** `clients/<slug>/*.json` rendered as client
-  dashboards / reports / brand audits. (Public client portals moved to
+- **`/ops/clients` — client CRM.** Client records live in the private Supabase
+  `client_records` table (never in this public repo), read via `GET /api/clients`
+  through the `lib/clients/store.mjs` port and rendered as client dashboards /
+  reports / brand audits. Local `clients/<slug>/*.json` (gitignored) is only the
+  import source for `scripts/import-client-records.mjs`. (Public client portals moved to
   `hirobius/portal-kit`; the old in-ops `/c/:slug` portal was removed.)
 - **`/ops/projects`, `/ops/digest`, `/ops` index** — fleet views. Merge
   governance runs through ralph-gate's `ralph-auto`/`ralph-approved` labels on
@@ -84,8 +87,8 @@ pnpm build        # prebuild (ensure-ops-data) → vite build
 src/app/        React dashboard (pages, components, lib)
 api/            Vercel serverless functions (ops-login, tasks, tasks-import, task-action, leads, projects, …)
 lib/            framework-agnostic engine (agent, lead-gen, leads, render, schema, github, supabase, tasks)
-clients/        per-client CRM data (gitignored real clients; _template tracked)
-supabase/       SQL migrations (leads, tasks)
+clients/        local import source for client records (gitignored; only _template tracked)
+supabase/       SQL migrations (leads, tasks, digest, client_records)
 scripts/        gates, generators, dev middleware, ensure-ops-data
 docs/           architecture, ai/handoff, guardrails
 ```

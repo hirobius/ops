@@ -12,18 +12,18 @@
 import React from 'react';
 import { Card, Badge, Stack } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
-import { CLIENT_REGISTRY } from '../clientRegistry';
+import { useClientRegistry } from '../clientRegistry';
+import { ClientStoreStatus, hasClients } from '../ClientStoreNotice';
 
 export default function ClientsTab() {
-  const clients = Object.entries(CLIENT_REGISTRY).sort(([a], [b]) => a.localeCompare(b));
-
-  if (clients.length === 0) {
-    return (
-      <div style={s.empty}>
-        <p style={s.emptyText}>No clients registered.</p>
-      </div>
-    );
+  // Records come from the private client store (GET /api/clients), not the repo.
+  // Loading, unavailable and empty-store states are shared with the client pages.
+  const clientStore = useClientRegistry();
+  if (!clientStore.registry || !hasClients(clientStore)) {
+    return <ClientStoreStatus state={clientStore} />;
   }
+
+  const clients = Object.entries(clientStore.registry).sort(([a], [b]) => a.localeCompare(b));
 
   return (
     <div style={s.grid}>
@@ -104,13 +104,5 @@ const s = {
   } satisfies React.CSSProperties,
   value: {
     color: 'var(--semantic-color-content-primary)',
-  } satisfies React.CSSProperties,
-  empty: {
-    padding: hds.semantic.space.component.padding,
-    textAlign: 'center',
-  } satisfies React.CSSProperties,
-  emptyText: {
-    margin: 0,
-    color: 'var(--semantic-color-content-secondary)',
   } satisfies React.CSSProperties,
 };

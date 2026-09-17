@@ -103,7 +103,9 @@ clients/*/automations/_log.jsonl
 clients/*/inbox-discovery-results/
 
 # Real client workspaces hold PII / business-confidential data — never commit
-# (backed up out-of-band; only the _template scaffold is tracked).
+# (only the _template scaffold is tracked). The /ops UI reads client records from
+# the private client_records store; scripts/import-client-records.mjs loads these
+# local folders into it. Do not add per-client `!clients/<slug>/` exceptions.
 clients/*
 !clients/_template/
 # Outscraper prospecting output — scraped business PII (names/phones/addresses),

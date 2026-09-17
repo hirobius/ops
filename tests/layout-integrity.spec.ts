@@ -22,6 +22,7 @@
 
 import { test, expect } from '@playwright/test';
 import { auditPageLayout } from './helpers/layout-audit';
+import { SYNTHETIC_CLIENTS } from './helpers/synthetic-clients';
 
 const DESKTOP = { width: 1440, height: 900 };
 
@@ -30,7 +31,8 @@ const DESKTOP = { width: 1440, height: 900 };
  * (Adrian, 2026-05-04): no exceptions, even for internal/experimental pages.
  * The lab sketchbook (/vibe-sketchbook/*) is the only exempt surface and is
  * tested separately. Parameterized routes (/ops/clients/:slug) are pinned to
- * known-good fixtures.
+ * known-good fixtures — for clients, the synthetic `client-alpha` record served
+ * by the /api/clients stub below (real client records never live in this repo).
  */
 const ALL_ROUTES = [
   // ── Root + info ─────────────────────────────────────────────────────────────
@@ -51,9 +53,9 @@ const ALL_ROUTES = [
   '/ops/tasks',
   '/ops/projects',
   '/ops/clients',
-  '/ops/clients/lilac-insure',
-  '/ops/clients/lilac-insure/report',
-  '/ops/clients/lilac-insure/brand-audit',
+  '/ops/clients/client-alpha',
+  '/ops/clients/client-alpha/report',
+  '/ops/clients/client-alpha/brand-audit',
   // ── Ops · temporary (deleted with OpsDashboardPage once harvest is finalized) ──
   // Client portal retired 2026-09-16 — /c/:slug removed (portals live in portal-kit).
 ] as const;
@@ -68,6 +70,14 @@ for (const route of ALL_ROUTES) {
       opsMeRoute.fulfill({
         contentType: 'application/json',
         body: JSON.stringify({ authed: true }),
+      }),
+    );
+    // Client surfaces read the private client store via GET /api/clients —
+    // serve synthetic records so the audit exercises fully-populated pages.
+    await page.route('**/api/clients', (clientsRoute) =>
+      clientsRoute.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ clients: SYNTHETIC_CLIENTS }),
       }),
     );
     await page.emulateMedia({ reducedMotion: 'reduce' });

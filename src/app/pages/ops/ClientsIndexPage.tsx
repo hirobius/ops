@@ -14,11 +14,14 @@
  * we're doing for them. A committed "Samples & demos" section (see `demos.ts`)
  * showcases concept builds that aren't clients.
  *
+ * Client records come from the private client store (GET /api/clients via
+ * useClientRegistry) — never from files in this public repo.
+ *
  * @category Internal
  * @tier utility
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router';
 
@@ -32,7 +35,8 @@ import { PageHeader } from './PageHeader';
 import { fetchFleetStatus, type FleetStatus } from './ralphStatus';
 
 import type { ClientFiles } from './clientTypes';
-import { CLIENT_REGISTRY } from './clientRegistry';
+import { useClientRegistry } from './clientRegistry';
+import { ClientStoreStatus } from './ClientStoreNotice';
 import { DEMOS, type DemoBuild } from './demos';
 
 // ── Tone helpers ──────────────────────────────────────────────────────────────
@@ -116,25 +120,41 @@ function deriveCard(slug: string, { meta, tasks, retainer, checklist }: ClientFi
   };
 }
 
-// Skip scaffolding slugs (`_template`) — they aren't real clients.
-const ALL_CARDS = Object.entries(CLIENT_REGISTRY)
-  .filter(([slug]) => !slug.startsWith('_'))
-  .map(([slug, files]) => deriveCard(slug, files));
-const CLIENTS = ALL_CARDS.filter((c) => c.status === 'active');
-const PROSPECTS = ALL_CARDS.filter((c) => c.status === 'prospect');
+/** Split the registry into cards (scaffold `_` slugs are already filtered by the registry). */
+function cardsOf(registry: Record<string, ClientFiles>) {
+  const all = Object.entries(registry)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([slug, files]) => deriveCard(slug, files));
+  return {
+    ALL_CARDS: all,
+    CLIENTS: all.filter((c) => c.status === 'active'),
+    PROSPECTS: all.filter((c) => c.status === 'prospect'),
+  };
+}
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 /** @public */
 export default function ClientsIndexPage() {
+  const clientStore = useClientRegistry();
+  const { registry } = clientStore;
+  const { ALL_CARDS, CLIENTS, PROSPECTS } = useMemo(() => cardsOf(registry ?? {}), [registry]);
+  const counts = registry
+    ? ` — ${CLIENTS.length} active, ${PROSPECTS.length} prospect, ${DEMOS.length} demos`
+    : '';
+
   return (
     <Page>
       <Stack direction="column" gap="spacious">
         <PageHeader
           breadcrumbs={[{ label: 'Ops', href: '/ops' }, { label: 'Clients' }]}
           title="Clients"
-          lede={`Active retainers, prospects & sample builds — ${CLIENTS.length} active, ${PROSPECTS.length} prospect, ${DEMOS.length} demos.`}
+          lede={`Active retainers, prospects & sample builds${counts}.`}
         />
+
+        {/* Client records live in the private store, not this repo — loading,
+            unavailable (with the fix) and empty-store states. */}
+        <ClientStoreStatus state={clientStore} />
 
         {/* Lead funnel — the tier upstream of clients (Supabase leads), so the
             whole picture (leads → prospects → clients) reads in one place. */}

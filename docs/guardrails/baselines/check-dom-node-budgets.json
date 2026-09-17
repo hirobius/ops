@@ -8,10 +8,11 @@
     "src/app/pages/ErrorPage.tsx": 2,
     "src/app/pages/InfoPageWrapper.tsx": 12,
     "src/app/pages/NotFoundPage.tsx": 1,
-    "src/app/pages/ops/ClientBrandAuditPage.tsx": 41,
-    "src/app/pages/ops/ClientDashboardPage.tsx": 128,
-    "src/app/pages/ops/ClientReportPage.tsx": 55,
-    "src/app/pages/ops/ClientsIndexPage.tsx": 77,
+    "src/app/pages/ops/ClientBrandAuditPage.tsx": 42,
+    "src/app/pages/ops/ClientDashboardPage.tsx": 129,
+    "src/app/pages/ops/ClientReportPage.tsx": 56,
+    "src/app/pages/ops/ClientStoreNotice.tsx": 3,
+    "src/app/pages/ops/ClientsIndexPage.tsx": 78,
     "src/app/pages/ops/Disclosure.tsx": 8,
     "src/app/pages/ops/PageHeader.tsx": 8,
     "src/app/pages/ops/agentic-os/AgenticOSPage.tsx": 25,
@@ -22,7 +23,7 @@
     "src/app/pages/ops/agentic-os/SkillsBar.test.tsx": 8,
     "src/app/pages/ops/agentic-os/SkillsBar.tsx": 40,
     "src/app/pages/ops/agentic-os/SurfacesRail.tsx": 6,
-    "src/app/pages/ops/atlas/clients-tab.tsx": 13,
+    "src/app/pages/ops/atlas/clients-tab.tsx": 12,
     "src/app/pages/ops/atlas/routes-tree.tsx": 29,
     "src/app/pages/ops/atlas/validators-tab.tsx": 37,
     "src/app/pages/ops/digest/DigestPage.tsx": 38,
@@ -35,6 +36,6 @@
     "src/app/pages/ops/standing/StandingPage.tsx": 95,
     "src/app/routes.tsx": 26
   },
-  "updatedAt": "2026-09-16T04:57:59.466Z",
-  "sha": "ebfee00"
+  "updatedAt": "2026-09-16T21:00:00.000Z",
+  "sha": "90ffc5b"
 }

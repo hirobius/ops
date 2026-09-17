@@ -4,7 +4,7 @@
 > Regenerate with `pnpm scripts:index`. Deterministic (no timestamps), so it
 > only changes when scripts do.
 
-**146 scripts** across 9 categories.
+**148 scripts** across 9 categories.
 
 ## Prefix taxonomy
 
@@ -135,7 +135,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `test-phase1.mjs`            | (no header description)                                                                                     | `test:phase1`  | —     |
 | `test-prompt-regression.mjs` | Regression suite for LLM prompt outputs. Walks fixtures/llm-prompts/<slug>/ directories. Each must contain: | `test:prompts` | —     |
 
-## other (74)
+## other (76)
 
 | Script                           | Purpose                                                                                                                                                                                                                      | pnpm                                                                      | Fires         |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------- |
@@ -146,6 +146,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `case-study-draft.mjs`           | Context/Problem/Approach/Outcome/Artefacts case-study record.                                                                                                                                                                | —                                                                         | —             |
 | `cc-plugins-middleware.mjs`      | Dev-only middleware: GET /api/cc-plugins Enumerates installed Claude Code skills from: ~/.claude/skills/ (global user skills) {cwd}/.claude/skills/ (project-scoped skills)                                                  | —                                                                         | —             |
 | `client-digest.mjs`              | Walks the last N days of git log restricted to clients/<slug>/, buckets commits into shipped / next / blocker / other, and emits a markdown email draft ready to paste. Solo agencies live on perceived momentum; this       | —                                                                         | —             |
+| `clients-middleware.mjs`         | Dev-only mirror of GET /api/clients (client records from the private store), using the same ClientStore adapter + response mapping as the prod function                                                                      | —                                                                         | —             |
 | `component-discovery.mjs`        | (no header description)                                                                                                                                                                                                      | —                                                                         | —             |
 | `convert-incoming-assets.mjs`    | (no header description)                                                                                                                                                                                                      | `assets:convert`                                                          | —             |
 | `crawl-lead-emails.mjs`          | 1 lead of 263 has an email. Google Business Profile has no email field, so no Maps scraper returns one and the B2B enrichment tier covers 3-person trades                                                                    | —                                                                         | —             |
@@ -163,6 +164,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `google-auth.mjs`                | One-time OAuth setup: generates a Google refresh token with Gmail + Drive scope.                                                                                                                                             | —                                                                         | —             |
 | `harvest-park-signals.mjs`       | `docs/ai/learned-rules.jsonl` went dark for four months because its writer's only caller (`hermes-unit.mjs runPostMortem()`) was deleted with the orchestration retirement. The park trail it needs never went away          | —                                                                         | manual · warn |
 | `headless-scan.browser.js`       | (no header description)                                                                                                                                                                                                      | —                                                                         | —             |
+| `import-client-records.mjs`      | One-time, idempotent import of the local, gitignored clients/<slug>/ JSON into the private client store (Supabase client_records, migration 0015).                                                                           | —                                                                         | —             |
 | `install-skills.mjs`             | Installer for skills-lock.json. Fetches each pinned skill's files from raw.githubusercontent.com at the lock's pinnedCommit, verifies the fetched bytes against computedHash (owns the canonical hash algorithm — see        | `skills:install`                                                          | —             |
 | `leads-middleware.mjs`           | Backs the /ops Leads board under `pnpm dev` (Vite). It reuses the EXACT same logic modules as the production Vercel functions — lib/supabase/leads (the                                                                      | —                                                                         | —             |
 | `llm-stream-bridge.mjs`          | (no header description)                                                                                                                                                                                                      | `figma:stream`                                                            | —             |

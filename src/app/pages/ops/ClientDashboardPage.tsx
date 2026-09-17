@@ -14,57 +14,20 @@ import { PhaseHeader, type PhaseHeaderTone } from '../../components/phase-header
 import { statusTone, statusLabel } from '../../lib/statusPresentation';
 import { PageHeader } from './PageHeader';
 
-// ── Manifest-driven client registry ───────────────────────────────────────────
+// ── Client registry (private client store via GET /api/clients) ───────────────
 
 import type {
   ClientFiles,
-  ClientMeta,
   ClientTasksFile,
   ClientChecklistFile,
   ClientRetainerFile,
   ClientGoalsFile,
   ClientTask,
   ClientAutomationConfig,
-  ClientWorkflowConfig,
   ClientWorkflow,
 } from './clientTypes';
-import { buildClientRegistry } from './clientRegistry';
-
-const _metas = import.meta.glob<{ default: ClientMeta }>('../../../../clients/*/meta.json', {
-  eager: true,
-});
-const _tasks = import.meta.glob<{ default: ClientTasksFile }>('../../../../clients/*/tasks.json', {
-  eager: true,
-});
-const _checks = import.meta.glob<{ default: ClientChecklistFile }>(
-  '../../../../clients/*/checklist.json',
-  { eager: true },
-);
-const _retains = import.meta.glob<{ default: ClientRetainerFile }>(
-  '../../../../clients/*/retainer.json',
-  { eager: true },
-);
-const _goals = import.meta.glob<{ default: ClientGoalsFile }>('../../../../clients/*/goals.json', {
-  eager: true,
-});
-const _autoCfgs = import.meta.glob<{ default: ClientAutomationConfig }>(
-  '../../../../clients/*/automation-config.json',
-  { eager: true },
-);
-const _workflows = import.meta.glob<{ default: ClientWorkflowConfig }>(
-  '../../../../clients/*/automations/*/config.json',
-  { eager: true },
-);
-
-const CLIENT_REGISTRY = buildClientRegistry({
-  metas: _metas,
-  tasks: _tasks,
-  checks: _checks,
-  retains: _retains,
-  goals: _goals,
-  autoCfgs: _autoCfgs,
-  workflows: _workflows,
-});
+import { useClientRegistry } from './clientRegistry';
+import { ClientStoreStatus, hasClients } from './ClientStoreNotice';
 
 // ── Status colours ─────────────────────────────────────────────────────────────
 
@@ -93,16 +56,21 @@ function tileTone(status: string): StatusTileTone {
 
 export default function ClientDashboardPage() {
   const { slug } = useParams<{ slug: string }>();
-  const data = CLIENT_REGISTRY[slug ?? ''];
+  const clientStore = useClientRegistry();
+  const data = clientStore.registry?.[slug ?? ''];
 
   if (!data) {
     return (
       <Page maxWidth="content">
-        <div style={{ textAlign: 'center' }}>
-          <p style={s.ui}>
-            No client workspace found for <code>{slug}</code>
-          </p>
-        </div>
+        {hasClients(clientStore) ? (
+          <div style={{ textAlign: 'center' }}>
+            <p style={s.ui}>
+              No client workspace found for <code>{slug}</code>
+            </p>
+          </div>
+        ) : (
+          <ClientStoreStatus state={clientStore} />
+        )}
       </Page>
     );
   }
