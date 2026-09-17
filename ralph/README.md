@@ -13,8 +13,12 @@ Deterministic, auditable, human-approved on the revenue path. GitHub **is** the 
 3. Merges follow ops#238: a green `ralph-gate` merges by default — the hourly
    watchdog (`scripts/ralph-watchdog.mjs`) merges any the engine did not arm.
    A diff touching a **supervised revenue path** (`REVENUE_PATH_PREFIXES` in
-   `scripts/metric-north-star-share.mjs`) waits for a human to label the PR
-   `ralph-approved`, and an unreadable diff never merges unapproved.
+   `scripts/metric-north-star-share.mjs`), or the boundary's own files
+   (`BOUNDARY_SELF_PATHS` in the watchdog), waits for a human to label the PR
+   `ralph-approved`, and an unreadable diff never merges unapproved. While it
+   waits, the watchdog labels the PR `needs-adrian`, comments why, and pages
+   Discord, once per head SHA. Only PRs from a `ralph/*` branch of this repo
+   count; a fork's `ralph/*` branch is never treated as Ralph's.
    **Gap:** that boundary covers the watchdog's merge path only. The shared
    engine (`hirobius/ralph` `ralph-gate-reusable.yml@v1`) still arms
    auto-merge for an issue tagged `ralph-auto` with no path check (deferred,

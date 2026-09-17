@@ -31,3 +31,6 @@ jobs:
       - run: node scripts/ralph-watchdog.mjs --apply --json
         env:
           GITHUB_TOKEN: ${{ secrets.RALPH_WATCHDOG_TOKEN || secrets.GITHUB_TOKEN }}
+          # Pages Discord once per head SHA when a green PR waits on a human
+          # (awaiting-approval). Unset is fail-soft: the label and comment still land.
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}

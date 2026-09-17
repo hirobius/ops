@@ -15,7 +15,15 @@
  * changing what counts is a deliberate edit to this constant, not a drifting
  * interpretation. It is also the #238 supervised-path merge boundary, reused
  * (not duplicated) by scripts/ralph-watchdog.mjs — so an edit here changes
- * what may merge unattended, not only what the metric counts.
+ * what may merge unattended, not only what the metric counts. That is why this
+ * file is itself supervised (BOUNDARY_SELF_PATHS in scripts/ralph-watchdog.mjs):
+ * an edit to it cannot merge without ralph-approved either.
+ *
+ * What the list does and does not cover: every runtime source that reads or
+ * writes the do-not-contact flag is on it (pinned by a test that greps for it),
+ * as are the send, the lead store and intake APIs, and site generation. It is
+ * NOT a lead-PII boundary — other scripts read lead rows or contact data
+ * (e.g. rescore-leads, export-agent-lead, sync-client-emails) and are not listed.
  *
  * DEFAULT_TARGET_SHARE is a starting instrument threshold, not a calibrated
  * policy — Adrian can retune it (or pass --target) once a few windows of
@@ -64,6 +72,14 @@ export const REVENUE_PATH_PREFIXES = [
   'lib/supabase/leads.mjs',
   'api/leads.ts',
   'api/pull-leads.ts',
+  // Added 2026-09-16 (ops#375 review): the other scripts that honour or set the
+  // do-not-contact flag (crawler eligibility, call list, call log, the purge
+  // that keeps opt-out tombstones), and the no-API site generator's CLI.
+  'scripts/crawl-lead-emails.mjs',
+  'scripts/export-call-list.mjs',
+  'scripts/log-call.mjs',
+  'scripts/purge-stale-leads.mjs',
+  'scripts/generate-lead-site.mjs',
 ];
 
 /** Starting instrument threshold — see module header. */

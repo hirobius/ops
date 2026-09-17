@@ -15,6 +15,7 @@ const pr = (over = {}) => ({
   number: 100,
   headRef: 'ralph/issue-330-telemetry',
   gateConclusion: 'success',
+  mergeable: true,
   mergeableState: 'clean',
   supervisedFiles: [],
   ...over,
@@ -125,6 +126,72 @@ describe('ralph-watchdog: open-PR states', () => {
     const d = decideWatchdogAction({ openRalphPrs: [pr({ draft: true })], readyIssueCount: 1 });
     expect(d.action).toBe(ACTION.IDLE);
     expect(d.reason).toMatch(/DRAFT/);
+  });
+
+  it('asks a human when a supervised PR waits — AWAITING_APPROVAL is a write, not a silent idle', () => {
+    // An IDLE decision used to write nothing, and the engine's classify_wedged
+    // reads a green status as healthy — so a supervised PR could hold the
+    // single-flight queue all weekend with no page to anyone.
+    const d = decideWatchdogAction({
+      openRalphPrs: [pr({ supervisedFiles: ['lib/leads/pipeline.mjs'] })],
+      readyIssueCount: 3,
+    });
+    expect(d.idleReason).toBe(IDLE_REASON.AWAITING_APPROVAL);
+    expect(d.needsHuman).toBe(true);
+    expect(isMutating(d)).toBe(true);
+  });
+
+  it('asks a human for a diff past the file cap — no retry can clear it', () => {
+    const d = decideWatchdogAction({
+      openRalphPrs: [pr({ supervisedFiles: null, diffUnreadable: DIFF_UNREADABLE.FILE_CAP })],
+      readyIssueCount: 1,
+    });
+    expect(d.needsHuman).toBe(true);
+    expect(isMutating(d)).toBe(true);
+  });
+
+  it('does NOT page a human for a transient API error — the next tick retries first', () => {
+    for (const diffUnreadable of [DIFF_UNREADABLE.API_ERROR, null, undefined]) {
+      const d = decideWatchdogAction({
+        openRalphPrs: [pr({ supervisedFiles: null, diffUnreadable })],
+        readyIssueCount: 1,
+      });
+      expect(d.idleReason).toBe(IDLE_REASON.AWAITING_APPROVAL);
+      expect(d.needsHuman).toBeFalsy();
+      expect(isMutating(d)).toBe(false);
+    }
+  });
+
+  it('does not merge before GitHub has computed mergeability — unknown is not clean', () => {
+    // pulls/{n} returns mergeable: null until GitHub finishes computing it,
+    // and the list endpoint never carries it at all. Merging on unknown got a
+    // 405 that exited 2 every hour instead of reporting the conflict.
+    for (const mergeable of [null, undefined]) {
+      const d = decideWatchdogAction({
+        openRalphPrs: [pr({ mergeable, mergeableState: 'unknown' })],
+        readyIssueCount: 1,
+      });
+      expect(d.action).toBe(ACTION.IDLE);
+      expect(d.idleReason).toBe(IDLE_REASON.MERGEABILITY_PENDING);
+      expect(d.reason).toMatch(/next tick/i);
+      expect(isMutating(d)).toBe(false);
+    }
+  });
+
+  it('a supervised PR still waits for approval while mergeability is unknown', () => {
+    const d = decideWatchdogAction({
+      openRalphPrs: [pr({ mergeable: null, supervisedFiles: ['lib/render/site.mjs'] })],
+      readyIssueCount: 1,
+    });
+    expect(d.idleReason).toBe(IDLE_REASON.AWAITING_APPROVAL);
+  });
+
+  it('treats mergeable:false as a conflict even without a dirty mergeable_state', () => {
+    const d = decideWatchdogAction({
+      openRalphPrs: [pr({ mergeable: false, mergeableState: undefined })],
+      readyIssueCount: 1,
+    });
+    expect(d.action).toBe(ACTION.RESOLVE_CONFLICT);
   });
 
   it('resolves a conflict before looking at the gate', () => {
@@ -293,6 +360,8 @@ describe('ralph-watchdog: determinism and defaults', () => {
 
   it('isMutating separates the write actions from idle', () => {
     expect(isMutating({ action: ACTION.IDLE })).toBe(false);
+    // …except the one idle that asks a human: posting that ask is a write.
+    expect(isMutating({ action: ACTION.IDLE, needsHuman: true })).toBe(true);
     for (const a of [
       ACTION.MERGE,
       ACTION.FIX,
@@ -325,9 +394,18 @@ describe('ralph-watchdog: determinism and defaults', () => {
 // I/O half: gatherFacts + applyDecision against an injected fake port.
 // No network, no fixtures on disk — the port is the seam.
 // ---------------------------------------------------------------------------
-import { gatherFacts, applyDecision, makeGitHubPort, buildReport } from '../ralph-watchdog.mjs';
+import {
+  gatherFacts,
+  applyDecision,
+  makeGitHubPort,
+  buildReport,
+  BOUNDARY_SELF_PATHS,
+  HUMAN_LABEL,
+} from '../ralph-watchdog.mjs';
 
 const NOW = Date.parse('2026-09-16T08:00:00Z');
+/** `head.repo` as pulls?state=open returns it for a branch in this repo. */
+const HEAD_REPO = { full_name: 'hirobius/ops' };
 
 const fakePort = (over = {}) => ({
   listOpenPrs: async () => [],
@@ -336,8 +414,228 @@ const fakePort = (over = {}) => ({
   listCheckRuns: async () => ({ check_runs: [] }),
   getCombinedStatus: async () => ({ state: 'pending', statuses: [] }),
   getIssue: async () => ({ state: 'open' }),
+  getPr: async () => ({ mergeable: true, mergeable_state: 'clean' }),
   listPrFiles: async () => [],
+  listComments: async () => [],
   ...over,
+});
+
+const greenStatus = async () => ({ statuses: [{ context: 'ralph-gate', state: 'success' }] });
+
+describe('gatherFacts: only same-repo ralph/* heads are Ralph PRs', () => {
+  // ops is PUBLIC. The engine posts `ralph-gate: success` ("non-Ralph PR —
+  // human-reviewed") on the head SHA of every human PR. A fork branch named
+  // `ralph/...` pointing at one of those SHAs used to read as a green Ralph PR
+  // with no supervised files — and the watchdog squash-merged it to main.
+  const forkExploit = (repo) =>
+    fakePort({
+      listOpenPrs: async () => [
+        {
+          number: 9999,
+          head: { repo, ref: 'ralph/issue-9999-x', sha: 'c'.repeat(40) },
+          labels: [],
+        },
+      ],
+      getCombinedStatus: async () => ({
+        statuses: [
+          { context: 'ralph-gate', state: 'success', description: 'non-Ralph PR — human-reviewed' },
+        ],
+      }),
+      listPrFiles: async () => [{ filename: 'api/ops-login.ts' }],
+    });
+
+  it('ignores a fork PR on a ralph/* branch, however green its SHA looks', async () => {
+    const f = await gatherFacts(forkExploit({ full_name: 'mallory/ops' }), NOW);
+    expect(f.openRalphPrs).toHaveLength(0);
+    const d = decideWatchdogAction(f);
+    expect(d.action).not.toBe(ACTION.MERGE);
+  });
+
+  it('ignores a PR whose head repo is gone (deleted fork)', async () => {
+    for (const repo of [null, undefined]) {
+      const f = await gatherFacts(forkExploit(repo), NOW);
+      expect(f.openRalphPrs).toHaveLength(0);
+    }
+  });
+
+  it('ignores ralph/claim-* refs, matching lib.sh open_ralph_prs', async () => {
+    const f = await gatherFacts(
+      fakePort({
+        listOpenPrs: async () => [
+          { number: 5, head: { repo: HEAD_REPO, ref: 'ralph/claim-5', sha: 's' }, labels: [] },
+        ],
+      }),
+      NOW,
+    );
+    expect(f.openRalphPrs).toHaveLength(0);
+  });
+
+  it('matches the head repo case-insensitively, so a repo slug in other case still sees the PR', async () => {
+    const f = await gatherFacts(
+      fakePort({
+        listOpenPrs: async () => [
+          { number: 9, head: { repo: HEAD_REPO, ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
+        ],
+      }),
+      NOW,
+      { repo: 'Hirobius/OPS' },
+    );
+    expect(f.openRalphPrs.map((p) => p.number)).toEqual([9]);
+  });
+
+  it('never reads the engine pass-through status as green on a same-repo ralph/* PR', async () => {
+    // Defense in depth: that description is only ever posted for NON-Ralph
+    // PRs. On a ralph/* head it means the real gate has not spoken for this SHA.
+    const f = await gatherFacts(
+      fakePort({
+        listOpenPrs: async () => [
+          { number: 9, head: { repo: HEAD_REPO, ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
+        ],
+        getCombinedStatus: async () => ({
+          statuses: [
+            {
+              context: 'ralph-gate',
+              state: 'success',
+              description: 'non-Ralph PR — human-reviewed',
+            },
+          ],
+        }),
+      }),
+      NOW,
+    );
+    expect(f.openRalphPrs[0].gateConclusion).toBe('pending');
+    expect(decideWatchdogAction({ ...f, readyIssueCount: 1 }).action).not.toBe(ACTION.MERGE);
+  });
+});
+
+describe('gatherFacts: mergeability comes from the single-PR endpoint', () => {
+  // Real pulls?state=open entries have NO mergeable / mergeable_state field
+  // (verified live on all 12 open PRs), so `dirty` could never be seen there.
+  const listShaped = async () => [
+    {
+      number: 9,
+      draft: false,
+      head: { repo: HEAD_REPO, ref: 'ralph/issue-9-x', sha: 'a'.repeat(40) },
+      labels: [],
+    },
+  ];
+
+  it('sees a conflict the list response hides, and reports it instead of merging', async () => {
+    const asked = [];
+    const f = await gatherFacts(
+      fakePort({
+        listOpenPrs: listShaped,
+        getCombinedStatus: greenStatus,
+        getPr: async (n) => {
+          asked.push(n);
+          return { mergeable: false, mergeable_state: 'dirty', head: { sha: 'a'.repeat(40) } };
+        },
+      }),
+      NOW,
+    );
+    expect(asked).toEqual([9]);
+    expect(f.openRalphPrs[0]).toMatchObject({ mergeable: false, mergeableState: 'dirty' });
+    expect(decideWatchdogAction({ ...f, readyIssueCount: 1 }).action).toBe(ACTION.RESOLVE_CONFLICT);
+  });
+
+  it('holds a green PR while GitHub is still computing mergeability', async () => {
+    const f = await gatherFacts(
+      fakePort({
+        listOpenPrs: listShaped,
+        getCombinedStatus: greenStatus,
+        getPr: async () => ({ mergeable: null, mergeable_state: 'unknown' }),
+      }),
+      NOW,
+    );
+    expect(f.openRalphPrs[0].mergeable).toBeNull();
+    const d = decideWatchdogAction({ ...f, readyIssueCount: 1 });
+    expect(d.action).toBe(ACTION.IDLE);
+    expect(d.idleReason).toBe(IDLE_REASON.MERGEABILITY_PENDING);
+  });
+
+  it('treats mergeability as unknown when the head moved between the two reads', async () => {
+    const f = await gatherFacts(
+      fakePort({
+        listOpenPrs: listShaped,
+        getCombinedStatus: greenStatus,
+        getPr: async () => ({
+          mergeable: true,
+          mergeable_state: 'clean',
+          head: { sha: 'b'.repeat(40) },
+        }),
+      }),
+      NOW,
+    );
+    expect(f.openRalphPrs[0].mergeable).toBeNull();
+    expect(decideWatchdogAction({ ...f, readyIssueCount: 1 }).action).not.toBe(ACTION.MERGE);
+  });
+
+  it('merges a clean, green, unsupervised PR read from real endpoint shapes', async () => {
+    const f = await gatherFacts(
+      fakePort({
+        listOpenPrs: listShaped,
+        getCombinedStatus: greenStatus,
+        getPr: async () => ({
+          mergeable: true,
+          mergeable_state: 'clean',
+          head: { sha: 'a'.repeat(40) },
+        }),
+        listPrFiles: async () => [{ filename: 'docs/ai/notes.md' }],
+      }),
+      NOW,
+    );
+    expect(decideWatchdogAction({ ...f, readyIssueCount: 1 }).action).toBe(ACTION.MERGE);
+  });
+});
+
+describe('gatherFacts: the boundary supervises its own definition', () => {
+  // If the files that define and enforce the boundary merged unattended, the
+  // first merge that weakened them would become the rule for every later PR.
+  const withFiles = (files) =>
+    fakePort({
+      listOpenPrs: async () => [
+        { number: 9, head: { repo: HEAD_REPO, ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
+      ],
+      getCombinedStatus: greenStatus,
+      listPrFiles: async () => files.map((filename) => ({ filename })),
+    });
+
+  it('holds a PR that edits any boundary file for ralph-approved', async () => {
+    for (const file of [
+      'scripts/metric-north-star-share.mjs',
+      'scripts/ralph-watchdog.mjs',
+      'lib/ops/ralph-watchdog.mjs',
+      '.github/workflows/ralph-watchdog.yml',
+    ]) {
+      const f = await gatherFacts(withFiles([file, 'docs/x.md']), NOW);
+      expect(f.openRalphPrs[0].supervisedFiles).toEqual([file]);
+      const d = decideWatchdogAction({ ...f, readyIssueCount: 1 });
+      expect(d.idleReason).toBe(IDLE_REASON.AWAITING_APPROVAL);
+    }
+  });
+
+  it('BOUNDARY_SELF_PATHS covers the watchdog’s whole local import graph and its workflow', () => {
+    // Self-maintaining: add an import to the watchdog without supervising the
+    // new file, and this fails. Walks static and dynamic relative imports.
+    const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+    const seen = new Set();
+    const walk = (rel) => {
+      if (seen.has(rel)) return;
+      seen.add(rel);
+      const src = readFileSync(join(root, rel), 'utf8');
+      const specs = [
+        ...src.matchAll(/\bfrom\s+['"](\.{1,2}\/[^'"]+)['"]/g),
+        ...src.matchAll(/\bimport\s*\(?\s*['"](\.{1,2}\/[^'"]+)['"]/g),
+      ].map((m) => m[1]);
+      for (const spec of specs) {
+        walk(join(dirname(rel), spec).split('\\').join('/'));
+      }
+    };
+    walk('scripts/ralph-watchdog.mjs');
+    expect(seen.size).toBeGreaterThan(2);
+    for (const file of seen) expect(BOUNDARY_SELF_PATHS).toContain(file);
+    expect(BOUNDARY_SELF_PATHS).toContain('.github/workflows/ralph-watchdog.yml');
+  });
 });
 
 describe('gatherFacts', () => {
@@ -367,7 +665,7 @@ describe('gatherFacts', () => {
     const f = await gatherFacts(
       fakePort({
         listOpenPrs: async () => [
-          { number: 9, head: { ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
+          { number: 9, head: { repo: HEAD_REPO, ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
         ],
         getCombinedStatus: async () => ({
           state: 'failure',
@@ -391,7 +689,11 @@ describe('gatherFacts', () => {
     const f = await gatherFacts(
       fakePort({
         listOpenPrs: async () => [
-          { number: 325, head: { ref: 'ralph/issue-298-x', sha: '30c4cc4' }, labels: [] },
+          {
+            number: 325,
+            head: { repo: HEAD_REPO, ref: 'ralph/issue-298-x', sha: '30c4cc4' },
+            labels: [],
+          },
         ],
         listCheckRuns: async () => ({
           check_runs: [
@@ -430,7 +732,7 @@ describe('gatherFacts', () => {
       const f = await gatherFacts(
         fakePort({
           listOpenPrs: async () => [
-            { number: 9, head: { ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
+            { number: 9, head: { repo: HEAD_REPO, ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
           ],
           getCombinedStatus: async () => ({ statuses }),
         }),
@@ -444,7 +746,7 @@ describe('gatherFacts', () => {
     const f = await gatherFacts(
       fakePort({
         listOpenPrs: async () => [
-          { number: 9, head: { ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
+          { number: 9, head: { repo: HEAD_REPO, ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
         ],
         listCheckRuns: async () => ({
           check_runs: [
@@ -465,7 +767,7 @@ describe('gatherFacts', () => {
     const f = await gatherFacts(
       fakePort({
         listOpenPrs: async () => [
-          { number: 9, head: { ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
+          { number: 9, head: { repo: HEAD_REPO, ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
         ],
         getIssue: async () => {
           throw new Error('500');
@@ -482,7 +784,7 @@ describe('gatherFacts', () => {
         listOpenPrs: async () => [
           {
             number: 9,
-            head: { ref: 'ralph/issue-9-x', sha: 's' },
+            head: { repo: HEAD_REPO, ref: 'ralph/issue-9-x', sha: 's' },
             labels: [{ name: 'ralph-approved' }],
           },
         ],
@@ -501,7 +803,9 @@ describe('gatherFacts', () => {
     expect(f.openRalphPrs[0].prApproved).toBe(true);
   });
 
-  const onePr = async () => [{ number: 9, head: { ref: 'ralph/issue-9-x', sha: 's' }, labels: [] }];
+  const onePr = async () => [
+    { number: 9, head: { repo: HEAD_REPO, ref: 'ralph/issue-9-x', sha: 's' }, labels: [] },
+  ];
   const docsPage = (page) =>
     Array.from({ length: 100 }, (_, i) => ({ filename: `docs/p${page}-f${i}.md` }));
 
@@ -650,6 +954,113 @@ describe('applyDecision', () => {
     expect(order).toEqual(['comment', 'close']);
   });
 
+  const SHA = 'd'.repeat(40);
+  const awaiting = (over = {}) =>
+    decideWatchdogAction({
+      openRalphPrs: [
+        pr({ number: 42, headSha: SHA, supervisedFiles: ['lib/leads/pipeline.mjs'], ...over }),
+      ],
+      readyIssueCount: 2,
+    });
+  const recorder = (over = {}) => {
+    const calls = [];
+    const port = fakePort({
+      addLabels: async (n, labels) => calls.push(['label', n, labels]),
+      comment: async (n, body) => calls.push(['comment', n, body]),
+      mergePr: async () => calls.push(['merge']),
+      closePr: async () => calls.push(['close']),
+      dispatch: async () => calls.push(['dispatch']),
+      ...over,
+    });
+    const pages = [];
+    const page = async (text) => {
+      pages.push(text);
+      return { sent: true };
+    };
+    return { port, calls, pages, page };
+  };
+
+  it('asks a human once for a supervised PR: needs-adrian, a comment naming the files, a Discord page', async () => {
+    const { port, calls, pages, page } = recorder();
+    const performed = await applyDecision(port, awaiting(), { page });
+    expect(calls.map((c) => c[0])).toEqual(['label', 'comment']);
+    expect(calls[0]).toEqual(['label', 42, [HUMAN_LABEL]]);
+    expect(HUMAN_LABEL).toBe('needs-adrian');
+    const body = calls[1][2];
+    expect(body).toMatch(/lib\/leads\/pipeline\.mjs/);
+    expect(body).toMatch(/ralph-approved/);
+    expect(body).toContain(SHA); // the dedupe marker carries the FULL head sha
+    expect(pages).toHaveLength(1);
+    expect(pages[0]).toMatch(/\/pull\/42\b/);
+    expect(performed).toMatch(/#42/);
+  });
+
+  it('does not re-ask on a later tick for the same head SHA', async () => {
+    const first = recorder();
+    await applyDecision(first.port, awaiting(), { page: first.page });
+    const posted = first.calls.find((c) => c[0] === 'comment')[2];
+
+    const { port, calls, pages, page } = recorder({
+      listComments: async (n, p) => (p === 1 ? [{ body: 'unrelated' }, { body: posted }] : []),
+    });
+    const performed = await applyDecision(port, awaiting(), { page });
+    expect(calls).toEqual([]);
+    expect(pages).toEqual([]);
+    expect(performed).toMatch(/already/i);
+  });
+
+  it('asks again once the head SHA changes — a new push is a new diff to review', async () => {
+    const first = recorder();
+    await applyDecision(first.port, awaiting(), { page: first.page });
+    const posted = first.calls.find((c) => c[0] === 'comment')[2];
+
+    const { port, calls } = recorder({
+      listComments: async (n, p) => (p === 1 ? [{ body: posted }] : []),
+    });
+    await applyDecision(port, awaiting({ headSha: 'e'.repeat(40) }), { page: async () => ({}) });
+    expect(calls.map((c) => c[0])).toEqual(['label', 'comment']);
+  });
+
+  it('reads every page of comments before deciding it has not asked yet', async () => {
+    const first = recorder();
+    await applyDecision(first.port, awaiting(), { page: first.page });
+    const posted = first.calls.find((c) => c[0] === 'comment')[2];
+    const filler = Array.from({ length: 100 }, (_, i) => ({ body: `c${i}` }));
+
+    const seenPages = [];
+    const { port, calls } = recorder({
+      listComments: async (n, p) => {
+        seenPages.push(p);
+        return p === 1 ? filler : p === 2 ? [{ body: posted }] : [];
+      },
+    });
+    await applyDecision(port, awaiting(), { page: async () => ({ sent: true }) });
+    expect(seenPages).toEqual([1, 2]);
+    expect(calls).toEqual([]);
+  });
+
+  it('still lands the label and comment when Discord is not configured, and says how to fix it', async () => {
+    const { port, calls } = recorder();
+    const performed = await applyDecision(port, awaiting(), {
+      page: async () => ({ sent: false, reason: 'DISCORD_WEBHOOK_URL is not set' }),
+    });
+    expect(calls.map((c) => c[0])).toEqual(['label', 'comment']);
+    expect(performed).toMatch(/DISCORD_WEBHOOK_URL/);
+  });
+
+  it('never pings for a transient diff-read error, or any other idle', async () => {
+    const { port, calls, pages, page } = recorder();
+    for (const d of [
+      awaiting({ supervisedFiles: null, diffUnreadable: DIFF_UNREADABLE.API_ERROR }),
+      decideWatchdogAction({ openRalphPrs: [], readyIssueCount: 0 }),
+      decideWatchdogAction({ openRalphPrs: [pr({ gateConclusion: 'pending' })] }),
+    ]) {
+      await applyDecision(port, d, { page });
+    }
+    expect(calls).toEqual([]);
+    expect(pages).toEqual([]);
+  });
+
   it('never auto-acts on fix or resolve-conflict — those need a reader', async () => {
     let touched = false;
     const port = fakePort({
@@ -681,6 +1092,33 @@ describe('makeGitHubPort endpoints', () => {
     const { port, urls } = recordingPort();
     await port.listPrFiles(42, 3);
     expect(urls[0]).toMatch(/\/pulls\/42\/files\?per_page=100&page=3$/);
+  });
+
+  it('reads mergeability from the single-PR endpoint', async () => {
+    const { port, urls } = recordingPort();
+    await port.getPr(42);
+    expect(urls[0]).toMatch(/\/pulls\/42$/);
+  });
+
+  it('pages PR comments one explicit page at a time', async () => {
+    const { port, urls } = recordingPort();
+    await port.listComments(42, 2);
+    expect(urls[0]).toMatch(/\/issues\/42\/comments\?per_page=100&page=2$/);
+  });
+
+  it('adds labels through the issues labels endpoint', async () => {
+    const seen = [];
+    const port = makeGitHubPort({
+      token: 't',
+      fetchImpl: async (url, init) => {
+        seen.push([url, init.method, init.body]);
+        return { status: 200, ok: true, json: async () => [] };
+      },
+    });
+    await port.addLabels(42, ['needs-adrian']);
+    expect(seen[0][0]).toMatch(/\/issues\/42\/labels$/);
+    expect(seen[0][1]).toBe('POST');
+    expect(JSON.parse(seen[0][2])).toEqual({ labels: ['needs-adrian'] });
   });
 
   it('reads the gate verdict from the combined commit status endpoint', async () => {
@@ -765,6 +1203,12 @@ describe('the Actions job token can read everything gatherFacts reads', () => {
     const yml = readFileSync(join(root, '.github', 'workflows', 'ralph-watchdog.yml'), 'utf8');
     expect(yml).toMatch(/^\s+statuses:\s*(read|write)\b/m);
     expect(yml).toMatch(/^\s+checks:\s*(read|write)\b/m);
+  });
+
+  it('ralph-watchdog.yml hands the job the Discord webhook, so an awaiting-approval wedge pages', () => {
+    const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+    const yml = readFileSync(join(root, '.github', 'workflows', 'ralph-watchdog.yml'), 'utf8');
+    expect(yml).toMatch(/DISCORD_WEBHOOK_URL:\s*\$\{\{\s*secrets\.DISCORD_WEBHOOK_URL\s*\}\}/);
   });
 });
 
