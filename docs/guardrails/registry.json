@@ -326,7 +326,7 @@
     },
     {
       "id": "check-layout-tests",
-      "description": "Layout-integrity Playwright suite (pnpm run test:layout: route coverage + tests/layout-integrity.spec.ts against a vite build/preview server on :5200). Fails on any layout collision, overflow, or uncovered route. Formerly a bespoke quality.yml step; folded into the registry by ops#241.",
+      "description": "Layout-integrity Playwright suite (pnpm run test:layout: route coverage + tests/layout-integrity.spec.ts against a vite build/preview server on :5200, built into node_modules/.cache/playwright-preview so no other gate rebuilding dist/ can clobber it). Fails on any layout collision, overflow, or uncovered route. Formerly a bespoke quality.yml step; folded into the registry by ops#241.",
       "severity": "error",
       "gateScript": "scripts/check-layout-tests.mjs",
       "fixturePath": "fixtures/check-layout-tests",
@@ -334,7 +334,7 @@
       "source": "human",
       "firingChannel": "ci-pr",
       "supportsJson": true,
-      "skipMetaProbe": "drives a full Playwright run that rebuilds dist/ and binds :5200 — a second copy spawned by a meta-probe during the ci-pr run would race the real one"
+      "skipMetaProbe": "drives a full Playwright run that builds into node_modules/.cache/playwright-preview and binds :5200 — a second copy spawned by a meta-probe during the ci-pr run would race the real one"
     },
     {
       "id": "check-licenses",

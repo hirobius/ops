@@ -7,11 +7,16 @@
  * browser install) or the advisory dependency audit. Adding a new direct gate
  * step fails here — register the check in docs/guardrails/registry.json on the
  * ci-pr channel instead.
+ *
+ * The audit matches whole commands, not prefixes, and rejects every key that
+ * can stop the runner from blocking (`|| true`, a chained command, `if:`,
+ * `continue-on-error:` on the step or the job). The mutation cases below prove
+ * each of those edits turns the audit red (PR #382 review).
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, dirname, posix } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { stripYamlComments } from '../lib/yaml-comments.mjs';
 import { COMMAND_GATES, FIXTURE_FLAG } from '../lib/command-gate.mjs';
@@ -23,13 +28,25 @@ const WORKFLOW = join(ROOT, '.github', 'workflows', 'quality.yml');
 const registry = JSON.parse(readFileSync(join(ROOT, 'docs/guardrails/registry.json'), 'utf8'));
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
 
+const KEY_LINE = /^(\s*)([\w-]+):\s*(.*)$/;
+const BLOCK_SCALAR = /^[|>][-+]?\d*$/;
+
+function yamlLines(yaml) {
+  return stripYamlComments(yaml).split(/\r?\n/);
+}
+
+function indentOf(line) {
+  return line.length - line.trimStart().length;
+}
+
 /**
  * Minimal step reader for a single-job workflow: returns each `- ` list item
- * under `steps:` as { name, run, uses, continueOnError }. Not a YAML parser —
- * quality.yml's steps are flat key/value maps, which is all this needs.
+ * under `steps:` as { name, run, uses, if, continueOnError, keys }. Not a YAML
+ * parser — quality.yml's steps are flat key/value maps, which is all this needs.
+ * Block scalars (`run: |`) are joined with newlines so a chained second command
+ * stays visible to the whole-line matchers.
  */
 function readSteps(yaml) {
-  const lines = stripYamlComments(yaml).split('\n');
   const steps = [];
   let inSteps = false;
   let itemIndent = -1;
@@ -37,9 +54,9 @@ function readSteps(yaml) {
   let blockKey = null;
   let blockIndent = -1;
 
-  for (const line of lines) {
+  for (const line of yamlLines(yaml)) {
     if (line.trim() === '') continue;
-    const indent = line.length - line.trimStart().length;
+    const indent = indentOf(line);
 
     if (/^\s*steps:\s*$/.test(line)) {
       inSteps = true;
@@ -61,7 +78,7 @@ function readSteps(yaml) {
       assign(current, item[2], item[3], itemIndent + 2);
       continue;
     }
-    const kv = line.match(/^(\s*)([\w-]+):\s*(.*)$/);
+    const kv = line.match(KEY_LINE);
     if (current && kv && kv[1].length === itemIndent + 2) {
       assign(current, kv[2], kv[3], kv[1].length);
     }
@@ -70,11 +87,13 @@ function readSteps(yaml) {
     name: s.name ?? null,
     run: s.run ?? null,
     uses: s.uses ?? null,
+    if: s.if ?? null,
     continueOnError: s['continue-on-error'] === 'true',
+    keys: Object.keys(s),
   }));
 
   function assign(step, key, value, keyIndent) {
-    if (value === '|' || value === '>') {
+    if (BLOCK_SCALAR.test(value.trim())) {
       step[key] = '';
       blockKey = key;
       blockIndent = keyIndent;
@@ -84,10 +103,48 @@ function readSteps(yaml) {
   }
 }
 
-const steps = readSteps(readFileSync(WORKFLOW, 'utf8'));
-const runSteps = steps.filter((s) => s.run !== null);
+/** Every job under `jobs:` as { id, keys } — keys are the job's own top-level keys. */
+function readJobs(yaml) {
+  const jobs = [];
+  let inJobs = false;
+  let jobIndent = -1;
+  let current = null;
 
-const RUNNER = /^node scripts\/run-gates\.mjs --channel ci-pr(\s|$)/;
+  for (const line of yamlLines(yaml)) {
+    if (line.trim() === '') continue;
+    const indent = indentOf(line);
+
+    if (indent === 0) {
+      inJobs = /^jobs:\s*$/.test(line);
+      current = null;
+      continue;
+    }
+    if (!inJobs) continue;
+
+    const kv = line.match(KEY_LINE);
+    if (!kv) continue;
+    if (jobIndent === -1) jobIndent = indent;
+    if (indent === jobIndent) {
+      current = { id: kv[2], keys: {} };
+      jobs.push(current);
+    } else if (current && indent === jobIndent + 2) {
+      current.keys[kv[2]] = kv[3].trim();
+    }
+  }
+  return jobs;
+}
+
+// Whole-command matchers: anything appended (`|| true`, `; cmd`, a second line
+// in a `run: |` block, a narrowing flag) no longer matches.
+const RUNNER = /^node scripts\/run-gates\.mjs --channel ci-pr --parallel \d+$/;
+
+// The runner step may carry only these keys. `if:` can skip it, and
+// `continue-on-error:` (in any spelling, e.g. `${{ true }}`) lets it fail green.
+const RUNNER_KEYS = ['name', 'run'];
+
+// Job-level keys that make a failing ci-pr run report green: a skipped job
+// satisfies a required check, and continue-on-error hides the failure.
+const JOB_BYPASS_KEYS = ['if', 'continue-on-error'];
 
 // The only `run:` steps allowed outside the registry runner. None of these is a
 // pass/fail quality check on the code: they install, build, or are advisory.
@@ -99,50 +156,152 @@ const NON_GATE_STEPS = [
     why: 'browser binaries for the ci-pr layout-tests gate (setup)',
   },
   {
-    pattern: /^pnpm audit\b/,
+    pattern: /^pnpm audit --audit-level \w+$/,
     why: 'advisory dependency audit (#243) — must stay continue-on-error',
     advisory: true,
   },
 ];
 
-describe('quality.yml — gates run only through run-gates.mjs (ops#241)', () => {
-  it('parses the workflow steps', () => {
-    expect(steps.length).toBeGreaterThan(0);
-    expect(runSteps.length).toBeGreaterThan(0);
-  });
+/** The ops#241 contract for quality.yml. Returns problems; [] means compliant. */
+function auditQualityWorkflow(yaml) {
+  const problems = [];
+  const steps = readSteps(yaml);
+  const runSteps = steps.filter((s) => s.run !== null);
+  const jobs = readJobs(yaml);
 
-  it('has no run step besides declared setup steps and the registry runner', () => {
-    const undeclared = runSteps
-      .filter((s) => !RUNNER.test(s.run) && !NON_GATE_STEPS.some((d) => d.pattern.test(s.run)))
-      .map((s) => `${s.name}: ${s.run}`);
-    expect(
-      undeclared,
-      'register these as ci-pr gates in docs/guardrails/registry.json instead of a workflow step',
-    ).toEqual([]);
-  });
-
-  it('keeps advisory steps advisory', () => {
-    for (const s of runSteps) {
-      const decl = NON_GATE_STEPS.find((d) => d.pattern.test(s.run));
-      if (decl?.advisory)
-        expect(s.continueOnError, `${s.name} must be continue-on-error`).toBe(true);
+  if (jobs.length !== 1) problems.push(`expected exactly one job, found ${jobs.length}`);
+  for (const job of jobs) {
+    for (const key of JOB_BYPASS_KEYS) {
+      if (key in job.keys) {
+        problems.push(`job "${job.id}" sets \`${key}\` — the ci-pr run could report green`);
+      }
     }
-  });
+  }
 
-  it('invokes the ci-pr runner exactly once, and lets it block', () => {
-    const runners = runSteps.filter((s) => RUNNER.test(s.run));
-    expect(runners).toHaveLength(1);
-    expect(runners[0].continueOnError).toBe(false);
-    expect(runSteps.some((s) => s.run.includes('run-gates.mjs') && !RUNNER.test(s.run))).toBe(
-      false,
+  if (runSteps.length === 0) problems.push('no run: steps parsed');
+
+  for (const s of runSteps) {
+    if (RUNNER.test(s.run) || NON_GATE_STEPS.some((d) => d.pattern.test(s.run))) continue;
+    problems.push(
+      `undeclared run step "${s.name}": ${JSON.stringify(s.run)} — register it as a ci-pr gate in docs/guardrails/registry.json instead`,
     );
+  }
+
+  for (const s of runSteps) {
+    const decl = NON_GATE_STEPS.find((d) => d.pattern.test(s.run));
+    if (decl?.advisory && !s.continueOnError) {
+      problems.push(`advisory step "${s.name}" must be continue-on-error`);
+    }
+  }
+
+  const runners = runSteps.filter((s) => RUNNER.test(s.run));
+  if (runners.length !== 1) {
+    problems.push(`expected the ci-pr runner exactly once, found ${runners.length}`);
+  }
+  for (const r of runners) {
+    const extra = r.keys.filter((k) => !RUNNER_KEYS.includes(k));
+    if (extra.length > 0) {
+      problems.push(
+        `runner step "${r.name}" sets ${extra.map((k) => `\`${k}\``).join(', ')} — it may carry only ${RUNNER_KEYS.join(', ')}, so it always blocks`,
+      );
+    }
+  }
+
+  const browser = runSteps.findIndex((s) => /playwright install/.test(s.run));
+  const runner = runSteps.findIndex((s) => RUNNER.test(s.run));
+  if (browser === -1 || runner === -1 || browser > runner) {
+    problems.push('the Playwright browser install must come before the ci-pr runner');
+  }
+
+  return problems;
+}
+
+const WORKFLOW_YAML = readFileSync(WORKFLOW, 'utf8');
+const RUNNER_LINE = '        run: node scripts/run-gates.mjs --channel ci-pr --parallel 4';
+const AUDIT_LINE = '        run: pnpm audit --audit-level high';
+const RUNS_ON_LINE = '    runs-on: ubuntu-latest';
+
+describe('quality.yml — gates run only through run-gates.mjs (ops#241)', () => {
+  it('parses the workflow steps and its single job', () => {
+    const steps = readSteps(WORKFLOW_YAML);
+    expect(steps.filter((s) => s.run !== null).length).toBeGreaterThan(0);
+    expect(readJobs(WORKFLOW_YAML).map((j) => j.id)).toEqual(['gates']);
   });
 
-  it('installs the Playwright browser before the runner needs it', () => {
-    const browser = runSteps.findIndex((s) => /playwright install/.test(s.run));
-    const runner = runSteps.findIndex((s) => RUNNER.test(s.run));
-    expect(browser).toBeGreaterThanOrEqual(0);
-    expect(browser).toBeLessThan(runner);
+  it('the committed quality.yml satisfies the contract', () => {
+    expect(auditQualityWorkflow(WORKFLOW_YAML)).toEqual([]);
+  });
+
+  describe('rejects edits that stop a gate from blocking (PR #382 review)', () => {
+    // Each mutation is a single edit to the committed file. The anchor lines are
+    // asserted present, so a reworded workflow fails loudly here instead of
+    // silently testing an unmutated copy.
+    const MUTATIONS = [
+      {
+        name: 'runner swallowed with `|| true`',
+        from: RUNNER_LINE,
+        to: `${RUNNER_LINE} || true`,
+        expect: /undeclared run step/,
+      },
+      {
+        name: 'runner narrowed to a single gate',
+        from: RUNNER_LINE,
+        to: `${RUNNER_LINE} --gate check-typecheck`,
+        expect: /undeclared run step/,
+      },
+      {
+        name: 'a direct command chained after the runner in a `run: |` block',
+        from: RUNNER_LINE,
+        to: [
+          '        run: |',
+          '          node scripts/run-gates.mjs --channel ci-pr --parallel 4',
+          '          pnpm exec knip',
+        ].join('\n'),
+        expect: /undeclared run step/,
+      },
+      {
+        name: 'a direct gate chained onto the advisory audit',
+        from: AUDIT_LINE,
+        to: `${AUDIT_LINE}; pnpm typecheck`,
+        expect: /undeclared run step/,
+      },
+      {
+        name: 'runner step skipped with `if: false`',
+        from: RUNNER_LINE,
+        to: `        if: false\n${RUNNER_LINE}`,
+        expect: /runner step .* sets `if`/,
+      },
+      {
+        name: 'runner step made non-blocking with an expression',
+        from: RUNNER_LINE,
+        to: `${RUNNER_LINE}\n        continue-on-error: \${{ true }}`,
+        expect: /runner step .* sets `continue-on-error`/,
+      },
+      {
+        name: 'job skipped with `if: false`',
+        from: RUNS_ON_LINE,
+        to: `${RUNS_ON_LINE}\n    if: false`,
+        expect: /job "gates" sets `if`/,
+      },
+      {
+        name: 'job made non-blocking with `continue-on-error`',
+        from: RUNS_ON_LINE,
+        to: `${RUNS_ON_LINE}\n    continue-on-error: true`,
+        expect: /job "gates" sets `continue-on-error`/,
+      },
+    ];
+
+    for (const m of MUTATIONS) {
+      it(m.name, () => {
+        expect(WORKFLOW_YAML.split(/\r?\n/), `anchor line missing: ${m.from}`).toContain(m.from);
+        const mutated = WORKFLOW_YAML.replace(m.from, m.to);
+        const problems = auditQualityWorkflow(mutated);
+        expect(
+          problems.some((p) => m.expect.test(p)),
+          problems.join('\n'),
+        ).toBe(true);
+      });
+    }
   });
 });
 
@@ -199,4 +358,53 @@ describe('former quality.yml steps are blocking ci-pr registry gates (ops#241)',
       }
     });
   }
+});
+
+describe('check-layout-tests serves a build no other gate can clobber (PR #382 review)', () => {
+  // In the parallel ci-pr run, other processes rebuild Vite's default dist/
+  // (audit-gates-supportjson probes audit-bundle, whose vite-bundle-visualizer
+  // empties dist/ mid-build). If the layout suite previewed dist/, a route could
+  // load a 404 shell mid-run. Its Playwright web server therefore builds into,
+  // and previews, a directory of its own.
+  const webServer = (() => {
+    const configUrl = pathToFileURL(join(ROOT, 'playwright.config.ts')).href;
+    const r = spawnSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '-e',
+        `const c = (await import(${JSON.stringify(configUrl)})).default;` +
+          'process.stdout.write(JSON.stringify(c.webServer ?? null));',
+      ],
+      { cwd: ROOT, encoding: 'utf8' },
+    );
+    if (r.status !== 0) throw new Error(`could not load playwright.config.ts:\n${r.stderr}`);
+    return JSON.parse(r.stdout);
+  })();
+
+  const segments = String(webServer?.command ?? '')
+    .split('&&')
+    .map((s) => s.trim());
+  const build = segments.find((s) => /^pnpm build\b/.test(s));
+  const preview = segments.find((s) => /\bvite preview\b/.test(s));
+  const outDirOf = (cmd) => cmd?.match(/--outDir[= ](\S+)/)?.[1] ?? null;
+
+  it('builds and then previews in one web server command', () => {
+    expect(build, webServer?.command).toBeDefined();
+    expect(preview, webServer?.command).toBeDefined();
+    expect(segments.indexOf(build)).toBeLessThan(segments.indexOf(preview));
+  });
+
+  it('builds into the same outDir it previews', () => {
+    expect(outDirOf(build), build).not.toBeNull();
+    expect(outDirOf(preview)).toBe(outDirOf(build));
+  });
+
+  it('keeps that outDir out of dist/ and out of every tree walk', () => {
+    const outDir = posix.normalize(String(outDirOf(build)).replace(/\\/g, '/'));
+    expect(outDir === 'dist' || outDir.startsWith('dist/')).toBe(false);
+    // node_modules is skipped by git and by every repo tree-walking gate, so the
+    // built bundle never reads as source (hardcoded colors, exemptions, …).
+    expect(outDir.startsWith('node_modules/')).toBe(true);
+  });
 });
