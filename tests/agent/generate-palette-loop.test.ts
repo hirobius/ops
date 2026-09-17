@@ -25,19 +25,27 @@ const LEAD = {
   category: 'landscaping',
   city: 'Austin',
   region: 'TX',
-  phone: '+1-555-0142',
+  phone: '+1-512-555-0142',
   email: 'hi@violetverge.com',
 };
 const BRIEF = { summary: 'Landscaper.', suggestedPreset: 'landscaping', suggestedFont: 'system' };
 
 const GOOD_PALETTE = {
-  primary: '#7b2d8e', accent: '#e0a800', bg: '#fdfcff',
-  fg: '#1a121d', muted: '#efe7f2', onPrimary: '#ffffff',
+  primary: '#7b2d8e',
+  accent: '#e0a800',
+  bg: '#fdfcff',
+  fg: '#1a121d',
+  muted: '#efe7f2',
+  onPrimary: '#ffffff',
 };
 const p = PALETTE_PRESETS.landscaping;
 const LAZY_PALETTE = {
-  primary: p['--brand-primary'], accent: p['--brand-accent'], bg: p['--brand-bg'],
-  fg: p['--brand-fg'], muted: p['--brand-muted'], onPrimary: p['--brand-on-primary'],
+  primary: p['--brand-primary'],
+  accent: p['--brand-accent'],
+  bg: p['--brand-bg'],
+  fg: p['--brand-fg'],
+  muted: p['--brand-muted'],
+  onPrimary: p['--brand-on-primary'],
 };
 
 const content = (palette: Record<string, string>) => ({

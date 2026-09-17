@@ -15,7 +15,7 @@ const CONFIG = {
   slug: 'pressure-pros',
   business: {
     name: 'Pressure Pros',
-    phone: '+1-555-1234',
+    phone: '+1-512-555-1234',
     email: 'info@pressurepros.com',
     hours: [{ days: 'Mon–Fri', hours: '8–6' }],
     serviceAreas: ['Austin'],
@@ -23,7 +23,11 @@ const CONFIG = {
   brand: { palettePreset: 'pressure-washing' },
   layout: {},
   services: [{ title: 'Driveway washing', description: 'We clean driveways.' }],
-  copy: { heroHeadline: 'Austin Pressure Washing', heroSub: 'Spotless in a day.', about: 'Local & insured.' },
+  copy: {
+    heroHeadline: 'Austin Pressure Washing',
+    heroSub: 'Spotless in a day.',
+    about: 'Local & insured.',
+  },
   form: { provider: 'web3forms', accessKey: 'abc123' },
   seo: {
     title: 'Pressure Washing in Austin',
@@ -49,7 +53,9 @@ function makeSb(opts: {
             eq() {
               return {
                 single: async () =>
-                  lead ? { data: lead, error: null } : { data: null, error: { message: 'not found' } },
+                  lead
+                    ? { data: lead, error: null }
+                    : { data: null, error: { message: 'not found' } },
               };
             },
           };
@@ -77,7 +83,9 @@ describe('renderArtifacts', () => {
     expect(a.configFile).toContain('"slug": "pressure-pros"');
     // defaults applied by the contract are baked into the emitted file
     expect(a.configFile).toContain('"font": "system"');
-    expect(a.commands).toContain('pnpm new-client pressure-pros --name "Pressure Pros" --preset pressure-washing');
+    expect(a.commands).toContain(
+      'pnpm new-client pressure-pros --name "Pressure Pros" --preset pressure-washing',
+    );
     expect(a.commands).toContain('apps/pressure-pros/client.config.ts');
   });
 
@@ -89,7 +97,10 @@ describe('renderArtifacts', () => {
 describe('renderLeadSite', () => {
   it('404s when the lead is missing', async () => {
     const { sb } = makeSb({ lead: null });
-    expect(await renderLeadSite(sb, 'nope')).toEqual({ status: 404, body: { error: 'lead not found' } });
+    expect(await renderLeadSite(sb, 'nope')).toEqual({
+      status: 404,
+      body: { error: 'lead not found' },
+    });
   });
 
   it('409s when the lead has no generated config', async () => {
@@ -100,7 +111,9 @@ describe('renderLeadSite', () => {
   });
 
   it('422s (and changes nothing) when the stored config no longer validates', async () => {
-    const { sb, updates } = makeSb({ lead: { id: 'l1', status: 'scored', config: { slug: 'Bad!' } } });
+    const { sb, updates } = makeSb({
+      lead: { id: 'l1', status: 'scored', config: { slug: 'Bad!' } },
+    });
     const r = await renderLeadSite(sb, 'l1');
     expect(r.status).toBe(422);
     expect(r.body.code).toBe('CONFIG_INVALID');
