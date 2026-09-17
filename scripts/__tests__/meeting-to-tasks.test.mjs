@@ -50,24 +50,32 @@ describe('toProposedUnits', () => {
   const ts = '2026-05-11T00:00:00Z';
 
   it('emits one proposed-unit per action/decision item', () => {
-    const lines = toProposedUnits(items, { slug: 'lilac-insure', transcriptPath: 'transcripts/2026-05-11.txt', ts });
+    const lines = toProposedUnits(items, {
+      slug: 'acme-agency',
+      transcriptPath: 'transcripts/2026-05-11.txt',
+      ts,
+    });
     expect(lines).toHaveLength(2);
   });
 
   it('tags fromUnitId with meeting + slug + ts and references the transcript in agentNotes', () => {
-    const [line] = toProposedUnits([items[0]], { slug: 'lilac-insure', transcriptPath: '/tmp/t.txt', ts });
-    expect(line.fromUnitId).toMatch(/^meeting-lilac-insure-/);
+    const [line] = toProposedUnits([items[0]], {
+      slug: 'acme-agency',
+      transcriptPath: '/tmp/t.txt',
+      ts,
+    });
+    expect(line.fromUnitId).toMatch(/^meeting-acme-agency-/);
     expect(line.proposedUnit.agentNotes.some((n) => n.includes('/tmp/t.txt'))).toBe(true);
   });
 
   it('sets reason="side-quest" for ACTION and "cleanup" for DECISION', () => {
-    const lines = toProposedUnits(items, { slug: 'lilac-insure', transcriptPath: 't.txt', ts });
+    const lines = toProposedUnits(items, { slug: 'acme-agency', transcriptPath: 't.txt', ts });
     expect(lines[0].reason).toBe('side-quest');
     expect(lines[1].reason).toBe('cleanup');
   });
 
   it('produces unique unit ids when multiple items share a slug', () => {
-    const lines = toProposedUnits(items, { slug: 'lilac-insure', transcriptPath: 't.txt', ts });
+    const lines = toProposedUnits(items, { slug: 'acme-agency', transcriptPath: 't.txt', ts });
     const ids = lines.map((l) => l.proposedUnit.id);
     expect(new Set(ids).size).toBe(ids.length);
   });

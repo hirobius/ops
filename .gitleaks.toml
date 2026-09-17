@@ -16,6 +16,24 @@ regexes = [
   '''primitive\.(radius|size)\.[\w\.]+''',
 ]
 
+# Extends the default slack-webhook-url rule (same id, no regex, so the default
+# detection is kept) with one false-positive exemption. The check-secrets
+# gate's violating fixture holds a placeholder webhook: zeroed workspace/bot IDs
+# and an all-X token. It was the only finding in the 2026-09-16 full-history
+# scan (ops#32). Path AND regex both have to match, so a real webhook pasted into
+# that file is still caught. The fixture-proof run is unaffected because it
+# scans a temp copy outside this path.
+# Checked: gitleaks 8.30.1 (the version CI pins) applies it. 8.21.0 loads the
+# config but ignores the exemption, so it still reports the fixture.
+[[rules]]
+id = "slack-webhook-url"
+[[rules.allowlists]]
+description = "check-secrets violating fixture: placeholder Slack webhook (zeroed IDs, X token)"
+condition = "AND"
+paths = ['''^fixtures/check-secrets/violating\.example\.txt$''']
+regexTarget = "secret"
+regexes = ['''hooks\.slack\.com/services/T0+/B0+/X+$''']
+
 [allowlist]
 description = "Global allowlist for known false positives in HDS"
 paths = [

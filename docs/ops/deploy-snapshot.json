@@ -14,13 +14,13 @@
       "checkedAt": "2026-07-07T20:11:18.183Z"
     },
     "prj_cMDIvWXl1Z9ykfnIkZgILvQOiyNS": {
-      "name": "lilac-insure",
+      "name": "client-project-1",
       "state": "READY",
       "target": "production",
       "checkedAt": "2026-07-07T20:11:18.183Z"
     },
     "prj_blQSWMxOMPpQ86JjEpXyjrHQmJ9z": {
-      "name": "lilac-bonds",
+      "name": "client-project-2",
       "state": "READY",
       "target": null,
       "checkedAt": "2026-07-07T20:11:18.183Z"
@@ -32,7 +32,7 @@
       "checkedAt": "2026-07-07T20:11:18.183Z"
     },
     "prj_petGeKX45BUSDo5hdc0G0PWPyuO4": {
-      "name": "access-tech",
+      "name": "client-project-3",
       "state": "READY",
       "target": "production",
       "checkedAt": "2026-07-07T20:11:18.183Z"
@@ -50,7 +50,7 @@
       "checkedAt": "2026-07-07T20:11:18.183Z"
     },
     "prj_hgpPItxKbWHMam0MPICHRKTEJg20": {
-      "name": "veteran-resource-navigator",
+      "name": "client-project-4",
       "state": "READY",
       "target": null,
       "checkedAt": "2026-07-07T20:11:18.183Z"

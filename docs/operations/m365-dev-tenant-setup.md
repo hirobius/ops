@@ -1,16 +1,16 @@
 ---
-title: Microsoft 365 — Setup for Email-Triage Live Test (Lilac tenant)
+title: Microsoft 365 — Setup for Email-Triage Live Test (client tenant)
 audience: Adrian (operator)
-client: lilac-insure (test surface; reusable for any client)
+client: any Outlook-using client (reusable per tenant)
 lastUpdated: 2026-05-06
 ---
 
-# M365 Setup Runbook — Lilac Tenant Path
+# M365 Setup Runbook — Client Tenant Path
 
-**Goal:** stand up Microsoft Graph access against Lilac Insurance Group's real
-M365 tenant, scoped narrowly to `administration@lilacinsure.com` as the test
-surface, so we can run `email-triage` end-to-end without touching Conrad's
-personal mailbox until we're ready.
+**Goal:** stand up Microsoft Graph access against a client's real M365 tenant,
+scoped narrowly to the client's shared admin mailbox (`<admin-mailbox>@<client-domain>`)
+as the test surface, so we can run `email-triage` end-to-end without touching the
+owner's personal mailbox until we're ready.
 
 Time: ~25 minutes for first-time setup (most of it click-through in the Azure
 portal).
@@ -30,16 +30,16 @@ now returns:
 
 > You don't currently qualify for a Microsoft 365 Developer Program sandbox subscription.
 
-The replacement path uses the **customer's own tenant** (Lilac's), with the
-shared `administration@lilacinsure.com` mailbox as the test surface. That
-mailbox is the agency's operational ops/admin inbox; it does not contain
-client PII (Conrad's personal `cmilsap@` mailbox is where customer data
-lives). An Exchange Application Access Policy then scopes the registered
+The replacement path uses the **customer's own tenant**, with the client's
+shared `<admin-mailbox>@<client-domain>` mailbox as the test surface. Pick a
+mailbox that is an operational ops/admin inbox and does not contain customer
+PII (the owner's personal `<owner-mailbox>@` mailbox is typically where customer
+data lives). An Exchange Application Access Policy then scopes the registered
 Azure AD app so it can only read **that one mailbox** even though Graph
 Application Permissions technically grant tenant-wide reach. That's the
 security guardrail this runbook adds in Step 3c.
 
-When we flip the test surface from `administration@` to Conrad's mailbox
+When we flip the test surface from the admin mailbox to the owner's mailbox
 later, the only change is one env variable (`MS_GRAPH_TEST_MAILBOX`) and one
 line in the Application Access Policy. No code change, no re-registration.
 
@@ -49,43 +49,43 @@ line in the Application Access Policy. No code change, no re-registration.
 
 Before starting, confirm:
 
-- **You can sign in to Lilac's tenant.** Adrian uses `administration@lilacinsure.com`.
+- **You can sign in to the client's tenant** with the admin mailbox account.
 - **That account has admin rights.** Specifically you need one of:
-  - Global Administrator (full power; most likely on a 1-person agency tenant)
+  - Global Administrator (full power; most likely on a small tenant)
   - Application Administrator + Exchange Administrator combined
   - Cloud Application Administrator + Exchange Administrator combined
   - Enough privilege to register apps, grant admin consent, and run
     `New-ApplicationAccessPolicy` in Exchange Online.
-- **Test:** open `portal.azure.com` while signed in as `administration@`. If
+- **Test:** open `portal.azure.com` while signed in as the admin mailbox. If
   you can navigate to **Microsoft Entra ID → App registrations → New
   registration** without a permission error, you're good.
 
-If `administration@` is not the global admin, find out which mailbox is — that
-account needs to be the one running the steps below, OR Conrad needs to grant
-the missing role to `administration@` first.
+If the admin mailbox is not the global admin, find out which account is — that
+account needs to be the one running the steps below, OR the client's owner needs
+to grant the missing role to the admin mailbox first.
 
 ---
 
 ## Step 1 — Identify the test mailbox
 
-We use `administration@lilacinsure.com` as the test surface. Confirm it
+We use `<admin-mailbox>@<client-domain>` as the test surface. Confirm it
 exists and is reachable:
 
-1. Sign in at https://outlook.office.com as `administration@lilacinsure.com`.
-2. Confirm the inbox loads. Note any existing categories (so the `lilac-*`
+1. Sign in at https://outlook.office.com as `<admin-mailbox>@<client-domain>`.
+2. Confirm the inbox loads. Note any existing categories (so the `<prefix>-*`
    tags we add later don't collide).
 
 That's it. No new mailbox to create — we're using what's already there.
 
 ---
 
-## Step 2 — Register an Azure AD app in Lilac's tenant
+## Step 2 — Register an Azure AD app in the client's tenant
 
-1. Go to https://portal.azure.com (signed in as `administration@lilacinsure.com`).
+1. Go to https://portal.azure.com (signed in as `<admin-mailbox>@<client-domain>`).
 2. Navigate to **Microsoft Entra ID → App registrations → New registration**.
-3. Name: `Lilac Email Triage`.
+3. Name: `<Client> Email Triage`.
 4. Supported account types: **Accounts in this organizational directory only**
-   (single tenant — Lilac only).
+   (single tenant — this client only).
 5. Redirect URI: leave blank.
 6. Click **Register**.
 7. On the app's **Overview** page, copy:
@@ -109,13 +109,13 @@ That's it. No new mailbox to create — we're using what's already there.
    - `Mail.Read` — read messages
    - `Mail.ReadWrite` — read + apply category tags
 3. Click **Add permissions**.
-4. Click **Grant admin consent for `Lilac Insurance Group`**. Status should
+4. Click **Grant admin consent for `<client organization>`**. Status should
    change to green ✓ for both.
 
 ### Step 2c — Scope the app to a single mailbox (CRITICAL — security guard)
 
 `Mail.Read` and `Mail.ReadWrite` Application Permissions grant the app access
-to **every mailbox in Lilac's tenant**. We do not want that. An Exchange
+to **every mailbox in the client's tenant**. We do not want that. An Exchange
 Online **Application Access Policy** restricts the app's reach to a specific
 mailbox or distribution group — the standard Microsoft pattern for scoping
 app-only auth.
@@ -133,36 +133,36 @@ Install-Module -Name ExchangeOnlineManagement -Scope CurrentUser
 #### Apply the policy
 
 ```powershell
-# Sign in to Exchange Online as administration@lilacinsure.com
-Connect-ExchangeOnline -UserPrincipalName administration@lilacinsure.com
+# Sign in to Exchange Online as the admin mailbox
+Connect-ExchangeOnline -UserPrincipalName <admin-mailbox>@<client-domain>
 
 # Create the access policy. Replace <CLIENT-ID> with MS_GRAPH_CLIENT_ID from Step 2.
 New-ApplicationAccessPolicy `
   -AppId <CLIENT-ID> `
-  -PolicyScopeGroupId administration@lilacinsure.com `
+  -PolicyScopeGroupId <admin-mailbox>@<client-domain> `
   -AccessRight RestrictAccess `
-  -Description "Lilac Email Triage — restrict to administration mailbox only"
+  -Description "<Client> Email Triage — restrict to the admin mailbox only"
 
 # Verify
-Test-ApplicationAccessPolicy -Identity administration@lilacinsure.com -AppId <CLIENT-ID>
+Test-ApplicationAccessPolicy -Identity <admin-mailbox>@<client-domain> -AppId <CLIENT-ID>
 # Expected: AccessCheckResult : Granted
-Test-ApplicationAccessPolicy -Identity cmilsap@lilacinsure.com -AppId <CLIENT-ID>
+Test-ApplicationAccessPolicy -Identity <owner-mailbox>@<client-domain> -AppId <CLIENT-ID>
 # Expected: AccessCheckResult : Denied
 ```
 
-If `Granted` shows for `administration@` and `Denied` shows for any other
+If `Granted` shows for the admin mailbox and `Denied` shows for any other
 mailbox you test, the scope is correct. The app cannot reach mailboxes
 outside the policy even though its Graph permissions technically allow it.
 
-#### Future: flipping to Conrad's mailbox
+#### Future: flipping to the owner's mailbox
 
-When we're ready to move from test to production against Conrad's mailbox,
+When we're ready to move from test to production against the owner's mailbox,
 update the policy:
 
 ```powershell
 Set-ApplicationAccessPolicy `
   -Identity "<existing-policy-id>" `
-  -PolicyScopeGroupId cmilsap@lilacinsure.com
+  -PolicyScopeGroupId <owner-mailbox>@<client-domain>
 ```
 
 …and change `MS_GRAPH_TEST_MAILBOX` in `.env.local`. No code change, no
@@ -176,11 +176,11 @@ Open your local `.env.local` (you handle this — Claude does not touch `.env*`)
 Add:
 
 ```bash
-# Microsoft Graph — Lilac email-triage (Lilac M365 tenant, administration@ surface)
+# Microsoft Graph — client email-triage (client M365 tenant, admin-mailbox surface)
 MS_GRAPH_TENANT_ID=<paste from Step 2>
 MS_GRAPH_CLIENT_ID=<paste from Step 2>
 MS_GRAPH_CLIENT_SECRET=<paste from Step 2a>
-MS_GRAPH_TEST_MAILBOX=administration@lilacinsure.com
+MS_GRAPH_TEST_MAILBOX=<admin-mailbox>@<client-domain>
 ```
 
 The variable name `MS_GRAPH_TEST_MAILBOX` is historical — it now means
@@ -192,12 +192,13 @@ sandbox mailbox.
 ## Step 4 — Smoke-test the auth
 
 ```bash
-node clients/lilac-insure/automations/email-triage/live-graph.mjs --auth-check
+node clients/<slug>/automations/email-triage/live-graph.mjs --auth-check
 ```
 
 Expected: HTTP 200 from token endpoint, prints `auth ok — token TTL ~60min`.
 
 Diagnostics:
+
 - **400 `invalid_client`** → wrong client secret. Regenerate via Step 2a, rotate.
 - **401** → admin consent not granted (Step 2b) or wrong tenant ID.
 - **403 on subsequent message reads** → `Mail.Read` permission missing OR
@@ -213,9 +214,9 @@ Diagnostics:
 
 ## Step 5 — Send the 12 test emails
 
-Open `clients/lilac-insure/automations/email-triage/test-emails.md`. It has 12
+Open `clients/<slug>/automations/email-triage/test-emails.md`. It has 12
 copy-paste-ready emails (one per category). Send each to
-`administration@lilacinsure.com` from any sender (your personal Gmail works —
+`<admin-mailbox>@<client-domain>` from any sender (your personal Gmail works —
 vary the `From` address per the guidance in the doc to exercise the
 `from-pattern` rules).
 
@@ -225,23 +226,23 @@ vary the `From` address per the guidance in the doc to exercise the
 
 ```bash
 # Read mode (no mutation): fetch latest 20 unread, classify each, print results
-node clients/lilac-insure/automations/email-triage/live-graph.mjs --read
+node clients/<slug>/automations/email-triage/live-graph.mjs --read
 
 # Apply mode: same, but PATCH categories on each message (visible in Outlook UI)
-node clients/lilac-insure/automations/email-triage/live-graph.mjs --apply
+node clients/<slug>/automations/email-triage/live-graph.mjs --apply
 ```
 
-Outlook → categories show up as `lilac-<id>` (`lilac-lead`, `lilac-claim`,
+Outlook → categories show up as `<prefix>-<id>` (`<prefix>-lead`, `<prefix>-claim`,
 etc.). Right-click any email in Outlook to confirm.
 
 For full-mailbox aggregate stats:
 
 ```bash
-node clients/lilac-insure/automations/email-triage/live-graph.mjs --sweep
+node clients/<slug>/automations/email-triage/live-graph.mjs --sweep
 ```
 
 Writes a privacy-safe report (no message bodies) to
-`clients/lilac-insure/inbox-discovery-results/sweep-<ISO-ts>.json`.
+`clients/<slug>/inbox-discovery-results/sweep-<ISO-ts>.json`.
 
 ---
 
@@ -250,10 +251,10 @@ Writes a privacy-safe report (no message bodies) to
 - **Rotate the client secret** before its expiry date. Set a calendar reminder
   for ~5 days before the date you picked in Step 2a.
 - **Delete the registered app** when the engagement ends: Entra ID → App
-  registrations → `Lilac Email Triage` → Delete. This also removes the
+  registrations → `<Client> Email Triage` → Delete. This also removes the
   Application Access Policy automatically once the AppId no longer exists.
 - **Audit access** quarterly: re-run `Test-ApplicationAccessPolicy` for both
-  `administration@` (should be `Granted`) and `cmilsap@` (should be `Denied`
+  the admin mailbox (should be `Granted`) and the owner's mailbox (should be `Denied`
   until intentionally promoted).
 - **If the secret is exposed** at any point: rotate immediately via Step 2a,
   then update `.env.local`.
@@ -262,16 +263,16 @@ Writes a privacy-safe report (no message bodies) to
 
 ## What this unlocks
 
-Once auth works end-to-end against `administration@`:
+Once auth works end-to-end against the admin mailbox:
 
 - **`email-triage` live test** — classify real Graph payloads (not just fixtures),
   validate the 15/15 classifier holds against actual Outlook structure.
 - **`auto-responder` live test** — once we add `Mail.Send` Application
   Permission (same Step 2b pattern), the auto-responder can send via
-  `administration@` in test mode.
+  the admin mailbox in test mode.
 - **Inbox discovery report (Phase 2 pro bono `pb-1`)** — once we flip the
-  Application Access Policy to Conrad's mailbox, Pattern A discovery runs
-  against his real inbox with one env change.
+  Application Access Policy to the owner's mailbox, Pattern A discovery runs
+  against that real inbox with one env change.
 - **Future M365 clients** — same playbook: register an app in their tenant,
   scope to one mailbox via Application Access Policy, run.
 

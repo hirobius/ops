@@ -16,8 +16,8 @@ describe('CASE_STUDY_FIELDS', () => {
 
 describe('draftCaseStudy', () => {
   it('returns a record with all canonical sections + slug + rawNotes', () => {
-    const r = draftCaseStudy({ slug: 'lilac', text: 'just rambling' });
-    expect(r.slug).toBe('lilac');
+    const r = draftCaseStudy({ slug: 'acme', text: 'just rambling' });
+    expect(r.slug).toBe('acme');
     for (const f of CASE_STUDY_FIELDS) expect(r[f]).toBeDefined();
     expect(r.rawNotes).toBe('just rambling');
   });
@@ -25,16 +25,16 @@ describe('draftCaseStudy', () => {
   it('extracts headings (## Context, ## Problem, …) when present', () => {
     const text = [
       '## Context',
-      'Insurance agency, solo founder, manual processes.',
+      'Local service business, small team, manual processes.',
       '',
       '## Problem',
       'Spending 6h/wk on inbox triage.',
       '',
       '## Approach',
-      'Built classifier + Graph rules.',
+      'Built classifier + routing rules.',
     ].join('\n');
-    const r = draftCaseStudy({ slug: 'lilac', text });
-    expect(r.context).toContain('solo founder');
+    const r = draftCaseStudy({ slug: 'acme', text });
+    expect(r.context).toContain('small team');
     expect(r.problem).toContain('6h/wk');
     expect(r.approach).toContain('classifier');
     expect(r.outcome).toBe(''); // not present in input
