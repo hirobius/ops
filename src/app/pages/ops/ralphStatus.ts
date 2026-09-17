@@ -132,7 +132,8 @@ export interface FleetIssue {
   comments: number;
   assignee: string | null;
   /**
-   * Whether the body carries a `- [ ]` checklist.
+   * Whether the body carries a `- [ ]` checklist or an acceptance/DoD section —
+   * `ralph/next.sh`'s own `has_dod_marker` test (lib/tasks/ralph-parked.mjs).
    *
    * `ralph/next.sh` parks a DoD-less issue on sight, so a row without one will
    * bounce the moment it is queued. Better to see that before tapping Queue

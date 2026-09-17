@@ -179,7 +179,11 @@ describe('importIssuesHandler', () => {
   it('pages a task whose issue is newly labeled needs-adrian (ops#51)', async () => {
     const { sb } = makeSb({ existingTags: [{ key: 'github:hirobius/ops#1', tags: [] }] });
     const github = {
-      listOpenIssues: async () => [issue('hirobius/ops', 1, 'Pick a design', ['needs-adrian'])],
+      listOpenIssues: async () => ({
+        issues: [issue('hirobius/ops', 1, 'Pick a design', ['needs-adrian'])],
+        truncated: false,
+        fetched: 1,
+      }),
     };
     const result = await importIssuesHandler(sb, {} as never, { github: github as never });
     expect(result).toMatchObject({ status: 200, body: { paged: 1 } });
@@ -200,7 +204,11 @@ describe('importIssuesHandler', () => {
       existingTags: [{ key: 'github:hirobius/ops#1', tags: ['needs-adrian'] }],
     });
     const github = {
-      listOpenIssues: async () => [issue('hirobius/ops', 1, 'Pick a design', ['needs-adrian'])],
+      listOpenIssues: async () => ({
+        issues: [issue('hirobius/ops', 1, 'Pick a design', ['needs-adrian'])],
+        truncated: false,
+        fetched: 1,
+      }),
     };
     const result = await importIssuesHandler(sb, {} as never, { github: github as never });
     expect(result).toMatchObject({ status: 200, body: { paged: 0 } });
@@ -211,7 +219,11 @@ describe('importIssuesHandler', () => {
     const { sb } = makeSb({ existingTags: [{ key: 'github:hirobius/ops#1', tags: [] }] });
     notifyEventMock.mockRejectedValueOnce(new Error('EROFS: read-only file system'));
     const github = {
-      listOpenIssues: async () => [issue('hirobius/ops', 1, 'Pick a design', ['needs-adrian'])],
+      listOpenIssues: async () => ({
+        issues: [issue('hirobius/ops', 1, 'Pick a design', ['needs-adrian'])],
+        truncated: false,
+        fetched: 1,
+      }),
     };
     const result = await importIssuesHandler(sb, {} as never, { github: github as never });
     expect(result).toMatchObject({ status: 200, body: { imported: 1, paged: 1 } });
@@ -219,7 +231,13 @@ describe('importIssuesHandler', () => {
 
   it('500s when the pre-upsert tags read fails', async () => {
     const { sb } = makeSb({ tagsListError: { message: 'db down' } });
-    const github = { listOpenIssues: async () => [issue('hirobius/ops', 1)] };
+    const github = {
+      listOpenIssues: async () => ({
+        issues: [issue('hirobius/ops', 1)],
+        truncated: false,
+        fetched: 1,
+      }),
+    };
     const result = await importIssuesHandler(sb, {} as never, { github: github as never });
     expect(result).toEqual({ status: 500, body: { error: 'db down' } });
   });

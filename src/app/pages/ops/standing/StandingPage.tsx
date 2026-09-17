@@ -21,11 +21,15 @@
  *     authenticated-identity feed, so the repo set is DISCOVERED: a repo joins
  *     this view by existing, across every owner the token can see.
  *
- * Deliberately NOT a task board. /ops/tasks is where work gets moved; this page
- * is read-only and exists so the fleet can be understood without operating it.
  * It leads with the chain because the fleet's recurring failure is aim, not
  * capability — #185 sat p0 and unqueued for 64 days, then shipped in two hours
  * once it was labelled (ops#274).
+ *
+ * It is also where work gets moved: /ops/tasks and /ops/projects redirect here,
+ * and every issue row carries the same mirror-free actions, which write labels
+ * straight to GitHub (lib/tasks/actions.mjs). The two that act on the loop
+ * rather than on a label ask first — `run` jumps the queue and steals any
+ * claim, and arming `auto` merges with no supervised-path check (ops#238).
  *
  * Nothing here can go stale the way a hand-maintained status table does; the
  * one it replaced had drifted on three separate facts at once. Every lane
@@ -164,6 +168,12 @@ export default function StandingPage() {
    * exist.
    */
   const [acted, setActed] = useState<ReadonlyMap<string, ActionOutcome>>(new Map());
+  /**
+   * Rows `run` has already fired at, keyed `owner/repo#n`. The row does not
+   * pick up `ralph-wip` until the engine claims the issue, so without this a
+   * second tap in that window would dispatch the same issue twice.
+   */
+  const [dispatched, setDispatched] = useState<ReadonlySet<string>>(new Set());
 
   const act = useCallback(
     async (
@@ -189,6 +199,7 @@ export default function StandingPage() {
             : { text: result.error ?? 'action failed', ok: false },
         ),
       );
+      if (result.ok && action === 'run_now') setDispatched((prev) => new Set(prev).add(id));
       // Pull the change straight back instead of leaving the row sitting in the
       // wrong lane for up to a full poll interval.
       if (result.ok) refetch();
@@ -264,6 +275,7 @@ export default function StandingPage() {
                 issue={b}
                 busy={busy}
                 acted={acted}
+                dispatched={dispatched}
                 act={act}
               />
             ))}
@@ -429,6 +441,7 @@ export default function StandingPage() {
                 issue={q}
                 busy={busy}
                 acted={acted}
+                dispatched={dispatched}
                 act={act}
               />
             ))}
@@ -467,6 +480,7 @@ export default function StandingPage() {
                   issue={b}
                   busy={busy}
                   acted={acted}
+                  dispatched={dispatched}
                   act={act}
                 />
               ),
@@ -506,11 +520,13 @@ function IssueRow({
   issue,
   busy,
   acted,
+  dispatched,
   act,
 }: {
   issue: FleetIssue;
   busy: ReadonlySet<string>;
   acted: ReadonlyMap<string, ActionOutcome>;
+  dispatched: ReadonlySet<string>;
   act: (
     repo: string,
     number: number,
@@ -529,7 +545,7 @@ function IssueRow({
       </a>
       {issue.excerpt ? <p style={s.excerpt}>{issue.excerpt}</p> : null}
       <IssueMeta issue={issue} />
-      <IssueActions id={id} issue={issue} busy={busy} act={act} />
+      <IssueActions id={id} issue={issue} busy={busy} dispatched={dispatched} act={act} />
       <RowResult outcome={outcome} />
     </li>
   );
@@ -560,7 +576,10 @@ function IssueMeta({ issue }: { issue: FleetIssue }) {
       {/* A DoD-less issue is parked on sight by ralph/next.sh. Saying so here
           costs a word; discovering it costs a whole iteration. */}
       {issue.hasDod ? null : (
-        <span style={s.warn} title="No `- [ ]` checklist — the loop parks this on sight">
+        <span
+          style={s.warn}
+          title="No `- [ ]` checklist or acceptance/DoD section — ralph/next.sh parks this on sight"
+        >
           no DoD
         </span>
       )}
@@ -584,16 +603,25 @@ function IssueMeta({ issue }: { issue: FleetIssue }) {
  * position always does the obvious thing. The rest are the toggles the loop
  * actually reads: `ralph-auto` arms self-merge, priority is what
  * `ralph/next.sh` ranks on, and Run jumps the queue outright.
+ *
+ * Run and arming auto act on the loop, not on a label, so both ask first.
+ * Run is offered only on a row in the queue lane that no iteration holds —
+ * the rule the server re-checks against a fresh read before it dispatches —
+ * and stays disabled once it has fired. Disarming auto stays one tap: taking
+ * a risk away should never cost more than adding it.
  */
-function IssueActions({
+export function IssueActions({
   id,
   issue,
   busy,
+  dispatched,
   act,
 }: {
   id: string;
   issue: FleetIssue;
   busy: ReadonlySet<string>;
+  /** Rows `run` has already fired at this session, keyed `owner/repo#n`. */
+  dispatched: ReadonlySet<string>;
   act: (
     repo: string,
     number: number,
@@ -603,8 +631,18 @@ function IssueActions({
   ) => void;
 }) {
   const working = busy.has(id);
+  const name = `${shortRepo(issue.repo)}#${issue.number}`;
   const go = (action: StandingAction, label: string, priority?: string | null) => () =>
     act(issue.repo, issue.number, action, label, priority);
+  /** `go`, behind a confirm — cancelling sends nothing. */
+  const ask = (question: string, action: StandingAction, label: string) => () => {
+    if (window.confirm(question)) act(issue.repo, issue.number, action, label);
+  };
+
+  // In the queue lane (ralph-ready, not parked or gated) and not held by an
+  // iteration: an explicit dispatch steals any claim, so nothing else qualifies.
+  const runnable = issue.queued && !issue.wip && !issue.label;
+  const fired = dispatched.has(id);
 
   const primary =
     issue.label === 'ralph-parked'
@@ -634,22 +672,34 @@ function IssueActions({
         onClick={
           issue.auto
             ? go('auto_off_direct', 'Auto-merge off')
-            : go('auto_on_direct', 'Auto-merge armed')
+            : ask(
+                `Arm auto-merge on ${name}?\n\nops#238: a green PR on this issue merges with NO ` +
+                  'supervised-path check — a diff that touches a revenue path merges without ' +
+                  'ralph-approved.',
+                'auto_on_direct',
+                'Auto-merge armed',
+              )
         }
-        aria-label={`${issue.auto ? 'Disarm' : 'Arm'} auto-merge on ${shortRepo(issue.repo)}#${issue.number}`}
+        aria-label={`${issue.auto ? 'Disarm' : 'Arm'} auto-merge on ${name}`}
       >
         {issue.auto ? 'auto ✓' : 'auto'}
       </Button>
 
-      <Button
-        size="sm"
-        variant="tertiary"
-        disabled={working}
-        onClick={go('run_now', 'Dispatched — jumps the queue')}
-        aria-label={`Run the loop on ${shortRepo(issue.repo)}#${issue.number} now — jumps the queue`}
-      >
-        run
-      </Button>
+      {runnable ? (
+        <Button
+          size="sm"
+          variant="tertiary"
+          disabled={working || fired}
+          onClick={ask(
+            `Run the loop on ${name} now?\n\nThis dispatches ralph.yml at this issue and jumps the queue.`,
+            'run_now',
+            'Dispatched — jumps the queue',
+          )}
+          aria-label={`Run the loop on ${name} now — jumps the queue`}
+        >
+          {fired ? 'dispatched' : 'run'}
+        </Button>
+      ) : null}
 
       <div style={s.prioGroup} role="group" aria-label={`Priority for #${issue.number}`}>
         {PRIORITIES.map((prio) => (

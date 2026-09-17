@@ -227,8 +227,10 @@ describe('sortFleetLanes', () => {
 
     it('leaves a sev1 in its own lane as well', () => {
       const { backlog, total, blocked, queue } = sortFleetLanes(withSev);
-      expect(backlog.map((i: { number: number }) => i.number)).toEqual([4, 27, 99]);
-      expect(blocked.map((i: { number: number }) => i.number)).toEqual([35]);
+      // #27 carries needs-decision, a blocking label since the ops#295 split, so
+      // it waits on Adrian AND stays in the sev1 call-out.
+      expect(backlog.map((i: { number: number }) => i.number)).toEqual([4, 99]);
+      expect(blocked.map((i: { number: number }) => i.number)).toEqual([27, 35]);
       expect(blocked.length + queue.length + backlog.length).toBe(total);
     });
 

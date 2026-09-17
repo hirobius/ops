@@ -1330,35 +1330,114 @@ describe('applyTaskAction — bump_priority (Standing, mirror-free)', () => {
   });
 });
 
+/**
+ * A port for run_now: `getIssue` answers with `issue`, and every dispatch is
+ * recorded, so a test can assert that NOTHING fired as well as what did.
+ */
+function runPort(
+  issue: { state: string; labels: string[] },
+  dispatch: (i: unknown) => Promise<{ runUrl?: string }> = async () => ({
+    runUrl: 'https://github.com/someone/brand-new/actions/workflows/ralph.yml',
+  }),
+) {
+  const reads: unknown[] = [];
+  const dispatched: unknown[] = [];
+  return {
+    reads,
+    dispatched,
+    github: {
+      getIssue: async (i: unknown) => {
+        reads.push(i);
+        return issue;
+      },
+      dispatchWorkflow: async (i: unknown) => {
+        dispatched.push(i);
+        return dispatch(i);
+      },
+    },
+  };
+}
+
+const QUEUED = { state: 'open', labels: ['ralph-ready', 'p1'] };
+
 describe('applyTaskAction — run_now (Standing, mirror-free)', () => {
   it('dispatches ralph.yml at the issue straight from the key, with no Supabase row', async () => {
     const { sb } = makeSb();
-    const calls: unknown[] = [];
-    const github = {
-      dispatchWorkflow: async (i: unknown) => {
-        calls.push(i);
-        return { runUrl: 'https://github.com/hirobius/ops/actions' };
-      },
-    };
+    const { reads, dispatched, github } = runPort(QUEUED);
     const result = await applyTaskAction(
       sb,
       { key: 'github:someone/brand-new#7', action: 'run_now' },
       { github },
     );
-    expect(calls).toEqual([
+    expect(reads).toEqual([{ owner: 'someone', repo: 'brand-new', number: '7' }]);
+    expect(dispatched).toEqual([
       { owner: 'someone', repo: 'brand-new', workflow: 'ralph.yml', inputs: { issue: '7' } },
     ]);
     expect(result).toMatchObject({ status: 200, body: { ok: true } });
   });
 
-  it('names "Actions: write" — a different scope from every other action here', async () => {
-    // A token that labels fine and 404s on dispatch is otherwise baffling.
+  // An explicit issue number overrides ralph.yml's single-flight and priority
+  // guard AND steals any claim. So the button is only as safe as the read in
+  // front of it: every case below must 409 with nothing dispatched.
+  it.each([
+    ['lacks ralph-ready', { state: 'open', labels: ['p1'] }, 'RUN_NOT_QUEUED', /ralph-ready/],
+    [
+      'is ralph-parked',
+      { state: 'open', labels: ['ralph-parked', 'ralph-ready'] },
+      'RUN_NOT_QUEUED',
+      /ralph-parked/,
+    ],
+    [
+      'carries a blocking label',
+      { state: 'open', labels: ['needs-adrian', 'ralph-ready'] },
+      'RUN_NOT_QUEUED',
+      /needs-adrian/,
+    ],
+    ['is closed', { state: 'closed', labels: ['ralph-ready'] }, 'RUN_ISSUE_CLOSED', /closed/],
+    [
+      'already carries ralph-wip',
+      { state: 'open', labels: ['ralph-ready', 'ralph-wip'] },
+      'RUN_ALREADY_WIP',
+      /ralph-wip/,
+    ],
+  ])('409s without dispatching when the issue %s', async (_why, issue, code, message) => {
     const { sb } = makeSb();
-    const github = {
-      dispatchWorkflow: async () => {
-        throw new Error('HTTP 404');
-      },
-    };
+    const { dispatched, github } = runPort(issue);
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#44', action: 'run_now' },
+      { github },
+    );
+    expect(dispatched).toEqual([]);
+    expect(result).toMatchObject({ status: 409, body: { code } });
+    expect((result.body as { error: string }).error).toMatch(message);
+  });
+
+  it('reports a dispatch 404 as "no ralph.yml in <repo>", not a token rotation', async () => {
+    // The issue read just succeeded with the same token, so the repo is visible:
+    // a 404 on the dispatch means the workflow file is not there. Sending the
+    // operator off to rotate a working token is the wrong fix.
+    const { sb } = makeSb();
+    const { github } = runPort(QUEUED, async () => {
+      throw Object.assign(new Error('GitHub returned 404.'), { status: 404 });
+    });
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:someone/brand-new#7', action: 'run_now' },
+      { github },
+    );
+    expect(result).toMatchObject({ status: 404, body: { code: 'RALPH_WORKFLOW_MISSING' } });
+    const { error } = result.body as { error: string };
+    expect(error).toContain('no ralph.yml in someone/brand-new');
+    expect(error).not.toMatch(/rotate/i);
+  });
+
+  it('names "Actions: write" when the dispatch is refused — a different scope from every other action here', async () => {
+    // A token that labels fine and 403s on dispatch is otherwise baffling.
+    const { sb } = makeSb();
+    const { github } = runPort(QUEUED, async () => {
+      throw Object.assign(new Error('GitHub returned 403.'), { status: 403 });
+    });
     const result = await applyTaskAction(
       sb,
       { key: 'github:hirobius/ops#7', action: 'run_now' },
@@ -1366,6 +1445,27 @@ describe('applyTaskAction — run_now (Standing, mirror-free)', () => {
     );
     expect(result.status).toBe(502);
     expect((result.body as { error: string }).error).toContain('Actions: write');
+  });
+
+  it('502s without dispatching when the issue cannot be read', async () => {
+    const { sb } = makeSb();
+    const dispatched: unknown[] = [];
+    const github = {
+      getIssue: async () => {
+        throw new Error('HTTP 500 — upstream');
+      },
+      dispatchWorkflow: async (i: unknown) => {
+        dispatched.push(i);
+        return {};
+      },
+    };
+    const result = await applyTaskAction(
+      sb,
+      { key: 'github:hirobius/ops#7', action: 'run_now' },
+      { github },
+    );
+    expect(dispatched).toEqual([]);
+    expect(result).toMatchObject({ status: 502, body: { code: 'GITHUB_ISSUE_READ_FAILED' } });
   });
 
   it('503s without a port, naming GITHUB_TOKEN', async () => {

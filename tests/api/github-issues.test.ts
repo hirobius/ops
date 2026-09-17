@@ -10,6 +10,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { makeGitHubPort } from '../../lib/github/issues.mjs';
+import { hasDodMarker } from '../../lib/tasks/ralph-parked.mjs';
 
 function rawIssue(n, repo = 'hirobius/ops') {
   return {
@@ -123,13 +124,34 @@ describe('makeGitHubPort().listOpenIssues — pagination', () => {
     expect(issues[0]).not.toHaveProperty('body');
   });
 
-  it('reports hasDod false when the body has no checklist — the loop parks those', async () => {
+  it('reports hasDod false when the body has no checklist or DoD section — the loop parks those', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(pageResponse([{ ...rawIssue(1), body: 'Just a paragraph.' }])),
     );
     const { issues } = await makeGitHubPort().listOpenIssues();
     expect(issues[0].hasDod).toBe(false);
+  });
+
+  it('agrees with ralph/next.sh on a DoD section that has no checklist', async () => {
+    // next.sh's has_dod_marker accepts an acceptance / DoD / definition-of-done
+    // section, not only `- [ ]`. A checklist-only test flagged these rows
+    // "no DoD" while the loop happily took them — the row must say what the
+    // loop will actually do, so it reuses the loop's own port of the regex.
+    const bodies = [
+      '## Acceptance criteria\n\nThe page renders the banner.',
+      'Definition of done: the cron is green for a week.',
+      '## DoD\nShip it.',
+    ];
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(pageResponse(bodies.map((body, i) => ({ ...rawIssue(i + 1), body })))),
+    );
+    const { issues } = await makeGitHubPort().listOpenIssues();
+    expect(issues.map((i: { hasDod: boolean }) => i.hasDod)).toEqual([true, true, true]);
+    for (const body of bodies) expect(hasDodMarker(body)).toBe(true);
   });
 });
 
@@ -578,5 +600,89 @@ describe('makeGitHubPort().dispatchWorkflow (ops#113 — "Run Ralph" board actio
         inputs: { issue: '113' },
       }),
     ).rejects.toThrow(/GITHUB_TOKEN/);
+  });
+
+  it('carries the HTTP status on the thrown error so a caller can tell 404 from 403', async () => {
+    // Standing's run reads the issue first with the same token; after that read
+    // succeeds, a dispatch 404 means "no ralph.yml here", not "rotate the token".
+    // It can only say so if the status survives the throw.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: { get: () => null },
+        text: async () => '',
+      }),
+    );
+
+    await expect(
+      makeGitHubPort()!.dispatchWorkflow({
+        owner: 'hirobius',
+        repo: 'ops',
+        workflow: 'ralph.yml',
+        inputs: { issue: '113' },
+      }),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+});
+
+describe('makeGitHubPort().getIssue (Standing run guard)', () => {
+  beforeEach(() => {
+    vi.stubEnv('GITHUB_TOKEN', 'test-token');
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it('GETs one issue and returns its state and label names', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: { get: () => null },
+      json: async () => ({
+        number: 44,
+        state: 'open',
+        labels: [{ name: 'ralph-ready' }, { name: 'p1' }],
+        body: 'not forwarded',
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const issue = await makeGitHubPort()!.getIssue({ owner: 'hirobius', repo: 'ops', number: 44 });
+
+    expect(fetchMock.mock.calls[0][0]).toBe('https://api.github.com/repos/hirobius/ops/issues/44');
+    expect(issue).toEqual({ number: 44, state: 'open', labels: ['ralph-ready', 'p1'] });
+  });
+
+  it('throws an actionable token error on 401/403', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        headers: { get: () => null },
+        text: async () => '',
+      }),
+    );
+    await expect(
+      makeGitHubPort()!.getIssue({ owner: 'hirobius', repo: 'ops', number: 44 }),
+    ).rejects.toThrow(/GITHUB_TOKEN/);
+  });
+
+  it('throws with the status on any other failure', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: { get: () => null },
+        text: async () => 'Not Found',
+      }),
+    );
+    await expect(
+      makeGitHubPort()!.getIssue({ owner: 'hirobius', repo: 'ops', number: 9999 }),
+    ).rejects.toMatchObject({ status: 404 });
   });
 });
