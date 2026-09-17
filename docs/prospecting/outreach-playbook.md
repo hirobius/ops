@@ -16,20 +16,20 @@ the primary channel** (B2B calls are exempt from WA's telemarketing law, and the
 "no website" fact is visible before you dial), backed by a **pre-built spec-site**
 you can show them before they pay. SMS is effectively off the table in WA.
 
-**Partner rule of thumb:** *Call businesses by hand, 8am–8pm. Email is fine if the
+**Partner rule of thumb:** _Call businesses by hand, 8am–8pm. Email is fine if the
 subject line is 100% true and every email has our address + an unsubscribe. Never
-bulk-text. Only text/DM someone after they reply.*
+bulk-text. Only text/DM someone after they reply._
 
 ## 1. Channels + legality
 
-| Channel | Verdict | Why |
-|---|---|---|
-| **Cold call (live, manual dial)** | ✅ Primary | WA telemarketing law (RCW 19.158) **exempts business-to-business calls**; trades answer phones |
-| **Cold email** | ✅ Secondary / follow-up | Legal under CAN-SPAM (opt-out); scalable — but WA CEMA subject-line rules apply |
-| **IG / FB DM** | 🟡 Supplementary | Good for FB-page-only prospects; low volume, manual |
-| **Cold SMS to cell** | ❌ Avoid in WA | TCPA written consent + WA CEMA bans unsolicited commercial texts |
+| Channel                           | Verdict                  | Why                                                                                            |
+| --------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------- |
+| **Cold call (live, manual dial)** | ✅ Primary               | WA telemarketing law (RCW 19.158) **exempts business-to-business calls**; trades answer phones |
+| **Cold email**                    | ✅ Secondary / follow-up | Legal under CAN-SPAM (opt-out); scalable — but WA CEMA subject-line rules apply                |
+| **IG / FB DM**                    | 🟡 Supplementary         | Good for FB-page-only prospects; low volume, manual                                            |
+| **Cold SMS to cell**              | ❌ Avoid in WA           | TCPA written consent + WA CEMA bans unsolicited commercial texts                               |
 
-- **Calling:** TCPA restricts *autodialers and prerecorded/AI voices* — a **live
+- **Calling:** TCPA restricts _autodialers and prerecorded/AI voices_ — a **live
   person dialing by hand** to numbers not on the National DNC list is permitted.
   WA adds: no calls before 8am / after 8pm local; identify yourself, company, and
   purpose within **30 seconds**; honor a stop request within 10 seconds and a
@@ -49,10 +49,11 @@ Leading with a tangible artifact beats a plain pitch. Our unfair advantage: we c
 show a **real, working one-page site of their own business** (name, services, their
 photos, their reviews) before they pay — collapsing the two hardest objections
 ("will it look good?" / "will you get my business?") into a link they open on their
-phone. It reframes the call from *"do you want a website?"* (easy no) to *"I already
-built yours — want to see it?"* (curiosity-driven yes).
+phone. It reframes the call from _"do you want a website?"_ (easy no) to _"I already
+built yours — want to see it?"_ (curiosity-driven yes).
 
 **Keep it low-friction, and let `buildScore` triage the effort:**
+
 1. **Batch-build full spec sites for high-`buildScore` leads** (rich photos, reviews,
    hours, description = enough material for a believable page).
 2. For **low-`buildScore`** leads, use a cheaper **60-second Loom teardown** of their
@@ -63,34 +64,42 @@ built yours — want to see it?"* (curiosity-driven yes).
 
 ## 3. Templates + sequence
 
-Short, specific to *their* business, one idea per message, plain language, always a
+Short, specific to _their_ business, one idea per message, plain language, always a
 low-effort ask. Reference the scrape facts (no-site, review count, category).
 
 **Call opener (primary):**
+
 > "Hi, is this [Owner]? … I'll be quick — I build websites for [tree/fence/septic]
 > companies here in [county]. I noticed [Business] has **[47] reviews at 4.9 stars**
 > but no real website, just the Facebook page — so I actually already **built you a
 > sample one-page site** with your info on it. Can I text you the link real quick?"
 
 **Voicemail:**
+
 > "Hey [Owner], it's [Partner] — I build websites for [category] companies around
 > [city]. I put together a quick sample site for [Business] using your reviews and
 > photos, no charge to look. I'll text you the link — give it a peek, [number]."
 
-**Email — first touch.** Subject: `sample website for [Business Name]` *(literally true)*
+**Email — first touch.** Subject: `sample website for [Business Name]` _(literally true)_
+
 > Hi [Owner], I build simple websites for [category] companies around [city]. I
 > noticed [Business] has [47] Google reviews but no website yet. So I built you a
 > sample one-page site with your services, photos, and reviews already on it. Want
 > the link? Free to look, no obligation.
-> — [Partner], [Company] · [Physical address] · reply "stop" to opt out
+> — [Partner]
+>
+> _(footer: paste the output of `node scripts/render-privacy-policy.mjs --footer`,
+> which carries the entity, physical address, ad disclosure and opt-out from
+> `lib/compliance/identity.mjs`)_
 
 **Follow-up 1 (day 3):** deliver the link. **FU 2 (day 6):** ROI in their units —
 "one extra [fence/tree/septic] job covers it for the year." **FU 3 (day 10):** social
 proof + offer a 5-min walkthrough. **Breakup (day 14):** "I'll stop bugging you — I'll
-leave the sample link live another week." *(Breakup messages reliably pull a chunk of
-total replies.)*
+leave the sample link live another week." _(Breakup messages reliably pull a chunk of
+total replies.)_
 
 **IG/FB DM (for FB-only prospects):**
+
 > "Hey [Owner] — love the deck work in your recent post. I build websites for
 > [category] businesses and put together a quick sample page for [Business] with your
 > photos + reviews. Want me to send the link? Free to look 👍"
@@ -136,7 +145,7 @@ follow-ups before starting new leads** → warm handoff to the demo/close call.
 
 **Tools (low-cost):** email sequencing — **Smartlead** or **Instantly** (with inbox
 warmup, truthful subjects, address + unsubscribe in footer); calls — **Google
-Voice / OpenPhone**, *manual dial only*; teardown video — **Loom** (free); CRM —
+Voice / OpenPhone**, _manual dial only_; teardown video — **Loom** (free); CRM —
 start with a **Google Sheet / Airtable** (Business, Category, Phone, Email, Reviews,
 Rating, HasSite, leadScore, buildScore, City, Status, Last Touch, Next Follow-up,
 Notes, Outcome, Spec-site URL); a permanent **do-not-call tab**, scrubbed before every send.
@@ -151,8 +160,8 @@ next month — closing the loop between the pipeline and the sales floor.
 Common first-partner structures: **commission-only ~20–30% of a closed one-time
 site**, sometimes **10–20% recurring** on any monthly hosting/maintenance; a hybrid
 (higher first-deal %, smaller renewal share) is standard when there's recurring
-revenue. Two structural choices: **(a)** pay on *closed deals* vs. a small bounty per
-*qualified booked demo* + the bigger % on close (kinder to a new partner); **(b)** for
+revenue. Two structural choices: **(a)** pay on _closed deals_ vs. a small bounty per
+_qualified booked demo_ + the bigger % on close (kinder to a new partner); **(b)** for
 a **non-technical** partner #1, the cleanest split is **partner books & warms (calls,
 sends spec links, sets the meeting); the technical owner runs the demo & close** — so
 the partner never fields build/pricing questions. Raise their % as they take on more
@@ -164,19 +173,21 @@ Turns this playbook into a buildable v1. **Channels: email + phone.** SMS stays 
 DM / direct-mail are later.
 
 **Decisions locked**
+
 - **Volume:** ~**20 personalized emails/day** (+ manual dials). Deliberately low + personalized —
   best deliverability, lowest legal surface. One warmed inbox covers it.
 - **Sender = a purpose-built cold platform (Smartlead recommended; Instantly equivalent),
   NOT a transactional API.** Resend/Postmark/SES are built for opted-in/transactional mail —
   they penalize or ban cold outreach and give none of the warm-up / inbox-rotation / suppression
-  tooling. **Resend keeps only the *transactional* half**: once a prospect replies/opts in, the
+  tooling. **Resend keeps only the _transactional_ half**: once a prospect replies/opts in, the
   1:1 "here's your preview link," notifications, and later invoices go through Resend — never
   the cold campaign.
 - **Integration:** cold platform ⇄ **Supabase** (`leads` stays the source of truth).
 
 **Prerequisite setup (human, one-time — agents never touch DNS or `.env*`)**
-- [ ] Buy a **secondary sending domain** (a hirobius lookalike, e.g. `gethirobius.com`) — *never
-      send cold from the primary domain*, so a reputation dip never touches real mail. **(Not
+
+- [ ] Buy a **secondary sending domain** (a hirobius lookalike, e.g. `gethirobius.com`) — _never
+      send cold from the primary domain_, so a reputation dip never touches real mail. **(Not
       owned yet — this gates go-live.)**
 - [ ] Create **1 Google Workspace inbox** on it (a 2nd as backup). At ~20/day one warmed inbox
       is plenty (safe ceiling ~30–50/day/inbox once warmed).
@@ -186,6 +197,7 @@ DM / direct-mail are later.
       one-click unsubscribe).
 
 **Architecture (fits the Vercel + Supabase stack)**
+
 - **Supabase `leads` = source of truth.** A Vercel function (approval-button or cron) selects
   qualified leads (`lead_score ≥ threshold`, has email, not suppressed, WA + target niche) with
   their `preview_url`, and pushes them into a platform campaign via its API.
@@ -204,6 +216,7 @@ DM / direct-mail are later.
 weekly what-converts review (§6).
 
 **Compliance send-gate** — enforce in code before any lead is queued; one failing check blocks it:
+
 - Subject line rendered and checked **literally true** (no `Re:`/`Fwd:`, no "as discussed") — WA
   CEMA, **$500/email**.
 - Footer has a **valid physical mailing address** + **working one-click unsubscribe** — CAN-SPAM;
@@ -216,6 +229,7 @@ weekly what-converts review (§6).
 ≈**2–4 closed sites/mo** once follow-ups run (touches 2–4 win most; the platform automates them).
 
 **Build order for #9**
+
 1. `leads`/`outreach` schema migration + suppression list.
 2. Platform API client + the push-qualified-leads function (approval-gated).
 3. Webhook receiver → status writeback.
@@ -223,6 +237,7 @@ weekly what-converts review (§6).
 5. Warm-up, then first 20/day live once the domain + inbox are ready.
 
 ## Honest caveats
+
 - The big "video lifted replies 4%→22%" figures are practitioner anecdotes — treat
   the **direction** (tangible artifact beats plain pitch) as reliable, the exact
   multiplier as marketing.
@@ -231,6 +246,7 @@ weekly what-converts review (§6).
   spec-site-first motion is the safer core play.
 
 ## Sources
+
 - [FTC — CAN-SPAM Compliance Guide](https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business)
 - [RCW 19.158 (WA telephone solicitation)](https://app.leg.wa.gov/rcw/default.aspx?cite=19.158&full=true) · [Davis Wright Tremaine — WA B2B exemption](https://www.dwt.com/blogs/family-business-resource-center/2022/08/washington-tcpa-telemarketing-restrictions-law)
 - [RCW 19.190 (WA CEMA)](https://app.leg.wa.gov/rcw/default.aspx?cite=19.190&full=true) · [Clark Hill — CEMA subject-line ruling](https://www.clarkhill.com/news-events/news/washington-supreme-court-says-its-illegal-to-include-any-false-or-misleading-information-in-the-subject-line-of-a-commercial-email/)

@@ -12,15 +12,22 @@
  *
  *   NODE_USE_ENV_PROXY=1 node scripts/purge-stale-leads.mjs             # dry-run
  *   NODE_USE_ENV_PROXY=1 node scripts/purge-stale-leads.mjs --apply     # delete
- *   --months <n>   retention window (default 12)
+ *   --months <n>   retention window (default RETENTION_MONTHS = 12, from
+ *                  lib/compliance/retention.mjs — the same number the public
+ *                  privacy policy states, ops#38)
  */
 
+import { RETENTION_MONTHS } from '../lib/compliance/retention.mjs';
+
 function parseArgs(argv) {
-  const o = { months: 12, apply: false };
+  const o = { months: RETENTION_MONTHS, apply: false };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--months') o.months = Number(argv[++i]);
     else if (argv[i] === '--apply') o.apply = true;
-    else if (argv[i] === '--help' || argv[i] === '-h') { console.log('See header.'); process.exit(0); }
+    else if (argv[i] === '--help' || argv[i] === '-h') {
+      console.log('See header.');
+      process.exit(0);
+    }
   }
   return o;
 }
@@ -35,30 +42,46 @@ async function main() {
   const sb = await getServiceClient();
 
   // Candidates: older than the window, never worked, not won, not suppressed.
-  const filter = (q) => q
-    .lt('created_at', cutoffIso)
-    .is('outreach_status', null)
-    .is('won_at', null)
-    .eq('do_not_contact', false);
+  const filter = (q) =>
+    q
+      .lt('created_at', cutoffIso)
+      .is('outreach_status', null)
+      .is('won_at', null)
+      .eq('do_not_contact', false);
 
-  const { count, error } = await filter(sb.from('leads').select('id', { count: 'exact', head: true }));
+  const { count, error } = await filter(
+    sb.from('leads').select('id', { count: 'exact', head: true }),
+  );
   if (error) {
     console.error('Supabase read failed (did migration 0007 apply?):', error.message || error);
     process.exit(1);
   }
   console.log(`Retention: ${o.months} months (cutoff ${cutoffIso.slice(0, 10)}).`);
   console.log(`Purge candidates (stale + unworked + not won + not suppressed): ${count ?? 0}`);
-  console.log('Kept regardless: won leads, do_not_contact / unsubscribed tombstones, in-outreach leads.');
+  console.log(
+    'Kept regardless: won leads, do_not_contact / unsubscribed tombstones, in-outreach leads.',
+  );
 
   if (!o.apply) {
     console.log('\nDRY RUN — nothing deleted. Re-run with --apply to delete the above.');
     return;
   }
-  if (!count) { console.log('\nNothing to purge.'); return; }
+  if (!count) {
+    console.log('\nNothing to purge.');
+    return;
+  }
 
   const { error: delErr } = await filter(sb.from('leads').delete());
-  if (delErr) { console.error('Delete failed:', delErr.message || delErr); process.exit(1); }
-  console.log(`\nPurged ${count} stale lead(s). (Logged count only — the PII itself is gone, per #37.)`);
+  if (delErr) {
+    console.error('Delete failed:', delErr.message || delErr);
+    process.exit(1);
+  }
+  console.log(
+    `\nPurged ${count} stale lead(s). (Logged count only — the PII itself is gone, per #37.)`,
+  );
 }
 
-main().catch((e) => { console.error(e?.stack || String(e)); process.exit(1); });
+main().catch((e) => {
+  console.error(e?.stack || String(e));
+  process.exit(1);
+});

@@ -4,7 +4,7 @@
 > Regenerate with `pnpm scripts:index`. Deterministic (no timestamps), so it
 > only changes when scripts do.
 
-**146 scripts** across 9 categories.
+**148 scripts** across 9 categories.
 
 ## Prefix taxonomy
 
@@ -135,7 +135,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `test-phase1.mjs`            | (no header description)                                                                                     | `test:phase1`  | —     |
 | `test-prompt-regression.mjs` | Regression suite for LLM prompt outputs. Walks fixtures/llm-prompts/<slug>/ directories. Each must contain: | `test:prompts` | —     |
 
-## other (74)
+## other (76)
 
 | Script                           | Purpose                                                                                                                                                                                                                      | pnpm                                                                      | Fires         |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------- |
@@ -178,6 +178,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `persist-learned-rule.mjs`       | Append a learned-rule entry to docs/ai/learned-rules.jsonl, the append-only canon for hermes post-mortem distillation output. Each entry is one JSON line, schema:                                                           | —                                                                         | —             |
 | `prerender.mjs`                  | Static pre-render script.                                                                                                                                                                                                    | `build:prerender`                                                         | —             |
 | `print-health-commit.mjs`        | Prints a copyable commit message that includes the current system integrity grade from the latest token audit.                                                                                                               | `health-commit`                                                           | —             |
+| `privacy-request.mjs`            | contacting a business, delete what we hold on it, or tell it what we hold.                                                                                                                                                   | —                                                                         | —             |
 | `process-call-recording.mjs`     | Download, extract, and transcribe call recording ZIPs from Google Drive. Point it at a folder ID and it processes every unread ZIP inside. Point it at a single file ID and it processes just that one.                      | —                                                                         | —             |
 | `promote-learned-rule.mjs`       | Interactive walker over docs/ai/learned-rules.jsonl. For each unpromoted entry (no `promotedAt` field), prompts Adrian to promote it to one of two destinations:                                                             | `guardrail:learned-rules`, `guardrail:promote-rule`                       | —             |
 | `promote-to-core.mjs`            | 4-check Promotion Checklist: 1. no-hex-colors — no raw `#RRGGBB` / `#RGB` outside of comments 2. uses-tokens — at least one `var(--semantic-…)` or `var(--primitive-…)`                                                      | —                                                                         | —             |
@@ -191,6 +192,7 @@ One canonical meaning per verb-prefix — pick the matching prefix when adding a
 | `reconcile-ralph-closures.mjs`   | The problem: a Ralph PR merges with `Closes #N` in its body, GitHub's closing-keyword linkage silently doesn't fire, and the issue stays open and `ralph-ready`. The loop re-claims it, the agent correctly reports "already | —                                                                         | manual · warn |
 | `record-health.mjs`              | Appends the current token audit snapshot to the health history log so the Overview rail can track trend over time.                                                                                                           | `check:semantic-report`, `health:record`                                  | —             |
 | `refresh-firing-stats.mjs`       | Reads docs/guardrails/firing-log.jsonl (produced by run-gates.mjs emit-jsonl, see 13g-12-postcommit-verifier) and computes per-gate `lastFiringAt` / `lastViolationAt` stats via scripts/lib/firing-stats.mjs.               | `guardrail:firing-stats`                                                  | —             |
+| `render-privacy-policy.mjs`      | CAN-SPAM email footer, ready to paste (ops#38).                                                                                                                                                                              | —                                                                         | —             |
 | `rescore-leads.mjs`              | for leads already in Supabase, from columns we already hold.                                                                                                                                                                 | —                                                                         | —             |
 | `research-feed-middleware.mjs`   | Dev-only HTTP middleware: GET /api/research-feed Returns a flat, time-sorted list of recent auto-research findings so the /ops "Research" disclosure can render a feed without parsing markdown                              | —                                                                         | —             |
 | `run-gates.mjs`                  | Single source of truth for "which gates run on which channel."                                                                                                                                                               | `closure:plan`                                                            | —             |
