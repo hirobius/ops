@@ -154,8 +154,8 @@ export function formatReport(open) {
     '',
     ...open.flatMap((i) => [`  • ${i.repo}#${i.number} — ${i.title}`, `      ${i.url}`]),
     '',
-    'A sev1 stays on this list and on /ops/standing until it is closed or explicitly accepted.',
-    'It cannot be silently carried.',
+    'A sev1 stays on this list and on /ops/standing until it is closed.',
+    'Removing the sev1 label instead needs a comment on the issue saying why — it cannot be silently carried.',
   ];
   return lines.join('\n');
 }

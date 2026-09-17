@@ -166,8 +166,8 @@ export default function StandingPage() {
 
       <Coverage data={data} error={error} needsToken={needsToken} />
 
-      {/* ── 0. Open sev1 (ops#317) — above everything, absent when none ──── */}
-      <Sev1Banner sev1={data?.sev1 ?? []} />
+      {/* ── 0. Open sev1 (ops#317) — above everything; UNKNOWN if the read failed ── */}
+      <Sev1Banner sev1={data?.sev1 ?? []} error={error} needsToken={needsToken} loaded={loaded} />
 
       {note ? (
         <p style={note.ok ? s.noteOk : s.noteBad} role="status">

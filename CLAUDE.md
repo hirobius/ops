@@ -23,7 +23,7 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
 - **Severity is orthogonal to `p0`–`p3`** (ops#317): priority is _when_, severity
   is _what happens if we don't_. `sev1` — legal exposure, security incident, data
   loss, or already affecting a real third party: tops `/ops/standing` and fails
-  `pnpm sev1:check` until closed or explicitly accepted; never silently carried.
+  `pnpm sev1:check` until closed; removing `sev1` needs a comment saying why.
   `sev2` — could become sev1, degrades a production surface, or breaks a trust
   signal: reviewed weekly. `sev3` — contained blast radius: normal backlog.
 - **`/ops` is gated in production** by a server-side password: `api/ops-login.ts` checks `OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET` and sets an httpOnly session cookie. Adrian sets those in the Vercel dashboard env (Production + Preview scopes). `pnpm dev` bypasses the gate.

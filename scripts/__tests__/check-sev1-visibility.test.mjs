@@ -182,7 +182,10 @@ describe('formatReport', () => {
     expect(text).toContain('https://x/27');
     expect(text).toContain('hirobius/hds#4');
     expect(text).toContain('Legal exposure, security incident, data loss');
-    expect(text).toMatch(/closed or explicitly accepted/);
+    expect(text).toMatch(/until it is closed/);
+    // No 'accepted' state exists to point at — only closing, or unlabelling with a stated reason.
+    expect(text).not.toMatch(/accepted/);
+    expect(text).toMatch(/comment on the issue saying why/);
   });
 });
 
