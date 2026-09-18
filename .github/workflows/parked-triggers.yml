@@ -9,6 +9,15 @@ name: Parked triggers
 # stays red every day until the entry is handled: rolled forward if it is
 # recurring, or filed as a fresh issue and deleted if it is one-shot.
 #
+# A failed-run email addressed to one account is a weak alert, so the run also
+# pages DISCORD_WEBHOOK_URL with what fired, via scripts/discord-page.mjs. The
+# page is best-effort: it always exits 0, so it never turns a red run green and
+# never turns a green one red. A missing secret OR a dead webhook prints a
+# notice naming the variable and the `gh secret set` line that fixes it — the
+# script checks the HTTP status, which is why this is not four lines of inline
+# `curl` (`curl` without `--fail` exits 0 on a 401/404, so a revoked webhook
+# read as a delivered page).
+#
 # Node builtins only, so there is no install step.
 
 on:
@@ -36,4 +45,20 @@ jobs:
           node-version: '22'
 
       - name: Check parked triggers
-        run: node scripts/check-parked-triggers.mjs
+        id: check
+        run: |
+          set -o pipefail
+          node scripts/check-parked-triggers.mjs 2>&1 | tee "$RUNNER_TEMP/parked.txt"
+
+      - name: Page Discord with what fired
+        if: failure()
+        env:
+          # GITHUB_REPOSITORY is set by the runner; discord-page.mjs prints it
+          # back in the `gh secret set` fix line, so nothing extra is needed.
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          node scripts/discord-page.mjs \
+            --title "⏰ **Parked trigger fired** — \`docs/ai/PARKED.md\` has an entry whose condition is now true. Roll it forward if recurring, or file it as an issue and delete it." \
+            --url "$RUN_URL" \
+            --detail-file "$RUNNER_TEMP/parked.txt"

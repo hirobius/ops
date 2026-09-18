@@ -84,8 +84,13 @@ not a bug.
   and, once its PR is open, the issue loop waits on it. While the batch is
   still running (no PR yet) the issue loop can't see it and may start
   alongside — see the workflow header.
-- **Merge:** batch PRs link no issue, so `ralph-auto` can't pre-approve them —
-  label the PR `ralph-approved`, then re-dispatch to re-measure.
+- **Merge:** batch PRs link no issue, so `ralph-auto` can't pre-approve them.
+  They still merge hands-off under ops#238: `ralph/metric-*` is a `ralph/*`
+  branch, so once `ralph-gate` is green the hourly watchdog merges it like any
+  other Ralph PR. `ralph-approved` is needed **only** when the batch touches a
+  supervised revenue path (`REVENUE_PATH_PREFIXES`) or the boundary's own files
+  (`BOUNDARY_SELF_PATHS`), or when the watchdog cannot read the diff. Either
+  way, re-dispatch after the merge to re-measure.
 - The workflow's header comment is the full contract;
   `scripts/__tests__/ralph-metric-workflow.test.mjs` pins its safety
   invariants.

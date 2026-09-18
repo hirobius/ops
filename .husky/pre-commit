@@ -28,11 +28,14 @@ node scripts/validate-guardrail-registry.mjs
 echo "Checking lockfile integrity (pnpm install --frozen-lockfile)..."
 pnpm install --frozen-lockfile --offline --prefer-offline --ignore-scripts --silent 2>/dev/null || (echo "Lockfile drift detected: run 'pnpm install' to resync pnpm-lock.yaml" && exit 1)
 
-echo "Running all pre-commit registry gates (15 gates, declaration order)..."
+echo "Running all pre-commit registry gates (declaration order)..."
 # Single source of truth: reads docs/guardrails/registry.json --channel pre-commit.
 # Gate list and order are authoritative from the registry — never edit gate
 # invocations here directly. To add/remove a gate from pre-commit, update
 # registry.json firingChannel instead. Serial (no --parallel): order matters.
+# Never restate the gate COUNT in this echo either: run-gates prints the live
+# one ("running channel pre-commit (N gate(s))"), and the number hard-coded
+# here had drifted to 15 against an actual 20.
 #
 # Per-file scoping (unit 13g-2-validator-self-register): pass the staged
 # file list as --scope. Gates with a `glob` in registry.json run only when

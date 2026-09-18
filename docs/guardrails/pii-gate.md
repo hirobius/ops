@@ -29,9 +29,11 @@ written.
   turned into spaces, so `jane\s+example` also matches `jane-example`,
   `jane_example`, `JaneExample` and `Jane+Example`.
 
-**Why email and phone only warn.** `run-gates` fails pre-commit on _any_
-non-zero exit, whatever the registry severity (ops#304), so a blocking rule has
-to be precise. The 2026-09-16 sweep found that only about 11% of non-allowlisted
+**Why email and phone only warn.** `run-gates` blocks on a failing
+**error**-severity gate (ops#306), and `check-pii` is registered `error`, so any
+non-zero exit from the gate stops the commit. Only the error-severity _rules_
+above drive that exit code (`--fail-on error`, the default), so a blocking rule
+has to be precise. The 2026-09-16 sweep found that only about 11% of non-allowlisted
 emails were real PII, and most phone numbers were public business listings or
 fixtures. Denylist terms and private links had about zero false positives. The
 client mailboxes that matter are denylist entries (`@<client-domain>`), so they

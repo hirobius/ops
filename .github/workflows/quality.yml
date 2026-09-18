@@ -57,5 +57,8 @@ jobs:
         # coverage, and the layout tests are registry gates there, not steps here.
         # To add/remove a CI check, change the registry, never this file;
         # scripts/__tests__/quality-workflow.test.mjs fails on a new direct step.
-        # run-gates runs every gate (no fail-fast) and exits 1 if any failed.
+        # run-gates runs every gate (no fail-fast) and exits 1 if any
+        # ERROR-severity gate failed. A warn/info gate's non-zero exit is
+        # printed and does not fail the job (ops#306) — severity lives in the
+        # registry, so demoting a check to advisory is a registry edit.
         run: node scripts/run-gates.mjs --channel ci-pr --parallel 4

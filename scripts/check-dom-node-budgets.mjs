@@ -18,6 +18,8 @@
  * quietly accreting hand-written markup past a sane structural ceiling.
  *
  * Baseline: docs/guardrails/baselines/check-dom-node-budgets.json
+ *   (overridable via CHECK_DOM_NODE_BUDGETS_BASELINE_FILE, for tests only —
+ *   this script WRITES its baseline, and a test must never write a tracked file)
  *   Shape: { budgets: { [repoRelPath]: number }, updatedAt: ISO8601, sha: string }
  *
  * Exit codes:
@@ -35,7 +37,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, dirname, relative } from 'node:path';
+import { join, dirname, relative, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
@@ -44,7 +46,12 @@ import { hasJsonFlag, emitResult } from './lib/gate-output.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const SCAN_ROOT = join(ROOT, 'src', 'app');
-const BASELINE_FILE = join(ROOT, 'docs', 'guardrails', 'baselines', 'check-dom-node-budgets.json');
+// Overridable so tests can point at a disposable copy instead of the tracked
+// baseline (real writes, real repo counts — just an isolated destination).
+// Unset in every non-test invocation. Same seam as check-fixture-stubs-ratchet.
+const BASELINE_FILE =
+  process.env.CHECK_DOM_NODE_BUDGETS_BASELINE_FILE ||
+  join(ROOT, 'docs', 'guardrails', 'baselines', 'check-dom-node-budgets.json');
 
 const jsonMode = hasJsonFlag(process.argv);
 const updateMode = process.argv.includes('--update');
@@ -85,10 +92,41 @@ function countJsxElements(file) {
   return count;
 }
 
+/**
+ * Rewrites either separator to POSIX. Exported, and matching BOTH separators
+ * rather than the host's `sep`, so the conversion is testable anywhere: a split
+ * on `sep` alone is a no-op on Linux — where `relative()` already returns
+ * forward slashes — so no assertion running on CI could fail if this regressed.
+ *
+ * @param {string} p
+ * @returns {string}
+ */
+export function toPosixPath(p) {
+  return p.split(/[\\/]/).join('/');
+}
+
+/**
+ * Repo-relative path with POSIX separators, on every platform.
+ *
+ * The baseline is a committed, cross-platform artifact keyed by path, so the
+ * key must not depend on who ran the script. `relative()` returns
+ * `src\app\…` on Windows, which matched nothing in the checked-in baseline:
+ * every file read as brand-new, was recorded at its current count, and the
+ * whole baseline got rewritten with backslash keys — silently raising every
+ * budget and blowing up the diff. That is why `--update` carried a
+ * "WSL only" warning. It no longer needs one.
+ *
+ * @param {string} file absolute path inside the repo
+ * @returns {string}
+ */
+function repoRelative(file) {
+  return toPosixPath(relative(ROOT, file));
+}
+
 function currentCounts() {
   const counts = {};
   for (const file of walkTsx(SCAN_ROOT)) {
-    counts[relative(ROOT, file)] = countJsxElements(file);
+    counts[repoRelative(file)] = countJsxElements(file);
   }
   return counts;
 }
@@ -163,7 +201,10 @@ function main() {
         `check-dom-node-budgets: baseline updated → ${Object.keys(counts).length} file(s)\n`,
       );
     }
-    emitResult({ violations: [], summary: { files: Object.keys(counts).length }, ok: true }, jsonMode);
+    emitResult(
+      { violations: [], summary: { files: Object.keys(counts).length }, ok: true },
+      jsonMode,
+    );
     return 0;
   }
 
@@ -195,7 +236,8 @@ function main() {
     if (!jsonMode) {
       process.stderr.write(
         `check-dom-node-budgets: FAIL — ${violations.length} file(s) over budget.\n` +
-          violations.map((v) => `  ${v.file}: ${v.message}`).join('\n') + '\n',
+          violations.map((v) => `  ${v.file}: ${v.message}`).join('\n') +
+          '\n',
       );
     }
     emitResult({ violations, summary: { overBudget: violations.length }, ok }, jsonMode);
@@ -203,7 +245,10 @@ function main() {
   }
 
   // No regressions — persist tightened / new budgets (skip in json read mode).
-  const changed = JSON.stringify(nextBudgets) !== JSON.stringify(sortObj(locked));
+  // Compare SORTED against SORTED: writeBaseline sorts, but nextBudgets is in
+  // directory-walk order, so an unsorted comparison reported "changed" on every
+  // run and rewrote updatedAt/sha into a tracked file each time.
+  const changed = JSON.stringify(sortObj(nextBudgets)) !== JSON.stringify(sortObj(locked));
   if (changed && !jsonMode) {
     writeBaseline(nextBudgets);
     process.stderr.write('check-dom-node-budgets: baseline tightened/extended.\n');
@@ -213,7 +258,10 @@ function main() {
     );
   }
 
-  emitResult({ violations: [], summary: { files: Object.keys(counts).length }, ok: true }, jsonMode);
+  emitResult(
+    { violations: [], summary: { files: Object.keys(counts).length }, ok: true },
+    jsonMode,
+  );
   return 0;
 }
 
@@ -223,9 +271,13 @@ function sortObj(o) {
   return s;
 }
 
-try {
-  process.exit(main());
-} catch (err) {
-  process.stderr.write(`check-dom-node-budgets: ${err.message}\n`);
-  process.exit(2);
+// Guarded: a test imports `toPosixPath` from here, and importing the module
+// must not run a full AST scan of src/app (or write a baseline).
+if (resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
+  try {
+    process.exit(main());
+  } catch (err) {
+    process.stderr.write(`check-dom-node-budgets: ${err.message}\n`);
+    process.exit(2);
+  }
 }

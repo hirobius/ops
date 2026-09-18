@@ -8,17 +8,19 @@ name: PII weekly scan
 #      8 days (7-day cadence + 1 day overlap). Fails on ANY finding, warnings
 #      included: the volume is small and a pasted personal mailbox or phone in
 #      an issue is exactly what this is for.
-#   2. The main tips of hirobius/portal-kit and hirobius/site-engine, every
-#      tracked text file. Fails on errors only (denylist terms, private
-#      workspace links); email/phone warnings are listed in the summary. A tree
-#      scan re-reports the same fixture numbers every week, and a check that is
-#      permanently red gets ignored.
+#   2. The public default-branch tips of hirobius/portal-kit, hirobius/site-engine,
+#      hirobius/hds and hirobius/concrete, every tracked text file. Fails on
+#      errors only (denylist terms, private workspace links); email/phone
+#      warnings are listed in the summary. A tree scan re-reports the same
+#      fixture numbers every week, and a check that is permanently red gets
+#      ignored. Each checkout takes the repo's DEFAULT branch, which is `main`
+#      everywhere except concrete — whatever is public is what gets scanned.
 #
 # Not covered: issue edit history (GraphQL userContentEdits). A hit in issue text
 # must be edited AND its old revision deleted — see docs/guardrails/pii-gate.md.
 #
-# All three repos are public, so the checkouts use the default token read-only.
-# Output never contains a matched value.
+# Every scanned repo is public, so the checkouts use the default token
+# read-only. Output never contains a matched value.
 
 on:
   schedule:
@@ -97,6 +99,36 @@ jobs:
           PII_DENYLIST: ${{ secrets.PII_DENYLIST }}
         run: node scripts/check-pii.mjs --tree external/site-engine --label hirobius/site-engine --fail-on error --github
 
+      - name: Checkout hds
+        uses: actions/checkout@v4
+        with:
+          repository: hirobius/hds
+          path: external/hds
+          persist-credentials: false
+
+      - name: Scan hds main
+        id: hds
+        continue-on-error: true
+        env:
+          PII_DENYLIST: ${{ secrets.PII_DENYLIST }}
+        run: node scripts/check-pii.mjs --tree external/hds --label hirobius/hds --fail-on error --github
+
+      # concrete's default branch is not `main` — checkout@v4 with no `ref:`
+      # takes the default, which is the tip that is actually public.
+      - name: Checkout concrete
+        uses: actions/checkout@v4
+        with:
+          repository: hirobius/concrete
+          path: external/concrete
+          persist-credentials: false
+
+      - name: Scan concrete default branch
+        id: concrete
+        continue-on-error: true
+        env:
+          PII_DENYLIST: ${{ secrets.PII_DENYLIST }}
+        run: node scripts/check-pii.mjs --tree external/concrete --label hirobius/concrete --fail-on error --github
+
       - name: Fail the job if any scan found personal data
         if: always()
         run: |
@@ -106,7 +138,9 @@ jobs:
           fi
           if [ "${{ steps.text.outcome == 'failure' }}" = "true" ] \
             || [ "${{ steps.portal_kit.outcome == 'failure' }}" = "true" ] \
-            || [ "${{ steps.site_engine.outcome == 'failure' }}" = "true" ]; then
+            || [ "${{ steps.site_engine.outcome == 'failure' }}" = "true" ] \
+            || [ "${{ steps.hds.outcome == 'failure' }}" = "true" ] \
+            || [ "${{ steps.concrete.outcome == 'failure' }}" = "true" ]; then
             echo "::error title=PII weekly scan::Personal data found (or a scan could not run) — see the job summary for masked locations and docs/guardrails/pii-gate.md for how to handle it."
             exit 1
           fi
