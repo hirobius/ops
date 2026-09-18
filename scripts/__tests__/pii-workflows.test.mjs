@@ -99,14 +99,19 @@ describe('pii-weekly workflow (warn-only sweep)', () => {
     );
   });
 
-  it('scans the portal-kit and site-engine tips without keeping credentials', () => {
-    for (const repo of ['portal-kit', 'site-engine']) {
+  // Every public hirobius repo is in scope: a name that leaked into ops is just
+  // as exposed in a sibling, and only a repo listed here ever gets swept.
+  const SIBLING_REPOS = ['portal-kit', 'site-engine', 'hds', 'concrete'];
+
+  it('scans every public sibling tip without keeping credentials', () => {
+    for (const repo of SIBLING_REPOS) {
       expect(workflow).toMatch(new RegExp(`repository:\\s*hirobius/${repo}`));
       expect(workflow).toMatch(
         new RegExp(`check-pii\\.mjs --tree external/${repo}[^\\n]*--github`),
       );
     }
-    expect(workflow.match(/persist-credentials:\s*false/g)?.length).toBe(3);
+    // One per sibling checkout, plus the ops checkout that runs the scanner.
+    expect(workflow.match(/persist-credentials:\s*false/g)?.length).toBe(SIBLING_REPOS.length + 1);
   });
 
   it('still scans the repo tips when fetching issue text fails', () => {
@@ -118,7 +123,9 @@ describe('pii-weekly workflow (warn-only sweep)', () => {
     expect(workflow).toMatch(/PII_DENYLIST:\s*\$\{\{\s*secrets\.PII_DENYLIST\s*\}\}/);
     expect(workflow).toMatch(/steps\.fetch\.outcome == 'failure'/);
     expect(workflow).toMatch(/steps\.text\.outcome == 'failure'/);
-    expect(workflow).toMatch(/steps\.portal_kit\.outcome == 'failure'/);
-    expect(workflow).toMatch(/steps\.site_engine\.outcome == 'failure'/);
+    // A scan step whose id is never tested here would fail silently.
+    for (const id of ['portal_kit', 'site_engine', 'hds', 'concrete']) {
+      expect(workflow).toMatch(new RegExp(`steps\\.${id}\\.outcome == 'failure'`));
+    }
   });
 });

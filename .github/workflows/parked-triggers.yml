@@ -9,6 +9,11 @@ name: Parked triggers
 # stays red every day until the entry is handled: rolled forward if it is
 # recurring, or filed as a fresh issue and deleted if it is one-shot.
 #
+# A failed-run email addressed to one account is a weak alert, so the run also
+# pages DISCORD_WEBHOOK_URL with what fired. The page is best-effort: a missing
+# secret or a dead webhook prints a notice and never turns a red run green, and
+# never turns a green one red.
+#
 # Node builtins only, so there is no install step.
 
 on:
@@ -36,4 +41,28 @@ jobs:
           node-version: '22'
 
       - name: Check parked triggers
-        run: node scripts/check-parked-triggers.mjs
+        id: check
+        run: |
+          set -o pipefail
+          node scripts/check-parked-triggers.mjs 2>&1 | tee "$RUNNER_TEMP/parked.txt"
+
+      - name: Page Discord with what fired
+        if: failure()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "DISCORD_WEBHOOK_URL is not set on this repo — the failed-run email is the only alert."
+            echo "Fix: gh secret set DISCORD_WEBHOOK_URL --repo $REPO"
+            exit 0
+          fi
+          detail="$(head -c 900 "$RUNNER_TEMP/parked.txt" 2>/dev/null || true)"
+          if [ -z "$detail" ]; then
+            detail="(the step produced no output — it probably crashed before running)"
+          fi
+          payload="$(jq -n --arg url "$RUN_URL" --arg detail "$detail" \
+            '{content: ("⏰ **Parked trigger fired** — `docs/ai/PARKED.md` has an entry whose condition is now true. Roll it forward if recurring, or file it as an issue and delete it.\n" + $url + "\n```\n" + $detail + "\n```")}')"
+          curl -sS -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK_URL" \
+            || echo "Discord notify failed (non-fatal) — the run stays red regardless."

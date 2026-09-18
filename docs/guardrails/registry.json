@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "generated": "2026-05-05T00:00:00.000Z",
-  "precommitStructureHash": "9484347e769aeebaa10ff668eccd55a378a498a57633323bc135b3af98f902c7",
-  "precommitStructureHashUpdatedAt": "2026-09-17T08:05:34.097Z",
+  "precommitStructureHash": "a504a11021e5577998ade0598e7f1ebe52cf896e9d8a714052ee2fc298201069",
+  "precommitStructureHashUpdatedAt": "2026-09-18T01:18:38.503Z",
   "gates": [
     {
       "id": "audit-batch-deliverables",
@@ -462,7 +462,7 @@
     },
     {
       "id": "check-pii",
-      "description": "Blocks personal data from entering git (ops#27, ops#35). Scans lines ADDED by the staged change, plus staged paths, for denylist terms (real client/contact identifiers loaded from the PII_DENYLIST env/secret or the gitignored .pii-denylist file, never the repo) and private Google/Microsoft/SharePoint/Wix workspace links, which block; emails outside a reviewed allowlist and US phone numbers only warn, because run-gates blocks on any non-zero exit (ops#304) and the 2026-09-16 sweep measured those at ~11% precision. Denylist terms also match decoded and loosened copies of the text (percent/JSON/HTML escapes, accents, slugs, camelCase, comment-wrapped lines); UTF-16 and .gitattributes-binary text is scanned; copies of the denylist are blocked. With nothing staged (the post-commit re-run) it scans HEAD and its message, so a --no-verify bypass is logged. Output shows rule, location and match length, never the value. Commit messages: .husky/commit-msg via scripts/pii-commit-msg.mjs. CI backstop (added lines, commit messages, PR title/body/branch name): .github/workflows/pii-scan.yml; weekly issue-text and sibling-repo sweep: pii-weekly.yml. Guide: docs/guardrails/pii-gate.md.",
+      "description": "Blocks personal data from entering git (ops#27, ops#35). Scans lines ADDED by the staged change, plus staged paths, for denylist terms (real client/contact identifiers loaded from the PII_DENYLIST env/secret or the gitignored .pii-denylist file, never the repo) and private Google/Microsoft/SharePoint/Wix workspace links, which block; emails outside a reviewed allowlist and US phone numbers only warn, because run-gates blocks on a failing error-severity gate (ops#306) and this gate is registered error, so any non-zero exit stops the commit — only the error-severity rules drive that exit code (--fail-on error, the default), and the 2026-09-16 sweep measured emails/phones at ~11% precision. Denylist terms also match decoded and loosened copies of the text (percent/JSON/HTML escapes, accents, slugs, camelCase, comment-wrapped lines); UTF-16 and .gitattributes-binary text is scanned; copies of the denylist are blocked. With nothing staged (the post-commit re-run) it scans HEAD and its message, so a --no-verify bypass is logged. Output shows rule, location and match length, never the value. Commit messages: .husky/commit-msg via scripts/pii-commit-msg.mjs. CI backstop (added lines, commit messages, PR title/body/branch name): .github/workflows/pii-scan.yml; weekly issue-text and sibling-repo sweep: pii-weekly.yml. Guide: docs/guardrails/pii-gate.md.",
       "severity": "error",
       "gateScript": "scripts/check-pii.mjs",
       "fixturePath": "fixtures/check-pii",

@@ -35,7 +35,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, dirname, relative } from 'node:path';
+import { join, dirname, relative, sep } from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
@@ -85,10 +85,28 @@ function countJsxElements(file) {
   return count;
 }
 
+/**
+ * Repo-relative path with POSIX separators, on every platform.
+ *
+ * The baseline is a committed, cross-platform artifact keyed by path, so the
+ * key must not depend on who ran the script. `relative()` returns
+ * `src\app\…` on Windows, which matched nothing in the checked-in baseline:
+ * every file read as brand-new, was recorded at its current count, and the
+ * whole baseline got rewritten with backslash keys — silently raising every
+ * budget and blowing up the diff. That is why `--update` carried a
+ * "WSL only" warning. It no longer needs one.
+ *
+ * @param {string} file absolute path inside the repo
+ * @returns {string}
+ */
+function repoRelative(file) {
+  return relative(ROOT, file).split(sep).join('/');
+}
+
 function currentCounts() {
   const counts = {};
   for (const file of walkTsx(SCAN_ROOT)) {
-    counts[relative(ROOT, file)] = countJsxElements(file);
+    counts[repoRelative(file)] = countJsxElements(file);
   }
   return counts;
 }
@@ -163,7 +181,10 @@ function main() {
         `check-dom-node-budgets: baseline updated → ${Object.keys(counts).length} file(s)\n`,
       );
     }
-    emitResult({ violations: [], summary: { files: Object.keys(counts).length }, ok: true }, jsonMode);
+    emitResult(
+      { violations: [], summary: { files: Object.keys(counts).length }, ok: true },
+      jsonMode,
+    );
     return 0;
   }
 
@@ -195,7 +216,8 @@ function main() {
     if (!jsonMode) {
       process.stderr.write(
         `check-dom-node-budgets: FAIL — ${violations.length} file(s) over budget.\n` +
-          violations.map((v) => `  ${v.file}: ${v.message}`).join('\n') + '\n',
+          violations.map((v) => `  ${v.file}: ${v.message}`).join('\n') +
+          '\n',
       );
     }
     emitResult({ violations, summary: { overBudget: violations.length }, ok }, jsonMode);
@@ -203,7 +225,10 @@ function main() {
   }
 
   // No regressions — persist tightened / new budgets (skip in json read mode).
-  const changed = JSON.stringify(nextBudgets) !== JSON.stringify(sortObj(locked));
+  // Compare SORTED against SORTED: writeBaseline sorts, but nextBudgets is in
+  // directory-walk order, so an unsorted comparison reported "changed" on every
+  // run and rewrote updatedAt/sha into a tracked file each time.
+  const changed = JSON.stringify(sortObj(nextBudgets)) !== JSON.stringify(sortObj(locked));
   if (changed && !jsonMode) {
     writeBaseline(nextBudgets);
     process.stderr.write('check-dom-node-budgets: baseline tightened/extended.\n');
@@ -213,7 +238,10 @@ function main() {
     );
   }
 
-  emitResult({ violations: [], summary: { files: Object.keys(counts).length }, ok: true }, jsonMode);
+  emitResult(
+    { violations: [], summary: { files: Object.keys(counts).length }, ok: true },
+    jsonMode,
+  );
   return 0;
 }
 

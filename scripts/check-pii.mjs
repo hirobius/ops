@@ -22,9 +22,11 @@
  *   warn   email address         outside the reviewed allowlist
  *   warn   US phone number       placeholders (555, repeated digits) skipped
  *
- * Why email/phone only warn: run-gates fails pre-commit on ANY non-zero exit,
- * whatever the registry severity says (ops#304), so a blocking rule must be
- * precise. The 2026-09-16 sweep measured non-allowlisted emails at ~11% real
+ * Why email/phone only warn: run-gates blocks on a failing ERROR-severity gate
+ * (ops#306), and this gate is registered `error`, so any non-zero exit here
+ * stops the commit. A blocking rule therefore has to be precise, and only the
+ * error-severity RULES below drive the exit code (--fail-on error, the
+ * default). The 2026-09-16 sweep measured non-allowlisted emails at ~11% real
  * PII and found phones mostly public business listings plus fixture numbers.
  * Denylist terms and private workspace URLs had ~0 false positives. The
  * client mailboxes that matter are denylist entries (@client-domain), so they

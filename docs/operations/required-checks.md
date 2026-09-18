@@ -1,20 +1,29 @@
 # GitHub Required Checks — Promotion Policy
 
-This document inventories every workflow in `.github/workflows/`, tracks which are currently required for merging to `main`, and defines the criteria for promoting an optional workflow to a required branch-protection check.
+This document inventories the merge-gate-relevant workflows in `.github/workflows/`, tracks which are currently required for merging to `main`, and defines the criteria for promoting an optional workflow to a required branch-protection check.
+
+**The live source of truth is branch protection, not this table.** Read it with:
+
+```bash
+gh api repos/hirobius/ops/branches/main/protection \
+  --jq '.required_status_checks | {strict, contexts}'
+```
+
+As of 2026-09-18 that returns `strict: false` and exactly one context: `ralph-gate`. Every other workflow below is advisory — it goes red on the PR, but nothing stops the merge. Do not read a "Required for merge" cell here as enforcement without checking the API.
 
 ---
 
 ## Current Workflow Inventory
 
-| Workflow file              | Name                                 | Trigger                                                                        | Required for merge | Notes                                                                                                                 |
-| -------------------------- | ------------------------------------ | ------------------------------------------------------------------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| `quality.yml`              | Quality gates                        | `push` + `pull_request` → `main`                                               | **YES**            | Build, then every `ci-pr` registry gate via `run-gates.mjs` (typecheck, type coverage, layout tests, …; #241).        |
-| `responsive.yml`           | Responsive                           | `pull_request` → `main`                                                        | No                 | Wired in this commit (unit `12p-test-required-checks-promote`). Promote after first clean green run.                  |
-| `collision.yml`            | Collision                            | `pull_request` → `main`                                                        | No                 | Wired in this commit (unit `12p-test-required-checks-promote`). Promote after first clean green run.                  |
-| `hds-migration-audit.yml`  | HDS V1→V2 Migration Audit            | `push` + `pull_request` (path-filtered), `workflow_dispatch`                   | No                 | Advisory only — posts PR comment. Not a candidate for required-check promotion (path-filtered, informational).        |
-| `sync-figma-variables.yml` | Sync Design Tokens → Figma Variables | `push` → `main` (path-filtered on `hirobius.tokens.json`), `workflow_dispatch` | No                 | Post-merge side-effect, not a PR gate. Not a candidate.                                                               |
-| `token-scan.yml`           | HDS Token Scan                       | `deployment_status`                                                            | No                 | Runs on Vercel preview deployments only — not a PR check. Not a candidate.                                            |
-| `secret-scan.yml`          | Secret scan                          | every `pull_request` + `push` → `main`, `workflow_dispatch`                    | No                 | gitleaks CLI over the changed commits only (ops#32). Candidate: job `gitleaks`, display `Gitleaks (changed commits)`. |
+| Workflow file              | Name                                 | Trigger                                                                        | Required for merge | Notes                                                                                                                                                                                                                  |
+| -------------------------- | ------------------------------------ | ------------------------------------------------------------------------------ | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ralph-gate.yml`           | Ralph Gate                           | `pull_request` (opened, synchronize, reopened, labeled)                        | **YES**            | The only context in branch protection. Thin caller into `hirobius/ralph`; a non-`ralph/*` branch passes it through.                                                                                                    |
+| `quality.yml`              | Quality gates                        | `push` + `pull_request` → `main`                                               | No                 | Build, then every `ci-pr` registry gate via `run-gates.mjs` (typecheck, type coverage, layout tests, …; #241). The de-facto quality bar, but **not** enforced by branch protection — promotion candidate: job `gates`. |
+| `responsive.yml`           | Responsive                           | `pull_request` → `main`                                                        | No                 | Wired in this commit (unit `12p-test-required-checks-promote`). Promote after first clean green run.                                                                                                                   |
+| `collision.yml`            | Collision                            | `pull_request` → `main`                                                        | No                 | Wired in this commit (unit `12p-test-required-checks-promote`). Promote after first clean green run.                                                                                                                   |
+| `sync-figma-variables.yml` | Sync Design Tokens → Figma Variables | `push` → `main` (path-filtered on `hirobius.tokens.json`), `workflow_dispatch` | No                 | Post-merge side-effect, not a PR gate. Not a candidate.                                                                                                                                                                |
+| `token-scan.yml`           | HDS Token Scan                       | `deployment_status`                                                            | No                 | Runs on Vercel preview deployments only — not a PR check. Not a candidate.                                                                                                                                             |
+| `secret-scan.yml`          | Secret scan                          | every `pull_request` + `push` → `main`, `workflow_dispatch`                    | No                 | gitleaks CLI over the changed commits only (ops#32). Candidate: job `gitleaks`, display `Gitleaks (changed commits)`.                                                                                                  |
 
 ---
 
@@ -52,6 +61,7 @@ Note: A workflow must have run at least once on a PR targeting `main` before it 
 
 | Workflow         | Blocking condition                                     | Target state                           |
 | ---------------- | ------------------------------------------------------ | -------------------------------------- |
+| `quality.yml`    | Adrian's call only — it has been green for months      | Promote to required (job `gates`)      |
 | `responsive.yml` | None known — waiting on first CI run after this commit | Promote to required after 3 green runs |
 | `collision.yml`  | None known — waiting on first CI run after this commit | Promote to required after 3 green runs |
 

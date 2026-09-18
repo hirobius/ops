@@ -68,6 +68,7 @@ believes it.
 | `ClientsIndexPage`, `SurfacesRail`, `clientTypes`, clients gallery                | claude (portal-kit→ops) | 2026-09-16 | **released — gallery merged (#340); follow-up dead-code prune on `claude/ops-deadcode-prune` (ops#307 dead specs removed)**                                                                                                   |
 | `scripts/ralph-watchdog.mjs`, `lib/ops/ralph-watchdog.mjs`                        | _(nobody)_              | —          | **FREE — merged #375**                                                                                                                                                                                                        |
 | `StandingPage`, `ralphStatus.ts`, `lib/tasks/fleet*.mjs`, `lib/github/issues.mjs` | _(nobody)_              | —          | **FREE — merged as ops#367 and ops#388.**                                                                                                                                                                                     |
+| `.github/workflows/`, `.husky/pre-commit`, PII/dom-budget gate docs               | _(nobody)_              | —          | **FREE — released on PR open. Merge-plan F2/F3/F4 shipped on `claude/cleanup-followups-2026-09-18`; nothing in flight. `hds-migration-audit.yml` was DELETED there — don't recreate it.**                                     |
 
 ## Messages — newest first
 
