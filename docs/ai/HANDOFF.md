@@ -127,10 +127,10 @@ foundation, Code Connect v2, honest front door). Detail: `DONE-LOG.md`.
    **Do not rebuild any of them — unblock or leave.**
 2. **hds:** #210 (draft) is blocked on the tenant-rename decision; #207 and #208
    (owner-chip tokens, accent neutralisation) are open and reviewable.
-3. **#348 — apply `0011_digest_items` ONLY. Needs Adrian (writes production).**
-   Its `pitch_queue` half is wrong: **that is a FILENAME, not a table.** Ledger
-   repairs for 0010/0012/0013 stand; `check-migration-ledger` is the high-value
-   box — repo↔database is the only schema seam with no gate.
+3. **#348 — gate SHIPPED (#392); the rest needs Adrian (writes production).**
+   `pnpm migrations:check` with `SUPABASE_ACCESS_TOKEN` is now the inventory. It
+   finds **7** unrecorded migrations, not 2 — 0003/0004/0006/0008 too. Apply
+   `0011_digest_items` BEFORE recording it, then `--sql` for the repair.
 4. **Guardrails:** #330 (gate telemetry structurally unfillable) **carries
    `ralph-wip` — the loop holds it.** Then `reconcile-ralph-closures.mjs
 --apply` with a real `GITHUB_TOKEN`.
