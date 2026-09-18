@@ -1,0 +1,718 @@
+<!-- docs/state-of-play.html — Hirobius state of play, 2026-09-18.
+
+     Published as an Artifact (phone-readable):
+       https://claude.ai/artifact/6zLof4AB9Q8Bycj6Vm7tEo
+     This file is the source of record; republish it to that same URL rather
+     than creating a second one, or the two drift.
+
+     Authored in Artifact page shape (no <!doctype>/<html>/<body> wrapper: the
+     publisher supplies those). Renders correctly opened directly in a browser
+     too — browsers construct the missing elements. One file, two surfaces.
+     Regenerate rather than patch: it is a snapshot, not a living doc. -->
+<title>Hirobius State of Play</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,200..800;1,200..800&display=swap"
+/>
+<style>
+  /* ── Tokens — true monochromatic neutrals + one accent (HDS) ─────────── */
+  :root {
+    --n-0: #ffffff;
+    --n-50: #fafafa;
+    --n-100: #f2f2f2;
+    --n-200: #e6e6e6;
+    --n-300: #cfcfcf;
+    --n-400: #a3a3a3;
+    --n-600: #6b6b6b;
+    --n-800: #2e2e2e;
+    --n-900: #141414;
+
+    --bg: var(--n-50);
+    --surface: var(--n-0);
+    --text: var(--n-900);
+    --text-dim: var(--n-600);
+    --rule: var(--n-200);
+    --rule-strong: var(--n-300);
+    --accent: #1e2efd;
+    --accent-ink: #ffffff;
+    --shade: var(--n-100);
+
+    --r-action: 4px;
+    --r-container: 8px;
+    --s1: 4px;
+    --s2: 8px;
+    --s3: 12px;
+    --s4: 16px;
+    --s6: 24px;
+    --s8: 32px;
+    --s12: 48px;
+    --s16: 64px;
+
+    --font:
+      'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', ui-sans-serif, system-ui,
+      -apple-system, 'Segoe UI', sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #0d0d0d;
+      --surface: #171717;
+      --text: #f2f2f2;
+      --text-dim: #a3a3a3;
+      --rule: #2e2e2e;
+      --rule-strong: #404040;
+      --accent: #7b85ff;
+      --accent-ink: #0d0d0d;
+      --shade: #212121;
+    }
+  }
+  :root[data-theme='dark'] {
+    --bg: #0d0d0d;
+    --surface: #171717;
+    --text: #f2f2f2;
+    --text-dim: #a3a3a3;
+    --rule: #2e2e2e;
+    --rule-strong: #404040;
+    --accent: #7b85ff;
+    --accent-ink: #0d0d0d;
+    --shade: #212121;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 44rem;
+    margin: 0 auto;
+    padding-inline: var(--s4);
+    padding-block: var(--s8) var(--s16);
+  }
+
+  /* ── Type roles — one family, three voices ──────────────────────────── */
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 0 0 var(--s2);
+  }
+  h1 {
+    font-size: clamp(30px, 7vw, 44px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    text-wrap: balance;
+    margin: 0 0 var(--s3);
+  }
+  h2 {
+    font-size: clamp(20px, 4.4vw, 25px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    text-wrap: balance;
+    margin: 0 0 var(--s4);
+  }
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 var(--s2);
+  }
+  p {
+    margin: 0 0 var(--s4);
+  }
+  a {
+    color: var(--accent);
+    text-underline-offset: 2px;
+  }
+  a:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--r-action);
+  }
+  code {
+    font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+    font-size: 0.86em;
+    background: var(--shade);
+    padding: 1px 5px;
+    border-radius: var(--r-action);
+  }
+  strong {
+    font-weight: 700;
+  }
+
+  section {
+    margin-block-start: var(--s12);
+  }
+  .lede {
+    font-size: 17px;
+    color: var(--text-dim);
+    margin-bottom: var(--s6);
+  }
+
+  /* ── North star ─────────────────────────────────────────────────────── */
+  .star {
+    border-left: 3px solid var(--accent);
+    padding: var(--s3) 0 var(--s3) var(--s4);
+    margin-bottom: var(--s6);
+  }
+  .star p {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 500;
+  }
+  .star .test {
+    margin-top: var(--s3);
+    font-size: 15px;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+
+  /* ── Vital signs ────────────────────────────────────────────────────── */
+  .vitals {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-container);
+    overflow: hidden;
+  }
+  .vital {
+    background: var(--surface);
+    padding: var(--s4);
+  }
+  .vital dt {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: var(--s1);
+  }
+  .vital dd {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .vital dd .unit {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--text-dim);
+  }
+  /* The zero rows are the subject of this page — mark them by weight, not hue. */
+  .vital.is-zero {
+    background: var(--n-900);
+  }
+  .vital.is-zero dt {
+    color: var(--n-400);
+  }
+  .vital.is-zero dd {
+    color: var(--n-0);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .vital.is-zero {
+      background: #000;
+    }
+  }
+  :root[data-theme='dark'] .vital.is-zero {
+    background: #000;
+  }
+
+  /* ── Status markers — form, not hue (HDS permits one accent only) ───── */
+  .mark {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: var(--s2);
+    flex: none;
+    position: relative;
+    top: -1px;
+  }
+  .mark--done {
+    background: var(--accent);
+  }
+  .mark--part {
+    background: transparent;
+    border: 2px solid var(--accent);
+  }
+  .mark--stop {
+    background: var(--text);
+    border-radius: 1px;
+    width: 10px;
+    height: 4px;
+  }
+
+  /* ── Tables ─────────────────────────────────────────────────────────── */
+  .scroll {
+    overflow-x: auto;
+    margin-bottom: var(--s4);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 15px;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: var(--s3) var(--s3) var(--s3) 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--rule-strong);
+    white-space: nowrap;
+  }
+  td:last-child,
+  th:last-child {
+    padding-right: 0;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* ── Commitment list ────────────────────────────────────────────────── */
+  .commits {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .commits li {
+    display: flex;
+    gap: var(--s3);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .commits .n {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--text-dim);
+    flex: none;
+    width: 1.4rem;
+  }
+  .commits .body {
+    flex: 1;
+    min-width: 0;
+  }
+  .commits .verdict {
+    display: block;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  /* ── Callout ────────────────────────────────────────────────────────── */
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-container);
+    padding: var(--s4);
+    margin-bottom: var(--s4);
+  }
+  .callout h3 {
+    margin-bottom: var(--s2);
+  }
+  .callout p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ── Steps ──────────────────────────────────────────────────────────── */
+  ol.steps {
+    padding-left: 0;
+    list-style: none;
+    counter-reset: step;
+    margin: 0;
+  }
+  ol.steps li {
+    counter-increment: step;
+    position: relative;
+    padding-left: var(--s8);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule);
+  }
+  ol.steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: var(--s3);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 12px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    font-variant-numeric: tabular-nums;
+  }
+  ol.steps li:last-child {
+    border-bottom: 0;
+  }
+
+  footer {
+    margin-top: var(--s16);
+    padding-top: var(--s4);
+    border-top: 1px solid var(--rule);
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  footer p {
+    margin-bottom: var(--s2);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">Hirobius · 18 September 2026</p>
+  <h1>The platform is ahead of the business.</h1>
+  <p class="lede">
+    An engineering platform worth having now exists. Nothing has been sold through it. These are the
+    numbers that decide what to do next.
+  </p>
+
+  <div class="star">
+    <p>
+      Build the Hirobius web/automations agency: sign and ship paying client sites end-to-end —
+      lead&nbsp;→&nbsp;generated site&nbsp;→&nbsp;publish&nbsp;→&nbsp;outreach&nbsp;→&nbsp;invoice.
+      Infrastructure exists only in service of that.
+    </p>
+    <p class="test">
+      The scope test on every ask: <em>does this get a paying client site shipped sooner?</em>
+    </p>
+  </div>
+
+  <!-- ── Vital signs ──────────────────────────────────────────────────── -->
+  <section>
+    <p class="eyebrow">Vital signs</p>
+    <h2>Six rows are the whole story</h2>
+
+    <dl class="vitals">
+      <div class="vital">
+        <dt>Leads in database</dt>
+        <dd class="num">263</dd>
+      </div>
+      <div class="vital">
+        <dt>With a phone number</dt>
+        <dd class="num">260</dd>
+      </div>
+      <div class="vital is-zero">
+        <dt>With an email address</dt>
+        <dd class="num">1</dd>
+      </div>
+      <div class="vital is-zero">
+        <dt>Contacted</dt>
+        <dd class="num">0</dd>
+      </div>
+      <div class="vital is-zero">
+        <dt>Paying clients</dt>
+        <dd class="num">0</dd>
+      </div>
+      <div class="vital is-zero">
+        <dt>Way to take money</dt>
+        <dd><span class="unit">none built</span></dd>
+      </div>
+    </dl>
+
+    <p style="margin-top: var(--s4)">
+      Everything else on this page is commentary on those six figures. Lead counts are as recorded
+      on 2026-09-17; the live verdict always comes from
+      <code>/ops/standing</code>, which derives it from <code>leads</code> row counts rather than
+      from any document — including this one.
+    </p>
+  </section>
+
+  <!-- ── What exists ──────────────────────────────────────────────────── -->
+  <section>
+    <p class="eyebrow">Built and working</p>
+    <h2>The machine is in good shape</h2>
+    <p>
+      A single fleet surface at <code>/ops/standing</code>, phone-operable and repo-filtered,
+      deriving every verdict from live row counts. A Ralph autonomous loop with single-flight
+      control, attempt caps and a supervised-path merge boundary.
+      <strong>63 registered guardrails</strong> with severity semantics, proof-of-firing fixtures
+      and a registry that fails closed. A PII gate on pre-commit, commit messages, every PR and
+      weekly. A design system published to npm with a Figma sync foundation. Visual regression now
+      gated on pull requests <em>and</em> on <code>main</code>.
+    </p>
+    <p>
+      That is a real platform. Measured against the scope test, it is also mostly
+      <em>indirect</em>.
+    </p>
+  </section>
+
+  <!-- ── Commitments ──────────────────────────────────────────────────── -->
+  <section>
+    <p class="eyebrow">The four commitments</p>
+    <h2>Graded honestly</h2>
+    <p>
+      Numbered because the north star numbers them, and because 2 gates 3 — the order carries
+      information.
+    </p>
+
+    <ul class="commits">
+      <li>
+        <span class="n">1</span>
+        <span class="body">
+          <span class="mark mark--part"></span><strong>First real lead → generate → render</strong>
+          <span class="verdict"
+            >Partial. The pipeline exists; an end-to-end run on a real lead has not been
+            demonstrated.</span
+          >
+        </span>
+      </li>
+      <li>
+        <span class="n">2</span>
+        <span class="body">
+          <span class="mark mark--stop"></span
+          ><strong>Outreach v1 — cold email, approve-every-send</strong>
+          <span class="verdict"
+            >Blocked at the source, not in code. 1 of 263 leads has an email address. Google
+            Business Profile has no email field, so no scraper returns one. The crawler that fixes
+            this merged but has never run for real — both containers block egress.</span
+          >
+        </span>
+      </li>
+      <li>
+        <span class="n">3</span>
+        <span class="body">
+          <span class="mark mark--part"></span
+          ><strong>Astro cutover — publish path is the billing event</strong>
+          <span class="verdict">Gated on the clients Astro factory being live.</span>
+        </span>
+      </li>
+      <li>
+        <span class="n">4</span>
+        <span class="body">
+          <span class="mark mark--done"></span
+          ><strong>Fleet hub — only what reduces Adrian-as-bottleneck</strong>
+          <span class="verdict">Done, and the most complete of the four.</span>
+        </span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ── Blockers ─────────────────────────────────────────────────────── -->
+  <section>
+    <p class="eyebrow">Waiting on you, not on an agent</p>
+    <h2>One hour unblocks finished work</h2>
+    <p>
+      Nine pull requests are open across four repos and nearly every one waits on a human. Each row
+      below releases work that is already written and tested.
+    </p>
+
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Set this</th>
+            <th>Unblocks</th>
+            <th class="num">Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <a href="https://github.com/hirobius/ops/settings/secrets/actions"
+                ><code>OPS_AGENT_KEY</code></a
+              >
+            </td>
+            <td>ops#380 — production health check</td>
+            <td class="num">2 min</td>
+          </tr>
+          <tr>
+            <td>
+              <a href="https://supabase.com/dashboard/project/vvyccwxtcwvlusweenje/sql/new"
+                >Supabase <code>0015</code> + import</a
+              >
+            </td>
+            <td>ops#387 — client records leave the repo</td>
+            <td class="num">10 min</td>
+          </tr>
+          <tr>
+            <td>
+              <a href="https://github.com/hirobius/ops/settings/secrets/actions"
+                ><code>PII_DENYLIST</code></a
+              >
+              + <code>.pii-denylist</code>
+            </td>
+            <td>Makes the PII gate real rather than generic</td>
+            <td class="num">5 min</td>
+          </tr>
+          <tr>
+            <td>
+              <a
+                href="https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables"
+                ><code>PAGESPEED_API_KEY</code></a
+              >
+            </td>
+            <td>223 leads get a real opening line</td>
+            <td class="num">2 min</td>
+          </tr>
+          <tr>
+            <td>
+              <a href="https://supabase.com/dashboard/account/tokens"
+                ><code>SUPABASE_ACCESS_TOKEN</code></a
+              >
+            </td>
+            <td>ops#348 — the migration-ledger inventory</td>
+            <td class="num">2 min</td>
+          </tr>
+          <tr>
+            <td>Run the email crawler where egress works</td>
+            <td>The entire email channel</td>
+            <td class="num">unknown</td>
+          </tr>
+          <tr>
+            <td>Stripe — ops#200</td>
+            <td><strong>Taking money at all</strong></td>
+            <td class="num">½ day</td>
+          </tr>
+          <tr>
+            <td>hds release checklist</td>
+            <td>Publishing past <code>0.13.0</code></td>
+            <td class="num">½ day</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Structural ───────────────────────────────────────────────────── -->
+  <section>
+    <p class="eyebrow">Two things worth naming</p>
+    <h2>Structural, not incidental</h2>
+
+    <div class="callout">
+      <h3>The autonomous loop has no fuel</h3>
+      <p>
+        <strong>74 open issues</strong> across four repos, and <strong>zero</strong> carry
+        <code>ralph-ready</code> — in any repo. The loop runs and succeeds; there is simply nothing
+        queued. That is the exact inverse of where this work started, when the task was to fill that
+        queue. It has drained.
+      </p>
+      <div class="scroll" style="margin-top: var(--s3); margin-bottom: 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Repo</th>
+              <th class="num">Open</th>
+              <th class="num">Queued</th>
+              <th class="num">Blocked</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ops</code></td>
+              <td class="num">29</td>
+              <td class="num">0</td>
+              <td class="num">2</td>
+            </tr>
+            <tr>
+              <td><code>site-engine</code></td>
+              <td class="num">21</td>
+              <td class="num">0</td>
+              <td class="num">2</td>
+            </tr>
+            <tr>
+              <td><code>hds</code></td>
+              <td class="num">19</td>
+              <td class="num">0</td>
+              <td class="num">0</td>
+            </tr>
+            <tr>
+              <td><code>Ralph</code></td>
+              <td class="num">5</td>
+              <td class="num">0</td>
+              <td class="num">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout">
+      <h3>ops#27 is the only sev1, and it is live</h3>
+      <p>
+        <code>ops</code>, <code>hds</code> and <code>site-engine</code> are all public repositories,
+        and client PII remains in git history. Prevention shipped; erasure did not. The gate also
+        still matches generic patterns only, because the denylist does not exist yet — which is
+        precisely how a client tenant's name reached a test fixture unflagged.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Next ─────────────────────────────────────────────────────────── -->
+  <section>
+    <p class="eyebrow">Recommended order</p>
+    <h2>What to do next</h2>
+
+    <ol class="steps">
+      <li>
+        <strong>Spend one hour on the credentials table above.</strong>
+        Highest ratio of outcome to effort anywhere on the board — every row releases work that is
+        finished and idle.
+      </li>
+      <li>
+        <strong>Run the email crawler somewhere with egress.</strong>
+        Until then, outreach v1 is not blocked on code. It is blocked on 262 missing addresses.
+        Expect tuning, not a clean run.
+      </li>
+      <li>
+        <strong>Stripe.</strong> There is no path today from "shipped site" to "money received." It
+        is the last unbuilt link in the north-star chain, and the one place where more
+        infrastructure genuinely is the answer.
+      </li>
+      <li>
+        <strong>Then ops#27</strong>, using the rehearsed runbook in
+        <code>docs/ai/REPO-PROCEDURES.md</code>.
+      </li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>
+      <strong>Snapshot, not a living document.</strong> Regenerate it rather than patch it. For
+      whether a pipeline stage actually works, read <code>/ops/standing</code> — a document that
+      restates live state will drift, and this one will too.
+    </p>
+    <p>
+      Source of record: <code>docs/state-of-play.html</code> in <code>hirobius/ops</code>, linked
+      from <code>docs/ai/HANDOFF.md</code>. Counts taken 2026-09-18; lead figures as recorded
+      2026-09-17.
+    </p>
+  </footer>
+</div>
