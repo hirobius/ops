@@ -10,9 +10,13 @@ name: Parked triggers
 # recurring, or filed as a fresh issue and deleted if it is one-shot.
 #
 # A failed-run email addressed to one account is a weak alert, so the run also
-# pages DISCORD_WEBHOOK_URL with what fired. The page is best-effort: a missing
-# secret or a dead webhook prints a notice and never turns a red run green, and
-# never turns a green one red.
+# pages DISCORD_WEBHOOK_URL with what fired, via scripts/discord-page.mjs. The
+# page is best-effort: it always exits 0, so it never turns a red run green and
+# never turns a green one red. A missing secret OR a dead webhook prints a
+# notice naming the variable and the `gh secret set` line that fixes it — the
+# script checks the HTTP status, which is why this is not four lines of inline
+# `curl` (`curl` without `--fail` exits 0 on a 401/404, so a revoked webhook
+# read as a delivered page).
 #
 # Node builtins only, so there is no install step.
 
@@ -49,20 +53,12 @@ jobs:
       - name: Page Discord with what fired
         if: failure()
         env:
+          # GITHUB_REPOSITORY is set by the runner; discord-page.mjs prints it
+          # back in the `gh secret set` fix line, so nothing extra is needed.
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
-            echo "DISCORD_WEBHOOK_URL is not set on this repo — the failed-run email is the only alert."
-            echo "Fix: gh secret set DISCORD_WEBHOOK_URL --repo $REPO"
-            exit 0
-          fi
-          detail="$(head -c 900 "$RUNNER_TEMP/parked.txt" 2>/dev/null || true)"
-          if [ -z "$detail" ]; then
-            detail="(the step produced no output — it probably crashed before running)"
-          fi
-          payload="$(jq -n --arg url "$RUN_URL" --arg detail "$detail" \
-            '{content: ("⏰ **Parked trigger fired** — `docs/ai/PARKED.md` has an entry whose condition is now true. Roll it forward if recurring, or file it as an issue and delete it.\n" + $url + "\n```\n" + $detail + "\n```")}')"
-          curl -sS -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK_URL" \
-            || echo "Discord notify failed (non-fatal) — the run stays red regardless."
+          node scripts/discord-page.mjs \
+            --title "⏰ **Parked trigger fired** — \`docs/ai/PARKED.md\` has an entry whose condition is now true. Roll it forward if recurring, or file it as an issue and delete it." \
+            --url "$RUN_URL" \
+            --detail-file "$RUNNER_TEMP/parked.txt"

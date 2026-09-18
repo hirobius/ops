@@ -1,9 +1,18 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { writeFileSync, readFileSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
+import {
+  writeFileSync,
+  readFileSync,
+  copyFileSync,
+  mkdtempSync,
+  rmSync,
+  existsSync,
+} from 'node:fs';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+
+import { toPosixPath } from '../check-dom-node-budgets.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
@@ -85,32 +94,53 @@ describe('check-dom-node-budgets', () => {
       expect(backslashed).toEqual([]);
     });
 
+    // The assertion that can actually fail on CI. A whole-gate run cannot catch
+    // this on Linux, where `relative()` already returns forward slashes — the
+    // separator handling would have to be exercised on Windows to break. So the
+    // conversion is tested directly, on a literal Windows-shaped path, and a
+    // revert to `.split(sep)` goes red on every platform.
+    it('converts a native separator to POSIX whatever the host OS is', () => {
+      expect(toPosixPath('src\\app\\pages\\HomePage.tsx')).toBe('src/app/pages/HomePage.tsx');
+      expect(toPosixPath('src/app/pages/HomePage.tsx')).toBe('src/app/pages/HomePage.tsx');
+      expect(toPosixPath('HomePage.tsx')).toBe('HomePage.tsx');
+      expect(toPosixPath('')).toBe('');
+    });
+
     it('never writes a platform-native separator, and settles after one run', () => {
-      const before = readFileSync(BASELINE, 'utf8');
+      // Writes go to a disposable copy, never the tracked baseline: this runs
+      // under `pnpm test` (and `--watch`, on every save), and a Ctrl-C or a
+      // killed worker between the two multi-second AST scans would otherwise
+      // leave the real file rewritten in the working tree, to be swept into the
+      // next unrelated commit. Same reason check-fixture-stubs-ratchet took an
+      // env override. Real writes, real repo counts, isolated destination.
+      const tracked = readFileSync(BASELINE, 'utf8');
+      const scratch = join(tmp(), 'check-dom-node-budgets.json');
+      copyFileSync(BASELINE, scratch);
+
       // No --json: this is the mode that persists a tightened/extended baseline.
       // Twice, because the second run is the one that proves it settles — an
       // unsorted comparison used to rewrite updatedAt/sha on every single run.
       const persist = () => {
         try {
-          execFileSync('node', [SCRIPT], { cwd: ROOT, encoding: 'utf8' });
+          execFileSync('node', [SCRIPT], {
+            cwd: ROOT,
+            encoding: 'utf8',
+            env: { ...process.env, CHECK_DOM_NODE_BUDGETS_BASELINE_FILE: scratch },
+          });
         } catch {
           // Over budget here is someone else's failure; key shape is the assertion.
         }
-        return readFileSync(BASELINE, 'utf8');
+        return readFileSync(scratch, 'utf8');
       };
-      let first;
-      let second;
-      try {
-        first = persist();
-        second = persist();
-      } finally {
-        if (readFileSync(BASELINE, 'utf8') !== before) writeFileSync(BASELINE, before);
-      }
+      const first = persist();
+      const second = persist();
 
       const written = Object.keys(JSON.parse(first).budgets);
       expect(written.filter((key) => key.includes('\\'))).toEqual([]);
       expect(written.length).toBeGreaterThan(0);
       expect(second).toBe(first);
+      // And the tracked file is exactly as it was — no cleanup step required.
+      expect(readFileSync(BASELINE, 'utf8')).toBe(tracked);
     });
   });
 });

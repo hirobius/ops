@@ -18,6 +18,8 @@
  * quietly accreting hand-written markup past a sane structural ceiling.
  *
  * Baseline: docs/guardrails/baselines/check-dom-node-budgets.json
+ *   (overridable via CHECK_DOM_NODE_BUDGETS_BASELINE_FILE, for tests only —
+ *   this script WRITES its baseline, and a test must never write a tracked file)
  *   Shape: { budgets: { [repoRelPath]: number }, updatedAt: ISO8601, sha: string }
  *
  * Exit codes:
@@ -35,7 +37,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, dirname, relative, sep } from 'node:path';
+import { join, dirname, relative, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
@@ -44,7 +46,12 @@ import { hasJsonFlag, emitResult } from './lib/gate-output.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const SCAN_ROOT = join(ROOT, 'src', 'app');
-const BASELINE_FILE = join(ROOT, 'docs', 'guardrails', 'baselines', 'check-dom-node-budgets.json');
+// Overridable so tests can point at a disposable copy instead of the tracked
+// baseline (real writes, real repo counts — just an isolated destination).
+// Unset in every non-test invocation. Same seam as check-fixture-stubs-ratchet.
+const BASELINE_FILE =
+  process.env.CHECK_DOM_NODE_BUDGETS_BASELINE_FILE ||
+  join(ROOT, 'docs', 'guardrails', 'baselines', 'check-dom-node-budgets.json');
 
 const jsonMode = hasJsonFlag(process.argv);
 const updateMode = process.argv.includes('--update');
@@ -86,6 +93,19 @@ function countJsxElements(file) {
 }
 
 /**
+ * Rewrites either separator to POSIX. Exported, and matching BOTH separators
+ * rather than the host's `sep`, so the conversion is testable anywhere: a split
+ * on `sep` alone is a no-op on Linux — where `relative()` already returns
+ * forward slashes — so no assertion running on CI could fail if this regressed.
+ *
+ * @param {string} p
+ * @returns {string}
+ */
+export function toPosixPath(p) {
+  return p.split(/[\\/]/).join('/');
+}
+
+/**
  * Repo-relative path with POSIX separators, on every platform.
  *
  * The baseline is a committed, cross-platform artifact keyed by path, so the
@@ -100,7 +120,7 @@ function countJsxElements(file) {
  * @returns {string}
  */
 function repoRelative(file) {
-  return relative(ROOT, file).split(sep).join('/');
+  return toPosixPath(relative(ROOT, file));
 }
 
 function currentCounts() {
@@ -251,9 +271,13 @@ function sortObj(o) {
   return s;
 }
 
-try {
-  process.exit(main());
-} catch (err) {
-  process.stderr.write(`check-dom-node-budgets: ${err.message}\n`);
-  process.exit(2);
+// Guarded: a test imports `toPosixPath` from here, and importing the module
+// must not run a full AST scan of src/app (or write a baseline).
+if (resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
+  try {
+    process.exit(main());
+  } catch (err) {
+    process.stderr.write(`check-dom-node-budgets: ${err.message}\n`);
+    process.exit(2);
+  }
 }
