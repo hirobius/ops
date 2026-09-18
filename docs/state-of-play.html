@@ -617,12 +617,25 @@
     <h2>Structural, not incidental</h2>
 
     <div class="callout">
-      <h3>The autonomous loop has no fuel</h3>
+      <h3>The backlog is un-queueable, not unqueued</h3>
       <p>
-        <strong>74 open issues</strong> across four repos, and <strong>zero</strong> carry
-        <code>ralph-ready</code> — in any repo. The loop runs and succeeds; there is simply nothing
-        queued. That is the exact inverse of where this work started, when the task was to fill that
-        queue. It has drained.
+        The loop had drained to <strong>zero</strong> queued issues in all four repos. Refilling it
+        meant vetting 30 candidates against the code actually on <code>main</code> — and
+        <strong>one</strong> survived as written.
+      </p>
+      <p>
+        The failures cluster. Nine issues carry no <code>- [ ]</code> DoD in the <em>body</em>, and
+        the picker's regex never reads comments, which is where the decisions actually live. Six
+        name a <code>.github/workflows/</code> file as their deliverable, which the bot token cannot
+        push. Five wait on a human. Three name a target that no longer exists on <code>main</code>.
+      </p>
+      <p>
+        Three dead issues were closed, three were given real DoDs, and
+        <strong>four now carry <code>ralph-ready</code></strong
+        >. The related find:
+        <strong>finished, tested work is stranded on unmerged branches</strong> — se#84's fix sat
+        green and un-PR'd for two months before being recovered, and se#107, se#147, ops#71 and
+        ops#5 have the same shape.
       </p>
       <div class="scroll" style="margin-top: var(--s3); margin-bottom: 0">
         <table>
@@ -637,20 +650,20 @@
           <tbody>
             <tr>
               <td><code>ops</code></td>
-              <td class="num">29</td>
+              <td class="num">28</td>
               <td class="num">0</td>
               <td class="num">2</td>
             </tr>
             <tr>
               <td><code>site-engine</code></td>
               <td class="num">21</td>
-              <td class="num">0</td>
+              <td class="num">2</td>
               <td class="num">2</td>
             </tr>
             <tr>
               <td><code>hds</code></td>
-              <td class="num">19</td>
-              <td class="num">0</td>
+              <td class="num">17</td>
+              <td class="num">2</td>
               <td class="num">0</td>
             </tr>
             <tr>
