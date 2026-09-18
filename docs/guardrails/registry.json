@@ -690,6 +690,22 @@
       "owner": "Adrian",
       "source": "agent",
       "firingChannel": "pre-commit"
+    },
+    {
+      "id": "check-migration-ledger",
+      "description": "Compares supabase/migrations/*.sql against the live supabase_migrations.schema_migrations ledger and reports every migration the repo has but the ledger does not (and every ledger row no repo migration explains). Skips loudly when Supabase credentials are absent — it never reports \"in sync\" for a ledger it could not read.",
+      "severity": "warn",
+      "gateScript": "scripts/check-migration-ledger.mjs",
+      "fixturePath": null,
+      "owner": "Adrian",
+      "source": "agent",
+      "firingChannel": "manual",
+      "supportsJson": true,
+      "scope": "full-tree",
+      "pureExceptions": [
+        "network: reads the live migration ledger through the Management API — that comparison is the entire gate",
+        "env: SUPABASE_ACCESS_TOKEN / SUPABASE_PROJECT_REF are the credentials it needs to reach the ledger"
+      ]
     }
   ]
 }

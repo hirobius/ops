@@ -121,6 +121,7 @@
     "test:responsive": "playwright test tests/responsive.spec.ts",
     "test:watch": "vitest",
     "tokens:audit:pages": "node scripts/audit-pages.mjs",
+    "migrations:check": "node scripts/check-migration-ledger.mjs",
     "parked:check": "node scripts/check-parked-triggers.mjs",
     "sev1:check": "node scripts/check-sev1-visibility.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
