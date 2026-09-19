@@ -16,8 +16,13 @@ name: Ralph
 # single-flight, wedge alerts, and reconciliation all live in the reusable
 # workflow + ralph/lib.sh — one logic for CI and local runs.
 #
-# ops is private client automation — correctness over speed, no destructive
-# ops. Merges follow ops#238: green `ralph-gate` merges by default; a diff on a
+# ops is PUBLIC (`gh api repos/hirobius/ops --jq .private` → false) and runs
+# client automation — correctness over speed, no destructive ops. The watchdog
+# header and its fork-PR guard both depend on this repo being public, so the
+# old "private client automation" line here was not just stale, it contradicted
+# the code built on top of it.
+#
+# Merges follow ops#238: green `ralph-gate` merges by default; a diff on a
 # supervised revenue path needs `ralph-approved` (watchdog-enforced only — the
 # engine's `ralph-auto` arm has no path check yet; see ralph/README.md).
 # Auth: CLAUDE_CODE_OAUTH_TOKEN (Max) — NO API key.
