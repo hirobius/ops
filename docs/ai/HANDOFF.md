@@ -60,19 +60,14 @@ call next: `/ops/pitch`. A doc that restates either will drift.
   mirror on purpose. **`listOpenIssues()` returns `{ issues, truncated, fetched }`,
   not an array** — anything branched before #367 that calls it is broken.
 
-- **🛡️ CI got materially harder today** (roll-call in `DONE-LOG.md`): gitleaks on
-  PRs and main pushes, `quality.yml` through `run-gates.mjs`, registry severity
-  on a sev1–sev3 axis, a bounded `ralph-metric.yml`, the watchdog enforcing the
-  #238 supervised-path boundary, parked triggers on a daily cron. **Windows
-  checkouts work again** — two path bugs and the lint-staged hook (#373, #389).
+- **🛡️ CI gates are in place** — full roll-call in `DONE-LOG.md` (2026-09-17).
+  The load-bearing one: the watchdog enforces the #238 supervised-path boundary
+  on its own merge path; the **engine** still does not (Ralph#25).
 
-- **🎨 hds has a Figma foundation and nothing shipped.** #211–#216 merged today:
-  tokens → Figma model, push/snapshot/drift on a Pro plan, **Code Connect v2
-  templates generated from `cva`** gated in CI, Brand/Density collections, an
-  honest README + MIT licence. ADR-025 **Accepted 2026-09-17**. **Publishing
-  custom Code Connect needs Organization/Enterprise — Pro cannot, so no Dev Mode
-  snippet is live.** Nothing published to npm; hds is still on **v0.13.0** and
-  the release stays held (hds#199).
+- **🎨 hds has a Figma foundation and nothing shipped** (#211–#216, `DONE-LOG.md`).
+  **Publishing custom Code Connect needs Organization/Enterprise — Pro cannot**,
+  so no Dev Mode snippet is live. npm is still **v0.13.0**: the release workflow
+  failed on a repo _setting_ (Actions may not open PRs), not code (hds#199).
 
 - **📞 `/ops/pitch` — the call sheet.** Only pitchable leads appear
   (`preview_url`, not `do_not_contact`), re-checked on every write. Notes live
@@ -83,10 +78,12 @@ call next: `/ops/pitch`. A doc that restates either will drift.
 - **PRODUCTION is LIVE** — `hirobius-ops` deploys from `main`; `/ops` is password
   gated (`OPS_GATE_PASSWORD` + `OPS_SESSION_SECRET`); Supabase wired; DS from
   npm. Vercel **Pro**; preview Deployment Protection off — the gate covers it.
-- **FULL-AUTO since 2026-09-16.** Every `ralph-ready` issue carries `ralph-auto`;
-  `ralph-gate` is the **sole required check**. **One unapproved `ralph/*` PR
-  halts the queue and `ralph.yml` then no-ops in ~12s — fast-green runs are the
-  wedge signature, not progress. Check open PRs BEFORE the run list.**
+- **AUTO-MERGE IS CONDITIONAL (Adrian, 2026-09-19).** Tag `ralph-auto` only on
+  an issue whose DoD names **no** supervised path — the engine's arm has no path
+  check (ops#238), so a blanket tag is what let #368 and #362 merge lead-handling
+  diffs unreviewed. `ralph-gate` is the **sole required check**. **One unapproved
+  `ralph/*` PR halts the queue and `ralph.yml` then no-ops in ~12s — fast-green
+  runs are the wedge signature, not progress. Check open PRs BEFORE the run list.**
 - **Compliance gates SCALED outreach** (#35 → #38 → #27 before #9); one call or
   one manual email is not. **Outscraper spend (#190) stays ON HOLD.** Publishing
   stays a human action — it is the billing event.
@@ -137,8 +134,10 @@ foundation, Code Connect v2, honest front door). Detail: `DONE-LOG.md`.
 --apply` with a real `GITHUB_TOKEN`.
 5. **site-engine#192, filed today:** that repo's Ralph loop has had **no
    scheduled watchdog since 2026-07-16** — its `ralph.yml` schedule is off.
-6. **Adrian's calls:** #200 (Stripe — no way to take money today) ·
-   #303/#302/#296/#238 (one shared `hirobius/ralph` engine release, not four).
+6. **Adrian's calls:** #200 (Stripe — no way to take money today) · #303/#302/#296
+   (one shared engine release). **#238 is decomposed:** Ralph#25 (engine path
+   check) MUST land before ops#402 (flip the default), or the flip deletes the
+   revenue-path boundary #375 added. `v1` advanced to `a4f0c21` 2026-09-19.
 7. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
 8. **Run the email crawler where egress works** — merged (#346), never run
    against a trades site; both containers 403 all egress.
