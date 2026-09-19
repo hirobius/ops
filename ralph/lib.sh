@@ -425,12 +425,41 @@ run_claim_time() {
   iso_of "$(($(date -u +%s) - RALPH_ITER_TIMEOUT - 600))"
 }
 
+# newest_branch <lines> — lines are "<sha>\t<branch>". Echoes the branch whose
+# head commit is newest (ralph#18).
+#
+# Recovery must never be blocked by an API hiccup: if any candidate cannot be
+# dated, this falls back to the historical behaviour (first in ls-remote order)
+# and says so, rather than failing the reconciliation. A wrong-but-recovered
+# branch is recoverable by hand; a crashed reconcile is not.
+#
+# ISO-8601 Zulu sorts correctly as a string, so no date parsing is needed.
+newest_branch() {
+  local lines="$1" best="" best_date="" sha br cdate
+  while IFS=$'\t' read -r sha br; do
+    [ -n "$br" ] || continue
+    cdate=$(gh api "repos/$(repo_slug)/commits/$sha" --jq '.commit.committer.date' 2>/dev/null || true)
+    if [ -z "$cdate" ]; then
+      echo "ralph: could not date $br via the API — falling back to ls-remote order" >&2
+      awk -F'\t' 'NF {print $2}' <<<"$lines" | head -n1
+      return 0
+    fi
+    if [ -z "$best_date" ] || [[ "$cdate" > "$best_date" ]]; then
+      best_date="$cdate"
+      best="$br"
+    fi
+  done <<<"$lines"
+  [ -n "$best" ] || best=$(awk -F'\t' 'NF {print $2}' <<<"$lines" | head -n1)
+  echo "$best"
+}
+
 # reconcile_issue <n> <run_id> <work_status>
 # State-based post-iteration reconciliation — the single place that decides
 # what actually happened, regardless of how the work step died. Prints one
 # token: pr:<num> | parked:<why> | failed:<why>. Never returns non-zero.
 reconcile_issue() {
   local n=$1 run_id=$2 work_status=$3 all since pr closed branch i fails why eligible
+  local candidates cand_count passed_over
   all=$(gh pr list --state all --limit 200 --json number,headRefName,state,createdAt \
     --jq "[.[] | select(.headRefName | startswith(\"ralph/issue-$n-\"))]" \
     2>/dev/null || echo '[]')
@@ -455,13 +484,24 @@ reconcile_issue() {
   #    open it ourselves, bounded retry with backoff. Never when a CLOSED PR
   #    exists — that would resurrect human-rejected work (parked in 4 below).
   branch=""
+  passed_over=""
   if [ "${closed:-0}" -eq 0 ]; then
-    branch=$(git ls-remote --heads origin "ralph/issue-$n-*" 2>/dev/null |
-      awk '{print $2}' | sed 's#refs/heads/##')
-    if [ "$(grep -c . <<<"$branch")" -gt 1 ]; then
-      echo "ralph: WARNING — multiple ralph/issue-$n-* branches exist; recovering the first" >&2
+    # Keep the sha alongside the ref: with more than one orphan we choose by
+    # commit date (ralph#18), and the sha is what the commits API needs.
+    candidates=$(git ls-remote --heads origin "ralph/issue-$n-*" 2>/dev/null |
+      awk 'NF >= 2 {print $1"\t"$2}' | sed 's#refs/heads/##')
+    cand_count=$(grep -c . <<<"$candidates" || true)
+    if [ "${cand_count:-0}" -gt 1 ]; then
+      # ls-remote order is alphabetical, not chronological, so head -n1 could
+      # resurrect the older of two crash orphans and open a PR for work that
+      # was already superseded.
+      branch=$(newest_branch "$candidates")
+      passed_over=$(awk -F'\t' -v keep="$branch" 'NF && $2 != keep {print $2}' <<<"$candidates" |
+        paste -sd', ' -)
+      echo "ralph: multiple ralph/issue-$n-* branches — recovering $branch (newest commit); passed over: ${passed_over:-none}" >&2
+    else
+      branch=$(awk -F'\t' 'NF {print $2}' <<<"$candidates" | head -n1)
     fi
-    branch=$(head -n1 <<<"$branch")
   fi
   if [ -n "$branch" ]; then
     if [ "$RALPH_DRY_RUN" = "1" ]; then
@@ -473,7 +513,11 @@ reconcile_issue() {
         --title "$(git log -1 --format=%s "origin/$branch" 2>/dev/null || echo "ralph: issue #$n")" \
         --body "Closes #$n
 
-Opened by ralph reconciliation (run \`$run_id\`): the iteration pushed this branch but its PR step failed." \
+Opened by ralph reconciliation (run \`$run_id\`): the iteration pushed this branch but its PR step failed.${passed_over:+
+
+**Other branches exist for this issue and were passed over:** $passed_over
+
+This branch was chosen because its head commit is the newest. If the work you wanted is on one of the others, open it by hand — nothing deletes them.}" \
         >/dev/null 2>&1; then
         release_claim "$n"
         echo "pr:recovered"
