@@ -56,8 +56,7 @@ call next: `/ops/pitch`. A doc that restates either will drift.
   mirror on purpose. **`listOpenIssues()` returns `{ issues, truncated, fetched }`,
   not an array** — anything branched before #367 that calls it is broken.
   **Its issue TOTAL is wrong until #405 lands**: `GET /issues?filter=all` spans
-  every visible repo — 209 rows, of which only **95 are the fleet**; `job-hunt`
-  (32) is the biggest contributor. Open-PR counts are fine.
+  every visible repo — 209 rows, only **95** the fleet. Open-PR counts are fine.
 
 - **🛡️ CI gates are in place** — full roll-call in `DONE-LOG.md` (2026-09-17).
   The load-bearing one: the watchdog enforces the #238 supervised-path boundary
@@ -93,13 +92,15 @@ se#205–#207 shipped; hds CI finally runs its 9-gate `pretest`. `DONE-LOG.md`.
 ## Adrian's open actions (his court, not blocked on a session)
 
 - **Restrict sharing on the linked private docs and rotate any credentials in
-  them** — one is a "Logins" doc. Rotating is the part a gate cannot do.
+  them** — one is a "Logins" doc; rotating is what a gate cannot do.
 - **hds: tick "Allow GitHub Actions to create and approve pull requests"** at
   https://github.com/hirobius/hds/settings/actions. One checkbox; it is the only
   thing failing `release` (hds#199). ops#346's emails are redacted.
-- **folio: make `main` the default branch** (Settings → General). It is
-  `claude/eloquent-ramanujan-9ag4uy` today, so `Closes #N` never fires and
-  `main` is 2 ahead / 0 behind.
+- **Two repos' default branch is not `main`, so `Closes #N` silently no-ops in
+  both** (ops#407). **folio:** switch the default to the `main` that exists (2
+  ahead / 0 behind). **concrete:** it has NO `main` — _rename_
+  `claude/concrete-creations-migration-0okzxk` (Settings → Branches → pencil);
+  GitHub redirects and retargets PRs. Do not create an empty `main` instead.
 - **Create the `PII_DENYLIST` Actions secret + a gitignored `.pii-denylist`**
   (format in `REPO-PROCEDURES.md`, secret at
   https://github.com/hirobius/ops/settings/secrets/actions). Without it the gate
@@ -125,12 +126,12 @@ se#205–#207 shipped; hds CI finally runs its 9-gate `pretest`. `DONE-LOG.md`.
    by Adrian (writes production). #378 (draft) needs a real eval run and
    `ralph-approved`. #384 (draft) waits for the new hirobius.com to exist.
    **Do not rebuild any of them — unblock or leave.**
-2. **hds:** #210 (draft) is blocked on the tenant-rename decision; #207 and #208
-   (owner-chip tokens, accent neutralisation) are open and reviewable.
+2. **hds:** #210 (draft) blocked on the tenant-rename decision; #207/#208 are
+   open and reviewable.
 3. **#348 — gate SHIPPED (#392); the rest needs Adrian (writes production).**
-   `pnpm migrations:check` with `SUPABASE_ACCESS_TOKEN` is now the inventory. It
-   finds **7** unrecorded migrations, not 2 — 0003/0004/0006/0008 too. Apply
-   `0011_digest_items` BEFORE recording it, then `--sql` for the repair.
+   `pnpm migrations:check` with `SUPABASE_ACCESS_TOKEN` finds **7** unrecorded
+   migrations, not 2. Apply `0011_digest_items` BEFORE recording it, then
+   `--sql`.
 4. **Guardrails:** #330 (gate telemetry structurally unfillable) **carries
    `ralph-wip` — the loop holds it.** Then `reconcile-ralph-closures.mjs
 --apply` with a real `GITHUB_TOKEN`.
@@ -141,8 +142,8 @@ se#205–#207 shipped; hds CI finally runs its 9-gate `pretest`. `DONE-LOG.md`.
    check) MUST land before ops#402 (flip the default), or the flip deletes the
    revenue-path boundary #375 added. `v1` advanced to `a4f0c21` 2026-09-19.
 7. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
-8. **Run the email crawler where egress works** — merged (#346), never run
-   against a trades site; both containers 403 all egress.
+8. **Run the email crawler where egress works** — merged (#346), never run;
+   both containers 403 all egress.
 9. **Cutover Part B remainder** — gated on the clients Astro factory.
 
 ## Parked / known warts

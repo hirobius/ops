@@ -567,11 +567,15 @@
           <tr>
             <td>
               <a href="https://github.com/hirobius/folio/settings"
-                >folio → default branch <code>main</code></a
+                >folio + concrete → default branch</a
               >
             </td>
-            <td><code>Closes #N</code> starts working; it silently never fires today</td>
-            <td class="num">30 sec</td>
+            <td>
+              <code>Closes #N</code> starts working. Neither repo's default is <code>main</code>, so
+              it has silently never fired in either. folio switches to the <code>main</code> it
+              already has; concrete has none and must be <em>renamed</em>
+            </td>
+            <td class="num">2 min</td>
           </tr>
           <tr>
             <td>
@@ -691,9 +695,13 @@
         converts un-startable epics into shippable units.
       </p>
       <p>
-        The related find: <strong>finished, tested work is stranded on unmerged branches</strong> —
-        se#84's fix sat green and un-PR'd for two months before being recovered, and se#107, ops#71
-        and ops#5 have the same shape.
+        The related find, now measured:
+        <strong>86 remote branches have never had a pull request in any state</strong>, and 69 of
+        them are agent branches that did work and stopped short of opening one. se#84's fix sat
+        green and un-PR'd for two months before being recovered; se#107, ops#71 and ops#5 have the
+        same shape. A branch with no PR is invisible to every surface we have, so some unknown share
+        of the "blocked" 49 may already be finished. ops#407 asks for the report — not deletions,
+        and not a 69-PR flood.
       </p>
       <div class="scroll" style="margin-top: var(--s3); margin-bottom: 0">
         <table>
