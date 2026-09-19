@@ -1,4 +1,4 @@
-<!-- docs/state-of-play.html — Hirobius state of play, 2026-09-18.
+<!-- docs/state-of-play.html — Hirobius state of play, 2026-09-19.
 
      Published as an Artifact (phone-readable):
        https://claude.ai/artifact/6zLof4AB9Q8Bycj6Vm7tEo
@@ -397,7 +397,7 @@
 </style>
 
 <div class="wrap">
-  <p class="eyebrow">Hirobius · 18 September 2026</p>
+  <p class="eyebrow">Hirobius · 19 September 2026</p>
   <h1>The platform is ahead of the business.</h1>
   <p class="lede">
     An engineering platform worth having now exists. Nothing has been sold through it. These are the
@@ -617,25 +617,54 @@
     <h2>Structural, not incidental</h2>
 
     <div class="callout">
-      <h3>The backlog is un-queueable, not unqueued</h3>
+      <h3>15 of 90 open issues are actionable by an agent</h3>
       <p>
-        The loop had drained to <strong>zero</strong> queued issues in all four repos. Refilling it
-        meant vetting 30 candidates against the code actually on <code>main</code> — and
-        <strong>one</strong> survived as written.
+        Every open issue across the six repos was triaged with adversarial verification — a second
+        agent tried to refute each verdict, and <strong>27 of 33</strong> first-pass close/do-now
+        calls were overturned. The split below is what survived that.
+      </p>
+      <div class="scroll" style="margin-bottom: var(--s4)">
+        <table>
+          <thead>
+            <tr>
+              <th>Bucket</th>
+              <th class="num">Count</th>
+              <th>What it means</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Actionable now</strong></td>
+              <td class="num"><strong>15</strong></td>
+              <td>An agent can finish it in one PR</td>
+            </tr>
+            <tr>
+              <td>Blocked on you</td>
+              <td class="num">49</td>
+              <td>A credential, a decision, a payment account, a real-world fact</td>
+            </tr>
+            <tr>
+              <td>Needs decomposition</td>
+              <td class="num">20</td>
+              <td>Epic-shaped; must be split before anyone starts</td>
+            </tr>
+            <tr>
+              <td>Untriaged</td>
+              <td class="num">6</td>
+              <td>Verdict was overturned without a clear replacement</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        The count rose from 76 to 90 on purpose: two epics (ops#238, site-engine#153) were
+        decomposed into 15 children. Decomposition inflates the number before it deflates it — it
+        converts un-startable epics into shippable units.
       </p>
       <p>
-        The failures cluster. Nine issues carry no <code>- [ ]</code> DoD in the <em>body</em>, and
-        the picker's regex never reads comments, which is where the decisions actually live. Six
-        name a <code>.github/workflows/</code> file as their deliverable, which the bot token cannot
-        push. Five wait on a human. Three name a target that no longer exists on <code>main</code>.
-      </p>
-      <p>
-        Three dead issues were closed, three were given real DoDs, and
-        <strong>four now carry <code>ralph-ready</code></strong
-        >. The related find:
-        <strong>finished, tested work is stranded on unmerged branches</strong> — se#84's fix sat
-        green and un-PR'd for two months before being recovered, and se#107, se#147, ops#71 and
-        ops#5 have the same shape.
+        The related find: <strong>finished, tested work is stranded on unmerged branches</strong> —
+        se#84's fix sat green and un-PR'd for two months before being recovered, and se#107, ops#71
+        and ops#5 have the same shape.
       </p>
       <div class="scroll" style="margin-top: var(--s3); margin-bottom: 0">
         <table>
@@ -650,25 +679,25 @@
           <tbody>
             <tr>
               <td><code>ops</code></td>
-              <td class="num">28</td>
+              <td class="num">32</td>
               <td class="num">0</td>
               <td class="num">2</td>
             </tr>
             <tr>
               <td><code>site-engine</code></td>
-              <td class="num">21</td>
-              <td class="num">2</td>
+              <td class="num">25</td>
+              <td class="num">0</td>
               <td class="num">2</td>
             </tr>
             <tr>
               <td><code>hds</code></td>
-              <td class="num">17</td>
-              <td class="num">2</td>
+              <td class="num">12</td>
+              <td class="num">0</td>
               <td class="num">0</td>
             </tr>
             <tr>
               <td><code>Ralph</code></td>
-              <td class="num">5</td>
+              <td class="num">6</td>
               <td class="num">0</td>
               <td class="num">0</td>
             </tr>
@@ -716,6 +745,134 @@
     </ol>
   </section>
 
+  <!-- ── Handoff ──────────────────────────────────────────────────────── -->
+  <section>
+    <p class="eyebrow">Pick up from here</p>
+    <h2>The 15 an agent can finish</h2>
+    <p>
+      Every row is one pull request. Nothing here waits on a credential or a decision. Ordered so
+      the client-visible defects come first and the dependency chains come last.
+    </p>
+
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Issue</th>
+            <th>What</th>
+            <th class="num">Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>site-engine#205</code></td>
+            <td>
+              septic-response V1 still ships the arborist's forest-green palette — a water-damage
+              company in a tree surgeon's colours, on a prospect-facing page
+            </td>
+            <td class="num">S</td>
+          </tr>
+          <tr>
+            <td><code>folio#9</code></td>
+            <td>architecture scrub — two duplicated möbius seams, blocker now closed</td>
+            <td class="num">M</td>
+          </tr>
+          <tr>
+            <td><code>ops#399</code></td>
+            <td>four checked-in statements still describe the pre-#238 posture</td>
+            <td class="num">S</td>
+          </tr>
+          <tr>
+            <td><code>ops#398</code></td>
+            <td>
+              measure the auto-merge arming hole — PRs #368 and #362 merged touching supervised
+              paths with zero labels
+            </td>
+            <td class="num">M</td>
+          </tr>
+          <tr>
+            <td><code>ops#400</code></td>
+            <td>publish the supervised-path set so the engine's bash can read one source</td>
+            <td class="num">M</td>
+          </tr>
+          <tr>
+            <td><code>concrete#8</code></td>
+            <td>
+              product data model + a guided authoring script (the catalog JSON is uncast today)
+            </td>
+            <td class="num">M</td>
+          </tr>
+          <tr>
+            <td><code>site-engine#108</code></td>
+            <td>fleet health monitor — verify first, one pass already concluded it was done</td>
+            <td class="num">M</td>
+          </tr>
+          <tr>
+            <td><code>site-engine#206–210</code></td>
+            <td>
+              the bespoke extraction chain: role-name V2 props → define <code>SiteSpec</code> → make
+              pages spec-driven → extract <code>_bespoke-template</code> → scaffold command.
+              <strong>Strictly sequential</strong>, and gated on site-engine#203 resolving as
+              "build"
+            </td>
+            <td class="num">M–L</td>
+          </tr>
+          <tr>
+            <td><code>ops#314</code>, <code>ops#8</code></td>
+            <td>
+              recheck before starting — both were reclassified late and one still carries a
+              <code>blocked</code> label
+            </td>
+            <td class="num">?</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <h3>Four answers that unblock the most</h3>
+      <p>These are the decisions with the largest downstream fan-out, not the full list of 49:</p>
+      <ol class="steps" style="margin-top: var(--s3)">
+        <li>
+          <strong>site-engine#203</strong> — build the bespoke extraction now, or park it behind the
+          first signed engagement? Five filed issues are waiting on this one word.
+        </li>
+        <li>
+          <strong>ops#401</strong> — keep or pause the blanket <code>ralph-auto</code> tag while the
+          engine-side path check is still deferred.
+        </li>
+        <li>
+          <strong>Release engine <code>v1</code></strong> — <code>v1</code> is a branch still at
+          <code>f645031</code>; two merged fixes (Ralph#23, Ralph#24) are on <code>main</code> and
+          invisible to every caller until it advances. This is a fleet-wide deploy.
+        </li>
+        <li>
+          <strong>hds release hold</strong> — <code>release</code> is red on a repo
+          <em>setting</em>: Settings → Actions → General → "Allow GitHub Actions to create and
+          approve pull requests".
+        </li>
+      </ol>
+    </div>
+
+    <div class="callout">
+      <h3>Two safety constraints that must not be reordered</h3>
+      <p>
+        <strong>Ralph#25 before ops#402.</strong> The revenue-path boundary currently holds because
+        risky issues simply aren't tagged <code>ralph-auto</code> — a human convention, not a
+        mechanism. Flip auto-merge to default-on before the engine enforces paths and every green
+        <code>ralph/*</code> PR self-merges, including one touching <code>lib/leads/</code>. Closing
+        ops#238 in its stated order would delete the protection PR #375 added.
+      </p>
+      <p>
+        <strong>A new section variant is always an enum change</strong>, so it always needs the ops
+        mirror (<code>lib/schema</code> + the vendored snapshot). A new optional <em>field</em> may
+        not — se#84's <code>analytics</code> was safe only because its <code>provider</code> is a
+        <code>z.literal</code>, and <code>collectEnums()</code> collects only
+        <code>kind === 'enum'</code>.
+      </p>
+    </div>
+  </section>
+
   <footer>
     <p>
       <strong>Snapshot, not a living document.</strong> Regenerate it rather than patch it. For
@@ -724,7 +881,7 @@
     </p>
     <p>
       Source of record: <code>docs/state-of-play.html</code> in <code>hirobius/ops</code>, linked
-      from <code>docs/ai/HANDOFF.md</code>. Counts taken 2026-09-18; lead figures as recorded
+      from <code>docs/ai/HANDOFF.md</code>. Counts taken 2026-09-19; lead figures as recorded
       2026-09-17.
     </p>
   </footer>
