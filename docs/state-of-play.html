@@ -714,13 +714,19 @@
             </tr>
             <tr>
               <td><code>site-engine</code></td>
-              <td class="num">25</td>
+              <td class="num">22</td>
               <td class="num">0</td>
               <td class="num">2</td>
             </tr>
             <tr>
               <td><code>hds</code></td>
-              <td class="num">12</td>
+              <td class="num">21</td>
+              <td class="num">0</td>
+              <td class="num">0</td>
+            </tr>
+            <tr>
+              <td><code>concrete</code></td>
+              <td class="num">9</td>
               <td class="num">0</td>
               <td class="num">0</td>
             </tr>
@@ -729,6 +735,18 @@
               <td class="num">6</td>
               <td class="num">0</td>
               <td class="num">0</td>
+            </tr>
+            <tr>
+              <td><code>folio</code></td>
+              <td class="num">5</td>
+              <td class="num">0</td>
+              <td class="num">0</td>
+            </tr>
+            <tr>
+              <td><strong>Fleet</strong></td>
+              <td class="num"><strong>95</strong></td>
+              <td class="num">0</td>
+              <td class="num">4</td>
             </tr>
           </tbody>
         </table>
@@ -777,10 +795,12 @@
   <!-- ── Handoff ──────────────────────────────────────────────────────── -->
   <section>
     <p class="eyebrow">Pick up from here</p>
-    <h2>The 15 an agent can finish</h2>
+    <h2>What an agent can finish unaided</h2>
     <p>
-      Every row is one pull request. Nothing here waits on a credential or a decision. Ordered so
-      the client-visible defects come first and the dependency chains come last.
+      Every row is one pull request. Nothing here waits on a credential or a decision. Five of the
+      original fifteen shipped on 19 September and are struck from the list:
+      <code>site-engine#205</code>, <code>#206</code> and <code>#207</code>,
+      <code>folio#9</code> and <code>ops#399</code>. Ten remain.
     </p>
 
     <div class="scroll">
@@ -794,22 +814,14 @@
         </thead>
         <tbody>
           <tr>
-            <td><code>site-engine#205</code></td>
+            <td><code>site-engine#208</code></td>
             <td>
-              septic-response V1 still ships the arborist's forest-green palette — a water-damage
-              company in a tree surgeon's colours, on a prospect-facing page
+              <strong>next in the bespoke chain, and the large one.</strong> #205–#207 are done: the
+              two V1 pages are now byte-identical, driven entirely by <code>site.spec.ts</code> and
+              a generated <code>design.css</code>. #208 does the same for <code>v2.astro</code> and
+              <code>PreviewControls.astro</code>; #209 and #210 follow
             </td>
-            <td class="num">S</td>
-          </tr>
-          <tr>
-            <td><code>folio#9</code></td>
-            <td>architecture scrub — two duplicated möbius seams, blocker now closed</td>
-            <td class="num">M</td>
-          </tr>
-          <tr>
-            <td><code>ops#399</code></td>
-            <td>four checked-in statements still describe the pre-#238 posture</td>
-            <td class="num">S</td>
+            <td class="num">L</td>
           </tr>
           <tr>
             <td><code>ops#398</code></td>
@@ -837,14 +849,12 @@
             <td class="num">M</td>
           </tr>
           <tr>
-            <td><code>site-engine#206–210</code></td>
+            <td><code>ops#405</code></td>
             <td>
-              the bespoke extraction chain: role-name V2 props → define <code>SiteSpec</code> → make
-              pages spec-driven → extract <code>_bespoke-template</code> → scaffold command.
-              <strong>Strictly sequential</strong>, and gated on site-engine#203 resolving as
-              "build"
+              scope <code>listOpenIssues()</code> to a fleet-repo constant — today the standing page
+              counts 209 issues across every repo the token can see, where the fleet is 95
             </td>
-            <td class="num">M–L</td>
+            <td class="num">M</td>
           </tr>
           <tr>
             <td><code>ops#314</code>, <code>ops#8</code></td>
@@ -859,28 +869,33 @@
     </div>
 
     <div class="callout">
-      <h3>Four answers that unblock the most</h3>
-      <p>These are the decisions with the largest downstream fan-out, not the full list of 49:</p>
+      <h3>Three of the four big answers came in</h3>
+      <p>These were the decisions with the largest downstream fan-out. Answered on 19 September:</p>
       <ol class="steps" style="margin-top: var(--s3)">
         <li>
-          <strong>site-engine#203</strong> — build the bespoke extraction now, or park it behind the
-          first signed engagement? Five filed issues are waiting on this one word.
+          <strong>site-engine#203 — build it now, all five.</strong> #205, #206 and #207 shipped the
+          same day; #208–#210 are unblocked and queued.
         </li>
         <li>
-          <strong>ops#401</strong> — keep or pause the blanket <code>ralph-auto</code> tag while the
-          engine-side path check is still deferred.
+          <strong>ops#401 — <code>ralph-auto</code> is now conditional</strong>, not blanket. Tag it
+          only on an issue whose definition of done names no supervised path. The blanket practice
+          is what let PRs #368 and #362 merge lead-handling diffs unreviewed.
         </li>
         <li>
-          <strong>Release engine <code>v1</code></strong> — <code>v1</code> is a branch still at
-          <code>f645031</code>; two merged fixes (Ralph#23, Ralph#24) are on <code>main</code> and
-          invisible to every caller until it advances. This is a fleet-wide deploy.
-        </li>
-        <li>
-          <strong>hds release hold</strong> — <code>release</code> is red on a repo
-          <em>setting</em>: Settings → Actions → General → "Allow GitHub Actions to create and
-          approve pull requests".
+          <strong>Engine <code>v1</code> released</strong> — advanced from <code>f645031</code> to
+          <code>a4f0c21</code>, re-vendored in all three callers and verified live. Ralph#23 fixes
+          orphan-branch recovery to pick the newest branch; Ralph#24 makes the kit-drift check
+          compare against the engine revision actually running.
         </li>
       </ol>
+      <p style="margin-top: var(--s4); margin-bottom: 0">
+        <strong>The fourth is still open and is 30 seconds of work:</strong> the hds
+        <code>release</code> job is red on a repo <em>setting</em> —
+        <a href="https://github.com/hirobius/hds/settings/actions"
+          >Settings → Actions → General → "Allow GitHub Actions to create and approve pull
+          requests"</a
+        >. It is the only failing job on that repo's <code>main</code>.
+      </p>
     </div>
 
     <div class="callout">
@@ -888,7 +903,8 @@
       <p>
         <strong>Ralph#25 before ops#402.</strong> The revenue-path boundary currently holds because
         risky issues simply aren't tagged <code>ralph-auto</code> — a human convention, not a
-        mechanism. Flip auto-merge to default-on before the engine enforces paths and every green
+        mechanism. The ops#401 decision tightened that convention; it did not replace it. Flip
+        auto-merge to default-on before the engine enforces paths and every green
         <code>ralph/*</code> PR self-merges, including one touching <code>lib/leads/</code>. Closing
         ops#238 in its stated order would delete the protection PR #375 added.
       </p>
@@ -910,8 +926,13 @@
     </p>
     <p>
       Source of record: <code>docs/state-of-play.html</code> in <code>hirobius/ops</code>, linked
-      from <code>docs/ai/HANDOFF.md</code>. Counts taken 2026-09-19; lead figures as recorded
-      2026-09-17.
+      from <code>docs/ai/HANDOFF.md</code>. Issue and PR counts taken 2026-09-19 at session close;
+      lead figures as recorded 2026-09-17.
+    </p>
+    <p>
+      <strong>Session closed clean.</strong> No agent holds a claim, nothing is half-pushed, and
+      every pull request opened on 19 September is merged. The sixteen still open across GitHub
+      predate that session or belong to another one.
     </p>
   </footer>
 </div>
