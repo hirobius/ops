@@ -73,6 +73,26 @@ believes it.
 
 ## Messages — newest first
 
+### 2026-09-19 · burndown session → all · two structural findings at close-out
+
+**`concrete`'s default branch is not `main`, and it has no `main` at all.** It
+is `claude/concrete-creations-migration-0okzxk`. folio has the same class of
+problem but a different fix — folio HAS a `main` to switch to, concrete must
+have its current default RENAMED. Do not create an empty `main` in concrete and
+switch to it; that orphans the history. `Closes #N` has silently no-opped in
+both repos, so two of concrete's nine open issues may already be fixed.
+
+**86 remote branches across the fleet have never had a PR in any state**
+(ops#407). 69 are `claude/issue-<N>-*` agent branches that did work and stopped
+short of opening one — invisible to `/ops/standing`, to the watchdog and to
+`gh pr list`. That is the exact failure that stranded se#84's fix for two
+months. **Do not mass-delete and do not mass-open PRs**: a 69-PR flood buries
+the real ones and halts the single-flight queue. ops#407 wants a report.
+
+**When you write that audit, exclude each repo's ACTUAL default branch from the
+API** — never a hardcoded `main`. Two of the six fleet repos do not use it, and
+assuming otherwise is what made my first pass report two false positives.
+
 ### 2026-09-19 · burndown session → all · closed out; nothing in flight
 
 **No claims held, no branch half-pushed, no uncommitted work.** Every PR this

@@ -20,9 +20,10 @@
     "ops#402 (flip the supervised-path default) MUST NOT land before Ralph#25 (the engine-side path check). Flipping first deletes the revenue-path boundary PR #375 added, because today that boundary is a human convention rather than a mechanism. Engine v1 is at a4f0c21 as of 2026-09-19.",
     "Compliance, to unlock the SCALED send: #35 -> #38 -> #27, then #9.",
     "Cutover Part B remainder — gated on the clients Astro factory being live.",
-    "ADRIAN: make main the default branch in hirobius/folio (Settings → General). It is claude/eloquent-ramanujan-9ag4uy today, which is why \"Closes #9\" silently never fired; main is 2 ahead / 0 behind.",
+    "ADRIAN, TWO REPOS HAVE THE WRONG DEFAULT BRANCH, so `Closes #N` has been silently no-opping in both (ops#407). folio: switch the default to the `main` that already exists (Settings → General); it is 2 ahead / 0 behind. concrete: there is NO `main` to switch to — RENAME `claude/concrete-creations-migration-0okzxk` to main (Settings → Branches → pencil icon), which GitHub redirects and retargets open PRs for. Do not create an empty main and switch to it; that is the destructive version.",
     "ops#405 — scope listOpenIssues() to a FLEET_REPOS constant. Until it lands, do not read \"how much is left\" off /ops/standing: 209 issues are counted and only 95 are the fleet.",
-    "site-engine#208 is next in the bespoke chain and is the large one (#209, #210 follow). se#205/#206/#207 are shipped."
+    "site-engine#208 is next in the bespoke chain and is the large one (#209, #210 follow). se#205/#206/#207 are shipped.",
+    "ops#407 — 86 remote branches across the fleet have never had a pull request in any state. 69 are `claude/issue-<N>-*` agent branches that did work and stopped short of opening one, which is the exact failure that stranded se#84 for two months. The issue asks for a REPORT, not deletions and not an auto-PR flood."
   ],
   "blocked": []
 }
