@@ -28,6 +28,13 @@
  *   pre-push         runs via .husky/pre-push (gating, slower set)
  *   ci-pr            runs on every PR via GitHub Actions (gating)
  *   ci-scheduled     scheduled CI (nightly/weekly)
+ *   ci-dispatch      lives in a GitHub Actions workflow but fires ONLY on
+ *                    workflow_dispatch — a human presses Run. Distinct from
+ *                    `manual` (which means nothing in CI can invoke it at all)
+ *                    and from `ci-scheduled` (no cron, so it never self-fires).
+ *                    Added 2026-09-19: audit-sites needed a Run button without
+ *                    a cron, and declaring either neighbour would have been a
+ *                    lie in the one file whose job is to stop exactly that.
  *   pnpm-meta        invoked via pnpm meta-scripts (pretest, tokens, …)
  *   manual           operator-only CLI tool, never auto-fires
  *
@@ -60,7 +67,14 @@ const PKG = path.join(ROOT, 'package.json');
 const GH_DIR = path.join(ROOT, '.github/workflows');
 
 const VALID_CHANNELS = new Set([
-  'pre-commit', 'commit-msg', 'pre-push', 'ci-pr', 'ci-scheduled', 'pnpm-meta', 'manual',
+  'pre-commit',
+  'commit-msg',
+  'pre-push',
+  'ci-pr',
+  'ci-scheduled',
+  'ci-dispatch',
+  'pnpm-meta',
+  'manual',
 ]);
 
 const args = new Set(process.argv.slice(2));
@@ -69,21 +83,28 @@ const REPORT = args.has('--report');
 const SELF_TEST = args.has('--self-test');
 
 function readSafe(p) {
-  try { return fs.readFileSync(p, 'utf8'); } catch { return ''; }
+  try {
+    return fs.readFileSync(p, 'utf8');
+  } catch {
+    return '';
+  }
 }
 
 function listGhActions() {
   if (!fs.existsSync(GH_DIR)) return '';
-  return fs.readdirSync(GH_DIR)
-    .filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'))
-    // Comments are stripped before matching: this content is substring-searched
-    // for gate script names, and a *prose mention* of one is not wiring. ops#262
-    // — a comment in quality.yml naming `audit-sbom` was read as a live
-    // invocation, and the resulting WIRING_DRIFT blocked every commit in the
-    // repo. The .husky path already did this via parseHookLines; this closes the
-    // GitHub Actions gap. See scripts/lib/yaml-comments.mjs and ops#304.
-    .map((f) => stripYamlComments(readSafe(path.join(GH_DIR, f))))
-    .join('\n');
+  return (
+    fs
+      .readdirSync(GH_DIR)
+      .filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'))
+      // Comments are stripped before matching: this content is substring-searched
+      // for gate script names, and a *prose mention* of one is not wiring. ops#262
+      // — a comment in quality.yml naming `audit-sbom` was read as a live
+      // invocation, and the resulting WIRING_DRIFT blocked every commit in the
+      // repo. The .husky path already did this via parseHookLines; this closes the
+      // GitHub Actions gap. See scripts/lib/yaml-comments.mjs and ops#304.
+      .map((f) => stripYamlComments(readSafe(path.join(GH_DIR, f))))
+      .join('\n')
+  );
 }
 
 /**
@@ -172,8 +193,7 @@ function detectBypassPatterns(parsedLines, gateScript, strictArgv) {
     }
 
     // ── Check if this line invokes the gate ──────────────────────────
-    const invokesGate =
-      trimmed.includes(gateScript) || trimmed.includes(scriptBase);
+    const invokesGate = trimmed.includes(gateScript) || trimmed.includes(scriptBase);
 
     if (!invokesGate) continue;
 
@@ -232,7 +252,6 @@ function detectBypassPatterns(parsedLines, gateScript, strictArgv) {
         detail: `gate '${scriptBase}' is backgrounded with '&' — exit code is discarded`,
       });
     }
-
   }
 
   // Rule 7: missing strictArgv — checked at file level.
@@ -241,9 +260,7 @@ function detectBypassPatterns(parsedLines, gateScript, strictArgv) {
     const allGateLines = parsedLines.filter(
       ({ trimmed: t }) => t.includes(gateScript) || t.includes(scriptBase),
     );
-    const hasStrictInvocation = allGateLines.some(
-      ({ trimmed: t }) => t.includes(strictArgv),
-    );
+    const hasStrictInvocation = allGateLines.some(({ trimmed: t }) => t.includes(strictArgv));
     if (allGateLines.length > 0 && !hasStrictInvocation) {
       violations.push({
         lineNum: allGateLines[0].lineNum,
@@ -286,7 +303,14 @@ function hasUnifiedRunnerInvocation(content, channel) {
  * Returns { violations, summary } where violations is an array of
  * objects and summary is an array of per-gate status objects.
  */
-function runWiringCheck(registryObj, precommitPath, prepushPath, ghActionsContent, pkgObj, commitmsgPath) {
+function runWiringCheck(
+  registryObj,
+  precommitPath,
+  prepushPath,
+  ghActionsContent,
+  pkgObj,
+  commitmsgPath,
+) {
   const violations = [];
   const summary = [];
 
@@ -300,7 +324,11 @@ function runWiringCheck(registryObj, precommitPath, prepushPath, ghActionsConten
   const precommitUsesUnifiedRunner = hasUnifiedRunnerInvocation(precommitContent, 'pre-commit');
   if (precommitUsesUnifiedRunner) {
     // Check that the run-gates.mjs line itself isn't bypass-wrapped.
-    const runnerBypassViolations = detectBypassPatterns(parsedPrecommit, 'scripts/run-gates.mjs', null);
+    const runnerBypassViolations = detectBypassPatterns(
+      parsedPrecommit,
+      'scripts/run-gates.mjs',
+      null,
+    );
     for (const bv of runnerBypassViolations) {
       violations.push({
         id: 'run-gates-pre-commit-runner',
@@ -319,15 +347,22 @@ function runWiringCheck(registryObj, precommitPath, prepushPath, ghActionsConten
     // Canonical unified runner invocation: run-gates.mjs --channel <channel>
     // is in the hook content AND the gate is registered for that channel.
     if (declaredChannel === 'pre-commit' && precommitUsesUnifiedRunner) return 'pre-commit';
-    if (declaredChannel === 'pre-push' && hasUnifiedRunnerInvocation(prepushContent, 'pre-push')) return 'pre-push';
-    if (declaredChannel === 'ci-pr' && hasUnifiedRunnerInvocation(ghActionsContent, 'ci-pr')) return 'ci-detected';
-    if (declaredChannel === 'ci-scheduled' && hasUnifiedRunnerInvocation(ghActionsContent, 'ci-scheduled')) return 'ci-detected';
+    if (declaredChannel === 'pre-push' && hasUnifiedRunnerInvocation(prepushContent, 'pre-push'))
+      return 'pre-push';
+    if (declaredChannel === 'ci-pr' && hasUnifiedRunnerInvocation(ghActionsContent, 'ci-pr'))
+      return 'ci-detected';
+    if (
+      declaredChannel === 'ci-scheduled' &&
+      hasUnifiedRunnerInvocation(ghActionsContent, 'ci-scheduled')
+    )
+      return 'ci-detected';
 
     // Fallback: check legacy per-gate invocations in GH Actions / pnpm.
     if (
       ghActionsContent.includes(gateScript) ||
       ghActionsContent.includes(path.basename(gateScript, '.mjs'))
-    ) return 'ci-detected';
+    )
+      return 'ci-detected';
     const scripts = pkgObj.scripts || {};
     const callers = Object.entries(scripts).filter(([, cmd]) => cmd.includes(gateScript));
     if (callers.length) return 'pnpm-meta';
@@ -337,11 +372,19 @@ function runWiringCheck(registryObj, precommitPath, prepushPath, ghActionsConten
   for (const entry of registryObj.gates) {
     const declared = entry.firingChannel;
     if (!declared) {
-      violations.push({ id: entry.id, code: 'MISSING_CHANNEL', detail: 'firingChannel is missing' });
+      violations.push({
+        id: entry.id,
+        code: 'MISSING_CHANNEL',
+        detail: 'firingChannel is missing',
+      });
       continue;
     }
     if (!VALID_CHANNELS.has(declared)) {
-      violations.push({ id: entry.id, code: 'BAD_CHANNEL', detail: `unknown channel '${declared}'` });
+      violations.push({
+        id: entry.id,
+        code: 'BAD_CHANNEL',
+        detail: `unknown channel '${declared}'`,
+      });
       continue;
     }
 
@@ -349,7 +392,11 @@ function runWiringCheck(registryObj, precommitPath, prepushPath, ghActionsConten
 
     let ok = false;
     if (declared === actual) ok = true;
-    else if ((declared === 'ci-pr' || declared === 'ci-scheduled') && actual === 'ci-detected') ok = true;
+    else if (
+      (declared === 'ci-pr' || declared === 'ci-scheduled' || declared === 'ci-dispatch') &&
+      actual === 'ci-detected'
+    )
+      ok = true;
     else if (declared === 'manual' && (actual === 'none' || actual === 'pnpm-meta')) ok = true;
     else if (declared === 'pre-commit' && actual === 'pre-commit') ok = true;
     else if (declared === 'commit-msg' && actual === 'commit-msg') ok = true;
@@ -369,7 +416,11 @@ function runWiringCheck(registryObj, precommitPath, prepushPath, ghActionsConten
     // file, so bypass checking shifts to the run-gates.mjs invocation line
     // (checked above at the runner level). Only run per-gate bypass detection
     // when the gate IS directly invoked (legacy or explicit override).
-    if (declared === 'pre-commit' && actual === 'pre-commit' && precommitContent.includes(entry.gateScript)) {
+    if (
+      declared === 'pre-commit' &&
+      actual === 'pre-commit' &&
+      precommitContent.includes(entry.gateScript)
+    ) {
       const bypassViolations = detectBypassPatterns(
         parsedPrecommit,
         entry.gateScript,
@@ -452,7 +503,7 @@ if (SELF_TEST) {
     if (!ok) {
       allPassed = false;
       const reason = expectPass
-        ? `expected PASS but got ${violations.length} violation(s): ${violations.map(v => v.code).join(', ')}`
+        ? `expected PASS but got ${violations.length} violation(s): ${violations.map((v) => v.code).join(', ')}`
         : `expected FAIL but got 0 violations (bypass not detected)`;
       results.push({ file, ok: false, reason });
     } else {
@@ -470,7 +521,7 @@ if (SELF_TEST) {
     if (!r.ok) console.log(`         → ${r.reason}`);
   }
   console.log('─'.repeat(70));
-  const passed = results.filter(r => r.ok).length;
+  const passed = results.filter((r) => r.ok).length;
   const total = results.length;
   console.log(`  ${passed}/${total} sub-tests passed`);
   console.log();
@@ -515,7 +566,8 @@ if (registryObj.precommitStructureHash) {
       violations.push({
         id: 'pre-commit-structure-hash',
         code: 'PRECOMMIT_HASH_DRIFT',
-        detail: `pre-commit structural drift: registry hash ${registryHash}, file hash ${fileHash}. ` +
+        detail:
+          `pre-commit structural drift: registry hash ${registryHash}, file hash ${fileHash}. ` +
           `If the change is intentional, run \`node scripts/update-precommit-hash.mjs\` and commit ` +
           `the registry update with the hook change.`,
       });

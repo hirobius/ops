@@ -224,13 +224,19 @@ function validate() {
     // MISSING case: no fixture dir or missing files
     if (!violatingPath || !passingPath) {
       // Proof-of-firing only applies to gates that AUTO-FIRE in a hook/CI
-      // channel. A `manual` gate is run by hand, and a gate whose script is
-      // absent cannot fire at all (tracked separately as drift) — neither needs
-      // a proof-of-firing fixture, so exempt them rather than hard-failing.
-      if (gate.firingChannel === 'manual' || !scriptExists) {
+      // channel. A `manual` gate is run by hand, a `ci-dispatch` gate is equally
+      // hand-run (it lives in a workflow but fires only on workflow_dispatch —
+      // it cannot fire on its own), and a gate whose script is absent cannot
+      // fire at all (tracked separately as drift) — none needs a proof-of-firing
+      // fixture, so exempt them rather than hard-failing.
+      if (
+        gate.firingChannel === 'manual' ||
+        gate.firingChannel === 'ci-dispatch' ||
+        !scriptExists
+      ) {
         if (VERBOSE)
           console.warn(
-            `  [EXEMPT] ${gateId}: ${!scriptExists ? 'gate script absent' : 'manual channel (not auto-firing)'} — fixture not required`,
+            `  [EXEMPT] ${gateId}: ${!scriptExists ? 'gate script absent' : `${gate.firingChannel} channel (not auto-firing)`} — fixture not required`,
           );
         continue;
       }

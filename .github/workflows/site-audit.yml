@@ -1,0 +1,108 @@
+name: Site audit (PageSpeed)
+
+# Runs scripts/audit-sites.mjs against leads that already have a website.
+#
+# WHY THIS EXISTS: the script was merged and then never run, because nothing
+# invoked it. It is not an npm script, not a Vercel function and not wired to
+# any workflow — so 223 leads with a website carry no site-quality score, and
+# outreach has no real opening line. This is the invoker.
+#
+# MANUAL ONLY, ON PURPOSE. No `schedule:` — Adrian's 2026-09-19 directive was to
+# cut automated checks, and the guardrail registry pins audit-sites to
+# firingChannel "manual". Adding a cron here would make that entry a lie and
+# trip validate-guardrail-registry. Run it from the Actions tab when you want a
+# fresh pass.
+#
+# SECRETS (repository → Settings → Secrets and variables → Actions):
+#   PAGESPEED_API_KEY        required — free Google Cloud key. The anonymous
+#                            PageSpeed endpoint 429s immediately, so without it
+#                            the run cannot do anything.
+#   SUPABASE_URL             already set
+#   SUPABASE_SERVICE_ROLE_KEY already set
+#
+# Google fetches each prospect's site server-side, so this job only ever calls
+# www.googleapis.com — it never reaches an arbitrary business domain itself.
+# Zero Outscraper credits: it re-uses leads already paid for.
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Max leads to audit'
+        required: false
+        default: '50'
+        type: string
+      presence:
+        description: 'Which leads to audit'
+        required: false
+        default: 'custom'
+        type: choice
+        options:
+          - custom
+          - builder
+          - all-with-site
+      write:
+        description: 'Persist scores to Supabase (leave off for a dry run)'
+        required: false
+        default: false
+        type: boolean
+
+concurrency: ${{ github.workflow }}
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Fail loud and actionable BEFORE burning a run: name the variable and the
+      # fix, per the repo's token/secret convention. A missing key otherwise
+      # surfaces as a wall of PageSpeed 429s, which reads like a Google problem.
+      - name: Check required secrets
+        env:
+          PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          SECRETS_URL="${{ github.server_url }}/${{ github.repository }}/settings/secrets/actions"
+          missing=""
+          if [ -z "$PAGESPEED_API_KEY" ]; then
+            echo "::error title=Missing secret PAGESPEED_API_KEY::PAGESPEED_API_KEY is not set, so every PageSpeed call will 429 immediately. Create a free key (enable the API at https://console.cloud.google.com/apis/library/pagespeedonline.googleapis.com, then create it at https://console.cloud.google.com/apis/credentials) and add it as a repository secret at $SECRETS_URL"
+            missing="$missing PAGESPEED_API_KEY"
+          fi
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "::error title=Missing Supabase secrets::SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY are not set, so the run cannot read the leads table. Add them at $SECRETS_URL"
+            missing="$missing SUPABASE"
+          fi
+          if [ -n "$missing" ]; then
+            echo "Missing:$missing"
+            exit 1
+          fi
+          echo "All required secrets present."
+
+      - name: Run the audit
+        env:
+          PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # NODE_USE_ENV_PROXY is deliberately NOT set. It exists so a sandboxed
+          # agent container can reach googleapis through its proxy; a GitHub
+          # runner has open egress and no proxy, so setting it would break the
+          # call rather than enable it.
+          node scripts/audit-sites.mjs \
+            --limit "${{ inputs.limit }}" \
+            --presence "${{ inputs.presence }}" \
+            ${{ inputs.write == true && '--write' || '' }}
