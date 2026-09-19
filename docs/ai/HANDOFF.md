@@ -30,6 +30,16 @@ Everything below is **on-demand** — open one only when the task calls for it.
 call next: `/ops/pitch`. A doc that restates either will drift.
 `docs/ai/archive/` is history, not context — do not read it to get oriented.
 
+## The fleet is SIX repos (all `hirobius/`)
+
+`ops` · `site-engine` · `hds` · `Ralph` · `folio` · `concrete` — **95 open
+issues**. `portal-kit` is consumed, not worked. **Everything else the token sees
+is NOT fleet — never touch it**: `job-hunt`, `lilac`, `lilac-bonds`, `access-t`,
+`veteran-resource-navigator`, `adr-eng/adrian-milsap` (114 issues of noise).
+**`FLEET_REPOS` in `api/tasks.ts` lists only three** — ops#405 replaces it.
+**Default is `main` everywhere EXCEPT folio and concrete**, so `Closes #N`
+silently no-ops there (ops#407).
+
 ## Now (what is true today)
 
 - **☎️ THE EMAIL CHANNEL CANNOT RUN. 1 lead of 263 has an email address.**
@@ -41,35 +51,35 @@ call next: `/ops/pitch`. A doc that restates either will drift.
 
 - **🔒 PII: prevention landed, history not yet purged (#27, p1/sev1,
   `needs-decision`).** `check-pii` runs pre-commit, on the commit message, on
-  every PR and main push, and weekly, across ops, concrete, hds, site-engine and
-  portal-kit. The **history rewrite is still pending** — rehearsed, runbook in
-  `REPO-PROCEDURES.md`; the cleanup list also holds the `refs/pull` copy of
-  ops#388's early commit and the #367/#388 PR text. **The gate is only as strong
-  as its denylist**, deliberately out of repo (`PII_DENYLIST` secret /
-  gitignored `.pii-denylist`) and not yet created, so today it matches generic
-  patterns only — it missed a client tenant's name in a PR test fixture.
+  every PR and main push, and weekly, fleet-wide. The **history rewrite is still
+  pending** — rehearsed, runbook in `REPO-PROCEDURES.md`; the cleanup list also
+  holds the `refs/pull` copy of ops#388's early commit and the #367/#388 PR
+  text. **The gate is only as strong as its denylist**, deliberately out of repo
+  (`PII_DENYLIST` secret / gitignored `.pii-denylist`) and not yet created, so
+  today it matches generic patterns only — it missed a client tenant's name in a
+  PR test fixture.
 
 - **🪟 `/ops/standing` is the ONLY fleet surface** — chain, waiting-on-you, in
   flight, loop health, queue, backlog, deploys; `/ops/tasks` + `/ops/projects`
-  redirect here. Now phone-operable (#367) and repo-filtered on every lane
-  (#388). Its actions write labels straight to GitHub, bypassing the Supabase
-  mirror on purpose. **`listOpenIssues()` returns `{ issues, truncated, fetched }`,
-  not an array** — anything branched before #367 that calls it is broken.
-  **Its issue TOTAL is wrong until #405 lands**: `GET /issues?filter=all` spans
-  every visible repo — 209 rows, only **95** the fleet. Open-PR counts are fine.
+  redirect here. Phone-operable (#367), repo-filtered on every lane (#388). Its
+  actions write labels straight to GitHub, bypassing the Supabase mirror.
+  **`listOpenIssues()` returns `{ issues, truncated, fetched }`, not an array**
+  — anything branched before #367 that calls it is broken.
+  **Its issue TOTAL is wrong until #405 lands** — it counts 209, not 95 (see
+  above). Open-PR counts are fine.
 
 - **🛡️ CI gates are in place** — full roll-call in `DONE-LOG.md` (2026-09-17).
   The load-bearing one: the watchdog enforces the #238 supervised-path boundary
   on its own merge path; the **engine** still does not (Ralph#25).
 
-- **🎨 hds has a Figma foundation and nothing shipped** (#211–#216, `DONE-LOG.md`).
-  **Publishing custom Code Connect needs Organization/Enterprise — Pro cannot**,
-  so no Dev Mode snippet is live. npm is still **v0.13.0** (hds#199).
+- **🎨 hds: Figma foundation, nothing shipped** (#211–#216). **Code Connect
+  publishing needs Org/Enterprise — Pro cannot**, so no Dev Mode snippet is
+  live. npm is still **v0.13.0** (hds#199).
 
-- **📞 `/ops/pitch` — the call sheet.** Only pitchable leads appear
-  (`preview_url`, not `do_not_contact`), re-checked on every write. Notes live
-  in the `lead_notes` **table**, never a column. `0012`/`0013`/`0014` **are
-  applied**; `digest_items` (`0011`) is the one that is not (#348).
+- **📞 `/ops/pitch` — the call sheet.** Only pitchable leads (`preview_url`,
+  not `do_not_contact`), re-checked on every write. Notes live in the
+  `lead_notes` **table**, never a column. `0012`–`0014` **are applied**;
+  `digest_items` (`0011`) is not (#348).
 - **🎯 Revenue path is merged, unrun** (`docs/specs/leads-to-site.md`). The
   doctrine finding that steers: **we have the machinery and mis-aim it.**
 - **PRODUCTION is LIVE** — `hirobius-ops` deploys from `main`; `/ops` is password
@@ -79,8 +89,8 @@ call next: `/ops/pitch`. A doc that restates either will drift.
   an issue whose DoD names **no** supervised path — the engine's arm has no path
   check (ops#238), so a blanket tag is what let #368 and #362 merge lead-handling
   diffs unreviewed. `ralph-gate` is the **sole required check**. **One unapproved
-  `ralph/*` PR halts the queue and `ralph.yml` then no-ops in ~12s — fast-green
-  runs are the wedge signature, not progress. Check open PRs BEFORE the run list.**
+  `ralph/*` PR halts the queue; `ralph.yml` then no-ops in ~12s — fast-green runs
+  are the wedge signature, not progress. Check open PRs BEFORE the run list.**
 - **Compliance gates SCALED outreach** (#35 → #38 → #27 before #9); one call or
   one manual email is not. **Outscraper spend (#190) stays ON HOLD.** Publishing
   stays a human action — it is the billing event.
@@ -92,15 +102,14 @@ se#205–#207 shipped; hds CI finally runs its 9-gate `pretest`. `DONE-LOG.md`.
 ## Adrian's open actions (his court, not blocked on a session)
 
 - **Restrict sharing on the linked private docs and rotate any credentials in
-  them** — one is a "Logins" doc; rotating is what a gate cannot do.
+  them** — one is a "Logins" doc; a gate cannot rotate.
 - **hds: tick "Allow GitHub Actions to create and approve pull requests"** at
   https://github.com/hirobius/hds/settings/actions. One checkbox; it is the only
   thing failing `release` (hds#199). ops#346's emails are redacted.
-- **Two repos' default branch is not `main`, so `Closes #N` silently no-ops in
-  both** (ops#407). **folio:** switch the default to the `main` that exists (2
-  ahead / 0 behind). **concrete:** it has NO `main` — _rename_
-  `claude/concrete-creations-migration-0okzxk` (Settings → Branches → pencil);
-  GitHub redirects and retargets PRs. Do not create an empty `main` instead.
+- **Fix the two default branches** (ops#407). **folio:** switch to the `main`
+  that exists (2 ahead / 0 behind). **concrete:** it has NO `main` — _rename_
+  its default (Settings → Branches → pencil); GitHub redirects and retargets
+  PRs. Do not create an empty `main` instead.
 - **Create the `PII_DENYLIST` Actions secret + a gitignored `.pii-denylist`**
   (format in `REPO-PROCEDURES.md`, secret at
   https://github.com/hirobius/ops/settings/secrets/actions). Without it the gate
@@ -113,26 +122,23 @@ se#205–#207 shipped; hds CI finally runs its 9-gate `pretest`. `DONE-LOG.md`.
   so `audit-sites.mjs` cannot run and 223 leads have no true opening line. Enable
   at https://console.cloud.google.com/apis/library/pagespeedonline.googleapis.com,
   key at https://console.cloud.google.com/apis/credentials.
-- **Run the client onboarding prompt** → stands up the client repo to fleet spec.
+- **Run the client onboarding prompt** → client repo to fleet spec.
 - **Remove `PORTAL_HMAC_SECRET` + `VITE_PORTAL_HMAC_SECRET` from Vercel** —
   nothing reads either since the in-ops portal moved to `portal-kit`.
 
 ## Next (ordered queue)
 
-> Per-issue detail for everything open: `docs/ai/BURNDOWN-GAMEPLAN.md`.
-
-1. **Four open ops PRs each wait on a human, not a session.** #380 needs the
-   `OPS_AGENT_KEY` Actions secret. #387 needs migration `0015` + the import run
-   by Adrian (writes production). #378 (draft) needs a real eval run and
-   `ralph-approved`. #384 (draft) waits for the new hirobius.com to exist.
-   **Do not rebuild any of them — unblock or leave.**
+1. **Four open ops PRs each wait on a human.** #380: `OPS_AGENT_KEY`. #387:
+   migration `0015` + Adrian's import (writes production). #378 (draft): a real
+   eval run + `ralph-approved`. #384 (draft): the new hirobius.com.
+   **Do not rebuild any — unblock or leave.**
 2. **hds:** #210 (draft) blocked on the tenant-rename decision; #207/#208 are
    open and reviewable.
 3. **#348 — gate SHIPPED (#392); the rest needs Adrian (writes production).**
    `pnpm migrations:check` with `SUPABASE_ACCESS_TOKEN` finds **7** unrecorded
    migrations, not 2. Apply `0011_digest_items` BEFORE recording it, then
    `--sql`.
-4. **Guardrails:** #330 (gate telemetry structurally unfillable) **carries
+4. **Guardrails:** #330 (telemetry structurally unfillable) **carries
    `ralph-wip` — the loop holds it.** Then `reconcile-ralph-closures.mjs
 --apply` with a real `GITHUB_TOKEN`.
 5. **site-engine#192:** that repo's Ralph loop has had **no scheduled watchdog
@@ -144,32 +150,32 @@ se#205–#207 shipped; hds CI finally runs its 9-gate `pretest`. `DONE-LOG.md`.
 7. **Compliance, to unlock the scaled send:** #35 → #38 → #27, then #9.
 8. **Run the email crawler where egress works** — merged (#346), never run;
    both containers 403 all egress.
-9. **Cutover Part B remainder** — gated on the clients Astro factory.
+9. **Cutover Part B** — gated on the Astro factory.
 
 ## Parked / known warts
 
 - **`public/hds-manifest.json` churn**: builds rebake it (sometimes INVALID).
   `git checkout --` it on sight; never commit regens.
-- **Vercel:** on Pro — the 12-function cap no longer binds. Deploy parity and
-  the ESM extension trap: `REPO-PROCEDURES.md`.
-- `OPERATOR_BRIEF.md`, the night-shift loop and `orchestration.json` are RETIRED.
+- **Vercel:** on Pro — the 12-function cap no longer binds. Deploy parity + the
+  ESM extension trap: `REPO-PROCEDURES.md`.
+- `OPERATOR_BRIEF.md`, the night-shift loop, `orchestration.json`: RETIRED.
 
 ## Decisions (dated, newest first)
 
 - **2026-09-17 — a green merge button is not evidence.** The only required check
   passes non-Ralph PRs untested; run the repo's real gate on the pushed head.
 - **2026-09-16 — HANDOFF holds state, decisions and directives; PR roll-calls
-  and metric snapshots go to `DONE-LOG.md`.** The 25KB budget is binding and
-  shipped-work detail is what crowds it out. Older decisions: `DONE-LOG.md`.
+  and metric snapshots go to `DONE-LOG.md`**, which is binding under the 25KB
+  budget. Older decisions: `DONE-LOG.md`.
 
 ## Fleet directives (broadcast board — a dated line here reaches every repo)
 
 - 2026-07-02: Track work as GitHub Issues; keep root `status.json` fresh at
   session end; cross-repo asks route through the ops hub, never repo→repo.
-- **2026-09-15: Claim your subsystem in `SESSION-BOARD.md` before you start**,
-  and pre-flight with `gh pr list` + `git log origin/main -5`. Branch-per-session
-  prevents overwrites, not duplicated work — three collisions in a day proved it.
-  After a squash-merge your branch is dead: `git checkout -B <b> origin/main`.
+- **2026-09-15: Claim your subsystem in `SESSION-BOARD.md` first**, and
+  pre-flight with `gh pr list` + `git log origin/main -5`. Branch-per-session
+  prevents overwrites, not duplicated work — three collisions in a day proved
+  it. After a squash-merge your branch is dead: `git checkout -B <b> origin/main`.
 - **2026-09-15: Before merging to main, check for an in-flight `ralph/*` PR and
   re-base it after** — stranding it halts the single-flight queue (#325).
 - **2026-09-16 (Adrian, verbatim): STOP PROMPTING ABOUT CALLS.** "stop with the
@@ -179,8 +185,8 @@ se#205–#207 shipped; hds CI finally runs its 9-gate `pretest`. `DONE-LOG.md`.
 - **2026-09-16: A closed issue is not proof its migration ran.** Verify the
   table/column exists in the live project before closing (#348).
 - **2026-09-17: A redacted term can come back in a test fixture.** An agent
-  writing a gate's own tests reaches for a real example; without the denylist
-  loaded the gate cannot catch it. Denylist first, fixtures second.
+  writing a gate's tests reaches for a real example, and without the denylist
+  the gate cannot catch it. Denylist first, fixtures second.
 
 ## Standing rules (never violate)
 
