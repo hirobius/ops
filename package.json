@@ -70,6 +70,7 @@
     "closure:plan": "node scripts/run-gates.mjs --channel pre-commit --emit-inventory docs/guardrails/full-strictness-inventory.json && node scripts/generate-closure-plan.mjs",
     "closure:plan:check": "node scripts/generate-closure-plan.mjs --check",
     "dev": "vite --configLoader native",
+    "eval:agent-models": "node scripts/eval-agent-models.mjs",
     "docs:changelogs": "node scripts/generate-component-changelogs.mjs",
     "figma:stream": "node scripts/llm-stream-bridge.mjs",
     "guardrail:firing-stats": "node scripts/refresh-firing-stats.mjs",
