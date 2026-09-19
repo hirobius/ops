@@ -4,7 +4,7 @@
 > "status" or "go" reads this and acts from **Next**; a session that does real
 > work updates it before ending.
 
-_Last updated: 2026-09-17._
+_Last updated: 2026-09-19._
 
 ## The map (what else exists, and when to open it)
 
@@ -16,8 +16,7 @@ Everything below is **on-demand** — open one only when the task calls for it.
 | `NORTH_STAR.md`         | A request might be scope drift. Adrian owns it.             |
 | `PARKED.md`             | Work deliberately not being done (`pnpm parked:check`).     |
 | `FRONTIER-DOCTRINE.md`  | Deciding _how_ to work — specs, gates, metrics.             |
-| `AGENT_GUIDELINES.md`   | Dispatching sub-agents.                                     |
-| `PROMPT_TEMPLATES.md`   | Writing a prompt for one.                                   |
+| `AGENT_GUIDELINES.md`   | Dispatching sub-agents (prompts: `PROMPT_TEMPLATES.md`).    |
 | `REPO-PROCEDURES.md`    | You need a runbook (releases, the PII-scrub rehearsal).     |
 | `DONE-LOG.md`           | Shipped history — "was this already done?"                  |
 | `../DECISIONS.md`       | You need to know **why** — the four decision records.       |
@@ -34,20 +33,17 @@ call next: `/ops/pitch`. A doc that restates either will drift.
 ## Now (what is true today)
 
 - **☎️ THE EMAIL CHANNEL CANNOT RUN. 1 lead of 263 has an email address.**
-  Not 39 — that was `lead_score` qualification, which never checked for an
-  address. Google Business Profile has **no email field**, so no Maps scraper
-  returns one and enrichment covers a 3-person plumber badly. **Segment problem,
-  not tooling.** Fix: crawl the 223 known sites for `mailto:` ourselves (#346).
+  Not 39 — that was `lead_score`, which never checked for an address. Google
+  Business Profile has **no email field**, so no Maps scraper returns one.
+  **Segment problem, not tooling.** Fix: crawl the 223 sites for `mailto:` (#346).
   **Phone is the only live channel — 260 leads have one**; the funnel reads
   `0 contacted` and per Adrian's directive no session raises dialling.
 
 - **🔒 PII: prevention landed, history not yet purged (#27, p1/sev1,
-  `needs-decision`).** The gate and the current-file redaction shipped today
-  across ops, concrete and portal-kit (#385, #386, concrete#11, portal-kit#1):
-  `check-pii` runs pre-commit, on the commit message, on every PR and main push,
-  and weekly. Scope now also covers **hds, site-engine and portal-kit**. The
-  **history rewrite is still pending** — rehearsed, runbook in
-  `REPO-PROCEDURES.md` — and the cleanup list also holds the `refs/pull` copy of
+  `needs-decision`).** `check-pii` runs pre-commit, on the commit message, on
+  every PR and main push, and weekly, across ops, concrete, hds, site-engine and
+  portal-kit. The **history rewrite is still pending** — rehearsed, runbook in
+  `REPO-PROCEDURES.md`; the cleanup list also holds the `refs/pull` copy of
   ops#388's early commit and the #367/#388 PR text. **The gate is only as strong
   as its denylist**, deliberately out of repo (`PII_DENYLIST` secret /
   gitignored `.pii-denylist`) and not yet created, so today it matches generic
@@ -59,6 +55,9 @@ call next: `/ops/pitch`. A doc that restates either will drift.
   (#388). Its actions write labels straight to GitHub, bypassing the Supabase
   mirror on purpose. **`listOpenIssues()` returns `{ issues, truncated, fetched }`,
   not an array** — anything branched before #367 that calls it is broken.
+  **Its issue TOTAL is wrong until #405 lands**: `GET /issues?filter=all` spans
+  every visible repo — 209 rows, of which only **95 are the fleet**; `job-hunt`
+  (32) is the biggest contributor. Open-PR counts are fine.
 
 - **🛡️ CI gates are in place** — full roll-call in `DONE-LOG.md` (2026-09-17).
   The load-bearing one: the watchdog enforces the #238 supervised-path boundary
@@ -66,8 +65,7 @@ call next: `/ops/pitch`. A doc that restates either will drift.
 
 - **🎨 hds has a Figma foundation and nothing shipped** (#211–#216, `DONE-LOG.md`).
   **Publishing custom Code Connect needs Organization/Enterprise — Pro cannot**,
-  so no Dev Mode snippet is live. npm is still **v0.13.0**: the release workflow
-  failed on a repo _setting_ (Actions may not open PRs), not code (hds#199).
+  so no Dev Mode snippet is live. npm is still **v0.13.0** (hds#199).
 
 - **📞 `/ops/pitch` — the call sheet.** Only pitchable leads appear
   (`preview_url`, not `do_not_contact`), re-checked on every write. Notes live
@@ -88,16 +86,20 @@ call next: `/ops/pitch`. A doc that restates either will drift.
   one manual email is not. **Outscraper spend (#190) stays ON HOLD.** Publishing
   stays a human action — it is the billing event.
 
-**Done log (latest):** _2026-09-17_ — 14 ops PRs (PII gate, secret scan, severity
-axis, Standing phone + repo filter, Windows hook fixes) and 6 hds PRs (Figma
-foundation, Code Connect v2, honest front door). Detail: `DONE-LOG.md`.
+**Done log (latest):** _2026-09-19_ — engine `v1` → `a4f0c21` fleet-wide
+(Ralph#23/#24); two epics (ops#238, se#153) decomposed into 15 children;
+se#205–#207 shipped; hds CI finally runs its 9-gate `pretest`. `DONE-LOG.md`.
 
 ## Adrian's open actions (his court, not blocked on a session)
 
 - **Restrict sharing on the linked private docs and rotate any credentials in
   them** — one is a "Logins" doc. Rotating is the part a gate cannot do.
-- **Redact the 5 email addresses in the ops#346 PR body — by Mon 2026-09-21
-  15:23 UTC**, when the first `pii-weekly` run fires, or it goes red.
+- **hds: tick "Allow GitHub Actions to create and approve pull requests"** at
+  https://github.com/hirobius/hds/settings/actions. One checkbox; it is the only
+  thing failing `release` (hds#199). ops#346's emails are redacted.
+- **folio: make `main` the default branch** (Settings → General). It is
+  `claude/eloquent-ramanujan-9ag4uy` today, so `Closes #N` never fires and
+  `main` is 2 ahead / 0 behind.
 - **Create the `PII_DENYLIST` Actions secret + a gitignored `.pii-denylist`**
   (format in `REPO-PROCEDURES.md`, secret at
   https://github.com/hirobius/ops/settings/secrets/actions). Without it the gate
@@ -132,8 +134,8 @@ foundation, Code Connect v2, honest front door). Detail: `DONE-LOG.md`.
 4. **Guardrails:** #330 (gate telemetry structurally unfillable) **carries
    `ralph-wip` — the loop holds it.** Then `reconcile-ralph-closures.mjs
 --apply` with a real `GITHUB_TOKEN`.
-5. **site-engine#192, filed today:** that repo's Ralph loop has had **no
-   scheduled watchdog since 2026-07-16** — its `ralph.yml` schedule is off.
+5. **site-engine#192:** that repo's Ralph loop has had **no scheduled watchdog
+   since 2026-07-16** — its `ralph.yml` schedule is off.
 6. **Adrian's calls:** #200 (Stripe — no way to take money today) · #303/#302/#296
    (one shared engine release). **#238 is decomposed:** Ralph#25 (engine path
    check) MUST land before ops#402 (flip the default), or the flip deletes the

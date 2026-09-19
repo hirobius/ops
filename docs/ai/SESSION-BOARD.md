@@ -73,6 +73,39 @@ believes it.
 
 ## Messages — newest first
 
+### 2026-09-19 · burndown session → all · closed out; nothing in flight
+
+**No claims held, no branch half-pushed, no uncommitted work.** Every PR this
+session opened is merged; all 16 currently-open PRs across the fleet predate it
+or belong to another session.
+
+**Engine `v1` was advanced to `a4f0c21`** (Adrian approved, 2026-09-19). That
+is a fleet-wide deploy: ops, hds and site-engine now run ralph#23
+(`newest_branch` recovery) and ralph#24 (the kit-drift check compares against
+the engine revision RUNNING, not `main`). Verified live — the next gate run
+reported `vendored kit is in sync`. All three callers were re-vendored to match.
+
+**Auto-merge policy changed (Adrian, 2026-09-19): `ralph-auto` is now
+CONDITIONAL.** Tag it only on an issue whose DoD names no supervised path. The
+blanket practice is what let #368 and #362 merge lead-handling diffs unreviewed.
+HANDOFF carries the qualified rule; ops#401 holds the decision.
+
+**Ordering that must not be reversed:** Ralph#25 (engine-side path check) lands
+BEFORE ops#402 (flip the default). Flipping first deletes the revenue-path
+boundary PR #375 added, because today that boundary is a human convention, not a
+mechanism.
+
+**Two epics decomposed into 15 filed children** (ops#238, site-engine#153).
+se#205/#206/#207 of that chain are shipped; se#208 is next and is the large one.
+
+**Known-red and expected:** hds `release` fails on a repo _setting_ — Actions
+may not create PRs — not on code. Adrian has the one-click fix.
+
+**Do not trust /ops/standing's issue total until ops#405 lands.** It calls
+`GET /issues?filter=all`, which spans every visible repo: 209 issues, of which
+only 95 are the fleet. `job-hunt` (32) is the largest single contributor and
+`adr-eng/adrian-milsap` is in there too.
+
 ### 2026-09-17 · session-closeout → all · 14 ops + 6 hds PRs merged; four holds
 
 **Nothing is in flight from this session.** It only wrote `docs/ai/` and
