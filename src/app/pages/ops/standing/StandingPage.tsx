@@ -60,7 +60,19 @@ import { filterByRepo } from './repoScope';
 import { useRepoScope } from './useRepoScope';
 import { Sev1Banner } from './Sev1Banner';
 
-const POLL_MS = 60_000;
+/**
+ * Manual refresh only (ops, 2026-09-19 — Adrian's call).
+ *
+ * This page used to poll every 60s for the fleet sweep and every 120s for
+ * deploys. Each tick is a `/api/tasks` invocation that fans out to the GitHub
+ * API, so a dashboard left open on a second monitor billed ~90 invocations an
+ * hour whether or not anyone was reading it — on a pre-revenue account that is
+ * pure burn. `usePoll` treats 0 as "fetch on mount, then only on refetch".
+ *
+ * The page therefore owes the operator a way to tell how stale the numbers are
+ * and a way to make them current: see RefreshBar, rendered in the page body.
+ */
+const POLL_MS = 0;
 const SHOWN = 8;
 /** Backlog is the long tail — show more of it than the action lanes. */
 const BACKLOG_SHOWN = 25;
@@ -105,7 +117,7 @@ interface Chain {
 }
 
 export default function StandingPage() {
-  const { data, error, refetch } = usePoll<FleetStatus>(fetchFleetStatus, {
+  const { data, error, refetch, lastUpdatedAt } = usePoll<FleetStatus>(fetchFleetStatus, {
     intervalMs: POLL_MS,
     offlineIntervalMs: POLL_MS * 3,
     requestTimeoutMs: 20_000,
@@ -214,6 +226,14 @@ export default function StandingPage() {
         breadcrumbs={[{ label: 'Ops', href: '/ops' }, { label: 'Standing' }]}
         title="Standing"
         lede="Where the chain breaks, what is blocked on you, and what the loop is doing."
+      />
+
+      <RefreshBar
+        lastUpdatedAt={lastUpdatedAt}
+        onRefresh={() => {
+          refetch();
+          deploys.refetch();
+        }}
       />
 
       <Coverage data={data} error={error} needsToken={needsToken} />
@@ -964,6 +984,44 @@ function ChainRow({ link, total, isBreak }: { link: ChainLink; total: number; is
  * added — and the only way to TELL that it did is to print what came back.
  * A hardcoded list that silently went stale is the failure this replaces.
  */
+/**
+ * RefreshBar — how stale the page is, and the only thing that makes it current.
+ *
+ * This page does not poll (see POLL_MS). Without an explicit staleness readout
+ * an operator has no way to tell a quiet fleet from a page that loaded twenty
+ * minutes ago, which is a worse failure than the polling it replaced: wrong
+ * data that looks live. The age is rendered from `lastUpdatedAt` rather than a
+ * ticking clock, so the bar itself costs nothing to keep on screen.
+ */
+function RefreshBar({
+  lastUpdatedAt,
+  onRefresh,
+}: {
+  lastUpdatedAt: number | null;
+  onRefresh: () => void;
+}) {
+  // A wall-clock stamp, not a relative age. `Date.now()` in render is impure
+  // (react-hooks/purity), and a rendered "3m ago" would itself go stale on a
+  // page that no longer re-renders on a timer — the exact class of lie this
+  // bar exists to prevent. `new Date(x)` on a fixed argument is pure.
+  const when =
+    lastUpdatedAt === null
+      ? 'Loading…'
+      : `Updated ${new Date(lastUpdatedAt).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })}`;
+
+  return (
+    <p style={s.coverage}>
+      {when} · manual refresh{' '}
+      <Button size="sm" variant="secondary" onClick={onRefresh}>
+        Refresh
+      </Button>
+    </p>
+  );
+}
+
 function Coverage({
   data,
   error,

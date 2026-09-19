@@ -38,9 +38,9 @@
     "src/app/pages/ops/standing/Sev1Banner.test.tsx": 9,
     "src/app/pages/ops/standing/Sev1Banner.tsx": 20,
     "src/app/pages/ops/standing/StandingPage.test.tsx": 2,
-    "src/app/pages/ops/standing/StandingPage.tsx": 129,
+    "src/app/pages/ops/standing/StandingPage.tsx": 132,
     "src/app/routes.tsx": 26
   },
-  "updatedAt": "2026-09-18T01:24:33.327Z",
-  "sha": "cb30b47"
+  "updatedAt": "2026-09-19T21:56:05.948Z",
+  "sha": "f141b2d"
 }
