@@ -165,3 +165,6 @@ ralph/runs.jsonl
 ralph/logs/
 ralph/.lock
 verdict.json
+
+# Playwright MCP console/network dumps — per-session tool output, never committed
+.playwright-mcp/
