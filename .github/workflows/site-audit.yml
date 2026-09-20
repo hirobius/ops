@@ -62,7 +62,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # 22, not 20: `@supabase/realtime-js` needs a native WebSocket, which
+          # Node gained in 22. On 20 the very first `getServiceClient()` throws
+          # "Node.js 20 detected without native WebSocket support" before a
+          # single lead is read. 22 is also what 15 of this repo's other
+          # workflows pin, so this was an outlier as well as a bug.
+          node-version: '22'
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
