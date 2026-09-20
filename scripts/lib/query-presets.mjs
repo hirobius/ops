@@ -20,11 +20,22 @@ const WA_METROS = [
   {
     region: 'Seattle, WA',
     areas: [
-      'Seattle, WA', 'Bellevue, WA', 'Redmond, WA', 'Kirkland, WA', 'Renton, WA',
-      'Everett, WA', 'Kent, WA', 'Federal Way, WA', 'Shoreline, WA', 'Bothell, WA',
+      'Seattle, WA',
+      'Bellevue, WA',
+      'Redmond, WA',
+      'Kirkland, WA',
+      'Renton, WA',
+      'Everett, WA',
+      'Kent, WA',
+      'Federal Way, WA',
+      'Shoreline, WA',
+      'Bothell, WA',
     ],
   },
-  { region: 'Tacoma, WA', areas: ['Tacoma, WA', 'Lakewood, WA', 'Puyallup, WA', 'University Place, WA'] },
+  {
+    region: 'Tacoma, WA',
+    areas: ['Tacoma, WA', 'Lakewood, WA', 'Puyallup, WA', 'University Place, WA'],
+  },
   { region: 'Spokane, WA', areas: ['Spokane, WA', 'Spokane Valley, WA'] },
   { region: 'Vancouver, WA', areas: ['Vancouver, WA', 'Camas, WA'] },
   { region: 'Olympia, WA', areas: ['Olympia, WA', 'Lacey, WA'] },
@@ -37,7 +48,13 @@ export const PRESETS = {
   //    ticket + reachable by cold outreach (see docs/prospecting/niche-targeting.md).
   'fencing-wa': {
     label: 'Fencing & deck builders — WA metros',
-    keywords: ['fence company', 'fence installation', 'fence contractor', 'deck builder', 'deck contractor'],
+    keywords: [
+      'fence company',
+      'fence installation',
+      'fence contractor',
+      'deck builder',
+      'deck contractor',
+    ],
     metros: WA_METROS,
   },
   'tree-service-wa': {
@@ -47,7 +64,13 @@ export const PRESETS = {
   },
   'septic-wa': {
     label: 'Septic & excavation — WA metros',
-    keywords: ['septic service', 'septic pumping', 'septic installation', 'excavation contractor', 'land clearing'],
+    keywords: [
+      'septic service',
+      'septic pumping',
+      'septic installation',
+      'excavation contractor',
+      'land clearing',
+    ],
     metros: WA_METROS,
   },
   'pressure-washing-wa': {
@@ -57,7 +80,12 @@ export const PRESETS = {
   },
   'concrete-coating-wa': {
     label: 'Concrete / epoxy floor coating — WA metros',
-    keywords: ['epoxy flooring', 'garage floor coating', 'concrete coating', 'concrete resurfacing'],
+    keywords: [
+      'epoxy flooring',
+      'garage floor coating',
+      'concrete coating',
+      'concrete resurfacing',
+    ],
     metros: WA_METROS,
   },
 
@@ -65,7 +93,13 @@ export const PRESETS = {
   //    less-digitized, nobody pitching them; excavation clustered in Run 01. ──
   'excavation-wa': {
     label: 'Excavation / land clearing / grading — WA metros',
-    keywords: ['excavation contractor', 'land clearing', 'grading contractor', 'site prep', 'demolition contractor'],
+    keywords: [
+      'excavation contractor',
+      'land clearing',
+      'grading contractor',
+      'site prep',
+      'demolition contractor',
+    ],
     metros: WA_METROS,
   },
   'welding-wa': {
@@ -75,12 +109,61 @@ export const PRESETS = {
   },
   'well-drilling-wa': {
     label: 'Well drilling / water systems — WA metros',
-    keywords: ['well drilling', 'water well drilling', 'well pump service', 'water well', 'water systems'],
+    keywords: [
+      'well drilling',
+      'water well drilling',
+      'well pump service',
+      'water well',
+      'water systems',
+    ],
     metros: WA_METROS,
   },
   'masonry-wa': {
     label: 'Masonry / hardscaping — WA metros',
     keywords: ['masonry', 'hardscaping', 'retaining walls', 'paver patio', 'stone mason'],
+    metros: WA_METROS,
+  },
+
+  // ── The two highest no-website trades, added 2026-09-20.
+  //
+  // Every preset above was chosen for job ticket and cold-outreach reach. The
+  // 2026 Inland-NW prospecting report measured the thing that actually governs
+  // whether there is anything to sell — the share of businesses with a Google
+  // listing and NO website — and the two segments that top it were both
+  // missing here:
+  //
+  //   cleaning      ~40-60% no website
+  //   landscaping   ~45-55% no website
+  //   (for comparison: plumbers/electricians ~25-40%, auto repair ~28-35%)
+  //
+  // That matters more than ticket size for this stage: a business with no site
+  // has no incumbent to displace, and the site-quality scorer
+  // (scripts/lib/site-audit.mjs) cannot score them at all — it needs a URL to
+  // hand PageSpeed — so they are invisible to every ranking we currently run.
+  // Lower average ticket is the trade-off, and it is worth testing rather than
+  // assuming.
+  'cleaning-wa': {
+    label: 'Cleaning services — WA metros (highest no-website rate)',
+    keywords: [
+      'cleaning service',
+      'house cleaning',
+      'commercial cleaning',
+      'janitorial service',
+      'carpet cleaning',
+      'window cleaning',
+    ],
+    metros: WA_METROS,
+  },
+  'landscaping-wa': {
+    label: 'Landscaping & lawn care — WA metros (highest no-website rate)',
+    keywords: [
+      'landscaping',
+      'lawn care',
+      'landscape design',
+      'lawn maintenance',
+      'irrigation contractor',
+      'sprinkler repair',
+    ],
     metros: WA_METROS,
   },
 
@@ -100,11 +183,22 @@ export const PRESETS = {
       {
         region: 'Seattle, WA',
         areas: [
-          'Seattle, WA', 'Bellevue, WA', 'Redmond, WA', 'Kirkland, WA', 'Renton, WA',
-          'Everett, WA', 'Kent, WA', 'Federal Way, WA', 'Shoreline, WA', 'Bothell, WA',
+          'Seattle, WA',
+          'Bellevue, WA',
+          'Redmond, WA',
+          'Kirkland, WA',
+          'Renton, WA',
+          'Everett, WA',
+          'Kent, WA',
+          'Federal Way, WA',
+          'Shoreline, WA',
+          'Bothell, WA',
         ],
       },
-      { region: 'Tacoma, WA', areas: ['Tacoma, WA', 'Lakewood, WA', 'Puyallup, WA', 'University Place, WA'] },
+      {
+        region: 'Tacoma, WA',
+        areas: ['Tacoma, WA', 'Lakewood, WA', 'Puyallup, WA', 'University Place, WA'],
+      },
       { region: 'Spokane, WA', areas: ['Spokane, WA', 'Spokane Valley, WA'] },
       { region: 'Vancouver, WA', areas: ['Vancouver, WA', 'Camas, WA'] },
       { region: 'Olympia, WA', areas: ['Olympia, WA', 'Lacey, WA'] },
@@ -112,8 +206,14 @@ export const PRESETS = {
       {
         region: 'Portland, OR',
         areas: [
-          'Portland, OR', 'Beaverton, OR', 'Hillsboro, OR', 'Gresham, OR',
-          'Tigard, OR', 'Lake Oswego, OR', 'Oregon City, OR', 'Milwaukie, OR',
+          'Portland, OR',
+          'Beaverton, OR',
+          'Hillsboro, OR',
+          'Gresham, OR',
+          'Tigard, OR',
+          'Lake Oswego, OR',
+          'Oregon City, OR',
+          'Milwaukie, OR',
         ],
       },
       { region: 'Salem, OR', areas: ['Salem, OR', 'Keizer, OR'] },
