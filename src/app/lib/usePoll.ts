@@ -14,6 +14,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * Pass a `fetcher` that performs the request (using the provided AbortSignal) and
  * returns the already-extracted data — so each call site is one declaration, not
  * a copy of the whole timer/visibility/abort dance.
+ *
+ * **`intervalMs: 0` is manual mode**: fetch once on mount, refetch only when the
+ * caller asks, and arm no timer ever. Added 2026-09-19 for cost, not taste — a
+ * scheduled tick here is a serverless invocation that calls the GitHub API, and
+ * a dashboard left open on a second monitor was billing for data nobody read. A
+ * caller in manual mode owns surfacing `lastUpdatedAt` and a refresh control,
+ * because nothing else will make the data current.
  */
 export interface UsePollOptions {
   intervalMs: number;
@@ -89,6 +96,13 @@ export function usePoll<T>(
 
   const scheduleNext = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    // Manual mode: fetch on mount and on `refetch`, and schedule NOTHING.
+    // Guarding here rather than at the call sites is deliberate — every path
+    // that could arm a timer (mount, tab re-show, post-fetch reschedule) goes
+    // through this function, so one check closes all of them. Note a falsy
+    // interval must not fall through to `setTimeout(..., 0)`: that is a hot
+    // loop, not "no polling".
+    if (intervalMs <= 0) return;
     if (document.visibilityState !== 'visible') return;
     const delay = isOffline && offlineIntervalMs !== undefined ? offlineIntervalMs : intervalMs;
     timerRef.current = setTimeout(() => {
@@ -102,6 +116,10 @@ export function usePoll<T>(
 
     const onVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
+        // In manual mode a tab re-show is not a reason to spend a request —
+        // the operator asks for fresh data with the refresh control. Without
+        // this, alt-tabbing back would silently restore per-switch polling.
+        if (intervalMs <= 0) return;
         void fetchOnce().finally(scheduleNext);
       } else if (timerRef.current) {
         clearTimeout(timerRef.current);
@@ -115,7 +133,7 @@ export function usePoll<T>(
       if (timerRef.current) clearTimeout(timerRef.current);
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, [fetchOnce, scheduleNext]);
+  }, [fetchOnce, scheduleNext, intervalMs]);
 
   const refetch = useCallback(() => {
     void fetchOnce().finally(scheduleNext);

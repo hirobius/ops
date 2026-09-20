@@ -135,13 +135,13 @@
     },
     {
       "id": "audit-sites",
-      "description": "Site-quality / redesign-need auditor (#21). Reads custom-site leads from Supabase, calls Google PageSpeed Insights, and scores each site (0-100 inverse). Operator CLI + data tool, not a guardrail — manual channel, needs PAGESPEED_API_KEY + migration 0006.",
+      "description": "Site-quality / redesign-need auditor (#21). Reads custom-site leads from Supabase, calls Google PageSpeed Insights, and scores each site (0-100 inverse). Operator CLI + data tool, not a guardrail — ci-dispatch channel (workflow_dispatch, no cron), needs PAGESPEED_API_KEY + migration 0006.",
       "severity": "warn",
       "gateScript": "scripts/audit-sites.mjs",
       "fixturePath": null,
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "manual"
+      "firingChannel": "ci-dispatch"
     },
     {
       "id": "audit-soft-gates",

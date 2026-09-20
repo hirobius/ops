@@ -35,7 +35,7 @@
 
 1. Open [drive.google.com](https://drive.google.com)
 2. Create a folder named `Intake` (anywhere in your Drive — top-level is fine)
-3. Open the folder — **copy the folder ID from the URL**: `https://drive.google.com/drive/folders/`**`THIS_PART`**
+3. Open the folder — **copy the folder ID from the URL**: it is the path segment after `/drive/folders/` in the Drive address bar
 
 ### C. Create a `.env.local` file in `tools/intake/` (after Task 1 scaffolds the directory)
 

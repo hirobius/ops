@@ -126,13 +126,18 @@ const VALID_CHANNELS = new Set([
   'pre-push',
   'ci-pr',
   'ci-scheduled',
+  // Lives in a workflow but fires only on workflow_dispatch. Accepted as a
+  // --channel value for symmetry with the registry, though nothing schedules it.
+  'ci-dispatch',
   'pnpm-meta',
   'manual',
 ]);
 
 if (!channelArg && !gateArg) {
   console.error('✗ run-gates: --channel <name> or --gate <id> is required');
-  console.error('  Valid channels: pre-commit, pre-push, ci-pr, ci-scheduled, pnpm-meta, manual');
+  console.error(
+    '  Valid channels: pre-commit, pre-push, ci-pr, ci-scheduled, ci-dispatch, pnpm-meta, manual',
+  );
   process.exit(2);
 }
 

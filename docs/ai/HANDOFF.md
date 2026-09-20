@@ -33,12 +33,12 @@ call next: `/ops/pitch`. A doc that restates either will drift.
 ## The fleet is SIX repos (all `hirobius/`)
 
 `ops` · `site-engine` · `hds` · `Ralph` · `folio` · `concrete` — **95 open
-issues**. `portal-kit` is consumed, not worked. **Everything else the token sees
-is NOT fleet — never touch it**: `job-hunt`, `lilac`, `lilac-bonds`, `access-t`,
-`veteran-resource-navigator`, `adr-eng/adrian-milsap` (114 issues of noise).
+issues**. `portal-kit` is consumed, not worked. **Anything not in those six is
+NOT fleet — never touch it**, whatever it is called (~114 issues of noise).
+Allowlist, not a name-list — naming client repos here leaked one.
 **`FLEET_REPOS` in `api/tasks.ts` lists only three** — ops#405 replaces it.
-**Default is `main` everywhere EXCEPT folio and concrete**, so `Closes #N`
-silently no-ops there (ops#407).
+**Default is `main` in all six** (2026-09-19) — folio and concrete fixed, so
+`Closes #N` no longer no-ops there (ops#407).
 
 ## Now (what is true today)
 
