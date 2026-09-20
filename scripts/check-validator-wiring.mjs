@@ -90,6 +90,91 @@ function readSafe(p) {
   }
 }
 
+/**
+ * Workflow files as {name, content} pairs, comments stripped (same reasoning as
+ * `listGhActions`). Needed because `ci-dispatch` is a claim about ONE workflow's
+ * trigger block, and the joined blob cannot tell you which file a trigger
+ * belongs to.
+ */
+function listGhActionFiles() {
+  if (!fs.existsSync(GH_DIR)) return [];
+  return fs
+    .readdirSync(GH_DIR)
+    .filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'))
+    .map((f) => ({ name: f, content: stripYamlComments(readSafe(path.join(GH_DIR, f))) }));
+}
+
+/** Every GitHub Actions trigger that fires without a human pressing Run. */
+const AUTO_FIRING_TRIGGERS = [
+  'schedule',
+  'push',
+  'pull_request',
+  'pull_request_target',
+  'workflow_run',
+  'workflow_call',
+  'repository_dispatch',
+  'issues',
+  'issue_comment',
+  'release',
+  'create',
+  'delete',
+  'status',
+  'check_run',
+  'check_suite',
+  'deployment',
+  'deployment_status',
+  'milestone',
+  'label',
+  'watch',
+  'fork',
+  'gollum',
+  'page_build',
+  'public',
+  'registry_package',
+  'merge_group',
+  'discussion',
+  'discussion_comment',
+  'branch_protection_rule',
+];
+
+/**
+ * True when a workflow's `on:` block contains ONLY `workflow_dispatch`.
+ *
+ * This is what makes `ci-dispatch` an honest declaration rather than a hole.
+ * Channel detection decides `ci-detected` by substring-matching the gate script
+ * name in workflow YAML — it never reads the trigger block — so without this a
+ * gate whose workflow runs `on: schedule` could declare `ci-dispatch`, satisfy
+ * the wiring check, AND skip proof-of-firing, which is precisely the
+ * "aspirational guardrail" failure this validator exists to catch.
+ */
+function isDispatchOnly(content) {
+  const lines = String(content ?? '').split(/\r?\n/);
+  const start = lines.findIndex((l) => /^on\s*:/.test(l));
+  if (start === -1) return false;
+
+  // `on: push` / `on: [push, schedule]` on one line.
+  const inline = lines[start].slice(lines[start].indexOf(':') + 1).trim();
+  if (inline && inline !== '{}') {
+    const named = inline
+      .replace(/[[\]{},]/g, ' ')
+      .split(/\s+/)
+      .filter(Boolean);
+    return named.length > 0 && named.every((t) => t === 'workflow_dispatch');
+  }
+
+  // Block form: collect keys indented under `on:` until the next top-level key.
+  const found = [];
+  for (let i = start + 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.trim() === '') continue;
+    if (/^\S/.test(line)) break; // dedented to a new top-level key
+    const key = /^\s+([A-Za-z_][A-Za-z0-9_]*)\s*:/.exec(line);
+    if (key) found.push(key[1]);
+  }
+  if (!found.includes('workflow_dispatch')) return false;
+  return !found.some((t) => AUTO_FIRING_TRIGGERS.includes(t));
+}
+
 function listGhActions() {
   if (!fs.existsSync(GH_DIR)) return '';
   return (
@@ -392,12 +477,30 @@ function runWiringCheck(
 
     let ok = false;
     if (declared === actual) ok = true;
-    else if (
-      (declared === 'ci-pr' || declared === 'ci-scheduled' || declared === 'ci-dispatch') &&
-      actual === 'ci-detected'
-    )
+    else if ((declared === 'ci-pr' || declared === 'ci-scheduled') && actual === 'ci-detected')
       ok = true;
-    else if (declared === 'manual' && (actual === 'none' || actual === 'pnpm-meta')) ok = true;
+    // `ci-dispatch` is the only channel both accepted in CI and exempt from
+    // proof-of-firing, so it must be EARNED rather than merely declared: every
+    // workflow referencing the gate has to be workflow_dispatch-only.
+    else if (declared === 'ci-dispatch' && actual === 'ci-detected') {
+      const base = path.basename(entry.gateScript, '.mjs');
+      const referencing = listGhActionFiles().filter(
+        (f) => f.content.includes(entry.gateScript) || f.content.includes(base),
+      );
+      const autoFiring = referencing.filter((f) => !isDispatchOnly(f.content));
+      if (referencing.length > 0 && autoFiring.length === 0) ok = true;
+      else {
+        violations.push({
+          id: entry.id,
+          code: 'WIRING_DRIFT',
+          detail:
+            referencing.length === 0
+              ? `declared 'ci-dispatch' but no workflow references it`
+              : `declared 'ci-dispatch' but ${autoFiring.map((f) => f.name).join(', ')} fires automatically — use ci-pr or ci-scheduled`,
+        });
+        continue;
+      }
+    } else if (declared === 'manual' && (actual === 'none' || actual === 'pnpm-meta')) ok = true;
     else if (declared === 'pre-commit' && actual === 'pre-commit') ok = true;
     else if (declared === 'commit-msg' && actual === 'commit-msg') ok = true;
 
