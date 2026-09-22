@@ -6,7 +6,7 @@
   "gates": [
     {
       "id": "audit-batch-deliverables",
-      "description": "TODO: add description — audit-batch-deliverables.mjs JSDoc block is empty.",
+      "description": "TODO: add description \u2014 audit-batch-deliverables.mjs JSDoc block is empty.",
       "severity": "warn",
       "gateScript": "scripts/audit-batch-deliverables.mjs",
       "fixturePath": "fixtures/audit-batch-deliverables",
@@ -16,7 +16,7 @@
     },
     {
       "id": "audit-bundle",
-      "description": "Generates a bundle composition report at docs/perf/bundle-report.html using vite-bundle-visualizer. Manual channel only — artifact, not gating.",
+      "description": "Generates a bundle composition report at docs/perf/bundle-report.html using vite-bundle-visualizer. Manual channel only \u2014 artifact, not gating.",
       "severity": "warn",
       "gateScript": "scripts/audit-bundle.mjs",
       "fixturePath": null,
@@ -48,7 +48,7 @@
     },
     {
       "id": "audit-exceptions",
-      "description": "TODO: add description — audit-exceptions.mjs has no leading JSDoc block.",
+      "description": "TODO: add description \u2014 audit-exceptions.mjs has no leading JSDoc block.",
       "severity": "warn",
       "gateScript": "scripts/audit-exceptions.mjs",
       "fixturePath": "fixtures/audit-exceptions",
@@ -69,7 +69,7 @@
     },
     {
       "id": "audit-gate-replaceability",
-      "description": "Planning artifact: reads registry.json and produces a per-gate replaceability verdict (fully-replaceable / partially-replaceable / genuinely-custom) with industry-tool replacements and migration cost estimates. Output: /tmp/gate-replaceability-audit.json + docs/guardrails/gate-replaceability-plan.md. Manual channel only — run on demand when evaluating gate rationalization.",
+      "description": "Planning artifact: reads registry.json and produces a per-gate replaceability verdict (fully-replaceable / partially-replaceable / genuinely-custom) with industry-tool replacements and migration cost estimates. Output: /tmp/gate-replaceability-audit.json + docs/guardrails/gate-replaceability-plan.md. Manual channel only \u2014 run on demand when evaluating gate rationalization.",
       "severity": "warn",
       "gateScript": "scripts/audit-gate-replaceability.mjs",
       "fixturePath": "fixtures/audit-gate-replaceability",
@@ -92,7 +92,7 @@
     },
     {
       "id": "audit-orphan-modules",
-      "description": "Orphan-module sweeper. Wraps knip --reporter json's unused-files category (parsed.files) and reports each as a warn-severity violation — source files no entry point or import graph reaches. Never blocks (warn only, same precedent as audit-deps). Run via 'pnpm audit:orphan-modules'.",
+      "description": "Orphan-module sweeper. Wraps knip --reporter json's unused-files category (parsed.files) and reports each as a warn-severity violation \u2014 source files no entry point or import graph reaches. Never blocks (warn only, same precedent as audit-deps). Run via 'pnpm audit:orphan-modules'.",
       "severity": "warn",
       "gateScript": "scripts/audit-orphan-modules.mjs",
       "fixturePath": "fixtures/audit-orphan-modules",
@@ -103,7 +103,7 @@
     },
     {
       "id": "audit-orphan-wip",
-      "description": "Scans every branch ahead of main and classifies each commit as tracked/orphan based on whether it has a 'Refs: <task-id>' line that points to an open Hermes Kanban task. Companion to check-commit-message-task-ref (which catches new orphans pre-commit); this catches the existing backlog. Always exits 0 — purely informational. Run via 'pnpm audit:wip'. Writes docs/guardrails/orphan-wip-report.json.",
+      "description": "Scans every branch ahead of main and classifies each commit as tracked/orphan based on whether it has a 'Refs: <task-id>' line that points to an open Hermes Kanban task. Companion to check-commit-message-task-ref (which catches new orphans pre-commit); this catches the existing backlog. Always exits 0 \u2014 purely informational. Run via 'pnpm audit:wip'. Writes docs/guardrails/orphan-wip-report.json.",
       "severity": "info",
       "gateScript": "scripts/audit-orphan-wip.mjs",
       "fixturePath": "fixtures/audit-orphan-wip",
@@ -114,7 +114,7 @@
     },
     {
       "id": "audit-pages",
-      "description": "Token compliance auditor for page surfaces. This is intentionally looser than audit-components.mjs — reusable components must be strict, pages must still avoid raw design values but can keep justified editorial layout.",
+      "description": "Token compliance auditor for page surfaces. This is intentionally looser than audit-components.mjs \u2014 reusable components must be strict, pages must still avoid raw design values but can keep justified editorial layout.",
       "severity": "warn",
       "gateScript": "scripts/audit-pages.mjs",
       "fixturePath": "fixtures/audit-pages",
@@ -124,7 +124,7 @@
     },
     {
       "id": "audit-sbom",
-      "description": "Generates a CycloneDX Software Bill of Materials at docs/security/sbom.json. Manual channel — produces an artifact, not a gate. Useful for the GRC narrative and supply-chain review.",
+      "description": "Generates a CycloneDX Software Bill of Materials at docs/security/sbom.json. Manual channel \u2014 produces an artifact, not a gate. Useful for the GRC narrative and supply-chain review.",
       "severity": "warn",
       "gateScript": "scripts/audit-sbom.mjs",
       "fixturePath": null,
@@ -135,7 +135,7 @@
     },
     {
       "id": "audit-sites",
-      "description": "Site-quality / redesign-need auditor (#21). Reads custom-site leads from Supabase, calls Google PageSpeed Insights, and scores each site (0-100 inverse). Operator CLI + data tool, not a guardrail — ci-dispatch channel (workflow_dispatch, no cron), needs PAGESPEED_API_KEY + migration 0006.",
+      "description": "Site-quality / redesign-need auditor (#21). Reads custom-site leads from Supabase, calls Google PageSpeed Insights, and scores each site (0-100 inverse). Operator CLI + data tool, not a guardrail \u2014 ci-dispatch channel (workflow_dispatch, no cron), needs PAGESPEED_API_KEY + migration 0006.",
       "severity": "warn",
       "gateScript": "scripts/audit-sites.mjs",
       "fixturePath": null,
@@ -172,7 +172,18 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+    },
+    {
+      "id": "check-branch-ancestry",
+      "description": "Warns at commit time when the current branch is no longer based on origin/main. This repo squash-merges, so the instant a PR lands the source branch is unrelated to main in BOTH directions; committing there builds a fork whose PR carries phantom diffs reverting whatever else landed. The stop hook makes it worse by reporting the orphaned pointer as 'unpushed commits' and advising a push. Note the obvious check is INVERTED and wrong: 'merge-base --is-ancestor HEAD origin/main' is false for every healthy in-progress branch. Reads the locally-known origin/main and never fetches. Never blocks \u2014 run-gates fails on any non-zero exit regardless of severity (ops#304), so this exits 0 except under --fixture-mode. ops#335.",
+      "severity": "warn",
+      "gateScript": "scripts/check-branch-ancestry.mjs",
+      "fixturePath": "fixtures/check-branch-ancestry",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "pre-commit",
+      "supportsJson": true
     },
     {
       "id": "check-circular-deps",
@@ -193,18 +204,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
-    },
-    {
-      "id": "check-branch-ancestry",
-      "description": "Warns at commit time when the current branch is no longer based on origin/main. This repo squash-merges, so the instant a PR lands the source branch is unrelated to main in BOTH directions; committing there builds a fork whose PR carries phantom diffs reverting whatever else landed. The stop hook makes it worse by reporting the orphaned pointer as 'unpushed commits' and advising a push. Note the obvious check is INVERTED and wrong: 'merge-base --is-ancestor HEAD origin/main' is false for every healthy in-progress branch. Reads the locally-known origin/main and never fetches. Never blocks — run-gates fails on any non-zero exit regardless of severity (ops#304), so this exits 0 except under --fixture-mode. ops#335.",
-      "severity": "warn",
-      "gateScript": "scripts/check-branch-ancestry.mjs",
-      "fixturePath": "fixtures/check-branch-ancestry",
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "pre-commit",
-      "supportsJson": true
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-commit-message-task-ref",
@@ -226,7 +226,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-dom-node-budgets",
@@ -278,7 +278,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-frozen-demos",
@@ -289,7 +289,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-guardrail-drift",
@@ -304,7 +304,7 @@
     },
     {
       "id": "check-handoff-freshness",
-      "description": "Flags a docs/ai/HANDOFF.md \"Now\" bullet whose claim is contradicted by a newer dated \"Decisions\" entry on the same topic (ops#210) — e.g. a lifted freeze left standing as an active Now bullet.",
+      "description": "Flags a docs/ai/HANDOFF.md \"Now\" bullet whose claim is contradicted by a newer dated \"Decisions\" entry on the same topic (ops#210) \u2014 e.g. a lifted freeze left standing as an active Now bullet.",
       "severity": "warn",
       "gateScript": "scripts/check-handoff-freshness.mjs",
       "fixturePath": null,
@@ -334,7 +334,7 @@
       "source": "human",
       "firingChannel": "ci-pr",
       "supportsJson": true,
-      "skipMetaProbe": "drives a full Playwright run that builds into node_modules/.cache/playwright-preview and binds :5200 — a second copy spawned by a meta-probe during the ci-pr run would race the real one"
+      "skipMetaProbe": "drives a full Playwright run that builds into node_modules/.cache/playwright-preview and binds :5200 \u2014 a second copy spawned by a meta-probe during the ci-pr run would race the real one"
     },
     {
       "id": "check-licenses",
@@ -374,15 +374,31 @@
       ]
     },
     {
+      "id": "check-migration-ledger",
+      "description": "Compares supabase/migrations/*.sql against the live supabase_migrations.schema_migrations ledger and reports every migration the repo has but the ledger does not (and every ledger row no repo migration explains). Skips loudly when Supabase credentials are absent \u2014 it never reports \"in sync\" for a ledger it could not read.",
+      "severity": "warn",
+      "gateScript": "scripts/check-migration-ledger.mjs",
+      "fixturePath": null,
+      "owner": "Adrian",
+      "source": "agent",
+      "firingChannel": "manual",
+      "supportsJson": true,
+      "scope": "full-tree",
+      "pureExceptions": [
+        "network: reads the live migration ledger through the Management API \u2014 that comparison is the entire gate",
+        "env: SUPABASE_ACCESS_TOKEN / SUPABASE_PROJECT_REF are the credentials it needs to reach the ledger"
+      ]
+    },
+    {
       "id": "check-motion",
-      "description": "Verifies that interactive components ship with motion feedback — the HDS standard that every user action has a visible, token-timed response.",
+      "description": "Verifies that interactive components ship with motion feedback \u2014 the HDS standard that every user action has a visible, token-timed response.",
       "severity": "warn",
       "gateScript": "scripts/check-motion.mjs",
       "fixturePath": "fixtures/check-motion",
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-og-meta",
@@ -393,7 +409,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "pre-commit",
-      "wiringTodo": "should be ci-pr or ci-scheduled — not yet wired into a workflow that actually triggers it"
+      "wiringTodo": "should be ci-pr or ci-scheduled \u2014 not yet wired into a workflow that actually triggers it"
     },
     {
       "id": "check-page-shell",
@@ -404,6 +420,28 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "pre-commit"
+    },
+    {
+      "id": "check-parked-triggers",
+      "description": "Evaluates the re-entry triggers in docs/ai/PARKED.md, the file holding work deliberately kept out of the issue queue. date: and path: triggers fire automatically; issue:/event: triggers surface at the quarterly review. Exits non-zero when an entry is due to re-enter the queue, and prints a recurring entry's own `when it fires:` instruction in place of file-and-delete. Runs daily via .github/workflows/parked-triggers.yml, where a fired trigger fails the scheduled run so the reminder does not depend on memory; `pnpm parked:check` runs it on demand. Read-only \u2014 re-entry stays a deliberate human act. Warn severity: a fired trigger is information, not a defect in the commit.",
+      "severity": "warn",
+      "gateScript": "scripts/check-parked-triggers.mjs",
+      "fixturePath": "fixtures/check-parked-triggers",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "ci-scheduled"
+    },
+    {
+      "id": "check-pii",
+      "description": "Blocks personal data from entering git (ops#27, ops#35). Scans lines ADDED by the staged change, plus staged paths, for denylist terms (real client/contact identifiers loaded from the PII_DENYLIST env/secret or the gitignored .pii-denylist file, never the repo) and private Google/Microsoft/SharePoint/Wix workspace links, which block; emails outside a reviewed allowlist and US phone numbers only warn, because run-gates blocks on a failing error-severity gate (ops#306) and this gate is registered error, so any non-zero exit stops the commit \u2014 only the error-severity rules drive that exit code (--fail-on error, the default), and the 2026-09-16 sweep measured emails/phones at ~11% precision. Denylist terms also match decoded and loosened copies of the text (percent/JSON/HTML escapes, accents, slugs, camelCase, comment-wrapped lines); UTF-16 and .gitattributes-binary text is scanned; copies of the denylist are blocked. With nothing staged (the post-commit re-run) it scans HEAD and its message, so a --no-verify bypass is logged. Output shows rule, location and match length, never the value. Commit messages: .husky/commit-msg via scripts/pii-commit-msg.mjs. CI backstop (added lines, commit messages, PR title/body/branch name): .github/workflows/pii-scan.yml; weekly issue-text and sibling-repo sweep: pii-weekly.yml. Guide: docs/guardrails/pii-gate.md.",
+      "severity": "error",
+      "gateScript": "scripts/check-pii.mjs",
+      "fixturePath": "fixtures/check-pii",
+      "owner": "Adrian",
+      "source": "agent",
+      "firingChannel": "pre-commit",
+      "scope": "full-tree",
+      "supportsJson": true
     },
     {
       "id": "check-production-health",
@@ -425,7 +463,7 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-registry",
@@ -436,17 +474,57 @@
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "manual",
-      "retiredFromPreCommit": "DS-authoring gate — ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
+      "retiredFromPreCommit": "DS-authoring gate \u2014 ops consumes the design system, does not author it (2026-07-07). Run via the manual channel on demand."
     },
     {
       "id": "check-route-coverage",
-      "description": "Route coverage gate — every routable page must appear in the layout-integrity test set.",
+      "description": "Route coverage gate \u2014 every routable page must appear in the layout-integrity test set.",
       "severity": "warn",
       "gateScript": "scripts/check-route-coverage.mjs",
       "fixturePath": "fixtures/check-route-coverage",
       "owner": "Adrian",
       "source": "human",
       "firingChannel": "pre-commit"
+    },
+    {
+      "id": "check-schema-drift",
+      "description": "ops' vendored ClientConfig schema must offer every enum value site-engine ships. site-engine guards its schema against ops-shape.snapshot.json; nothing guarded the snapshot against ops, so shipped variants sat unreachable by the generation agent with every gate green (2026-09-16).",
+      "severity": "error",
+      "gateScript": "scripts/check-schema-drift.mjs",
+      "fixturePath": "fixtures/check-schema-drift",
+      "owner": "Adrian",
+      "source": "agent",
+      "firingChannel": "pre-commit"
+    },
+    {
+      "id": "check-secret-health",
+      "description": "Runs docs/secrets/registry.json's probe against the live service for every registered secret (ops#415) and reports missing/invalid/soon-to-expire \u2014 so no fleet secret can lapse silently.",
+      "severity": "warn",
+      "gateScript": "scripts/check-secret-health.mjs",
+      "fixturePath": null,
+      "owner": "Adrian",
+      "source": "agent",
+      "firingChannel": "manual",
+      "supportsJson": true,
+      "pureExceptions": [
+        "network: authenticates against GitHub/npm/Figma/Supabase to verify each secret still works \u2014 that live call is the entire point of the gate",
+        "env: reads every registered secret's own env var (process.env only, never a .env* file) plus SUPABASE_URL/SUPABASE_PROJECT_REF as companion values for the supabase-select probe"
+      ]
+    },
+    {
+      "id": "check-secret-registry",
+      "description": "Drift gate between the fleet's actual secrets.NAME workflow references and docs/secrets/registry.json (ops#415).",
+      "severity": "error",
+      "gateScript": "scripts/check-secret-registry.mjs",
+      "fixturePath": null,
+      "owner": "Adrian",
+      "source": "agent",
+      "firingChannel": "manual",
+      "supportsJson": true,
+      "scope": "full-tree",
+      "pureExceptions": [
+        "env: reads FLEET_ROOT (test/operator override for the sibling-repo directory) \u2014 the drift scan itself is pure filesystem reads, this is only where it looks"
+      ]
     },
     {
       "id": "check-secrets",
@@ -456,18 +534,6 @@
       "fixturePath": "fixtures/check-secrets",
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "pre-commit",
-      "scope": "full-tree",
-      "supportsJson": true
-    },
-    {
-      "id": "check-pii",
-      "description": "Blocks personal data from entering git (ops#27, ops#35). Scans lines ADDED by the staged change, plus staged paths, for denylist terms (real client/contact identifiers loaded from the PII_DENYLIST env/secret or the gitignored .pii-denylist file, never the repo) and private Google/Microsoft/SharePoint/Wix workspace links, which block; emails outside a reviewed allowlist and US phone numbers only warn, because run-gates blocks on a failing error-severity gate (ops#306) and this gate is registered error, so any non-zero exit stops the commit — only the error-severity rules drive that exit code (--fail-on error, the default), and the 2026-09-16 sweep measured emails/phones at ~11% precision. Denylist terms also match decoded and loosened copies of the text (percent/JSON/HTML escapes, accents, slugs, camelCase, comment-wrapped lines); UTF-16 and .gitattributes-binary text is scanned; copies of the denylist are blocked. With nothing staged (the post-commit re-run) it scans HEAD and its message, so a --no-verify bypass is logged. Output shows rule, location and match length, never the value. Commit messages: .husky/commit-msg via scripts/pii-commit-msg.mjs. CI backstop (added lines, commit messages, PR title/body/branch name): .github/workflows/pii-scan.yml; weekly issue-text and sibling-repo sweep: pii-weekly.yml. Guide: docs/guardrails/pii-gate.md.",
-      "severity": "error",
-      "gateScript": "scripts/check-pii.mjs",
-      "fixturePath": "fixtures/check-pii",
-      "owner": "Adrian",
-      "source": "agent",
       "firingChannel": "pre-commit",
       "scope": "full-tree",
       "supportsJson": true
@@ -483,6 +549,17 @@
       "firingChannel": "pre-commit"
     },
     {
+      "id": "check-sev1-visibility",
+      "description": "Lists every open sev1 issue (gh search, owner hirobius \u2014 the ladder labels live in ops and hds) and exits non-zero while any exists (ops#317). Severity is orthogonal to p0\u2013p3: sev1 = legal exposure, security incident, data loss, or already affecting a real third party. ops#27 sat at p1 for 71 days with nothing surfacing it. Warn severity: it reports, it never blocks a commit. /ops/standing shows the same list without running a command. A gh failure reports the result as UNKNOWN, never as clean.",
+      "severity": "warn",
+      "gateScript": "scripts/check-sev1-visibility.mjs",
+      "fixturePath": "fixtures/check-sev1-visibility",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "pnpm-meta",
+      "supportsJson": true
+    },
+    {
       "id": "check-skills-lock",
       "description": "Verifies every skill pinned in skills-lock.json is installed under .claude/skills/<id>/ and hash-matches the lock. Read-only; run install-skills.mjs to fetch a missing/stale skill.",
       "severity": "error",
@@ -495,7 +572,7 @@
     },
     {
       "id": "check-snapshot-staleness",
-      "description": "Warns when a committed snapshot baseline JSON is older than any of its source files — catching baselines that should have been regenerated after a source change but weren't. Covers fixtures/figma-masters/snapshot-pre-8v3.json (sources: pipeline/figma-masters-batch.mjs + public/hds-manifest.json) and fixtures/doc-pages/snapshot.json (sources: src/app/pages/docs/**/*.tsx). Warn-only by default; set STALENESS_ENFORCE=error to make blocking.",
+      "description": "Warns when a committed snapshot baseline JSON is older than any of its source files \u2014 catching baselines that should have been regenerated after a source change but weren't. Covers fixtures/figma-masters/snapshot-pre-8v3.json (sources: pipeline/figma-masters-batch.mjs + public/hds-manifest.json) and fixtures/doc-pages/snapshot.json (sources: src/app/pages/docs/**/*.tsx). Warn-only by default; set STALENESS_ENFORCE=error to make blocking.",
       "severity": "warn",
       "gateScript": "scripts/check-snapshot-staleness.mjs",
       "fixturePath": null,
@@ -506,7 +583,7 @@
     },
     {
       "id": "check-spec-freshness",
-      "description": "Anti-rot gate for docs/specs/<epic-slug>.md (ops#294, doctrine §2 rule 4). Flags a spec missing a parseable Status:/Last verified: header, an active spec whose Last verified is >60 days old, an active spec whose referenced issues are all closed (should be shipped), and a referenced issue number that doesn't exist in the stated repo. A shipped/abandoned spec is exempt from every check — history, not instruction. Advisory only. Manual channel only (network required for issue state).",
+      "description": "Anti-rot gate for docs/specs/<epic-slug>.md (ops#294, doctrine \u00a72 rule 4). Flags a spec missing a parseable Status:/Last verified: header, an active spec whose Last verified is >60 days old, an active spec whose referenced issues are all closed (should be shipped), and a referenced issue number that doesn't exist in the stated repo. A shipped/abandoned spec is exempt from every check \u2014 history, not instruction. Advisory only. Manual channel only (network required for issue state).",
       "severity": "warn",
       "gateScript": "scripts/check-spec-freshness.mjs",
       "fixturePath": "fixtures/check-spec-freshness",
@@ -546,7 +623,7 @@
       "source": "human",
       "firingChannel": "ci-pr",
       "supportsJson": true,
-      "skipMetaProbe": "re-runs the whole-program type-coverage analysis — the ci-pr run already reports it; a meta-probe copy only duplicates the work"
+      "skipMetaProbe": "re-runs the whole-program type-coverage analysis \u2014 the ci-pr run already reports it; a meta-probe copy only duplicates the work"
     },
     {
       "id": "check-typecheck",
@@ -558,7 +635,7 @@
       "source": "human",
       "firingChannel": "ci-pr",
       "supportsJson": true,
-      "skipMetaProbe": "re-runs the whole-program tsc check — the ci-pr run already reports it; a meta-probe copy only duplicates the work"
+      "skipMetaProbe": "re-runs the whole-program tsc check \u2014 the ci-pr run already reports it; a meta-probe copy only duplicates the work"
     },
     {
       "id": "check-unresponsive-grids",
@@ -572,7 +649,7 @@
     },
     {
       "id": "check-validator-wiring",
-      "description": "Meta-validator: every gate registered in docs/guardrails/registry.json has a firingChannel that matches actual invocation. Catches aspirational guardrails — gates registered but never really firing.",
+      "description": "Meta-validator: every gate registered in docs/guardrails/registry.json has a firingChannel that matches actual invocation. Catches aspirational guardrails \u2014 gates registered but never really firing.",
       "severity": "error",
       "gateScript": "scripts/check-validator-wiring.mjs",
       "fixturePath": "fixtures/check-validator-wiring",
@@ -583,7 +660,7 @@
     },
     {
       "id": "generate-strength-report",
-      "description": "Pure observer that reads registry.json, orchestration.json, swarm-watchdog-decisions.jsonl, tsconfig.json, and component-api.json. Computes Score A (Internal Integrity, 6 dims) + Score B (Industry Benchmark, 8 dims) per the 13s-strength-1 ADR. Emits docs/guardrails/strength-report.md and strength-report.json. Idempotent (same input → byte-identical output modulo timestamp). Fast (<2s). No mutations to source files.",
+      "description": "Pure observer that reads registry.json, orchestration.json, swarm-watchdog-decisions.jsonl, tsconfig.json, and component-api.json. Computes Score A (Internal Integrity, 6 dims) + Score B (Industry Benchmark, 8 dims) per the 13s-strength-1 ADR. Emits docs/guardrails/strength-report.md and strength-report.json. Idempotent (same input \u2192 byte-identical output modulo timestamp). Fast (<2s). No mutations to source files.",
       "severity": "warn",
       "gateScript": "scripts/generate-strength-report.mjs",
       "fixturePath": "fixtures/generate-strength-report",
@@ -594,9 +671,31 @@
     },
     {
       "id": "harvest-park-signals",
-      "description": "Reads the fleet's Ralph park trail (ralph-attempt-failed, the park comment, ralph-blocked) via GitHub Search, pairs each park/blocked signal with the next human comment as its recovery, and appends the raw pair to docs/ai/learned-rules.jsonl (source: park-harvest). No distillation — promote-learned-rule.mjs is the HITL step. Dry-run by default; --apply persists. Manual channel only (network required). ops#298.",
+      "description": "Reads the fleet's Ralph park trail (ralph-attempt-failed, the park comment, ralph-blocked) via GitHub Search, pairs each park/blocked signal with the next human comment as its recovery, and appends the raw pair to docs/ai/learned-rules.jsonl (source: park-harvest). No distillation \u2014 promote-learned-rule.mjs is the HITL step. Dry-run by default; --apply persists. Manual channel only (network required). ops#298.",
       "severity": "warn",
       "gateScript": "scripts/harvest-park-signals.mjs",
+      "fixturePath": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual",
+      "supportsJson": true
+    },
+    {
+      "id": "metric-human-gate-latency",
+      "description": "Median days an issue sits gated on Adrian under needs-adrian / needs-decision / needs-credential (ops#297, FRONTIER-DOCTRINE.md \u00a77 metric 2), broken out per label, plus the oldest still-open gated issue. Network required (repo-wide GitHub issue-events feed) \u2014 manual channel only, same as metric-north-star-share. Emits a violation when the median is above target, so ralph/metric.sh can drive off it.",
+      "severity": "warn",
+      "gateScript": "scripts/metric-human-gate-latency.mjs",
+      "fixturePath": null,
+      "owner": "Adrian",
+      "source": "agent",
+      "firingChannel": "manual",
+      "supportsJson": true
+    },
+    {
+      "id": "metric-north-star-share",
+      "description": "Over a rolling window (default 14 days), the share of merged PRs whose diff touches the revenue path (lib/agent, lib/leads, lib/lead-gen, lib/render, lib/outreach, api/lead-action.ts, the ops leads UI). Network required (GitHub Search + REST API) \u2014 manual channel only, same as audit-deps. Emits a violation when the share is below target, so ralph/metric.sh can drive off it.",
+      "severity": "warn",
+      "gateScript": "scripts/metric-north-star-share.mjs",
       "fixturePath": null,
       "owner": "Adrian",
       "source": "human",
@@ -637,75 +736,6 @@
       "firingChannel": "pre-commit",
       "strictArgv": "--strict-validation",
       "glob": "docs/ai/orchestration.json"
-    },
-    {
-      "id": "check-parked-triggers",
-      "description": "Evaluates the re-entry triggers in docs/ai/PARKED.md, the file holding work deliberately kept out of the issue queue. date: and path: triggers fire automatically; issue:/event: triggers surface at the quarterly review. Exits non-zero when an entry is due to re-enter the queue, and prints a recurring entry's own `when it fires:` instruction in place of file-and-delete. Runs daily via .github/workflows/parked-triggers.yml, where a fired trigger fails the scheduled run so the reminder does not depend on memory; `pnpm parked:check` runs it on demand. Read-only — re-entry stays a deliberate human act. Warn severity: a fired trigger is information, not a defect in the commit.",
-      "severity": "warn",
-      "gateScript": "scripts/check-parked-triggers.mjs",
-      "fixturePath": "fixtures/check-parked-triggers",
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "ci-scheduled"
-    },
-    {
-      "id": "check-sev1-visibility",
-      "description": "Lists every open sev1 issue (gh search, owner hirobius — the ladder labels live in ops and hds) and exits non-zero while any exists (ops#317). Severity is orthogonal to p0–p3: sev1 = legal exposure, security incident, data loss, or already affecting a real third party. ops#27 sat at p1 for 71 days with nothing surfacing it. Warn severity: it reports, it never blocks a commit. /ops/standing shows the same list without running a command. A gh failure reports the result as UNKNOWN, never as clean.",
-      "severity": "warn",
-      "gateScript": "scripts/check-sev1-visibility.mjs",
-      "fixturePath": "fixtures/check-sev1-visibility",
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "pnpm-meta",
-      "supportsJson": true
-    },
-    {
-      "id": "metric-north-star-share",
-      "description": "Over a rolling window (default 14 days), the share of merged PRs whose diff touches the revenue path (lib/agent, lib/leads, lib/lead-gen, lib/render, lib/outreach, api/lead-action.ts, the ops leads UI). Network required (GitHub Search + REST API) — manual channel only, same as audit-deps. Emits a violation when the share is below target, so ralph/metric.sh can drive off it.",
-      "severity": "warn",
-      "gateScript": "scripts/metric-north-star-share.mjs",
-      "fixturePath": null,
-      "owner": "Adrian",
-      "source": "human",
-      "firingChannel": "manual",
-      "supportsJson": true
-    },
-    {
-      "id": "metric-human-gate-latency",
-      "description": "Median days an issue sits gated on Adrian under needs-adrian / needs-decision / needs-credential (ops#297, FRONTIER-DOCTRINE.md §7 metric 2), broken out per label, plus the oldest still-open gated issue. Network required (repo-wide GitHub issue-events feed) — manual channel only, same as metric-north-star-share. Emits a violation when the median is above target, so ralph/metric.sh can drive off it.",
-      "severity": "warn",
-      "gateScript": "scripts/metric-human-gate-latency.mjs",
-      "fixturePath": null,
-      "owner": "Adrian",
-      "source": "agent",
-      "firingChannel": "manual",
-      "supportsJson": true
-    },
-    {
-      "id": "check-schema-drift",
-      "description": "ops' vendored ClientConfig schema must offer every enum value site-engine ships. site-engine guards its schema against ops-shape.snapshot.json; nothing guarded the snapshot against ops, so shipped variants sat unreachable by the generation agent with every gate green (2026-09-16).",
-      "severity": "error",
-      "gateScript": "scripts/check-schema-drift.mjs",
-      "fixturePath": "fixtures/check-schema-drift",
-      "owner": "Adrian",
-      "source": "agent",
-      "firingChannel": "pre-commit"
-    },
-    {
-      "id": "check-migration-ledger",
-      "description": "Compares supabase/migrations/*.sql against the live supabase_migrations.schema_migrations ledger and reports every migration the repo has but the ledger does not (and every ledger row no repo migration explains). Skips loudly when Supabase credentials are absent — it never reports \"in sync\" for a ledger it could not read.",
-      "severity": "warn",
-      "gateScript": "scripts/check-migration-ledger.mjs",
-      "fixturePath": null,
-      "owner": "Adrian",
-      "source": "agent",
-      "firingChannel": "manual",
-      "supportsJson": true,
-      "scope": "full-tree",
-      "pureExceptions": [
-        "network: reads the live migration ledger through the Management API — that comparison is the entire gate",
-        "env: SUPABASE_ACCESS_TOKEN / SUPABASE_PROJECT_REF are the credentials it needs to reach the ledger"
-      ]
     }
   ]
 }

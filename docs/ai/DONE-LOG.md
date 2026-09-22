@@ -778,3 +778,52 @@ reached a PR test fixture unflagged.
   proxy's `noProxy` list); 28 fixtures missed what one live fetch caught (#346).
   Superseded in HANDOFF by the 2026-09-17 denylist rule, which is the same
   failure one layer up.
+
+## 2026-09-22 — secrets registry + deterministic health check (ops#415)
+
+`docs/secrets/registry.json` — 19 entries, one per (repo, secret name) pair
+across the four repos that actually reference `secrets.NAME` in a workflow
+today (ops 11, hds 4, site-engine 2, Ralph 2 — folio/concrete have no
+`.github/workflows/` at all). Every `purpose`/`breaksWhenMissing` is grounded
+in the workflow that reads it, not guessed.
+
+**One correction to the issue's own ground truth, caught by verifying instead
+of trusting the list:** hds's `RELEASE_PAT` is not live — it exists only on
+hds's unmerged branch `claude/release-pat`, confirmed by diffing
+`.github/workflows/` against `origin/main` in both repos. 13 verified secret
+names, not 15. Left out of the registry until that branch merges (an early
+entry would just make the drift gate cry wolf); flagged on the issue and on
+`SESSION-BOARD.md`.
+
+`scripts/check-secret-registry.mjs` — the drift gate (`error`/`manual`).
+Scans every fleet repo's workflows for `secrets\.[A-Z_][A-Z0-9_]*`, diffs
+against the registry both directions, and reports a repo absent from disk
+rather than silently scanning fewer. A hand-reasoned `ALLOWLIST` (not a
+heuristic filter) covers `GITHUB_TOKEN` (auto-rotated per run, nothing to
+register) and the literal `secrets.X` placeholder text that RELEASE_PAT's
+own guard comment uses as an example of what NOT to write.
+
+`scripts/check-secret-health.mjs` (`warn`/`manual`) + `scripts/lib/
+secret-probes.mjs` — dispatches to one of five probes per registry entry
+(`github-token-expiry`, `npm-whoami`, `figma-me`, `supabase-select`,
+`presence`) and reports what breaks + where to fix it, never the value.
+**Confirmed live, not assumed:** GitHub really does send a
+`Github-Authentication-Token-Expiration` response header — verified with a
+real `GET api.github.com/user` call using this sandbox's own token. Also
+caught and fixed a real bug the same way: the `supabase-select` probe first
+404'd against the live ops project (`PGRST125: Invalid path specified`)
+because it appended `/rest/v1/` to a `SUPABASE_URL` that already had it —
+`lib/supabase/server.mjs` already strips exactly that; the probe now does
+too, and then passed against the real key.
+
+Both gates registered in `docs/guardrails/registry.json` as `manual` —
+`check-validator-wiring` requires that channel's detected wiring to be
+`none`, and neither is invoked from any hook, workflow, or `package.json`
+script (none was added; deliberately out of scope — no workflow-file
+changes). `audit-gate-purity` needed `pureExceptions` on both (`network`
+
+- `env` on the health check, `env` on the drift gate) to read EXEMPTED
+  rather than IMPURE. 50 new tests, several literal CANARIES (an unregistered
+  secret fixture that must exit 1; a bogus-token fetch mock that must fail
+  with the live rejection reason) — `pnpm exec vitest run` is 130 files /
+  1776 tests green, `pnpm typecheck` and `pnpm exec eslint` both clean.

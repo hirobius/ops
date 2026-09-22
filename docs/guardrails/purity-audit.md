@@ -6,34 +6,34 @@ A gate may legitimately need to mutate (e.g. an `--update` flag), read the clock
 
 ## Summary
 
-| Verdict | Count |
-|---|---:|
-| **PURE** — no impurity patterns found | 63 |
-| **EXEMPTED** — impurity present, documented in `pureExceptions` | 0 |
-| **IMPURE** — impurity present, **NOT** documented | 7 |
-| **MISSING** — `gateScript` file does not exist | 0 |
-| **TOTAL** | 70 |
+| Verdict                                                         | Count |
+| --------------------------------------------------------------- | ----: |
+| **PURE** — no impurity patterns found                           |    25 |
+| **EXEMPTED** — impurity present, documented in `pureExceptions` |     1 |
+| **IMPURE** — impurity present, **NOT** documented               |    39 |
+| **MISSING** — `gateScript` file does not exist                  |     0 |
+| **TOTAL**                                                       |    65 |
 
 ## Patterns scanned
 
-| Category | Pattern | Why it matters |
-|---|---|---|
-| `mutation` | `fs.writeFileSync` | mutates the working tree |
-| `mutation` | `fs.appendFileSync` | mutates the working tree |
-| `mutation` | `fs.unlinkSync` | deletes from the working tree |
-| `mutation` | `fs.rmSync` | deletes from the working tree |
-| `mutation` | `fs.mkdirSync` | mutates the working tree |
-| `mutation` | `fs.renameSync` | mutates the working tree |
-| `mutation` | `fs.copyFileSync` | mutates the working tree |
-| `mutation` | `fs.chmodSync` | mutates the working tree |
-| `mutation` | `fs.promises.writeFile` | mutates the working tree (async) |
-| `time` | `Date.now` | wall-clock — output varies across runs |
-| `time` | `new Date()` | wall-clock — output varies across runs |
-| `random` | `Math.random` | non-deterministic — output varies across runs |
-| `network` | `import 'http' / 'https'` | fetches data outside the working tree |
-| `network` | `import 'fetch' / axios / node-fetch` | fetches data outside the working tree |
-| `network` | `fetch(` | fetches data outside the working tree |
-| `env` | `process.env.X` (X not in allowlist) | external state — varies across machines |
+| Category   | Pattern                               | Why it matters                                |
+| ---------- | ------------------------------------- | --------------------------------------------- |
+| `mutation` | `fs.writeFileSync`                    | mutates the working tree                      |
+| `mutation` | `fs.appendFileSync`                   | mutates the working tree                      |
+| `mutation` | `fs.unlinkSync`                       | deletes from the working tree                 |
+| `mutation` | `fs.rmSync`                           | deletes from the working tree                 |
+| `mutation` | `fs.mkdirSync`                        | mutates the working tree                      |
+| `mutation` | `fs.renameSync`                       | mutates the working tree                      |
+| `mutation` | `fs.copyFileSync`                     | mutates the working tree                      |
+| `mutation` | `fs.chmodSync`                        | mutates the working tree                      |
+| `mutation` | `fs.promises.writeFile`               | mutates the working tree (async)              |
+| `time`     | `Date.now`                            | wall-clock — output varies across runs        |
+| `time`     | `new Date()`                          | wall-clock — output varies across runs        |
+| `random`   | `Math.random`                         | non-deterministic — output varies across runs |
+| `network`  | `import 'http' / 'https'`             | fetches data outside the working tree         |
+| `network`  | `import 'fetch' / axios / node-fetch` | fetches data outside the working tree         |
+| `network`  | `fetch(`                              | fetches data outside the working tree         |
+| `env`      | `process.env.X` (X not in allowlist)  | external state — varies across machines       |
 
 **Env allowlist:** `CI`, `GITHUB_ACTIONS`, `GITHUB_REF`, `GITHUB_SHA`, `GITHUB_TOKEN`, `HOME`, `LANG`, `LC_ALL`, `NODE_ENV`, `PATH`, `PWD`, `TZ`, `npm_lifecycle_event`
 
@@ -45,128 +45,412 @@ Each gate below has at least one finding in a category not covered by `pureExcep
 
 Source: `scripts/audit-claims.mjs`
 
-| Line | Category | Pattern | Snippet |
-|---:|---|---|---|
-| 55 | `time` | `Date.now` | `const now = Date.now();` |
+| Line | Category | Pattern    | Snippet                   |
+| ---: | -------- | ---------- | ------------------------- |
+|   45 | `time`   | `Date.now` | `const now = Date.now();` |
 
 ### `audit-exceptions`
 
 Source: `scripts/audit-exceptions.mjs`
 
-| Line | Category | Pattern | Snippet |
-|---:|---|---|---|
-| 201 | `time` | `new Date()` | `md += `Generated: ${new Date().toISOString()}\n\n`;` |
+| Line | Category | Pattern      | Snippet                                               |
+| ---: | -------- | ------------ | ----------------------------------------------------- |
+|  201 | `time`   | `new Date()` | `md += `Generated: ${new Date().toISOString()}\n\n`;` |
 
-### `audit-tiers`
+### `audit-gate-purity`
 
-Source: `scripts/audit-tiers.mjs`
+Source: `scripts/audit-gate-purity.mjs`
 
-| Line | Category | Pattern | Snippet |
-|---:|---|---|---|
-| 237 | `time` | `new Date()` | `lines.push(`Generated: ${new Date().toISOString().slice(0, 10)}`);` |
-| 335 | `mutation` | `fs.writeFileSync` | `fs.writeFileSync(r.file, next);` |
-| 368 | `mutation` | `fs.writeFileSync` | `fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + '\n');` |
-| 398 | `mutation` | `fs.writeFileSync` | `fs.writeFileSync(AUDIT_PATH, md);` |
+| Line | Category  | Pattern         | Snippet                                                                                                             |
+| ---: | --------- | --------------- | ------------------------------------------------------------------------------------------------------------------- |
+|  133 | `time`    | `new Date()`    | `label: 'new Date()',`                                                                                              |
+|  159 | `network` | `fetch(`        | `label: 'fetch(',`                                                                                                  |
+|  403 | `env`     | `process.env.X` | `lines.push(`\| \`env\` \| \`process.env.X\` (X not in allowlist) \| external state — varies across machines \|`);` |
 
-### `audit-tokens`
+### `audit-gate-replaceability`
 
-Source: `scripts/audit-tokens.mjs`
+Source: `scripts/audit-gate-replaceability.mjs`
 
-| Line | Category | Pattern | Snippet |
-|---:|---|---|---|
-| 141 | `time` | `new Date()` | `const timestamp = new Date().toISOString();` |
-| 188 | `time` | `new Date()` | `lastUpdated: new Date().toISOString(),` |
-| 928 | `time` | `new Date()` | `generatedAt: new Date().toISOString(),` |
+| Line | Category | Pattern      | Snippet                                  |
+| ---: | -------- | ------------ | ---------------------------------------- |
+| 1374 | `time`   | `new Date()` | `generatedAt: new Date().toISOString(),` |
 
-### `check-external-links`
+### `audit-orphan-modules`
 
-Source: `scripts/check-external-links.mjs`
+Source: `scripts/audit-orphan-modules.mjs`
 
-| Line | Category | Pattern | Snippet |
-|---:|---|---|---|
-| 16 | `network` | `import 'http' / 'https'` | `import http from 'node:http';` |
-| 17 | `network` | `import 'http' / 'https'` | `import https from 'node:https';` |
+| Line | Category | Pattern                        | Snippet                                                                                          |
+| ---: | -------- | ------------------------------ | ------------------------------------------------------------------------------------------------ |
+|   25 | `env`    | `process.env.HDS_FIXTURE_MODE` | `const fixtureMode = argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   26 | `env`    | `process.env.FIXTURE_FILE`     | `const fixtureFile = process.env.FIXTURE_FILE;`                                                  |
 
-### `check-route-smoke`
+### `audit-orphan-wip`
 
-Source: `scripts/check-route-smoke.mjs`
+Source: `scripts/audit-orphan-wip.mjs`
 
-| Line | Category | Pattern | Snippet |
-|---:|---|---|---|
-| 18 | `env` | `process.env.ROUTE_SMOKE_URL` | `const BASE_URL = process.env.ROUTE_SMOKE_URL \|\| `http://127.0.0.1:${PORT}`;` |
-| 50 | `network` | `fetch(` | `const response = await fetch(BASE_URL, { redirect: 'manual' });` |
-| 59 | `env` | `process.env.ROUTE_SMOKE_URL` | `const shouldStartPreview = !process.env.ROUTE_SMOKE_URL;` |
+| Line | Category | Pattern      | Snippet                                  |
+| ---: | -------- | ------------ | ---------------------------------------- |
+|  173 | `time`   | `new Date()` | `generatedAt: new Date().toISOString(),` |
 
-### `check-source-canon`
+### `audit-sites`
 
-Source: `scripts/check-source-canon.mjs`
+Source: `scripts/audit-sites.mjs`
 
-| Line | Category | Pattern | Snippet |
-|---:|---|---|---|
-| 385 | `mutation` | `fs.writeFileSync` | `fs.writeFileSync(path.join(ROOT, '.source-canon-baseline.txt'), lines.join('\n') + '\n');` |
+| Line | Category  | Pattern                         | Snippet                                                               |
+| ---: | --------- | ------------------------------- | --------------------------------------------------------------------- |
+|   80 | `network` | `fetch(`                        | `const res = await fetch(u, { signal: AbortSignal.timeout(60000) });` |
+|  126 | `env`     | `process.env.PAGESPEED_API_KEY` | `const key = process.env.PAGESPEED_API_KEY;`                          |
+|  191 | `time`    | `new Date()`                    | `site_audited_at: new Date().toISOString(),`                          |
+
+### `audit-soft-gates`
+
+Source: `scripts/audit-soft-gates.mjs`
+
+| Line | Category   | Pattern            | Snippet                                                                                           |
+| ---: | ---------- | ------------------ | ------------------------------------------------------------------------------------------------- |
+|  247 | `time`     | `new Date()`       | `generatedAt: new Date().toISOString(),`                                                          |
+|  253 | `mutation` | `fs.writeFileSync` | `fs.writeFileSync(OUT_JSON, JSON.stringify(inventory, null, 2), 'utf8');`                         |
+|  278 | `time`     | `new Date()`       | `const now = new Date().toISOString();`                                                           |
+|  432 | `mutation` | `fs.writeFileSync` | `fs.writeFileSync(OUT_PLAN, planMd, 'utf8');`                                                     |
+|  433 | `mutation` | `fs.writeFileSync` | `fs.writeFileSync(OUT_PLAN_CANONICAL, planMd, 'utf8');`                                           |
+|  450 | `time`     | `new Date()`       | `console.log(`Soft-gate audit — ${results.length} gates audited (${new Date().toISOString()})`);` |
+
+### `check-branch-ancestry`
+
+Source: `scripts/check-branch-ancestry.mjs`
+
+| Line | Category | Pattern                        | Snippet                                                                                          |
+| ---: | -------- | ------------------------------ | ------------------------------------------------------------------------------------------------ |
+|   46 | `env`    | `process.env.HDS_FIXTURE_MODE` | `const fixtureMode = argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   47 | `env`    | `process.env.FIXTURE_FILE`     | `const fixtureFile = process.env.FIXTURE_FILE;`                                                  |
+
+### `check-circular-deps`
+
+Source: `scripts/check-circular-deps.mjs`
+
+| Line | Category | Pattern                        | Snippet                                                                                                  |
+| ---: | -------- | ------------------------------ | -------------------------------------------------------------------------------------------------------- |
+|   50 | `env`    | `process.env.HDS_FIXTURE_MODE` | `const fixtureMode = process.argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   51 | `env`    | `process.env.FIXTURE_FILE`     | `const fixtureFile = process.env.FIXTURE_FILE;`                                                          |
+|  216 | `time`   | `new Date()`                   | `updatedAt: new Date().toISOString(),`                                                                   |
+
+### `check-commit-message-task-ref`
+
+Source: `scripts/check-commit-message-task-ref.mjs`
+
+| Line | Category | Pattern                          | Snippet                                                                     |
+| ---: | -------- | -------------------------------- | --------------------------------------------------------------------------- |
+|   36 | `env`    | `process.env.KANBAN_REF_ENFORCE` | `const ENFORCE = (process.env.KANBAN_REF_ENFORCE ?? 'warn').toLowerCase();` |
+
+### `check-dom-node-budgets`
+
+Source: `scripts/check-dom-node-budgets.mjs`
+
+| Line | Category | Pattern                                            | Snippet                                                                                                  |
+| ---: | -------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+|   53 | `env`    | `process.env.CHECK_DOM_NODE_BUDGETS_BASELINE_FILE` | `process.env.CHECK_DOM_NODE_BUDGETS_BASELINE_FILE \|\|`                                                  |
+|   58 | `env`    | `process.env.HDS_FIXTURE_MODE`                     | `const fixtureMode = process.argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   59 | `env`    | `process.env.FIXTURE_FILE`                         | `const fixtureFile = process.env.FIXTURE_FILE;`                                                          |
+|  157 | `time`   | `new Date()`                                       | `const payload = { budgets: sorted, updatedAt: new Date().toISOString(), sha: gitSha() };`               |
+
+### `check-editorconfig`
+
+Source: `scripts/check-editorconfig.mjs`
+
+| Line | Category | Pattern                                     | Snippet                                                                                    |
+| ---: | -------- | ------------------------------------------- | ------------------------------------------------------------------------------------------ |
+|   48 | `env`    | `process.env.FIXTURE_FILE`                  | `const fixtureMode = process.argv.includes('--fixture-mode') && process.env.FIXTURE_FILE;` |
+|   50 | `env`    | `process.env.CHECK_EDITORCONFIG_BIN`        | `const bin = fixtureMode ? 'node' : process.env.CHECK_EDITORCONFIG_BIN \|\| 'pnpm';`       |
+|   52 | `env`    | `process.env.FIXTURE_FILE`                  | `? [process.env.FIXTURE_FILE]`                                                             |
+|   53 | `env`    | `process.env.CHECK_EDITORCONFIG_ARGS`       | `: (process.env.CHECK_EDITORCONFIG_ARGS \|\| 'exec editorconfig-checker')`                 |
+|   56 | `env`    | `process.env.CHECK_EDITORCONFIG_TIMEOUT_MS` | `const timeout = Number(process.env.CHECK_EDITORCONFIG_TIMEOUT_MS) \|\| 30_000;`           |
+
+### `check-exemptions`
+
+Source: `scripts/check-exemptions.mjs`
+
+| Line | Category | Pattern                        | Snippet                                                                                                    |
+| ---: | -------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+|   22 | `env`    | `process.env.HDS_FIXTURE_MODE` | `const isFixtureMode = process.argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   23 | `env`    | `process.env.FIXTURE_FILE`     | `const fixtureFile = process.env.FIXTURE_FILE;`                                                            |
+
+### `check-fixture-stubs-ratchet`
+
+Source: `scripts/check-fixture-stubs-ratchet.mjs`
+
+| Line | Category | Pattern                                         | Snippet                                                                                                  |
+| ---: | -------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+|   48 | `env`    | `process.env.CHECK_FIXTURE_STUBS_BASELINE_FILE` | `process.env.CHECK_FIXTURE_STUBS_BASELINE_FILE \|\|`                                                     |
+|   52 | `env`    | `process.env.HDS_FIXTURE_MODE`                  | `const fixtureMode = process.argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   53 | `env`    | `process.env.FIXTURE_FILE`                      | `const fixtureFile = process.env.FIXTURE_FILE;`                                                          |
+|  125 | `time`   | `new Date()`                                    | `if (fixtureMode) return { count, updatedAt: new Date().toISOString(), sha: 'fixture' };`                |
+|  128 | `time`   | `new Date()`                                    | `updatedAt: new Date().toISOString(),`                                                                   |
+
+### `check-focus-states`
+
+Source: `scripts/check-focus-states.mjs`
+
+| Line | Category | Pattern                    | Snippet                                                                                 |
+| ---: | -------- | -------------------------- | --------------------------------------------------------------------------------------- |
+|   42 | `env`    | `process.env.FIXTURE_FILE` | `process.env.FIXTURE_FILE \|\| process.argv.slice(2).find((a) => !a.startsWith('--'));` |
+
+### `check-guardrail-drift`
+
+Source: `scripts/check-guardrail-drift.mjs`
+
+| Line | Category | Pattern                        | Snippet                                                                              |
+| ---: | -------- | ------------------------------ | ------------------------------------------------------------------------------------ |
+|   44 | `env`    | `process.env.HDS_FIXTURE_MODE` | `process.argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   45 | `env`    | `process.env.FIXTURE_FILE`     | `const FIXTURE_FILE = process.env.FIXTURE_FILE;`                                     |
+
+### `check-handoff-freshness`
+
+Source: `scripts/check-handoff-freshness.mjs`
+
+| Line | Category | Pattern                    | Snippet                                                                                            |
+| ---: | -------- | -------------------------- | -------------------------------------------------------------------------------------------------- |
+|  195 | `env`    | `process.env.FIXTURE_FILE` | `const file = FIXTURE_MODE && process.env.FIXTURE_FILE ? process.env.FIXTURE_FILE : DEFAULT_FILE;` |
+|  195 | `env`    | `process.env.FIXTURE_FILE` | `const file = FIXTURE_MODE && process.env.FIXTURE_FILE ? process.env.FIXTURE_FILE : DEFAULT_FILE;` |
+
+### `check-licenses`
+
+Source: `scripts/check-licenses.mjs`
+
+| Line | Category | Pattern                        | Snippet                                                                                          |
+| ---: | -------- | ------------------------------ | ------------------------------------------------------------------------------------------------ |
+|   21 | `env`    | `process.env.HDS_FIXTURE_MODE` | `const fixtureMode = argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   22 | `env`    | `process.env.FIXTURE_FILE`     | `const fixtureFile = process.env.FIXTURE_FILE;`                                                  |
+
+### `check-link-integrity`
+
+Source: `scripts/check-link-integrity.mjs`
+
+| Line | Category  | Pattern                        | Snippet                                                                                         |
+| ---: | --------- | ------------------------------ | ----------------------------------------------------------------------------------------------- |
+|   33 | `network` | `import 'http' / 'https'`      | `import http from 'node:http';`                                                                 |
+|   34 | `network` | `import 'http' / 'https'`      | `import https from 'node:https';`                                                               |
+|   50 | `env`     | `process.env.HDS_FIXTURE_MODE` | `const isFixtureMode = argSet.has('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   51 | `env`     | `process.env.FIXTURE_FILE`     | `const fixtureFile = process.env.FIXTURE_FILE;`                                                 |
+
+### `check-motion`
+
+Source: `scripts/check-motion.mjs`
+
+| Line | Category | Pattern                        | Snippet                                                                                                    |
+| ---: | -------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+|   58 | `env`    | `process.env.HDS_FIXTURE_MODE` | `const isFixtureMode = process.argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   59 | `env`    | `process.env.FIXTURE_FILE`     | `const fixtureFile = process.env.FIXTURE_FILE;`                                                            |
+
+### `check-parked-triggers`
+
+Source: `scripts/check-parked-triggers.mjs`
+
+| Line | Category | Pattern                    | Snippet                                    |
+| ---: | -------- | -------------------------- | ------------------------------------------ |
+|   37 | `env`    | `process.env.FIXTURE_FILE` | `FIXTURE_MODE && process.env.FIXTURE_FILE` |
+|   38 | `env`    | `process.env.FIXTURE_FILE` | `? process.env.FIXTURE_FILE`               |
+|   79 | `time`   | `new Date()`               | `const today = new Date();`                |
+
+### `check-pii`
+
+Source: `scripts/check-pii.mjs`
+
+| Line | Category | Pattern                           | Snippet                                                                      |
+| ---: | -------- | --------------------------------- | ---------------------------------------------------------------------------- |
+|  158 | `env`    | `process.env.HDS_FIXTURE_MODE`    | `if (process.env.HDS_FIXTURE_MODE === '1') opts.fixture = true;`             |
+|  365 | `env`    | `process.env.GITHUB_EVENT_NAME`   | `const eventName = process.env.GITHUB_EVENT_NAME;`                           |
+|  374 | `env`    | `process.env.GITHUB_EVENT_PATH`   | `payload = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));` |
+|  467 | `env`    | `process.env.FIXTURE_FILE`        | `const file = process.env.FIXTURE_FILE;`                                     |
+|  635 | `env`    | `process.env.GITHUB_STEP_SUMMARY` | `if (process.env.GITHUB_STEP_SUMMARY) {`                                     |
+|  637 | `env`    | `process.env.GITHUB_STEP_SUMMARY` | `process.env.GITHUB_STEP_SUMMARY,`                                           |
+
+### `check-production-health`
+
+Source: `scripts/check-production-health.mjs`
+
+| Line | Category | Pattern                        | Snippet                                                                              |
+| ---: | -------- | ------------------------------ | ------------------------------------------------------------------------------------ |
+|  329 | `time`   | `new Date()`                   | `now = () => new Date().toISOString(),`                                              |
+|  506 | `env`    | `process.env.HDS_FIXTURE_MODE` | `process.argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|  507 | `env`    | `process.env.FIXTURE_FILE`     | `if (fixtureMode && process.env.FIXTURE_FILE) {`                                     |
+|  508 | `env`    | `process.env.FIXTURE_FILE`     | `return runFixtureMode(process.env.FIXTURE_FILE, jsonMode);`                         |
+
+### `check-schema-drift`
+
+Source: `scripts/check-schema-drift.mjs`
+
+| Line | Category | Pattern                    | Snippet                         |
+| ---: | -------- | -------------------------- | ------------------------------- |
+|   44 | `env`    | `process.env.FIXTURE_FILE` | `process.env.FIXTURE_FILE \|\|` |
+
+### `check-secret-registry`
+
+Source: `scripts/check-secret-registry.mjs`
+
+| Line | Category | Pattern                  | Snippet                                                                    |
+| ---: | -------- | ------------------------ | -------------------------------------------------------------------------- |
+|  224 | `env`    | `process.env.FLEET_ROOT` | `const fleetRoot = resolve(process.env.FLEET_ROOT \|\| join(ROOT, '..'));` |
+
+### `check-secrets`
+
+Source: `scripts/check-secrets.mjs`
+
+| Line | Category | Pattern                    | Snippet                                                                              |
+| ---: | -------- | -------------------------- | ------------------------------------------------------------------------------------ |
+|   31 | `env`    | `process.env.FIXTURE_FILE` | `const fixtureFile = process.env.FIXTURE_FILE;`                                      |
+|   54 | `time`   | `Date.now`                 | `tempFixturePath = join(tmpdir(), `hds-fixture-secrets-check-${Date.now()}${ext}`);` |
+
+### `check-sev1-visibility`
+
+Source: `scripts/check-sev1-visibility.mjs`
+
+| Line | Category | Pattern                        | Snippet                                                                                          |
+| ---: | -------- | ------------------------------ | ------------------------------------------------------------------------------------------------ |
+|  192 | `env`    | `process.env.HDS_FIXTURE_MODE` | `const fixtureMode = argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|  194 | `env`    | `process.env.FIXTURE_FILE`     | `if (fixtureMode && process.env.FIXTURE_FILE) {`                                                 |
+|  195 | `env`    | `process.env.FIXTURE_FILE`     | `const fixture = JSON.parse(readFileSync(process.env.FIXTURE_FILE, 'utf8'));`                    |
+
+### `check-skills-lock`
+
+Source: `scripts/check-skills-lock.mjs`
+
+| Line | Category | Pattern                        | Snippet                                                                                           |
+| ---: | -------- | ------------------------------ | ------------------------------------------------------------------------------------------------- |
+|   34 | `env`    | `process.env.HDS_FIXTURE_MODE` | `const FIXTURE_MODE = argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   35 | `env`    | `process.env.FIXTURE_FILE`     | `const FIXTURE_FILE = process.env.FIXTURE_FILE;`                                                  |
+
+### `check-snapshot-staleness`
+
+Source: `scripts/check-snapshot-staleness.mjs`
+
+| Line | Category | Pattern                         | Snippet                                                     |
+| ---: | -------- | ------------------------------- | ----------------------------------------------------------- |
+|   41 | `env`    | `process.env.STALENESS_ENFORCE` | `const STRICT = process.env.STALENESS_ENFORCE === 'error';` |
+
+### `check-spec-freshness`
+
+Source: `scripts/check-spec-freshness.mjs`
+
+| Line | Category | Pattern                            | Snippet                                                     |
+| ---: | -------- | ---------------------------------- | ----------------------------------------------------------- |
+|  271 | `env`    | `process.env.GITHUB_REPO`          | `const repo = process.env.GITHUB_REPO \|\| 'hirobius/ops';` |
+|  272 | `time`   | `Date.now`                         | `const now = Date.now();`                                   |
+|  276 | `env`    | `process.env.FIXTURE_FILE`         | `const fixtureFile = process.env.FIXTURE_FILE;`             |
+|  303 | `env`    | `process.env.FIXTURE_ISSUE_STATES` | `const raw = process.env.FIXTURE_ISSUE_STATES;`             |
+
+### `check-unresponsive-grids`
+
+Source: `scripts/check-unresponsive-grids.mjs`
+
+| Line | Category | Pattern                        | Snippet                                                                                                    |
+| ---: | -------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+|   50 | `env`    | `process.env.HDS_FIXTURE_MODE` | `const isFixtureMode = process.argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   51 | `env`    | `process.env.FIXTURE_FILE`     | `const fixtureFile = process.env.FIXTURE_FILE;`                                                            |
+
+### `generate-strength-report`
+
+Source: `scripts/generate-strength-report.mjs`
+
+| Line | Category | Pattern                   | Snippet                                                        |
+| ---: | -------- | ------------------------- | -------------------------------------------------------------- |
+|   16 | `time`   | `Date.now`                | `*   - No Date.now() outside the top-level `generated` field`  |
+|   17 | `random` | `Math.random`             | `*   - No Math.random()`                                       |
+|  470 | `env`    | `process.env.CHROME_PATH` | `if (process.env.CHROME_PATH) return process.env.CHROME_PATH;` |
+|  470 | `env`    | `process.env.CHROME_PATH` | `if (process.env.CHROME_PATH) return process.env.CHROME_PATH;` |
+|  656 | `time`   | `new Date()`              | `generatedAt: new Date().toISOString(),`                       |
+| 1510 | `time`   | `new Date()`              | `const generated = new Date().toISOString();`                  |
+
+### `harvest-park-signals`
+
+Source: `scripts/harvest-park-signals.mjs`
+
+| Line | Category  | Pattern  | Snippet                                                                                           |
+| ---: | --------- | -------- | ------------------------------------------------------------------------------------------------- |
+|  116 | `network` | `fetch(` | `const res = await fetch(url, { headers: ghHeaders(token), signal: AbortSignal.timeout(9000) });` |
+
+### `metric-human-gate-latency`
+
+Source: `scripts/metric-human-gate-latency.mjs`
+
+| Line | Category | Pattern                   | Snippet                                                                              |
+| ---: | -------- | ------------------------- | ------------------------------------------------------------------------------------ |
+|   84 | `time`   | `Date.now`                | `export function buildGateIntervals(events, { now = Date.now() } = {}) {`            |
+|  299 | `env`    | `process.env.GITHUB_REPO` | `const repo = strFlag(argv, '--repo', process.env.GITHUB_REPO \|\| 'hirobius/ops');` |
+
+### `metric-north-star-share`
+
+Source: `scripts/metric-north-star-share.mjs`
+
+| Line | Category | Pattern                   | Snippet                                                                              |
+| ---: | -------- | ------------------------- | ------------------------------------------------------------------------------------ |
+|  230 | `time`   | `Date.now`                | `now = Date.now(),`                                                                  |
+|  258 | `env`    | `process.env.GITHUB_REPO` | `const repo = strFlag(argv, '--repo', process.env.GITHUB_REPO \|\| 'hirobius/ops');` |
+
+### `reconcile-ralph-closures`
+
+Source: `scripts/reconcile-ralph-closures.mjs`
+
+| Line | Category  | Pattern                   | Snippet                                                                                  |
+| ---: | --------- | ------------------------- | ---------------------------------------------------------------------------------------- |
+|   35 | `env`     | `process.env.GITHUB_REPO` | `const REPO = process.env.GITHUB_REPO \|\| 'hirobius/ops';`                              |
+|   68 | `network` | `fetch(`                  | `const res = await fetch(url, { headers, signal: AbortSignal.timeout(9000), ...init });` |
+
+### `validate-fixture-proof-of-firing`
+
+Source: `scripts/validate-fixture-proof-of-firing.mjs`
+
+| Line | Category | Pattern                        | Snippet                                                                                           |
+| ---: | -------- | ------------------------------ | ------------------------------------------------------------------------------------------------- |
+|   58 | `env`    | `process.env.HDS_FIXTURE_MODE` | `const FIXTURE_MODE = ARGV.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   59 | `env`    | `process.env.FIXTURE_FILE`     | `const FIXTURE_REGISTRY = process.env.FIXTURE_FILE;`                                              |
+
+### `validate-orchestration`
+
+Source: `scripts/validate-orchestration.mjs`
+
+| Line | Category | Pattern                        | Snippet                                                                              |
+| ---: | -------- | ------------------------------ | ------------------------------------------------------------------------------------ |
+|   41 | `env`    | `process.env.HDS_FIXTURE_MODE` | `process.argv.includes('--fixture-mode') \|\| process.env.HDS_FIXTURE_MODE === '1';` |
+|   43 | `env`    | `process.env.FIXTURE_FILE`     | `isFixtureMode && process.env.FIXTURE_FILE`                                          |
+|   44 | `env`    | `process.env.FIXTURE_FILE`     | `? path.resolve(process.env.FIXTURE_FILE)`                                           |
+
+## EXEMPTED gates
+
+Findings present, but every category is covered by a `pureExceptions` entry.
+
+| Gate                     | Categories | Exceptions                                                                                                                                                                                                         |
+| ------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `check-migration-ledger` | env        | `network: reads the live migration ledger through the Management API — that comparison is the entire gate`<br>`env: SUPABASE_ACCESS_TOKEN / SUPABASE_PROJECT_REF are the credentials it needs to reach the ledger` |
 
 ## PURE gates
 
 No impurity patterns detected. Deterministic by static analysis.
 
 - `audit-batch-deliverables`
-- `audit-components`
-- `audit-figma-system`
+- `audit-bundle`
+- `audit-deps`
+- `audit-gates-supportjson`
 - `audit-pages`
+- `audit-sbom`
 - `audit-strengths`
-- `audit-typography-overrides`
-- `check-asset-manifest`
 - `check-attributions`
-- `check-binding-drift`
-- `check-brand`
 - `check-code-connect`
-- `check-component-completeness`
-- `check-component-docs`
-- `check-contrast`
-- `check-css-integrity`
-- `check-css-values`
-- `check-dimensions`
-- `check-doc-references`
 - `check-doc-structure`
-- `check-exemptions`
-- `check-focus-states`
-- `check-font-files`
 - `check-frozen-demos`
-- `check-hardcoded-breakpoints`
 - `check-hardcoded-colors`
-- `check-hardcoded-fonts`
-- `check-hardcoded-spacing`
-- `check-inline-styles`
-- `check-legacy-hds-vars`
-- `check-manifest-drift`
-- `check-manifest-schema-semver`
-- `check-mojibake`
-- `check-mono-roles`
-- `check-motion`
+- `check-layout-tests`
 - `check-og-meta`
 - `check-page-shell`
-- `check-perf-budget`
-- `check-public-api`
 - `check-reduced-motion`
-- `check-ref-forwarding`
 - `check-registry`
 - `check-route-coverage`
-- `check-route-links`
+- `check-secret-health`
 - `check-security-baseline`
-- `check-style-prop-values`
-- `check-template-source-of-truth`
-- `check-tenant-tokens`
+- `check-steering-budget`
 - `check-tier-bypass`
-- `check-token-description-quality`
-- `check-token-descriptions`
-- `check-token-paths`
-- `check-token-rebake-needed`
-- `check-token-renames`
-- `check-token-structure`
-- `check-unit-overlap`
-- `check-unresponsive-grids`
+- `check-type-coverage`
+- `check-typecheck`
 - `check-validator-wiring`
-- `validate-orchestration`
 
 ## Re-running
 
@@ -174,4 +458,3 @@ No impurity patterns detected. Deterministic by static analysis.
 node scripts/audit-gate-purity.mjs --report          # regenerate this file
 node scripts/audit-gate-purity.mjs --strict          # exit 1 on any IMPURE
 ```
-
