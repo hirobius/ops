@@ -1,15 +1,14 @@
 # CLAUDE.md
 
-Hirobius **Ops** — the agency operations dashboard: leads → site pipeline,
-client CRM, projects/digest/tasks, build telemetry. It **consumes**
-`@hirobius/design-system` for UI; it does **not** author the design system (that
-lives in its own repo). Stack: Vite + React Router + Vercel serverless functions.
+Hirobius **Ops** — the agency operations dashboard: leads → site pipeline, client CRM,
+projects/digest/tasks, build telemetry. It **consumes** `@hirobius/design-system`; it does
+**not** author it (own repo). Stack: Vite + React Router + Vercel serverless functions.
 
 ## 0. HARD RULES (no exceptions, apply to all agents including Claude)
 
 - **ANOTHER SESSION MAY BE RUNNING — claim before you touch anything.** Read `docs/ai/SESSION-BOARD.md` first, add your session id to its table, claim the subsystem you are about to work on, and confirm nothing else is in flight on it. Release the claim when you stop, including when you stop unfinished — a stale claim is worse than none. Re-read the board before each significant push. Branch-per-session prevents overwrites, not duplicated work.
 - **NEVER read, write, create, or delete `.env*` files.** Keys are set by the human only. If a task needs a new key, document it in a comment in the script and stop — do not touch `.env.local`.
-- **NEVER git push.** Local commits only.
+- **NEVER git push from local machines.** Local commits only — with one exception: remote Claude Code sessions (web / GitHub integration) may push to their designated `claude/*` branch. `main` and all others stay forbidden everywhere.
 - **NEVER run `pnpm check:release` or deploy commands.**
 - **Issue intake is gated.** An issue holds work with a _current_ reason to act.
   Before filing, verify it isn't already done (`closed_by_pull_requests`, the code
@@ -85,18 +84,17 @@ Dispatched `@claude` issues carry these invocations in their body (`lib/tasks/ac
 
 ## 3. Sub-agent dispatch
 
-Canonical detail: **`docs/ai/AGENT_GUIDELINES.md`** §1–3 (model matrix, effort,
-pod sizing, worktree isolation, the bulk-lint:fix incident). Load it when you are
-actually dispatching. The three rules that must not be rediscovered:
+Canonical detail: **`docs/ai/AGENT_GUIDELINES.md`** §1–3 (model matrix, effort, pod
+sizing, worktree isolation, the bulk-lint:fix incident) — load it when dispatching. The
+three rules that must not be rediscovered:
 
 - **Cheapest model that can do the job.** `sonnet` is the default for source work
   and is **required for anything involving deletions**. `opus` only for
   cross-cutting architecture or subtle validator logic.
-- **NEVER `pnpm lint:fix` across the codebase** (Pod N incident, 2026-05-01 — it
-  merged unrelated code blocks into syntax errors). Per-rule only:
+- **NEVER `pnpm lint:fix` across the codebase** (Pod N, 2026-05-01 — it merged unrelated
+  code blocks into syntax errors). Per-rule only:
   `pnpm exec eslint src --fix --rule '{"<rule>": "error"}'`, then
-  `pnpm typecheck && pnpm exec vite build` after EACH rule. >50 files touched by
-  one rule → stop and ask.
+  `pnpm typecheck && pnpm exec vite build` after EACH rule. >50 files in one rule → ask.
 - **Branch-per-session** (`claude/*`); never two sessions on one branch.
 
 ---
@@ -106,26 +104,23 @@ actually dispatching. The three rules that must not be rediscovered:
 Full corpus: `docs/ai/learned-rules.jsonl` (`pnpm guardrail:learned-rules`); the
 rest stay there until promoted.
 
-- **A park is not proof the work is stuck.** `iteration ended without a pushed
-branch` is frequently loop _infrastructure_ (bot-actor push rejection, a
-  permission wall, a sensitive-file edit block) or a deliberate ask-don't-guess
-  stop — not a failure of the issue. Read the agent's own comment before believing
-  the verdict.
+- **A park is not proof the work is stuck.** `iteration ended without a pushed branch`
+  is frequently loop _infrastructure_ (bot-actor push rejection, a permission wall, a
+  sensitive-file edit block) or a deliberate ask-don't-guess stop. Read the agent's own
+  comment before believing the verdict.
 - **Before re-queuing a parked/blocked issue, read its comment history.**
-  `closed_by_pull_requests` plus the current code is not enough — ops#142 burned a
-  full iteration in September rediscovering a blocker written down in July.
-- **A gate failure blaming a missing binary may be a red herring.** Install it and
-  re-run before trusting the diagnosis; ops#178's real faults were a stale route
-  list and an architectural mismatch hiding underneath.
-- **A `ralph-gate` startup_failure with 0 jobs run = caller/reusable permission or
-  version skew on a stale branch.** Update the branch from `main` first; don't
-  conclude the shared engine regressed (ops#144).
-- **Diff a deletion issue's premise against `main` before deleting.** A prior
-  unrelated PR may have solved the problem differently, leaving the DoD stale —
-  stop and ask rather than deleting working code on the issue text's word (ops#122).
+  `closed_by_pull_requests` plus the current code is not enough (ops#142 burned an
+  iteration rediscovering a blocker written down three months earlier).
+- **A gate failure blaming a missing binary may be a red herring.** Install it and re-run
+  before trusting the diagnosis (ops#178 hid a stale route list underneath).
+- **A `ralph-gate` startup_failure with 0 jobs run = caller/reusable permission or version
+  skew on a stale branch.** Update from `main` first; the shared engine has not regressed
+  (ops#144).
+- **Diff a deletion issue's premise against `main` before deleting.** A prior PR may have
+  solved it differently, leaving the DoD stale — stop and ask (ops#122).
 
-**Never queue an issue whose DoD requires editing `.github/workflows/*`** — the
-bot's token lacks the `workflows` scope. Split it: the workflow file goes to a
-human/adr-eng PR, the rest becomes a script-or-registry issue Ralph can push.
-**`.husky/` is NOT `.github/workflows/`** — hooks carry no scope restriction and
-Ralph can push them.
+**Never queue an issue whose DoD requires editing `.github/workflows/*`** — _Ralph's_ bot
+token lacks the `workflows` scope. (A remote Claude Code session's does NOT: hds#267
+pushed a workflow file from one. Scope the claim to the actor.) Split it: the workflow
+goes to a human PR, the rest becomes an issue Ralph can push. **`.husky/` is NOT
+`.github/workflows/`** — hooks carry no scope restriction.
