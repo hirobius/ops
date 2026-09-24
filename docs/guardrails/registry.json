@@ -739,6 +739,17 @@
       "source": "human",
       "firingChannel": "manual",
       "supportsJson": true
+    },
+    {
+      "id": "check-secret-health",
+      "description": "ops#415: probes docs/secrets/registry.json's 15 fleet secrets so a lapsed credential (a fine-grained PAT like RELEASE_PAT WILL expire) fails loud instead of reading green. --sync asserts the registry agrees with a live grep of every fleet repo's workflows; --probe runs each secret's probe, but only for a secret THIS repo (hirobius/ops) actually holds — a secret owned by another fleet repo reports not-probed, never a false valid. Names, health status and days-to-expiry only — never a secret value. firingChannel is manual until a weekly schedule step exists (needs a .github/workflows/*.yml edit no agent token here can push; see the session report for the exact YAML) — this reads live GitHub/Figma/Supabase/npm data via tokens, same as metric-north-star-share.",
+      "severity": "warn",
+      "gateScript": "scripts/check-secret-health.mjs",
+      "fixturePath": "fixtures/check-secret-health",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual",
+      "supportsJson": true
     }
   ]
 }

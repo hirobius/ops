@@ -59,6 +59,7 @@
     "check:registry": "node scripts/check-registry.mjs",
     "check:release": "pnpm check:full && pnpm build && pnpm perf:budget && pnpm test:responsive && pnpm test:collision",
     "check:routes": "node scripts/check-link-integrity.mjs --route-links-only",
+    "check:secret-health": "node scripts/check-secret-health.mjs",
     "check:secrets": "node scripts/check-secrets.mjs",
     "check:security": "node scripts/check-security-baseline.mjs",
     "check:semantic-report": "node scripts/record-health.mjs",
