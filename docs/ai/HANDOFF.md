@@ -4,7 +4,7 @@
 > "status" or "go" reads this and acts from **Next**; a session that does real
 > work updates it before ending.
 
-_Last updated: 2026-09-19._
+_Last updated: 2026-09-24._
 
 ## The map (what else exists, and when to open it)
 
@@ -73,7 +73,8 @@ Allowlist, not a name-list — naming client repos here leaked one.
 
 - **🎨 hds: Figma foundation, nothing shipped** (#211–#216). **Code Connect
   publishing needs Org/Enterprise — Pro cannot**, so no Dev Mode snippet is
-  live. npm is still **v0.13.0** (hds#199).
+  live. **npm is v0.15.0 — verified; hds#199's premise is stale.** ops pins
+  `^0.13.0`: a bump in ops, not a broken pipe. Detail: `SESSION-BOARD.md`.
 
 - **📞 `/ops/pitch` — the call sheet.** Only pitchable leads (`preview_url`,
   not `do_not_contact`), re-checked on every write. Notes live in the
