@@ -33,7 +33,9 @@ type HealthState = 'green' | 'risk' | 'red';
 
 interface HealthRow {
   name: string;
-  state: string;
+  /** Narrowed at the import boundary below — JSON gives us `string`, and a cast
+   *  at every use site is how an unreviewed sixth state reaches the UI silently. */
+  state: HealthState;
   detail: string;
 }
 interface AuditIssue {
@@ -57,6 +59,19 @@ interface Audit {
 
 const audits = (auditData as { audits: Audit[] }).audits;
 
+/**
+ * A theme name is prose ("Broken right now") and an `id` must survive being read
+ * back as a space-separated token list — `aria-labelledby` splits on whitespace,
+ * so an unslugged name silently points at three ids that do not exist and the
+ * heading association dies without any visible symptom.
+ */
+function slugId(prefix: string, value: string): string {
+  return `${prefix}-${value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')}`;
+}
+
 /** `hds#284` → the issue URL. One place, so a typo cannot produce a plausible dead link. */
 function issueUrl(ref: string): string | null {
   const m = /^([a-z-]+)#(\d+)$/.exec(ref.trim());
@@ -71,8 +86,10 @@ const STATE_COLOR: Record<HealthState, string> = {
   red: 'var(--semantic-color-feedback-error)',
 };
 
-function stateColor(state: string): string {
-  return STATE_COLOR[state as HealthState] ?? 'var(--semantic-color-content-secondary)';
+function stateColor(state: HealthState): string {
+  // The `??` is not dead code: the cast at the import boundary is a promise TS
+  // cannot keep, so an unknown state must degrade to neutral rather than undefined.
+  return STATE_COLOR[state] ?? 'var(--semantic-color-content-secondary)';
 }
 
 /** @public */
@@ -118,8 +135,8 @@ export default function FleetAuditPage() {
             </section>
 
             {audit.themes.map((theme) => (
-              <section key={theme.name} aria-labelledby={`t-${audit.date}-${theme.name}`}>
-                <h3 id={`t-${audit.date}-${theme.name}`} style={s.sectionHeading}>
+              <section key={theme.name} aria-labelledby={slugId(`t-${audit.date}`, theme.name)}>
+                <h3 id={slugId(`t-${audit.date}`, theme.name)} style={s.sectionHeading}>
                   {theme.name}
                 </h3>
                 <p style={s.themeSummary}>{theme.summary}</p>
