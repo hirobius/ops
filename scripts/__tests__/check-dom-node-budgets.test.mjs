@@ -141,6 +141,8 @@ describe('check-dom-node-budgets', () => {
       expect(second).toBe(first);
       // And the tracked file is exactly as it was — no cleanup step required.
       expect(readFileSync(BASELINE, 'utf8')).toBe(tracked);
-    });
+      // Two full AST scans of src/ in child processes: ~3s alone, past vitest's
+      // 5s default once the whole suite runs in parallel.
+    }, 30_000);
   });
 });
