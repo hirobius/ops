@@ -25,6 +25,7 @@
     "src/app/pages/ops/atlas/clients-tab.tsx": 13,
     "src/app/pages/ops/atlas/routes-tree.tsx": 29,
     "src/app/pages/ops/atlas/validators-tab.tsx": 37,
+    "src/app/pages/ops/audit/FleetAuditPage.tsx": 29,
     "src/app/pages/ops/digest/DigestPage.tsx": 38,
     "src/app/pages/ops/leads/LeadSweepPanel.tsx": 41,
     "src/app/pages/ops/leads/LeadsPage.tsx": 31,
@@ -39,8 +40,8 @@
     "src/app/pages/ops/standing/Sev1Banner.tsx": 20,
     "src/app/pages/ops/standing/StandingPage.test.tsx": 2,
     "src/app/pages/ops/standing/StandingPage.tsx": 132,
-    "src/app/routes.tsx": 26
+    "src/app/routes.tsx": 27
   },
-  "updatedAt": "2026-09-19T21:56:05.948Z",
-  "sha": "f141b2d"
+  "updatedAt": "2026-09-24T05:29:41.930Z",
+  "sha": "39ddce0"
 }

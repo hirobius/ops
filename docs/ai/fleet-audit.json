@@ -1,0 +1,140 @@
+{
+  "$comment": "Data for /ops/audit. Records what each issue is FOR — never whether it is open. State is volatile and belongs to GitHub; asserting it here would create the exact rot half these issues are about. Add an entry when an audit surfaces work; do not edit entries to mark them done.",
+  "audits": [
+    {
+      "date": "2026-09-24",
+      "title": "Fleet audit — gates that fire from nothing, records that aren't true",
+      "session": "https://claude.ai/code/session_01EEogvtdUVYEizKn1B4d65y",
+      "verdict": "Every build that runs is green. The weakness is uniform and it is not code quality: excellent gates that nothing triggers, and records nobody verifies. Six of these fifteen are one of those two problems. check-sync-map and figma:staging-inventory --check already solve it correctly by re-deriving instead of trusting — that pattern just has not spread.",
+      "buildHealth": [
+        { "name": "hds main", "state": "green", "detail": "CI green on 5a28439" },
+        {
+          "name": "ops main",
+          "state": "green",
+          "detail": "CI, Quality gates, PII scan, Secret scan all green on da37a94"
+        },
+        {
+          "name": "concrete main",
+          "state": "risk",
+          "detail": "No .github/ at all — no CI. check-launch-ready runs only if a human types it, so a merge can ship placeholder Stripe ids unchallenged. The one repo about to take money."
+        },
+        {
+          "name": "Component reference site",
+          "state": "green",
+          "detail": "Live. 565 of 565 embedded frames resolve to a real story."
+        },
+        {
+          "name": "Hirobius Studio",
+          "state": "green",
+          "detail": "Live, gated behind Vercel Auth while the catalog is still placeholders."
+        },
+        {
+          "name": "Test suites",
+          "state": "green",
+          "detail": "hds 2012 · ops 1740 · typecheck and lint clean in both"
+        }
+      ],
+      "themes": [
+        {
+          "name": "Broken right now",
+          "summary": "Real defects with the fix already measured.",
+          "issues": [
+            {
+              "ref": "hds#284",
+              "title": "StackedCardRail ships broken CSS under SSR",
+              "accomplishes": "React escapes the quotes in its inline <style>, so five selectors arrive as &quot; and do nothing until hydration. Proven with React's own renderer. Bites any Next.js App Router consumer — which #268 shipped 'use client' specifically to support. One line."
+            },
+            {
+              "ref": "hds#287",
+              "title": "Three rendered defects, patches written and verified",
+              "accomplishes": "Table (a story fixture pins 240px against 234px of content — the primitive is innocent), Breadcrumb (the gate is wrong, not the component), tokenizer (32 findings are really 5 once the WCAG spacing exception is measured). All three diagnoses survived adversarial verification."
+            },
+            {
+              "ref": "hds#283",
+              "title": "Type scale and the small-text token bypass",
+              "accomplishes": "Separates three complaints that felt like one. The ramp has a 1.5x canyon at 48→72 then a near-duplicate at 72→80. Small text bypasses the eyebrow token entirely — components use Tailwind's tracking-wide (0.025em) where the token says 0.08em. And there is no golden ratio for UI type: shipped systems use two regimes, not one."
+            }
+          ]
+        },
+        {
+          "name": "Records that assert things that are not true",
+          "summary": "The theme of the day. A confident summary that happens to be wrong is worse than no summary.",
+          "issues": [
+            {
+              "ref": "hds#285",
+              "title": "status.json claims 56 play() functions that do not exist",
+              "accomplishes": "There are zero. The figure came from grepping `play:`, which matches `display:` in inline styles. It has been directing sessions at work that does not exist. Proposes moving derived counts into generated artifacts a gate can check."
+            },
+            {
+              "ref": "hds#281",
+              "title": "HdsSystemDocLayout's description claims a layout it does not have",
+              "accomplishes": "The manifest calls it a three-column doc layout with sidebar and nav. It renders a single centred column and takes two props, so there is nowhere to pass a sidebar. Agents are told to trust the manifest over prose."
+            },
+            {
+              "ref": "ops#417",
+              "title": "The dashboard cannot tell when status.json is stale",
+              "accomplishes": "Derivation shipped — statusFreshness now rides on every ProjectStatus, measured against the repo's real latest commit rather than a deploy timestamp. Left open because two DoD items are unmet and closing it would hide them."
+            },
+            {
+              "ref": "ops#419",
+              "title": "Render statusFreshness on /ops",
+              "accomplishes": "The data exists and nothing shows it. Deferred because StandingPage is claimed on the session board — and that claim may itself be stale, which is worth resolving first."
+            }
+          ]
+        },
+        {
+          "name": "Gates and hygiene",
+          "summary": "Mostly: a check exists and nothing fires it, or fires it wrongly.",
+          "issues": [
+            {
+              "ref": "hds#282",
+              "title": "check-rendered-geometry is non-deterministic on animated components",
+              "accomplishes": "Fired once in three identical runs on an animating spinner. A gate that fires at random trains people to re-run it, and a gate people re-run blocks nothing."
+            },
+            {
+              "ref": "hds#277",
+              "title": "docs/sync-map.json is committed generated output with no drift gate",
+              "accomplishes": "Either gate it or gitignore it — the repo should do one thing for generated artifacts, not two. Both review axes flagged it independently."
+            },
+            {
+              "ref": "hds#279",
+              "title": "The published library ships the documentation corpus",
+              "accomplishes": "component-api.json is ~45% of the main bundle and is documentation. Splitting it puts the bundle below main's current size and lets the budget come down rather than ratchet up."
+            },
+            {
+              "ref": "hds#286",
+              "title": "Dead island: componentPreviewRegistry and its two importers",
+              "accomplishes": "knip flags all three; they reference each other and nothing else. Its hand-written props table covers 30 of 139 components and a third of its entries name components that no longer exist — the cautionary tale for any docs rebuild that asks a human to author example props."
+            },
+            {
+              "ref": "ops#418",
+              "title": "Nothing counts down to decide_by",
+              "accomplishes": "The Decision template collects a default and a date so silence resolves instead of blocking. Nothing surfaces the date, so silence just stalls. blocking:Yes must never auto-default."
+            }
+          ]
+        },
+        {
+          "name": "Building toward something",
+          "summary": "Scoped work, not defects.",
+          "issues": [
+            {
+              "ref": "hds#280",
+              "title": "Docs shell: left rail, content, right rail",
+              "accomplishes": "A restoration, not a new design — the previous HDS site already had it. Records the Fumadocs mechanism: named grid areas, rail widths defaulting to 0, composing sticky offsets, and a TOC that becomes a popover rather than vanishing."
+            },
+            {
+              "ref": "ops#416",
+              "title": "One board for every live surface",
+              "accomplishes": "/api/projects already returns state, url and commit. Three gaps: it shows the hashed per-deploy URL instead of the stable alias, it can only ever see Vercel, and READY is not the same as live."
+            },
+            {
+              "ref": "concrete#12",
+              "title": "Consignment v1 — sell guest artists without becoming a marketplace",
+              "accomplishes": "Adrian stays merchant of record, so no Stripe Connect, no auth, no database — and ordinary bookkeeping instead of marketplace-facilitator tax and 1099-K. Tests the demand in a weekend rather than a quarter."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -43,6 +43,11 @@ const TILES: readonly SurfaceTile[] = [
     description: 'The whole board — chain, blocked, in flight, queue, backlog, deploys',
   },
   {
+    to: '/ops/audit',
+    label: 'Audit',
+    description: 'What the last fleet audit found, and what each issue is for',
+  },
+  {
     to: '/ops/clients',
     label: 'Clients',
     description: 'Active retainers, prospects & sample builds — portals, sites, demos',
