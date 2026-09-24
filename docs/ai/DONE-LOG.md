@@ -778,3 +778,45 @@ reached a PR test fixture unflagged.
   proxy's `noProxy` list); 28 fixtures missed what one live fetch caught (#346).
   Superseded in HANDOFF by the 2026-09-17 denylist rule, which is the same
   failure one layer up.
+
+## 2026-09-24 — scope-creep burndown: 29 issues built across hds, ops, Ralph
+
+Adrian asked for a count, then a triage of the 44 issues filed 2026-09-17..24,
+then "complete all 29" (the 28 non-critical keeps, plus ops#405). Triage found
+**0 already done or stale; 1 duplicate** (hds#240 → hds#234). Everything below
+sits on `claude/open-issues-count-1i85qw` in each repo. **No PR opened, no issue
+closed or commented** — merge, then close.
+
+**Ralph** — #25 `ralph_diff_is_supervised` + `RALPH_SUPERVISED_CMD` in
+`kit/lib.sh` (fails closed on a broken command); #26 `RALPH_DEFAULT_AUTO_MERGE`,
+default **off**. 91 tests. **Human PR still needed:** wire both into
+`.github/workflows/ralph-gate-reusable.yml` (both arming sites + header).
+**ops#402 still must not land before that wiring does.**
+
+**ops** — #398 `audit-ralph-merge-boundary.mjs` (+ `ralph-watchdog` finally
+registered); #400 `ralph-supervised-paths.mjs` (config.env sets
+`RALPH_SUPERVISED_CMD`); #407 `audit-stranded-branches.mjs` (default branch read
+from the API); #415 `docs/secrets/registry.json` (15 names, **`VERCEL_TOKEN`
+was missing from the issue's own table**) + `check-secret-health.mjs`; #416
+`docs/ai/SURFACES.json` + Surfaces section; #418 Decisions section (decide_by,
+fails safe to "blocking"); #419 freshness badge — **#417's DoD is now met**;
+#405 fleet-scoped issues **and** PRs (`FLEET_REPOS` in `lib/tasks/fleet.mjs`).
+Three new gates stay `manual` until a workflow runs them — snippet in the
+#415 commit. None ran live (no egress/token here). `check-dom-node-budgets`'s
+two-scan test got an explicit 30s timeout (it failed pre-push under load).
+
+**hds** — #231 Select in barrel; #257 Radio colours via cva (+ static gate);
+#284 SSR `<style>` escaping (+ 447-story SSR gate); #232 ADR-014 warn cycle on 5
+internals; #233 tokenUtils out of `lab/`; #285/#250/#281 false claims fixed
+(+ `check:status-claims`, ADR-028 erratum); #279 bundle 202→183 kB gzip;
+#280 `HdsDocsShell` smallest slice (5 follow-ups proposed, not filed); #252
+code side proves distinct modes — **the Figma file is stale; needs a
+`figma:push` to staging**; #264/#270/#277/#249 gate honesty (+ sync-map
+`--check` pre-commit, record-freshness pre-push); #282/#287/#234 rendered
+geometry deterministic, 3 defects fixed, contrast measured (**239 new findings
+accepted as baseline debt**).
+
+**Left for Adrian:** hds#264 rewrite-or-delete audit-tiers; hds#277 one rule for
+docs/components; the Ralph workflow PR; `figma:push`; 3 cron workflows (#398,
+#407, #415). Trap: multi-line `@deprecated` JSDoc leaks into the manifest
+description (generator drops only `@`-leading lines) — keep tag text on one line.
