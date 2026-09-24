@@ -60,7 +60,7 @@ import {
 import { deriveChain } from '../../../../../lib/chain/evidence.mjs';
 import { freshnessLabel } from '../../../../../lib/projects/freshness.mjs';
 import { RepoFilter } from './RepoFilter';
-import { filterByRepo } from './repoScope';
+import { filterByRepo, type RepoOption } from './repoScope';
 import { useRepoScope } from './useRepoScope';
 import { Sev1Banner } from './Sev1Banner';
 
@@ -242,7 +242,13 @@ export default function StandingPage() {
         }}
       />
 
-      <Coverage data={data} error={error} needsToken={needsToken} />
+      <Coverage
+        data={data}
+        error={error}
+        needsToken={needsToken}
+        activeRepo={scope.selected}
+        activeIssueCount={blocked.length + queue.length + backlog.length}
+      />
 
       {/* ── 0. Open sev1 (ops#317) — above everything; UNKNOWN if the read failed ── */}
       <Sev1Banner sev1={data?.sev1 ?? []} error={error} needsToken={needsToken} loaded={loaded} />
@@ -1161,27 +1167,44 @@ function RefreshBar({
   );
 }
 
+/**
+ * `activeRepo`/`activeIssueCount` are ops#405's per-repo isolation: #388 gave
+ * every lane below a repo filter, but this line kept reporting the unfiltered
+ * fleet total even while a lane read "1 of 6" — so "how much is in ops right
+ * now" still meant subtracting lanes by hand. Scoped, it reports exactly what
+ * the selected repo has open, the same figure the lanes below sum to.
+ */
 function Coverage({
   data,
   error,
   needsToken,
+  activeRepo,
+  activeIssueCount,
 }: {
   data: FleetStatus | null;
   error: string | null;
   needsToken: boolean;
+  /** The repo `?repo=` scopes to, or null for the whole fleet. */
+  activeRepo: RepoOption | null;
+  /** Open issues in `blocked` + `queue` + `backlog` AFTER the repo filter. */
+  activeIssueCount: number;
 }) {
   if (needsToken || (error && !data)) return null;
   if (!data) return <p style={s.coverage}>Discovering repos…</p>;
 
   const { repos, owners, counts } = data;
+  const repoCount = activeRepo ? 1 : counts.repos;
+  const issueCount = activeRepo ? activeIssueCount : counts.openIssues;
   return (
     <p style={s.coverage}>
-      Watching <strong style={s.strong}>{counts.repos}</strong>{' '}
-      {counts.repos === 1 ? 'repo' : 'repos'}
-      {owners.length ? ` across ${owners.join(' + ')}` : ''} ·{' '}
-      <strong style={s.strong}>{counts.openIssues}</strong> open{' '}
-      {counts.openIssues === 1 ? 'issue' : 'issues'}
-      <span style={s.coverageRepos}>{repos.map(shortRepo).join(' · ')}</span>
+      Watching <strong style={s.strong}>{repoCount}</strong> {repoCount === 1 ? 'repo' : 'repos'}
+      {activeRepo
+        ? ` — ${activeRepo.param}`
+        : owners.length
+          ? ` across ${owners.join(' + ')}`
+          : ''}{' '}
+      · <strong style={s.strong}>{issueCount}</strong> open {issueCount === 1 ? 'issue' : 'issues'}
+      {activeRepo ? null : <span style={s.coverageRepos}>{repos.map(shortRepo).join(' · ')}</span>}
     </p>
   );
 }
