@@ -133,6 +133,24 @@ describe('StandingPage — repo filter', () => {
     expect(chip(/^ops/).getAttribute('aria-pressed')).toBe('true');
   });
 
+  it('shows the unfiltered fleet totals in the coverage headline when no repo is selected', async () => {
+    await renderAt('/ops/standing');
+    const coverage = screen.getByText(/^Watching/).closest('p')!;
+    expect(within(coverage).getByText('3')).toBeTruthy();
+    expect(within(coverage).getByText('6')).toBeTruthy();
+  });
+
+  it('reflects the active repo filter in the coverage headline, not the unfiltered fleet total (ops#405)', async () => {
+    await renderAt('/ops/standing?repo=ops');
+    // Scoped to ops: 1 repo, and the sum of ops's own lanes (1 blocked + 1
+    // queued + 0 backlog) — never the fleet-wide 3 repos / 6 issues.
+    const coverage = screen.getByText(/^Watching/).closest('p')!;
+    expect(within(coverage).getByText('1')).toBeTruthy();
+    expect(within(coverage).getByText('2')).toBeTruthy();
+    expect(within(coverage).queryByText('3')).toBeNull();
+    expect(within(coverage).queryByText('6')).toBeNull();
+  });
+
   it('keeps an emptied lane on the page with a short empty state naming the repo', async () => {
     await renderAt('/ops/standing?repo=ops');
 
