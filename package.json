@@ -98,6 +98,7 @@
     "pretest": "node scripts/check-registry.mjs && knip --no-exit-code",
     "pretypecheck": "node scripts/ensure-ops-data.mjs",
     "promote": "node scripts/promote.mjs",
+    "ralph:supervised-paths": "node scripts/ralph-supervised-paths.mjs",
     "review:daily": "node scripts/daily-review.mjs",
     "roadmap:data": "node scripts/build-roadmap-data.mjs && node scripts/verify-roadmap-sync.mjs",
     "roadmap:verify": "node scripts/verify-roadmap-sync.mjs",

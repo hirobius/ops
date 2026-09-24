@@ -103,6 +103,9 @@ export const BOUNDARY_SELF_PATHS = [
   'scripts/lib/gate-output.mjs',
   'lib/ops/notify.mjs',
   '.github/workflows/ralph-watchdog.yml',
+  // ops#400: publishes this SAME list for the engine's bash to read — an edit
+  // to it changes what may merge unattended, same as the files above.
+  'scripts/ralph-supervised-paths.mjs',
 ];
 
 const isSupervisedFile = (path) => isRevenuePathFile(path) || BOUNDARY_SELF_PATHS.includes(path);
