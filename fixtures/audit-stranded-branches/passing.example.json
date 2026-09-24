@@ -1,0 +1,14 @@
+{
+  "_comment": "REAL passing fixture for audit-stranded-branches (ops#407). folio's default branch (also NOT `main` — folio's is claude/eloquent-ramanujan-9ag4uy, per the issue's own correction comment) is correctly excluded by API-reported name, and its two other branches both carry a PR, so nothing fires. This is the case a hardcoded `main` check gets wrong twice over: it would both fail to exclude the true default and misreport the merged-PR branches as stranded.",
+  "repos": [
+    {
+      "repo": "folio",
+      "defaultBranch": "claude/eloquent-ramanujan-9ag4uy",
+      "branches": [
+        { "name": "claude/eloquent-ramanujan-9ag4uy", "hasPr": false },
+        { "name": "chore/ralph-setup", "hasPr": true },
+        { "name": "main", "hasPr": true }
+      ]
+    }
+  ]
+}

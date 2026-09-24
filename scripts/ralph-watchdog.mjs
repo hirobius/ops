@@ -60,6 +60,7 @@
  * GITHUB_TOKEN is sufficient, given those in ralph-watchdog.yml's permissions.
  */
 
+import { readFileSync } from 'node:fs';
 import {
   decideWatchdogAction,
   isMutating,
@@ -103,6 +104,9 @@ export const BOUNDARY_SELF_PATHS = [
   'scripts/lib/gate-output.mjs',
   'lib/ops/notify.mjs',
   '.github/workflows/ralph-watchdog.yml',
+  // ops#400: publishes this SAME list for the engine's bash to read — an edit
+  // to it changes what may merge unattended, same as the files above.
+  'scripts/ralph-supervised-paths.mjs',
 ];
 
 const isSupervisedFile = (path) => isRevenuePathFile(path) || BOUNDARY_SELF_PATHS.includes(path);
@@ -431,10 +435,66 @@ export function buildReport({ decision, facts, apply, performed }) {
   };
 }
 
+/**
+ * ops#407-sibling proof-of-firing support (ops#398 registers this gate as
+ * `ci-scheduled`, which validate-fixture-proof-of-firing does not exempt).
+ * Reads `facts` — the same shape gatherFacts() produces — straight from
+ * FIXTURE_FILE and runs it through the pure decideWatchdogAction, with no
+ * network and no --apply path. "Firing" is any action other than idle: there
+ * is something this run would report or do.
+ */
+async function runFixtureMode(argv) {
+  const jsonMode = argv.includes('--json');
+  const fixtureFile = process.env.FIXTURE_FILE;
+  if (!fixtureFile) {
+    process.stderr.write('ralph-watchdog: --fixture-mode requires FIXTURE_FILE\n');
+    process.exit(2);
+    return;
+  }
+  let facts;
+  try {
+    facts = JSON.parse(readFileSync(fixtureFile, 'utf8'));
+  } catch (err) {
+    process.stderr.write(`ralph-watchdog: cannot read fixture: ${err.message}\n`);
+    process.exit(2);
+    return;
+  }
+  const decision = decideWatchdogAction(facts);
+  const firing = decision.action !== 'idle';
+  if (jsonMode) {
+    console.log(
+      JSON.stringify(
+        {
+          violations: firing
+            ? [
+                {
+                  file: '*',
+                  line: null,
+                  rule: `WATCHDOG_${decision.action.toUpperCase()}`,
+                  severity: 'warn',
+                  message: decision.reason,
+                },
+              ]
+            : [],
+          ok: !firing,
+        },
+        null,
+        2,
+      ),
+    );
+  } else {
+    console.log(`ralph-watchdog (fixture): ${decision.action.toUpperCase()}`);
+    console.log(`  ${decision.reason}`);
+  }
+  process.exit(firing ? 1 : 0);
+}
+
 async function main() {
   const argv = process.argv.slice(2);
   const jsonMode = argv.includes('--json');
   const apply = argv.includes('--apply');
+  const fixtureMode = argv.includes('--fixture-mode') || process.env.HDS_FIXTURE_MODE === '1';
+  if (fixtureMode) return runFixtureMode(argv);
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
 
   const fail = (msg) => {
