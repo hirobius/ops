@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { runAudit, gatherRepoWorld, FLEET_REPOS } from '../audit-stranded-branches.mjs';
+import { FLEET_REPOS as CANONICAL_FLEET } from '../../lib/tasks/fleet.mjs';
 import {
   auditWorld,
   buildViolations,
@@ -176,7 +177,7 @@ describe('audit-stranded-branches: gatherRepoWorld / runAudit (no network — st
     expect(result.summary.byRepo.ops).toBe(1);
   });
 
-  it('FLEET_REPOS is the six-repo fleet the issue swept', () => {
-    expect(FLEET_REPOS).toEqual(['ops', 'site-engine', 'hds', 'Ralph', 'folio', 'concrete']);
+  it('FLEET_REPOS is the fleet from lib/tasks/fleet.mjs, not a second copy', () => {
+    expect(FLEET_REPOS).toEqual(CANONICAL_FLEET.map((r) => r.split('/')[1]));
   });
 });

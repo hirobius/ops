@@ -33,10 +33,11 @@
 
 import { readFileSync } from 'node:fs';
 import { hasJsonFlag, emitResult } from './lib/gate-output.mjs';
-import { auditWorld, buildViolations } from '../lib/ops/stranded-branches.mjs';
+import { auditWorld, buildViolations, isExcludedBranch } from '../lib/ops/stranded-branches.mjs';
+import { FLEET_REPOS as FLEET } from '../lib/tasks/fleet.mjs';
 
-/** The fleet, per docs/ai/SESSION-BOARD.md / the issue's own evidence trail. */
-export const FLEET_REPOS = ['ops', 'site-engine', 'hds', 'Ralph', 'folio', 'concrete'];
+/** The fleet's repo names (owner stripped) — derived, never restated (ops#405). */
+export const FLEET_REPOS = FLEET.map((fullName) => fullName.split('/')[1]);
 const OWNER = 'hirobius';
 
 const VERCEL_ENV_URL =
@@ -148,7 +149,7 @@ export async function gatherRepoWorld({ owner, repo, token, fetchImpl }) {
     // No PR ever — pattern-excluded classes (ralph/claim-*, archive/*) don't
     // need the extra compare/detail calls; the pure layer excludes them by
     // name regardless, so skip the network round-trip for them here too.
-    if (/^ralph\/claim-/.test(name) || /^archive\//.test(name)) {
+    if (isExcludedBranch(name)) {
       branches.push({ name, hasPr: false });
       continue;
     }

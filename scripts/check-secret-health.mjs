@@ -57,7 +57,7 @@ import { hasJsonFlag, emitResult } from './lib/gate-output.mjs';
 import { postToDiscord } from '../lib/ops/notify.mjs';
 import {
   extractSecretNames,
-  findUnregisteredSecrets,
+  buildSyncViolations,
   buildVerdict,
   buildViolations,
 } from '../lib/ops/secret-health.mjs';
@@ -67,7 +67,11 @@ const ROOT = join(__dirname, '..');
 const REGISTRY_PATH = join(ROOT, 'docs', 'secrets', 'registry.json');
 const THIS_REPO = 'hirobius/ops';
 
-/** The repos whose workflows are grepped for `secrets.NAME` (the ones with any workflow at all). */
+/**
+ * The repos whose workflows are grepped for `secrets.NAME`: the fleet repos
+ * that have any workflow at all (folio and concrete have none). A subset of
+ * FLEET_REPOS in lib/tasks/fleet.mjs, pinned by a test.
+ */
 export const WORKFLOW_REPOS = ['ops', 'hds', 'site-engine', 'Ralph'];
 const OWNER = 'hirobius';
 
@@ -230,7 +234,7 @@ function formatHuman({ syncViolations, verdicts, violations }) {
   const lines = [];
   if (syncViolations.length) {
     lines.push(
-      `secret-health --sync: ${syncViolations.length} secret(s) referenced but not registered:`,
+      `secret-health --sync: ${syncViolations.length} disagreement(s) between the registry and the fleet's workflows:`,
     );
     for (const v of syncViolations) lines.push(`  ${v.message}`);
   } else {
@@ -268,16 +272,7 @@ async function main() {
       return;
     }
     // Fixture world: { registryNames: string[], grepNames: string[], verdictInputs: [{entry, outcome}] }
-    const syncViolations = findUnregisteredSecrets(
-      world.registryNames ?? [],
-      world.grepNames ?? [],
-    ).map((name) => ({
-      file: '*',
-      line: null,
-      rule: 'SECRET_NOT_REGISTERED',
-      severity: 'error',
-      message: `${name} is referenced in a fleet workflow but not in docs/secrets/registry.json.`,
-    }));
+    const syncViolations = buildSyncViolations(world.registryNames ?? [], world.grepNames ?? []);
     const verdicts = (world.verdictInputs ?? []).map(({ entry, outcome }) =>
       buildVerdict(entry, outcome),
     );
@@ -309,16 +304,10 @@ async function main() {
     }
     try {
       const grepNames = await fetchFleetSecretNames({ token });
-      syncViolations = findUnregisteredSecrets(
+      syncViolations = buildSyncViolations(
         registry.map((e) => e.name),
         grepNames,
-      ).map((name) => ({
-        file: '*',
-        line: null,
-        rule: 'SECRET_NOT_REGISTERED',
-        severity: 'error',
-        message: `${name} is referenced in a fleet workflow but not in docs/secrets/registry.json.`,
-      }));
+      );
     } catch (err) {
       console.error(
         `check-secret-health --sync: ${err instanceof Error ? err.message : String(err)}`,

@@ -2,11 +2,14 @@ import { describe, it, expect } from 'vitest';
 import {
   extractSecretNames,
   findUnregisteredSecrets,
+  findOrphanedSecrets,
+  buildSyncViolations,
   buildVerdict,
   buildViolations,
   EXPIRY_WARN_DAYS,
 } from '../../lib/ops/secret-health.mjs';
 import { probeAll, fetchFleetSecretNames, WORKFLOW_REPOS } from '../check-secret-health.mjs';
+import { FLEET_REPOS as CANONICAL_FLEET } from '../../lib/tasks/fleet.mjs';
 
 describe('lib/ops/secret-health: extractSecretNames', () => {
   it('finds every secrets.NAME reference', () => {
@@ -40,6 +43,30 @@ describe('lib/ops/secret-health: findUnregisteredSecrets', () => {
 
   it('reports a workflow-referenced secret the registry does not carry', () => {
     expect(findUnregisteredSecrets(['A'], ['A', 'NEW_SECRET'])).toEqual(['NEW_SECRET']);
+  });
+});
+
+describe('lib/ops/secret-health: findOrphanedSecrets', () => {
+  it('reports a registered secret no fleet workflow references any more', () => {
+    expect(findOrphanedSecrets(['A', 'GONE'], ['A'])).toEqual(['GONE']);
+  });
+
+  it('is empty when every registered name is still referenced', () => {
+    expect(findOrphanedSecrets(['A', 'B'], ['B', 'A'])).toEqual([]);
+  });
+});
+
+describe('lib/ops/secret-health: buildSyncViolations', () => {
+  it('fails in both directions, so the registry and the grep must agree', () => {
+    const rules = buildSyncViolations(['A', 'GONE'], ['A', 'NEW']).map((v) => [v.rule, v.message]);
+    expect(rules).toEqual([
+      ['SECRET_NOT_REGISTERED', expect.stringContaining('NEW')],
+      ['SECRET_NOT_REFERENCED', expect.stringContaining('GONE')],
+    ]);
+  });
+
+  it('is empty when they agree', () => {
+    expect(buildSyncViolations(['A'], ['A'])).toEqual([]);
   });
 });
 
@@ -141,6 +168,11 @@ describe('check-secret-health: probeAll / fetchFleetSecretNames (no network — 
     };
     const names = await fetchFleetSecretNames({ repos: ['ops'], token: 't', fetchImpl });
     expect(names).toEqual(['FOO_TOKEN']);
+  });
+
+  it('WORKFLOW_REPOS is a subset of the canonical fleet', () => {
+    const fleet = CANONICAL_FLEET.map((r) => r.split('/')[1]);
+    expect(WORKFLOW_REPOS.every((r) => fleet.includes(r))).toBe(true);
   });
 
   it('WORKFLOW_REPOS is the four repos that carry workflows', () => {

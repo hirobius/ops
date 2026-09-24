@@ -17,9 +17,9 @@
  *     those plus env-var PRESENCE into each stage's state, the break (the first
  *     stage nothing reached) and the biggest leak. A stage reads `proven` only
  *     when real leads got through — shipped code never promotes one.
- *   - The three live lanes come from `listOpenIssues()`, GitHub's
- *     authenticated-identity feed, so the repo set is DISCOVERED: a repo joins
- *     this view by existing, across every owner the token can see.
+ *   - The three live lanes come from `listOpenIssues()`, filtered to
+ *     `FLEET_REPOS` in lib/tasks/fleet.mjs (ops#405). The token sees more repos
+ *     than the fleet, and counting them all inflated every total.
  *
  * It leads with the chain because the fleet's recurring failure is aim, not
  * capability — #185 sat p0 and unqueued for 64 days, then shipped in two hours
@@ -630,8 +630,8 @@ export default function StandingPage() {
           onToggle={toggleLane}
         />
         <p style={s.footnote}>
-          Live from GitHub, every repo the token can see. Actions write the label straight to the
-          issue — no mirror, so they work on repos the importer never touched.
+          Live from GitHub, the six fleet repos. Actions write the label straight to the issue — no
+          mirror, so they work on repos the importer never touched.
         </p>
       </Section>
     </div>
@@ -1125,9 +1125,8 @@ function ChainRow({ link, total, isBreak }: { link: ChainLink; total: number; is
 
 /**
  * What this page is actually watching. Worth a line of its own: the repo set is
- * discovered from the token's issue feed, so it grows on its own when a repo is
- * added — and the only way to TELL that it did is to print what came back.
- * A hardcoded list that silently went stale is the failure this replaces.
+ * FLEET_REPOS (lib/tasks/fleet.mjs), and printing what came back is how you
+ * tell a repo is missing from it — or that one has no open issues.
  */
 /**
  * RefreshBar — how stale the page is, and the only thing that makes it current.
