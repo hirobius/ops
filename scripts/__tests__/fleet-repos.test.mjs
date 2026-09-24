@@ -4,8 +4,8 @@
  * `listOpenIssues()` (lib/github/issues.mjs) fetches GitHub's
  * authenticated-identity feed — every open issue the token can see, across
  * every owner — so without a filter the fleet count was dominated by repos
- * that were never the fleet (114 of 209 on 2026-09-19: job-hunt, lilac,
- * lilac-bonds, veteran-resource-navigator, access-t, and an unrelated repo in
+ * that were never the fleet (114 of 209 on 2026-09-19: job-hunt, several
+ * client and side-project repos, and an unrelated repo in
  * a different org). These tests exercise the pure filter directly, with no
  * token and no fetch, per the DoD's "in-fleet kept, out-of-fleet dropped,
  * empty result, and a repo filter narrowing the count".
@@ -42,7 +42,7 @@ describe('filterFleetIssues', () => {
       issue('hirobius/job-hunt', 2),
       issue('hirobius/hds', 3),
       issue('adr-eng/adrian-milsap', 4),
-      issue('hirobius/lilac', 5),
+      issue('hirobius/example-client', 5),
     ];
     expect(filterFleetIssues(mixed)).toEqual([issue('hirobius/ops', 1), issue('hirobius/hds', 3)]);
   });
@@ -53,7 +53,7 @@ describe('filterFleetIssues', () => {
 
   it('returns an empty result when nothing in the sweep is in the fleet', () => {
     expect(
-      filterFleetIssues([issue('hirobius/job-hunt', 1), issue('hirobius/lilac-bonds', 2)]),
+      filterFleetIssues([issue('hirobius/job-hunt', 1), issue('hirobius/example-client-b', 2)]),
     ).toEqual([]);
   });
 

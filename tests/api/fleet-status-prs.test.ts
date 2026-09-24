@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildFleetStatus } from '../../lib/tasks/fleet-status.mjs';
 
 // ops#405 follow-up: the PR search is scoped by OWNER (`user:hirobius`), so
-// open PRs in non-fleet hirobius repos (job-hunt, lilac, …) inflated the
+// open PRs in non-fleet hirobius repos (job-hunt, client repos, …) inflated the
 // "All repos" chip after the issue sweep itself was fleet-scoped.
 function stubPort(prs: Array<{ repo: string; number: number }>) {
   return {

@@ -154,7 +154,7 @@ describe('makeGitHubPort().listOpenIssues — pagination', () => {
         pageResponse([
           rawIssue(1, 'hirobius/ops'),
           rawIssue(2, 'hirobius/job-hunt'),
-          rawIssue(3, 'hirobius/lilac'),
+          rawIssue(3, 'hirobius/example-client'),
         ]),
       );
     vi.stubGlobal('fetch', fetchMock);
