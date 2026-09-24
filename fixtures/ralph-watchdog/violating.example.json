@@ -1,0 +1,18 @@
+{
+  "_comment": "REAL violating fixture for ralph-watchdog (ops#398). Reproduces the exact 2026-09-16 five-hour wedge: a gate-green, mergeable PR sitting open with nothing merging it because the auto-merge simply did not arm. decideWatchdogAction reads this and returns MERGE — the watchdog has something to do, which is what 'firing' means for a decision tool. Not a stub.",
+  "openRalphPrs": [
+    {
+      "number": 333,
+      "headRef": "ralph/issue-330-telemetry",
+      "gateConclusion": "success",
+      "draft": false,
+      "mergeable": true,
+      "mergeableState": "clean",
+      "prApproved": true,
+      "supervisedFiles": [],
+      "issueClosed": false
+    }
+  ],
+  "readyIssueCount": 9,
+  "runInProgress": true
+}

@@ -1,0 +1,6 @@
+{
+  "_comment": "REAL passing fixture for ralph-watchdog (ops#398). Nothing open, nothing queued, nothing running — a genuinely drained backlog. decideWatchdogAction reads this and returns IDLE (queue-empty), which is correctly doing nothing, not a wedge.",
+  "openRalphPrs": [],
+  "readyIssueCount": 0,
+  "runInProgress": false
+}

@@ -706,6 +706,28 @@
         "network: reads the live migration ledger through the Management API — that comparison is the entire gate",
         "env: SUPABASE_ACCESS_TOKEN / SUPABASE_PROJECT_REF are the credentials it needs to reach the ledger"
       ]
+    },
+    {
+      "id": "audit-ralph-merge-boundary",
+      "description": "Measures the ops#238 merge boundary directly over a rolling window of merged PRs: how many touched a supervised path (revenue path, via isRevenuePathFile, or the boundary's own files, BOUNDARY_SELF_PATHS) without carrying ralph-approved. Turns the PR #368 / PR #362 spot check into a standing number. Network required (GitHub Search + REST API) — manual channel only, same as metric-north-star-share.",
+      "severity": "warn",
+      "gateScript": "scripts/audit-ralph-merge-boundary.mjs",
+      "fixturePath": null,
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual",
+      "supportsJson": true
+    },
+    {
+      "id": "ralph-watchdog",
+      "description": "Keeps the Ralph loop moving: merges a green PR whose diff clears the ops#238 supervised-path boundary, abandons a PR that cannot proceed, re-dispatches ralph.yml when the chain died silently, and labels+pages a green PR that needs a human. Reports fix and resolve-conflict rather than attempting them. Was the only live enforcement of the #238 boundary and was invisible to this registry until ops#398 — see scripts/ralph-watchdog.mjs's own header for the full decision table.",
+      "severity": "warn",
+      "gateScript": "scripts/ralph-watchdog.mjs",
+      "fixturePath": "fixtures/ralph-watchdog",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "ci-scheduled",
+      "supportsJson": true
     }
   ]
 }
