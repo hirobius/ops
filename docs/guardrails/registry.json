@@ -728,6 +728,17 @@
       "source": "human",
       "firingChannel": "ci-scheduled",
       "supportsJson": true
+    },
+    {
+      "id": "audit-stranded-branches",
+      "description": "Lists every fleet-repo branch that has NEVER had a pull request in any state — invisible to /ops/standing, the Ralph watchdog and gh pr list alike, and the exact shape that stranded se#84's fix for two months. Excludes ralph/claim-* markers, archive/* subtrees, and each repo's ACTUAL default branch as reported by the GitHub API (never a hardcoded main — two of the six fleet repos don't use it). firingChannel is manual until a scheduled workflow step exists (see the PR/report for the exact YAML) — this reads live GitHub data via a token, same as metric-north-star-share and audit-ralph-merge-boundary. Reporting only: never deletes a branch or opens a PR, and never fails its own exit code on a live run.",
+      "severity": "warn",
+      "gateScript": "scripts/audit-stranded-branches.mjs",
+      "fixturePath": "fixtures/audit-stranded-branches",
+      "owner": "Adrian",
+      "source": "human",
+      "firingChannel": "manual",
+      "supportsJson": true
     }
   ]
 }
