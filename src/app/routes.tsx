@@ -15,6 +15,7 @@ const LeadsPage = lazy(() => import('./pages/ops/leads/LeadsPage'));
 const DigestPage = lazy(() => import('./pages/ops/digest/DigestPage'));
 const StandingPage = lazy(() => import('./pages/ops/standing/StandingPage'));
 const PitchPage = lazy(() => import('./pages/ops/pitch/PitchPage'));
+const FleetAuditPage = lazy(() => import('./pages/ops/audit/FleetAuditPage'));
 
 // ── Fallback ──────────────────────────────────────────────────────────────────
 function HDSFallback() {
@@ -74,6 +75,7 @@ export const router = createBrowserRouter([
           { path: 'projects', element: <Navigate to="/ops/standing" replace /> },
           { path: 'standing', element: <LazyHDS Page={StandingPage} /> },
           { path: 'pitch', element: <LazyHDS Page={PitchPage} /> },
+          { path: 'audit', element: <LazyHDS Page={FleetAuditPage} /> },
           // /ops/issues retired 2026-07-09 (#52): consolidated into /ops/tasks —
           // the importer already pulls the same cross-repo issue feed, and the
           // multi-select "Copy refs" action moved onto the tasks board.
