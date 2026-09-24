@@ -9,6 +9,7 @@ import { describe, it, expect } from 'vitest';
 import {
   ageInDays,
   blockingLabelOf,
+  decisionsOf,
   laneOf,
   openPrSearchQuery,
   ownersOf,
@@ -187,6 +188,7 @@ describe('sortFleetLanes', () => {
       queue: [],
       backlog: [],
       sev1: [],
+      decisions: [],
       repos: [],
       total: 0,
     });
@@ -236,6 +238,73 @@ describe('sortFleetLanes', () => {
 
     it('is empty when nothing is sev1', () => {
       expect(sortFleetLanes(fleet).sev1).toEqual([]);
+    });
+  });
+
+  // ops#418: the countdown rail. A call-out like sev1 — an issue with
+  // `decision.isDecision` still sits in whichever lane its labels put it in.
+  describe('decisions call-out', () => {
+    const decision = (over: Record<string, unknown>) =>
+      issue({
+        labels: ['needs-adrian'],
+        decision: {
+          isDecision: true,
+          decideByRaw: '2026-10-03',
+          decideBy: '2026-10-03',
+          malformedDate: false,
+          blocking: false,
+        },
+        ...over,
+      });
+
+    it('surfaces a decision issue via decisionsOf regardless of its lane', () => {
+      const list = [
+        decision({ number: 1, decision: { isDecision: true, decideBy: '2026-10-03' } }),
+        issue({ number: 2, labels: ['backlog'] }), // not a decision issue at all
+      ];
+      const now = Date.parse('2026-09-24T00:00:00Z');
+      expect(decisionsOf(list, now).map((d: { number: number }) => d.number)).toEqual([1]);
+    });
+
+    it('is ordered overdue-first via sortFleetLanes, whatever GitHub returned the issues in', () => {
+      const now = Date.parse('2026-09-24T00:00:00Z');
+      const list = [
+        decision({ number: 1, decision: { isDecision: true, decideBy: '2026-12-01' } }),
+        decision({ number: 2, decision: { isDecision: true, decideBy: '2026-09-01' } }), // overdue
+      ];
+      expect(
+        sortFleetLanes(list, { now }).decisions.map((d: { number: number }) => d.number),
+      ).toEqual([2, 1]);
+    });
+
+    it('carries blocking through so a caller can refuse to offer a default', () => {
+      const list = [
+        decision({
+          number: 1,
+          decision: {
+            isDecision: true,
+            decideBy: '2026-10-03',
+            blocking: true,
+          },
+        }),
+      ];
+      expect(decisionsOf(list)[0].blocking).toBe(true);
+    });
+
+    it('renders a decision issue with no decide_by as "no-date" rather than dropping it', () => {
+      const list = [
+        decision({
+          number: 1,
+          decision: { isDecision: true, decideBy: null, decideByRaw: null, malformedDate: false },
+        }),
+      ];
+      const row = decisionsOf(list)[0];
+      expect(row.urgency).toBe('no-date');
+      expect(row.decideBy).toBeNull();
+    });
+
+    it('is empty when nothing in the sweep is a decision issue', () => {
+      expect(decisionsOf([issue({ number: 1, labels: ['backlog'] })])).toEqual([]);
     });
   });
 
