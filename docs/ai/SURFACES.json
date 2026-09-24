@@ -1,0 +1,40 @@
+{
+  "$comment": "ops#416 — the registry Gap 2 asks for: what SHOULD exist, joined onto what Vercel discovers. Adding a surface here is the whole mechanism (no code change) — api/projects.ts reads this file and joins it onto the live Vercel project list on every request. `vercelProject` is the exact Vercel project name to join on; leave it null for a surface that has never been deployed (renders as 'not deployed' rather than vanishing — the case #416 was filed over). `kind: \"vercel\"` entries get their state DERIVED from the live join; every other kind is 'external' and just needs a `url`. `gated` is declared here because whether a surface enforces a password gate is a property of its code, not something the Vercel API reports — same category as `role`.",
+  "surfaces": [
+    {
+      "id": "ops-dashboard",
+      "kind": "vercel",
+      "name": "Ops dashboard",
+      "repo": "hirobius/ops",
+      "role": "internal ops tool",
+      "vercelProject": "hirobius-ops",
+      "gated": true
+    },
+    {
+      "id": "hds-components",
+      "kind": "vercel",
+      "name": "HDS component reference",
+      "repo": "hirobius/hds",
+      "role": "design-system docs",
+      "vercelProject": "hirobius-hds-components",
+      "gated": false
+    },
+    {
+      "id": "hds-npm",
+      "kind": "npm",
+      "name": "@hirobius/design-system",
+      "repo": "hirobius/hds",
+      "role": "published package",
+      "url": "https://www.npmjs.com/package/@hirobius/design-system"
+    },
+    {
+      "id": "concrete-storefront",
+      "kind": "vercel",
+      "name": "concrete storefront",
+      "repo": "hirobius/concrete",
+      "role": "client site",
+      "vercelProject": null,
+      "$comment": "The exact case ops#416 was filed over — a complete storefront with Stripe wired that has never been deployed. No Vercel project exists, so this MUST render as 'not deployed', not be silently absent."
+    }
+  ]
+}
