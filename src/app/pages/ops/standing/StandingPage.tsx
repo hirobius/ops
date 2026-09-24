@@ -49,12 +49,16 @@ import {
   fetchFleetStatus,
   shortRepo,
   type DeployProject,
+  type DeploysPayload,
+  type Surface,
+  type DecisionRow as DecisionItem,
   type FleetStatus,
   type FleetIssue,
   type LoopState,
   type StandingAction,
 } from '../ralphStatus';
 import { deriveChain } from '../../../../../lib/chain/evidence.mjs';
+import { freshnessLabel } from '../../../../../lib/projects/freshness.mjs';
 import { RepoFilter } from './RepoFilter';
 import { filterByRepo } from './repoScope';
 import { useRepoScope } from './useRepoScope';
@@ -146,6 +150,7 @@ export default function StandingPage() {
   }, []);
 
   const blocked = filterByRepo(data?.blocked ?? [], selectedRepo);
+  const decisions = filterByRepo(data?.decisions ?? [], selectedRepo);
   const prs = filterByRepo(data?.prs ?? [], selectedRepo);
   const queue = filterByRepo(data?.queue ?? [], selectedRepo);
   const backlog = filterByRepo(data?.backlog ?? [], selectedRepo);
@@ -162,8 +167,9 @@ export default function StandingPage() {
   });
 
   // Deploy state is a separate endpoint and a separate failure mode: Vercel
-  // being unreachable must not blank the issue lanes, and vice versa.
-  const deploys = usePoll<DeployProject[]>(fetchDeploys, {
+  // being unreachable must not blank the issue lanes, and vice versa. Same
+  // read also carries the surfaces registry join (ops#416).
+  const deploys = usePoll<DeploysPayload>(fetchDeploys, {
     intervalMs: POLL_MS * 2,
     offlineIntervalMs: POLL_MS * 6,
     requestTimeoutMs: 15_000,
@@ -322,6 +328,34 @@ export default function StandingPage() {
         />
       </Section>
 
+      {/* ── 2b. Decision countdown (ops#418) ─────────────────────────────── */}
+      <Section
+        title="Decisions"
+        count={laneCount(needsToken, error, loaded, decisions.length, ['decision', 'decisions'])}
+      >
+        <Lane
+          needsToken={needsToken}
+          error={error}
+          loaded={loaded}
+          empty={decisions.length === 0}
+          emptyCopy={scoped(
+            'No open decision issue anywhere in the fleet.',
+            (name) => `No open decision issue in ${name}.`,
+          )}
+        >
+          <ul style={s.list}>
+            {decisions.map((d) => (
+              <DecisionItemRow key={`${d.repo}#${d.number}`} row={d} />
+            ))}
+          </ul>
+        </Lane>
+        <p style={s.footnote}>
+          Every open issue from the Decision template, nearest <code style={s.code}>decide_by</code>{' '}
+          first. Silence resolves to the stated default once its date passes — unless it is flagged{' '}
+          <code style={s.code}>must decide</code>, which never auto-defaults.
+        </p>
+      </Section>
+
       {/* ── 3. Is the loop turning ───────────────────────────────────────── */}
       <Section title="The loop" count={loopCount(loop)}>
         <Lane
@@ -412,16 +446,16 @@ export default function StandingPage() {
       </Section>
 
       {/* ── Deploys ──────────────────────────────────────────────────────── */}
-      <Section title="Deploys" count={deployCount(deploys.error, deploys.data)}>
+      <Section title="Deploys" count={deployCount(deploys.error, deploys.data?.projects ?? null)}>
         {deploys.error && !deploys.data ? (
           <p style={s.notice}>Couldn’t reach /api/projects — {deploys.error}</p>
         ) : !deploys.data ? (
           <p style={s.notice}>Reading Vercel…</p>
-        ) : deploys.data.length === 0 ? (
+        ) : deploys.data.projects.length === 0 ? (
           <p style={s.notice}>No Vercel projects visible to this token.</p>
         ) : (
           <ul style={s.list}>
-            {deploys.data.slice(0, SHOWN).map((proj) => {
+            {deploys.data.projects.slice(0, SHOWN).map((proj) => {
               const d = proj.latestDeployment;
               const tone = deployTone(d?.state);
               return (
@@ -435,6 +469,7 @@ export default function StandingPage() {
                       {d?.state ?? 'never deployed'}
                       {d?.target ? ` · ${d.target}` : ''}
                     </span>
+                    <StatusFreshnessBadge freshness={proj.statusFreshness} />
                     {d?.url ? (
                       <a
                         href={`https://${d.url}`}
@@ -452,6 +487,55 @@ export default function StandingPage() {
             })}
           </ul>
         )}
+      </Section>
+
+      {/* ── Surfaces (ops#416) ───────────────────────────────────────────── */}
+      <Section
+        title="Surfaces"
+        count={surfacesCount(deploys.error, deploys.data?.surfaces ?? null)}
+      >
+        {deploys.error && !deploys.data ? (
+          <p style={s.notice}>Couldn’t reach /api/projects — {deploys.error}</p>
+        ) : !deploys.data ? (
+          <p style={s.notice}>Reading the registry…</p>
+        ) : deploys.data.surfaces.length === 0 ? (
+          <p style={s.notice}>
+            <code style={s.code}>docs/ai/SURFACES.json</code> declares nothing yet.
+          </p>
+        ) : (
+          <ul style={s.list}>
+            {deploys.data.surfaces.map((surface) => (
+              <li key={surface.id} style={s.row}>
+                <div style={s.rowLink}>
+                  <span style={{ ...s.num, color: SURFACE_TONE[surface.state] }}>●</span>
+                  <span style={s.title}>{surface.name}</span>
+                </div>
+                <div style={s.metaRow}>
+                  <span style={s.meta}>{SURFACE_WORD[surface.state]}</span>
+                  <span style={s.meta}>{shortRepo(surface.repo)}</span>
+                  <span style={s.meta}>{surface.role}</span>
+                  {surface.url ? (
+                    <a
+                      href={surface.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hds-focus"
+                      style={s.issueRef}
+                    >
+                      open
+                    </a>
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p style={s.footnote}>
+          Every surface <code style={s.code}>docs/ai/SURFACES.json</code> declares, joined onto what
+          Vercel discovers — a declared surface with no live project reads as{' '}
+          <code style={s.code}>not deployed</code> instead of vanishing. Adding a surface is an edit
+          to that file; no code change.
+        </p>
       </Section>
 
       {data?.errors.length ? (
@@ -592,6 +676,61 @@ function IssueRow({
       <IssueMeta issue={issue} />
       <IssueActions id={id} issue={issue} busy={busy} dispatched={dispatched} act={act} />
       <RowResult outcome={outcome} />
+    </li>
+  );
+}
+
+/** Badge tone per urgency — `no-date` is a template violation, so it reads as loud as overdue. */
+const URGENCY_TONE: Record<DecisionItem['urgency'], 'danger' | 'warning' | 'neutral'> = {
+  overdue: 'danger',
+  'due-soon': 'warning',
+  scheduled: 'neutral',
+  'no-date': 'warning',
+};
+
+/** The one line a decision row leads with — what the countdown actually says. */
+function urgencyLabel(row: DecisionItem): string {
+  if (row.urgency === 'overdue') {
+    const days = Math.abs(row.daysUntil ?? 0);
+    return `${days}d overdue — apply the default or move the date`;
+  }
+  if (row.urgency === 'due-soon') {
+    return row.daysUntil === 0 ? 'due today' : `due in ${row.daysUntil}d`;
+  }
+  if (row.urgency === 'scheduled') return `decide by ${row.decideBy}`;
+  return row.malformedDate
+    ? `decide_by "${row.decideByRaw ?? ''}" is not a date`
+    : 'no decide_by set';
+}
+
+/**
+ * One decision-template issue on the countdown rail (ops#418).
+ *
+ * `blocking` rows carry their own badge and are never described as due for a
+ * default anywhere in this row — the wording above only ever talks about
+ * dates. That split is deliberate: a caller reading just this component can
+ * see `must decide` is a different claim from "overdue", not a louder version
+ * of the same one.
+ */
+function DecisionItemRow({ row }: { row: DecisionItem }) {
+  return (
+    <li style={s.row}>
+      <a href={row.url} target="_blank" rel="noreferrer" className="hds-focus" style={s.rowLink}>
+        <span style={s.num}>#{row.number}</span>
+        <span style={s.title}>{row.title}</span>
+      </a>
+      <div style={s.metaRow}>
+        <Badge tone={URGENCY_TONE[row.urgency]}>{urgencyLabel(row)}</Badge>
+        <span style={s.meta}>{shortRepo(row.repo)}</span>
+        {row.blocking ? (
+          <Badge
+            tone="danger"
+            title="Flagged irreversible — money, legal, PII, or outward-facing. Never auto-defaults."
+          >
+            must decide
+          </Badge>
+        ) : null}
+      </div>
     </li>
   );
 }
@@ -1114,12 +1253,65 @@ function deployTone(state: string | undefined): string {
   return 'var(--semantic-color-feedback-warning)';
 }
 
+/**
+ * Whether a project's `status.json` still describes it (ops#417/#419).
+ *
+ * `current` renders nothing — the default case must be silent, or a fleet
+ * that is mostly current would drown in badges saying so. `unknown` renders
+ * its own word rather than nothing, because nothing is indistinguishable from
+ * `current` and that collapse is exactly the failure mode this exists to
+ * prevent — hds's `status.json` was 3h/6 commits behind and would have shown
+ * as current on 2026-09-24. Wording comes from `freshnessLabel()` (imported
+ * from `lib/projects/freshness.mjs`), never re-typed here, so the API and any
+ * UI cannot say something different.
+ */
+function StatusFreshnessBadge({ freshness }: { freshness: DeployProject['statusFreshness'] }) {
+  if (!freshness || freshness.state === 'current') return null;
+  const tone: 'warning' | 'neutral' | 'info' =
+    freshness.state === 'stale' ? 'warning' : freshness.state === 'unknown' ? 'neutral' : 'info';
+  return (
+    <Badge tone={tone} title="Whether status.json still describes this repo — ops#417">
+      {freshnessLabel(freshness)}
+    </Badge>
+  );
+}
+
 function deployCount(error: string | null, data: DeployProject[] | null): string {
   if (error && !data) return 'unreachable';
   if (!data) return '…';
   const bad = data.filter((p) => p.latestDeployment?.state === 'ERROR').length;
   if (bad > 0) return `${bad} failing`;
   return `${data.length} ${data.length === 1 ? 'project' : 'projects'}`;
+}
+
+/** Dot color per surface state (ops#416) — never claim green for what is not deployed or not derived. */
+const SURFACE_TONE: Record<Surface['state'], string> = {
+  live: 'var(--semantic-color-feedback-success)',
+  gated: 'var(--semantic-color-feedback-success)',
+  preview: 'var(--semantic-color-content-tertiary)',
+  building: 'var(--semantic-color-feedback-warning)',
+  failed: 'var(--semantic-color-feedback-error)',
+  'not-deployed': 'var(--semantic-color-content-disabled)',
+  external: 'var(--semantic-color-content-tertiary)',
+};
+
+/** Words are DoD-fixed: `not deployed` — the exact reading a silently-absent row could not give. */
+const SURFACE_WORD: Record<Surface['state'], string> = {
+  live: 'live',
+  gated: 'gated',
+  preview: 'preview',
+  building: 'building',
+  failed: 'failed',
+  'not-deployed': 'not deployed',
+  external: 'external link',
+};
+
+function surfacesCount(error: string | null, data: Surface[] | null): string {
+  if (error && !data) return 'unreachable';
+  if (!data) return '…';
+  const notDeployed = data.filter((s) => s.state === 'not-deployed').length;
+  if (notDeployed > 0) return `${notDeployed} not deployed`;
+  return `${data.length} ${data.length === 1 ? 'surface' : 'surfaces'}`;
 }
 
 /* ── styles ─────────────────────────────────────────────────────────────── */

@@ -65,6 +65,8 @@ const FLEET: FleetStatus = {
   prs: [pr('client-alpha', 7, 'Client-alpha PR')],
   // Required since ops#317: isFleetStatus rejects a payload with no sev1 array.
   sev1: [],
+  // Required since ops#418: isFleetStatus rejects a payload with no decisions array.
+  decisions: [],
   loop: [],
   truncated: false,
   errors: [],
@@ -88,7 +90,7 @@ const fetchMock = vi.fn(async (url: string) => {
   const body = url.startsWith('/api/tasks?fleet=1')
     ? fleet
     : url.startsWith('/api/projects')
-      ? { projects: [] }
+      ? { projects: [], surfaces: [] }
       : { ok: true };
   return { ok: true, status: 200, json: async () => body };
 });

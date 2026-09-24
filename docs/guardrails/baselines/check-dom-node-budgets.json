@@ -38,10 +38,12 @@
     "src/app/pages/ops/standing/RepoFilter.tsx": 9,
     "src/app/pages/ops/standing/Sev1Banner.test.tsx": 9,
     "src/app/pages/ops/standing/Sev1Banner.tsx": 20,
+    "src/app/pages/ops/standing/StandingPage.freshness.test.tsx": 2,
+    "src/app/pages/ops/standing/StandingPage.surfaces.test.tsx": 2,
     "src/app/pages/ops/standing/StandingPage.test.tsx": 2,
-    "src/app/pages/ops/standing/StandingPage.tsx": 132,
+    "src/app/pages/ops/standing/StandingPage.tsx": 167,
     "src/app/routes.tsx": 27
   },
-  "updatedAt": "2026-09-24T05:29:41.930Z",
-  "sha": "39ddce0"
+  "updatedAt": "2026-09-24T16:10:03.808Z",
+  "sha": "b207630"
 }
