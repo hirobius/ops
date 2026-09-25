@@ -27,7 +27,7 @@ Infrastructure exists only in service of that.**
 5. Take money: Stripe (ops#200). Buy, don't build.
 
 **Build vs buy:** build only `ClientConfig` + the lead → site pipeline; for
-the rest, buy a mature tool (prefer one with an MCP server) or thin-wrap it.
+the rest, buy a mature tool (prefer an MCP server) or wrap it in <200 lines.
 
 **Design system:** HDS is the one design system; every surface moves onto it
 in small slices, never blocking a client site.
