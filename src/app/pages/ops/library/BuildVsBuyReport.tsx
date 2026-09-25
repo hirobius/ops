@@ -55,6 +55,7 @@ export default function BuildVsBuyReport() {
       ),
     [filter, sortKey, dir],
   );
+  const keepers = buildVsBuy.systems.filter((x) => x.verdict === 'KEEP');
   const tally = (v: Verdict) => buildVsBuy.systems.filter((x) => x.verdict === v).length;
 
   function onSort(key: SortKey) {
@@ -150,6 +151,8 @@ export default function BuildVsBuyReport() {
               })),
               { key: 'alt', label: 'Best alternative', width: '20%' },
             ]}
+            // Cells are positional: their order must match `columns` above
+            // (COLUMNS, then the alternative). Reorder both together.
             rows={rows.map((x) => ({
               key: x.id,
               cells: [
@@ -199,6 +202,30 @@ export default function BuildVsBuyReport() {
               ],
             }))}
           />
+        </Stack>
+      </section>
+
+      <section aria-labelledby="bvb-keep">
+        <h2 id="bvb-keep" style={s.h2}>
+          Keep, don&apos;t touch
+        </h2>
+        <p style={{ ...s.body, marginTop: hds.space.px4 }}>
+          The edge, or already on the right vendor, or cheaper than any tool.
+        </p>
+        <Stack direction="column" gap="px2" style={{ marginTop: hds.space.px12 }}>
+          {keepers.map((x) => (
+            <div key={x.id} style={s.band}>
+              <Stack direction="column" gap="px2" style={{ minWidth: 0 }}>
+                <span style={s.bandHead}>
+                  <span style={s.bandTitle}>{x.name}</span>
+                  <span style={s.mono}>{x.repo}</span>
+                </span>
+                <span style={s.body}>
+                  {x.payoffNote}. {x.why}
+                </span>
+              </Stack>
+            </div>
+          ))}
         </Stack>
       </section>
 
