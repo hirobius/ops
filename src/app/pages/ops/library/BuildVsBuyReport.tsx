@@ -73,7 +73,7 @@ export default function BuildVsBuyReport() {
         <p style={s.lede}>{buildVsBuy.verdict}</p>
         <p style={s.caption}>
           {tally('REPLACE')} replace · {tally('WRAP')} wrap · {tally('KEEP')} keep ·{' '}
-          <a href={buildVsBuy.artifact} style={s.link}>
+          <a href={buildVsBuy.artifact} className="hds-focus" style={s.link}>
             original artifact
           </a>
         </p>
