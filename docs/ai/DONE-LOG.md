@@ -857,3 +857,7 @@ to `chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-s
 - **🛡️ CI gates are in place** — full roll-call in `DONE-LOG.md` (2026-09-17).
   The load-bearing one: the watchdog enforces the #238 supervised-path boundary
   on its own merge path; the engine's (Ralph#25) is built, not yet wired.
+
+## 2026-09-25 — `/ops/standing` reads live, not authored (session_015pT8Gb, PR #426)
+
+Adrian asked whether Standing was accurate. Counts were already live; four things read as authored or misleading, now fixed: (1) the coverage line prints open PRs beside open issues, so it reconciles with the repo chips (which count both — "97" vs "108" was 11 PRs, not a bug); (2) the chain total says "won", not "paid" — it counts `won_at`, and nothing reads Stripe; stage 8 renamed "Win the deal"; (3) stage notes lost their status claims ("has never run", "no billing path yet", "columns are live") — a test now forbids that vocabulary in notes; (4) status is derived instead: `optionalEnvKeys` (PAGESPEED_API_KEY on stage 3) report live without blocking, and each stage's linked issues show open/closed from the fleet read (unknown, never "closed", when the read is truncated or ops errored). #27 joined stage 6's issues (the old note named it). Took over session_01KaDkS8's stale StandingPage claim (idle since 09-21; its work shipped in #411). DOM budget StandingPage 167→171.
