@@ -849,3 +849,9 @@ tickets to Adrian, not filed.
 **Environment trap (again):** Playwright wants chromium r1208; the container
 ships r1194. Symlink `chromium_headless_shell-1194/chrome-linux/headless_shell`
 to `chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell`.
+
+**Moved out of HANDOFF 2026-09-25 (steering budget, to make room for the NORTH_STAR edit), verbatim:**
+
+- **🛡️ CI gates are in place** — full roll-call in `DONE-LOG.md` (2026-09-17).
+  The load-bearing one: the watchdog enforces the #238 supervised-path boundary
+  on its own merge path; the engine's (Ralph#25) is built, not yet wired.
