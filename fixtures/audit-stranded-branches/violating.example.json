@@ -1,0 +1,37 @@
+{
+  "_comment": "REAL violating fixture for audit-stranded-branches (ops#407). `Ralph`'s claude/action-minutes-wrap-up-ny7p91 is a genuine stranded branch, per the issue's own 2026-09-19 correction comment (the sweep initially miscounted Ralph as 0). Alongside it: concrete's actual default branch (not `main` — concrete has no `main` at all) correctly excluded by name match, not a hardcoded literal, and a ralph/claim-* marker correctly excluded by pattern. Not a stub — the gate evaluates this world and STRANDED_BRANCH_NO_PR fires exactly once, for the one branch that should trip it.",
+  "repos": [
+    {
+      "repo": "Ralph",
+      "defaultBranch": "main",
+      "branches": [
+        {
+          "name": "claude/action-minutes-wrap-up-ny7p91",
+          "hasPr": false,
+          "aheadBy": 3,
+          "compareStatus": "ahead",
+          "lastCommitDate": "2026-07-10T14:22:00Z"
+        }
+      ]
+    },
+    {
+      "repo": "concrete",
+      "defaultBranch": "claude/concrete-creations-migration-0okzxk",
+      "branches": [
+        {
+          "name": "claude/concrete-creations-migration-0okzxk",
+          "hasPr": false
+        },
+        {
+          "name": "claude/pii-tip-redaction",
+          "hasPr": true
+        }
+      ]
+    },
+    {
+      "repo": "ops",
+      "defaultBranch": "main",
+      "branches": [{ "name": "ralph/claim-issue-330", "hasPr": false }]
+    }
+  ]
+}

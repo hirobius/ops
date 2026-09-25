@@ -147,6 +147,34 @@ export interface FleetIssue {
   wip: boolean;
 }
 
+/**
+ * One decision-template issue (ops#418): `.github/ISSUE_TEMPLATE/decision.yml`
+ * promises silence resolves to its stated default once `decideBy` passes —
+ * this is the row that lets a human see the date coming instead of finding
+ * out the promise never fired.
+ */
+export interface DecisionRow {
+  repo: string;
+  number: number;
+  title: string;
+  url: string;
+  /** `YYYY-MM-DD`, or null when the field is missing or unparseable. */
+  decideBy: string | null;
+  /** The field's raw text, whatever it says — shown when it did not parse. */
+  decideByRaw: string | null;
+  /** The field was present but not a real calendar date — a template violation, not silence. */
+  malformedDate: boolean;
+  /**
+   * "Yes — irreversible" was chosen. Fails safe: an unreadable answer also
+   * reads as `true`, never as "safe to default" — see `parseDecisionMeta`.
+   * A `blocking` row must never be rendered as defaultable.
+   */
+  blocking: boolean;
+  urgency: 'overdue' | 'due-soon' | 'scheduled' | 'no-date';
+  /** Signed days until `decideBy`; negative once overdue. Null with no date. */
+  daysUntil: number | null;
+}
+
 export interface FleetPr {
   repo: string;
   number: number;
@@ -198,6 +226,12 @@ export interface FleetStatus {
    * also sits in whichever lane its other labels put it in.
    */
   sev1: FleetIssue[];
+  /**
+   * Every open decision-template issue, nearest `decideBy` first (ops#418). A
+   * call-out, like sev1: each also sits in whichever lane its other labels put
+   * it in (usually `blocked`, since the template labels `needs-adrian`).
+   */
+  decisions: DecisionRow[];
   /** Every open issue the sweep saw — blocked + queue + backlog. */
   total: number;
   prs: FleetPr[];
@@ -247,6 +281,9 @@ function isFleetStatus(v: unknown): v is FleetStatus {
     // Required, not optional: a missing list would render as "no open sev1",
     // the all-clear reading (ops#317).
     Array.isArray(v['sev1']) &&
+    // Same reasoning, ops#418: a missing list must not render as "no open
+    // decisions" — that is the false all-clear this exists to prevent.
+    Array.isArray(v['decisions']) &&
     Array.isArray(v['prs'])
   );
 }
@@ -267,17 +304,52 @@ export interface DeployProject {
     createdAt: number | null;
     target: string | null;
   } | null;
+  /**
+   * Whether the repo's `status.json` still describes the repo (ops#417), or
+   * null before `attachRepoStatuses` has run (no GITHUB_TOKEN). `unknown`
+   * means the file is missing or its `updatedAt` could not be parsed — a real
+   * verdict, not the absence of one; see `lib/projects/freshness.mjs`.
+   */
+  statusFreshness: {
+    state: 'current' | 'recent' | 'stale' | 'unknown';
+    behindHours: number | null;
+  } | null;
 }
 
 /**
- * Deploy state per Vercel project. Folded onto Standing so "where do things
- * stand" is one page rather than three: issues answer what the work is, this
- * answers whether what shipped is actually up.
+ * One entry from `docs/ai/SURFACES.json`, joined onto live Vercel data
+ * (ops#416) — "one board for every live thing", not only what Vercel knows
+ * about. A registry entry with no matching Vercel project renders as
+ * `not-deployed` instead of being silently absent (the `concrete` case the
+ * issue was filed over), and a non-Vercel entry (npm, Figma, a Claude
+ * artifact gallery) is `external` — a fixed link, no live state to derive.
+ */
+export interface Surface {
+  id: string;
+  kind: string;
+  name: string;
+  repo: string;
+  role: string;
+  /** The ONE clickable link — the stable alias, never a per-deploy hashed host. */
+  url: string | null;
+  state: 'live' | 'gated' | 'preview' | 'building' | 'failed' | 'not-deployed' | 'external';
+}
+
+export interface DeploysPayload {
+  projects: DeployProject[];
+  surfaces: Surface[];
+}
+
+/**
+ * Deploy state per Vercel project, plus the surfaces registry join (ops#416).
+ * Folded onto Standing so "where do things stand" is one page rather than
+ * three: issues answer what the work is, this answers whether what shipped is
+ * actually up — and, now, whether it exists at all.
  *
  * Same fail-loud contract as the fleet read — a 200 that is not the payload is
  * an error, never an empty list that reads as "no projects".
  */
-export async function fetchDeploys(signal: AbortSignal): Promise<DeployProject[]> {
+export async function fetchDeploys(signal: AbortSignal): Promise<DeploysPayload> {
   const res = await fetch('/api/projects', { signal });
   const body: unknown = await res.json().catch(() => null);
   if (!res.ok) {
@@ -287,10 +359,10 @@ export async function fetchDeploys(signal: AbortSignal): Promise<DeployProject[]
         : `HTTP ${res.status}`;
     throw new Error(message);
   }
-  if (!isRecord(body) || !Array.isArray(body['projects'])) {
+  if (!isRecord(body) || !Array.isArray(body['projects']) || !Array.isArray(body['surfaces'])) {
     throw new Error('GET /api/projects returned 200 with a body that is not the projects payload.');
   }
-  return body['projects'] as DeployProject[];
+  return { projects: body['projects'] as DeployProject[], surfaces: body['surfaces'] as Surface[] };
 }
 
 /* ── acting on an issue, straight to GitHub ──────────────────────────────── */

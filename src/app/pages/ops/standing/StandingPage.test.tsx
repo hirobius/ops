@@ -65,6 +65,8 @@ const FLEET: FleetStatus = {
   prs: [pr('client-alpha', 7, 'Client-alpha PR')],
   // Required since ops#317: isFleetStatus rejects a payload with no sev1 array.
   sev1: [],
+  // Required since ops#418: isFleetStatus rejects a payload with no decisions array.
+  decisions: [],
   loop: [],
   truncated: false,
   errors: [],
@@ -88,7 +90,7 @@ const fetchMock = vi.fn(async (url: string) => {
   const body = url.startsWith('/api/tasks?fleet=1')
     ? fleet
     : url.startsWith('/api/projects')
-      ? { projects: [] }
+      ? { projects: [], surfaces: [] }
       : { ok: true };
   return { ok: true, status: 200, json: async () => body };
 });
@@ -129,6 +131,24 @@ describe('StandingPage — repo filter', () => {
 
     expect(within(lane('Queued for the loop')).getByText('1 ralph-ready issue')).toBeTruthy();
     expect(chip(/^ops/).getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('shows the unfiltered fleet totals in the coverage headline when no repo is selected', async () => {
+    await renderAt('/ops/standing');
+    const coverage = screen.getByText(/^Watching/).closest('p')!;
+    expect(within(coverage).getByText('3')).toBeTruthy();
+    expect(within(coverage).getByText('6')).toBeTruthy();
+  });
+
+  it('reflects the active repo filter in the coverage headline, not the unfiltered fleet total (ops#405)', async () => {
+    await renderAt('/ops/standing?repo=ops');
+    // Scoped to ops: 1 repo, and the sum of ops's own lanes (1 blocked + 1
+    // queued + 0 backlog) — never the fleet-wide 3 repos / 6 issues.
+    const coverage = screen.getByText(/^Watching/).closest('p')!;
+    expect(within(coverage).getByText('1')).toBeTruthy();
+    expect(within(coverage).getByText('2')).toBeTruthy();
+    expect(within(coverage).queryByText('3')).toBeNull();
+    expect(within(coverage).queryByText('6')).toBeNull();
   });
 
   it('keeps an emptied lane on the page with a short empty state naming the repo', async () => {

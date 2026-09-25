@@ -16,7 +16,8 @@
 
 import type { VercelRequest } from '@vercel/node';
 import { withOpsHandler, type HandlerResult } from '../lib/api/handler.js';
-import { listProjects } from '../lib/projects/index.mjs';
+import { listProjects, loadSurfaceRegistry } from '../lib/projects/index.mjs';
+import { joinSurfaces } from '../lib/projects/surfaces.mjs';
 
 export async function projectsHandler(_req: VercelRequest): Promise<HandlerResult> {
   const result = await listProjects();
@@ -24,7 +25,11 @@ export async function projectsHandler(_req: VercelRequest): Promise<HandlerResul
     const status = result.code === 'ENV_MISSING_VERCEL_TOKEN' ? 503 : 500;
     return { status, body: { error: result.error, code: result.code } };
   }
-  return { status: 200, body: { projects: result.projects } };
+  // ops#416: joined onto the SAME Vercel read — no second call, and a
+  // registry problem (a bad edit, a missing file) degrades to an empty
+  // `surfaces` list rather than taking `projects` down with it.
+  const surfaces = joinSurfaces(loadSurfaceRegistry(), result.projects);
+  return { status: 200, body: { projects: result.projects, surfaces } };
 }
 
 export default withOpsHandler('GET', projectsHandler);

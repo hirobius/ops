@@ -133,6 +133,39 @@ describe('makeGitHubPort().listOpenIssues — pagination', () => {
     expect(issues[0].hasDod).toBe(false);
   });
 
+  it('drops a non-fleet repo and keeps a fleet one (ops#405)', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        pageResponse([rawIssue(1, 'hirobius/ops'), rawIssue(2, 'hirobius/job-hunt')]),
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { issues } = await makeGitHubPort().listOpenIssues();
+
+    expect(issues).toHaveLength(1);
+    expect(issues[0]).toMatchObject({ repo: 'hirobius/ops', number: 1 });
+  });
+
+  it('reports fetched as everything pulled off GitHub and kept as what survived the fleet filter', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        pageResponse([
+          rawIssue(1, 'hirobius/ops'),
+          rawIssue(2, 'hirobius/job-hunt'),
+          rawIssue(3, 'hirobius/example-client'),
+        ]),
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { issues, fetched, kept } = await makeGitHubPort().listOpenIssues();
+
+    expect(fetched).toBe(3);
+    expect(kept).toBe(1);
+    expect(issues).toHaveLength(1);
+  });
+
   it('agrees with ralph/next.sh on a DoD section that has no checklist', async () => {
     // next.sh's has_dod_marker accepts an acceptance / DoD / definition-of-done
     // section, not only `- [ ]`. A checklist-only test flagged these rows

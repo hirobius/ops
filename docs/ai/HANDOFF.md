@@ -4,7 +4,7 @@
 > "status" or "go" reads this and acts from **Next**; a session that does real
 > work updates it before ending.
 
-_Last updated: 2026-09-19._
+_Last updated: 2026-09-24._
 
 ## The map (what else exists, and when to open it)
 
@@ -65,16 +65,16 @@ Allowlist, not a name-list — naming client repos here leaked one.
   actions write labels straight to GitHub, bypassing the Supabase mirror.
   **`listOpenIssues()` returns `{ issues, truncated, fetched }`, not an array**
   — anything branched before #367 that calls it is broken.
-  **Its issue TOTAL is wrong until #405 lands** — it counts 209, not 95 (see
-  above). Open-PR counts are fine.
+  Issues and PRs are fleet-scoped once #405's branch merges.
 
 - **🛡️ CI gates are in place** — full roll-call in `DONE-LOG.md` (2026-09-17).
   The load-bearing one: the watchdog enforces the #238 supervised-path boundary
-  on its own merge path; the **engine** still does not (Ralph#25).
+  on its own merge path; the engine's (Ralph#25) is built, not yet wired.
 
 - **🎨 hds: Figma foundation, nothing shipped** (#211–#216). **Code Connect
   publishing needs Org/Enterprise — Pro cannot**, so no Dev Mode snippet is
-  live. npm is still **v0.13.0** (hds#199).
+  live. **npm is v0.15.0 — verified; hds#199's premise is stale.** ops pins
+  `^0.13.0`: a bump in ops, not a broken pipe. Detail: `SESSION-BOARD.md`.
 
 - **📞 `/ops/pitch` — the call sheet.** Only pitchable leads (`preview_url`,
   not `do_not_contact`), re-checked on every write. Notes live in the
@@ -95,9 +95,8 @@ Allowlist, not a name-list — naming client repos here leaked one.
   one manual email is not. **Outscraper spend (#190) stays ON HOLD.** Publishing
   stays a human action — it is the billing event.
 
-**Done log (latest):** _2026-09-19_ — engine `v1` → `a4f0c21` fleet-wide
-(Ralph#23/#24); two epics (ops#238, se#153) decomposed into 15 children;
-se#205–#207 shipped; hds CI finally runs its 9-gate `pretest`. `DONE-LOG.md`.
+**Done log (latest):** _2026-09-24_ — 29 issues built (hds 19, ops 8, Ralph 2)
+on `claude/open-issues-count-1i85qw`, unmerged; list + leftovers in `DONE-LOG.md`.
 
 ## Adrian's open actions (his court, not blocked on a session)
 
@@ -106,10 +105,6 @@ se#205–#207 shipped; hds CI finally runs its 9-gate `pretest`. `DONE-LOG.md`.
 - **hds: tick "Allow GitHub Actions to create and approve pull requests"** at
   https://github.com/hirobius/hds/settings/actions. One checkbox; it is the only
   thing failing `release` (hds#199). ops#346's emails are redacted.
-- **Fix the two default branches** (ops#407). **folio:** switch to the `main`
-  that exists (2 ahead / 0 behind). **concrete:** it has NO `main` — _rename_
-  its default (Settings → Branches → pencil); GitHub redirects and retargets
-  PRs. Do not create an empty `main` instead.
 - **Create the `PII_DENYLIST` Actions secret + a gitignored `.pii-denylist`**
   (format in `REPO-PROCEDURES.md`, secret at
   https://github.com/hirobius/ops/settings/secrets/actions). Without it the gate
@@ -128,6 +123,9 @@ se#205–#207 shipped; hds CI finally runs its 9-gate `pretest`. `DONE-LOG.md`.
 
 ## Next (ordered queue)
 
+0. **Merge `claude/open-issues-count-1i85qw` (ops, hds, Ralph), then close its
+   29 issues** — do not rebuild them. Ralph#25/#26 still need the
+   `ralph-gate-reusable.yml` wiring (human PR) before ops#402.
 1. **Four open ops PRs each wait on a human.** #380: `OPS_AGENT_KEY`. #387:
    migration `0015` + Adrian's import (writes production). #378 (draft): a real
    eval run + `ralph-approved`. #384 (draft): the new hirobius.com.

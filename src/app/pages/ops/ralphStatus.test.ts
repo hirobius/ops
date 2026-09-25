@@ -75,8 +75,11 @@ describe('fetchFleetStatus', () => {
     queue: [],
     backlog: [],
     sev1: [],
+    decisions: [],
     total: 0,
     prs: [],
+    loop: [],
+    truncated: false,
     errors: [],
     counts: { openIssues: 0, repos: 0 },
   };

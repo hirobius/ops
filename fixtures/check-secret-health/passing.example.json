@@ -1,0 +1,18 @@
+{
+  "_comment": "REAL passing fixture for check-secret-health (ops#415). Registry and grep agree exactly, and the one probed secret comes back valid with 90 days until expiry — well outside the 14-day warning window. Nothing fires.",
+  "registryNames": ["RALPH_WATCHDOG_TOKEN"],
+  "grepNames": ["RALPH_WATCHDOG_TOKEN"],
+  "verdictInputs": [
+    {
+      "entry": {
+        "name": "RALPH_WATCHDOG_TOKEN",
+        "repos": ["hirobius/ops"],
+        "probe": "github-token-expiry",
+        "probeStrength": "verified",
+        "rotateUrl": "https://github.com/settings/personal-access-tokens",
+        "breaksWhenMissing": "the wedge-detection job stops silently"
+      },
+      "outcome": { "status": "valid", "daysUntilExpiry": 90 }
+    }
+  ]
+}
