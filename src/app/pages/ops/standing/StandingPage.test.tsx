@@ -140,6 +140,18 @@ describe('StandingPage — repo filter', () => {
     expect(within(coverage).getByText('6')).toBeTruthy();
   });
 
+  it('counts open PRs separately from issues, so the repo chips (issues + PRs) reconcile', async () => {
+    await renderAt('/ops/standing');
+    const coverage = screen.getByText(/^Watching/).closest('p')!;
+    expect(coverage.textContent).toMatch(/6\s*open issues\s*·\s*1\s*open PR(?!s)/);
+  });
+
+  it('labels the chain total "won", never "paid" — won_at is not money received', async () => {
+    await renderAt('/ops/standing');
+    expect(screen.getByText(/^\d+ won$/)).toBeTruthy();
+    expect(screen.queryByText(/^\d+ paid$/)).toBeNull();
+  });
+
   it('reflects the active repo filter in the coverage headline, not the unfiltered fleet total (ops#405)', async () => {
     await renderAt('/ops/standing?repo=ops');
     // Scoped to ops: 1 repo, and the sum of ops's own lanes (1 blocked + 1

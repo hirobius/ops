@@ -210,3 +210,75 @@ describe('deriveChain — stage 5 liveness note (ops#322)', () => {
     }
   });
 });
+
+describe('deriveChain — stage notes carry no status claims (2026-09-25)', () => {
+  it('no stage note asserts a state that can go stale', () => {
+    // A note is structure ("what this stage does"). Anything that changes
+    // without a code change — "never run", "no billing path yet", "are live" —
+    // belongs in derived fields, where it cannot silently rot.
+    for (const s of STAGES) {
+      expect(s.note, `stage ${s.n}`).not.toMatch(
+        /never run|has never|not yet|exists yet|are live|gates this/i,
+      );
+    }
+  });
+
+  it('labels the last stage by what it counts: a deal marked won, not money received', () => {
+    const last = STAGES[STAGES.length - 1];
+    expect(last.metric).toBe('won');
+    expect(last.name).not.toMatch(/paid/i);
+  });
+});
+
+describe('deriveChain — optional env keys are reported live, never block', () => {
+  it('names an unset optional key without blocking the stage', () => {
+    const { links } = deriveChain({
+      funnel: funnelOf(FULL),
+      env: { ...ALL_ENV, PAGESPEED_API_KEY: false },
+    });
+    const qualify = links[2];
+    expect(qualify.state).toBe('proven');
+    expect(qualify.missingOptional).toEqual(['PAGESPEED_API_KEY']);
+  });
+
+  it('reports nothing when the optional key is set', () => {
+    const { links } = deriveChain({ funnel: funnelOf(FULL), env: ALL_ENV });
+    expect(links[2].missingOptional).toEqual([]);
+  });
+
+  it('asks the server about optional keys too', () => {
+    expect(CHAIN_ENV_KEYS).toContain('PAGESPEED_API_KEY');
+  });
+});
+
+describe('deriveChain — linked issues show live open/closed state', () => {
+  const outreachIssues = STAGES[5].issues;
+
+  it('marks an issue closed when the fleet read is complete and it is not open', () => {
+    const [openOne, ...rest] = outreachIssues;
+    const { links } = deriveChain({
+      funnel: funnelOf(FULL),
+      env: ALL_ENV,
+      openIssues: { numbers: [openOne], complete: true },
+    });
+    expect(links[5].issueStates).toEqual([
+      { n: openOne, open: true },
+      ...rest.map((n: number) => ({ n, open: false })),
+    ]);
+  });
+
+  it('says unknown (null), not closed, when the read is partial or missing', () => {
+    const partial = deriveChain({
+      funnel: funnelOf(FULL),
+      env: ALL_ENV,
+      openIssues: { numbers: [], complete: false },
+    });
+    expect(
+      partial.links[5].issueStates.every((i: { open: boolean | null }) => i.open === null),
+    ).toBe(true);
+    const none = deriveChain({ funnel: funnelOf(FULL), env: ALL_ENV });
+    expect(none.links[5].issueStates.every((i: { open: boolean | null }) => i.open === null)).toBe(
+      true,
+    );
+  });
+});

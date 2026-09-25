@@ -4,7 +4,7 @@
 > "status" or "go" reads this and acts from **Next**; a session that does real
 > work updates it before ending.
 
-_Last updated: 2026-09-24._
+_Last updated: 2026-09-25._
 
 ## The map (what else exists, and when to open it)
 
@@ -67,10 +67,6 @@ Allowlist, not a name-list — naming client repos here leaked one.
   — anything branched before #367 that calls it is broken.
   Issues and PRs are fleet-scoped once #405's branch merges.
 
-- **🛡️ CI gates are in place** — full roll-call in `DONE-LOG.md` (2026-09-17).
-  The load-bearing one: the watchdog enforces the #238 supervised-path boundary
-  on its own merge path; the engine's (Ralph#25) is built, not yet wired.
-
 - **🎨 hds: Figma foundation, nothing shipped** (#211–#216). **Code Connect
   publishing needs Org/Enterprise — Pro cannot**, so no Dev Mode snippet is
   live. **npm is v0.15.0 — verified; hds#199's premise is stale.** ops pins
@@ -95,8 +91,7 @@ Allowlist, not a name-list — naming client repos here leaked one.
   one manual email is not. **Outscraper spend (#190) stays ON HOLD.** Publishing
   stays a human action — it is the billing event.
 
-**Done log (latest):** _2026-09-24_ — 29 issues built (hds 19, ops 8, Ralph 2)
-on `claude/open-issues-count-1i85qw`, unmerged; list + leftovers in `DONE-LOG.md`.
+**Done log (latest):** _2026-09-25_ — `/ops/library` + build-vs-buy audit, unmerged.
 
 ## Adrian's open actions (his court, not blocked on a session)
 

@@ -110,6 +110,10 @@ interface ChainLink {
   issues: number[];
   count: number | null;
   missingEnv: string[];
+  /** Keys that sharpen the stage but never block it, unset on the server. */
+  missingOptional: string[];
+  /** `open` null = unknown (partial read); false = closed per the live read. */
+  issueStates: { n: number; open: boolean | null }[];
   state: LinkState;
 }
 
@@ -164,6 +168,7 @@ export default function StandingPage() {
     funnel: data?.funnel ?? {},
     env: data?.env ?? {},
     liveness: data?.liveness ?? null,
+    openIssues: data ? opsOpenIssues(data) : null,
   });
 
   // Deploy state is a separate endpoint and a separate failure mode: Vercel
@@ -248,6 +253,7 @@ export default function StandingPage() {
         needsToken={needsToken}
         activeRepo={scope.selected}
         activeIssueCount={blocked.length + queue.length + backlog.length}
+        openPrCount={prs.length}
       />
 
       {/* ── 0. Open sev1 (ops#317) — above everything; UNKNOWN if the read failed ── */}
@@ -266,7 +272,7 @@ export default function StandingPage() {
       <TruncationNotice data={data} />
 
       {/* ── 1. The chain ─────────────────────────────────────────────────── */}
-      <Section title="The chain" count={`${chain.reachedEnd} paid`}>
+      <Section title="The chain" count={`${chain.reachedEnd} won`}>
         <p style={s.lede}>
           Eight stages from a sourced lead to a paid site. Every figure below is a row count from
           the leads table — nothing here is an estimate, and a stage counts as proven only when real
@@ -1095,18 +1101,32 @@ function ChainRow({ link, total, isBreak }: { link: ChainLink; total: number; is
               : ' — neither is set on the server.'}
           </p>
         ) : null}
-        {link.issues.length ? (
+        {link.missingOptional.length ? (
+          <p style={s.linkNote}>
+            Sharper with{' '}
+            {link.missingOptional.map((k, i) => (
+              <span key={k}>
+                {i > 0 ? ' and ' : ''}
+                <code style={s.code}>{k}</code>
+              </span>
+            ))}{' '}
+            — not set on the server.
+          </p>
+        ) : null}
+        {link.issueStates.length ? (
           <div style={s.linkIssues}>
-            {link.issues.map((n) => (
+            {link.issueStates.map(({ n, open }) => (
               <a
                 key={n}
                 href={`https://github.com/hirobius/ops/issues/${n}`}
                 target="_blank"
                 rel="noreferrer"
                 className="hds-focus"
-                style={s.issueRef}
+                style={open === false ? { ...s.issueRef, ...s.issueClosed } : s.issueRef}
+                aria-label={`#${n}${open === false ? ', closed' : open ? ', open' : ''}`}
               >
                 #{n}
+                {open === false ? ' ✓' : ''}
               </a>
             ))}
           </div>
@@ -1121,6 +1141,19 @@ function ChainRow({ link, total, isBreak }: { link: ChainLink; total: number; is
       </div>
     </li>
   );
+}
+
+/**
+ * Open hirobius/ops issue numbers from the fleet read, for the chain's issue
+ * links. `complete` is false when the sweep was truncated or ops itself errored:
+ * then an issue missing from the read is unknown, never "closed".
+ */
+function opsOpenIssues(data: FleetStatus): { numbers: number[]; complete: boolean } {
+  const numbers = [...data.blocked, ...data.queue, ...data.backlog]
+    .filter((i) => i.repo === 'hirobius/ops')
+    .map((i) => i.number);
+  const opsErrored = data.errors.some((e) => e.repo === 'hirobius/ops');
+  return { numbers, complete: !data.truncated && !opsErrored };
 }
 
 /**
@@ -1179,6 +1212,7 @@ function Coverage({
   needsToken,
   activeRepo,
   activeIssueCount,
+  openPrCount,
 }: {
   data: FleetStatus | null;
   error: string | null;
@@ -1187,6 +1221,9 @@ function Coverage({
   activeRepo: RepoOption | null;
   /** Open issues in `blocked` + `queue` + `backlog` AFTER the repo filter. */
   activeIssueCount: number;
+  /** Open PRs AFTER the repo filter. The repo chips count issues + PRs, so
+   *  printing both is what makes this line and the chips reconcile. */
+  openPrCount: number;
 }) {
   if (needsToken || (error && !data)) return null;
   if (!data) return <p style={s.coverage}>Discovering repos…</p>;
@@ -1203,6 +1240,8 @@ function Coverage({
           ? ` across ${owners.join(' + ')}`
           : ''}{' '}
       · <strong style={s.strong}>{issueCount}</strong> open {issueCount === 1 ? 'issue' : 'issues'}
+      {' · '}
+      <strong style={s.strong}>{openPrCount}</strong> open {openPrCount === 1 ? 'PR' : 'PRs'}
       {activeRepo ? null : <span style={s.coverageRepos}>{repos.map(shortRepo).join(' · ')}</span>}
     </p>
   );
@@ -1480,6 +1519,11 @@ const s = {
     ...hds.typeStyles.labelTechnical,
     color: 'var(--semantic-color-content-accent)',
     textDecoration: 'none',
+  },
+  // Closed per the live fleet read: done work reads as done, not as a blocker.
+  issueClosed: {
+    color: 'var(--semantic-color-content-tertiary)',
+    textDecoration: 'line-through',
   },
   breakCall: {
     ...hds.typeStyles.bodySmall,

@@ -820,3 +820,44 @@ accepted as baseline debt**).
 docs/components; the Ralph workflow PR; `figma:push`; 3 cron workflows (#398,
 #407, #415). Trap: multi-line `@deprecated` JSDoc leaks into the manifest
 description (generator drops only `@`-leading lines) — keep tag text on one line.
+
+## 2026-09-25 — `/ops/library` + the build-vs-buy audit (session_015pT8Gb)
+
+Branch `claude/hirobius-stack-audit-qrgaxb` (ops), pushed, no PR. Research first:
+a build-vs-buy audit of 34 hand-built systems across the six repos (artifact:
+https://claude.ai/artifact/JfSrq2bdwPYFTtQjDckQ7a). Then, per Adrian ("bundle all
+of those docs into my ops dashboard — they will all eventually consume HDS"):
+
+- **`/ops/library`** — index of every report, newest first, each badged HDS or
+  "Not on HDS yet". Data: `docs/ai/library.json`. Linked from the SurfacesRail.
+- **`/ops/library/build-vs-buy`** — the audit rebuilt natively on HDS (sortable,
+  filterable table, top 5, business tools). Data: `docs/ai/build-vs-buy.json`, a
+  dated snapshot — append a new audit, never edit numbers in place.
+- **`/ops/library/:slug` for legacy HTML** (`pipeline-walkthrough`,
+  `state-of-play`) — lazy `?raw` import into an iframe sandboxed WITHOUT
+  same-origin, so a report's scripts cannot reach the ops session cookie.
+  Migrating one to HDS = flip `render` to `hds` and add a native component.
+- Gates honoured, not bypassed: route-coverage (+3 ALL_ROUTES), dom-node budget
+  (`routes.tsx` 27→29 for the two route elements). 1857 unit + layout 19/19.
+
+**HDS adoption, measured (not built):** only ops depends on
+`@hirobius/design-system` (pinned ^0.13.0; npm has 0.15.0). site-engine, folio and
+concrete consume none of it. 31 of 37 ops page files carry `hds-bypass`.
+CORRECTION (same session): HDS DOES ship `Table` (since ≤0.13.0) — an earlier
+grep missed it behind `export *`. The build-vs-buy table now uses it. The real
+gap: its header cells take no `aria-sort`, so sort state rides on each header
+button's aria-label. Adoption tickets filed on Adrian's word (see the PR).
+
+**Environment trap (again):** Playwright wants chromium r1208; the container
+ships r1194. Symlink `chromium_headless_shell-1194/chrome-linux/headless_shell`
+to `chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell`.
+
+**Moved out of HANDOFF 2026-09-25 (steering budget, to make room for the NORTH_STAR edit), verbatim:**
+
+- **🛡️ CI gates are in place** — full roll-call in `DONE-LOG.md` (2026-09-17).
+  The load-bearing one: the watchdog enforces the #238 supervised-path boundary
+  on its own merge path; the engine's (Ralph#25) is built, not yet wired.
+
+## 2026-09-25 — `/ops/standing` reads live, not authored (session_015pT8Gb, PR #426)
+
+Adrian asked whether Standing was accurate. Counts were already live; four things read as authored or misleading, now fixed: (1) the coverage line prints open PRs beside open issues, so it reconciles with the repo chips (which count both — "97" vs "108" was 11 PRs, not a bug); (2) the chain total says "won", not "paid" — it counts `won_at`, and nothing reads Stripe; stage 8 renamed "Win the deal"; (3) stage notes lost their status claims ("has never run", "no billing path yet", "columns are live") — a test now forbids that vocabulary in notes; (4) status is derived instead: `optionalEnvKeys` (PAGESPEED_API_KEY on stage 3) report live without blocking, and each stage's linked issues show open/closed from the fleet read (unknown, never "closed", when the read is truncated or ops errored). #27 joined stage 6's issues (the old note named it). Took over session_01KaDkS8's stale StandingPage claim (idle since 09-21; its work shipped in #411). DOM budget StandingPage 167→171.
