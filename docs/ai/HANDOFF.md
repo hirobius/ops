@@ -4,7 +4,7 @@
 > "status" or "go" reads this and acts from **Next**; a session that does real
 > work updates it before ending.
 
-_Last updated: 2026-09-24._
+_Last updated: 2026-09-25._
 
 ## The map (what else exists, and when to open it)
 
@@ -95,8 +95,8 @@ Allowlist, not a name-list — naming client repos here leaked one.
   one manual email is not. **Outscraper spend (#190) stays ON HOLD.** Publishing
   stays a human action — it is the billing event.
 
-**Done log (latest):** _2026-09-24_ — 29 issues built (hds 19, ops 8, Ralph 2)
-on `claude/open-issues-count-1i85qw`, unmerged; list + leftovers in `DONE-LOG.md`.
+**Done log (latest):** _2026-09-25_ — `/ops/library` (reports hub + build-vs-buy
+audit on HDS), unmerged on `claude/hirobius-stack-audit-qrgaxb`; see `DONE-LOG.md`.
 
 ## Adrian's open actions (his court, not blocked on a session)
 

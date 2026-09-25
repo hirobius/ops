@@ -820,3 +820,32 @@ accepted as baseline debt**).
 docs/components; the Ralph workflow PR; `figma:push`; 3 cron workflows (#398,
 #407, #415). Trap: multi-line `@deprecated` JSDoc leaks into the manifest
 description (generator drops only `@`-leading lines) — keep tag text on one line.
+
+## 2026-09-25 — `/ops/library` + the build-vs-buy audit (session_015pT8Gb)
+
+Branch `claude/hirobius-stack-audit-qrgaxb` (ops), pushed, no PR. Research first:
+a build-vs-buy audit of 34 hand-built systems across the six repos (artifact:
+https://claude.ai/artifact/JfSrq2bdwPYFTtQjDckQ7a). Then, per Adrian ("bundle all
+of those docs into my ops dashboard — they will all eventually consume HDS"):
+
+- **`/ops/library`** — index of every report, newest first, each badged HDS or
+  "Not on HDS yet". Data: `docs/ai/library.json`. Linked from the SurfacesRail.
+- **`/ops/library/build-vs-buy`** — the audit rebuilt natively on HDS (sortable,
+  filterable table, top 5, business tools). Data: `docs/ai/build-vs-buy.json`, a
+  dated snapshot — append a new audit, never edit numbers in place.
+- **`/ops/library/:slug` for legacy HTML** (`pipeline-walkthrough`,
+  `state-of-play`) — lazy `?raw` import into an iframe sandboxed WITHOUT
+  same-origin, so a report's scripts cannot reach the ops session cookie.
+  Migrating one to HDS = flip `render` to `hds` and add a native component.
+- Gates honoured, not bypassed: route-coverage (+3 ALL_ROUTES), dom-node budget
+  (`routes.tsx` 27→29 for the two route elements). 1857 unit + layout 19/19.
+
+**HDS adoption, measured (not built):** only ops depends on
+`@hirobius/design-system` (pinned ^0.13.0; npm has 0.15.0). site-engine, folio and
+concrete consume none of it. 31 of 37 ops page files carry `hds-bypass`. HDS has
+no Table/DataTable, so every table in ops is hand-styled. These are proposed as
+tickets to Adrian, not filed.
+
+**Environment trap (again):** Playwright wants chromium r1208; the container
+ships r1194. Symlink `chromium_headless_shell-1194/chrome-linux/headless_shell`
+to `chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell`.

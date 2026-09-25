@@ -48,6 +48,11 @@ const TILES: readonly SurfaceTile[] = [
     description: 'What the last fleet audit found, and what each issue is for',
   },
   {
+    to: '/ops/library',
+    label: 'Library',
+    description: 'Every report and research artifact — audits, walkthroughs, state of play',
+  },
+  {
     to: '/ops/clients',
     label: 'Clients',
     description: 'Active retainers, prospects & sample builds — portals, sites, demos',

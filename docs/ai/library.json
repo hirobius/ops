@@ -1,0 +1,36 @@
+{
+  "$comment": "Index for /ops/library — every report and research artifact, in one place. `render` says how the page shows it: `hds` = a native page built on @hirobius/design-system, `legacy` = a standalone HTML file shown framed until it is migrated to HDS. Add an entry when a report lands; migrating one flips `render` from legacy to hds.",
+  "entries": [
+    {
+      "slug": "build-vs-buy",
+      "title": "Build-vs-buy audit",
+      "date": "2026-09-25",
+      "summary": "34 hand-built systems across the six repos, each with a verdict, the mature alternative, cost, effort and payoff. Includes the business tools to add.",
+      "render": "hds"
+    },
+    {
+      "slug": "fleet-audit",
+      "title": "Fleet audit",
+      "date": "2026-09-24",
+      "summary": "Gates that fire from nothing and records nobody verifies: 15 issues grouped by what each one is for, plus a dated build-health snapshot.",
+      "render": "hds",
+      "href": "/ops/audit"
+    },
+    {
+      "slug": "state-of-play",
+      "title": "State of play",
+      "date": "2026-09-19",
+      "summary": "The business picture: the six numbers, the blockers, and the order to work them.",
+      "render": "legacy",
+      "source": "docs/state-of-play.html"
+    },
+    {
+      "slug": "pipeline-walkthrough",
+      "title": "Pipeline walkthrough",
+      "date": "2026-09-17",
+      "summary": "Visual companion to docs/ARCHITECTURE.md: lead → site → outreach → invoice. The narrative, not the live status — /ops/standing owns that.",
+      "render": "legacy",
+      "source": "docs/pipeline-walkthrough.html"
+    }
+  ]
+}
