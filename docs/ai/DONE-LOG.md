@@ -842,9 +842,11 @@ of those docs into my ops dashboard — they will all eventually consume HDS"):
 
 **HDS adoption, measured (not built):** only ops depends on
 `@hirobius/design-system` (pinned ^0.13.0; npm has 0.15.0). site-engine, folio and
-concrete consume none of it. 31 of 37 ops page files carry `hds-bypass`. HDS has
-no Table/DataTable, so every table in ops is hand-styled. These are proposed as
-tickets to Adrian, not filed.
+concrete consume none of it. 31 of 37 ops page files carry `hds-bypass`.
+CORRECTION (same session): HDS DOES ship `Table` (since ≤0.13.0) — an earlier
+grep missed it behind `export *`. The build-vs-buy table now uses it. The real
+gap: its header cells take no `aria-sort`, so sort state rides on each header
+button's aria-label. Adoption tickets filed on Adrian's word (see the PR).
 
 **Environment trap (again):** Playwright wants chromium r1208; the container
 ships r1194. Symlink `chromium_headless_shell-1194/chrome-linux/headless_shell`

@@ -1,4 +1,4 @@
-/* hds-bypass: ops-internal page. HDS has no Table/DataTable yet — tokens on native elements until it does. */
+/* hds-bypass: ops-internal page. Token-only inline styles for layout HDS has no primitive for. */
 
 /**
  * Shared styles for `/ops/library`. Every value is an HDS token or semantic CSS
@@ -78,40 +78,12 @@ export const s = {
   link: {
     color: 'var(--semantic-color-content-accent)',
   } as CSSProperties,
-  // Only the table may exceed the viewport, inside its own scroller.
-  tableScroll: {
-    overflowX: 'auto',
-    border: '1px solid var(--semantic-color-border-default)',
-    borderRadius: hds.borderRadius.md,
-    background: 'var(--semantic-color-surface-raised)',
-  } as CSSProperties,
-  table: {
-    ...hds.typeStyles.ui,
-    borderCollapse: 'collapse',
-    width: '100%',
-    minWidth: '960px',
-  } as CSSProperties,
-  th: {
-    textAlign: 'left',
-    padding: 0,
-    borderBottom: '1px solid var(--semantic-color-border-default)',
-    background: 'var(--semantic-color-surface-base)',
-  } as CSSProperties,
   thButton: {
-    ...hds.typeStyles.labelTechnical,
     all: 'unset',
-    display: 'block',
-    padding: `${hds.space.px10} ${hds.space.px12}`,
+    ...hds.typeStyles.labelTechnical,
     cursor: 'pointer',
     whiteSpace: 'nowrap',
     color: 'var(--semantic-color-content-secondary)',
-  } as CSSProperties,
-  td: {
-    textAlign: 'left',
-    verticalAlign: 'top',
-    padding: `${hds.space.px10} ${hds.space.px12}`,
-    borderBottom: '1px solid var(--semantic-color-border-subtle)',
-    color: 'var(--semantic-color-content-primary)',
   } as CSSProperties,
   tdNum: {
     fontFamily: hds.monoFamily,

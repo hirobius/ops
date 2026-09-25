@@ -1,4 +1,4 @@
-/* hds-bypass: ops-internal page. HDS has no Table/DataTable yet — tokens on native elements until it does. */
+/* hds-bypass: ops-internal page. HDS Table has no aria-sort on its headers yet — sort state is announced via each header button's label. */
 
 /**
  * BuildVsBuyReport — the 2026-09-25 build-vs-buy audit, native on HDS.
@@ -12,7 +12,7 @@
 
 import { useMemo, useState } from 'react';
 
-import { Badge, Stack, Tag } from '@hirobius/design-system';
+import { Badge, Stack, Table, Tag } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 
 import { buildVsBuy, sortSystems, type SortDir, type SortKey, type Verdict } from './libraryData';
@@ -26,14 +26,14 @@ const VERDICT_TONE: Record<Verdict, BadgeTone> = {
   KEEP: 'success',
 };
 
-const COLUMNS: { key: SortKey; label: string }[] = [
-  { key: 'name', label: 'System' },
-  { key: 'repo', label: 'Repo' },
-  { key: 'lines', label: 'Size' },
-  { key: 'verdict', label: 'Verdict' },
-  { key: 'cost', label: 'Cost' },
-  { key: 'effort', label: 'Effort' },
-  { key: 'payoff', label: 'Payoff' },
+const COLUMNS: { key: SortKey; label: string; width: string }[] = [
+  { key: 'name', label: 'System', width: '22%' },
+  { key: 'repo', label: 'Repo', width: '9%' },
+  { key: 'lines', label: 'Size', width: '11%' },
+  { key: 'verdict', label: 'Verdict', width: '9%' },
+  { key: 'cost', label: 'Cost', width: '12%' },
+  { key: 'effort', label: 'Effort', width: '7%' },
+  { key: 'payoff', label: 'Payoff', width: '10%' },
 ];
 
 const FILTERS: (Verdict | 'ALL')[] = ['ALL', 'REPLACE', 'WRAP', 'KEEP'];
@@ -125,64 +125,80 @@ export default function BuildVsBuyReport() {
               {rows.length} of {buildVsBuy.systems.length}
             </span>
           </div>
-          <div style={s.tableScroll}>
-            <table style={s.table}>
-              <thead>
-                <tr>
-                  {COLUMNS.map((c) => (
-                    <th
-                      key={c.key}
-                      style={s.th}
-                      aria-sort={
-                        c.key === sortKey ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'
-                      }
-                    >
-                      <button
-                        type="button"
-                        className="hds-focus"
-                        style={s.thButton}
-                        onClick={() => onSort(c.key)}
-                      >
-                        {c.label}
-                        {c.key === sortKey ? (dir === 'asc' ? ' ↑' : ' ↓') : ''}
-                      </button>
-                    </th>
-                  ))}
-                  <th style={s.th}>
-                    <span style={s.thButton}>Best alternative</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((x) => (
-                  <tr key={x.id}>
-                    <td style={s.td}>
+          <Table
+            minWidth={960}
+            density="compact"
+            stickyHeader
+            columns={[
+              ...COLUMNS.map((c) => ({
+                key: c.key,
+                width: c.width,
+                label: (
+                  <button
+                    type="button"
+                    className="hds-focus"
+                    style={s.thButton}
+                    onClick={() => onSort(c.key)}
+                    aria-label={`Sort by ${c.label}${
+                      c.key === sortKey ? (dir === 'asc' ? ', ascending' : ', descending') : ''
+                    }`}
+                  >
+                    {c.label}
+                    {c.key === sortKey ? (dir === 'asc' ? ' ↑' : ' ↓') : ''}
+                  </button>
+                ),
+              })),
+              { key: 'alt', label: 'Best alternative', width: '20%' },
+            ]}
+            rows={rows.map((x) => ({
+              key: x.id,
+              cells: [
+                {
+                  slot: 'custom',
+                  content: (
+                    <span>
                       <strong>{x.name}</strong>
                       <span style={s.sub}>{x.why}</span>
-                    </td>
-                    <td style={s.td}>{x.repo}</td>
-                    <td style={{ ...s.td, ...s.tdNum }}>
+                    </span>
+                  ),
+                },
+                { slot: 'value', content: x.repo },
+                {
+                  slot: 'custom',
+                  content: (
+                    <span style={s.tdNum}>
                       {x.files || x.lines ? `${fmt(x.files)} / ${fmt(x.lines)}` : 'none built'}
                       <span style={s.sub}>{x.commits90d} commits · 90d</span>
-                    </td>
-                    <td style={s.td}>
-                      <Badge tone={VERDICT_TONE[x.verdict]}>{x.verdict}</Badge>
-                    </td>
-                    <td style={s.td}>{x.cost}</td>
-                    <td style={{ ...s.td, ...s.tdNum }}>{x.effort ?? '—'}</td>
-                    <td style={s.td}>
+                    </span>
+                  ),
+                },
+                {
+                  slot: 'badge',
+                  content: <Badge tone={VERDICT_TONE[x.verdict]}>{x.verdict}</Badge>,
+                },
+                { slot: 'value', content: x.cost },
+                { slot: 'code', content: x.effort ?? '—' },
+                {
+                  slot: 'custom',
+                  content: (
+                    <span>
                       <span style={s.tdNum}>{x.payoff}</span>
                       <span style={s.sub}>{x.payoffNote}</span>
-                    </td>
-                    <td style={s.td}>
+                    </span>
+                  ),
+                },
+                {
+                  slot: 'custom',
+                  content: (
+                    <span>
                       {x.alternative}
                       {x.alsoConsider ? <span style={s.sub}>Also: {x.alsoConsider}</span> : null}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </span>
+                  ),
+                },
+              ],
+            }))}
+          />
         </Stack>
       </section>
 
