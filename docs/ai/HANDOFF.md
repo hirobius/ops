@@ -91,7 +91,7 @@ Allowlist, not a name-list — naming client repos here leaked one.
   one manual email is not. **Outscraper spend (#190) stays ON HOLD.** Publishing
   stays a human action — it is the billing event.
 
-**Done log (latest):** _09-26_ ops#413 GBP-gap opening lines on `/ops/pitch`.
+**Done log (latest):** _09-26_ ops#416 fix: concrete Vercel join + surfaces added.
 
 ## Adrian's open actions (his court, not blocked on a session)
 

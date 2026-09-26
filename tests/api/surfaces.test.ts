@@ -157,9 +157,14 @@ describe('loadSurfaceRegistry', () => {
     const registry = loadSurfaceRegistry();
     expect(Array.isArray(registry)).toBe(true);
     expect(registry.length).toBeGreaterThan(0);
+    // ops#416 review (2026-09-26): a Vercel project "concrete" now exists
+    // (created ~2026-09-24) — the registry must join on it, not claim
+    // not-deployed for a surface that is in fact live (behind SSO, since it
+    // has no custom domain).
     const concrete = registry.find((e: { repo: string }) => e.repo === 'hirobius/concrete');
     expect(concrete).toBeTruthy();
-    expect(concrete.vercelProject).toBeNull();
+    expect(concrete.vercelProject).toBe('concrete');
+    expect(concrete.gated).toBe(true);
   });
 
   it('degrades to an empty registry for a missing file, rather than throwing', () => {

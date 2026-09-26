@@ -33,26 +33,39 @@
       "name": "concrete storefront",
       "repo": "hirobius/concrete",
       "role": "client site",
-      "vercelProject": null,
-      "$comment": "The exact case ops#416 was filed over — a complete storefront with Stripe wired that has never been deployed. No Vercel project exists, so this MUST render as 'not deployed', not be silently absent."
+      "vercelProject": "concrete",
+      "gated": true,
+      "$comment": "CORRECTED 2026-09-26 (ops#416 review) — a Vercel project named \"concrete\" now exists (created ~2026-09-24), confirmed live via Vercel list_projects/get_project. It has no custom domain, so Vercel SSO protection (enabled, deploymentType 'all_except_custom_domains') gates every current URL — hence gated:true. This entry previously named vercelProject:null and rendered 'not-deployed'; that was the stale case this fix corrects, not the one ops#416 was originally filed over."
     },
     {
-      "id": "site-engine-factory",
+      "id": "hds-storybook",
       "kind": "vercel",
-      "name": "site-engine (client factory)",
+      "name": "HDS Storybook",
+      "repo": "hirobius/hds",
+      "role": "design-system Storybook — the storybookUrl hds/figma/links.json points component doc links at",
+      "vercelProject": "hirobius-design-system",
+      "gated": false,
+      "$comment": "Added 2026-09-26 (ops#416 review, Gap 2) — the Vercel project \"hirobius-design-system\" is live and is exactly hds/figma/links.json's storybookUrl (https://hirobius-design-system.vercel.app), the same file the Figma entries below were sourced from. No password/SSO protection set on the project."
+    },
+    {
+      "id": "clients-gallery",
+      "kind": "vercel",
+      "name": "clients gallery (internal component preview)",
       "repo": "hirobius/site-engine",
-      "role": "engine + reference factory — not deployed itself; each client app under apps/<slug> is its own Vercel project",
-      "vercelProject": null,
-      "$comment": "Checked live via Vercel list_projects (2026-09-26) — no project named for the engine itself; the repo is the factory, not a site. Individual client-app projects (concrete, clients-monroe-street-power-wash, etc.) are already their own surfaces or out of scope for this board."
+      "role": "internal preset/component preview app (apps/_gallery) — not a client site",
+      "vercelProject": "clients-gallery",
+      "gated": false,
+      "$comment": "Added 2026-09-26 (ops#416 review, Gap 4) — Vercel project confirmed live via list_projects. site-engine's own CLAUDE.md marks apps/_gallery as internal, not a client deliverable; no middleware.ts in that app, so ungated."
     },
     {
-      "id": "ralph-loop",
+      "id": "clients-monroe-street-power-wash",
       "kind": "vercel",
-      "name": "Ralph",
-      "repo": "hirobius/Ralph",
-      "role": "shared dispatch/gate engine vendored into ops/hds/site-engine — a GitHub Actions loop, not a deployed site",
-      "vercelProject": null,
-      "$comment": "Checked live via Vercel list_projects (2026-09-26) — no matching project. Ralph has no Vercel surface at all; declared here so its absence is legible rather than Ralph never appearing on the board."
+      "name": "Monroe Street Power Wash (client site)",
+      "repo": "hirobius/site-engine",
+      "role": "client site — apps/monroe-street-power-wash",
+      "vercelProject": "clients-monroe-street-power-wash",
+      "gated": true,
+      "$comment": "Added 2026-09-26 (ops#416 review, Gap 4) — Vercel project confirmed live via list_projects (latest deployment currently ERROR, so it will render 'failed', derived live). apps/monroe-street-power-wash/middleware.ts basic-auth gates the preview per site-engine's CLAUDE.md, hence gated:true."
     },
     {
       "id": "folio-portfolio",
