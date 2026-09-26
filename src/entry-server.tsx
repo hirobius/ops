@@ -23,8 +23,21 @@ import {
 
 // Direct (non-lazy) imports so renderToString resolves them synchronously
 import InfoPageWrapper from './app/pages/InfoPageWrapper';
+import { HdsReactRouterBridge } from './app/hds-router-adapter';
 
-const SSR_ROUTES = [{ path: '/info', element: <InfoPageWrapper /> }];
+const SSR_ROUTES = [
+  {
+    path: '/info',
+    // Same router-adapter bridge as RootLayout (routes.tsx), so any HDS
+    // component that navigates renders consistently whether it's mounted
+    // client-side or pre-rendered here. Refs hirobius/ops#425 review round 2.
+    element: (
+      <HdsReactRouterBridge>
+        <InfoPageWrapper />
+      </HdsReactRouterBridge>
+    ),
+  },
+];
 
 export function render(url: string): string {
   // Routes not in SSR_ROUTES (the gated /ops app, or stale prerender entries) have
