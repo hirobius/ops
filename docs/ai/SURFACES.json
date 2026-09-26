@@ -35,6 +35,106 @@
       "role": "client site",
       "vercelProject": null,
       "$comment": "The exact case ops#416 was filed over — a complete storefront with Stripe wired that has never been deployed. No Vercel project exists, so this MUST render as 'not deployed', not be silently absent."
+    },
+    {
+      "id": "site-engine-factory",
+      "kind": "vercel",
+      "name": "site-engine (client factory)",
+      "repo": "hirobius/site-engine",
+      "role": "engine + reference factory — not deployed itself; each client app under apps/<slug> is its own Vercel project",
+      "vercelProject": null,
+      "$comment": "Checked live via Vercel list_projects (2026-09-26) — no project named for the engine itself; the repo is the factory, not a site. Individual client-app projects (concrete, clients-monroe-street-power-wash, etc.) are already their own surfaces or out of scope for this board."
+    },
+    {
+      "id": "ralph-loop",
+      "kind": "vercel",
+      "name": "Ralph",
+      "repo": "hirobius/Ralph",
+      "role": "shared dispatch/gate engine vendored into ops/hds/site-engine — a GitHub Actions loop, not a deployed site",
+      "vercelProject": null,
+      "$comment": "Checked live via Vercel list_projects (2026-09-26) — no matching project. Ralph has no Vercel surface at all; declared here so its absence is legible rather than Ralph never appearing on the board."
+    },
+    {
+      "id": "folio-portfolio",
+      "kind": "vercel",
+      "name": "folio (personal portfolio)",
+      "repo": "hirobius/folio",
+      "role": "personal portfolio site",
+      "vercelProject": "portfolio",
+      "gated": false,
+      "$comment": "Vercel project is named \"portfolio\" (matches package.json name in the folio repo), not \"folio\" — confirmed via Vercel list_projects (2026-09-26)."
+    },
+    {
+      "id": "repo-ops",
+      "kind": "github",
+      "name": "hirobius/ops",
+      "repo": "hirobius/ops",
+      "role": "GitHub repo",
+      "url": "https://github.com/hirobius/ops"
+    },
+    {
+      "id": "repo-hds",
+      "kind": "github",
+      "name": "hirobius/hds",
+      "repo": "hirobius/hds",
+      "role": "GitHub repo",
+      "url": "https://github.com/hirobius/hds"
+    },
+    {
+      "id": "repo-site-engine",
+      "kind": "github",
+      "name": "hirobius/site-engine",
+      "repo": "hirobius/site-engine",
+      "role": "GitHub repo",
+      "url": "https://github.com/hirobius/site-engine"
+    },
+    {
+      "id": "repo-concrete",
+      "kind": "github",
+      "name": "hirobius/concrete",
+      "repo": "hirobius/concrete",
+      "role": "GitHub repo",
+      "url": "https://github.com/hirobius/concrete"
+    },
+    {
+      "id": "repo-ralph",
+      "kind": "github",
+      "name": "hirobius/Ralph",
+      "repo": "hirobius/Ralph",
+      "role": "GitHub repo",
+      "url": "https://github.com/hirobius/Ralph"
+    },
+    {
+      "id": "repo-folio",
+      "kind": "github",
+      "name": "hirobius/folio",
+      "repo": "hirobius/folio",
+      "role": "GitHub repo",
+      "url": "https://github.com/hirobius/folio"
+    },
+    {
+      "id": "figma-library-published",
+      "kind": "figma",
+      "name": "HDS Tokens & Components (published library)",
+      "repo": "hirobius/hds",
+      "role": "published design-system library — read-only to agents (ADR-026)",
+      "url": "https://www.figma.com/design/c8MaVgwxOlxm4wr8wnH0Z4"
+    },
+    {
+      "id": "figma-library-staging",
+      "kind": "figma",
+      "name": "HDS Tokens & Components (staging duplicate)",
+      "repo": "hirobius/hds",
+      "role": "agent write target — Adrian promotes to the published library by hand",
+      "url": "https://www.figma.com/design/2VgBbVpKiDnu0aftJEVyBQ"
+    },
+    {
+      "id": "artifact-build-vs-buy-audit",
+      "kind": "artifact",
+      "name": "Build-vs-buy audit (Claude artifact)",
+      "repo": "hirobius/ops",
+      "role": "Claude artifact — 2026-09-25 build-vs-buy audit",
+      "url": "https://claude.ai/artifact/JfSrq2bdwPYFTtQjDckQ7a"
     }
   ]
 }
