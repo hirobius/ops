@@ -10,20 +10,20 @@ _Last updated: 2026-09-26._
 
 Everything below is **on-demand** — open one only when the task calls for it.
 
-| File                    | Open it when                                                |
-| ----------------------- | ----------------------------------------------------------- |
-| `SESSION-BOARD.md`      | A session may be running. Claim your subsystem there first. |
-| `NORTH_STAR.md`         | A request might be scope drift. Adrian owns it.             |
-| `PARKED.md`             | Work deliberately not being done (`pnpm parked:check`).     |
-| `FRONTIER-DOCTRINE.md`  | Deciding _how_ to work — specs, gates, metrics.             |
-| `AGENT_GUIDELINES.md`   | Dispatching sub-agents (prompts: `PROMPT_TEMPLATES.md`).    |
-| `REPO-PROCEDURES.md`    | You need a runbook (releases, the PII-scrub rehearsal).     |
-| `DONE-LOG.md`           | Shipped history — "was this already done?"                  |
-| `../DECISIONS.md`       | You need to know **why** — the four decision records.       |
-| `BURNDOWN-GAMEPLAN.md`  | Open issues, clustered, with a plan.                        |
-| `learned-rules.jsonl`   | Walking unpromoted rules (`pnpm guardrail:learned-rules`).  |
-| `../ARCHITECTURE.md`    | The pipeline's narrative. **Not** its status.               |
-| `../state-of-play.html` | Business picture: the six numbers, blockers, order to work. |
+| File                   | Open it when                                                |
+| ---------------------- | ----------------------------------------------------------- |
+| `SESSION-BOARD.md`     | A session may be running. Claim your subsystem there first. |
+| `NORTH_STAR.md`        | A request might be scope drift. Adrian owns it.             |
+| `PARKED.md`            | Work deliberately not being done (`pnpm parked:check`).     |
+| `FRONTIER-DOCTRINE.md` | Deciding _how_ to work — specs, gates, metrics.             |
+| `AGENT_GUIDELINES.md`  | Dispatching sub-agents (prompts: `PROMPT_TEMPLATES.md`).    |
+| `REPO-PROCEDURES.md`   | You need a runbook (releases, the PII-scrub rehearsal).     |
+| `DONE-LOG.md`          | Shipped history — "was this already done?"                  |
+| `../DECISIONS.md`      | You need to know **why** — the four decision records.       |
+| `BURNDOWN-GAMEPLAN.md` | Open issues, clustered, with a plan.                        |
+| `learned-rules.jsonl`  | Walking unpromoted rules (`pnpm guardrail:learned-rules`).  |
+| `../ARCHITECTURE.md`   | The pipeline's narrative. **Not** its status.               |
+| `state-of-play.json`   | Business picture: six numbers, blockers, order.             |
 
 **Live state is not in a document.** Whether a pipeline stage works: read
 `/ops/standing`, which derives every verdict from `leads` row counts. Who to

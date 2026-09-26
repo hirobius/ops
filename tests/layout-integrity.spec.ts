@@ -51,6 +51,7 @@ const ALL_ROUTES = [
   '/ops/library',
   '/ops/library/build-vs-buy',
   '/ops/library/state-of-play',
+  '/ops/library/pipeline-walkthrough',
   '/ops/issues',
   '/ops/tasks',
   '/ops/projects',

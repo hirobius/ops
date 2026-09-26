@@ -1,0 +1,202 @@
+{
+  "$comment": "Data for /ops/library/state-of-play. A dated snapshot (2026-09-19), not live state — for whether a pipeline stage actually works, read /ops/standing. Regenerate rather than patch: append a new snapshot instead of editing numbers in place.",
+  "date": "2026-09-19",
+  "artifact": "https://claude.ai/artifact/6zLof4AB9Q8Bycj6Vm7tEo",
+  "headline": "The platform is ahead of the business.",
+  "lede": "An engineering platform worth having now exists. Nothing has been sold through it. These are the numbers that decide what to do next.",
+  "northStar": "Build the Hirobius web/automations agency: sign and ship paying client sites end-to-end — lead → generated site → publish → outreach → invoice. Infrastructure exists only in service of that.",
+  "scopeTest": "The scope test on every ask: does this get a paying client site shipped sooner?",
+  "vitals": [
+    { "label": "Leads in database", "value": "263", "zero": false },
+    { "label": "With a phone number", "value": "260", "zero": false },
+    { "label": "With an email address", "value": "1", "zero": true },
+    { "label": "Contacted", "value": "0", "zero": true },
+    { "label": "Paying clients", "value": "0", "zero": true },
+    { "label": "Way to take money", "value": "none built", "zero": true }
+  ],
+  "vitalsNote": "Everything else on this page is commentary on those six figures. Lead counts are as recorded on 2026-09-17; the live verdict always comes from /ops/standing, which derives it from leads row counts rather than from any document — including this one.",
+  "builtAndWorking": "A single fleet surface at /ops/standing, phone-operable and repo-filtered, deriving every verdict from live row counts. A Ralph autonomous loop with single-flight control, attempt caps and a supervised-path merge boundary. 63 registered guardrails with severity semantics, proof-of-firing fixtures and a registry that fails closed. A PII gate on pre-commit, commit messages, every PR and weekly. A design system published to npm with a Figma sync foundation. Visual regression now gated on pull requests and on main. That is a real platform. Measured against the scope test, it is also mostly indirect.",
+  "commitments": [
+    {
+      "n": 1,
+      "title": "First real lead → generate → render",
+      "status": "part",
+      "verdict": "Partial. The pipeline exists; an end-to-end run on a real lead has not been demonstrated."
+    },
+    {
+      "n": 2,
+      "title": "Outreach v1 — cold email, approve-every-send",
+      "status": "stop",
+      "verdict": "Blocked at the source, not in code. 1 of 263 leads has an email address. Google Business Profile has no email field, so no scraper returns one. The crawler that fixes this merged but has never run for real — both containers block egress."
+    },
+    {
+      "n": 3,
+      "title": "Astro cutover — publish path is the billing event",
+      "status": "part",
+      "verdict": "Gated on the clients Astro factory being live."
+    },
+    {
+      "n": 4,
+      "title": "Fleet hub — only what reduces Adrian-as-bottleneck",
+      "status": "done",
+      "verdict": "Done, and the most complete of the four."
+    }
+  ],
+  "blockersIntro": "Nine pull requests are open across the four fleet repos and nearly every one waits on a human. Each row below releases work that is already written and tested. The top two are single clicks and each of them is currently the only thing making a green build look red.",
+  "blockersCallout": "/ops/standing says 16 open PRs, and that figure is correct — nine fleet, six job-hunt, one lilac. Its issue total is the one not to trust until ops#405 lands: that query is scoped to every repo the token can see, so it counts 209 where the fleet is 95.",
+  "blockers": [
+    {
+      "set": "hds → allow Actions to open PRs",
+      "href": "https://github.com/hirobius/hds/settings/actions",
+      "unlocks": "The only red on hds main — a repo setting, not code",
+      "time": "30 sec"
+    },
+    {
+      "set": "folio + concrete → default branch",
+      "href": "https://github.com/hirobius/folio/settings",
+      "unlocks": "Closes #N starts working. Neither repo's default is main, so it has silently never fired in either. folio switches to the main it already has; concrete has none and must be renamed",
+      "time": "2 min"
+    },
+    {
+      "set": "OPS_AGENT_KEY",
+      "href": "https://github.com/hirobius/ops/settings/secrets/actions",
+      "unlocks": "ops#380 — production health check",
+      "time": "2 min"
+    },
+    {
+      "set": "Supabase 0015 + import",
+      "href": "https://supabase.com/dashboard/project/vvyccwxtcwvlusweenje/sql/new",
+      "unlocks": "ops#387 — client records leave the repo",
+      "time": "10 min"
+    },
+    {
+      "set": "PII_DENYLIST + .pii-denylist",
+      "href": "https://github.com/hirobius/ops/settings/secrets/actions",
+      "unlocks": "Makes the PII gate real rather than generic",
+      "time": "5 min"
+    },
+    {
+      "set": "PAGESPEED_API_KEY",
+      "href": "https://vercel.com/adrian-6234s-projects/hirobius-ops/settings/environment-variables",
+      "unlocks": "223 leads get a real opening line",
+      "time": "2 min"
+    },
+    {
+      "set": "SUPABASE_ACCESS_TOKEN",
+      "href": "https://supabase.com/dashboard/account/tokens",
+      "unlocks": "ops#348 — the migration-ledger inventory",
+      "time": "2 min"
+    },
+    {
+      "set": "Run the email crawler where egress works",
+      "href": null,
+      "unlocks": "The entire email channel",
+      "time": "unknown"
+    },
+    { "set": "Stripe — ops#200", "href": null, "unlocks": "Taking money at all", "time": "½ day" },
+    {
+      "set": "hds release checklist",
+      "href": null,
+      "unlocks": "Publishing past 0.13.0",
+      "time": "½ day"
+    }
+  ],
+  "structural": {
+    "triageTitle": "15 of 90 open issues are actionable by an agent",
+    "triageBody": "Every open issue across the six repos was triaged with adversarial verification — a second agent tried to refute each verdict, and 27 of 33 first-pass close/do-now calls were overturned. The split below is what survived that.",
+    "triageBuckets": [
+      { "bucket": "Actionable now", "count": 15, "meaning": "An agent can finish it in one PR" },
+      {
+        "bucket": "Blocked on you",
+        "count": 49,
+        "meaning": "A credential, a decision, a payment account, a real-world fact"
+      },
+      {
+        "bucket": "Needs decomposition",
+        "count": 20,
+        "meaning": "Epic-shaped; must be split before anyone starts"
+      },
+      {
+        "bucket": "Untriaged",
+        "count": 6,
+        "meaning": "Verdict was overturned without a clear replacement"
+      }
+    ],
+    "triageNote1": "The count rose from 76 to 90 on purpose: two epics (ops#238, site-engine#153) were decomposed into 15 children. Decomposition inflates the number before it deflates it — it converts un-startable epics into shippable units.",
+    "triageNote2": "The related find, now measured: 86 remote branches have never had a pull request in any state, and 69 of them are agent branches that did work and stopped short of opening one. se#84's fix sat green and un-PR'd for two months before being recovered; se#107, ops#71 and ops#5 have the same shape. A branch with no PR is invisible to every surface we have, so some unknown share of the \"blocked\" 49 may already be finished. ops#407 asks for the report — not deletions, and not a 69-PR flood.",
+    "repoRows": [
+      { "repo": "ops", "open": 32, "queued": 0, "blocked": 2 },
+      { "repo": "site-engine", "open": 22, "queued": 0, "blocked": 2 },
+      { "repo": "hds", "open": 21, "queued": 0, "blocked": 0 },
+      { "repo": "concrete", "open": 9, "queued": 0, "blocked": 0 },
+      { "repo": "Ralph", "open": 6, "queued": 0, "blocked": 0 },
+      { "repo": "folio", "open": 5, "queued": 0, "blocked": 0 },
+      { "repo": "Fleet", "open": 95, "queued": 0, "blocked": 4, "total": true }
+    ],
+    "sev1Title": "ops#27 is the only sev1, and it is live",
+    "sev1Body": "ops, hds and site-engine are all public repositories, and client PII remains in git history. Prevention shipped; erasure did not. The gate also still matches generic patterns only, because the denylist does not exist yet — which is precisely how a client tenant's name reached a test fixture unflagged."
+  },
+  "nextSteps": [
+    "Spend one hour on the credentials table above. Highest ratio of outcome to effort anywhere on the board — every row releases work that is finished and idle.",
+    "Run the email crawler somewhere with egress. Until then, outreach v1 is not blocked on code. It is blocked on 262 missing addresses. Expect tuning, not a clean run.",
+    "Stripe. There is no path today from \"shipped site\" to \"money received.\" It is the last unbuilt link in the north-star chain, and the one place where more infrastructure genuinely is the answer.",
+    "Then ops#27, using the rehearsed runbook in docs/ai/REPO-PROCEDURES.md."
+  ],
+  "handoffIntro": "Every row is one pull request. Nothing here waits on a credential or a decision. Five of the original fifteen shipped on 19 September and are struck from the list: site-engine#205, #206 and #207, folio#9 and ops#399. Ten remain.",
+  "handoff": [
+    {
+      "issue": "site-engine#208",
+      "what": "next in the bespoke chain, and the large one. #205–#207 are done: the two V1 pages are now byte-identical, driven entirely by site.spec.ts and a generated design.css. #208 does the same for v2.astro and PreviewControls.astro; #209 and #210 follow",
+      "size": "L"
+    },
+    {
+      "issue": "ops#398",
+      "what": "measure the auto-merge arming hole — PRs #368 and #362 merged touching supervised paths with zero labels",
+      "size": "M"
+    },
+    {
+      "issue": "ops#400",
+      "what": "publish the supervised-path set so the engine's bash can read one source",
+      "size": "M"
+    },
+    {
+      "issue": "concrete#8",
+      "what": "product data model + a guided authoring script (the catalog JSON is uncast today)",
+      "size": "M"
+    },
+    {
+      "issue": "site-engine#108",
+      "what": "fleet health monitor — verify first, one pass already concluded it was done",
+      "size": "M"
+    },
+    {
+      "issue": "ops#405",
+      "what": "scope listOpenIssues() to a fleet-repo constant — today the standing page counts 209 issues across every repo the token can see, where the fleet is 95",
+      "size": "M"
+    },
+    {
+      "issue": "ops#314, ops#8",
+      "what": "recheck before starting — both were reclassified late and one still carries a blocked label",
+      "size": "?"
+    }
+  ],
+  "decisionsTitle": "Three of the four big answers came in",
+  "decisionsIntro": "These were the decisions with the largest downstream fan-out. Answered on 19 September:",
+  "decisions": [
+    "site-engine#203 — build it now, all five. #205, #206 and #207 shipped the same day; #208–#210 are unblocked and queued.",
+    "ops#401 — ralph-auto is now conditional, not blanket. Tag it only on an issue whose definition of done names no supervised path. The blanket practice is what let PRs #368 and #362 merge lead-handling diffs unreviewed.",
+    "Engine v1 released — advanced from f645031 to a4f0c21, re-vendored in all three callers and verified live. Ralph#23 fixes orphan-branch recovery to pick the newest branch; Ralph#24 makes the kit-drift check compare against the engine revision actually running."
+  ],
+  "decisionsFourth": "The fourth is still open and is 30 seconds of work: the hds release job is red on a repo setting — Settings → Actions → General → \"Allow GitHub Actions to create and approve pull requests\". It is the only failing job on that repo's main.",
+  "decisionsFourthHref": "https://github.com/hirobius/hds/settings/actions",
+  "safetyTitle": "Two safety constraints that must not be reordered",
+  "safety": [
+    "Ralph#25 before ops#402. The revenue-path boundary currently holds because risky issues simply aren't tagged ralph-auto — a human convention, not a mechanism. The ops#401 decision tightened that convention; it did not replace it. Flip auto-merge to default-on before the engine enforces paths and every green ralph/* PR self-merges, including one touching lib/leads/. Closing ops#238 in its stated order would delete the protection PR #375 added.",
+    "A new section variant is always an enum change, so it always needs the ops mirror (lib/schema + the vendored snapshot). A new optional field may not — se#84's analytics was safe only because its provider is a z.literal, and collectEnums() collects only kind === 'enum'."
+  ],
+  "footer": {
+    "note": "Snapshot, not a living document. Regenerate it rather than patch it. For whether a pipeline stage actually works, read /ops/standing — a document that restates live state will drift, and this one will too.",
+    "source": "Source of record: docs/state-of-play.html in hirobius/ops, linked from docs/ai/HANDOFF.md. Issue and PR counts taken 2026-09-19 at session close; lead figures as recorded 2026-09-17.",
+    "sessionNote": "Session closed clean. No agent holds a claim, nothing is half-pushed, and every pull request opened on 19 September is merged. The sixteen still open across GitHub predate that session or belong to another one."
+  }
+}

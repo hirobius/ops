@@ -5,7 +5,9 @@ import {
   buildVsBuy,
   entryHref,
   library,
+  pipelineWalkthrough,
   sortSystems,
+  stateOfPlay,
   type BvbSystem,
 } from './libraryData';
 
@@ -36,6 +38,54 @@ describe('library index', () => {
   it('lists newest first', () => {
     const dates = library.map((e) => e.date);
     expect([...dates].sort().reverse()).toEqual(dates);
+  });
+
+  it('has no legacy loaders left over once an entry migrates to hds', () => {
+    // Every entry currently renders natively — a stale loader here would be
+    // dead code the ops#424 migration was supposed to remove.
+    const legacySlugs = new Set(library.filter((e) => e.render === 'legacy').map((e) => e.slug));
+    for (const slug of Object.keys(LEGACY_LOADERS)) {
+      expect(legacySlugs.has(slug), slug).toBe(true);
+    }
+  });
+});
+
+describe('state-of-play data', () => {
+  it('has six vital signs and at least one commitment/blocker/next-step', () => {
+    expect(stateOfPlay.vitals).toHaveLength(6);
+    expect(stateOfPlay.commitments.length).toBeGreaterThan(0);
+    expect(stateOfPlay.blockers.length).toBeGreaterThan(0);
+    expect(stateOfPlay.nextSteps.length).toBeGreaterThan(0);
+  });
+
+  it('uses only the three commitment statuses', () => {
+    for (const c of stateOfPlay.commitments) {
+      expect(['done', 'part', 'stop'], c.title).toContain(c.status);
+    }
+  });
+
+  it('never hand-writes a live pipeline verdict — it defers to /ops/standing', () => {
+    // This is a snapshot; ops#424's DoD is that live status still comes from
+    // /ops/standing, not this document.
+    expect(stateOfPlay.vitalsNote).toContain('/ops/standing');
+  });
+});
+
+describe('pipeline-walkthrough data', () => {
+  it('has at least one stage and a tally entry per status used', () => {
+    expect(pipelineWalkthrough.stages.length).toBeGreaterThan(0);
+    const statusesUsed = new Set(pipelineWalkthrough.stages.map((s) => s.status));
+    const tallied = new Set(pipelineWalkthrough.tally.map((t) => t.status));
+    for (const status of statusesUsed) {
+      if (status === 'future') continue; // "future" stages aren't tallied on the original page
+      expect(tallied.has(status), status).toBe(true);
+    }
+  });
+
+  it('stages are numbered in order starting at 1', () => {
+    expect(pipelineWalkthrough.stages.map((s) => s.n)).toEqual(
+      pipelineWalkthrough.stages.map((_, i) => i + 1),
+    );
   });
 });
 

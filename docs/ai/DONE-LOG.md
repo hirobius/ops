@@ -7,6 +7,19 @@
 > Append here when a session ships something; HANDOFF keeps only the most recent
 > Done-log line.
 
+## 2026-09-26 — state-of-play + pipeline-walkthrough onto native HDS (ops#424)
+
+`StateOfPlayReport.tsx` and `PipelineWalkthroughReport.tsx` under
+`src/app/pages/ops/library/` replace the two legacy iframed HTML reports at
+`/ops/library`; data moved to `docs/ai/state-of-play.json` and
+`docs/ai/pipeline-walkthrough.json` (same pattern as `build-vs-buy.json`).
+Both `library.json` entries flipped `render: "hds"`; `LEGACY_LOADERS` emptied
+(kept as a registration point). The pipeline page links to `/ops/standing` for
+live status rather than hand-writing it. `docs/*.html` source files kept per
+CLAUDE.md's ARCHITECTURE lockstep — they're the source of record, this is the
+in-app rendering of them. `/ops/library/pipeline-walkthrough` added to
+layout-integrity's `ALL_ROUTES` (it was missing even before this change).
+
 ## 2026-09-26 — GBP-gap opening lines on /ops/pitch (ops#413)
 
 `lib/leads/gbp-gaps.mjs` exports a pure `deriveGbpGaps(lead)` (no network calls)
