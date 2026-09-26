@@ -4,7 +4,7 @@
 > "status" or "go" reads this and acts from **Next**; a session that does real
 > work updates it before ending.
 
-_Last updated: 2026-09-25._
+_Last updated: 2026-09-26._
 
 ## The map (what else exists, and when to open it)
 
