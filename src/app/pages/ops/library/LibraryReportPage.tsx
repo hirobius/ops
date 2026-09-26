@@ -16,11 +16,15 @@ import { Callout, Page, Stack } from '@hirobius/design-system';
 
 import { PageHeader } from '../PageHeader';
 import BuildVsBuyReport from './BuildVsBuyReport';
+import PipelineWalkthroughReport from './PipelineWalkthroughReport';
+import StateOfPlayReport from './StateOfPlayReport';
 import { LEGACY_LOADERS, library } from './libraryData';
 import { s } from './styles';
 
 const NATIVE: Record<string, () => JSX.Element> = {
   'build-vs-buy': BuildVsBuyReport,
+  'state-of-play': StateOfPlayReport,
+  'pipeline-walkthrough': PipelineWalkthroughReport,
 };
 
 function LegacyFrame({ slug, title }: { slug: string; title: string }) {

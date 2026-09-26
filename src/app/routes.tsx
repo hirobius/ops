@@ -4,6 +4,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import ErrorPage from './pages/ErrorPage';
 import InfoPageWrapper from './pages/InfoPageWrapper';
 import OpsGate from './components/OpsGate';
+import { HdsReactRouterBridge } from './hds-router-adapter';
 
 // ── Ops / internal tooling — lazy loaded ─────────────────────────────────────
 const AgenticOSPage = lazy(() => import('./pages/ops/agentic-os/AgenticOSPage'));
@@ -36,7 +37,11 @@ function LazyHDS({ Page }: { Page: ComponentType }) {
 // @hirobius/design-system site; pages provide their own chrome. Context
 // providers are wired in App.tsx.
 function RootLayout() {
-  return <Outlet />;
+  return (
+    <HdsReactRouterBridge>
+      <Outlet />
+    </HdsReactRouterBridge>
+  );
 }
 
 // ── Router ────────────────────────────────────────────────────────────────────

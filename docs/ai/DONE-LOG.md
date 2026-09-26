@@ -7,6 +7,39 @@
 > Append here when a session ships something; HANDOFF keeps only the most recent
 > Done-log line.
 
+## 2026-09-26 — state-of-play + pipeline-walkthrough onto native HDS (ops#424)
+
+`StateOfPlayReport.tsx` and `PipelineWalkthroughReport.tsx` under
+`src/app/pages/ops/library/` replace the two legacy iframed HTML reports at
+`/ops/library`; data moved to `docs/ai/state-of-play.json` and
+`docs/ai/pipeline-walkthrough.json` (same pattern as `build-vs-buy.json`).
+Both `library.json` entries flipped `render: "hds"`; `LEGACY_LOADERS` emptied
+(kept as a registration point). The pipeline page links to `/ops/standing` for
+live status rather than hand-writing it. `docs/*.html` source files kept per
+CLAUDE.md's ARCHITECTURE lockstep — they're the source of record, this is the
+in-app rendering of them. `/ops/library/pipeline-walkthrough` added to
+layout-integrity's `ALL_ROUTES` (it was missing even before this change).
+
+## 2026-09-26 — GBP-gap opening lines on /ops/pitch (ops#413)
+
+`lib/leads/gbp-gaps.mjs` exports a pure `deriveGbpGaps(lead)` (no network calls)
+that reads columns already on `leads` and produces ordered opening lines for
+the phone: no website > no hours > no photos > few photos > not owner-verified
+
+> no logo > low rating. Deliberately excludes `description` and `social` —
+> 263/263 and 195/263 null in the live table, which the issue itself flags as a
+> scraper-coverage gap rather than a real profile gap; they stay out until
+> checked against 5 live profiles. "Never scraped" (should never gap) is gated
+> on `lead_score` being non-null, since it's written in the same batch as every
+> other GBP-derived column by `prospectToLeadRow` — noted in the module as a
+> known limitation that `logo_url`/`hours` still collapse "never fetched" and
+> "confirmed empty" into the same NULL at ingest (a pre-existing ingest-layer
+> issue, not fixed here). 22 unit tests. Wired into `GET /api/leads?pitch=1`
+> (`lib/supabase/leads.mjs` select + `api/leads.ts`) as `gbp_gap` on each pitch
+> lead; `/ops/pitch` renders it as a plain line on the call card — no
+> dial-pressure copy, per Adrian's directive. DOM-node budget for
+> `PitchPage.tsx` ratcheted 39→40. typecheck/test/lint/test:layout all green.
+
 ## status.json headline archive (moved 2026-09-16)
 
 > The root `status.json` `headline` field had accumulated into a single
@@ -858,6 +891,23 @@ to `chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-s
   The load-bearing one: the watchdog enforces the #238 supervised-path boundary
   on its own merge path; the engine's (Ralph#25) is built, not yet wired.
 
+## 2026-09-26 — ops#416 registry filled out (session_015pT8Gb, `claude/hirobius-stack-audit-qrgaxb`)
+
+Data-only add to `docs/ai/SURFACES.json` (mechanism already shipped 2026-09-24). Added: `site-engine`, `Ralph`, `folio` as `kind: vercel` entries — checked live via Vercel `list_projects` (folio's project is named `portfolio`, matching its `package.json`; site-engine and Ralph have no matching project, so both render `not-deployed`, same as `concrete`); one `kind: github` entry per fleet repo (6); the hds Figma library — published (`libraryFileKey`, read-only) and staging (`stagingFileKey`, agent write target) — sourced from `hds/figma/links.json`; and the 2026-09-25 build-vs-buy Claude artifact. No code touched — `lib/projects/surfaces.mjs`'s join already handles the new `kind`s as `external`. `tests/api/surfaces.test.ts` + `StandingPage.surfaces.test.tsx` (28/28) and `pnpm typecheck` green.
+
+**CORRECTED same day, same branch, after review** — four things were wrong against the live Vercel list:
+
+1. A Vercel project named `concrete` was created ~2026-09-24, after the check above ran, and was missed. `concrete-storefront` now has `vercelProject: "concrete"` + `gated: true` (SSO-protected, no custom domain) instead of `null` — it was rendering `not-deployed` for a surface that is in fact live. The "same as concrete" DONE-LOG line above is now false for site-engine/Ralph in the sense that concrete itself changed, not that those two did — they're still genuinely undeployed, re-verified live.
+2. Added `hds-storybook` (`vercelProject: "hirobius-design-system"`) — the Storybook surface the ops#416 issue names, live on Vercel and exactly `hds/figma/links.json`'s `storybookUrl`. Missed the first pass because that project wasn't in the Figma-sourced entries.
+3. Dropped `site-engine-factory` and `ralph-loop` as `kind: vercel` entries with `vercelProject: null`. ops#416 reserves the `not-deployed` render for a surface that SHOULD be a deployed site and isn't (the concrete case). Neither site-engine nor Ralph is meant to be a site — their own `$comment`s said so — so declaring them as `vercel` repeated the exact false alarm the board exists to prevent. `repo-site-engine`/`repo-ralph` (`kind: github`) already cover them.
+4. Added `clients-gallery` (internal preview app, ungated) and `clients-monroe-street-power-wash` (client site, `middleware.ts` basic-auth gated) as `kind: vercel` entries — both are live Vercel projects under site-engine's `apps/*` that the first pass's own comment called "already their own surfaces" without actually registering them, leaving the DoD's "every surface across the six repos" unmet.
+
+Verified live via Vercel `list_projects`/`get_project` (`adrian-6234s-projects`) for all four; the build-vs-buy artifact URL (`JfSrq2bdwPYFTtQjDckQ7a`) was re-read and confirmed correct (title matches, content matches). `tests/api/surfaces.test.ts` updated (the `concrete.vercelProject` assertion flipped from `toBeNull()` to `toBe('concrete')`, plus a `gated` check) since the premise it locked in was the thing that needed fixing. `pnpm typecheck` clean, `pnpm test` 141 files / 1892 tests green. No code touched beyond that one test file.
+
 ## 2026-09-25 — `/ops/standing` reads live, not authored (session_015pT8Gb, PR #426)
 
 Adrian asked whether Standing was accurate. Counts were already live; four things read as authored or misleading, now fixed: (1) the coverage line prints open PRs beside open issues, so it reconciles with the repo chips (which count both — "97" vs "108" was 11 PRs, not a bug); (2) the chain total says "won", not "paid" — it counts `won_at`, and nothing reads Stripe; stage 8 renamed "Win the deal"; (3) stage notes lost their status claims ("has never run", "no billing path yet", "columns are live") — a test now forbids that vocabulary in notes; (4) status is derived instead: `optionalEnvKeys` (PAGESPEED_API_KEY on stage 3) report live without blocking, and each stage's linked issues show open/closed from the fleet read (unknown, never "closed", when the read is truncated or ops errored). #27 joined stage 6's issues (the old note named it). Took over session_01KaDkS8's stale StandingPage claim (idle since 09-21; its work shipped in #411). DOM budget StandingPage 167→171.
+
+## 2026-09-26 — ops#423: @hirobius/design-system ^0.13.0 → ^0.16.0 (session_015pT8Gb, `claude/hirobius-stack-audit-qrgaxb`)
+
+npm's latest was 0.16.0 by the time this ran (issue text said 0.15.0, filed a day earlier), so bumped to that and read the full 0.14–0.16 CHANGELOG for breaking changes: `TenantProvider`'s `VITE_TENANT_SLUG`→`slug` prop change (0.14) never applied here — ops always called `<TenantProvider>` with no slug. The one real call site: 0.16.0 removed the unused `--primitive-typography-weight-semibold` token; `src/app/pages/ops/library/styles.ts` was the only consumer (`bandTitle.fontWeight`), swapped to `hds.fontWeight.bold` (closest of the three remaining weights to the old 600). `pnpm typecheck`, `pnpm test` (141/141, 1892/1892), `pnpm check:full`, `pnpm test:layout` (19/19, including `/ops/library` and `/ops/standing`), `bash ralph/gate.sh` all green.

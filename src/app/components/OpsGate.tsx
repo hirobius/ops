@@ -10,23 +10,11 @@
  * /api/ops-me reports whether that cookie is valid. The data/action api/ routes
  * enforce the same cookie, so this is a real gate — no client-bundled hash.
  */
-/* hds-bypass: gate screen — 320px maxWidth is a fixed form measure, not a layout token */
 // motion-ok: auth gate renders once and exits — CSS opacity transition on button is sufficient, no choreographed sequence needed
 // ref-ok: OpsGate is a self-contained auth screen; the password input is internal state and not composable
+// 320px form maxWidth below is a fixed form measure, not a layout token — no HDS piece covers it.
 import { useEffect, useState, type ReactNode } from 'react';
-import hds from '@hirobius/design-system/tokens';
-
-const opsGateStyles = {
-  submitBtnBase: {
-    ...hds.typeStyles.ui,
-    padding: `var(--hds-space-sm) var(--hds-space-lg)`,
-    border: '1px solid var(--semantic-color-border-strong)',
-    borderRadius: 'var(--semantic-radius-action)',
-    background: 'var(--semantic-color-surface-overlay)',
-    color: 'var(--semantic-color-content-primary)',
-    transition: `opacity var(--hds-motion-productive-duration) ease, background-color var(--hds-motion-productive-duration) ease`,
-  } satisfies React.CSSProperties,
-} as const;
+import { Button, Input, Text } from '@hirobius/design-system';
 
 // Dev has no deployed api/ functions (the Vite middleware serves the data routes
 // locally, unguarded), so bypass the gate in `pnpm dev`.
@@ -101,9 +89,13 @@ export default function OpsGate({ children }: OpsGateProps) {
   if (authed === null) {
     return (
       <main style={{ minHeight: '60vh', display: 'grid', placeItems: 'center' }}>
-        <p style={{ ...hds.typeStyles.ui, color: 'var(--semantic-color-content-secondary)', margin: 0 }}>
+        <Text
+          as="p"
+          variant="ui"
+          style={{ color: 'var(--semantic-color-content-secondary)', margin: 0 }}
+        >
           Checking…
-        </p>
+        </Text>
       </main>
     );
   }
@@ -127,25 +119,21 @@ export default function OpsGate({ children }: OpsGateProps) {
           textAlign: 'center',
         }}
       >
-        <h1
-          style={{
-            ...hds.typeStyles.h2,
-            color: 'var(--semantic-color-content-primary)',
-            margin: 0,
-          }}
+        <Text
+          as="h1"
+          variant="heading2"
+          style={{ color: 'var(--semantic-color-content-primary)', margin: 0 }}
         >
           /ops
-        </h1>
-        <p
-          style={{
-            ...hds.typeStyles.body,
-            color: 'var(--semantic-color-content-secondary)',
-            margin: 0,
-          }}
+        </Text>
+        <Text
+          as="p"
+          variant="body"
+          style={{ color: 'var(--semantic-color-content-secondary)', margin: 0 }}
         >
           Internal area. Enter the key to continue.
-        </p>
-        <input
+        </Text>
+        <Input
           type="password"
           value={input}
           onChange={(e) => {
@@ -154,39 +142,26 @@ export default function OpsGate({ children }: OpsGateProps) {
           }}
           aria-label="Ops gate key"
           autoComplete="current-password"
-          style={{
-            ...hds.typeStyles.body,
-            padding: `var(--hds-space-sm) var(--hds-space-md)`,
-            border: '1px solid var(--semantic-color-border-subdued)',
-            borderRadius: 'var(--semantic-radius-action)',
-            background: 'var(--semantic-color-surface-page)',
-            color: 'var(--semantic-color-content-primary)',
-          }}
+          error={Boolean(error)}
         />
         {error && (
-          <p
+          <Text
+            as="p"
             role="alert"
-            style={{
-              ...hds.typeStyles.ui,
-              color: 'var(--semantic-color-feedback-error)',
-              margin: 0,
-            }}
+            variant="ui"
+            style={{ color: 'var(--semantic-color-feedback-error)', margin: 0 }}
           >
             {error}
-          </p>
+          </Text>
         )}
-        <button
+        <Button
           type="submit"
+          variant="secondary"
           disabled={checking || input.length === 0}
-          className="hds-focus"
-          style={{
-            ...opsGateStyles.submitBtnBase,
-            cursor: checking || input.length === 0 ? 'not-allowed' : 'pointer',
-            opacity: checking || input.length === 0 ? 0.5 : 1,
-          }}
+          loading={checking}
         >
           {checking ? 'Checking…' : 'Continue'}
-        </button>
+        </Button>
       </form>
     </main>
   );

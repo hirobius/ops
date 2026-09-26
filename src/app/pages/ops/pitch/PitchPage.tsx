@@ -62,6 +62,12 @@ interface PitchNote {
   body: string;
 }
 
+interface GbpGap {
+  gap: string;
+  evidence: string;
+  line: string;
+}
+
 interface PitchLead {
   id: string;
   name: string | null;
@@ -78,6 +84,9 @@ interface PitchLead {
   next_action_at: string | null;
   /** Only the ?pitch=1 shape carries these; treat as optional at the edge. */
   notes?: PitchNote[];
+  /** The lead's strongest Google Business Profile gap (ops#413), or null when
+   * it has none — an opening line for the call, never a dial-pressure prompt. */
+  gbp_gap?: GbpGap | null;
 }
 
 interface PitchResponse {
@@ -252,6 +261,8 @@ export default function PitchPage() {
                       }`
                     : ''}
                 </div>
+
+                {lead.gbp_gap ? <p style={s.openingLine}>{lead.gbp_gap.line}</p> : null}
 
                 <div style={s.actions}>
                   {lead.phone ? (
@@ -488,6 +499,15 @@ const s = {
   },
   name: { ...hds.typeStyles.h3, margin: 0, color: 'var(--semantic-color-content-primary)' },
   meta: { ...hds.typeStyles.caption, color: 'var(--semantic-color-content-secondary)' },
+  openingLine: {
+    ...hds.typeStyles.bodySmall,
+    margin: 0,
+    padding: hds.space.px8,
+    borderRadius: hds.borderRadius.sm,
+    borderLeft: '3px solid var(--semantic-color-content-accent)',
+    background: 'var(--semantic-color-surface-base)',
+    color: 'var(--semantic-color-content-primary)',
+  },
   actions: { display: 'flex', flexWrap: 'wrap' as const, gap: hds.space.px8 },
   callBtn: {
     ...hds.typeStyles.label,

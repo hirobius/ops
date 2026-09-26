@@ -1,0 +1,145 @@
+{
+  "$comment": "Data for /ops/library/pipeline-walkthrough. The visual companion to docs/ARCHITECTURE.md — the narrative, not live status. Both update together; /ops/standing (not this page, not ARCHITECTURE.md) is the source for whether a stage actually works today.",
+  "updated": "2026-07-08",
+  "canonicalSource": "docs/ARCHITECTURE.md",
+  "headline": "Lead to invoice, end-to-end — and where it breaks",
+  "lede": "Every stage of lead → score → site → preview → outreach → reply → deal → invoice, its moving parts, and an honest status. Built for the operator, not the archive.",
+  "thesis": "Both ends are built — sourcing and scoring are live, outreach is scaffolded. But the middle is the broken link: the site actually gets generated (stage 3) and published (stage 4) has never run end-to-end. Until it does, there is no preview link to send. That middle — not the outreach engine — is the #1 build target.",
+  "tally": [
+    { "status": "live", "label": "live", "count": 3 },
+    { "status": "gated", "label": "gated", "count": 2 },
+    { "status": "scaffold", "label": "scaffolded", "count": 2 },
+    { "status": "gap", "label": "gap", "count": 2 }
+  ],
+  "legend": [
+    { "status": "live", "label": "live / proven" },
+    { "status": "gated", "label": "gated on a human step" },
+    { "status": "scaffold", "label": "scaffolded, unrun" },
+    { "status": "gap", "label": "gap / broken" }
+  ],
+  "stages": [
+    {
+      "n": 1,
+      "title": "Source leads",
+      "status": "live",
+      "statusLabel": "live · spend on hold",
+      "description": "Scrape local businesses via Outscraper, normalize + score, upsert to Supabase. Proven: Run 01 = 249 leads, 25 qualified. Opt-out suppression is enforced on ingest.",
+      "chips": [
+        "scripts/outscraper-fetch.mjs",
+        "lib/lead-gen/",
+        "lib/supabase/leads.mjs",
+        "/ops/leads + sweep presets",
+        "OUTSCRAPER_API_KEY",
+        "SUPABASE_*"
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Score & qualify",
+      "status": "live",
+      "statusLabel": "live",
+      "extraStatus": "gated",
+      "extraStatusLabel": "3rd scorer gated",
+      "description": "lead_score (need) + build_score (demo material); qualified at ≥ 60. The site-quality / redesign scorer (PageSpeed) is built but waits on a key + migration.",
+      "chips": [
+        "scripts/lib/outscraper-normalize.mjs",
+        "scripts/prospect-stats.mjs",
+        "scripts/audit-sites.mjs",
+        "PAGESPEED_API_KEY",
+        "migration 0006"
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Generate the site",
+      "status": "scaffold",
+      "statusLabel": "wired · never run",
+      "description": "The agent (enrich → generate → judge) emits a ClientConfig. Triggered from the board, but never actually run on a real lead — and it produces a config, not a live site.",
+      "chips": [
+        "lib/agent/",
+        "lib/schema (ClientConfig)",
+        "/api/lead-action → generate",
+        "ANTHROPIC_API_KEY"
+      ]
+    },
+    {
+      "n": 4,
+      "title": "Build & publish",
+      "status": "gap",
+      "statusLabel": "gap · mid-cutover",
+      "description": "Duda is retired; the Astro clients factory is the replacement but isn't live yet (Cutover Part B). There is no working path from config → a published preview site today — this is the hole.",
+      "chips": [
+        "lib/render/",
+        "lib/duda/ (retired)",
+        "hirobius/clients (Astro)",
+        "ops-astro-cutover-plan.md"
+      ],
+      "brokenMiddleAfter": true
+    },
+    {
+      "n": 5,
+      "title": "Preview / client portal",
+      "status": "live",
+      "statusLabel": "live · needs a site",
+      "description": "The /c/:slug?token= portal (server-side auth) shows the live preview + milestones + a feedback form. The lead's preview_url is the hook the outreach email points at.",
+      "chips": [
+        "lib/portal-auth.mjs",
+        "api/portal-verify.ts",
+        "ClientPortalPage",
+        "PORTAL_HMAC_SECRET"
+      ]
+    },
+    {
+      "n": 6,
+      "title": "Outreach",
+      "status": "scaffold",
+      "statusLabel": "scaffolded",
+      "extraStatus": "gated",
+      "extraStatusLabel": "gated",
+      "description": "Smartlead adapter + push script (dry-run by default, compliance-filtered). Sending is gated on the key + a warmed sending domain (2–4 wk). The reply/bounce webhook is deferred (function cap + secret).",
+      "chips": [
+        "lib/outreach/",
+        "scripts/push-outreach.mjs",
+        "SMARTLEAD_API_KEY",
+        "SMARTLEAD_CAMPAIGN_ID"
+      ]
+    },
+    {
+      "n": 7,
+      "title": "CRM lifecycle & compliance",
+      "status": "gated",
+      "statusLabel": "built · migration not applied",
+      "description": "Lifecycle columns + opt-out suppression + retention purge are built; they activate once migration 0007 is applied. B2B cold email is CAN-SPAM-legal; the privacy page is the open item.",
+      "chips": [
+        "migration 0007",
+        "scripts/purge-stale-leads.mjs",
+        "docs/prospecting/compliance.md",
+        "do_not_contact (#36)"
+      ]
+    },
+    {
+      "n": 8,
+      "title": "Deal → invoice",
+      "status": "future",
+      "statusLabel": "not built",
+      "description": "The funnel's end. No won-deal → billing path exists yet — a future stage once the middle is closed and outreach is converting.",
+      "chips": ["— future —"]
+    }
+  ],
+  "commandCenter": {
+    "title": "Cross-cutting · the command center (/ops)",
+    "heading": "The dashboard everything runs from",
+    "status": "live",
+    "description": "Surfaces: leads · tasks · digest · projects · issues · clients · agentic-os home. Password-gated, with a machine-auth key for headless agents. The fleet view watches every Vercel deploy + repo status; the task board imports GitHub issues and dispatches them by @-mentioning Claude; every autonomous run posts a recap to the run-log. The pre-Ralph /admin/approvals inbox was retired 2026-07-13 (ops#157) — merge governance now runs through ralph-gate and the ops#238 boundary: green merges by default, a diff touching a supervised revenue path needs ralph-approved (enforced by scripts/ralph-watchdog.mjs; the engine's ralph-auto arm has no path check yet).",
+    "chips": [
+      "/ops/* surfaces",
+      "scripts/deploy-alert.mjs",
+      "tasks importer (#25)",
+      "docs/ops/run-log.jsonl",
+      "OPS_GATE_PASSWORD",
+      "OPS_AGENT_KEY"
+    ],
+    "openNote": "Open here: the autonomy dial and tier→model dispatch UI polish (#13)."
+  },
+  "footer": "Canonical source: docs/ARCHITECTURE.md · updated 2026-07-08 · legend: green live · amber gated · blue scaffolded · red gap"
+}

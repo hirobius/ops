@@ -21,16 +21,14 @@
       "title": "State of play",
       "date": "2026-09-19",
       "summary": "The business picture: the six numbers, the blockers, and the order to work them.",
-      "render": "legacy",
-      "source": "docs/state-of-play.html"
+      "render": "hds"
     },
     {
       "slug": "pipeline-walkthrough",
       "title": "Pipeline walkthrough",
       "date": "2026-09-17",
       "summary": "Visual companion to docs/ARCHITECTURE.md: lead → site → outreach → invoice. The narrative, not the live status — /ops/standing owns that.",
-      "render": "legacy",
-      "source": "docs/pipeline-walkthrough.html"
+      "render": "hds"
     }
   ]
 }

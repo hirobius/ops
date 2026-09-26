@@ -60,7 +60,7 @@ export const s = {
   } as CSSProperties,
   bandTitle: {
     ...hds.typeStyles.body,
-    fontWeight: hds.fontWeight.semibold ?? 600,
+    fontWeight: hds.fontWeight.bold,
     color: 'var(--semantic-color-content-primary)',
     textDecoration: 'none',
   } as CSSProperties,
