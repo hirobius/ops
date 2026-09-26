@@ -13,7 +13,7 @@
     "src/app/pages/ops/ClientReportPage.tsx": 55,
     "src/app/pages/ops/ClientsIndexPage.tsx": 77,
     "src/app/pages/ops/Disclosure.tsx": 8,
-    "src/app/pages/ops/PageHeader.tsx": 8,
+    "src/app/pages/ops/PageHeader.tsx": 4,
     "src/app/pages/ops/agentic-os/AgenticOSPage.tsx": 25,
     "src/app/pages/ops/agentic-os/PluginsBar.tsx": 19,
     "src/app/pages/ops/agentic-os/ResearchBar.tsx": 31,
@@ -35,18 +35,20 @@
     "src/app/pages/ops/library/BuildVsBuyReport.tsx": 61,
     "src/app/pages/ops/library/LibraryPage.tsx": 13,
     "src/app/pages/ops/library/LibraryReportPage.tsx": 12,
+    "src/app/pages/ops/library/PipelineWalkthroughReport.tsx": 40,
+    "src/app/pages/ops/library/StateOfPlayReport.tsx": 82,
     "src/app/pages/ops/pitch/PitchPage.tsx": 40,
     "src/app/pages/ops/standing/IssueActions.test.tsx": 1,
     "src/app/pages/ops/standing/RepoFilter.test.tsx": 12,
     "src/app/pages/ops/standing/RepoFilter.tsx": 9,
     "src/app/pages/ops/standing/Sev1Banner.test.tsx": 9,
-    "src/app/pages/ops/standing/Sev1Banner.tsx": 20,
+    "src/app/pages/ops/standing/Sev1Banner.tsx": 22,
     "src/app/pages/ops/standing/StandingPage.freshness.test.tsx": 2,
     "src/app/pages/ops/standing/StandingPage.surfaces.test.tsx": 2,
     "src/app/pages/ops/standing/StandingPage.test.tsx": 2,
     "src/app/pages/ops/standing/StandingPage.tsx": 171,
     "src/app/routes.tsx": 29
   },
-  "updatedAt": "2026-09-26T01:40:18.262Z",
-  "sha": "c91e380"
+  "updatedAt": "2026-09-26T03:45:58.661Z",
+  "sha": "79fc229"
 }

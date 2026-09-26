@@ -1,5 +1,3 @@
-/* hds-bypass: ops-internal page. Inline styles intentional for ops dashboard. */
-
 /**
  * Sev1Banner — every open sev1 across the fleet, at the top of /ops/standing.
  *
@@ -21,7 +19,7 @@
 
 import { useId } from 'react';
 import type { CSSProperties } from 'react';
-import { Badge } from '@hirobius/design-system';
+import { Badge, Callout } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { shortRepo, type FleetIssue } from '../ralphStatus';
 import { SEVERITY_LADDER } from '../../../../../lib/tasks/severity.mjs';
@@ -56,17 +54,19 @@ export function Sev1Banner({
   if (needsToken || (error && !loaded)) {
     const reason = asSentence(error ?? NO_TOKEN);
     return (
-      <section style={s.banner} aria-labelledby={headingId}>
-        <div style={s.head}>
-          <h2 id={headingId} style={s.title}>
-            Open sev1
-          </h2>
-          <span style={s.count}>UNKNOWN</span>
-        </div>
-        <p style={s.means}>
-          Couldn’t read the fleet, so this is not an all-clear: {reason} Run{' '}
-          <code style={s.code}>pnpm sev1:check</code> to list open sev1 from a terminal.
-        </p>
+      <section aria-labelledby={headingId}>
+        <Callout tone="danger">
+          <div style={s.head}>
+            <h2 id={headingId} style={s.title}>
+              Open sev1
+            </h2>
+            <span style={s.count}>UNKNOWN</span>
+          </div>
+          <p style={s.means}>
+            Couldn’t read the fleet, so this is not an all-clear: {reason} Run{' '}
+            <code style={s.code}>pnpm sev1:check</code> to list open sev1 from a terminal.
+          </p>
+        </Callout>
       </section>
     );
   }
@@ -75,48 +75,41 @@ export function Sev1Banner({
   if (sev1.length === 0) return null;
 
   return (
-    <section style={s.banner} aria-labelledby={headingId}>
-      <div style={s.head}>
-        <h2 id={headingId} style={s.title}>
-          Open sev1
-        </h2>
-        <span style={s.count}>{sev1.length} open</span>
-      </div>
-      <p style={s.means}>
-        {SEV1_MEANS}. Stays at the top of this page until closed. The only way to accept one without
-        closing it: relabel it sev2 with a comment on the issue giving the reason.
-      </p>
-      <ul style={s.list}>
-        {sev1.map((i) => (
-          <li key={`${i.repo}#${i.number}`} style={s.row}>
-            <a href={i.url} target="_blank" rel="noreferrer" className="hds-focus" style={s.link}>
-              <span style={s.num}>#{i.number}</span>
-              <span style={s.issueTitle}>{i.title}</span>
-            </a>
-            <div style={s.meta}>
-              <Badge tone="danger">sev1</Badge>
-              <span style={s.repo}>
-                {shortRepo(i.repo)}
-                {i.prio ? ` · ${i.prio}` : ''}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
+    <section aria-labelledby={headingId}>
+      <Callout tone="danger">
+        <div style={s.head}>
+          <h2 id={headingId} style={s.title}>
+            Open sev1
+          </h2>
+          <span style={s.count}>{sev1.length} open</span>
+        </div>
+        <p style={s.means}>
+          {SEV1_MEANS}. Stays at the top of this page until closed. The only way to accept one
+          without closing it: relabel it sev2 with a comment on the issue giving the reason.
+        </p>
+        <ul style={s.list}>
+          {sev1.map((i) => (
+            <li key={`${i.repo}#${i.number}`} style={s.row}>
+              <a href={i.url} target="_blank" rel="noreferrer" className="hds-focus" style={s.link}>
+                <span style={s.num}>#{i.number}</span>
+                <span style={s.issueTitle}>{i.title}</span>
+              </a>
+              <div style={s.meta}>
+                <Badge tone="danger">sev1</Badge>
+                <span style={s.repo}>
+                  {shortRepo(i.repo)}
+                  {i.prio ? ` · ${i.prio}` : ''}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Callout>
     </section>
   );
 }
 
 const s = {
-  banner: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: hds.space.px8,
-    padding: hds.space.px16,
-    borderLeft: '3px solid var(--semantic-color-feedback-error)',
-    borderRadius: `0 ${hds.borderRadius.sm} ${hds.borderRadius.sm} 0`,
-    background: 'var(--semantic-color-surface-raised)',
-  },
   head: {
     display: 'flex',
     alignItems: 'baseline',

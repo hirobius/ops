@@ -1,5 +1,3 @@
-/* hds-bypass: ops-internal chrome. Inline styles intentional for standalone ops surfaces. */
-
 /**
  * PageHeader — locked-down chrome for /ops surfaces.
  *
@@ -15,7 +13,7 @@
  */
 
 import type { CSSProperties } from 'react';
-import { Link } from 'react-router';
+import { Breadcrumb, Text } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 
 export interface BreadcrumbItem {
@@ -26,79 +24,43 @@ export interface BreadcrumbItem {
 
 export interface PageHeaderProps {
   breadcrumbs?: BreadcrumbItem[];
-  title:        string;
-  lede?:        string;
+  title: string;
+  lede?: string;
 }
 
 export function PageHeader({ breadcrumbs, title, lede }: PageHeaderProps) {
   return (
     <header style={s.root}>
-      {breadcrumbs && breadcrumbs.length > 0 ? (
-        <nav aria-label="Breadcrumb" style={s.crumbs}>
-          {breadcrumbs.map((c, i) => {
-            const isLast = i === breadcrumbs.length - 1;
-            return (
-              <span key={`${c.label}-${i}`} style={s.crumbWrap}>
-                {c.href && !isLast ? (
-                  <Link to={c.href} style={s.crumbLink}>{c.label}</Link>
-                ) : (
-                  <span style={isLast ? s.crumbCurrent : s.crumbLink}>{c.label}</span>
-                )}
-                {!isLast && <span style={s.crumbSep} aria-hidden="true">·</span>}
-              </span>
-            );
-          })}
-        </nav>
+      {breadcrumbs && breadcrumbs.length > 0 ? <Breadcrumb items={breadcrumbs} /> : null}
+
+      <Text as="h1" variant="display" style={s.title}>
+        {title}
+      </Text>
+
+      {lede ? (
+        <Text as="p" variant="body" style={s.lede}>
+          {lede}
+        </Text>
       ) : null}
-
-      <h1 style={s.title}>{title}</h1>
-
-      {lede ? <p style={s.lede}>{lede}</p> : null}
     </header>
   );
 }
 
 const s = {
   root: {
-    display:        'flex',
-    flexDirection:  'column' as const,
-    gap:            hds.space.px8,
-    paddingBottom:  hds.space.px16,
-    borderBottom:   '1px solid var(--semantic-color-border-default)',
-  },
-  crumbs: {
-    display:    'flex',
-    flexWrap:   'wrap' as const,
-    alignItems: 'center',
-    gap:        hds.space.px6,
-  },
-  crumbWrap: {
-    display:    'inline-flex',
-    alignItems: 'center',
-    gap:        hds.space.px6,
-  },
-  crumbLink: {
-    ...hds.typeStyles.ui,
-    color:          'var(--semantic-color-content-secondary)',
-    textDecoration: 'none',
-  },
-  crumbCurrent: {
-    ...hds.typeStyles.ui,
-    color: 'var(--semantic-color-content-primary)',
-  },
-  crumbSep: {
-    ...hds.typeStyles.ui,
-    color: 'var(--semantic-color-border-default)',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: hds.space.px8,
+    paddingBottom: hds.space.px16,
+    borderBottom: '1px solid var(--semantic-color-border-default)',
   },
   title: {
-    ...hds.typeStyles.display,
     margin: 0,
-    color:  'var(--semantic-color-content-primary)',
+    color: 'var(--semantic-color-content-primary)',
   },
   lede: {
-    ...hds.typeStyles.body,
-    margin:   0,
-    color:    'var(--semantic-color-content-secondary)',
+    margin: 0,
+    color: 'var(--semantic-color-content-secondary)',
     maxWidth: '60ch',
   },
 } satisfies Record<string, CSSProperties>;

@@ -1,4 +1,3 @@
-/* hds-bypass: ops-internal chrome. Inline styles intentional for standalone ops surfaces. */
 /* eslint-disable react-hooks/set-state-in-effect -- localStorage hydration on mount is intentional: avoids SSR mismatch */
 /* eslint-disable no-restricted-syntax -- ops-internal; grid layout intentional */
 
@@ -16,6 +15,7 @@
 
 import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { ChevronRight } from 'lucide-react';
+import { Text } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 
 export interface DisclosureProps {
@@ -79,8 +79,14 @@ export function Disclosure({ id, label, hint, defaultOpen = false, children }: D
             flexShrink: 0,
           }}
         />
-        <span style={s.label}>{label}</span>
-        {hint && <span style={s.hint}>{hint}</span>}
+        <Text as="span" variant="eyebrow" style={s.label}>
+          {label}
+        </Text>
+        {hint && (
+          <Text as="span" variant="technical" style={s.hint}>
+            {hint}
+          </Text>
+        )}
       </button>
 
       <div
@@ -118,12 +124,10 @@ const s = {
     color: 'inherit',
   },
   label: {
-    ...hds.typeStyles.eyebrow,
     color: 'var(--semantic-color-content-secondary)',
     flex: '1 1 auto' as const,
   },
   hint: {
-    ...hds.typeStyles.mono,
     fontSize: hds.fontSize.xs,
     color: 'var(--semantic-color-content-secondary)',
     flexShrink: 0,
