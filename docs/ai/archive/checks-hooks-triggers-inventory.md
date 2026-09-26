@@ -212,9 +212,8 @@ session. **To disable:** remove the `PreToolUse` entry from
 `.claude/settings.json`, or set `BLAST_RADIUS_DISABLE=1` in the environment.
 Self-test: `scripts/__tests__/blast-radius.test.mjs`.
 
-Editing `.claude/settings.json` is itself permission-gated in Claude Code
-sessions (hook config is a code-execution surface), so an autonomous session
-cannot self-wire a new hook — the JSON snippet below needs a human apply:
+The hook is wired in `.claude/settings.json` (`PreToolUse`, matcher
+`Edit|Write`) as of this commit:
 
 ```json
 "PreToolUse": [
@@ -223,7 +222,7 @@ cannot self-wire a new hook — the JSON snippet below needs a human apply:
     "hooks": [
       {
         "type": "command",
-        "command": "node scripts/hooks/blast-radius.mjs",
+        "command": "cd \"$(git rev-parse --show-toplevel)\" && node scripts/hooks/blast-radius.mjs",
         "shell": "bash",
         "timeout": 15,
         "statusMessage": "Tracing blast radius..."

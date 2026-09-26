@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node scripts/hooks/blast-radius.mjs",
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && node scripts/hooks/blast-radius.mjs",
             "shell": "bash",
             "timeout": 15,
             "statusMessage": "Tracing blast radius..."
