@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-25T23:45:00Z",
+  "updatedAt": "2026-09-26T01:00:00Z",
   "phase": "live",
   "headline": "PAUSED FOR TRIAGE, TWO SESSIONS RECONCILED (2026-09-24). Adrian has called a deliberate halt: lock the new code issues, close the quarter cleanly, and add structure to how and when we build rather than committing to whatever is most pressing. SCOPE-CREEP BURNDOWN (2026-09-24): 44 issues filed in a week were triaged (0 stale, 1 duplicate) and 29 were built on claude/open-issues-count-1i85qw in ops, hds and Ralph — unmerged, no PRs, no issues closed. /ops/standing now counts only the six fleet repos, issues and PRs alike (ops#405). Detail and leftovers: docs/ai/DONE-LOG.md. THE FUNNEL STILL READS 0 CONTACTED.",
   "next": [

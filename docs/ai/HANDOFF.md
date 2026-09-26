@@ -91,7 +91,7 @@ Allowlist, not a name-list — naming client repos here leaked one.
   one manual email is not. **Outscraper spend (#190) stays ON HOLD.** Publishing
   stays a human action — it is the billing event.
 
-**Done log (latest):** _2026-09-25_ — `/ops/library` + build-vs-buy audit, unmerged.
+**Done log (latest):** _09-26_ ops#5 hook. _09-25_ `/ops/library`+build-vs-buy audit.
 
 ## Adrian's open actions (his court, not blocked on a session)
 
