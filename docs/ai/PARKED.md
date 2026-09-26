@@ -261,6 +261,46 @@ the umbrella.
 - **salvage:** branch `claude/issue-142-20260712-1845` (commit `175fc57`) holds standalone helpers (`taskPaletteMatch.ts`, `taskPaletteActions.ts`, `useTaskCommandPalette.ts`, ~20 unit tests) that carry into a custom overlay. Its tests were never run and its `TaskCommandPalette.tsx` targets an API that doesn't exist. Don't delete the branch in a cleanup.
 - **re-entry rule:** file a fresh issue reusing #142's DoD.
 
+### Agentic review loop (cron → analyze → Discord CTA → @claude issue)
+
+- **origin:** ops#228 (closed 2026-09-26, fleet triage)
+- **trigger:** `event: someone acts by hand on pnpm review:daily findings at least 3 times in one month, OR the Cross-repo Ralph mayor entry fires`
+- **why parked:** only the analyzer exists (`scripts/daily-review.mjs`); no one acts on its output yet, so the loop has nothing to automate.
+
+---
+
+### Codeburn — cost observability + moving-parts spec
+
+- **origin:** ops#71 (closed 2026-09-26, Adrian decision)
+- **trigger:** `event: fleet dispatch moves from flat-rate to metered/per-token spend`
+- **why parked:** dispatch is flat-rate, so there are no dollars to track. The spend ceiling already rides on the mayor entry.
+
+---
+
+### Design-extraction bake-off (SkillUI vs extract-design)
+
+- **origin:** ops#212 (closed 2026-09-26, Adrian decision)
+- **trigger:** `event: the Notes feature (built in a separate thread) is ready to absorb design-extraction capture, OR client onboarding starts reading extracted tokens`
+- **decision (Adrian, 2026-09-26):** park; the capability may fold into the Notes tool rather than run as a standalone bake-off.
+
+---
+
+### Ad-sourced tool leads — Bloom, Greptile
+
+- **origin:** ops#409 (closed 2026-09-26, Adrian decision: pass)
+- **trigger:** `event: a proven, recurring bottleneck that one of these tools addresses (e.g. PR review becomes the bottleneck → Greptile)`
+- **note:** security-posture work Adrian wants lives on ops#33 (free baseline), not in these tools.
+
+---
+
+### Business tooling kit — Cal.com, Tally, Documenso, Wave
+
+- **origin:** 2026-09-25 build-vs-buy audit (`/ops/library/build-vs-buy`), no issue filed by design
+- **trigger:** `event: the first prospect asks to book a call or the first care-plan client signs`
+- **what:** Cal.com (book-a-call link on previews), Tally (client intake form), Documenso (e-sign before build), Wave (bookkeeping fed by Stripe). All have free tiers; set up alongside Stripe billing above.
+
+---
+
 ### Stripe billing — care-plan subscriptions
 
 - **origin:** ops#200 (closed 2026-09-16)
@@ -271,6 +311,57 @@ the umbrella.
 ---
 
 ## Cross-repo
+
+### HDS token modes beyond light/dark
+
+- **origin:** hds#197 (closed 2026-09-26, fleet triage)
+- **trigger:** `event: a client, tenant or accessibility requirement asks for a theme mode other than light/dark (e.g. high-contrast, dim)`
+
+---
+
+### Fleet health monitor — scheduled uptime + JSON-LD + canary form per live site
+
+- **origin:** site-engine#108 (closed 2026-09-26, fleet triage). The site-engine side (`verify-live`, PR #138) is done; the scheduler lives in ops per Adrian's 2026-07-12 placement decision.
+- **trigger:** `event: the first client site is live (live_url in the leads table and SITE_LIVE=true deployed)`
+
+---
+
+### Retire site-engine transfer/backlog docs
+
+- **origin:** site-engine#20 (closed 2026-09-26, fleet triage). Half done in site-engine PR #182.
+- **trigger:** `issue: site-engine#10 closed`
+- **what:** delete `docs/OPS-HANDOFF.md` and `docs/OPS-INTEGRATION*.md` once the frozen engine is removed.
+
+---
+
+### Ralph chain-hop failure alert + backoff
+
+- **origin:** Ralph#15 (closed 2026-09-26, fleet triage)
+- **trigger:** `event: a fleet caller's ralph.yml lacks actions: write under the ralph job, OR a Ralph run log contains "chain hop failed — caller lacks"`
+- **why parked:** the reusable already releases the claim and logs a `::error` naming the caller fix; a dedicated alert only matters once a caller regresses.
+
+---
+
+### Concrete — consignment v1 (guest artists)
+
+- **origin:** concrete#12 (closed 2026-09-26, fleet triage)
+- **trigger:** `event: Studio is live at hirobius.studio (check-launch-ready passes) and at least one real sale of Adrian's own work has gone through`
+
+---
+
+### Concrete — AI content-repurposing pipeline
+
+- **origin:** concrete#6 (closed 2026-09-26, fleet triage)
+- **trigger:** `event: the Concrete storefront is live in production (concrete#1–#4 closed) and one Product has a filled story field`
+
+---
+
+### Multi-page local SEO build (per-service / per-area pages)
+
+- **origin:** site-engine#107 (scope doc merges as the signed-off plan; Adrian decision 2026-09-26)
+- **trigger:** `event: a client buys the multi-page SEO upsell`
+
+---
 
 ### DS Alert — Figma drift
 
