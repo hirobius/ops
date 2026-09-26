@@ -7,6 +7,26 @@
 > Append here when a session ships something; HANDOFF keeps only the most recent
 > Done-log line.
 
+## 2026-09-26 — GBP-gap opening lines on /ops/pitch (ops#413)
+
+`lib/leads/gbp-gaps.mjs` exports a pure `deriveGbpGaps(lead)` (no network calls)
+that reads columns already on `leads` and produces ordered opening lines for
+the phone: no website > no hours > no photos > few photos > not owner-verified
+
+> no logo > low rating. Deliberately excludes `description` and `social` —
+> 263/263 and 195/263 null in the live table, which the issue itself flags as a
+> scraper-coverage gap rather than a real profile gap; they stay out until
+> checked against 5 live profiles. "Never scraped" (should never gap) is gated
+> on `lead_score` being non-null, since it's written in the same batch as every
+> other GBP-derived column by `prospectToLeadRow` — noted in the module as a
+> known limitation that `logo_url`/`hours` still collapse "never fetched" and
+> "confirmed empty" into the same NULL at ingest (a pre-existing ingest-layer
+> issue, not fixed here). 22 unit tests. Wired into `GET /api/leads?pitch=1`
+> (`lib/supabase/leads.mjs` select + `api/leads.ts`) as `gbp_gap` on each pitch
+> lead; `/ops/pitch` renders it as a plain line on the call card — no
+> dial-pressure copy, per Adrian's directive. DOM-node budget for
+> `PitchPage.tsx` ratcheted 39→40. typecheck/test/lint/test:layout all green.
+
 ## status.json headline archive (moved 2026-09-16)
 
 > The root `status.json` `headline` field had accumulated into a single

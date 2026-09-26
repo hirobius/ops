@@ -25,6 +25,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { withOpsHandler, withServiceClient, type HandlerResult } from '../lib/api/handler.js';
 import { listLeads, listPitchQueue } from '../lib/supabase/leads.mjs';
 import { orderPitchQueue, pitchSummary } from '../lib/leads/pitch.mjs';
+import { strongestGbpGap } from '../lib/leads/gbp-gaps.mjs';
 
 const DEFAULT_LIMIT = 200;
 const MAX_LIMIT = 500;
@@ -37,9 +38,15 @@ export async function leadsHandler(sb: SupabaseClient, req: VercelRequest): Prom
     const { data, error } = await listPitchQueue(sb, clampLimit(rawLimit));
     if (error) return { status: 500, body: { error: error.message } };
     const rows = data ?? [];
+    const leads = orderPitchQueue(rows).map((lead) => ({
+      ...lead,
+      // The opening line for the call — see lib/leads/gbp-gaps.mjs. Never a
+      // dial-pressure prompt, just the strongest verifiable profile gap.
+      gbp_gap: strongestGbpGap(lead),
+    }));
     return {
       status: 200,
-      body: { leads: orderPitchQueue(rows), summary: pitchSummary(rows) },
+      body: { leads, summary: pitchSummary(rows) },
     };
   }
 
