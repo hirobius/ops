@@ -118,9 +118,7 @@ Allowlist, not a name-list — naming client repos here leaked one.
 
 ## Next (ordered queue)
 
-0. **Merge `claude/open-issues-count-1i85qw` (ops, hds, Ralph), then close its
-   29 issues** — do not rebuild them. Ralph#25/#26 still need the
-   `ralph-gate-reusable.yml` wiring (human PR) before ops#402.
+0. Ralph#25/#26 need the `ralph-gate-reusable.yml` wiring (human PR) before ops#402.
 1. **Four open ops PRs each wait on a human.** #380: `OPS_AGENT_KEY`. #387:
    migration `0015` + Adrian's import (writes production). #378 (draft): a real
    eval run + `ralph-approved`. #384 (draft): the new hirobius.com.
@@ -180,6 +178,9 @@ Allowlist, not a name-list — naming client repos here leaked one.
 - **2026-09-17: A redacted term can come back in a test fixture.** An agent
   writing a gate's tests reaches for a real example, and without the denylist
   the gate cannot catch it. Denylist first, fixtures second.
+
+- **2026-09-26 (Adrian): Matt Pocock skills are the base kit in EVERY repo.**
+  Missing `.claude/skills/`? Copy the nine from ops first.
 
 ## Standing rules (never violate)
 
