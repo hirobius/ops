@@ -9,31 +9,24 @@
  * Surface flow (top → bottom):
  *   1. PageHeader        locked-down chrome (Clash anchor + divider)
  *   2. SurfacesRail      inline jump-tiles to sibling /ops surfaces
- *   3. Routes            (atlas import) — interactive route tree
- *   4. Clients           (atlas import) — registry card grid
- *   5. Gates             (atlas import) — guardrail validators table
- *   6. Skills / New skill / Plugins / Research (collapsed disclosures)
+ *   3. Services / Skills  (collapsed disclosures)
+ *   4. Gates             (atlas import) — guardrail validators table
+ *
+ * Routes, Clients, New skill, Plugins and Research were stripped 2026-09-27
+ * (ops redesign T1 — confirmed dead by the audit).
  *
  * @category Internal
  * @tier utility
  */
 
-import { type CSSProperties, type ReactNode } from 'react';
-
 import { Page, Stack } from '@hirobius/design-system';
-import hds from '@hirobius/design-system/tokens';
 
 import { PageHeader } from '../PageHeader';
 import { Disclosure } from '../Disclosure';
 
-import RoutesTree from '../atlas/routes-tree';
-import ClientsTab from '../atlas/clients-tab';
 import ValidatorsTab from '../atlas/validators-tab';
 import { SurfacesRail } from './SurfacesRail';
 import { SkillsBar } from './SkillsBar';
-import { SkillCreatorForm } from './SkillCreatorForm';
-import { PluginsBar } from './PluginsBar';
-import { ResearchBar } from './ResearchBar';
 import { ServicesBar } from './ServicesBar';
 
 /** @public */
@@ -54,34 +47,6 @@ export default function AgenticOSPage() {
         </Disclosure>
 
         <Disclosure
-          id="agentic-os.skill-creator"
-          label="New skill"
-          hint="capture intent — build deferred to next session"
-        >
-          <SkillCreatorForm />
-        </Disclosure>
-
-        <Disclosure id="agentic-os.plugins" label="Plugins" hint="Claude Code skills">
-          <PluginsBar />
-        </Disclosure>
-
-        <Disclosure
-          id="agentic-os.research"
-          label="Research"
-          hint="auto-research findings — local Ollama"
-        >
-          <ResearchBar />
-        </Disclosure>
-
-        <Section label="Routes" hint="all /app routes — clickable">
-          <RoutesTree />
-        </Section>
-
-        <Disclosure id="agentic-os.clients" label="Clients" hint="active retainers + prospects">
-          <ClientsTab />
-        </Disclosure>
-
-        <Disclosure
           id="agentic-os.gates"
           label="Gates"
           hint="guardrail registry — severity, fixture, owner"
@@ -92,39 +57,3 @@ export default function AgenticOSPage() {
     </Page>
   );
 }
-
-function Section({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
-  return (
-    <Stack as="section" direction="column" gap="px8">
-      <Stack
-        direction="row"
-        align="center"
-        justify="space-between"
-        gap="px8"
-        style={{
-          paddingBottom: hds.space.px4,
-          borderBottom: '1px solid var(--semantic-color-border-default)',
-        }}
-      >
-        <span style={s.sectionLabel}>{label}</span>
-        {hint && <span style={s.sectionHint}>{hint}</span>}
-      </Stack>
-      <div style={s.sectionBody}>{children}</div>
-    </Stack>
-  );
-}
-
-const s = {
-  sectionLabel: {
-    ...hds.typeStyles.eyebrow,
-    color: 'var(--semantic-color-content-secondary)',
-  } as CSSProperties,
-  sectionHint: {
-    ...hds.typeStyles.mono,
-    fontSize: hds.fontSize.xs,
-    color: 'var(--semantic-color-content-secondary)',
-  } as CSSProperties,
-  sectionBody: {
-    paddingTop: hds.space.px8,
-  } as CSSProperties,
-};

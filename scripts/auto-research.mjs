@@ -12,9 +12,10 @@
  * Per the kanban task t_b28fc089:
  *   - manifest:    docs/research/queries.json (committed; sample queries)
  *   - runner:      this script (committed)
- *   - surface:     /ops/agentic-os "Research" disclosure (committed)
+ *   - surface:     none — the /ops "Research" disclosure was removed
+ *                  2026-09-27 (ops redesign T1); read findings on disk.
  *   - scheduling:  DEFERRED — VPS not yet provisioned. Trigger manually
- *                  via the ops surface or `node scripts/auto-research.mjs --once`
+ *                  via `node scripts/auto-research.mjs --once`
  *                  until cron infra exists. Documented in
  *                  docs/research/queries.json and CLAUDE.md.
  *
