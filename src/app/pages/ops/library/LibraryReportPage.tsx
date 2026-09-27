@@ -24,7 +24,7 @@ import { PageHeader } from '../PageHeader';
 import BuildVsBuyReport from './BuildVsBuyReport';
 import PipelineWalkthroughReport from './PipelineWalkthroughReport';
 import StateOfPlayReport from './StateOfPlayReport';
-import { LEGACY_LOADERS, library } from './libraryData';
+import { LEGACY_LOADERS, isExternalHref, library } from './libraryData';
 
 const NATIVE: Record<string, () => JSX.Element> = {
   'build-vs-buy': BuildVsBuyReport,
@@ -70,6 +70,10 @@ export default function LibraryReportPage() {
   const entry = library.find((e) => e.slug === slug);
   // Unknown slug, or an entry that lives at its own route (e.g. /ops/audit).
   if (!entry) return <Navigate to="/ops/library" replace />;
+  if (isExternalHref(entry.href)) {
+    window.location.replace(entry.href!);
+    return null;
+  }
   if (entry.href) return <Navigate to={entry.href} replace />;
 
   const Native = NATIVE[slug];

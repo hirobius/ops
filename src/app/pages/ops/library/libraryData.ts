@@ -24,7 +24,7 @@ export interface LibraryEntry {
   date: string;
   summary: string;
   render: RenderMode;
-  /** Set when the report already lives at its own route (e.g. `/ops/audit`). */
+  /** Set when the report lives at its own route (e.g. `/ops/audit`) or outside ops (an https Figma file or artifact). */
   href?: string;
   /** Repo path of a legacy HTML file. */
   source?: string;
@@ -150,6 +150,11 @@ export const pipelineWalkthrough = pipelineWalkthroughJson as PipelineWalkthroug
  * register a loader.
  */
 export const LEGACY_LOADERS: Record<string, () => Promise<string>> = {};
+
+/** True for a link that leaves ops (Figma, an artifact) — opened in a new tab, not routed. */
+export function isExternalHref(href: string | undefined): boolean {
+  return typeof href === 'string' && href.startsWith('https://');
+}
 
 export function entryHref(entry: Pick<LibraryEntry, 'slug' | 'render' | 'href'>): string {
   return entry.href ?? `/ops/library/${entry.slug}`;
