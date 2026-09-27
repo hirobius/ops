@@ -1,4 +1,29 @@
 {
+  "permissions": {
+    "deny": [
+      "mcp__Figma",
+      "mcp__Gmail",
+      "mcp__Google_Calendar",
+      "mcp__Google_Drive",
+      "mcp__Wix",
+      "mcp__Excalidraw",
+      "mcp__Claude_Docs"
+    ]
+  },
+  "skillOverrides": {
+    "anthropic-skills:algorithmic-art": "off",
+    "anthropic-skills:built-in-browser": "off",
+    "anthropic-skills:chrome-browser": "off",
+    "anthropic-skills:computer-use": "off",
+    "anthropic-skills:docx": "off",
+    "anthropic-skills:pptx": "off",
+    "anthropic-skills:xlsx": "off",
+    "anthropic-skills:import-memory": "off",
+    "anthropic-skills:morning": "off",
+    "anthropic-skills:extract-design": "off",
+    "keybindings-help": "off",
+    "session-start-hook": "off"
+  },
   "hooks": {
     "PreToolUse": [
       {

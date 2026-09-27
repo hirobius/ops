@@ -7,6 +7,23 @@
 > Append here when a session ships something; HANDOFF keeps only the most recent
 > Done-log line.
 
+## 2026-09-27 — per-turn tool payload trim, repo-local slice (ops#427)
+
+`.claude/settings.json` gets bare-name `permissions.deny` for seven MCP
+connectors with no call site in ops (`Figma`, `Gmail`, `Google_Calendar`,
+`Google_Drive`, `Wix`, `Excalidraw`, `Claude_Docs`) and `skillOverrides: "off"`
+for twelve bundled Anthropic skills with no ops use (`algorithmic-art`,
+`built-in-browser`, `chrome-browser`, `computer-use`, `docx`, `pptx`, `xlsx`,
+`import-memory`, `morning`, `extract-design`, `keybindings-help`,
+`session-start-hook`). Kept, with reasons: `github`, `Vercel`, `Supabase`
+connectors and the `playwright` `.mcp.json` server; the vendored
+`.claude/skills/` set is untouched by either lever. Full audit + rationale:
+`docs/guardrails/tool-audit-427.md`. Steering-budget baseline recorded
+(25.0KB/25.0KB CLAUDE.md+HANDOFF+NORTH_STAR — unaffected by this change, a
+different context axis). **Not done**: `/context` before/after and the
+logging-proxy per-tool ranking (need an interactive session), hds/site-engine's
+own audits (separate repos), and a post-change green Ralph/`@claude` run.
+
 ## 2026-09-26 — state-of-play + pipeline-walkthrough onto native HDS (ops#424)
 
 `StateOfPlayReport.tsx` and `PipelineWalkthroughReport.tsx` under
