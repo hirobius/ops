@@ -59,10 +59,13 @@ import {
 } from '../ralphStatus';
 import { deriveChain } from '../../../../../lib/chain/evidence.mjs';
 import { freshnessLabel } from '../../../../../lib/projects/freshness.mjs';
+import { Disclosure } from '../Disclosure';
 import { RepoFilter } from './RepoFilter';
 import { filterByRepo, type RepoOption } from './repoScope';
 import { useRepoScope } from './useRepoScope';
 import { Sev1Banner } from './Sev1Banner';
+import { CopyBox } from './CopyBox';
+import { chores, guideUrl, stepsFor, type StepItem } from './adrianSteps';
 
 /**
  * Manual refresh only (ops, 2026-09-19 — Adrian's call).
@@ -338,6 +341,25 @@ export default function StandingPage() {
           expanded={expanded.has('blocked')}
           onToggle={toggleLane}
         />
+        <Disclosure id="adrian-chores" label={`Housekeeping (no issue) · ${chores.length}`}>
+          <ul style={s.choreList}>
+            {chores.map((chore) => (
+              <li key={chore.id} style={s.choreItem}>
+                <span style={s.choreTitle}>{chore.title}</span>
+                <StepList steps={chore.steps} />
+              </li>
+            ))}
+          </ul>
+        </Disclosure>
+        <a
+          href={guideUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="hds-focus"
+          style={s.guideLink}
+        >
+          Full step-by-step guide ↗
+        </a>
       </Section>
 
       {/* ── 2b. Decision countdown (ops#418) ─────────────────────────────── */}
@@ -678,6 +700,7 @@ function IssueRow({
 }) {
   const id = `${issue.repo}#${issue.number}`;
   const outcome = acted.get(id);
+  const steps = stepsFor(issue.repo, issue.number);
   return (
     <li style={outcome?.ok ? { ...s.row, ...s.rowActed } : s.row}>
       <a href={issue.url} target="_blank" rel="noreferrer" className="hds-focus" style={s.rowLink}>
@@ -688,7 +711,49 @@ function IssueRow({
       <IssueMeta issue={issue} />
       <IssueActions id={id} issue={issue} busy={busy} dispatched={dispatched} act={act} />
       <RowResult outcome={outcome} />
+      {steps ? (
+        <Disclosure id={`adrian-steps-${id}`} label={`How to (${steps.length} steps)`}>
+          <StepList steps={steps} />
+        </Disclosure>
+      ) : null}
     </li>
+  );
+}
+
+/**
+ * Adrian's copy-ready how-to for one issue or chore (ops's fleet to-do guide,
+ * folded into the lane it belongs to instead of living as a separate page).
+ * Each step is plain text plus an optional link and an optional copy box —
+ * never both squeezed onto one line, so a long command block never fights the
+ * link beside it for width.
+ */
+function StepList({ steps }: { steps: readonly StepItem[] }) {
+  return (
+    <ol style={s.stepList}>
+      {steps.map((step, i) => (
+        <li key={i} style={s.stepItem}>
+          <span>
+            {step.text}
+            {step.href ? (
+              <>
+                {' '}
+                <a
+                  href={step.href}
+                  target={step.href.startsWith('http') ? '_blank' : undefined}
+                  rel={step.href.startsWith('http') ? 'noreferrer' : undefined}
+                  className="hds-focus"
+                  style={s.stepLink}
+                  title={step.href}
+                >
+                  Open ↗
+                </a>
+              </>
+            ) : null}
+          </span>
+          {step.copy ? <CopyBox text={step.copy} /> : null}
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -1688,5 +1753,48 @@ const s = {
     padding: `0 ${hds.space.px4}`,
     borderRadius: hds.borderRadius.sm,
     background: 'var(--semantic-color-surface-raised)',
+  },
+
+  /* Adrian's how-to steps */
+  stepList: {
+    listStyle: 'decimal',
+    margin: 0,
+    padding: `0 0 0 ${hds.space.px20}`,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: hds.space.px8,
+  },
+  stepItem: {
+    ...hds.typeStyles.bodySmall,
+    color: 'var(--semantic-color-content-secondary)',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: hds.space.px4,
+  },
+  stepLink: {
+    color: 'var(--semantic-color-content-accent)',
+    whiteSpace: 'nowrap' as const,
+  },
+  choreList: {
+    listStyle: 'none',
+    margin: 0,
+    padding: 0,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: hds.space.px12,
+  },
+  choreItem: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: hds.space.px4,
+  },
+  choreTitle: {
+    ...hds.typeStyles.bodySmall,
+    fontWeight: 600,
+    color: 'var(--semantic-color-content-primary)',
+  },
+  guideLink: {
+    ...hds.typeStyles.caption,
+    color: 'var(--semantic-color-content-accent)',
   },
 } satisfies Record<string, CSSProperties>;

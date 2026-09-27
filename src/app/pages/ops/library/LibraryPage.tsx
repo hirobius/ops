@@ -1,5 +1,3 @@
-/* hds-bypass: ops-internal page */
-
 /**
  * LibraryPage — `/ops/library`. Every report and research artifact in one
  * place, each marked by whether it is built on HDS yet. The HDS count is the
@@ -13,11 +11,11 @@
 
 import { Link } from 'react-router';
 
-import { Badge, Page, Stack } from '@hirobius/design-system';
+import { Badge, Divider, Page, Stack, Text } from '@hirobius/design-system';
+import hds from '@hirobius/design-system/tokens';
 
 import { PageHeader } from '../PageHeader';
 import { entryHref, library } from './libraryData';
-import { s } from './styles';
 
 /** @public */
 export default function LibraryPage() {
@@ -30,25 +28,58 @@ export default function LibraryPage() {
           title="Library"
           lede="Every report and research artifact, newest first."
         />
-        <p style={s.caption}>
+        <Text variant="caption" as="p" style={{ color: 'var(--semantic-color-content-secondary)' }}>
           {onHds} of {library.length} on HDS. Legacy reports show as-is until migrated.
-        </p>
+        </Text>
         <Stack direction="column" gap="px2">
-          {library.map((e) => (
-            <div key={e.slug} style={s.band}>
-              <Stack direction="column" gap="px4" style={{ minWidth: 0 }}>
-                <span style={s.bandHead}>
-                  <Link to={entryHref(e)} className="hds-focus" style={s.bandTitle}>
-                    {e.title}
-                  </Link>
-                  <span style={s.mono}>{e.date}</span>
-                  {e.render === 'hds' ? (
-                    <Badge tone="success">HDS</Badge>
-                  ) : (
-                    <Badge tone="warning">Not on HDS yet</Badge>
-                  )}
-                </span>
-                <span style={s.body}>{e.summary}</span>
+          {library.map((e, i) => (
+            <div key={e.slug}>
+              {i > 0 && <Divider />}
+              <Stack
+                direction="row"
+                gap="px12"
+                align="start"
+                style={{ padding: `${hds.space.px16} 0` }}
+              >
+                <Stack direction="column" gap="px4" style={{ minWidth: 0 }}>
+                  <Stack direction="row" gap="px8" wrap="wrap" style={{ alignItems: 'baseline' }}>
+                    <Link
+                      to={entryHref(e)}
+                      className="hds-focus"
+                      style={{ textDecoration: 'none' }}
+                    >
+                      <Text
+                        variant="body"
+                        as="span"
+                        style={{
+                          fontWeight: hds.fontWeight.bold,
+                          color: 'var(--semantic-color-content-primary)',
+                        }}
+                      >
+                        {e.title}
+                      </Text>
+                    </Link>
+                    <Text
+                      variant="technical"
+                      as="span"
+                      style={{ color: 'var(--semantic-color-content-secondary)' }}
+                    >
+                      {e.date}
+                    </Text>
+                    {e.render === 'hds' ? (
+                      <Badge tone="success">HDS</Badge>
+                    ) : (
+                      <Badge tone="warning">Not on HDS yet</Badge>
+                    )}
+                  </Stack>
+                  <Text
+                    variant="ui"
+                    as="span"
+                    style={{ color: 'var(--semantic-color-content-secondary)' }}
+                  >
+                    {e.summary}
+                  </Text>
+                </Stack>
               </Stack>
             </div>
           ))}
