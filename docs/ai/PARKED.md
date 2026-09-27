@@ -310,6 +310,13 @@ the umbrella.
 
 ---
 
+### HDS type: revisit the font, drop bold from headlines
+
+- **origin:** Adrian, 2026-09-26 (after the hds#283 type ramp merged)
+- **trigger:** `event: Adrian picks the next design pass, or a client-site review flags headline weight`
+- **why parked:** a taste call, not a defect. The ramp sizes just landed; weight and family are the next lever.
+- **scope when revived:** hds tokens only: point the heading styles at a regular/medium weight, audit the family choice, `pnpm tokens`, then a minor changeset. Consumers (ops, concrete, site-engine) pick it up on the next bump.
+
 ## Cross-repo
 
 ### HDS token modes beyond light/dark
