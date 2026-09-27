@@ -15,7 +15,7 @@ import { Badge, Divider, Page, Stack, Text } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 
 import { PageHeader } from '../PageHeader';
-import { entryHref, library } from './libraryData';
+import { entryHref, isExternalHref, library } from './libraryData';
 
 /** @public */
 export default function LibraryPage() {
@@ -43,22 +43,43 @@ export default function LibraryPage() {
               >
                 <Stack direction="column" gap="px4" style={{ minWidth: 0 }}>
                   <Stack direction="row" gap="px8" wrap="wrap" style={{ alignItems: 'baseline' }}>
-                    <Link
-                      to={entryHref(e)}
-                      className="hds-focus"
-                      style={{ textDecoration: 'none' }}
-                    >
-                      <Text
-                        variant="body"
-                        as="span"
-                        style={{
-                          fontWeight: hds.fontWeight.bold,
-                          color: 'var(--semantic-color-content-primary)',
-                        }}
+                    {isExternalHref(e.href) ? (
+                      <a
+                        href={e.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="hds-focus"
+                        style={{ textDecoration: 'none' }}
                       >
-                        {e.title}
-                      </Text>
-                    </Link>
+                        <Text
+                          variant="body"
+                          as="span"
+                          style={{
+                            fontWeight: hds.fontWeight.bold,
+                            color: 'var(--semantic-color-content-primary)',
+                          }}
+                        >
+                          {e.title}
+                        </Text>
+                      </a>
+                    ) : (
+                      <Link
+                        to={entryHref(e)}
+                        className="hds-focus"
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <Text
+                          variant="body"
+                          as="span"
+                          style={{
+                            fontWeight: hds.fontWeight.bold,
+                            color: 'var(--semantic-color-content-primary)',
+                          }}
+                        >
+                          {e.title}
+                        </Text>
+                      </Link>
+                    )}
                     <Text
                       variant="technical"
                       as="span"

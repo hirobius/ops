@@ -4,6 +4,7 @@ import {
   LEGACY_LOADERS,
   buildVsBuy,
   entryHref,
+  isExternalHref,
   library,
   pipelineWalkthrough,
   sortSystems,
@@ -33,6 +34,19 @@ describe('library index', () => {
       '/ops/library/state-of-play',
     );
     expect(entryHref({ slug: 'build-vs-buy', render: 'hds' })).toBe('/ops/library/build-vs-buy');
+  });
+
+  it('treats only https links as external', () => {
+    expect(isExternalHref('https://www.figma.com/design/x')).toBe(true);
+    expect(isExternalHref('/ops/standing')).toBe(false);
+    expect(isExternalHref(undefined)).toBe(false);
+  });
+
+  it('every href is an in-app route or an https link', () => {
+    // A bare domain or http:// link would be treated as an app route and 404.
+    for (const e of library.filter((x) => x.href)) {
+      expect(e.href!.startsWith('/') || isExternalHref(e.href), e.slug).toBe(true);
+    }
   });
 
   it('lists newest first', () => {

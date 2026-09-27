@@ -35,7 +35,8 @@ lives in its own repo). Stack: Vite + React Router + Vercel serverless functions
   don't duplicate that list here. The always-on set is capped by
   `scripts/check-steering-budget.mjs` (ops#292).
 - **Context awareness:** look for local `CLAUDE.md` files in subdirectories for overriding rules before editing.
-- **Plan & PR artifacts (convention, #4):** for a substantial implementation plan, write it as a self-contained **HTML file** (real tables, mockups, data-flow, key code snippets) reviewable in a browser — not a markdown wall (template gallery: `anthropics/html-effectiveness`). For a large diff, produce an **artifact walkthrough** (the diff, reasoning per change, what was tested). Small changes stay inline.
+- **Plan & PR artifacts (#4):** big plans → self-contained **HTML file**, not a markdown wall; big diffs → **artifact walkthrough** (diff, reasoning, tests).
+- **Ops is the paper trail.** For every feature, report, design file or artifact shipped in any fleet repo, ask "should Ops show this?" Yes → surface it (min: a `docs/ai/library.json` entry). No → say why in one line.
 
 **Before ending a session that did real work:** update `docs/ai/HANDOFF.md` (Now / Next / Parked / one Done-log line) and refresh root `status.json` (the fleet dashboard renders it); include both in the final commit.
 

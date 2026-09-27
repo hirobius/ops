@@ -2,6 +2,22 @@
   "$comment": "Index for /ops/library — every report and research artifact, in one place. `render` says how the page shows it: `hds` = a native page built on @hirobius/design-system, `legacy` = a standalone HTML file shown framed until it is migrated to HDS. Add an entry when a report lands; migrating one flips `render` from legacy to hds.",
   "entries": [
     {
+      "slug": "ops-redesign-figma",
+      "title": "Ops redesign — Figma (mobile)",
+      "date": "2026-09-27",
+      "summary": "Every ops page captured at phone width (390px) from the redesign preview. Opens in Figma.",
+      "render": "hds",
+      "href": "https://www.figma.com/design/UF6h4BiTIsEbFe6iWxkao6"
+    },
+    {
+      "slug": "ops-redesign-plan",
+      "title": "Ops redesign plan",
+      "date": "2026-09-27",
+      "summary": "The audit behind the redesign: Standing split into Chain / Work / Fleet, one tile per feature, dead features stripped, 21 tickets.",
+      "render": "hds",
+      "href": "https://claude.ai/artifact/HfDyT3GeYprit6v2cZweEy"
+    },
+    {
       "slug": "adrian-todo",
       "title": "Your to-do (step-by-step)",
       "date": "2026-09-27",
