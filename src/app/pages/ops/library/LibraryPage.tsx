@@ -9,6 +9,7 @@
  * @tier utility
  */
 
+import type { ElementType } from 'react';
 import { Link } from 'react-router';
 
 import { Badge, Divider, Page, Stack, Text } from '@hirobius/design-system';
@@ -16,6 +17,16 @@ import hds from '@hirobius/design-system/tokens';
 
 import { PageHeader } from '../PageHeader';
 import { entryHref, isExternalHref, library } from './libraryData';
+
+/** An https entry (Figma, an artifact) opens in a new tab; everything else routes. */
+function linkProps(
+  href: string | undefined,
+  route: string,
+): { as: ElementType } & Record<string, unknown> {
+  return isExternalHref(href)
+    ? { as: 'a', href, target: '_blank', rel: 'noreferrer' }
+    : { as: Link, to: route };
+}
 
 /** @public */
 export default function LibraryPage() {
@@ -32,22 +43,21 @@ export default function LibraryPage() {
           {onHds} of {library.length} on HDS. Legacy reports show as-is until migrated.
         </Text>
         <Stack direction="column" gap="px2">
-          {library.map((e, i) => (
-            <div key={e.slug}>
-              {i > 0 && <Divider />}
-              <Stack
-                direction="row"
-                gap="px12"
-                align="start"
-                style={{ padding: `${hds.space.px16} 0` }}
-              >
-                <Stack direction="column" gap="px4" style={{ minWidth: 0 }}>
-                  <Stack direction="row" gap="px8" wrap="wrap" style={{ alignItems: 'baseline' }}>
-                    {isExternalHref(e.href) ? (
-                      <a
-                        href={e.href}
-                        target="_blank"
-                        rel="noreferrer"
+          {library.map((e, i) => {
+            const { as: TitleTag, ...titleProps } = linkProps(e.href, entryHref(e));
+            return (
+              <div key={e.slug}>
+                {i > 0 && <Divider />}
+                <Stack
+                  direction="row"
+                  gap="px12"
+                  align="start"
+                  style={{ padding: `${hds.space.px16} 0` }}
+                >
+                  <Stack direction="column" gap="px4" style={{ minWidth: 0 }}>
+                    <Stack direction="row" gap="px8" wrap="wrap" style={{ alignItems: 'baseline' }}>
+                      <TitleTag
+                        {...titleProps}
                         className="hds-focus"
                         style={{ textDecoration: 'none' }}
                       >
@@ -61,49 +71,32 @@ export default function LibraryPage() {
                         >
                           {e.title}
                         </Text>
-                      </a>
-                    ) : (
-                      <Link
-                        to={entryHref(e)}
-                        className="hds-focus"
-                        style={{ textDecoration: 'none' }}
+                      </TitleTag>
+                      <Text
+                        variant="technical"
+                        as="span"
+                        style={{ color: 'var(--semantic-color-content-secondary)' }}
                       >
-                        <Text
-                          variant="body"
-                          as="span"
-                          style={{
-                            fontWeight: hds.fontWeight.bold,
-                            color: 'var(--semantic-color-content-primary)',
-                          }}
-                        >
-                          {e.title}
-                        </Text>
-                      </Link>
-                    )}
+                        {e.date}
+                      </Text>
+                      {e.render === 'hds' ? (
+                        <Badge tone="success">HDS</Badge>
+                      ) : (
+                        <Badge tone="warning">Not on HDS yet</Badge>
+                      )}
+                    </Stack>
                     <Text
-                      variant="technical"
+                      variant="ui"
                       as="span"
                       style={{ color: 'var(--semantic-color-content-secondary)' }}
                     >
-                      {e.date}
+                      {e.summary}
                     </Text>
-                    {e.render === 'hds' ? (
-                      <Badge tone="success">HDS</Badge>
-                    ) : (
-                      <Badge tone="warning">Not on HDS yet</Badge>
-                    )}
                   </Stack>
-                  <Text
-                    variant="ui"
-                    as="span"
-                    style={{ color: 'var(--semantic-color-content-secondary)' }}
-                  >
-                    {e.summary}
-                  </Text>
                 </Stack>
-              </Stack>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </Stack>
       </Stack>
     </Page>

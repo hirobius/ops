@@ -10,18 +10,10 @@
       "href": "https://github.com/hirobius/ops/blob/main/docs/ai/PARKED.md#jev-typesafe-ai-for-fast-typed-decisions--pilot-on-should-ops-show-this"
     },
     {
-      "slug": "ops-redesign-figma",
-      "title": "Ops redesign — Figma (mobile)",
-      "date": "2026-09-27",
-      "summary": "Every ops page captured at phone width (390px) from the redesign preview. Opens in Figma.",
-      "render": "hds",
-      "href": "https://www.figma.com/design/UF6h4BiTIsEbFe6iWxkao6"
-    },
-    {
       "slug": "ops-redesign-plan",
-      "title": "Ops redesign plan",
+      "title": "Ops redesign plan (dropped)",
       "date": "2026-09-27",
-      "summary": "The audit behind the redesign: Standing split into Chain / Work / Fleet, one tile per feature, dead features stripped, 21 tickets.",
+      "summary": "The tile/Chain/Work/Fleet redesign plan. Built on a preview, rejected on review 2026-09-27 for visual inconsistency; kept for the record. Lesson: approve one mocked screen before building.",
       "render": "hds",
       "href": "https://claude.ai/artifact/HfDyT3GeYprit6v2cZweEy"
     },
