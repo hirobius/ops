@@ -1,5 +1,3 @@
-/* hds-bypass: ops-internal page. Inline styles intentional for ops dashboard. */
-
 /**
  * RenderHandoffPanel — the render-action hand-off for one lead row.
  *
@@ -9,9 +7,8 @@
  * the Working-with-Adrian "paste-ready text" convention). The design-system
  * CodeBlock owns the copy button — no bespoke clipboard code needed here.
  */
-import { CodeBlock } from '@hirobius/design-system';
+import { Button, CodeBlock, Stack, Text } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
-import type { CSSProperties } from 'react';
 
 export interface RenderHandoffPanelProps {
   configFile: string;
@@ -21,45 +18,21 @@ export interface RenderHandoffPanelProps {
 
 export function RenderHandoffPanel({ configFile, commands, onDismiss }: RenderHandoffPanelProps) {
   return (
-    <div style={s.wrap}>
-      <div style={s.header}>
-        <span style={s.title}>Render hand-off — paste into hirobius/clients</span>
-        <button type="button" onClick={onDismiss} className="hds-focus" style={s.dismiss}>
+    <Stack direction="column" gap="px8" style={{ width: '100%', paddingBottom: hds.space.px12 }}>
+      <Stack direction="row" justify="space-between" align="center" gap="px12">
+        <Text
+          variant="technical"
+          as="span"
+          style={{ color: 'var(--semantic-color-content-secondary)' }}
+        >
+          Render hand-off — paste into hirobius/clients
+        </Text>
+        <Button variant="tertiary" size="sm" onClick={onDismiss}>
           Dismiss
-        </button>
-      </div>
+        </Button>
+      </Stack>
       <CodeBlock code={configFile} language="typescript" filename="client.config.ts" />
       <CodeBlock code={commands} language="bash" filename="deploy commands" />
-    </div>
+    </Stack>
   );
 }
-
-const s = {
-  wrap: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: hds.space.px8,
-    width: '100%',
-    padding: `0 0 ${hds.space.px12}`,
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: hds.space.px12,
-  },
-  title: {
-    ...hds.typeStyles.ui,
-    fontSize: hds.fontSize.xs,
-    color: 'var(--semantic-color-content-secondary)',
-  },
-  dismiss: {
-    ...hds.typeStyles.ui,
-    fontSize: hds.fontSize.xs,
-    background: 'transparent',
-    border: 'none',
-    color: 'var(--semantic-color-content-accent)',
-    cursor: 'pointer',
-    padding: 0,
-  },
-} satisfies Record<string, CSSProperties>;
