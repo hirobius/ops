@@ -310,6 +310,13 @@ the umbrella.
 
 ---
 
+### Jev (TypeSafe AI) for fast typed decisions — pilot on "should Ops show this?"
+
+- **origin:** Adrian, 2026-09-27 (codenewsletter.ai guide; skill: github.com/dbreunig/building-with-jev-skill)
+- **trigger:** `event: the ops redesign merges, or a Claude-call triage step (lead scoring, issue labels, Ops-surfacing) shows up as a cost or latency problem`
+- **why parked:** Jev returns typed yes/no/enum decisions in <0.5s for ~$0.04/M tokens — fits classification, not generation. A new paid key + vendor, so it waits until a concrete call site hurts.
+- **scope when revived:** one pilot: on each merged PR, ask Jev "surface in Ops? which place (library / tile / none)?" and compare to Claude's call for two weeks. Candidates after: lead-fit scoring, issue triage labels. Key goes in Vercel env by Adrian; fail loud if unset.
+
 ### HDS type: revisit the font, drop bold from headlines
 
 - **origin:** Adrian, 2026-09-26 (after the hds#283 type ramp merged)
