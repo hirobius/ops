@@ -7,6 +7,24 @@
 > Append here when a session ships something; HANDOFF keeps only the most recent
 > Done-log line.
 
+## 2026-09-27 — ops#427 review-fix round
+
+Reviewer rejected the slice below on 5 points; fixed 4 in this commit, 1
+(keep-list agreement) drained to an issue comment since it needs Adrian, not
+a session. (1) `.claude/settings.json`'s `skillOverrides` key
+`anthropic-skills:extract-design` corrected to `extract-design` — that skill
+registers unprefixed, unlike the rest of the bundle, so the override was a
+no-op. (2) The prior commit message's "per Adrian's decision on the issue"
+was false (ops#427 has zero comments) — posted the proposed keep/deny list as
+an issue comment for him to actually confirm; `tool-audit-427.md` now says so
+under Remaining instead of implying agreement. (3) HANDOFF is updated here
+(this line + the Done-log pointer) — the prior round's run claimed it was,
+but the diff never touched it. (4) `SESSION-BOARD.md`'s ops#427 claim row had
+a blank line splitting it from the claims table, so it rendered as stray text
+— rejoined. (5) The steering-budget figure in `tool-audit-427.md` was
+presented as the DoD's `/context` "before" number; relabeled as an unrelated,
+already-unaffected metric — the real `/context` totals are still not done.
+
 ## 2026-09-27 — per-turn tool payload trim, repo-local slice (ops#427)
 
 `.claude/settings.json` gets bare-name `permissions.deny` for seven MCP

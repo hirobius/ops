@@ -81,11 +81,20 @@ Left on despite being plausible-unused, for lower confidence of "clearly":
 This number is the always-on **document** context (CLAUDE.md/HANDOFF/
 NORTH_STAR), a separate axis from the MCP **tool-definition** payload this
 issue targets — the settings.json change above doesn't move it, and it wasn't
-expected to. It's recorded here as the "before" figure the issue's DoD asked
-for; it is identical after, by construction (neither file was touched).
+expected to. **This is not the DoD's "before" figure** — the DoD asks for
+`/context` totals (system prompt, system tools, MCP tools, memory), which
+still needs an interactive session (see Remaining below). It's recorded here
+only as an unrelated, unaffected baseline for the steering-budget gate; it is
+identical after, by construction (neither file was touched).
 
 ## Remaining (needs an interactive session — not agent-actionable here)
 
+- **Keep list is not yet Adrian-agreed** (DoD box 3). ops#427 has zero
+  comments as of this writing; the kept/denied split above is this session's
+  own reasoning against the issue body and CLAUDE.md, not a recorded decision.
+  A comment proposing this exact list was posted on the issue for Adrian to
+  confirm or amend — until he does, treat the deny list as a proposal, not a
+  settled keep list.
 - **`/context` before/after totals** in ops, hds and site-engine (DoD box 1)
   and the **per-tool ranking via the logging proxy** (`node proxy.mjs` +
   `ANTHROPIC_BASE_URL=http://localhost:8787 claude`, DoD box 2) both need an

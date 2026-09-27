@@ -20,7 +20,7 @@
     "anthropic-skills:xlsx": "off",
     "anthropic-skills:import-memory": "off",
     "anthropic-skills:morning": "off",
-    "anthropic-skills:extract-design": "off",
+    "extract-design": "off",
     "keybindings-help": "off",
     "session-start-hook": "off"
   },

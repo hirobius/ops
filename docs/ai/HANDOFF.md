@@ -4,7 +4,7 @@
 > "status" or "go" reads this and acts from **Next**; a session that does real
 > work updates it before ending.
 
-_Last updated: 2026-09-26._
+_Last updated: 2026-09-27._
 
 ## The map (what else exists, and when to open it)
 
@@ -91,7 +91,7 @@ Allowlist, not a name-list — naming client repos here leaked one.
   one manual email is not. **Outscraper spend (#190) stays ON HOLD.** Publishing
   stays a human action — it is the billing event.
 
-**Done log (latest):** _09-26_ ops#416 fix: concrete Vercel join + surfaces added.
+**Done log (latest):** _09-27_ ops#427 review-fix — see DONE-LOG.
 
 ## Adrian's open actions (his court, not blocked on a session)
 
