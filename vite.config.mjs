@@ -6,12 +6,7 @@ import { spawn } from 'child_process';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { createSkillRunnerMiddleware } from './scripts/skill-runner-middleware.mjs';
-import { createThreadsMiddleware } from './scripts/threads-middleware.mjs';
-import { createProposedUnitsMiddleware } from './scripts/proposed-units-middleware.mjs';
-import { createProposedSkillsMiddleware } from './scripts/proposed-skills-middleware.mjs';
 import { createServiceManagerMiddleware } from './scripts/service-manager-middleware.mjs';
-import { createCcPluginsMiddleware } from './scripts/cc-plugins-middleware.mjs';
-import { createResearchFeedMiddleware } from './scripts/research-feed-middleware.mjs';
 import { createLeadsMiddleware } from './scripts/leads-middleware.mjs';
 import { createTasksMiddleware } from './scripts/tasks-middleware.mjs';
 import { createDigestMiddleware } from './scripts/digest-middleware.mjs';
@@ -150,80 +145,6 @@ export default defineConfig(({ mode }) => {
           server.middlewares.use('/api/skills', createSkillRunnerMiddleware({ cwd: __dirname }));
         },
       },
-      // Dev-only: GET /api/cc-plugins — lists all Claude Code skills visible to
-      // the dev session (project-local + global). Backs the /ops CC Plugins
-      // panel. apply: 'serve' so prod builds never expose this endpoint.
-      {
-        name: 'ops-cc-plugins-api',
-        apply: 'serve',
-        configureServer(server) {
-          server.middlewares.use('/api/cc-plugins', createCcPluginsMiddleware({ cwd: __dirname }));
-        },
-      },
-      // Dev-only: GET /api/research-feed — surfaces auto-research findings
-      // from docs/research/findings/<id>/*.md. Read-only filesystem scan;
-      // backs the /ops "Research" disclosure. apply: 'serve' so prod never
-      // exposes disk reads. See scripts/research-feed-middleware.mjs.
-      {
-        name: 'ops-research-feed-api',
-        apply: 'serve',
-        configureServer(server) {
-          server.middlewares.use(
-            '/api/research-feed',
-            createResearchFeedMiddleware({ projectRoot: __dirname }),
-          );
-        },
-      },
-      // Dev-only: GET /api/threads — surfaces git worktrees, live Claude
-      // Code sessions (~/.claude/sessions/*.json), and recent transcripts
-      // (~/.claude/projects/<slug>/*.jsonl mtimes) so /ops/kanban can
-      // correlate "open work" with Hermes tasks. Read-only filesystem
-      // scan, no Hermes call. apply: 'serve' so prod never exposes it.
-      {
-        name: 'ops-threads-api',
-        apply: 'serve',
-        configureServer(server) {
-          server.middlewares.use(
-            '/api/threads',
-            createThreadsMiddleware({
-              projectRoot: __dirname,
-              // Surface the sibling concrete-creations repo as a
-              // thread source — its branches don't match Hermes task
-              // IDs, so they land in the loose-threads rail.
-              siblingRoots: [path.resolve(__dirname, '..', 'concrete-creations')],
-            }),
-          );
-        },
-      },
-      // Dev-only: GET /api/proposed-units — streams docs/ai/proposed-units.jsonl
-      // (the agent-proposed pre-Hermes idea backlog) for /ops/kanban's
-      // backlog disclosure. apply: 'serve' so prod never reads from disk.
-      {
-        name: 'ops-proposed-units-api',
-        apply: 'serve',
-        configureServer(server) {
-          server.middlewares.use(
-            '/api/proposed-units',
-            createProposedUnitsMiddleware({ projectRoot: __dirname }),
-          );
-        },
-      },
-      // Dev-only: GET/POST /api/proposed-skills — capture seam for natural-
-      // language skill descriptions. POST appends one JSONL line to
-      // docs/ai/proposed-skills.jsonl (gitignored, append-only). The build
-      // step happens later in an interactive Claude Code session — this
-      // endpoint captures intent only and never triggers code generation.
-      // apply: 'serve' so prod never exposes the disk write.
-      {
-        name: 'ops-proposed-skills-api',
-        apply: 'serve',
-        configureServer(server) {
-          server.middlewares.use(
-            '/api/proposed-skills',
-            createProposedSkillsMiddleware({ projectRoot: __dirname }),
-          );
-        },
-      },
       // Dev-only: /api/services/* — start/stop/status local dev daemons
       // (HDS Bridge, Discord Bot, Roadmap Watcher). Process state is in-memory;
       // resets when Vite restarts. See scripts/service-manager-middleware.mjs.
@@ -235,59 +156,6 @@ export default defineConfig(({ mode }) => {
             '/api/services',
             createServiceManagerMiddleware({ cwd: __dirname }),
           );
-        },
-      },
-      // Dev-only: GET /api/pod-tail?id=<unitId> — returns last 50 telemetry
-      // events whose `data.unitId` matches the queried pod id. Backs the
-      // 13w-ops-13a polled stdout tail on /ops/sessions. apply: 'serve' so
-      // prod builds never expose this endpoint.
-      {
-        name: 'ops-pod-tail-api',
-        apply: 'serve',
-        configureServer(server) {
-          server.middlewares.use('/api/pod-tail', async (req, res, next) => {
-            if (req.method !== 'GET') return next();
-            try {
-              const url = new URL(req.url, 'http://localhost');
-              const id = url.searchParams.get('id');
-              if (!id) {
-                res.statusCode = 400;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ error: 'id query param required' }));
-                return;
-              }
-              const fs = await import('node:fs');
-              const path = await import('node:path');
-              const eventsPath = path.join(__dirname, 'telemetry/events.jsonl');
-              if (!fs.existsSync(eventsPath)) {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ id, events: [] }));
-                return;
-              }
-              const raw = fs.readFileSync(eventsPath, 'utf8');
-              const lines = raw.split('\n').filter(Boolean);
-              const matched = [];
-              // Walk lines bottom-up so we cap at 50 most-recent matches without
-              // parsing the whole file when the tail is very long.
-              for (let i = lines.length - 1; i >= 0 && matched.length < 50; i--) {
-                try {
-                  const evt = JSON.parse(lines[i]);
-                  const candidate = evt?.data?.unitId ?? evt?.data?.unit_id ?? evt?.data?.id;
-                  if (candidate === id) matched.unshift(evt);
-                } catch {
-                  /* skip malformed line */
-                }
-              }
-              res.statusCode = 200;
-              res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify({ id, events: matched }));
-            } catch (error) {
-              res.statusCode = 500;
-              res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify({ error: String(error?.message || error) }));
-            }
-          });
         },
       },
     ],

@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate-script-index.mjs",
   "note": "Deterministic — regenerate with `pnpm scripts:index`. Do not edit by hand.",
-  "totalScripts": 154,
+  "totalScripts": 155,
   "taxonomy": {
     "check": {
       "category": "gate",
@@ -41,10 +41,10 @@
     }
   },
   "categoryCounts": {
-    "other": 77,
-    "audit": 16,
+    "other": 74,
+    "audit": 18,
     "build": 1,
-    "gate": 40,
+    "gate": 42,
     "generate": 11,
     "sync": 3,
     "test": 2,
@@ -190,6 +190,17 @@
       }
     },
     {
+      "name": "audit-ralph-merge-boundary.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Measures the ops#238 merge boundary directly, over a rolling window of merged PRs: how many touched a supervised path (the revenue path, or the files that define/enforce the boundary itself) WITHOUT carrying",
+      "pnpm": ["audit:merge-boundary"],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
       "name": "audit-sbom.mjs",
       "category": "audit",
       "prefix": "audit",
@@ -207,7 +218,7 @@
       "purpose": "(no header description)",
       "pnpm": [],
       "gate": {
-        "channel": "manual",
+        "channel": "ci-dispatch",
         "severity": "warn"
       }
     },
@@ -223,13 +234,24 @@
       }
     },
     {
+      "name": "audit-stranded-branches.mjs",
+      "category": "audit",
+      "prefix": "audit",
+      "purpose": "Measures the ops#407 \"stranded work\" class across the fleet: every remote branch that has NEVER had a pull request, in any state. A branch with no PR is invisible to every surface this fleet has — /ops/standing reads…",
+      "pnpm": ["audit:stranded-branches"],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
       "name": "audit-strengths.mjs",
       "category": "audit",
       "prefix": "audit",
       "purpose": "Verifies that each documented differentiator in docs/architecture/strengths-and-differentiators.md is still real.",
       "pnpm": [],
       "gate": {
-        "channel": "ci-scheduled",
+        "channel": "manual",
         "severity": "warn"
       }
     },
@@ -270,14 +292,6 @@
       "category": "other",
       "prefix": "case",
       "purpose": "Context/Problem/Approach/Outcome/Artefacts case-study record.",
-      "pnpm": [],
-      "gate": null
-    },
-    {
-      "name": "cc-plugins-middleware.mjs",
-      "category": "other",
-      "prefix": "cc",
-      "purpose": "Dev-only middleware: GET /api/cc-plugins Enumerates installed Claude Code skills from: ~/.claude/skills/ (global user skills) {cwd}/.claude/skills/ (project-scoped skills)",
       "pnpm": [],
       "gate": null
     },
@@ -480,6 +494,17 @@
       }
     },
     {
+      "name": "check-migration-ledger.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "Compares supabase/migrations/*.sql against the live supabase_migrations.schema_migrations ledger and reports every migration the repo has but the ledger does not (and every ledger row no repo migration explains).…",
+      "pnpm": ["migrations:check"],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
+      }
+    },
+    {
       "name": "check-motion.mjs",
       "category": "gate",
       "prefix": "check",
@@ -541,7 +566,7 @@
       "purpose": "just a 200 (ops#347, script half of #318).",
       "pnpm": [],
       "gate": {
-        "channel": "manual",
+        "channel": "ci-scheduled",
         "severity": "error"
       }
     },
@@ -587,6 +612,17 @@
       "gate": {
         "channel": "pre-commit",
         "severity": "error"
+      }
+    },
+    {
+      "name": "check-secret-health.mjs",
+      "category": "gate",
+      "prefix": "check",
+      "purpose": "ops#415: the same failure shape the fleet spent 2026-09-22 removing everywhere else — a credential that lapses SILENTLY and reads as green. `RELEASE_PAT` (hds#267) is a fine-grained PAT and WILL expire; the only",
+      "pnpm": ["check:secret-health"],
+      "gate": {
+        "channel": "manual",
+        "severity": "warn"
       }
     },
     {
@@ -791,6 +827,14 @@
       "prefix": "discord",
       "purpose": "Hirobius HQ — Discord bot with Claude API integration.",
       "pnpm": ["bot"],
+      "gate": null
+    },
+    {
+      "name": "discord-page.mjs",
+      "category": "other",
+      "prefix": "discord",
+      "purpose": "A scheduled workflow that fails notifies exactly one account by email: whoever last touched the cron line. That is a weak alert, so the failing step also",
+      "pnpm": [],
       "gate": null
     },
     {
@@ -1134,22 +1178,6 @@
       "gate": null
     },
     {
-      "name": "proposed-skills-middleware.mjs",
-      "category": "other",
-      "prefix": "proposed",
-      "purpose": "Dev-only HTTP middleware for the `/ops` \"new skill\" capture seam. Mirrors scripts/proposed-units-middleware.mjs (the proposed-units inbox) but for skill ideas. Adrian describes a skill in natural language; we",
-      "pnpm": [],
-      "gate": null
-    },
-    {
-      "name": "proposed-units-middleware.mjs",
-      "category": "other",
-      "prefix": "proposed",
-      "purpose": "Dev-only HTTP middleware that surfaces docs/ai/proposed-units.jsonl — the append-only seam where dispatched agents propose new units that haven't been promoted to Hermes tasks yet — to the /ops/kanban page.",
-      "pnpm": [],
-      "gate": null
-    },
-    {
       "name": "prospect-stats.mjs",
       "category": "other",
       "prefix": "prospect",
@@ -1174,12 +1202,23 @@
       "gate": null
     },
     {
+      "name": "ralph-supervised-paths.mjs",
+      "category": "other",
+      "prefix": "ralph",
+      "purpose": "Publishes the ops#238 supervised-path set as one line per path, so the engine's bash (hirobius/ralph#25) can read the SAME definition this repo's JS watchdog enforces, without hand-copying prefixes into a workflow.",
+      "pnpm": ["ralph:supervised-paths"],
+      "gate": null
+    },
+    {
       "name": "ralph-watchdog.mjs",
       "category": "other",
       "prefix": "ralph",
       "purpose": "file is the I/O half: gather facts from GitHub, ask the rule what to do, and (with --apply) do the mechanical part of it. Same split as check-branch-ancestry / branch-ancestry.mjs.",
-      "pnpm": [],
-      "gate": null
+      "pnpm": ["ralph:watchdog"],
+      "gate": {
+        "channel": "ci-scheduled",
+        "severity": "warn"
+      }
     },
     {
       "name": "reconcile-ralph-closures.mjs",
@@ -1213,14 +1252,6 @@
       "category": "other",
       "prefix": "rescore",
       "purpose": "for leads already in Supabase, from columns we already hold.",
-      "pnpm": [],
-      "gate": null
-    },
-    {
-      "name": "research-feed-middleware.mjs",
-      "category": "other",
-      "prefix": "research",
-      "purpose": "Dev-only HTTP middleware: GET /api/research-feed Returns a flat, time-sorted list of recent auto-research findings so the /ops \"Research\" disclosure can render a feed without parsing markdown",
       "pnpm": [],
       "gate": null
     },
@@ -1374,14 +1405,6 @@
       "prefix": "test",
       "purpose": "Regression suite for LLM prompt outputs. Walks fixtures/llm-prompts/<slug>/ directories. Each must contain:",
       "pnpm": ["test:prompts"],
-      "gate": null
-    },
-    {
-      "name": "threads-middleware.mjs",
-      "category": "other",
-      "prefix": "threads",
-      "purpose": "Dev-only HTTP middleware that surfaces \"open work threads\" to the /ops/kanban page so it can correlate Hermes tasks with Adrian's git worktrees and active Claude Code sessions.",
-      "pnpm": [],
       "gate": null
     },
     {
