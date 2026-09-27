@@ -161,7 +161,7 @@
       "fixturePath": "fixtures/audit-strengths",
       "owner": "Adrian",
       "source": "human",
-      "firingChannel": "ci-scheduled"
+      "firingChannel": "manual"
     },
     {
       "id": "check-attributions",

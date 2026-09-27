@@ -34,4 +34,28 @@ export const DEMOS: readonly DemoBuild[] = [
     services: ['website', 'design'],
     note: 'Residential real-estate concept.',
   },
+  {
+    slug: 'preview-arborist',
+    name: 'Arborist — outreach preview',
+    vertical: 'Tree care',
+    url: 'https://hirobius-pnw-arborist.vercel.app',
+    services: ['website'],
+    note: 'Cold-outreach preview (site-engine apps/pnw-arborist). Basic-auth gated; placeholder contact details.',
+  },
+  {
+    slug: 'preview-tree-service',
+    name: 'Tree service — outreach preview',
+    vertical: 'Tree care',
+    url: 'https://hirobius-duran-tree-service.vercel.app',
+    services: ['website'],
+    note: 'Cold-outreach preview (site-engine apps/duran-tree-service). Basic-auth gated; placeholder contact details.',
+  },
+  {
+    slug: 'preview-septic',
+    name: 'Septic — outreach preview',
+    vertical: 'Septic service',
+    url: 'https://hirobius-septic-response.vercel.app',
+    services: ['website'],
+    note: 'Cold-outreach preview (site-engine apps/septic-response). Basic-auth gated; placeholder contact details.',
+  },
 ] as const;
