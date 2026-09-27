@@ -334,3 +334,41 @@ describe('StandingPage — repo filter', () => {
     });
   });
 });
+
+describe('StandingPage — Adrian how-to steps', () => {
+  it('renders a "How to" disclosure on a blocked issue the guide has steps for, collapsed until opened', async () => {
+    fleet = {
+      ...FLEET,
+      blocked: [issue('ops', 414, 'NEPDA website RFQ', { label: 'needs-decision' })],
+    };
+    await renderAt('/ops/standing');
+
+    const waiting = lane('Waiting on you');
+    const toggle = within(waiting).getByRole('button', { name: /How to \(\d+ steps\)/ });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(within(waiting).getByText(/Email kelly@northeastpda.com/)).toBeTruthy();
+
+    fireEvent.click(toggle);
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('renders no "How to" disclosure on a blocked issue the guide has nothing for', async () => {
+    fleet = {
+      ...FLEET,
+      blocked: [issue('ops', 999999, 'Something with no guide entry', { label: 'needs-adrian' })],
+    };
+    await renderAt('/ops/standing');
+
+    const waiting = lane('Waiting on you');
+    expect(within(waiting).queryByRole('button', { name: /How to \(\d+ steps\)/ })).toBeNull();
+  });
+
+  it('lists the housekeeping chores and the full-guide link in the "Waiting on you" lane', async () => {
+    await renderAt('/ops/standing');
+
+    const waiting = lane('Waiting on you');
+    expect(within(waiting).getByText(/Housekeeping \(no issue\)/)).toBeTruthy();
+    expect(within(waiting).getByRole('link', { name: /Full step-by-step guide/ })).toBeTruthy();
+  });
+});

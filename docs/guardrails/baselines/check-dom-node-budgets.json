@@ -39,6 +39,8 @@
     "src/app/pages/ops/library/PipelineWalkthroughReport.tsx": 40,
     "src/app/pages/ops/library/StateOfPlayReport.tsx": 82,
     "src/app/pages/ops/pitch/PitchPage.tsx": 40,
+    "src/app/pages/ops/standing/CopyBox.test.tsx": 4,
+    "src/app/pages/ops/standing/CopyBox.tsx": 3,
     "src/app/pages/ops/standing/IssueActions.test.tsx": 1,
     "src/app/pages/ops/standing/RepoFilter.test.tsx": 12,
     "src/app/pages/ops/standing/RepoFilter.tsx": 9,
@@ -47,9 +49,9 @@
     "src/app/pages/ops/standing/StandingPage.freshness.test.tsx": 2,
     "src/app/pages/ops/standing/StandingPage.surfaces.test.tsx": 2,
     "src/app/pages/ops/standing/StandingPage.test.tsx": 2,
-    "src/app/pages/ops/standing/StandingPage.tsx": 171,
+    "src/app/pages/ops/standing/StandingPage.tsx": 184,
     "src/app/routes.tsx": 30
   },
-  "updatedAt": "2026-09-27T03:18:19.020Z",
+  "updatedAt": "2026-09-27T04:37:58.345Z",
   "sha": "175579d"
 }

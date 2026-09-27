@@ -1,0 +1,452 @@
+{
+  "$comment": "Copy-ready how-to steps for the fleet issues shown in the /ops/standing 'Waiting on you' lane (needs-adrian / needs-decision / needs-credential). Keyed 'hirobius/<repo>#<n>'. Sourced from the 2026-09-27 fleet to-do guide (guideUrl). Chores have no issue. PUBLIC REPO: never add passwords, lead business names, or client names here.",
+  "guideUrl": "https://claude.ai/artifact/Fu7S1PCzH5cUj4kzLx2H12",
+  "issues": {
+    "hirobius/ops#414": {
+      "steps": [
+        {
+          "text": "Email kelly@northeastpda.com. To:",
+          "href": "mailto:kelly@northeastpda.com",
+          "copy": "kelly@northeastpda.com"
+        },
+        {
+          "text": "Subject:",
+          "copy": "2026 NEPDA Website Design & Development RFQ Response — Hirobius"
+        },
+        {
+          "text": "Body:",
+          "copy": "Hi Kelly,\n\nI'm a Spokane-based design systems engineer and only just saw the NEPDA website RFQ, after the September 20 deadline. Is the selection still open to a late statement of qualifications? If so, I can have a 5–7 page SOQ to you within three business days, including a recommended CMS, a phased fee proposal within the $20,000 target, and optional hosting and maintenance pricing.\n\nIf the window has closed, no problem, and I'd be glad to be considered for future work.\n\nThanks,\nAdrian Milsap\nHirobius\nadrian@hirobius.com"
+        },
+        {
+          "text": "Post the answer on ops#414.",
+          "href": "https://github.com/hirobius/ops/issues/414"
+        }
+      ]
+    },
+    "hirobius/ops#321": {
+      "steps": [
+        {
+          "text": "Open /ops/pitch and pick a phone-only WA lead that has a preview.",
+          "href": "https://hirobius-ops.vercel.app/ops/pitch"
+        },
+        {
+          "text": "Call, then mark it pitched with channel phone. Or log it from the ops repo:",
+          "copy": "node scripts/log-call.mjs --id <lead-id> --outcome <outcome>"
+        }
+      ]
+    },
+    "hirobius/ops#348": {
+      "steps": [
+        {
+          "text": "Open the SQL file and copy all of it: 0011_digest_items.sql (use GitHub's \"Copy raw file\" button).",
+          "href": "https://github.com/hirobius/ops/blob/main/supabase/migrations/0011_digest_items.sql"
+        },
+        {
+          "text": "Paste into the Supabase SQL editor and click Run. Safe to re-run.",
+          "href": "https://supabase.com/dashboard/project/vvyccwxtcwvlusweenje/sql/new"
+        }
+      ]
+    },
+    "hirobius/ops#78": {
+      "steps": [
+        {
+          "text": "Open the SQL file and copy all of it: 0011_digest_items.sql (use GitHub's \"Copy raw file\" button).",
+          "href": "https://github.com/hirobius/ops/blob/main/supabase/migrations/0011_digest_items.sql"
+        },
+        {
+          "text": "Paste into the Supabase SQL editor and click Run. Safe to re-run.",
+          "href": "https://supabase.com/dashboard/project/vvyccwxtcwvlusweenje/sql/new"
+        }
+      ]
+    },
+    "hirobius/site-engine#12": {
+      "steps": [
+        {
+          "text": "In your site-engine clone:",
+          "copy": "git fetch origin main && git tag template-v0.7.0 origin/main && git push origin template-v0.7.0"
+        },
+        {
+          "text": "Close #12 with:",
+          "href": "https://github.com/hirobius/site-engine/issues/12",
+          "copy": "Tagged template-v0.7.0 on main."
+        }
+      ]
+    },
+    "hirobius/ops#413": {
+      "steps": [
+        {
+          "text": "From /ops/leads, open 5 leads with no description or socials on Google Maps.",
+          "href": "https://hirobius-ops.vercel.app/ops/leads"
+        },
+        {
+          "text": "Post on #413 and close:",
+          "href": "https://github.com/hirobius/ops/issues/413",
+          "copy": "Checked 5 leads with empty description/social against live Google Business Profiles: __ of 5 were genuinely missing. Leaving both fields out of the opening lines is correct. Closing."
+        }
+      ]
+    },
+    "hirobius/ops#90": {
+      "steps": [
+        {
+          "text": "Open Ralph Metric → Run workflow (branch main). metric:",
+          "href": "https://github.com/hirobius/ops/actions/workflows/ralph-metric.yml",
+          "copy": "audit-gates-supportjson"
+        },
+        {
+          "text": "target:",
+          "copy": "35"
+        },
+        {
+          "text": "About $3.50. If it ends silently again, do Ralph#10 first."
+        }
+      ]
+    },
+    "hirobius/ops#427": {
+      "steps": [
+        {
+          "text": "Read the proposed list on #427, then reply:",
+          "href": "https://github.com/hirobius/ops/issues/427",
+          "copy": "Keep/deny list approved as proposed."
+        }
+      ]
+    },
+    "hirobius/ops#35": {
+      "steps": [
+        {
+          "text": "Reply on #35:",
+          "href": "https://github.com/hirobius/ops/issues/35",
+          "copy": "Decision (Adrian): never cold-email an address found only by scripts/crawl-lead-emails.mjs. Only email addresses the business published itself (e.g. its Google listing via Outscraper). Record this in docs/prospecting/compliance.md."
+        }
+      ]
+    },
+    "hirobius/ops#296": {
+      "steps": [
+        {
+          "text": "Reply on #296:",
+          "href": "https://github.com/hirobius/ops/issues/296",
+          "copy": "Decision (Adrian): (a) post the drafted DoD as a comment, never edit the issue body; (b) draft it with a cheap Haiku pass; (c) ship it in the same hirobius/ralph release as Ralph#25, after #25."
+        }
+      ]
+    },
+    "hirobius/ops#87": {
+      "steps": [
+        {
+          "text": "Close #87 with:",
+          "href": "https://github.com/hirobius/ops/issues/87",
+          "copy": "Closing as a tracker: remaining work lives in #238 and #296."
+        }
+      ]
+    },
+    "hirobius/ops#7": {
+      "steps": [
+        {
+          "text": "Reply on PR #378:",
+          "href": "https://github.com/hirobius/ops/pull/378",
+          "copy": "Decisions: pass tolerance 0.1; run 16 leads with --max-usd 20; keep the judge-swap thresholds as proposed."
+        },
+        {
+          "text": "Locally in ops (needs your Anthropic key in .env.local), dry run first:",
+          "href": "https://console.anthropic.com/settings/keys",
+          "copy": "git checkout claude/sonnet5-eval-7 && node --env-file=.env.local scripts/eval-agent-models.mjs --from-db 8 --dry-run"
+        },
+        {
+          "text": "Then the real run, and paste temp/agent-model-eval/<timestamp>.md into #7:",
+          "href": "https://github.com/hirobius/ops/issues/7",
+          "copy": "node --env-file=.env.local scripts/eval-agent-models.mjs --from-db 8"
+        }
+      ]
+    },
+    "hirobius/ops#38": {
+      "steps": [
+        {
+          "text": "Read PR #384, ideally with counsel. Mark ready and merge.",
+          "href": "https://github.com/hirobius/ops/pull/384"
+        }
+      ]
+    },
+    "hirobius/ops#351": {
+      "steps": [
+        {
+          "text": "Review and merge PR #387 (ask me to rebase it first if it conflicts).",
+          "href": "https://github.com/hirobius/ops/pull/387"
+        },
+        {
+          "text": "Paste its migration SQL into the SQL editor and run.",
+          "href": "https://supabase.com/dashboard/project/vvyccwxtcwvlusweenje/sql/new"
+        },
+        {
+          "text": "Locally, with the real clients/<slug>/ folders present:",
+          "copy": "node --env-file=.env.local scripts/import-client-records.mjs --apply"
+        }
+      ]
+    },
+    "hirobius/ops#33": {
+      "steps": [
+        {
+          "text": "Create the org at Bitwarden → New organization. Collection names:",
+          "href": "https://vault.bitwarden.com/#/create-organization",
+          "copy": "Hirobius — Internal\nConcrete Creations"
+        },
+        {
+          "text": "Turn on secret scanning, push protection, Dependabot and CodeQL in each repo: ops, hds, site-engine, Ralph, folio, concrete.",
+          "href": "https://github.com/hirobius/ops/settings/security_analysis"
+        },
+        {
+          "text": "2FA: GitHub, Vercel, Supabase.",
+          "href": "https://github.com/settings/security"
+        },
+        {
+          "text": "Reply on #33:",
+          "href": "https://github.com/hirobius/ops/issues/33",
+          "copy": "Bitwarden org created: ______. Secret scanning, push protection, Dependabot and CodeQL enabled on all 6 repos; 2FA on GitHub, Vercel, Supabase."
+        }
+      ]
+    },
+    "hirobius/ops#32": {
+      "steps": [
+        {
+          "text": "ops: create .env.example and paste the block from #32.",
+          "href": "https://github.com/hirobius/ops/new/main?filename=.env.example"
+        }
+      ]
+    },
+    "hirobius/concrete#7": {
+      "steps": [
+        {
+          "text": "concrete: create .env.example and paste:",
+          "href": "https://github.com/hirobius/concrete/new/main?filename=.env.example",
+          "copy": "# Stripe secret key (Bitwarden: Concrete Creations)\nSTRIPE_SECRET_KEY=\n# Stripe publishable key\nVITE_STRIPE_PUBLISHABLE_KEY=\n# Stripe webhook signing secret\nSTRIPE_WEBHOOK_SECRET=\n# Stripe tax rate id for the fixed Spokane rate\nSTRIPE_TAX_RATE_ID=\n# Public site URL\nVITE_SITE_URL=\n# Discord #sales webhook\nDISCORD_SALES_WEBHOOK_URL="
+        }
+      ]
+    },
+    "hirobius/site-engine#8": {
+      "steps": [
+        {
+          "text": "Create a token at Vercel → Tokens. Name:",
+          "href": "https://vercel.com/account/tokens",
+          "copy": "site-engine deploy-preview (local)"
+        },
+        {
+          "text": "In site-engine:",
+          "copy": "export VERCEL_TOKEN=<paste token> && pnpm deploy-preview demo-pressure-pros"
+        },
+        {
+          "text": "Paste the output on #8, close it, then close #112.",
+          "href": "https://github.com/hirobius/site-engine/issues/8"
+        }
+      ]
+    },
+    "hirobius/site-engine#112": {
+      "steps": [
+        {
+          "text": "Create a token at Vercel → Tokens. Name:",
+          "href": "https://vercel.com/account/tokens",
+          "copy": "site-engine deploy-preview (local)"
+        },
+        {
+          "text": "In site-engine:",
+          "copy": "export VERCEL_TOKEN=<paste token> && pnpm deploy-preview demo-pressure-pros"
+        },
+        {
+          "text": "Paste the output on #8, close it, then close #112.",
+          "href": "https://github.com/hirobius/site-engine/issues/8"
+        }
+      ]
+    },
+    "hirobius/concrete#4": {
+      "steps": [
+        {
+          "text": "Stripe: create account, then create the Spokane tax rate and each product.",
+          "href": "https://dashboard.stripe.com/register"
+        },
+        {
+          "text": "Vercel env for the concrete project (Production + Preview), names:",
+          "href": "https://vercel.com/adrian-6234s-projects/concrete/settings/environment-variables",
+          "copy": "STRIPE_SECRET_KEY\nVITE_STRIPE_PUBLISHABLE_KEY\nSTRIPE_WEBHOOK_SECRET\nSTRIPE_TAX_RATE_ID\nVITE_SITE_URL\nDISCORD_SALES_WEBHOOK_URL"
+        },
+        {
+          "text": "Add each real product locally:",
+          "copy": "pnpm catalog:add"
+        },
+        {
+          "text": "Send the 4 legal pages (src/pages/legal) to an attorney.",
+          "href": "https://github.com/hirobius/concrete/tree/main/src/pages/legal"
+        }
+      ]
+    },
+    "hirobius/concrete#2": {
+      "steps": [
+        {
+          "text": "Stripe: create account, then create the Spokane tax rate and each product.",
+          "href": "https://dashboard.stripe.com/register"
+        },
+        {
+          "text": "Vercel env for the concrete project (Production + Preview), names:",
+          "href": "https://vercel.com/adrian-6234s-projects/concrete/settings/environment-variables",
+          "copy": "STRIPE_SECRET_KEY\nVITE_STRIPE_PUBLISHABLE_KEY\nSTRIPE_WEBHOOK_SECRET\nSTRIPE_TAX_RATE_ID\nVITE_SITE_URL\nDISCORD_SALES_WEBHOOK_URL"
+        },
+        {
+          "text": "Add each real product locally:",
+          "copy": "pnpm catalog:add"
+        },
+        {
+          "text": "Send the 4 legal pages (src/pages/legal) to an attorney.",
+          "href": "https://github.com/hirobius/concrete/tree/main/src/pages/legal"
+        }
+      ]
+    },
+    "hirobius/concrete#5": {
+      "steps": [
+        {
+          "text": "Stripe: create account, then create the Spokane tax rate and each product.",
+          "href": "https://dashboard.stripe.com/register"
+        },
+        {
+          "text": "Vercel env for the concrete project (Production + Preview), names:",
+          "href": "https://vercel.com/adrian-6234s-projects/concrete/settings/environment-variables",
+          "copy": "STRIPE_SECRET_KEY\nVITE_STRIPE_PUBLISHABLE_KEY\nSTRIPE_WEBHOOK_SECRET\nSTRIPE_TAX_RATE_ID\nVITE_SITE_URL\nDISCORD_SALES_WEBHOOK_URL"
+        },
+        {
+          "text": "Add each real product locally:",
+          "copy": "pnpm catalog:add"
+        },
+        {
+          "text": "Send the 4 legal pages (src/pages/legal) to an attorney.",
+          "href": "https://github.com/hirobius/concrete/tree/main/src/pages/legal"
+        }
+      ]
+    },
+    "hirobius/Ralph#10": {
+      "steps": [
+        {
+          "text": "Edit ralph-run-reusable.yml. Add to the Reconcile step's env:",
+          "href": "https://github.com/hirobius/Ralph/edit/main/.github/workflows/ralph-run-reusable.yml",
+          "copy": "RALPH_RESULT_FILE: ${{ runner.temp }}/ralph-result.txt"
+        },
+        {
+          "text": "Or say \"prep Ralph#10\" and I'll write the full diff for you to paste."
+        }
+      ]
+    },
+    "hirobius/Ralph#25": {
+      "steps": [
+        {
+          "text": "Edit ralph-gate-reusable.yml. The exact patch is in the a75623e commit message. Replacement line:",
+          "href": "https://github.com/hirobius/Ralph/edit/main/.github/workflows/ralph-gate-reusable.yml",
+          "copy": "gh pr diff \"$PR\" --name-only | bash ralph/lib.sh ralph_arm_reason \"$pr_ok\" \"$issue_ok\""
+        }
+      ]
+    },
+    "hirobius/Ralph#26": {
+      "steps": [
+        {
+          "text": "Edit ralph-gate-reusable.yml. The exact patch is in the a75623e commit message. Replacement line:",
+          "href": "https://github.com/hirobius/Ralph/edit/main/.github/workflows/ralph-gate-reusable.yml",
+          "copy": "gh pr diff \"$PR\" --name-only | bash ralph/lib.sh ralph_arm_reason \"$pr_ok\" \"$issue_ok\""
+        }
+      ]
+    },
+    "hirobius/hds#263": {
+      "steps": [
+        {
+          "text": "Edit hds ci.yml and add this step after checkout (checkout needs fetch-depth: 0):",
+          "href": "https://github.com/hirobius/hds/edit/main/.github/workflows/ci.yml",
+          "copy": "      - name: Secrets scan\n        uses: gitleaks/gitleaks-action@v2\n        env:\n          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
+        }
+      ]
+    },
+    "hirobius/hds#196": {
+      "steps": [
+        {
+          "text": "In hds:",
+          "copy": "pnpm figma:push"
+        },
+        {
+          "text": "Open the staging file in Figma desktop → Plugins → Development → Import plugin from manifest → figma/push/plugin/manifest.json. Run Plan push, then Push, then Take snapshot → Download JSON.",
+          "href": "https://www.figma.com/design/2VgBbVpKiDnu0aftJEVyBQ"
+        },
+        {
+          "text": "Ingest and commit:",
+          "copy": "pnpm figma:snapshot --ingest <downloaded-file.json>"
+        }
+      ]
+    },
+    "hirobius/hds#252": {
+      "steps": [
+        {
+          "text": "In hds:",
+          "copy": "pnpm figma:push"
+        },
+        {
+          "text": "Open the staging file in Figma desktop → Plugins → Development → Import plugin from manifest → figma/push/plugin/manifest.json. Run Plan push, then Push, then Take snapshot → Download JSON.",
+          "href": "https://www.figma.com/design/2VgBbVpKiDnu0aftJEVyBQ"
+        },
+        {
+          "text": "Ingest and commit:",
+          "copy": "pnpm figma:snapshot --ingest <downloaded-file.json>"
+        }
+      ]
+    },
+    "hirobius/ops#27": {
+      "steps": [
+        {
+          "text": "Block 1–2 hours and pause Ralph. Say \"prep #27\" and I'll produce the per-repo commands and redaction list."
+        },
+        {
+          "text": "After force-pushing, open one purge request per repo at GitHub Support.",
+          "href": "https://support.github.com/request"
+        }
+      ]
+    }
+  },
+  "chores": [
+    {
+      "id": "bitwarden-login",
+      "title": "Save the demo-site login in Bitwarden",
+      "steps": [
+        {
+          "text": "Open Bitwarden → New login. Name:",
+          "href": "https://vault.bitwarden.com/#/vault",
+          "copy": "Hirobius — Vercel — outreach preview sites"
+        },
+        {
+          "text": "Username:",
+          "copy": "hirobius"
+        },
+        {
+          "text": "Password: the one in chat (not repeated here)."
+        },
+        {
+          "text": "URLs:",
+          "copy": "https://hirobius-pnw-arborist.vercel.app\nhttps://hirobius-duran-tree-service.vercel.app\nhttps://hirobius-septic-response.vercel.app"
+        }
+      ]
+    },
+    {
+      "id": "delete-vercel-projects",
+      "title": "Delete 4 dead Vercel projects",
+      "steps": [
+        {
+          "text": "ops (old duplicate of hirobius-ops) — Settings → Advanced → Delete Project, paste the name to confirm:",
+          "href": "https://vercel.com/adrian-6234s-projects/ops/settings/advanced",
+          "copy": "ops"
+        },
+        {
+          "text": "hdshub — same steps:",
+          "href": "https://vercel.com/adrian-6234s-projects/hdshub/settings/advanced",
+          "copy": "hdshub"
+        },
+        {
+          "text": "hirobius-north-west-arbor — same steps:",
+          "href": "https://vercel.com/adrian-6234s-projects/hirobius-north-west-arbor/settings/advanced",
+          "copy": "hirobius-north-west-arbor"
+        },
+        {
+          "text": "clients-monroe-street-power-wash — same steps:",
+          "href": "https://vercel.com/adrian-6234s-projects/clients-monroe-street-power-wash/settings/advanced",
+          "copy": "clients-monroe-street-power-wash"
+        }
+      ]
+    }
+  ]
+}
