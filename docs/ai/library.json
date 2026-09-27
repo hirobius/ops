@@ -2,6 +2,14 @@
   "$comment": "Index for /ops/library — every report and research artifact, in one place. `render` says how the page shows it: `hds` = a native page built on @hirobius/design-system, `legacy` = a standalone HTML file shown framed until it is migrated to HDS. Add an entry when a report lands; migrating one flips `render` from legacy to hds.",
   "entries": [
     {
+      "slug": "jev-research",
+      "title": "Jev — fast typed-decision AI (parked)",
+      "date": "2026-09-27",
+      "summary": "Research note: TypeSafe AI's Jev answers yes/no or pick-one questions in under half a second, cheaply. Parked with a pilot plan: \"should Ops show this?\" on each merged PR.",
+      "render": "hds",
+      "href": "https://github.com/hirobius/ops/blob/main/docs/ai/PARKED.md#jev-typesafe-ai-for-fast-typed-decisions--pilot-on-should-ops-show-this"
+    },
+    {
       "slug": "ops-redesign-figma",
       "title": "Ops redesign — Figma (mobile)",
       "date": "2026-09-27",
