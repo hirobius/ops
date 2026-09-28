@@ -17,7 +17,8 @@
     "src/app/pages/ops/PageHeader.tsx": 4,
     "src/app/pages/ops/agentic-os/AgenticOSPage.test.tsx": 2,
     "src/app/pages/ops/agentic-os/AgenticOSPage.tsx": 10,
-    "src/app/pages/ops/agentic-os/ServicesBar.tsx": 9,
+    "src/app/pages/ops/agentic-os/ServicesBar.test.tsx": 1,
+    "src/app/pages/ops/agentic-os/ServicesBar.tsx": 10,
     "src/app/pages/ops/agentic-os/SkillsBar.test.tsx": 8,
     "src/app/pages/ops/agentic-os/SkillsBar.tsx": 40,
     "src/app/pages/ops/agentic-os/SurfacesRail.test.tsx": 2,
@@ -51,6 +52,6 @@
     "src/app/pages/ops/standing/StandingPage.tsx": 184,
     "src/app/routes.tsx": 30
   },
-  "updatedAt": "2026-09-28T04:10:01.679Z",
-  "sha": "81f9267"
+  "updatedAt": "2026-09-28T04:24:17.539Z",
+  "sha": "734f6f6"
 }
