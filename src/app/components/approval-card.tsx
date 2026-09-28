@@ -4,10 +4,10 @@
  * @category Display
  * @tier utility
  * @internal — ops infrastructure, absorbed from @hirobius/design-system (the DS
- *   repo stripped its ops-flavored components). Consumes only DS primitives
- *   (Card, Button, Tag) + the ops-local `cn`.
+ *   repo stripped its ops-flavored components). Composes only DS primitives
+ *   (Card, Button, Badge, Tag) with Tailwind layout utilities + the ops-local
+ *   `cn`; no inline styles, so nothing HDS provides is bypassed.
  */
-/* hds-bypass: ops-domain component — composes DS primitives with Tailwind utility classes, not a consumer HDS surface */
 
 import * as React from 'react';
 import { Card, Button, Tag, Badge } from '@hirobius/design-system';

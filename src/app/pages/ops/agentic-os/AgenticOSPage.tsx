@@ -1,5 +1,3 @@
-/* hds-bypass: ops-internal page */
-
 /**
  * AgenticOSPage — `/ops` index. The "is the system OK and what's happening
  * right now?" surface. Mobile-first; every metric reads truth from a
