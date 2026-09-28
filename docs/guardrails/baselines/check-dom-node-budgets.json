@@ -23,7 +23,8 @@
     "src/app/pages/ops/agentic-os/SurfacesRail.test.tsx": 2,
     "src/app/pages/ops/agentic-os/SurfacesRail.tsx": 7,
     "src/app/pages/ops/atlas/validators-tab.tsx": 37,
-    "src/app/pages/ops/audit/FleetAuditPage.tsx": 29,
+    "src/app/pages/ops/audit/FleetAuditPage.test.tsx": 2,
+    "src/app/pages/ops/audit/FleetAuditPage.tsx": 33,
     "src/app/pages/ops/digest/DigestPage.tsx": 38,
     "src/app/pages/ops/leads/LeadSweepPanel.tsx": 41,
     "src/app/pages/ops/leads/LeadsPage.tsx": 31,
@@ -49,6 +50,6 @@
     "src/app/pages/ops/standing/StandingPage.tsx": 184,
     "src/app/routes.tsx": 30
   },
-  "updatedAt": "2026-09-27T23:40:08.736Z",
-  "sha": "6dc74e1"
+  "updatedAt": "2026-09-28T03:58:25.798Z",
+  "sha": "01fce2f"
 }

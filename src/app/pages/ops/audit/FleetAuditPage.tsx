@@ -1,5 +1,3 @@
-/* hds-bypass: ops-internal page */
-
 /**
  * FleetAuditPage — `/ops/audit`. The standing record of what a fleet-wide audit
  * found and what each resulting issue is FOR.
@@ -23,7 +21,7 @@
 
 import { type CSSProperties } from 'react';
 
-import { Page, Stack } from '@hirobius/design-system';
+import { Divider, Page, Stack, StatusDot, Text, VisuallyHidden } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 
 import { PageHeader } from '../PageHeader';
@@ -78,18 +76,17 @@ function issueUrl(ref: string): string | null {
   return m ? `https://github.com/hirobius/${m[1]}/issues/${m[2]}` : null;
 }
 
-// CSS vars rather than the JS map: hds.color.feedback.* are {dark, light}
-// objects, so the var is the only value that resolves per theme.
-const STATE_COLOR: Record<HealthState, string> = {
-  green: 'var(--semantic-color-feedback-success)',
-  risk: 'var(--semantic-color-feedback-warning)',
-  red: 'var(--semantic-color-feedback-error)',
+type DotTone = 'success' | 'warning' | 'danger' | 'neutral';
+const STATE_TONE: Record<HealthState, DotTone> = {
+  green: 'success',
+  risk: 'warning',
+  red: 'danger',
 };
 
-function stateColor(state: HealthState): string {
+function stateTone(state: HealthState): DotTone {
   // The `??` is not dead code: the cast at the import boundary is a promise TS
   // cannot keep, so an unknown state must degrade to neutral rather than undefined.
-  return STATE_COLOR[state] ?? 'var(--semantic-color-content-secondary)';
+  return STATE_TONE[state] ?? 'neutral';
 }
 
 /** @public */
@@ -105,30 +102,40 @@ export default function FleetAuditPage() {
         {audits.map((audit) => (
           <Stack key={audit.date} direction="column" gap="px32">
             <Stack direction="column" gap="px8">
-              <span style={s.eyebrow}>{audit.date}</span>
-              <h2 style={s.auditTitle}>{audit.title}</h2>
-              <p style={s.verdict}>{audit.verdict}</p>
+              <Text variant="eyebrow" as="span" style={s.secondary}>
+                {audit.date}
+              </Text>
+              <Text variant="heading2" style={s.primary}>
+                {audit.title}
+              </Text>
+              <Text variant="body" style={{ ...s.secondary, maxWidth: '68ch' }}>
+                {audit.verdict}
+              </Text>
             </Stack>
 
             <section aria-labelledby={`health-${audit.date}`}>
-              <h3 id={`health-${audit.date}`} style={s.sectionHeading}>
+              <Text variant="heading3" id={`health-${audit.date}`} style={s.primary}>
                 Build health
-              </h3>
-              <p style={s.asOf}>Measured {audit.date}. Not live — re-run to refresh.</p>
+              </Text>
+              <Text variant="caption" style={{ ...s.secondary, marginTop: hds.space.px4 }}>
+                Measured {audit.date}. Not live — re-run to refresh.
+              </Text>
               <Stack direction="column" gap="px2" style={{ marginTop: hds.space.px12 }}>
                 {audit.buildHealth.map((row) => (
-                  <div key={row.name} style={s.band}>
-                    <span
-                      style={{ ...s.dot, background: stateColor(row.state) }}
-                      aria-hidden="true"
-                    />
-                    <Stack direction="column" gap="px2" style={{ minWidth: 0 }}>
-                      <span style={s.bandLabel}>
-                        {row.name}
-                        <span style={s.srOnly}>{` — ${row.state}`}</span>
-                      </span>
-                      <span style={s.bandDetail}>{row.detail}</span>
-                    </Stack>
+                  <div key={row.name}>
+                    <Divider />
+                    <div style={s.band}>
+                      <StatusDot tone={stateTone(row.state)} style={s.dot} />
+                      <Stack direction="column" gap="px2" style={{ minWidth: 0 }}>
+                        <span style={s.bandLabel}>
+                          {row.name}
+                          <VisuallyHidden>{` — ${row.state}`}</VisuallyHidden>
+                        </span>
+                        <Text variant="ui" as="span" style={s.bandDetail}>
+                          {row.detail}
+                        </Text>
+                      </Stack>
+                    </div>
                   </div>
                 ))}
               </Stack>
@@ -136,28 +143,42 @@ export default function FleetAuditPage() {
 
             {audit.themes.map((theme) => (
               <section key={theme.name} aria-labelledby={slugId(`t-${audit.date}`, theme.name)}>
-                <h3 id={slugId(`t-${audit.date}`, theme.name)} style={s.sectionHeading}>
+                <Text
+                  variant="heading3"
+                  id={slugId(`t-${audit.date}`, theme.name)}
+                  style={s.primary}
+                >
                   {theme.name}
-                </h3>
-                <p style={s.themeSummary}>{theme.summary}</p>
+                </Text>
+                <Text
+                  variant="ui"
+                  style={{ ...s.secondary, marginTop: hds.space.px4, maxWidth: '68ch' }}
+                >
+                  {theme.summary}
+                </Text>
                 <Stack direction="column" gap="px2" style={{ marginTop: hds.space.px12 }}>
                   {theme.issues.map((issue) => {
                     const href = issueUrl(issue.ref);
                     return (
-                      <div key={issue.ref} style={s.band}>
-                        <Stack direction="column" gap="px4" style={{ minWidth: 0 }}>
-                          <span style={s.issueHead}>
-                            {href ? (
-                              <a href={href} className="hds-focus" style={s.ref}>
-                                {issue.ref}
-                              </a>
-                            ) : (
-                              <span style={s.ref}>{issue.ref}</span>
-                            )}
-                            <span style={s.issueTitle}>{issue.title}</span>
-                          </span>
-                          <span style={s.bandDetail}>{issue.accomplishes}</span>
-                        </Stack>
+                      <div key={issue.ref}>
+                        <Divider />
+                        <div style={s.band}>
+                          <Stack direction="column" gap="px4" style={{ minWidth: 0 }}>
+                            <span style={s.issueHead}>
+                              {href ? (
+                                <a href={href} className="hds-focus" style={s.ref}>
+                                  {issue.ref}
+                                </a>
+                              ) : (
+                                <span style={s.ref}>{issue.ref}</span>
+                              )}
+                              <span style={s.issueTitle}>{issue.title}</span>
+                            </span>
+                            <Text variant="ui" as="span" style={s.bandDetail}>
+                              {issue.accomplishes}
+                            </Text>
+                          </Stack>
+                        </div>
                       </div>
                     );
                   })}
@@ -172,61 +193,27 @@ export default function FleetAuditPage() {
 }
 
 const s = {
-  // hds.typeStyles.eyebrow rather than a hand-rolled fontSize + letterSpacing:
-  // bypassing the token is exactly what hds#283 is about.
-  eyebrow: {
-    ...hds.typeStyles.eyebrow,
-    color: 'var(--semantic-color-content-secondary)',
-  } as CSSProperties,
-  auditTitle: {
-    ...hds.typeStyles.h2,
-    margin: 0,
-    color: 'var(--semantic-color-content-primary)',
-  } as CSSProperties,
-  verdict: {
-    ...hds.typeStyles.body,
-    margin: 0,
-    maxWidth: '68ch',
-    color: 'var(--semantic-color-content-secondary)',
-  } as CSSProperties,
-  sectionHeading: {
-    ...hds.typeStyles.h3,
-    margin: 0,
-    color: 'var(--semantic-color-content-primary)',
-  } as CSSProperties,
-  asOf: {
-    ...hds.typeStyles.caption,
-    margin: `${hds.space.px4} 0 0`,
-    color: 'var(--semantic-color-content-secondary)',
-  } as CSSProperties,
-  themeSummary: {
-    ...hds.typeStyles.ui,
-    margin: `${hds.space.px4} 0 0`,
-    maxWidth: '68ch',
-    color: 'var(--semantic-color-content-secondary)',
-  } as CSSProperties,
-  // Open bands separated by a divider, not repeated outlined cards — the
+  // Type comes from <Text variant>, whose classes read the same
+  // --semantic-typography-* vars as hds.typeStyles; only colour is set here.
+  primary: { color: 'var(--semantic-color-content-primary)' } as CSSProperties,
+  secondary: { color: 'var(--semantic-color-content-secondary)' } as CSSProperties,
+  // Open bands separated by a <Divider/>, not repeated outlined cards — the
   // roadmap/status rule in the design system's CLAUDE.md.
   band: {
     display: 'flex',
     gap: hds.space.px12,
     alignItems: 'flex-start',
     padding: `${hds.space.px12} 0`,
-    borderTop: '1px solid var(--semantic-color-border-default)',
   } as CSSProperties,
-  dot: {
-    width: hds.space.px8,
-    height: hds.space.px8,
-    borderRadius: '50%',
-    marginTop: hds.space.px8,
-    flexShrink: 0,
-  } as CSSProperties,
+  // StatusDot's md size is the same 8px; only the optical offset to the label's
+  // first line is local.
+  dot: { marginTop: hds.space.px8 } as CSSProperties,
   bandLabel: {
     ...hds.typeStyles.body,
     color: 'var(--semantic-color-content-primary)',
   } as CSSProperties,
   bandDetail: {
-    ...hds.typeStyles.ui,
+    display: 'block',
     maxWidth: '72ch',
     color: 'var(--semantic-color-content-secondary)',
   } as CSSProperties,
@@ -243,13 +230,5 @@ const s = {
   issueTitle: {
     ...hds.typeStyles.body,
     color: 'var(--semantic-color-content-primary)',
-  } as CSSProperties,
-  srOnly: {
-    position: 'absolute',
-    width: 1,
-    height: 1,
-    overflow: 'hidden',
-    clip: 'rect(0 0 0 0)',
-    whiteSpace: 'nowrap',
   } as CSSProperties,
 };
