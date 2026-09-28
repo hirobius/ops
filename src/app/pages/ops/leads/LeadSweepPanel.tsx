@@ -1,5 +1,3 @@
-/* hds-bypass: ops-internal page. Inline styles intentional for ops dashboard. */
-
 /**
  * LeadSweepPanel — saved niche×metro sweep selector for the Leads board (#12).
  *
@@ -19,10 +17,26 @@
  *   4. Confirmed run POSTs /api/pull-leads sequentially, one {niche, metro,
  *      count} per pair (mirrors PullLeadsForm's single-pair call), with a
  *      visible progress bar and a Stop control between calls.
+ *
+ * Chrome is a bordered HDS Card (same shape as PullLeadsForm, so both
+ * /ops/leads panels match); labels, region headers, area names and the
+ * estimate line are HDS <Text>; each field and the checklist blocks are
+ * <Stack>s. The native select + number inputs keep local styles: HDS
+ * Input/Select add their own shell and would change the rendered pixels
+ * (ops#425).
  */
 
 import { useMemo, useRef, useState, type CSSProperties } from 'react';
-import { Stack, Badge, Button, Callout, HdsCheckbox, Progress } from '@hirobius/design-system';
+import {
+  Stack,
+  Badge,
+  Button,
+  Callout,
+  Card,
+  HdsCheckbox,
+  Progress,
+  Text,
+} from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { opsApi } from '../../../lib/opsApi';
 import {
@@ -136,11 +150,13 @@ export function LeadSweepPanel({ onInserted }: LeadSweepPanelProps) {
   }
 
   return (
-    <section style={panelStyle} aria-label="Saved lead sweeps">
+    <Card as="section" bordered padding="none" style={panelStyle} aria-label="Saved lead sweeps">
       <Stack direction="column" gap="gap">
         <Stack direction="row" gap="gap" align="end" wrap="wrap">
-          <label style={fieldStyle}>
-            <span style={fieldLabelStyle}>Saved sweep</span>
+          <Stack as="label" direction="column" gap="px4" style={fieldStyle}>
+            <Text variant="eyebrow" as="span" style={secondaryText}>
+              Saved sweep
+            </Text>
             <select
               value={presetKey}
               onChange={(e) => handlePresetChange(e.target.value)}
@@ -154,9 +170,11 @@ export function LeadSweepPanel({ onInserted }: LeadSweepPanelProps) {
                 </option>
               ))}
             </select>
-          </label>
-          <label style={countFieldStyle}>
-            <span style={fieldLabelStyle}>Count / pair</span>
+          </Stack>
+          <Stack as="label" direction="column" gap="px4" style={countFieldStyle}>
+            <Text variant="eyebrow" as="span" style={secondaryText}>
+              Count / pair
+            </Text>
             <input
               type="number"
               min={1}
@@ -168,9 +186,11 @@ export function LeadSweepPanel({ onInserted }: LeadSweepPanelProps) {
               disabled={running}
               style={countInputStyle}
             />
-          </label>
-          <label style={countFieldStyle}>
-            <span style={fieldLabelStyle}>Cap / run</span>
+          </Stack>
+          <Stack as="label" direction="column" gap="px4" style={countFieldStyle}>
+            <Text variant="eyebrow" as="span" style={secondaryText}>
+              Cap / run
+            </Text>
             <input
               type="number"
               min={1}
@@ -180,18 +200,22 @@ export function LeadSweepPanel({ onInserted }: LeadSweepPanelProps) {
               disabled={running}
               style={countInputStyle}
             />
-          </label>
+          </Stack>
         </Stack>
 
         {preset && (
           <>
-            <div style={checklistBoxStyle}>
+            <Stack direction="column" gap="px16" style={checklistBoxStyle}>
               {preset.metros.map((metro) => (
-                <div key={metro.region} style={regionBlockStyle}>
-                  <div style={regionHeaderStyle}>{metro.region}</div>
+                <Stack key={metro.region} direction="column" gap="px8">
+                  <Text variant="eyebrow" as="div" style={secondaryText}>
+                    {metro.region}
+                  </Text>
                   {metro.areas.map((area) => (
                     <Stack key={area} direction="row" gap="gap" align="center" wrap="wrap">
-                      <span style={areaLabelStyle}>{area}</span>
+                      <Text variant="ui" as="span" style={areaLabelStyle}>
+                        {area}
+                      </Text>
                       {preset.keywords.map((keyword) => {
                         const key = pairKey({ niche: keyword, metro: area });
                         return (
@@ -206,9 +230,9 @@ export function LeadSweepPanel({ onInserted }: LeadSweepPanelProps) {
                       })}
                     </Stack>
                   ))}
-                </div>
+                </Stack>
               ))}
-            </div>
+            </Stack>
 
             <Stack direction="row" gap="gap" align="center" wrap="wrap" justify="space-between">
               <Stack direction="row" gap="gap" align="center" wrap="wrap">
@@ -222,11 +246,11 @@ export function LeadSweepPanel({ onInserted }: LeadSweepPanelProps) {
                   Reset to suggested sample
                 </Button>
               </Stack>
-              <span style={estimateTextStyle}>
+              <Text variant="technical" as="span" style={estimateTextStyle}>
                 {selectedKeys.size} of {pairs.length} pairs selected · ~{estimate} of{' '}
                 {MONTHLY_FREE_TIER} monthly free tier
                 {overCap ? ` · over the ${cap}/run cap` : ''}
-              </span>
+              </Text>
             </Stack>
 
             {overCap && (
@@ -283,18 +307,18 @@ export function LeadSweepPanel({ onInserted }: LeadSweepPanelProps) {
                 <Badge tone={run.stopped ? 'warning' : 'success'}>
                   {run.stopped ? 'Stopped' : 'Sourced'}
                 </Badge>
-                <span style={estimateTextStyle}>
+                <Text variant="technical" as="span" style={estimateTextStyle}>
                   {run.inserted} lead{run.inserted === 1 ? '' : 's'} upserted across {run.pairsRun}{' '}
                   pair
                   {run.pairsRun === 1 ? '' : 's'}
                   {run.stopped ? ' (stopped early)' : ''}.
-                </span>
+                </Text>
               </Stack>
             )}
           </>
         )}
       </Stack>
-    </section>
+    </Card>
   );
 }
 
@@ -306,33 +330,23 @@ function clamp(raw: string, min: number, max: number, fallback: number): number 
 
 // ── Styles (mobile-first; tap targets ≥ 44px) ───────────────────────────────────
 
+/** Card supplies the border + raised surface; the 8px inset and 8px radius
+ *  sit below its padding scale (16/24) and default radius (12). `color:
+ *  inherit` keeps the pre-migration text colour for un-styled children (the
+ *  Callout copy) — Card's own text-card-foreground would recolour it in dark
+ *  mode. Dropping this is a deliberate visual change, not a refactor. */
 const panelStyle: CSSProperties = {
-  border: '1px solid var(--semantic-color-border-default)',
-  borderRadius: hds.borderRadius[8],
   padding: hds.semantic.space.component.gap,
-  background: 'var(--semantic-color-surface-raised)',
+  borderRadius: hds.borderRadius[8],
   width: '100%',
+  color: 'inherit',
 };
 
-const fieldStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: hds.space.px4,
-  flex: '1 1 16rem',
-  minWidth: 0,
-};
+const fieldStyle: CSSProperties = { flex: '1 1 16rem', minWidth: 0 };
 
-const countFieldStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: hds.space.px4,
-  flex: '0 0 auto',
-};
+const countFieldStyle: CSSProperties = { flex: '0 0 auto' };
 
-const fieldLabelStyle: CSSProperties = {
-  ...hds.typeStyles.eyebrow,
-  color: 'var(--semantic-color-content-secondary)',
-};
+const secondaryText: CSSProperties = { color: 'var(--semantic-color-content-secondary)' };
 
 const selectStyle: CSSProperties = {
   ...hds.typeStyles.ui,
@@ -359,9 +373,6 @@ const countInputStyle: CSSProperties = {
 };
 
 const checklistBoxStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: hds.space.px16,
   maxHeight: '20rem',
   overflowY: 'auto',
   border: '1px solid var(--semantic-color-border-subdued)',
@@ -369,26 +380,20 @@ const checklistBoxStyle: CSSProperties = {
   padding: hds.space.px12,
 };
 
-const regionBlockStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: hds.space.px8,
-};
-
-const regionHeaderStyle: CSSProperties = {
-  ...hds.typeStyles.eyebrow,
-  color: 'var(--semantic-color-content-secondary)',
-};
-
 const areaLabelStyle: CSSProperties = {
-  ...hds.typeStyles.ui,
   fontSize: hds.fontSize.xs,
   color: 'var(--semantic-color-content-primary)',
   flex: '0 0 9rem',
 };
 
+/** Mono xs line that inherits the row's line metrics — the technical ramp's
+ *  own line-height / tracking would re-wrap the estimate at 390px. */
 const estimateTextStyle: CSSProperties = {
   fontFamily: hds.monoFamily,
   fontSize: hds.fontSize.xs,
+  fontWeight: 'inherit',
+  letterSpacing: 'inherit',
+  lineHeight: 'inherit',
+  maxWidth: 'none',
   color: 'var(--semantic-color-content-secondary)',
 };

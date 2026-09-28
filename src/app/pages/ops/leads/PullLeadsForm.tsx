@@ -1,16 +1,19 @@
-/* hds-bypass: ops-internal page. Inline styles intentional for ops dashboard. */
-
 /**
  * PullLeadsForm — niche + metro + count → POST /api/pull-leads.
  *
  * v1 trigger for the Leads board. Sources a single page of Places results and
  * upserts them to Supabase (status='sourced'). On success calls onInserted so
- * the parent can refetch the board immediately. Mirrors SessionInputForm's
- * shape (design-system primitives + token-driven inline styles).
+ * the parent can refetch the board immediately.
+ *
+ * Chrome is a bordered HDS Card, labels are <Text variant=eyebrow>, the status
+ * line is <Text variant=ui>, and each field is a column <Stack as=label>. The
+ * native inputs and submit keep local styles: HDS Input adds a clear button
+ * and its own shell, and HDS Button is 40/48px tall with a filled disabled
+ * state — both would change the rendered pixels (ops#425).
  */
 
 import { useState, type CSSProperties, type FormEvent } from 'react';
-import { Stack, Badge } from '@hirobius/design-system';
+import { Stack, Badge, Card, Text } from '@hirobius/design-system';
 import hds from '@hirobius/design-system/tokens';
 import { opsApi } from '../../../lib/opsApi';
 
@@ -58,11 +61,13 @@ export function PullLeadsForm({ onInserted }: PullLeadsFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={formStyle}>
+    <Card as="form" bordered padding="none" onSubmit={handleSubmit} style={formStyle}>
       <Stack direction="column" gap="gap">
         <Stack direction="row" gap="gap" align="end" wrap="wrap">
-          <label style={fieldStyle}>
-            <span style={fieldLabelStyle}>Niche</span>
+          <Stack as="label" direction="column" gap="px4" style={fieldStyle}>
+            <Text variant="eyebrow" as="span" style={secondaryText}>
+              Niche
+            </Text>
             <input
               type="text"
               value={niche}
@@ -71,9 +76,11 @@ export function PullLeadsForm({ onInserted }: PullLeadsFormProps) {
               disabled={status.kind === 'sending'}
               style={inputStyle}
             />
-          </label>
-          <label style={fieldStyle}>
-            <span style={fieldLabelStyle}>Metro</span>
+          </Stack>
+          <Stack as="label" direction="column" gap="px4" style={fieldStyle}>
+            <Text variant="eyebrow" as="span" style={secondaryText}>
+              Metro
+            </Text>
             <input
               type="text"
               value={metro}
@@ -82,9 +89,11 @@ export function PullLeadsForm({ onInserted }: PullLeadsFormProps) {
               disabled={status.kind === 'sending'}
               style={inputStyle}
             />
-          </label>
-          <label style={countFieldStyle}>
-            <span style={fieldLabelStyle}>Count</span>
+          </Stack>
+          <Stack as="label" direction="column" gap="px4" style={countFieldStyle}>
+            <Text variant="eyebrow" as="span" style={secondaryText}>
+              Count
+            </Text>
             <input
               type="number"
               min={1}
@@ -94,7 +103,7 @@ export function PullLeadsForm({ onInserted }: PullLeadsFormProps) {
               disabled={status.kind === 'sending'}
               style={countInputStyle}
             />
-          </label>
+          </Stack>
           <button
             type="submit"
             disabled={!canSubmit}
@@ -107,19 +116,21 @@ export function PullLeadsForm({ onInserted }: PullLeadsFormProps) {
         {status.kind === 'done' && (
           <Stack direction="row" gap="gap" align="center" wrap="wrap">
             <Badge tone="success">Sourced</Badge>
-            <span style={statusTextStyle}>
+            <Text variant="ui" as="span" style={secondaryText}>
               {status.inserted} lead{status.inserted === 1 ? '' : 's'} upserted.
-            </span>
+            </Text>
           </Stack>
         )}
         {status.kind === 'error' && (
           <Stack direction="row" gap="gap" align="center" wrap="wrap">
             <Badge tone="danger">Error</Badge>
-            <span style={statusTextStyle}>{status.message}</span>
+            <Text variant="ui" as="span" style={secondaryText}>
+              {status.message}
+            </Text>
           </Stack>
         )}
       </Stack>
-    </form>
+    </Card>
   );
 }
 
@@ -131,33 +142,19 @@ function clampCount(raw: string): number {
 
 // ── Styles (mobile-first; tap targets ≥ 44px) ───────────────────────────────────
 
+/** Card supplies the border + raised surface; the 8px inset and 8px radius
+ *  sit below its padding scale (16/24) and default radius (12). */
 const formStyle: CSSProperties = {
-  border: '1px solid var(--semantic-color-border-default)',
-  borderRadius: hds.borderRadius[8],
   padding: hds.semantic.space.component.gap,
-  background: 'var(--semantic-color-surface-raised)',
+  borderRadius: hds.borderRadius[8],
   width: '100%',
 };
 
-const fieldStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: hds.space.px4,
-  flex: '1 1 12rem',
-  minWidth: 0,
-};
+const fieldStyle: CSSProperties = { flex: '1 1 12rem', minWidth: 0 };
 
-const countFieldStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: hds.space.px4,
-  flex: '0 0 auto',
-};
+const countFieldStyle: CSSProperties = { flex: '0 0 auto' };
 
-const fieldLabelStyle: CSSProperties = {
-  ...hds.typeStyles.eyebrow,
-  color: 'var(--semantic-color-content-secondary)',
-};
+const secondaryText: CSSProperties = { color: 'var(--semantic-color-content-secondary)' };
 
 const inputStyle: CSSProperties = {
   ...hds.typeStyles.ui,
@@ -195,9 +192,4 @@ const buttonDisabledStyle: CSSProperties = {
   background: 'transparent',
   color: 'var(--semantic-color-content-secondary)',
   border: '1px solid var(--semantic-color-border-subdued)',
-};
-
-const statusTextStyle: CSSProperties = {
-  ...hds.typeStyles.ui,
-  color: 'var(--semantic-color-content-secondary)',
 };
